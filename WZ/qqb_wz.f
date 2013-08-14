@@ -36,7 +36,7 @@ c and interference term (first index from 1 to 3 respectively)
       double complex Fa346521,Fa341256,Fa651243
       double complex Fa345621,Fa341265,Fa653412
       double complex ZgL(-nf:nf),ZgR(-nf:nf),A6b_1,A6b_2,A6b_3,A6b_4
-      double precision v2(2),cl1,cl2,en1,en2
+      double precision v2(2),cl1,cl2,en1,en2,wl1,wl2
       double precision ave,cotw,wwflag,xfac
       character*2 plabel(mxpart)
       common/plabel/plabel
@@ -49,6 +49,8 @@ c and interference term (first index from 1 to 3 respectively)
       double complex AWZM_SAVE(-nf:nf,-nf:nf)
       double complex cpropfac
       external cpropfac
+      logical isewup,isewdo
+      integer i3chargeofid
 
       FAC=-two*gwsq*esq
 
@@ -62,16 +64,19 @@ c and interference term (first index from 1 to 3 respectively)
          stop
       endif 
 
-      if (nwz.eq.-1) then
-        cl1=1d0
-        cl2=0d0
-        en1=le
-        en2=ln
-      elseif (nwz.eq.1) then
-        cl1=0d0
-        cl2=1d0
-        en1=ln
-        en2=le
+      cl1=-fq(idpart3)            ! minus charge of W outgoing fermion (3)
+      cl2=-fq(-idpart4)            ! minus charge of W incoming fermion (4)
+      en1=zfl( idpart3)             ! Left coupling of W outgoing fermion
+      en2=zfl(-idpart4)             ! Left coupling of W incoming fermion
+
+c choice of which diagram with two W's
+      if((isewup(idpart6).and.isewup(idpart3)).or.
+     1   (isewdo(idpart6).and.isewdo(idpart3))) then
+         wl1=1
+         wl2=0
+      else
+         wl1=0
+         wl2=1
       endif
       
 c--- wwflag=1 for most cases, indicating presence of diagram with 2 W's
@@ -82,14 +87,14 @@ c--- but for Z -> bbbar this diagram contains |V_tb|**2 which we take 0
       endif
       
 c-- if Z -> neutrinos, we need to switch c1 and c2
-      if ((vdecaymodeZ.eq.12).or.(vdecaymodeZ.eq.14).or.
-     .     (vdecaymodeZ.eq.16)) then
-        cl1=1d0-cl1
-        cl2=1d0-cl2
-      endif
+c      if ((vdecaymodeZ.eq.12).or.(vdecaymodeZ.eq.14).or.
+c     .     (vdecaymodeZ.eq.16)) then
+c        cl1=1d0-cl1
+c        cl2=1d0-cl2
+c      endif
       
-      v2(1)=l1
-      v2(2)=r1
+      v2(1)=zfl(idpart5)
+      v2(2)=zfr(idpart5)
       cotw=dsqrt((one-xw)/xw)
 
       do j=-nf,nf
@@ -243,9 +248,10 @@ c---for supplementary diagrams.
 
 c---set up left/right handed couplings for both Z and gamma*
 c---note that L/R labels the LEPTON coupling v2, NOT the quarks (all L)
+      q1=fq(idpart5)
       do j=-nf,nf
-        ZgL(j)=L(j)*v2(1)*prop56+Q(j)*q1           
-        ZgR(j)=L(j)*v2(2)*prop56+Q(j)*q1           
+        ZgL(j)=zfL(j)*v2(1)*prop56+fQ(j)*q1           
+        ZgR(j)=zfL(j)*v2(2)*prop56+fQ(j)*q1           
       enddo
 
 
@@ -257,7 +263,8 @@ c In our initial state incoming scheme: (1+,2-,3-,4+,5+,6-)
       do j=-nf,nf
       do k=-nf,nf
 c--no point in wasting time if it gives zero anyway
-         if (Vsq(j,k) .ne. 0d0) then
+         if (i3chargeofid(j)+i3chargeofid(k).eq. 3*nwz
+     1        .and. Vsq(j,k).ne.0) then
             if ((j .gt. 0) .and. (k .lt. 0)) then
 c a213456: 2 is left (incoming quark;
 c          must carry Z L coupling for k
@@ -288,7 +295,7 @@ c---  4th term (l-h only) contains two W propagators
                   AWZM=AWZM+FAC*prop12*(
      .                 (en1*Fa346512+en2*Fa342156)*v2(1)*prop56
      .                 +q1*(-1d0)*(cl1*Fa346512+cl2*Fa342156)
-     .              +wwflag*0.5d0/xw*prop34*(cl1*Fa652143+cl2*Fa653412))
+     .              +wwflag*0.5d0/xw*prop34*(wl1*Fa652143+wl2*Fa653412))
                   AWZP=AWZP+FAC*prop12*(
      .                 (en1*Fa345612+en2*Fa342165)*v2(2)*prop56
      .                 +q1*(-1d0)*(cl1*Fa345612+cl2*Fa342165))
@@ -296,7 +303,7 @@ c---  4th term (l-h only) contains two W propagators
                   AWZM=AWZM+FAC*prop12*(
      .                 (en1*Fa346521+en2*Fa341256)*v2(1)*prop56
      .                 +q1*(-1d0)*(cl1*Fa346521+cl2*Fa341256)
-     .              +wwflag*0.5d0/xw*prop34*(cl1*Fa651243+cl2*Fa653421))
+     .              +wwflag*0.5d0/xw*prop34*(wl1*Fa651243+wl2*Fa653421))
                   AWZP=AWZP+FAC*prop12*(
      .                 (en1*Fa345621+en2*Fa341265)*v2(2)*prop56
      .                 +q1*(-1d0)*(cl1*Fa345621+cl2*Fa341265))

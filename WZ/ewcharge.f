@@ -1,3 +1,3 @@
-      double precision Q(-5:5),tau(-5:5)
+      double precision Q(-16:16),tau(-16:16)
       common/ewcharge/Q,tau
       save /ewcharge/

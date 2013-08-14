@@ -9,10 +9,12 @@ c---xw=sin^2 theta_w
       integer j
       double precision sin2xw
 
+c isospin = mod(j,2)
+
       sin2w=two*sqrt(sin2xw*(1d0-sin2xw))
-      do j=1,5   !-- 5 is nf
-      l(j)=(tau(j)-two*Q(j)*sin2xw)/sin2w
-      r(j)=      (-two*Q(j)*sin2xw)/sin2w
+      do j=-16,16   !-- 5 is nf
+      zfl(j)=(tau(j)-two*fq(j)*sin2xw)/sin2w
+      zfr(j)=      (-two*fq(j)*sin2xw)/sin2w
       enddo
 
       le=(-1d0-two*(-1d0)*sin2xw)/sin2w

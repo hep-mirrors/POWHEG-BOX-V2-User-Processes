@@ -24,33 +24,32 @@ c --- reads in anomalous couplings from powheg.input
          Vcb=0d0
       endif         
       Vsq=0d0
-      if (nwz.eq.1) then
-         Vsq(2,-1)=Vud**2
-         Vsq(2,-3)=Vus**2
-         Vsq(2,-5)=Vub**2
-         Vsq(4,-1)=Vcd**2
-         Vsq(4,-3)=Vcs**2
-         Vsq(4,-5)=Vcb**2
-         Vsq(-1,2)=Vsq(2,-1)
-         Vsq(-3,2)=Vsq(2,-3)
-         Vsq(-5,2)=Vsq(2,-5)
-         Vsq(-1,4)=Vsq(4,-1)
-         Vsq(-3,4)=Vsq(4,-3)
-         Vsq(-5,4)=Vsq(4,-5)
-      else
-         Vsq(1,-2)=Vud**2
-         Vsq(3,-2)=Vus**2
-         Vsq(5,-2)=Vub**2
-         Vsq(1,-4)=Vcd**2
-         Vsq(3,-4)=Vcs**2
-         Vsq(5,-4)=Vcb**2
-         Vsq(-2,1)=Vsq(1,-2)
-         Vsq(-2,3)=Vsq(3,-2)
-         Vsq(-2,5)=Vsq(5,-2)
-         Vsq(-4,1)=Vsq(1,-4)
-         Vsq(-4,3)=Vsq(3,-4)
-         Vsq(-4,5)=Vsq(5,-4)
-      endif
+
+      Vsq(2,-1)=Vud**2
+      Vsq(2,-3)=Vus**2
+      Vsq(2,-5)=Vub**2
+      Vsq(4,-1)=Vcd**2
+      Vsq(4,-3)=Vcs**2
+      Vsq(4,-5)=Vcb**2
+      Vsq(-1,2)=Vsq(2,-1)
+      Vsq(-3,2)=Vsq(2,-3)
+      Vsq(-5,2)=Vsq(2,-5)
+      Vsq(-1,4)=Vsq(4,-1)
+      Vsq(-3,4)=Vsq(4,-3)
+      Vsq(-5,4)=Vsq(4,-5)
+
+      Vsq(1,-2)=Vud**2
+      Vsq(3,-2)=Vus**2
+      Vsq(5,-2)=Vub**2
+      Vsq(1,-4)=Vcd**2
+      Vsq(3,-4)=Vcs**2
+      Vsq(5,-4)=Vcb**2
+      Vsq(-2,1)=Vsq(1,-2)
+      Vsq(-2,3)=Vsq(3,-2)
+      Vsq(-2,5)=Vsq(5,-2)
+      Vsq(-4,1)=Vsq(1,-4)
+      Vsq(-4,3)=Vsq(3,-4)
+      Vsq(-4,5)=Vsq(5,-4)
 
       return 
       end

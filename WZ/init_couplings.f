@@ -17,8 +17,8 @@
       logical verbose
       parameter(verbose=.true.)
       integer j,srint
-      real * 8 powheginput
-      external powheginput
+      real * 8 powheginput,chargeofid
+      external powheginput,chargeofid
       real * 8 deltas,asmzopi
       physpar_ml(1)=0.511d-3
       physpar_ml(2)=0.1057d0
@@ -45,18 +45,20 @@ c     number of light flavors
 
       
       !TM added z couplings
-      Q(-5)=+0.333333333333333d0
-      Q(-4)=-0.666666666666667d0
-      Q(-3)=+0.333333333333333d0
-      Q(-2)=-0.666666666666667d0
-      Q(-1)=+0.333333333333333d0
-      Q(0)=+0d0
-      Q(+1)=-0.333333333333333d0
-      Q(+2)=+0.666666666666667d0
-      Q(+3)=-0.333333333333333d0
-      Q(+4)=+0.666666666666667d0
-      Q(+5)=-0.333333333333333d0
-      tau=(/1d0,-1d0,1d0,-1d0,1d0,0d0,-1d0,1d0,-1d0,1d0,-1d0/)
+      do j=-16,16
+         fq(j)=chargeofid(j)
+      enddo
+      do j=1,16
+         if(mod(j,2).eq.0) then
+            tau(j)=1
+            tau(-j)=-1
+         else
+            tau(j)=-1
+            tau(-j)=1
+         endif
+      enddo
+      tau(0)=0
+
       esq = ph_unit_e**2
       zmass = ph_Zmass
       zwidth = ph_Zwidth
@@ -173,42 +175,10 @@ c flavours of the produced partons
       normbr = 1
 
       if(isquark(id1)) then
-         q1=q(id2)
-         l1=l(id2)
-         r1=r(id2)
          normbr=normbr*(1d0+ph_deltas)*3
-      elseif(islepton(id1)) then
-         q1=-1
-         l1=le
-         r1=re
-      elseif(isnu(id1)) then
-         q1=0
-         l1=ln
-         r1=rn
-      else
-         write(*,*) 'setzcoupl: invalid Z decay product' ,id2
-         call pwhg_exit(-1)
       endif
 
       if(isquark(id2)) then
-         q2=q(id2)
-         l2=l(id2)
-         r2=r(id2)
-         normbr=normbr*(1d0+ph_deltas)*3
-      elseif(islepton(id2)) then
-         q2=-1
-         l2=le
-         r2=re
-      elseif(isnu(id2)) then
-         q2=0
-         l2=ln
-         r2=rn
-      else
-         write(*,*) 'setzcoupl: invalid Z decay product' ,id2
-         call pwhg_exit(-1)
-      endif
-
-      if(isquark(id1)) then
          normbr=normbr*(1d0+ph_deltas)*3
       endif
 

@@ -46,7 +46,6 @@ c  cant have srdiags if zerowidth is true
       endif
 
       interference = (powheginput('#withinterference').ne.0)
-
       
 c no interference if zerowidth is true
       interference=(interference).and.(.not. zerowidth)
@@ -164,81 +163,6 @@ c 33                  continue
  999  write(*,*) 'init_processes: increase maxprocborn'
       call exit(-1)
       end
- 
-
-      function isquark(id)
-      implicit none
-      logical isquark
-      integer id,aid
-      aid=abs(id)
-      if(aid.ge.1.and.aid.le.6) then
-         isquark=.true.
-      else
-         isquark=.false.
-      endif
-      end
-
-      function isutype(id)
-      implicit none
-      logical isutype
-      integer id,aid
-      aid=abs(id)
-      if(aid.eq.2.or.aid.eq.4.or.aid.eq.6) then
-         isutype=.true.
-      else
-         isutype=.false.
-      endif
-      end
-
-      function isdtype(id)
-      implicit none
-      logical isdtype
-      integer id,aid
-      aid=abs(id)
-      if(aid.eq.1.or.aid.eq.3.or.aid.eq.5) then
-         isdtype=.true.
-      else
-         isdtype=.false.
-      endif
-      end
-
-      function islepton(id)
-      implicit none
-      logical islepton
-      integer id,aid
-      aid=abs(id)
-      if(aid.eq.11.or.aid.eq.13.or.aid.eq.15) then
-         islepton=.true.
-      else
-         islepton=.false.
-      endif
-      end
-
-      function isnu(id)
-      implicit none
-      logical isnu
-      integer id,aid
-      aid=abs(id)
-      if(aid.eq.12.or.aid.eq.14.or.aid.eq.16) then
-         isnu=.true.
-      else
-         isnu=.false.
-      endif
-      end
-
-
-      function ishigh(id)
-c if parton id is in the top position
-c in the doublet (i.e. lepton or down quark) 
-      implicit none
-      logical ishigh
-      integer id
-      if(2*(id/2).ne.id) then
-         ishigh=.true.
-      else
-         ishigh=.false.
-      endif
-      end
 
       subroutine alloweddec(i1,i2,i9,id1,id2,ida1,idw)
       implicit none
@@ -247,28 +171,33 @@ c id1: id of outgoing fermion in W decay
 c id2: id of outgoing fermion in Z decay
 c Return values:
 c ida1: id of outgoing antifermion in W decay
-c idw: W id      integer charge3(-6:6)
+c idw: W id, returns 0 if not allowed
       integer i1,i2,i9,id1,id2,ida1,idw
       integer charge3(-6:6)
       integer wch3
       data charge3 /-2,1,-2,1,-2,1,0,-1,2,-1,2,-1,2/
-      logical isquark,islepton,isnu,ishigh
+      logical isquark,islepton,isnu,isewup
+      if(i1.eq.1.and.i2.eq.-2.and.i9.eq.0.and.id1.eq.11.and.id2.eq.13)
+     1 then
+         write(*,*) 'here'
+      endif
 c idw=0: not allowed
       idw = 0
-      if(.not.(isquark(id2).or.islepton(id1).or.isnu(id1))) return
+      if(.not.(isquark(id1).or.islepton(id1).or.isnu(id1))) return
       if(.not.(isquark(id2).or.islepton(id2).or.isnu(id2))) return
 c one of i1,i2,i9 must be a gluon;
       if(i1*i2*i9.ne.0) return
       wch3=charge3(i1)+charge3(i2)-charge3(i9)
       if(abs(wch3).ne.3) return
-      if(ishigh(id1)) then
-         if(wch3.gt.0) return
-         ida1=-(id1+1)
-         if(abs(ida1).eq.6) return
-      else
+      if(isewup(id1)) then
          if(wch3.lt.0) return
          ida1=-(id1-1)
+         if(abs(ida1).eq.6) return
+      else
+         if(wch3.gt.0) return
+         ida1=-(id1+1)
       endif
+      if(.not.(id1.eq.12.and.id2.eq.13)) return
       if(wch3.gt.0) then
          idw=24
       else
