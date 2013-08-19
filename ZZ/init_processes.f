@@ -174,6 +174,7 @@ c     q g
       alloweddec = .false.
       if(.not.(isquark(id1).or.islepton(id1).or.isnu(id1))) return
       if(.not.(isquark(id2).or.islepton(id2).or.isnu(id2))) return
+      if(abs(id1).eq.6.or.abs(id2).eq.6) return
 c if the two id are different, then order them
 c as follows
       if(id1.ne.id2) then
