@@ -43,7 +43,7 @@ c---  averaged(summed) over initial(final) colours and spins
       double complex Fa346521,Fa341256,Fa651243
       double complex Fa345621,Fa341265,Fa653412
 c      double complex Fa561243,Fa562143
-      double precision v2(2),cl1,cl2,en1,en2,xfac
+      double precision v2(2),cl1,cl2,wl1,wl2,en1,en2,xfac
       double complex ZgL(-nf:nf),ZgR(-nf:nf)
       parameter(ave=0.25d0/xn)
       data cl1,cl2,en1,en2/4*1d0/
@@ -53,7 +53,9 @@ c      double complex Fa561243,Fa562143
       double complex AWZM_SAVE(-nf:nf,-nf:nf)
       double complex BWZM_SAVE(-nf:nf,-nf:nf)
       double complex cpropfac
-      external cpropfac
+      logical isewup,isewdo
+      integer i3chargeofid
+      external cpropfac,isewup,isewdo,i3chargeofid
 
 !      scheme='dred'
 
@@ -71,26 +73,24 @@ c      double complex Fa561243,Fa562143
       write(6,*) 'nwz ne +1 or -1'
       stop
       endif 
-      if     (nwz.eq.-1) then
-        cl1=1d0
-        cl2=0d0
-        en1=le
-        en2=ln
-      elseif (nwz.eq.+1) then
-        cl1=0d0
-        cl2=1d0
-        en1=ln
-        en2=le
-      endif
-c-- if Z -> neutrinos, we need to switch c1 and c2
-      if ((vdecaymodeZ.eq.12).or.(vdecaymodeZ.eq.14).or.
-     .     (vdecaymodeZ.eq.16)) then
-        cl1=1d0-cl1
-        cl2=1d0-cl2
+
+      cl1=-fq(idpart3)            ! minus charge of W outgoing fermion (3)
+      cl2=-fq(-idpart4)            ! minus charge of W incoming fermion (4)
+      en1=zfl( idpart3)             ! Left coupling of W outgoing fermion
+      en2=zfl(-idpart4)             ! Left coupling of W incoming fermion
+
+c choice of which diagram with two W's
+      if((isewup(idpart6).and.isewup(idpart3)).or.
+     1   (isewdo(idpart6).and.isewdo(idpart3))) then
+         wl1=1
+         wl2=0
+      else
+         wl1=0
+         wl2=1
       endif
 
-      v2(1)=l1
-      v2(2)=r1
+      v2(1)=zfl(idpart5)
+      v2(2)=zfr(idpart5)
       cotw=dsqrt((one-xw)/xw)
 
       do j=-nf,nf
@@ -127,24 +127,28 @@ c   DKS have--- u( q2)+dbar( q1)-->nu(q3)+e^+(q4)+mu^-(q6)+mu^+(q5)
             qdks(6,j)=p(5,j)
          enddo
       elseif (iloop.eq.2) then
-         if (nwz.eq.1) then
-         do j=1,4
-            qdks(1,j)=p(1,j)
-            qdks(2,j)=p(2,j)
-            qdks(3,j)=p(3,j)
-            qdks(4,j)=p(6,j)
-            qdks(5,j)=p(4,j)
-            qdks(6,j)=p(5,j)
-         enddo
-         elseif (nwz.eq.-1) then
-         do j=1,4
-            qdks(1,j)=p(1,j)
-            qdks(2,j)=p(2,j)
-            qdks(3,j)=p(5,j)
-            qdks(4,j)=p(4,j)
-            qdks(5,j)=p(6,j)
-            qdks(6,j)=p(3,j)
-         enddo
+         if(idpart4.eq.idpart6) then
+            do j=1,4
+               qdks(1,j)=p(1,j)
+               qdks(2,j)=p(2,j)
+               qdks(3,j)=p(3,j)
+               qdks(4,j)=p(6,j)
+               qdks(5,j)=p(4,j)
+               qdks(6,j)=p(5,j)
+            enddo
+         elseif (idpart5.eq.idpart3) then
+            do j=1,4
+               qdks(1,j)=p(1,j)
+               qdks(2,j)=p(2,j)
+               qdks(3,j)=p(5,j)
+               qdks(4,j)=p(4,j)
+               qdks(5,j)=p(6,j)
+               qdks(6,j)=p(3,j)
+            enddo
+         else
+            write(*,*) 'qqb_wz: it required interference,',
+     1                 'but did not find it ...'
+            call pwhg_exit(-1)            
          endif
       endif
 
@@ -266,13 +270,15 @@ c---loop diagrams just tree*Vpole since they're all triangle-type
 c---set up left/right handed couplings for both Z and gamma*
 c---note that L/R labels the LEPTON coupling v2, NOT the quarks (all L)
       do j=-nf,nf
-        ZgL(j)=L(j)*v2(1)*prop56+Q(j)*q1           
-        ZgR(j)=L(j)*v2(2)*prop56+Q(j)*q1           
+        ZgL(j)=zfL(j)*v2(1)*prop56+fQ(j)*q1           
+        ZgR(j)=zfL(j)*v2(2)*prop56+fQ(j)*q1           
       enddo
       
       do j=-nf,nf
       do k=-nf,nf
-      if (Vsq(j,k) .ne. 0d0) then
+c--no point in wasting time if it gives zero anyway
+         if (i3chargeofid(j)+i3chargeofid(k).eq. 3*nwz
+     1        .and. Vsq(j,k).ne.0) then
         if     ((j .gt. 0) .and. (k .lt. 0)) then
             AWZM=(FAC*(ZgL(+j)*Fa213456+ZgL(-k)*Fa216543)
      .           +FACM*(v2(1)*cotw*prop56*Fb213456_z
@@ -312,7 +318,7 @@ c---4th term (l-h only) contains two W propagators
             suppl=FAC*prop12*(
      .          (en1*Fa346512+en2*Fa342156)*v2(1)*prop56
      .          +q1**2*(cl1*Fa346512+cl2*Fa342156)
-     .          +0.5d0/xw*prop34*(cl1*Fa652143+cl2*Fa653412))
+     .          +0.5d0/xw*prop34*(wl1*Fa652143+wl2*Fa653412))
             AWZM=AWZM+suppl
             BWZM=BWZM+suppl*Vpole12
             suppl=FAC*prop12*(
@@ -324,7 +330,7 @@ c---4th term (l-h only) contains two W propagators
             suppl=FAC*prop12*(
      .          (en1*Fa346521+en2*Fa341256)*v2(1)*prop56
      .          +q1**2*(cl1*Fa346521+cl2*Fa341256)
-     .          +0.5d0/xw*prop34*(cl1*Fa651243+cl2*Fa653421))
+     .          +0.5d0/xw*prop34*(wl1*Fa651243+wl2*Fa653421))
             AWZM=AWZM+suppl
             BWZM=BWZM+suppl*Vpole12
             suppl=FAC*prop12*(

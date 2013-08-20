@@ -34,7 +34,7 @@ c   for the moment --- radiation only from initial line
      .  qu_qb(10,2,2),qu_gg(10,2,2),gg_qb(10,2,2),
      .  qb_qu(10,2,2),qb_gg(10,2,2),gg_qu(10,2,2),
      .  A(2,2)
-      double precision v2(2),cl1,cl2,en1,en2,xfac
+      double precision v2(2),cl1,cl2,wl1,wl2,en1,en2,xfac
       double complex ZgLR(nf,2),c1(2),c2(2)
       common/xanomcoup/xdelg1_z,xdelg1_g,xlambda_g,xlambda_z,
      . xdelk_g,xdelk_z
@@ -44,7 +44,8 @@ c   for the moment --- radiation only from initial line
       double complex A_SAVE(-nf:nf,-nf:nf,2,2)
       integer iloop,nloop
       double complex cpropfac
-      external cpropfac
+      logical isewup,isewdo
+      external cpropfac,isewup,isewdo
 
       FAC = -2D0*gwsq*esq
 
@@ -66,19 +67,27 @@ c      write(*,*)'MG gg',gsq
       write(6,*) 'nwz .ne. +1 or -1 in qqb_wz_g.f'
       stop
       endif 
-      if     (nwz.eq.-1) then
-        cl1=1d0
-        cl2=0d0
-        en1=le
-        en2=ln
-      elseif (nwz.eq.+1) then
-        cl1=0d0
-        cl2=1d0
-        en1=ln
-        en2=le
+
+
+
+      cl1=-fq(idpart3)            ! minus charge of W outgoing fermion (3)
+      cl2=-fq(-idpart4)            ! minus charge of W incoming fermion (4)
+      en1=zfl( idpart3)             ! Left coupling of W outgoing fermion
+      en2=zfl(-idpart4)             ! Left coupling of W incoming fermion
+
+c choice of which diagram with two W's
+      if((isewup(idpart6).and.isewup(idpart3)).or.
+     1   (isewdo(idpart6).and.isewdo(idpart3))) then
+         wl1=1
+         wl2=0
+      else
+         wl1=0
+         wl2=1
       endif
-      v2(1)=l1
-      v2(2)=r1
+      
+
+      v2(1)=zfl(idpart5)
+      v2(2)=zfr(idpart5)
 
 
 c--- wwflag=1 for most cases, indicating presence of diagram with 2 W's
@@ -88,13 +97,6 @@ c--- but for Z -> bbbar this diagram contains |V_tb|**2 which we take 0
         wwflag=0d0
       endif
 
-c-- if Z -> neutrinos, we need to switch c1 and c2
-      if ((vdecaymodeZ.eq.12).or.(vdecaymodeZ.eq.14).or.
-     .     (vdecaymodeZ.eq.16)) then
-        cl1=1d0-cl1
-        cl2=1d0-cl2
-      endif
-      
       do jp=-nf,nf
       do kp=-nf,nf
       msq(jp,kp)=0d0
@@ -193,8 +195,8 @@ c---set up left/right handed couplings for both Z and gamma*
 c---note that the second label corresponds to the helicity
 c---of the LEPTON coupling v2, NOT the quarks (all L)
       do j=1,nf
-        ZgLR(j,minus)=L(j)*v2(1)*prop56+Q(j)*q1           
-        ZgLR(j,mplus)=L(j)*v2(2)*prop56+Q(j)*q1           
+        ZgLR(j,minus)=zfL(j)*v2(1)*prop56+fQ(j)*q1           
+        ZgLR(j,mplus)=zfL(j)*v2(2)*prop56+fQ(j)*q1           
       enddo
 
 
@@ -237,8 +239,8 @@ c---case u-db
      .                   *prop12*qu_qb(5,polg,polz)
      .                 +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .                   *prop12*qu_qb(4,polg,polz)
-     .    +wwflag*0.5d0*prop34*prop12/xw*qu_qb(6,polg,polz)*cl1
-     .     +wwflag*0.5d0*prop34*prop12/xw*qu_qb(7,polg,polz)*cl2)
+     .    +wwflag*0.5d0*prop34*prop12/xw*qu_qb(6,polg,polz)*wl1
+     .     +wwflag*0.5d0*prop34*prop12/xw*qu_qb(7,polg,polz)*wl2)
      
 c          A(polg,polz)=((L(+j)*qu_qb(2,polg,polz)
 c     .                  +L(-k)*qu_qb(3,polg,polz))*FAC
@@ -263,8 +265,8 @@ c---case db-u
      .                   *prop12*qb_qu(5,polg,polz)
      .                 +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .                   *prop12*qb_qu(4,polg,polz)
-     .    +wwflag*0.5d0*prop34*prop12/xw*qb_qu(6,polg,polz)*cl1
-     .    +wwflag*0.5d0*prop34*prop12/xw*qb_qu(7,polg,polz)*cl2)
+     .    +wwflag*0.5d0*prop34*prop12/xw*qb_qu(6,polg,polz)*wl1
+     .    +wwflag*0.5d0*prop34*prop12/xw*qb_qu(7,polg,polz)*wl2)
 
 c          A(polg,polz)=((L(+k)*qb_qu(2,polg,polz)
 c     .                  +L(-j)*qb_qu(3,polg,polz))*FAC
@@ -289,8 +291,8 @@ c---case u-g
      .              *prop12*qu_gg(5,polg,polz)
      .              +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .              *prop12*qu_gg(4,polg,polz)
-     .    +wwflag*0.5d0*prop34*prop12/xw*qu_gg(6,polg,polz)*cl1
-     .    +wwflag*0.5d0*prop34*prop12/xw*qu_gg(7,polg,polz)*cl2)
+     .    +wwflag*0.5d0*prop34*prop12/xw*qu_gg(6,polg,polz)*wl1
+     .    +wwflag*0.5d0*prop34*prop12/xw*qu_gg(7,polg,polz)*wl2)
                   
 c          A(polg,polz)=((c1*qu_gg(2,polg,polz)
 c     .                  +c2*qu_gg(3,polg,polz))*FAC
@@ -314,8 +316,8 @@ c---case db-g
      .             *prop12*qb_gg(5,polg,polz)
      .             +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .             *prop12*qb_gg(4,polg,polz)
-     .     +wwflag*0.5d0*prop34*prop12/xw*qb_gg(6,polg,polz)*cl1
-     .     +wwflag*0.5d0*prop34*prop12/xw*qb_gg(7,polg,polz)*cl2)
+     .     +wwflag*0.5d0*prop34*prop12/xw*qb_gg(6,polg,polz)*wl1
+     .     +wwflag*0.5d0*prop34*prop12/xw*qb_gg(7,polg,polz)*wl2)
                   
 c          A(polg,polz)=((c1*qb_gg(2,polg,polz)
 c     .                  +c2*qb_gg(3,polg,polz))*FAC
@@ -341,8 +343,8 @@ c---case g-u
      .               *prop12*gg_qu(5,polg,polz)
      .               +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .               *prop12*gg_qu(4,polg,polz)
-     .     +wwflag*0.5d0*prop34*prop12/xw*gg_qu(6,polg,polz)*cl1
-     .     +wwflag*0.5d0*prop34*prop12/xw*gg_qu(7,polg,polz)*cl2)
+     .     +wwflag*0.5d0*prop34*prop12/xw*gg_qu(6,polg,polz)*wl1
+     .     +wwflag*0.5d0*prop34*prop12/xw*gg_qu(7,polg,polz)*wl2)
                   
 c     A(polg,polz)=((c1(polz)*gg_qu(2,polg,polz)
 c     .                  +c2(polz)*gg_qu(3,polg,polz))*FAC
@@ -368,8 +370,8 @@ c---case g-db
      .                *prop12*gg_qb(5,polg,polz)
      .                +(en2*v2(polz)*prop56+q1*(-1d0)*cl2)
      .                *prop12*gg_qb(4,polg,polz)
-     .      +wwflag*0.5d0*prop34*prop12/xw*gg_qb(6,polg,polz)*cl1
-     .      +wwflag*0.5d0*prop34*prop12/xw*gg_qb(7,polg,polz)*cl2)
+     .      +wwflag*0.5d0*prop34*prop12/xw*gg_qb(6,polg,polz)*wl1
+     .      +wwflag*0.5d0*prop34*prop12/xw*gg_qb(7,polg,polz)*wl2)
                   
 c     A(polg,polz)=((c1*gg_qb(2,polg,polz)
 c     .                  +c2*gg_qb(3,polg,polz))*FAC
