@@ -29,6 +29,7 @@ c   for the moment --- radiation only from initial line
       common/plabel/plabel
       common/pchoice/j,k
       double precision P(mxpart,4),qdks(mxpart,4),msq(-nf:nf,-nf:nf)
+      double precision xmsq(3,-nf:nf,-nf:nf)
       double precision ave,cotw,s127,wwflag
       double complex 
      .  qu_qb(10,2,2),qu_gg(10,2,2),gg_qb(10,2,2),
@@ -103,6 +104,8 @@ c--- but for Z -> bbbar this diagram contains |V_tb|**2 which we take 0
       A_SAVE(jp,kp,:,:)=0d0
       enddo
       enddo
+
+      xmsq = 0
 
       if (interference) then
          nloop=2
@@ -391,7 +394,7 @@ c     .                 *prop34*prop56*v2(polz)
       if (ave.gt.0d0) then
 
 
-      msq(j,k)=msq(j,k) + FAC1*ave
+      xmsq(iloop,j,k)=xmsq(iloop,j,k) + FAC1*ave
      .          *(cdabs(A(mplus,minus))**2+cdabs(A(minus,minus))**2
      .           +cdabs(A(mplus,mplus))**2+cdabs(A(minus,mplus))**2)
 
@@ -403,7 +406,7 @@ c     .                 *prop34*prop56*v2(polz)
             A_SAVE(j,k,minus,minus) = A(minus,minus)
          endif
       elseif(iloop.eq.2) then
-         msq(j,k)=msq(j,k) - FAC1*ave
+         xmsq(3,j,k)=xmsq(3,j,k) - FAC1*ave
      .          *(dconjg(A(mplus,minus))*A_SAVE(j,k,mplus,minus) + 
      .        A(mplus,minus)*dconjg(A_SAVE(j,k,mplus,minus)) +
      .        dconjg(A(minus,minus))*A_SAVE(j,k,minus,minus) + 
@@ -411,6 +414,18 @@ c     .                 *prop34*prop56*v2(polz)
      .           )
       endif
                
+            
+      if(interference) then
+         if(iloop.eq.2) then
+c     this is for testing:
+c            msq(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
+            msq(j,k)= xmsq(1,j,k) *
+     1           (1+xmsq(3,j,k)/(xmsq(1,j,k)+xmsq(2,j,k)))
+         endif
+      else
+         msq(j,k)=xmsq(1,j,k)
+      endif
+      
       endif
 
  19   continue

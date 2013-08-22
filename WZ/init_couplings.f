@@ -189,9 +189,8 @@ c flavours of the produced partons
             kn_jacborn = 0
          endif
       endif
-
+      vsymfact = 1
       if(id1.eq.id2) then
-         vsymfact=0.5d0
          if(withinterference) then
             interference=.true.
          else
@@ -209,7 +208,6 @@ c impose mllmin cut also upon the crossed pairs
             endif
          endif
       elseif(iad1.eq.-id2) then
-         vsymfact=0.5d0
          if(withinterference) then
             interference=.true.
          else
@@ -227,7 +225,6 @@ c impose mllmin cut also upon the crossed pairs
             endif
          endif
       else
-         vsymfact=1
          interference=.false.
       endif
 

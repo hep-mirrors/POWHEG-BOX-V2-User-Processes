@@ -24,6 +24,7 @@ c---  averaged(summed) over initial(final) colours and spins
       integer j,k
       double precision p(mxpart,4),qdks(mxpart,4)
       double precision msqv(-nf:nf,-nf:nf),msq(-nf:nf,-nf:nf)
+      double precision xmsq(3,-nf:nf,-nf:nf)
       double precision facnlo,ave,cotw
       double precision FAC,FACM
       double complex AWZM,AWZP,BWZM,BWZP,Vpole,Vpole12,suppl
@@ -100,6 +101,8 @@ c choice of which diagram with two W's
       BWZM_SAVE(j,k) = 0d0
       enddo
       enddo
+
+      xmsq=0
 
 c---calculate the lowest order matrix element
 !      call qqb_wz(p,msq)
@@ -341,7 +344,7 @@ c---4th term (l-h only) contains two W propagators
         endif
         endif
       
-      msqv(j,k)=msqv(j,k) + FACNLO*Vsq(j,k)*ave*2d0*
+      xmsq(iloop,j,k)=xmsq(iloop,j,k) + FACNLO*Vsq(j,k)*ave*2d0*
      .  dble(dconjg(AWZM)*BWZM+dconjg(AWZP)*BWZP)
 
       if (iloop.eq.1) then
@@ -350,13 +353,24 @@ c---4th term (l-h only) contains two W propagators
             BWZM_SAVE(j,k)=BWZM
          endif
       elseif (iloop.eq.2) then
-         msqv(j,k)=msqv(j,k)-FACNLO*Vsq(j,k)*ave*(
+         xmsq(3,j,k)=xmsq(3,j,k)-FACNLO*Vsq(j,k)*ave*(
      .   dconjg(AWZM_SAVE(j,k))*BWZM +
      .   AWZM_SAVE(j,k)*dconjg(BWZM) + 
      .   dconjg(AWZM)*BWZM_SAVE(j,k) +
      .   AWZM*dconjg(BWZM_SAVE(j,k)))
       endif
             
+            
+      if(interference) then
+         if(iloop.eq.2) then
+c     this is for testing:
+c            msqv(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
+            msq(j,k)= xmsq(1,j,k) *
+     1           (1+xmsq(3,j,k)/(xmsq(1,j,k)+xmsq(2,j,k)))
+         endif
+      else
+         msqv(j,k)=xmsq(1,j,k)
+      endif
 
 
 

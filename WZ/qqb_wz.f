@@ -21,7 +21,7 @@ c     Notation to allow room for p3 --- gluon emission.
       include 'nwz.f'
       include 'cvecbos.h'
       include 'vvsettings.f'
-      double precision msq(-nf:nf,-nf:nf),p(mxpart,4),qdks(mxpart,4)     
+      double precision msq(-nf:nf,-nf:nf),p(mxpart,4),qdks(mxpart,4)
 c in case interference is needed, it will hold the direct, crossed
 c and interference term (first index from 1 to 3 respectively)
       double precision xmsq(3,-nf:nf,-nf:nf)
@@ -325,17 +325,17 @@ c---  4th term (l-h only) contains two W propagators
             endif
             
             
-         endif
-
-         if(interference) then
-            if(iloop.eq.2) then
+            if(interference) then
+               if(iloop.eq.2) then
 c     this is for testing:
-c     msq(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
-               msq(j,k)= xmsq(1,j,k) *
-     1              (1+xmsq(3,j,k)/(xmsq(1,j,k)+xmsq(2,j,k)))
+c                  msq(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
+                  msq(j,k)= xmsq(1,j,k) *
+     1                 (1+xmsq(3,j,k)/(xmsq(1,j,k)+xmsq(2,j,k)))
+               endif
+            else
+               msq(j,k)=xmsq(1,j,k)
             endif
-         else
-            msq(j,k)=xmsq(1,j,k)
+
          endif
 
       enddo
