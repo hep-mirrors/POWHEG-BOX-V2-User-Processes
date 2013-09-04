@@ -10,7 +10,8 @@
       real * 8 bmunu(0:3,0:3,nlegs),born,colcf
       integer j,k,mu,nu
 c                    id1      iad1     id2      idw
-      call setzcoupl(bflav(5),bflav(6),bflav(7),bflav(3))
+      call setzcoupl(bflav(1),bflav(2),
+     1     bflav(5),bflav(6),bflav(7),bflav(3))
 
 
       call compborn(p,bflav,born,bmunu,bornjk)
@@ -34,7 +35,7 @@ c                    id1      iad1     id2      idw
       integer i,j,k,mu,nu
       real * 8 ferm_charge(nlegborn)
       real * 8 p(12,1:4)  ! 12 = mxpart in MCFM
-      double precision msq(-5:5,-5:5)
+      double precision msq
       real * 8 suppfact2e
 c     vector boson id and decay
       integer idvecbos,vdecaymode
@@ -55,7 +56,10 @@ c     vector boson id and decay
 
       call qqb_wz(p,msq)
 
-      born = msq(bflav(1),bflav(2))
+
+      write(*,'(a,1x,d15.9)') ' msq',msq
+
+      born = msq
       born = born * normbr
 
 

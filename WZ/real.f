@@ -15,12 +15,14 @@
       real * 8 suppfact2e
 
       integer i,j
-      double precision p(mxpart,4),msq(-5:5,-5:5)
+      double precision p(mxpart,4),msq
 
       ason2pi = st_alpha/2d0/pi
 
-c                    id1      iad1     id2      idw
-      call setzcoupl(rflav(5),rflav(6),rflav(7),rflav(3))
+      call setzcoupl(rflav(1),rflav(2),
+c          id1      iad1     id2      idw
+     .     rflav(5),rflav(6),rflav(7),rflav(3))
+
 
       do i=1,2
          p(i,4) = pin(0,i)
@@ -78,13 +80,15 @@ c                    id1      iad1     id2      idw
 !$$
 !$$      stop
 
-      amp2real = msq(rflav(1),rflav(2))
+      amp2real = msq
 
 !      write(*,*)'amp2real',amp2real
 
       amp2real = amp2real/ason2pi
 
       amp2real = amp2real * normbr
+
+      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'real',amp2real,rflav
 
 
       end

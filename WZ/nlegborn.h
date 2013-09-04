@@ -22,7 +22,7 @@ c take also away the two resonances
 c      integer maxprocborn,maxprocreal
 c      parameter (maxprocborn=1584,maxprocreal=15312)
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=1008,maxprocreal=3024)
+      parameter (maxprocborn=1152,maxprocreal=3456)
 
 
       integer maxalr

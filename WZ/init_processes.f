@@ -197,7 +197,12 @@ c one of i1,i2,i9 must be a gluon;
          if(wch3.gt.0) return
          ida1=-(id1+1)
       endif
-      if(.not.(id1.eq.13.and.id2.eq.13)) return
+c User's restrictions to processes
+
+c      if(.not.(id1.eq.13.and.id2.eq.13)) return
+
+c End User's restrictions to processes
+
       if(wch3.gt.0) then
          idw=24
       else

@@ -126,9 +126,9 @@ c      endif
 
 
 
-      subroutine setzcoupl(id1,iad1,id2,idw)
+      subroutine setzcoupl(a1,a2,id1,iad1,id2,idw)
       implicit none
-      integer id1,iad1,id2,idw
+      integer a1,a2,id1,iad1,id2,idw
       include 'nlegborn.h'
       include 'pwhg_kn.h'
       include 'PhysPars.h'
@@ -167,6 +167,8 @@ c signal if it is W+ or W- to cross section routines
 
 c the DKS like amplitude want to know the incoming
 c flavours of the produced partons
+      idpart1=a1
+      idpart2=a2
       idpart3=id1
       idpart4=iad1
       idpart5=id2

@@ -11,7 +11,7 @@ c     The as/(2pi) factor is attached at a later point
       include 'PhysPars.h'
       integer mxpart
       parameter (mxpart=12)
-      double precision msqB(-5:5,-5:5),msq(-5:5,-5:5)
+      double precision msqB,msq
       double precision p(mxpart,4),pTTTTTT(4,mxpart)
       real * 8 pin(0:3,nlegborn)
       integer vflav(nlegborn)
@@ -22,8 +22,9 @@ c     The as/(2pi) factor is attached at a later point
       integer i,j
       real * 8 suppfact2e
 
-c                    id1      iad1     id2      idw
-      call setzcoupl(vflav(5),vflav(6),vflav(7),vflav(3))
+      call setzcoupl(vflav(1),vflav(2),
+c          id1      iad1     id2      idw
+     .     vflav(5),vflav(6),vflav(7),vflav(3))
 
 
       ason2pi = st_alpha/2d0/pi
@@ -80,13 +81,15 @@ c                    id1      iad1     id2      idw
 
 
       ! -- divide out ason2pi
-      virtual = msq(vflav(1),vflav(2))/ason2pi
-      born = msqB(vflav(1),vflav(2))
+      virtual = msq/ason2pi
+      born = msqB
 
       ! -- scheme change from dred 
       virtual = virtual + born*(-2d0*(cf/2d0)) 
 
       virtual = virtual * normbr
+
+      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'virt',virtual,vflav
 
       end
 
