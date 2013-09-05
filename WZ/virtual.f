@@ -89,7 +89,7 @@ c          id1      iad1     id2      idw
 
       virtual = virtual * normbr
 
-      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'virt',virtual,vflav
+c      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'virt',virtual,vflav
 
       end
 

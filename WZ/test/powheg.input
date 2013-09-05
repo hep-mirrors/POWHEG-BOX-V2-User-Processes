@@ -72,3 +72,5 @@ wllmin 1d-2         ! default 1d-5 GeV this is min invar mass for W leptons
 
 
 smartsig 0
+
+withdamp 0

@@ -136,7 +136,7 @@ c     DKS have--- u( q2)+dbar( q1)-->nu(q3)+e^+(q4)+mu^-(q6)+mu^+(q5)+g(p7)
                oqdks1=qdks
             endif
          elseif (iloop.eq.2) then
-            if (nwz.eq.1) then
+            if (idpart4.eq.idpart6) then
                do jp=1,4
                   qdks(1,jp)=p(1,jp)
                   qdks(2,jp)=p(2,jp)
@@ -153,7 +153,7 @@ c     DKS have--- u( q2)+dbar( q1)-->nu(q3)+e^+(q4)+mu^-(q6)+mu^+(q5)+g(p7)
                   recalc=.true.
                   oqdks2=qdks
                endif
-            elseif (nwz.eq.-1) then
+            elseif (idpart5.eq.idpart3) then
                do jp=1,4
                   qdks(1,jp)=p(1,jp)
                   qdks(2,jp)=p(2,jp)
@@ -217,8 +217,8 @@ c---  case g-dbar
 
          endif
 c---  set up left/right handed couplings for both Z and gamma*
-c---  note that the second label corresponds to the helicity
-c---  of the LEPTON coupling v2, NOT the quarks (all L)
+c---  note that L/R labels the LEPTON coupling v2, NOT the quarks (all L)
+         q1=fq(idpart5)
          do j=1,nf
             ZgLR(j,minus)=zfL(j)*v2(1)*prop56(ip)+fQ(j)*q1           
             ZgLR(j,mplus)=zfL(j)*v2(2)*prop56(ip)+fQ(j)*q1           

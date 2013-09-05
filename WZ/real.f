@@ -88,7 +88,7 @@ c          id1      iad1     id2      idw
 
       amp2real = amp2real * normbr
 
-      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'real',amp2real,rflav
+c      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'real',amp2real,rflav
 
 
       end

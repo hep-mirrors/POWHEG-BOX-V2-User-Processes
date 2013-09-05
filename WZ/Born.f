@@ -57,7 +57,7 @@ c     vector boson id and decay
       call qqb_wz(p,msq)
 
 
-      write(*,'(a,1x,d15.9)') ' msq',msq
+c      write(*,'(a,1x,d15.9)') ' msq',msq
 
       born = msq
       born = born * normbr
@@ -122,7 +122,7 @@ c     colored particles
          icolup(2,2)=0
       else
          write(*,*) ' invalid flavour'
-         stop
+         call pwhg_exit(-1)
       endif
       if(isquark(5)) then
          icolup(1,5)=502

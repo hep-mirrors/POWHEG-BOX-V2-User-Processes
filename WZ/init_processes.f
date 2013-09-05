@@ -19,10 +19,10 @@
       include 'cvecbos.h'
       include 'vvsettings.f'
       
-c      par_isrtinycsi = 1d-6
-c      par_isrtinyy = 1d-6
-c      par_fsrtinycsi = 1d-5
-c      par_fsrtinyy = 1d-5
+c      par_isrtinycsi = 0
+c      par_isrtinyy = 0
+c      par_fsrtinycsi = 0
+c      par_fsrtinyy = 0
 
       if (powheginput("#zerowidth").eq.1) then 
          zerowidth = .true. 
