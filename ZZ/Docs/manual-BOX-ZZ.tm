@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.14>
+<TeXmacs|1.0.7.16>
 
 <style|article>
 
@@ -78,33 +78,29 @@
   interference is accounted for. Singly resonant graphs are also included by
   default, unless the <with|font-family|tt|dronly> flag is set to 1.
 
-  <\bibliography|bib|JHEP|paper.bib>
-    <\bib-list|1>
-      <bibitem*|1><label|bib-noi>T.<nbsp>Melia, P.<nbsp>Nason,
-      R.<nbsp>Rontsch, and G.<nbsp>Zanderighi, <with|font-shape|italic|W+W-,
-      WZ and ZZ production in the POWHEG BOX>, <with|font-shape|italic|JHEP>
-      <with|font-series|bold|1111> (2011) 078,
-      [<hlink|<with|font-family|tt|1107.5051>|http://xxx.lanl.gov/abs/1107.5051>].
+  <\bibliography|bib|tm-plain|paper.bib>
+    <\bib-list|4>
+      <bibitem*|1><label|bib-Campbell:1999ah>John M.<nbsp>Campbell<localize|
+      and >R. Keith<nbsp>Ellis.<newblock> An Update on vector boson pair
+      production at hadron colliders.<newblock>
+      <with|font-shape|italic|Phys.Rev.>, D60:113006, 1999.<newblock>
 
-      <bibitem*|2><label|bib-Dixon:1998py>L.<nbsp>J. Dixon, Z.<nbsp>Kunszt,
-      and A.<nbsp>Signer, <with|font-shape|italic|Helicity amplitudes for
-      O(alpha-s) production of <math|W<rsup|+>*W<rsup|->>,
+      <bibitem*|2><label|bib-Campbell:2011bn>John M.<nbsp>Campbell, R.
+      Keith<nbsp>Ellis<localize| and >Ciaran<nbsp>Williams.<newblock> Vector
+      boson pair production at the LHC.<newblock>
+      <with|font-shape|italic|JHEP>, 1107:18, 2011.<newblock>
+
+      <bibitem*|3><label|bib-Dixon:1998py>Lance J.<nbsp>Dixon,
+      Z.<nbsp>Kunszt<localize| and >A.<nbsp>Signer.<newblock> Helicity
+      amplitudes for O(alpha-s) production of <math|W<rsup|+>*W<rsup|->>,
       <math|W<rsup|\<pm\>>*Z>, <math|Z*Z>, <math|W<rsup|\<pm\>>*\<gamma\>>,
-      or <math|Z*\<gamma\>> pairs at hadron colliders>,
-      <with|font-shape|italic|Nucl.Phys.> <with|font-series|bold|B531> (1998)
-      3--23, [<hlink|<with|font-family|tt|hep-ph/9803250>|http://xxx.lanl.gov/abs/hep-ph/9803250>].
+      or <math|Z*\<gamma\>> pairs at hadron colliders.<newblock>
+      <with|font-shape|italic|Nucl.Phys.>, B531:3--23, 1998.<newblock>
 
-      <bibitem*|3><label|bib-Campbell:1999ah>J.<nbsp>M. Campbell and
-      R.<nbsp>Ellis, <with|font-shape|italic|An Update on vector boson pair
-      production at hadron colliders>, <with|font-shape|italic|Phys.Rev.>
-      <with|font-series|bold|D60> (1999) 113006,
-      [<hlink|<with|font-family|tt|hep-ph/9905386>|http://xxx.lanl.gov/abs/hep-ph/9905386>].
-
-      <bibitem*|4><label|bib-Campbell:2011bn>J.<nbsp>M. Campbell, R.<nbsp>K.
-      Ellis, and C.<nbsp>Williams, <with|font-shape|italic|Vector boson pair
-      production at the LHC>, <with|font-shape|italic|JHEP>
-      <with|font-series|bold|1107> (2011) 018,
-      [<hlink|<with|font-family|tt|1105.0020>|http://xxx.lanl.gov/abs/1105.0020>].
+      <bibitem*|4><label|bib-noi>Tom<nbsp>Melia, Paolo<nbsp>Nason,
+      Raoul<nbsp>Rontsch<localize| and >Giulia<nbsp>Zanderighi.<newblock>
+      W+W-, WZ and ZZ production in the POWHEG BOX.<newblock>
+      <with|font-shape|italic|JHEP>, 1111:78, 2011.<newblock>
     </bib-list>
   </bibliography>
 </body>
@@ -125,8 +121,8 @@
     <associate|auto-11|<tuple|6|?>>
     <associate|auto-2|<tuple|2|1>>
     <associate|auto-3|<tuple|3|1>>
-    <associate|auto-4|<tuple|3|1>>
-    <associate|auto-5|<tuple|1|2>>
+    <associate|auto-4|<tuple|3|2>>
+    <associate|auto-5|<tuple|4|2>>
     <associate|auto-6|<tuple|6|5>>
     <associate|auto-7|<tuple|7|5>>
     <associate|auto-8|<tuple|7|5>>
@@ -134,9 +130,9 @@
     <associate|bib-Alioli:2010xd|<tuple|2|?>>
     <associate|bib-Alwall:2006yp|<tuple|1|5>>
     <associate|bib-Boos:2001cv|<tuple|2|6>>
-    <associate|bib-Campbell:1999ah|<tuple|3|1>>
-    <associate|bib-Campbell:2011bn|<tuple|4|1>>
-    <associate|bib-Dixon:1998py|<tuple|2|?>>
+    <associate|bib-Campbell:1999ah|<tuple|1|2>>
+    <associate|bib-Campbell:2011bn|<tuple|2|2>>
+    <associate|bib-Dixon:1998py|<tuple|3|2>>
     <associate|bib-Frixione:2007nw|<tuple|1|?>>
     <associate|bib-Frixione:2007vw|<tuple|3|?>>
     <associate|bib-Frixione:2007zp|<tuple|3|6>>
@@ -144,7 +140,7 @@
     <associate|bib-Nason:1988xz|<tuple|5|6>>
     <associate|bib-Nason:1989zy|<tuple|6|6>>
     <associate|bib-Nason:2004rx|<tuple|7|6>>
-    <associate|bib-noi|<tuple|1|1>>
+    <associate|bib-noi|<tuple|4|2>>
   </collection>
 </references>
 
