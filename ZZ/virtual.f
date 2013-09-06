@@ -13,7 +13,7 @@ c     vector boson id and decay
       include 'PhysPars.h'
       integer mxpart
       parameter (mxpart=12)
-      double precision msqB(-5:5,-5:5),msq(-5:5,-5:5)
+      double precision msqB,msq
       double precision p(mxpart,4)
       real * 8 pin(0:3,nlegborn)
       integer vflav(nlegborn)
@@ -25,7 +25,7 @@ c     vector boson id and decay
 
       ason2pi = st_alpha/2d0/pi
 
-      call setzcoupl(vflav(5),vflav(7))
+      call setzcoupl(vflav(1),vflav(2),vflav(5),vflav(7))
 
       do i=1,2
          p(i,4) = pin(0,i)
@@ -41,17 +41,19 @@ c     vector boson id and decay
       p(2,:)=-p(2,:)
 
       call qqb_zz(p,msqB)
-      born=msqB(vflav(1),vflav(2))
+      born=msqB
       call qqb_zz_v(p,msq)
 
       ! -- divide out ason2pi
-      virtual = msq(vflav(1),vflav(2))/ason2pi
+      virtual = msq/ason2pi
 
       ! -- scheme change from dred 
       virtual = virtual + born*(-2d0*(cf/2d0)) 
 
 c phase space suppression of (36)(45) singularities
       virtual = virtual * normbr
+
+c      write(*,*) ' virtual: ',virtual
 
       end
 

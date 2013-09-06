@@ -65,9 +65,9 @@ c     number of light flavors
 
 
 
-      subroutine setzcoupl(id1,id2)
+      subroutine setzcoupl(a1,a2,id1,id2)
       implicit none
-      integer id1,id2
+      integer a1,a2,id1,id2
       include 'nlegborn.h'
       include 'pwhg_kn.h'
       include 'PhysPars.h'
@@ -98,6 +98,9 @@ c     number of light flavors
       endif
 
       normbr = 1
+
+      idpart1 = a1
+      idpart2 = a2
 
       if(isquark(id1)) then
          q1=q(id1)

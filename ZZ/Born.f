@@ -10,7 +10,7 @@
       real * 8 bmunu(0:3,0:3,nlegs),born,colcf
       integer j,k,mu,nu
 
-      call setzcoupl(bflav(5),bflav(7))
+      call setzcoupl(bflav(1),bflav(2),bflav(5),bflav(7))
 
       call compborn(p,bflav,born,bmunu,bornjk)
 
@@ -33,7 +33,7 @@
       integer i,j,k,mu,nu
       real * 8 ferm_charge(nlegborn)
       real * 8 p(12,1:4)  ! 12 = mxpart in MCFM
-      double precision msq(-5:5,-5:5)
+      double precision msq
 c     vector boson id and decay
       include 'cvecbos.h'
 
@@ -53,9 +53,11 @@ c     vector boson id and decay
 
       call qqb_zz(p,msq)
 
-      born = msq(bflav(1),bflav(2))
+      born = msq
 
       born = born * normbr
+
+c      write(*,'(a,1x,d15.9)') ' msq',born
 
 C     -- no gluons, so no spin correlated Born  
       do i=0,3

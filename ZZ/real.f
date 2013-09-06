@@ -14,11 +14,11 @@ c     vector boson id and decay
 
       integer i,mxpart
       parameter (mxpart=12)
-      double precision p(mxpart,4),msq(-5:5,-5:5)
+      double precision p(mxpart,4),msq
 
       ason2pi = st_alpha/2d0/pi
 
-      call setzcoupl(rflav(5),rflav(7))
+      call setzcoupl(rflav(1),rflav(2),rflav(5),rflav(7))
 
       do i=1,2
          p(i,4) = pin(0,i)
@@ -37,9 +37,11 @@ c     vector boson id and decay
       call qqb_zz_g(p,msq)
 
 
-      amp2real = msq(rflav(1),rflav(2))
+      amp2real = msq
       amp2real = amp2real/ason2pi
 
       amp2real = amp2real * normbr
+
+c      write(*,*) ' real:',amp2real
 
       end
