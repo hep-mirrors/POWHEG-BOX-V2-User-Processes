@@ -8,7 +8,7 @@ PDF=lhapdf
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=WZ
-ANALYSIS=sanity
+ANALYSIS=dummy
 ## For static linking uncomment the following
 STATIC= #-static
 #
@@ -77,6 +77,8 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
+PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi.o
+
 ifeq ("$(ANALYSIS)","WZ")
 ##To include Fastjet configuration uncomment the following lines. 
 #FASTJET_CONFIG=/users/melia/fastj/bin/fastjet-config
@@ -87,7 +89,7 @@ FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-WZ.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-else
+endif
 ifeq ("$(ANALYSIS)","sanity")
 ##To include Fastjet configuration uncomment the following lines. 
 #FASTJET_CONFIG=/users/melia/fastj/bin/fastjet-config
@@ -98,9 +100,6 @@ FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-sanity.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-else
-PWHGANAL=pwhg_analysis-default.o
-endif
 endif
 
 

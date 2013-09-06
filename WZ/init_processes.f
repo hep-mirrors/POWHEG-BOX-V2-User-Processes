@@ -164,43 +164,82 @@ c 33                  continue
       call exit(-1)
       end
 
-      subroutine alloweddec(i1,i2,i9,id1,id2,ida1,idw)
+      subroutine alloweddec(i1,i2,i9,idfw,idfz,idaw,idw)
       implicit none
 c i1,i2: incoming partons; i9:outgoing parton;
-c id1: id of outgoing fermion in W decay
-c id2: id of outgoing fermion in Z decay
+c idfw: id of outgoing fermion in W decay
+c idfz: id of outgoing fermion in Z decay
 c Return values:
-c ida1: id of outgoing antifermion in W decay
+c idaw: id of outgoing antifermion in W decay
 c idw: W id, returns 0 if not allowed
-      integer i1,i2,i9,id1,id2,ida1,idw
+      integer i1,i2,i9,idfw,idfz,idaw,idw
       integer charge3(-6:6)
       integer wch3
       data charge3 /-2,1,-2,1,-2,1,0,-1,2,-1,2,-1,2/
       logical isquark,islepton,isnu,isewup
-      if(i1.eq.1.and.i2.eq.-2.and.i9.eq.0.and.id1.eq.11.and.id2.eq.13)
-     1 then
-         write(*,*) 'here'
-      endif
+      real * 8 powheginput
 c idw=0: not allowed
       idw = 0
-      if(.not.(isquark(id1).or.islepton(id1).or.isnu(id1))) return
-      if(.not.(isquark(id2).or.islepton(id2).or.isnu(id2))) return
+      if(.not.(isquark(idfw).or.islepton(idfw).or.isnu(idfw))) return
+      if(.not.(isquark(idfz).or.islepton(idfz).or.isnu(idfz))) return
 c one of i1,i2,i9 must be a gluon;
       if(i1*i2*i9.ne.0) return
       wch3=charge3(i1)+charge3(i2)-charge3(i9)
       if(abs(wch3).ne.3) return
-      if(isewup(id1)) then
+      if(isewup(idfw)) then
          if(wch3.lt.0) return
-         ida1=-(id1-1)
-         if(abs(ida1).eq.6) return
+         idaw=-(idfw-1)
+         if(abs(idaw).eq.6) return
       else
          if(wch3.gt.0) return
-         ida1=-(id1+1)
+         idaw=-(idfw+1)
       endif
-c User's restrictions to processes
-
-c      if(.not.(id1.eq.13.and.id2.eq.13)) return
-
+c User's restrictions to processes; Below are some examples.
+c User's can easily add their own case.
+      if(powheginput("#only-e").eq.1) then
+         if(idfz.ne.11) return
+         if(idfw.ne.11.and.idaw.ne.-11) return
+      endif
+      if(powheginput("#only-mu").eq.1) then
+         if(idfz.ne.13) return
+         if(idfw.ne.13.and.idaw.ne.-13) return
+      endif
+      if(powheginput("#only-mu").eq.1) then
+         if(idfz.ne.15) return
+         if(idfw.ne.15.and.idaw.ne.-15) return
+      endif
+      if(powheginput("#emumu").eq.1) then
+         if(idfz.ne.13) return
+         if(idfw.ne.11.and.idaw.ne.-11) return
+      endif
+      if(powheginput("#muee").eq.1) then
+         if(idfz.ne.11) return
+         if(idfw.ne.13.and.idaw.ne.-13) return
+      endif
+      if(powheginput("#etautau").eq.1) then
+         if(idfz.ne.15) return
+         if(idfw.ne.11.and.idaw.ne.-11) return
+      endif
+      if(powheginput("#mutautau").eq.1) then
+         if(idfz.ne.15) return
+         if(idfw.ne.11.and.idaw.ne.-11) return
+      endif
+      if(powheginput("#tauee").eq.1) then
+         if(idfz.ne.11) return
+         if(idfw.ne.15.and.idaw.ne.-15) return
+      endif
+      if(powheginput("#tauee").eq.1) then
+         if(idfz.ne.11) return
+         if(idfw.ne.15.and.idaw.ne.-15) return
+      endif
+      if(powheginput("#lhh").eq.1) then
+         if(.not.isquark(idfz)) return
+         if(.not.(islepton(idfw).or.isnu(idfw))) return
+      endif
+      if(powheginput("#hll").eq.1) then
+         if(.not.islepton(idfz)) return
+         if(.not.isquark(idfw)) return
+      endif
 c End User's restrictions to processes
 
       if(wch3.gt.0) then
