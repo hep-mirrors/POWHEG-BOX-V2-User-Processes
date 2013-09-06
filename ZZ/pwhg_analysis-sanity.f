@@ -1,3 +1,14 @@
+c This analysis should work as sanity check analysis
+c for ZZ,WZ,WW production.
+c Set the values of dec1p, dec1a, dec2p, dec2a
+c in the powheg.input file
+c equal to the pdg id of the VV decay products.
+c Which one is 1 or 2 is decided as follows:
+c            in WZ 1 is W
+c            in WW 1 is W+;
+c            in ZZ always have dec1p >= dec2p
+
+
 c  The next subroutines, open some histograms and prepare them 
 c      to receive data 
 c  You can substitute these  with your favourite ones
@@ -131,9 +142,9 @@ c     we need to tell to this analysis file which program is running it
       real * 8 plep1(4),plep2(4),palp1(4),palp2(4)
       real * 8 httot,y,eta,pt,m
       real * 8 dy,deta,delphi,dr
-      integer ihep
-      real * 8 powheginput
-      external powheginput
+      integer ihep,itmp
+      real * 8 powheginput,random
+      external powheginput,random
       logical comesfrom
       external comesfrom
 
@@ -148,6 +159,9 @@ c     we need to tell to this analysis file which program is running it
          elseif(WHCPRG.eq.'PYTHIA') then
             write (*,*) '           PYTHIA ANALYSIS            '
          endif
+c set these in the powheg.input file, in such a way that
+c in WZ 1 is W, in WW 1 is W+;
+c in ZZ always have dec1p >= dec2p
          dec1p=powheginput('#dec1p')
          dec1a=powheginput('#dec1a')
          dec2p=powheginput('#dec2p')
@@ -159,7 +173,7 @@ c     find vector iheps
       ihepv1=0
       ihepv2=0
       do ihep=1,nhep
-         idtmp=abs(isthep(ihep))
+         idtmp=abs(idhep(ihep))
          if(idtmp.eq.24.or.idtmp.eq.23) then
             if(ihepv1.eq.0) then
                ihepv1=ihep
@@ -172,8 +186,15 @@ c     find vector iheps
          endif
       enddo
 
-c     find vector decay products
+c Put particles in order: W before Z, W+ before W-
+c i.e. always id1>=id2
+      if(idhep(ihepv1).lt.idhep(ihepv2)) then
+         itmp=ihepv1
+         ihepv1=ihepv2
+         ihepv2=itmp
+      endif
 
+c     find vector decay products
       do ihep=1,nhep
          if(isthep(ihep).eq.1) then
             if(comesfrom(ihepv1,ihep)) then
@@ -192,10 +213,43 @@ c     find vector decay products
          endif
       enddo
 
-      if(dec1p.gt.0.and.dec1p.ne.lep1) return
-      if(dec1a.gt.0.and.dec1a.ne.alp1) return
-      if(dec2p.gt.0.and.dec2p.ne.lep2) return
-      if(dec2a.gt.0.and.dec2a.ne.alp2) return
+c In ZZ production, always have dec1p >= dec2p
+      if(idhep(ihepv1).eq.idhep(ihepv2)) then
+         if(idhep(lep1).lt.idhep(lep2)) then
+            itmp=lep2
+            lep2=lep1
+            lep1=itmp
+            itmp=alp2
+            alp2=alp1
+            alp1=itmp
+         endif
+      endif
+
+c If there are any pair of identical particles, swap them
+c with 50% probability
+      if(idhep(lep1).eq.idhep(lep2)) then
+         if(random().gt.0.5d0) then
+            itmp=lep2
+            lep2=lep1
+            lep1=itmp
+         endif
+      endif
+            
+      if(idhep(alp1).eq.idhep(alp2)) then
+         if(random().gt.0.5d0) then
+            itmp=alp2
+            alp2=alp1
+            alp1=itmp
+         endif
+      endif
+            
+
+c find a match with the required decay mode
+         
+      if(dec1p.gt.0.and.dec1p.ne.idhep(lep1)) return
+      if(dec1a.gt.0.and.dec1a.ne.idhep(alp1)) return
+      if(dec2p.gt.0.and.dec2p.ne.idhep(lep2)) return
+      if(dec2a.gt.0.and.dec2a.ne.idhep(alp2)) return
 
 
       call filld('total',0.5d0,dsig)
