@@ -186,9 +186,11 @@ c     find vector iheps
          endif
       enddo
 
-c Put particles in order: W before Z, W+ before W-
+c Put particles in order: W (24) before Z (23), W+ before W-
 c i.e. always id1>=id2
-      if(idhep(ihepv1).lt.idhep(ihepv2)) then
+      if(abs(idhep(ihepv1)).lt.abs(idhep(ihepv2)).or.
+     1  (abs(idhep(ihepv1)).eq.abs(idhep(ihepv2)).and.
+     2       idhep(ihepv1).lt.idhep(ihepv2))) then
          itmp=ihepv1
          ihepv1=ihepv2
          ihepv2=itmp
