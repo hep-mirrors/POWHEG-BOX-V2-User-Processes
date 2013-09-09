@@ -188,7 +188,7 @@ c flavours of the produced partons
          m2=sqrt(kn_cmpborn(0,4)**2-kn_cmpborn(1,4)**2
      1        -kn_cmpborn(2,4)**2-kn_cmpborn(3,4)**2)
          if(m2.lt.mllmin) then
-            kn_jacborn = 0
+            normbr = 0
          endif
       endif
       vsymfact = 1
@@ -206,7 +206,7 @@ c impose mllmin cut also upon the crossed pairs
      3           (kn_cmpborn(2,5)+kn_cmpborn(2,8))**2-
      4           (kn_cmpborn(3,5)+kn_cmpborn(3,8))**2  )
             if(m1.lt.mllmin) then
-               kn_jacborn = 0
+               normbr = 0
             endif
          endif
       elseif(iad1.eq.-id2) then
@@ -223,7 +223,7 @@ c impose mllmin cut also upon the crossed pairs
      3           (kn_cmpborn(2,6)+kn_cmpborn(2,7))**2-
      4           (kn_cmpborn(3,6)+kn_cmpborn(3,7))**2  )
             if(m2.lt.mllmin) then
-               kn_jacborn = 0
+               normbr = 0
             endif
          endif
       else
