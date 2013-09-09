@@ -142,7 +142,7 @@ c     number of light flavors
          m1=sqrt(kn_cmpborn(0,3)**2-kn_cmpborn(1,3)**2
      1        -kn_cmpborn(2,3)**2-kn_cmpborn(3,3)**2)
          if(m1.lt.mllmin) then
-            kn_jacborn = 0
+            normbr = 0
          endif
       endif
 
@@ -150,7 +150,7 @@ c     number of light flavors
          m2=sqrt(kn_cmpborn(0,4)**2-kn_cmpborn(1,4)**2
      1        -kn_cmpborn(2,4)**2-kn_cmpborn(3,4)**2)
          if(m2.lt.mllmin) then
-            kn_jacborn = 0
+            normbr = 0
          endif
       endif
 
@@ -174,7 +174,7 @@ c impose mllmin cut also upon the crossed pairs
      3           (kn_cmpborn(2,6)+kn_cmpborn(2,7))**2-
      4           (kn_cmpborn(3,6)+kn_cmpborn(3,7))**2  )
             if(min(m1,m2).lt.mllmin) then
-               kn_jacborn = 0
+               normbr = 0
             endif
          endif
       else
