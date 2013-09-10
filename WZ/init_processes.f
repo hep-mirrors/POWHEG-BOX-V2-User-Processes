@@ -214,6 +214,10 @@ c Flavour changing interactions are introduced at the LH level.
          if(wch3.gt.0) return
          idaw=-(idfw+1)
       endif
+c Never allow top in the final state
+      if(abs(i9).eq.6.or.abs(idfw).eq.6.or.abs(idaw).eq.6
+     1     .or.idfz.eq.6) return
+
 c User's restrictions to processes; Below are some examples.
 c User's can easily add their own case.
       if(powheginput("#only-e").eq.1) then
