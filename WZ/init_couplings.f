@@ -90,9 +90,6 @@ c      l1=ln
 c      r1=rn
 c      endif
 
-      ! TM set CKM values
-      Vud = 0.974d0
-      call setckmmatrix
 
       !Set anom coulings
       call setanomcoup

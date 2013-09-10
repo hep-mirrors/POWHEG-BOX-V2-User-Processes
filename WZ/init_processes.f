@@ -79,6 +79,14 @@ c     index of the first coloured particle in the final state
 c     (all subsequent particles are coloured)
       flst_lightpart=9
 
+
+c Must set CKM matrix now; only processes with valid CKM
+c couplings are retained
+      Vud = 0.974d0
+      call setckmmatrix
+
+
+
 *********************************************************************
 ***********            BORN SUBPROCESSES              ***************
 *********************************************************************
