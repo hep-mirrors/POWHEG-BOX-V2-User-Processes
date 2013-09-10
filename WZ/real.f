@@ -59,12 +59,20 @@ c          id1      iad1     id2      idw
 !      write(*,*)'RFLAV',rflav
       if ((rflav(1).eq.0).and.(rflav(2).ne.0)) then
          Vsum = 0d0
-         Vsum(rflav(2)) = Vsq(rflav(2),-rflav(nlegreal))
-!         write(*,*)'Vsum',Vsum(rflav(2)),rflav(2),rflav(nlegreal)
+c         Vsum(rflav(2)) = Vsq(rflav(2),-rflav(nlegreal))
+
+c Assume that we produce the appropriate linear combination
+c of up (or down) quarks. The flavour will be picked according
+c to the CKM at the time of Houches event writing
+
+         Vsum(rflav(2)) = 1
+
       elseif ((rflav(1).ne.0).and.(rflav(2).eq.0)) then
          Vsum = 0d0
-         Vsum(rflav(1)) = Vsq(rflav(1),-rflav(nlegreal))
-!         write(*,*)'Vsum',Vsum(rflav(1)),rflav(1),rflav(nlegreal)
+c         Vsum(rflav(1)) = Vsq(rflav(1),-rflav(nlegreal))
+
+         Vsum(rflav(1)) = 1
+
       endif
 
       call qqb_wz_g(p,msq)

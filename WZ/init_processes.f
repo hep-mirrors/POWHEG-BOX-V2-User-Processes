@@ -166,6 +166,8 @@ c 33                  continue
 
       subroutine alloweddec(i1,i2,i9,idfw,idfz,idaw,idw)
       implicit none
+      include 'constants.f'
+      include 'ckm.f'
 c i1,i2: incoming partons; i9:outgoing parton;
 c idfw: id of outgoing fermion in W decay
 c idfz: id of outgoing fermion in Z decay
@@ -186,6 +188,16 @@ c one of i1,i2,i9 must be a gluon;
       if(i1*i2*i9.ne.0) return
       wch3=charge3(i1)+charge3(i2)-charge3(i9)
       if(abs(wch3).ne.3) return
+      if(i9.eq.0) then
+         if(vsq(i1,i2).eq.0) return
+      endif
+c if there is a radiated quark, take it as if CKM is diagonal.
+c Flavour changing interactions are introduced at the LH level.
+      if(i1.eq.0) then
+         if(abs(i2-i9).gt.1) return
+      elseif(i2.eq.0) then
+         if(abs(i1-i9).gt.1) return
+      endif
       if(isewup(idfw)) then
          if(wch3.lt.0) return
          idaw=-(idfw-1)
