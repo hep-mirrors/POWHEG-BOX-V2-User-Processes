@@ -147,19 +147,19 @@ c     colored particles
       subroutine finalize_lh
       implicit none
       include 'LesHouches.h'
-      logical isquark
-      call lhefinitemasses
+      logical isdtype
       if(nup.eq.9) then
          if(idup(9).ne.0) then
             call randomizeckm(idup(9),idup(9))
          endif
       endif
-      if(isquark(idup(5))) then
+      if(isdtype(idup(5))) then
+         call randomizeckm(idup(5),idup(5))
+      elseif(isdtype(idup(6))) then
          call randomizeckm(idup(6),idup(6))
       endif
-      if(isquark(idup(7))) then
-         call randomizeckm(idup(8),idup(8))
-      endif
+      
+      call lhefinitemasses
 
       end
 
@@ -176,22 +176,6 @@ c     colored particles
       if(isewup(id1)) then
          idd = -(abs(id1)-1)
 
-         rrr(1)=vsq(1,idd)
-         rrr(2)=vsq(3,idd)
-         rrr(3)=vsq(5,idd)
-
-         call pick_random(3,rrr,ind)
-
-         if(ind.eq.1) then
-            id2 = 1*sigid
-         elseif(ind.eq.2) then
-            id2 = 3*sigid
-         elseif(ind.eq.3) then
-            id2 = 5*sigid
-         endif
-      elseif(isewdo(id1)) then
-         idd = -(abs(id1)+1)
-
          rrr(1)=vsq(2,idd)
          rrr(2)=vsq(4,idd)
          rrr(3)=vsq(6,idd)
@@ -204,6 +188,22 @@ c     colored particles
             id2 = 4*sigid
          elseif(ind.eq.3) then
             id2 = 6*sigid
+         endif
+      elseif(isewdo(id1)) then
+         idd = -(abs(id1)+1)
+
+         rrr(1)=vsq(1,idd)
+         rrr(2)=vsq(3,idd)
+         rrr(3)=vsq(5,idd)
+
+         call pick_random(3,rrr,ind)
+
+         if(ind.eq.1) then
+            id2 = 1*sigid
+         elseif(ind.eq.2) then
+            id2 = 3*sigid
+         elseif(ind.eq.3) then
+            id2 = 5*sigid
          endif
       endif
       end
