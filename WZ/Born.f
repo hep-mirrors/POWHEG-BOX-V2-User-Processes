@@ -176,18 +176,17 @@ c     colored particles
       if(isewup(id1)) then
          idd = -(abs(id1)-1)
 
+c Don't pick a top!!!
+
          rrr(1)=vsq(2,idd)
          rrr(2)=vsq(4,idd)
-         rrr(3)=vsq(6,idd)
 
-         call pick_random(3,rrr,ind)
+         call pick_random(2,rrr,ind)
 
          if(ind.eq.1) then
             id2 = 2*sigid
          elseif(ind.eq.2) then
             id2 = 4*sigid
-         elseif(ind.eq.3) then
-            id2 = 6*sigid
          endif
       elseif(isewdo(id1)) then
          idd = -(abs(id1)+1)
