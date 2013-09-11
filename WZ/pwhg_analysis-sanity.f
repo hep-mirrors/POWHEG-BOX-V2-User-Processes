@@ -251,9 +251,9 @@ c with 50% probability
 c find a match with the required decay mode
          
       if(dec1p.gt.0.and.dec1p.ne.idhep(lep1)) return
-      if(dec1a.lt.0.and.dec1a.ne.-idhep(alp1)) return
+      if(dec1a.gt.0.and.dec1a.ne.-idhep(alp1)) return
       if(dec2p.gt.0.and.dec2p.ne.idhep(lep2)) return
-      if(dec2a.lt.0.and.dec2a.ne.-idhep(alp2)) return
+      if(dec2a.gt.0.and.dec2a.ne.-idhep(alp2)) return
 
 
       call filld('total',0.5d0,dsig)
