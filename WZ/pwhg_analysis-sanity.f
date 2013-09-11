@@ -164,8 +164,10 @@ c in WZ 1 is W, in WW 1 is W+;
 c in ZZ always have dec1p >= dec2p
          dec1p=powheginput('#dec1p')
          dec1a=powheginput('#dec1a')
+         if(dec1a.lt.0.and.dec1a.gt.-100) dec1a=abs(dec1a)
          dec2p=powheginput('#dec2p')
          dec2a=powheginput('#dec2a')
+         if(dec2a.lt.0.and.dec2a.gt.-100) dec2a=abs(dec2a)
          ini=.false.
       endif
 
@@ -249,9 +251,9 @@ c with 50% probability
 c find a match with the required decay mode
          
       if(dec1p.gt.0.and.dec1p.ne.idhep(lep1)) return
-      if(dec1a.gt.0.and.dec1a.ne.idhep(alp1)) return
+      if(dec1a.lt.0.and.dec1a.ne.-idhep(alp1)) return
       if(dec2p.gt.0.and.dec2p.ne.idhep(lep2)) return
-      if(dec2a.gt.0.and.dec2a.ne.idhep(alp2)) return
+      if(dec2a.lt.0.and.dec2a.ne.-idhep(alp2)) return
 
 
       call filld('total',0.5d0,dsig)
