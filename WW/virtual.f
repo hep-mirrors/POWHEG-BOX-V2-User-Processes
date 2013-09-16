@@ -8,8 +8,9 @@ c     The as/(2pi) factor is attached at a later point
       include 'pwhg_st.h'
       include 'qcdcouple.f'
       include 'constants.f'
-      double precision msqB(-nf:nf,-nf:nf),msq(-nf:nf,-nf:nf)
-      integer i
+      include 'vvsettings.f'
+      double precision msqB,msq
+      integer i,k
       double precision p(mxpart,4)
 
       real * 8 pin(0:3,nlegborn)
@@ -19,12 +20,20 @@ c     The as/(2pi) factor is attached at a later point
       real *8 s,dotp
       external dotp
 
+      idpart1 = vflav(1)
+      idpart2 = vflav(2)
+
 c --- set scale dependent QCD coupling 
       ason2pi = st_alpha/twopi
 
-      do i=1,nlegborn
-         p(i,4) = pin(0,i)
-         p(i,1:3) = pin(1:3,i)
+      do i=1,6
+         if(i.lt.3) then
+            k=i
+         else
+            k=i+2
+         endif
+         p(i,4) = pin(0,k)
+         p(i,1:3) = pin(1:3,k)
       enddo
       p(1,:)=-p(1,:)
       p(2,:)=-p(2,:)
@@ -33,11 +42,13 @@ c --- set scale dependent QCD coupling
       call qqb_ww_v(p,msq)
 
       ! -- divide out ason2pi
-      virtual = msq(vflav(1),vflav(2))/ason2pi
+      virtual = msq/ason2pi
  
       ! -- scheme change from dred 
-      born=msqB(vflav(1),vflav(2))
+      born=msqB
       virtual = virtual + born*(-2d0*(cf/2d0)) 
+
+c      write(*,'(a,d15.9)') ' virtual=',virtual
 
       end
 

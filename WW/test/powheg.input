@@ -59,3 +59,4 @@ testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 
 withnegweights 1
 
+smartsig 0

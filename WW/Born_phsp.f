@@ -116,11 +116,18 @@ C     total incoming momentum
       kn_jacborn = xjac 
 
       do i=1,6
-      kn_pborn(0,i) = p(4,i)
-      kn_pborn(1,i) = p(1,i)
-      kn_pborn(2,i) = p(2,i)
-      kn_pborn(3,i) = p(3,i)
+         if(i.le.2) then
+            k=i
+         else
+            k=i+2
+         endif
+         kn_pborn(0,k) = p(4,i)
+         kn_pborn(1,k) = p(1,i)
+         kn_pborn(2,k) = p(2,i)
+         kn_pborn(3,k) = p(3,i)
       enddo 
+      kn_pborn(:,3)=kn_pborn(:,5)+kn_pborn(:,6)
+      kn_pborn(:,4)=kn_pborn(:,7)+kn_pborn(:,8)
 
 c     now boost everything BACK along z-axis 
       kn_xb1 = xx(1)
@@ -268,8 +275,7 @@ c      endif
          mur = ph_Wmass
 c -- this scale is unobservable, but use it still
       else
-         pww = kn_cmpborn(:,3)+kn_cmpborn(:,4) +
-     .        kn_cmpborn(:,5)+kn_cmpborn(:,6)
+         pww = kn_cmpborn(:,3)+kn_cmpborn(:,4)
          muf = sqrt(pww(0)**2-pww(1)**2-pww(2)**2-pww(3)**2)
          mur=muf
       endif

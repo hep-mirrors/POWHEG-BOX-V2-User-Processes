@@ -3,13 +3,20 @@
       include 'pwhg_math.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      include 'vvsettings.f'
       integer nlegs
       parameter (nlegs=nlegborn)
       real * 8 p(0:3,nlegs),bornjk(nlegs,nlegs)
       integer bflav(nlegs)
       real * 8 bmunu(0:3,0:3,nlegs),born
 
+      idpart1 = bflav(1)
+      idpart2 = bflav(2)
+
       call compborn(p,bflav,born,bmunu,bornjk)
+
+c      write(*,*) ' born=',born
+
       end
 
 
@@ -26,21 +33,26 @@
       real *8 amp2,colcf
       integer i,j,k,mu,nu
       real * 8 p(mxpart,1:4)  
-      double precision msq(-nf:nf,-nf:nf)
+      double precision msq
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
 
-      do i=1,nlegborn
-         p(i,4)   = pin(0,i) 
-         p(i,1:3) = pin(1:3,i) 
+      do i=1,6
+         if(i.le.2) then
+            k=i
+         else
+            k=i+2
+         endif
+         p(i,4)   = pin(0,k) 
+         p(i,1:3) = pin(1:3,k) 
       enddo
       p(1,:) = -p(1,:) 
       p(2,:) = -p(2,:) 
 
       call qqb_ww(p,msq)
 
-      born = msq(bflav(1),bflav(2))
+      born = msq
 C     -- no gluons, so no spin correlated Born  
       do i=0,3
          do j=0,3

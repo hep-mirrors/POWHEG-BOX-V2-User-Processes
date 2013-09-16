@@ -17,8 +17,8 @@ c     q(-p1)+qbar(-p2)-->q'(p5)+bar{q'}(p6)+n(p3)+ebar(p4)
       include 'anomcoup.f'
       include 'pwhg_st.h'
       include 'vvsettings.f'
-      double precision msq(-nf:nf,-nf:nf),msqv(-nf:nf,-nf:nf),
-     . p(mxpart,4),qdks(mxpart,4),facnlo
+      double precision msq,msqv,p(mxpart,4),qdks(mxpart,4),
+     1     oqdks(mxpart,4),facnlo
       double complex AWWM,AWWP,BWWM,BWWP
       double complex prop12,prop34,prop56
       double complex a6treea,a6loopa,A6b_1,A6b_2,A6b_3
@@ -33,19 +33,27 @@ c     q(-p1)+qbar(-p2)-->q'(p5)+bar{q'}(p6)+n(p3)+ebar(p4)
       double complex Fa342156,Fa653412,Fa346512,Fa652143
       double complex cl_z(2),cr_z(2),cl_g(2),cr_g(2)
       double complex clgamz(2),crgamz(2),clz(2),crz(2)
+      save Fa123456,Fa213456,Fb123456_z,Fb213456_z,
+     1 Fa126543,Fa216543,Fb126543_z,Fb216543_z,
+     2 Fb123456_g,Fb213456_g,Fb126543_g,Fb216543_g,
+     3 La123456,La213456,Lb123456_z,Lb213456_z,
+     4 La126543,La216543,Lb126543_z,Lb216543_z,
+     5 Lb123456_g,Lb213456_g,Lb126543_g,Lb216543_g,
+     6 Fa341256,Fa653421,Fa346521,Fa651243,
+     7 Fa342156,Fa653412,Fa346512,Fa652143,Vpole12,
+     8 cl_z,cr_z,cl_g,cr_g,clgamz,crgamz,clz,crz,
+     9 prop12,prop34,prop56,oqdks
       double precision FAC,xfac
       integer j,k,jk
+      logical recalc
       double complex cpropfac
       external cpropfac
 
       fac=gw**8*aveqq*xn
       facnlo=ason2pi*cf
 c--- set msqv=0 to initalize
-      do j=-nf,nf
-      do k=-nf,nf
-      msqv(j,k)=0d0
-      enddo
-      enddo
+
+      msqv=0d0
       
 c--- calculate the lowest order matrix element
       call qqb_ww(p,msq)
@@ -63,110 +71,124 @@ c    DKS have--- ubar(q1)+u(q2)-->mu^-(q3)+nubar(q4)+e^+(q5)+nu(q6)
       qdks(6,j)=p(3,j)
       enddo
 
+
+      recalc = .false.
+      do j=1,4
+         do k=1,6
+            if(qdks(k,j).ne.oqdks(k,j)) then
+               recalc=.true.
+            endif
+         enddo
+      enddo
+      if(recalc) oqdks = qdks
+
+      if(recalc) then
 c-- s returned from sprod (common block) is 2*dot product
-      call spinoru(6,qdks,za,zb)
+         call spinoru(6,qdks,za,zb)
 
 c--   calculate propagators
 c      prop12=s(1,2)/dcmplx(s(1,2)-zmass**2,zmass*zwidth)
 c      prop34=s(3,4)/dcmplx(s(3,4)-wmass**2,wmass*wwidth)
 c      prop56=s(5,6)/dcmplx(s(5,6)-wmass**2,wmass*wwidth)
-      prop12=cpropfac(s(1,2),zmass,zwidth)
-      prop34=cpropfac(s(3,4),wmass,wwidth)
-      prop56=cpropfac(s(5,6),wmass,wwidth)
+         prop12=cpropfac(s(1,2),zmass,zwidth)
+         prop34=cpropfac(s(3,4),wmass,wwidth)
+         prop56=cpropfac(s(5,6),wmass,wwidth)
       
 c-- couplings with or without photon pole
-      do j=1,2
-      cl_z(j)=+mp(j)*l(j)*sin2w*prop12
-      cr_z(j)=-mp(j)*2d0*Q(j)*xw*prop12
-      cl_g(j)=+mp(j)*2d0*Q(j)*xw
-      cr_g(j)=+mp(j)*2d0*Q(j)*xw
-      if (.not.dronly) then
-      clgamz(j)=two*xw*(-Q(j)+le*L(j)*prop12)
-      crgamz(j)=two*xw*(-Q(j)+le*R(j)*prop12)
-      clz(j)=two*xw*ln*L(j)*prop12
-      crz(j)=two*xw*ln*R(j)*prop12
-      endif
-      enddo
+         do j=1,2
+            cl_z(j)=+mp(j)*l(j)*sin2w*prop12
+            cr_z(j)=-mp(j)*2d0*Q(j)*xw*prop12
+            cl_g(j)=+mp(j)*2d0*Q(j)*xw
+            cr_g(j)=+mp(j)*2d0*Q(j)*xw
+            if (.not.dronly) then
+               clgamz(j)=two*xw*(-Q(j)+le*L(j)*prop12)
+               crgamz(j)=two*xw*(-Q(j)+le*R(j)*prop12)
+               clz(j)=two*xw*ln*L(j)*prop12
+               crz(j)=two*xw*ln*R(j)*prop12
+            endif
+         enddo
 
 
 c--- apply a dipole form factor to anomalous couplings
-      xfac=1d0/(1d0+s(1,2)/(tevscale*1d3)**2)**2
-      xdelg1_z=xfac*delg1_z
-      xdelg1_g=xfac*delg1_g
-      xdelk_z=xfac*delk_z
-      xdelk_g=xfac*delk_g
-      xlambda_z=xfac*lambda_z
-      xlambda_g=xfac*lambda_g
-      
+         xfac=1d0/(1d0+s(1,2)/(tevscale*1d3)**2)**2
+         xdelg1_z=xfac*delg1_z
+         xdelg1_g=xfac*delg1_g
+         xdelk_z=xfac*delk_z
+         xdelk_g=xfac*delk_g
+         xlambda_z=xfac*lambda_z
+         xlambda_g=xfac*lambda_g
+         
 c---case dbar-d and d-dbar
-      Fa126543=A6treea(1,2,6,5,4,3,za,zb)
-      Fa216543=A6treea(2,1,6,5,4,3,za,zb)
-      Fa123456=A6treea(1,2,3,4,5,6,za,zb)
-      Fa213456=A6treea(2,1,3,4,5,6,za,zb)
-
-      call A6treeb_anom(1,2,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
-      Fb123456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
-     .          +A6b_2*(2d0*(1d0+xdelg1_z))
-     .          +A6b_3*(xlambda_z/wmass**2)
-      Fb123456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
-     .          +A6b_2*(2d0*(1d0+xdelg1_g))
-     .          +A6b_3*(xlambda_g/wmass**2)
-      Fb126543_z=-Fb123456_z
-      Fb126543_g=-Fb123456_g
-      call A6treeb_anom(2,1,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
-      Fb213456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
-     .          +A6b_2*(2d0*(1d0+xdelg1_z))
-     .          +A6b_3*(xlambda_z/wmass**2)
-      Fb213456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
-     .          +A6b_2*(2d0*(1d0+xdelg1_g))
-     .          +A6b_3*(xlambda_g/wmass**2)
-      Fb216543_z=-Fb213456_z
-      Fb216543_g=-Fb213456_g
+         Fa126543=A6treea(1,2,6,5,4,3,za,zb)
+         Fa216543=A6treea(2,1,6,5,4,3,za,zb)
+         Fa123456=A6treea(1,2,3,4,5,6,za,zb)
+         Fa213456=A6treea(2,1,3,4,5,6,za,zb)
+         
+         call A6treeb_anom(1,2,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
+         Fb123456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+     .        +A6b_2*(2d0*(1d0+xdelg1_z))
+     .        +A6b_3*(xlambda_z/wmass**2)
+         Fb123456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+     .        +A6b_2*(2d0*(1d0+xdelg1_g))
+     .        +A6b_3*(xlambda_g/wmass**2)
+         Fb126543_z=-Fb123456_z
+         Fb126543_g=-Fb123456_g
+         call A6treeb_anom(2,1,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
+         Fb213456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+     .        +A6b_2*(2d0*(1d0+xdelg1_z))
+     .        +A6b_3*(xlambda_z/wmass**2)
+         Fb213456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+     .        +A6b_2*(2d0*(1d0+xdelg1_g))
+     .        +A6b_3*(xlambda_g/wmass**2)
+         Fb216543_z=-Fb213456_z
+         Fb216543_g=-Fb213456_g
      
 c      Fb123456=A6treeb(1,2,3,4,5,6,za,zb)
 c      Fb126543=-Fb123456
 c      Fb213456=A6treeb(2,1,3,4,5,6,za,zb)
 c      Fb216543=-Fb213456
 
-      La126543=A6loopa(1,2,6,5,4,3,za,zb)
-      La216543=A6loopa(2,1,6,5,4,3,za,zb)
-      La123456=A6loopa(1,2,3,4,5,6,za,zb)
-      La213456=A6loopa(2,1,3,4,5,6,za,zb)
-
+         La126543=A6loopa(1,2,6,5,4,3,za,zb)
+         La216543=A6loopa(2,1,6,5,4,3,za,zb)
+         La123456=A6loopa(1,2,3,4,5,6,za,zb)
+         La213456=A6loopa(2,1,3,4,5,6,za,zb)
+         
 c--- loop for a6b is simply tree*Vpole
-      Vpole12=Vpole(s(1,2))
-      Lb123456_z=Vpole12*Fb123456_z
-      Lb213456_z=Vpole12*Fb213456_z
-      Lb126543_z=Vpole12*Fb126543_z
-      Lb216543_z=Vpole12*Fb216543_z
-      Lb123456_g=Vpole12*Fb123456_g
-      Lb213456_g=Vpole12*Fb213456_g
-      Lb126543_g=Vpole12*Fb126543_g
-      Lb216543_g=Vpole12*Fb216543_g
+         Vpole12=Vpole(s(1,2))
+         Lb123456_z=Vpole12*Fb123456_z
+         Lb213456_z=Vpole12*Fb213456_z
+         Lb126543_z=Vpole12*Fb126543_z
+         Lb216543_z=Vpole12*Fb216543_z
+         Lb123456_g=Vpole12*Fb123456_g
+         Lb213456_g=Vpole12*Fb213456_g
+         Lb126543_g=Vpole12*Fb126543_g
+         Lb216543_g=Vpole12*Fb216543_g
 
 c      Lb123456=A6loopb(1,2,3,4,5,6,za,zb)
 c      Lb213456=A6loopb(2,1,3,4,5,6,za,zb)
 c      Lb126543=A6loopb(1,2,6,5,4,3,za,zb)
 c      Lb216543=A6loopb(2,1,6,5,4,3,za,zb)
 
-      if (.not.dronly) then
+         if (.not.dronly) then
 c---for supplementary diagrams.
-      Fa341256=A6treea(3,4,1,2,5,6,za,zb)
-      Fa653421=A6treea(6,5,3,4,2,1,za,zb)
-      Fa346521=A6treea(3,4,6,5,2,1,za,zb)
-      Fa651243=A6treea(6,5,1,2,4,3,za,zb)
-      Fa342156=A6treea(3,4,2,1,5,6,za,zb)
-      Fa653412=A6treea(6,5,3,4,1,2,za,zb)
-      Fa346512=A6treea(3,4,6,5,1,2,za,zb)
-      Fa652143=A6treea(6,5,2,1,4,3,za,zb)
+            Fa341256=A6treea(3,4,1,2,5,6,za,zb)
+            Fa653421=A6treea(6,5,3,4,2,1,za,zb)
+            Fa346521=A6treea(3,4,6,5,2,1,za,zb)
+            Fa651243=A6treea(6,5,1,2,4,3,za,zb)
+            Fa342156=A6treea(3,4,2,1,5,6,za,zb)
+            Fa653412=A6treea(6,5,3,4,1,2,za,zb)
+            Fa346512=A6treea(3,4,6,5,1,2,za,zb)
+            Fa652143=A6treea(6,5,2,1,4,3,za,zb)
 
 c---loop diagrams just tree*Vpole since they're all triangle-type
-      Vpole12=Vpole(s(1,2))
+            Vpole12=Vpole(s(1,2))
+         endif
       endif
 
-      do j=-nf,nf
-      k=-j
-      if (j.eq.0) go to 20
+
+      j=idpart1
+      k=idpart2
+
       jk=max(j,k)
 
 c--assign values
@@ -259,11 +281,8 @@ c     .                  +crz(1)*(Fa653412*prop34+Fa342156*prop56)
       endif
 
 
-      msqv(j,k)=facnlo*fac*two*dble(dconjg(AWWM)*BWWM+dconjg(AWWP)*BWWP)
+      msqv=facnlo*fac*two*dble(dconjg(AWWM)*BWWM+dconjg(AWWP)*BWWP)
 
 
- 20   continue
-      enddo
-        
       return
       end
