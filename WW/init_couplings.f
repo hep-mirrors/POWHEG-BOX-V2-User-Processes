@@ -77,3 +77,19 @@ c --- set anomalous couplings
 
 
 
+      subroutine setwzcoupl(a1,a2,id1,id2)
+      implicit none
+      include 'vvsettings.f'
+      include 'PhysPars.h'
+      integer a1,a2,id1,id2
+      logical isquark
+      idpart1=a1
+      idpart2=a2
+      normbr=1
+      if(isquark(id1)) then
+         normbr = normbr*(1+ph_deltas)*3
+      endif
+      if(isquark(id2)) then
+         normbr = normbr*(1+ph_deltas)*3
+      endif
+      end

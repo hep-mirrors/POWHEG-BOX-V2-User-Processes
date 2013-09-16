@@ -8,7 +8,7 @@ c     The as/(2pi) factor is attached at a later point
       include 'pwhg_st.h'
       include 'qcdcouple.f'
       include 'constants.f'
-      include 'vvsettings.f'
+      include 'PhysPars.h'
       double precision msqB,msq
       integer i,k
       double precision p(mxpart,4)
@@ -20,8 +20,7 @@ c     The as/(2pi) factor is attached at a later point
       real *8 s,dotp
       external dotp
 
-      idpart1 = vflav(1)
-      idpart2 = vflav(2)
+      call setwzcoupl(vflav(1),vflav(2),vflav(5),vflav(7))
 
 c --- set scale dependent QCD coupling 
       ason2pi = st_alpha/twopi
@@ -47,6 +46,8 @@ c --- set scale dependent QCD coupling
       ! -- scheme change from dred 
       born=msqB
       virtual = virtual + born*(-2d0*(cf/2d0)) 
+
+      virtual = virtual * normbr
 
 c      write(*,'(a,d15.9)') ' virtual=',virtual
 

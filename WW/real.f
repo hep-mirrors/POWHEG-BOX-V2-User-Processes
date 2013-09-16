@@ -5,7 +5,7 @@
       include 'pwhg_st.h'
       include 'qcdcouple.f'
       include 'constants.f'
-      include 'vvsettings.f'
+      include 'PhysPars.h'
       real * 8 pin(0:3,nlegreal)
       integer rflav(nlegreal)
       real * 8 amp2real
@@ -16,9 +16,7 @@ c --- set scale dependent QCD coupling
       gsq = st_alpha*fourpi
       ason2pi = st_alpha/twopi
 
-      idpart1=rflav(1)
-      idpart2=rflav(2)
-      idpart7=rflav(9)
+      call setwzcoupl(rflav(1),rflav(2),rflav(5),rflav(7))
 
       do i=1,7
          if(i.lt.3) then
@@ -37,6 +35,8 @@ c --- set scale dependent QCD coupling
 
       amp2real = msq
       amp2real = amp2real/ason2pi
+
+      amp2real =  amp2real * normbr
 
 c      write(*,'(a,d15.9)') ' real=',amp2real
 
