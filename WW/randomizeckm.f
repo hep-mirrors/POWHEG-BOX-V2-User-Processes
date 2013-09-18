@@ -9,18 +9,26 @@ c to the ckm matrix
       integer sigid,ind,igen
       real * 8 ckmsq(3,3)
       common/csetckm/ckmsq
+      logical isutype,isdtype
       sigid=id1/abs(id1)
-      if(abs(id1).gt.5.or.2*(id1/2).eq.id1) then
-         write(*,*)' randomizeckm: first argument',id1
-         write(*,*)' should be a down quark'
-c         call pwhg_exit(-1)
-      endif
-      call setckm
+      if(isdtype(id1)) then
+         call setckm
 c generation:
-      igen=(abs(id1)+1)/2
-      rrr(:)=ckmsq(igen,:)
-      call pick_random(3,rrr,ind)
-      id2=(2*ind-1)*sigid
+         igen=(abs(id1)+1)/2
+         rrr(:)=ckmsq(igen,:)
+         call pick_random(3,rrr,ind)
+         id2=(2*ind-1)*sigid
+      elseif(isutype(id1)) then
+         call setckm
+c generation:
+         igen=abs(id1)/2
+         rrr(:)=ckmsq(:,igen)
+         call pick_random(3,rrr,ind)
+         id2= 2*ind*sigid
+      else
+         write(*,*) ' randomizeckm, arg 1 not a quark:',id1
+         call pwhg_exit(-1)
+      endif
       end
 
 
