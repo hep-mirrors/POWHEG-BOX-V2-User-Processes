@@ -1,3 +1,14 @@
+c This analysis should work as sanity check analysis
+c for ZZ,WZ,WW production.
+c Set the values of dec1p, dec1a, dec2p, dec2a
+c in the powheg.input file
+c equal to the pdg id of the VV decay products.
+c Which one is 1 or 2 is decided as follows:
+c            in WZ 1 is W
+c            in WW 1 is W+;
+c            in ZZ always have dec1p >= dec2p
+
+
 c  The next subroutines, open some histograms and prepare them 
 c      to receive data 
 c  You can substitute these  with your favourite ones
@@ -124,60 +135,21 @@ c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
-      integer vdecaytemp1,vdecaytemp2
-      save vdecaytemp1,vdecaytemp2
-
-      integer lep1, lep2, alp1,alp2
-      integer nlep1,nlep2,nalp1,nalp2
-      integer ilep1(100),ilep2(100),ialp1(100),ialp2(100)
+      integer ihepv1,ihepv2,idtmp
+      integer lep1,lep2,alp1,alp2
+      integer dec1p,dec1a,dec2p,dec2a
+      save dec1p,dec1a,dec2p,dec2a
       real * 8 plep1(4),plep2(4),palp1(4),palp2(4)
       real * 8 httot,y,eta,pt,m
       real * 8 dy,deta,delphi,dr
-      integer ihep
-      real * 8 powheginput
-      external powheginput
-      real * 8 mllmin
-      save mllmin, lep1, lep2, alp1, alp2
+      integer ihep,itmp
+      real * 8 powheginput,random
+      external powheginput,random
+      logical comesfrom
+      external comesfrom
 
       if(dsig.eq.0) return
-
-      if (ini) then
-         if(powheginput("#vdecaymodeZ1").gt.0) then
-            vdecaytemp1=powheginput("#vdecaymodeZ1")
-            vdecaytemp2=powheginput("#vdecaymodeZ2")
-            lep1= vdecaytemp1
-            alp1=-vdecaytemp1
-            lep2= vdecaytemp2
-            alp2=-vdecaytemp2
-         elseif(powheginput("#vdecaymodeZ").gt.0) then
-            vdecaytemp1=powheginput("#vdecaymodeZ")
-            vdecaytemp2=powheginput("#vdecaymodeW")
-            lep1= vdecaytemp1
-            alp1=-vdecaytemp1
-            if(vdecaytemp2.gt.0) then
-               lep2= vdecaytemp2
-               alp2=-(vdecaytemp2+1)
-            else
-               lep2=-vdecaytemp2+1
-               alp2= vdecaytemp2
-            endif
-         elseif(powheginput("#vdecaymodeWm").gt.0) then
-            vdecaytemp1=powheginput("#vdecaymodeWm")
-            vdecaytemp2=powheginput("#vdecaymodeWp")
-            lep1= vdecaytemp1
-            alp1=-(vdecaytemp1+1)
-            lep2= -vdecaytemp2+1
-            alp2= vdecaytemp2
-         else
-            write(*,*) ' which analysis?'
-            call exit(-1)
-         endif
-
-         
-            
-         mllmin=powheginput('#mllmin')
-         write (*,*)
-         write (*,*) '********************************************'
+      if(ini) then
          if(whcprg.eq.'NLO') then
             write(*,*) '       NLO analysis'
          elseif(WHCPRG.eq.'LHE   ') then
@@ -187,73 +159,112 @@ c     we need to tell to this analysis file which program is running it
          elseif(WHCPRG.eq.'PYTHIA') then
             write (*,*) '           PYTHIA ANALYSIS            '
          endif
-
+c set these in the powheg.input file, in such a way that
+c in WZ 1 is W, in WW 1 is W+;
+c in ZZ always have dec1p >= dec2p
+         dec1p=powheginput('#dec1p')
+         dec1a=powheginput('#dec1a')
+         if(dec1a.lt.0.and.dec1a.gt.-100) dec1a=abs(dec1a)
+         dec2p=powheginput('#dec2p')
+         dec2a=powheginput('#dec2a')
+         if(dec2a.lt.0.and.dec2a.gt.-100) dec2a=abs(dec2a)
          ini=.false.
       endif
 
-
-c     find Z decay products
-      nlep1=0                   ! number of lepton 1
-      nalp1=0                   ! number of antilepton 1
-      nlep2=0                   ! number of l-
-      nalp2=0                   ! number of l+
+c     find vector iheps
+      ihepv1=0
+      ihepv2=0
       do ihep=1,nhep
-         if(isthep(ihep).eq.1) then
-            if(idhep(ihep).eq.lep1) then
-               nlep1=nlep1+1
-               ilep1(nlep1) = ihep
-            elseif(idhep(ihep).eq.alp1) then
-               nalp1=nalp1+1
-               ialp1(nalp1) = ihep
-            elseif(idhep(ihep).eq.lep2) then
-               nlep2=nlep2+1
-               ilep2(nlep2) = ihep
-            elseif(idhep(ihep).eq.alp2) then
-               nalp2=nalp2+1
-               ialp2(nalp2) = ihep
+         idtmp=abs(idhep(ihep))
+         if(idtmp.eq.24.or.idtmp.eq.23) then
+            if(ihepv1.eq.0) then
+               ihepv1=ihep
+            elseif(ihepv2.eq.0) then
+               ihepv2=ihep
+            else
+               ihepv1=ihepv2
+               ihepv2=ihep
             endif
          endif
       enddo
 
-      if (nlep1 .ge. 100 .or. nalp1 .ge. 100 .or. nlep2 .ge. 100 .or.
-     .     nalp2 .ge. 100) then
-         write(*,*) 'crazy event, too many leptons'
-         return
+c Put particles in order: W (24) before Z (23), W+ before W-
+c i.e. always id1>=id2
+      if(abs(idhep(ihepv1)).lt.abs(idhep(ihepv2)).or.
+     1  (abs(idhep(ihepv1)).eq.abs(idhep(ihepv2)).and.
+     2       idhep(ihepv1).lt.idhep(ihepv2))) then
+         itmp=ihepv1
+         ihepv1=ihepv2
+         ihepv2=itmp
       endif
-      
-      call sortbypt(nlep1,ilep1)
-      call sortbypt(nalp1,ialp1)
-      call sortbypt(nlep2,ilep2)
-      call sortbypt(nalp2,ialp2)
 
-      if(lep1.eq.lep2) then
-         if(nlep1.lt.2) then
-            write(*,*) 'crazy event, not enough leptons'
-            call exit(-1)
+c     find vector decay products
+      do ihep=1,nhep
+         if(isthep(ihep).eq.1) then
+            if(comesfrom(ihepv1,ihep)) then
+               if(idhep(ihep).gt.0) then
+                  lep1=ihep
+               else
+                  alp1=ihep
+               endif
+            elseif(comesfrom(ihepv2,ihep)) then
+               if(idhep(ihep).gt.0) then
+                  lep2=ihep
+               else
+                  alp2=ihep
+               endif
+            endif
          endif
-         nlep2=1
-         ilep2(1)=ilep1(2)
-         nlep1=1
-      endif
-      if(alp1.eq.alp2) then
-         if(nalp1.lt.2) then
-            write(*,*) 'crazy event, not enough leptons'
-            call exit(-1)
+      enddo
+
+c In ZZ production, always have dec1p >= dec2p
+      if(idhep(ihepv1).eq.idhep(ihepv2)) then
+         if(idhep(lep1).lt.idhep(lep2)) then
+            itmp=lep2
+            lep2=lep1
+            lep1=itmp
+            itmp=alp2
+            alp2=alp1
+            alp1=itmp
          endif
-         nalp2=1
-         ialp2(1)=ialp1(2)
-         nalp1=1
       endif
+
+c If there are any pair of identical particles, swap them
+c with 50% probability
+      if(idhep(lep1).eq.idhep(lep2)) then
+         if(random().gt.0.5d0) then
+            itmp=lep2
+            lep2=lep1
+            lep1=itmp
+         endif
+      endif
+            
+      if(idhep(alp1).eq.idhep(alp2)) then
+         if(random().gt.0.5d0) then
+            itmp=alp2
+            alp2=alp1
+            alp1=itmp
+         endif
+      endif
+            
+
+c find a match with the required decay mode
+         
+      if(dec1p.gt.0.and.dec1p.ne.idhep(lep1)) return
+      if(dec1a.gt.0.and.dec1a.ne.-idhep(alp1)) return
+      if(dec2p.gt.0.and.dec2p.ne.idhep(lep2)) return
+      if(dec2a.gt.0.and.dec2a.ne.-idhep(alp2)) return
+
 
       call filld('total',0.5d0,dsig)
 
       rr=0.6d0 
       call buildjets(1,mjets,rr,ktj,etaj,rapj,phij,pj)
 
-      plep1=phep(1:4,ilep1(1))
-      palp1=phep(1:4,ialp1(1))
-      plep2=phep(1:4,ilep2(1))
-      palp2=phep(1:4,ialp2(1))
+      plep1=phep(1:4,lep1)
+      palp1=phep(1:4,alp1)
+      plep2=phep(1:4,lep2)
+      palp2=phep(1:4,alp2)
 
       call yetaptmassplot(plep1,dsig,'lep1')
       if(lep1.eq.lep2) then

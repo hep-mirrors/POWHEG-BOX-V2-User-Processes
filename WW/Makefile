@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=gfortran
+COMPILER=ifort
 FC=$(COMPILER)
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
@@ -13,6 +13,7 @@ ANALYSIS=sanity
 STATIC= #-static
 #
 ifeq ("$(COMPILER)","gfortran")	
+OBJ=obj-gfortran
 F77=gfortran -fno-automatic 	
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -25,11 +26,12 @@ OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb -pg
 ifdef DEBUG
-OPT=
+OPT=-O0
 endif
 endif
 
 ifeq ("$(COMPILER)","ifort")
+OBJ=obj-ifort
 F77 = ifort -save  -extend_source
 CXX = icpc
 LIBS = -limf
@@ -39,11 +41,14 @@ LIBS = -limf
 OPT = -O3 #-fast
 ## For debugging uncomment the following
 #DEBUG= -debug -g
+ifdef DEBUG
+OPT=-O0
+endif
 endif
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../:obj/
+VPATH= ./:../:$(OBJ)/
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
@@ -81,7 +86,7 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o fastjetfortran.o pwhg_bookhist.o
+PWHGANAL=pwhg_analysis.o fastjetfortran.o pwhg_bookhist-multi.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 else
@@ -92,7 +97,7 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-sanity.o fastjetfortran.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-sanity.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 else
@@ -100,18 +105,18 @@ else
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis-WW.o pwhg_bookhist-new.o fastjetfortran.o
+PWHGANAL=pwhg_analysis-WW.o pwhg_bookhist-multi.o fastjetfortran.o
 endif
 endif
 
 %.o: %.f $(INCLUDE)
-	$(FF) -c -o obj/$@ $<
+	$(FF) -c -o $(OBJ)/$@ $<
 
 %.o: %.c
-	$(CC) $(DEBUG) -c -o obj/$@ $^ 
+	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
 %.o: %.cc
-	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
 
 USER= setanomcoup.o init_couplings.o init_processes.o Born_phsp.o Born.o \
@@ -135,15 +140,15 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
-	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
      opencount.o powheginput.o $(PWHGANAL)	\
-     lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
+     lhefread.o newunit.o pwhg_analysis_driver.o utils.o $(FPEOBJ)
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
-	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
+	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 
 
@@ -153,7 +158,7 @@ HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
 	pdfdummies.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,obj/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
@@ -162,10 +167,10 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
 	$(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean
 clean:
-	rm -f obj/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
+	rm -f $(OBJ)/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
 	main-PYTHIA-lhef
