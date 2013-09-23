@@ -97,12 +97,14 @@ SYSHDRS	      =
 
 MFLAGS        = -e
 
+VPATH=./:../$(OBJ)
+
 #.F.o:
 %.o : %.F
-	$(FC) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $< -o../$(OBJ)/$*.o
 
 %.o : %.f
-	$(FC) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $< -o../$(OBJ)/$*.o
 
 all:		$(LIBRARY)
 
@@ -128,7 +130,7 @@ install-helas_check:
 
 $(LIBRARY):	$(OBJS)
 		@echo  "Loading $(LIBRARY) ... "
-		@ar cru $(LIBRARY) $(OBJS)
+		@ar cru $(LIBRARY) $(patsubst %,../$(OBJ)/%,$(OBJS))
 		@echo "done"
 
 clean:;		@rm -f $(OBJS) core

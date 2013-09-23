@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -15,7 +15,6 @@ ANALYSIS=trijet
 #
 
 OBJ=obj-$(COMPILER)
-OBJDIR:=$(OBJ)
 
 ifeq ("$(COMPILER)","gfortran")	
 F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
@@ -57,7 +56,7 @@ CXXFLAGS=$(OPT)
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1/:../:$(OBJDIR):./
+VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1/:../:$(OBJ):./
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
@@ -101,16 +100,16 @@ PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
 endif
 
 
-%.o: %.f $(INCLUDE) | $(OBJDIR)
+%.o: %.f $(INCLUDE) | $(OBJ)
 	$(FF) -c -o $(OBJ)/$@ $<
 
-%.o: %.f90 $(INCLUDE) | $(OBJDIR)
+%.o: %.f90 $(INCLUDE) | $(OBJ)
 	$(FF) -c -o $(OBJ)/$@ $<
 
-%.o: %.c | $(OBJDIR)
+%.o: %.c | $(OBJ)
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
-%.o: %.cc | $(OBJDIR)
+%.o: %.cc | $(OBJ)
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS) $(CXXFLAGS)
 
 USER=init_processes_born_real.o init_processes.o  init_couplings.o \
@@ -202,11 +201,11 @@ clean:
 
 veryclean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef *.a DHELAS/*.o Madlib/*.o MODEL/*.o 
+	main-PYTHIA-lhef
 
 # target to generate object directory if it does not exist
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
+$(OBJ):
+	mkdir -p $(OBJ)
 
 ##########################################################################
 

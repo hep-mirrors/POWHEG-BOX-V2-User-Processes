@@ -19,6 +19,10 @@
       enddo
       
       if ( leg.eq.           1  ) then
+         call VXXXXX(p_born(0,leg),0d0, 1,-1,Wp)
+         call VXXXXX(p_born(0,leg),0d0,-1,-1,Wm)
+         call VXXXXX(p_born(0,leg),0d0, 1, 1,Wps)
+         call VXXXXX(p_born(0,leg),0d0,-1, 1,Wms)
          call sb_cl_045_001(p_born,wgt1)
          wgt(0)=dble(wgt1(1))+dimag(wgt1(1))
       elseif ( leg.eq.           2  ) then
@@ -28,6 +32,10 @@
          call sb_cl_045_003(p_born,wgt1)
          wgt(0)=dble(wgt1(1))+dimag(wgt1(1))
       elseif ( leg.eq.           4  ) then
+         call VXXXXX(p_born(0,leg),0d0, 1,-1,Wp)
+         call VXXXXX(p_born(0,leg),0d0,-1,-1,Wm)
+         call VXXXXX(p_born(0,leg),0d0, 1, 1,Wps)
+         call VXXXXX(p_born(0,leg),0d0,-1, 1,Wms)
          call sb_cl_045_004(p_born,wgt1)
          wgt(0)=dble(wgt1(1))+dimag(wgt1(1))
       elseif ( leg.eq.           5  ) then

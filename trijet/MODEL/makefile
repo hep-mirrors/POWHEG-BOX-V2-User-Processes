@@ -12,14 +12,15 @@ LIBDIR        = ../$(OBJ)
 LIBRARY	      = $(LIBDIR)/libmodel.a
 MODEL         = printout.o couplings.o
 
-.f.o: ; $(F77) $(FFLAGS) -c $*.f
+VPATH=./:../$(OBJ)
 
-all: $(LIBDIR)libmodel.a
+%.o:%.f
+	$(F77) $(FFLAGS) -c $< -o../$(OBJ)/$@
 
-$(LIBDIR)libmodel.a: $(MODEL)
-	ar cru libmodel.a $(MODEL)
-	ranlib libmodel.a
-	mv libmodel.a  $(LIBDIR)
+
+$(LIBRARY): $(MODEL)
+	ar cru $(LIBRARY) $(patsubst %,../$(OBJ)/%,$(MODEL))
+	ranlib $(LIBRARY)
 
 smcalc: 
 	$(F77) $(FFLAGS) SMCalc.f -o smcalc 
