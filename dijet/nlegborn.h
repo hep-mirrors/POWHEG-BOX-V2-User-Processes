@@ -17,3 +17,6 @@ c     the resonance's masses
 
       integer maxprocborn,maxprocreal
       parameter (maxprocborn=500,maxprocreal=1000)
+
+      integer maxalr
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)

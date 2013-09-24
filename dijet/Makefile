@@ -1,5 +1,5 @@
 #-*- Makefile -*-
-## Choose compiler: gfortran,g77,ifort
+## Choose compiler: gfortran,ifort
 COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
@@ -7,7 +7,7 @@ PDF=native
 ## Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed
 ## separately (see below)
-ANALYSIS=none
+ANALYSIS=dummy
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -25,17 +25,6 @@ OPT=-O2
 #DEBUG= -ggdb -pg
 endif
 
-ifeq ("$(COMPILER)","g77")
-F77= g77 -fno-automatic 
-FFLAGS= -Wall -ffortran-bounds-check
-## For floating point exception trapping  uncomment the following 
-#FPEOBJ=trapfpe.o
-OPT=-O3
-## For debugging uncomment the following
-#DEBUG= -ggdb -pg
-endif
-
-
 ifeq ("$(COMPILER)","ifort")
 F77 = ifort -save  -extend_source
 CXX = icpc
@@ -48,17 +37,16 @@ OPT = -O3 #-fast
 #DEBUG= -debug -g
 endif
 
-
+OBJ=obj-$(COMPILER)
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:doublefsr/:../:obj/
+VPATH= ./:../:$(OBJ)/
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
-INCLUDE1.5=$(PWD)/doublefsr/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE1.5) -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
@@ -87,21 +75,21 @@ ifeq ("$(ANALYSIS)","default")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o 
+PWHGANAL=pwhg_analysis.o pwhg_bookhist-multi.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o
 else
-PWHGANAL=pwhg_analysis-dummy.o
+PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi.o
 endif
 
 %.o: %.f $(INCLUDE)
-	$(FF) -c -o obj/$@ $<
+	$(FF) -c -o $(OBJ)/$@ $<
 
 %.o: %.c
-	$(CC) $(DEBUG) -c -o obj/$@ $^ 
+	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
 %.o: %.cc
-	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
      real.o $(PWHGANAL)
@@ -112,43 +100,45 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	sigcollsoft.o sigvirtual.o reshufflemoms.o $(PDFPACK) $(USER) $(FPEOBJ)
+	sigcollsoft.o sigvirtual.o reshufflemoms.o ubprojections.o      \
+	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o          \
+	validflav.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
-	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o pwhg_bookhist.o $(PWHGANAL)	\
+     opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
-	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
+	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o	\
+	powheginput.o $(PWHGANAL) lhefread.o	\
 	pdfdummies.o opencount.o $(FPEOBJ)
 
 main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,obj/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o	\
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o newunit.o	\
+	powheginput.o $(PWHGANAL) lhefread.o newunit.o	\
 	pdfdummies.o pwhg_analysis_driver.o random.o cernroutines.o 	\
 	opencount.o $(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean
 clean:
-	rm -f obj/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
+	rm -f $(OBJ)/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
 	main-PYTHIA-lhef
