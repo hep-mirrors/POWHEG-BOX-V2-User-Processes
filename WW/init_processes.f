@@ -61,7 +61,7 @@ c  cant have srdiags if zerowidth is true
 
 c     index of the first coloured particle in the final state
 c     (all subsequent particles are coloured)
-      flst_lightpart=7
+      flst_lightpart=9
 
 *********************************************************************
 ***********            BORN SUBPROCESSES              ***************
@@ -201,8 +201,9 @@ c one of i1,i2,i9 must be a gluon;
       endif
       if(id1.eq.6.or.id2.eq.6.or.ida1.eq.-6.or.ida2.eq.-6) return
 
-      if(id1.ne.14.or.id2.ne.11) return
 c User's restrictions to processes;
+c do only mu+ e
+c      if(id1.ne.14.or.id2.ne.11) return
 c End User's restrictions to processes
       idw1=24
       idw2=-24
