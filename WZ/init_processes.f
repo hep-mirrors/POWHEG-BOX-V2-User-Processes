@@ -209,7 +209,6 @@ c Flavour changing interactions are introduced at the LH level.
       if(isewup(idfw)) then
          if(wch3.lt.0) return
          idaw=-(idfw-1)
-         if(abs(idaw).eq.6) return
       else
          if(wch3.gt.0) return
          idaw=-(idfw+1)
@@ -228,7 +227,7 @@ c User's can easily add their own case.
          if(idfz.ne.13) return
          if(idfw.ne.13.and.idaw.ne.-13) return
       endif
-      if(powheginput("#only-mu").eq.1) then
+      if(powheginput("#only-tau").eq.1) then
          if(idfz.ne.15) return
          if(idfw.ne.15.and.idaw.ne.-15) return
       endif
@@ -246,14 +245,14 @@ c User's can easily add their own case.
       endif
       if(powheginput("#mutautau").eq.1) then
          if(idfz.ne.15) return
-         if(idfw.ne.11.and.idaw.ne.-11) return
+         if(idfw.ne.13.and.idaw.ne.-13) return
       endif
       if(powheginput("#tauee").eq.1) then
          if(idfz.ne.11) return
          if(idfw.ne.15.and.idaw.ne.-15) return
       endif
-      if(powheginput("#tauee").eq.1) then
-         if(idfz.ne.11) return
+      if(powheginput("#taumumu").eq.1) then
+         if(idfz.ne.13) return
          if(idfw.ne.15.and.idaw.ne.-15) return
       endif
       if(powheginput("#lhh").eq.1) then
