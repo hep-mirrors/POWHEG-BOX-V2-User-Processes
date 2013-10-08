@@ -3,6 +3,7 @@
       include "brinclude.h"
       include "pwhg_st.h"
       include "pwhg_par.h"
+      include "pwhg_flg.h"
       include "coupl.inc"
       integer i
       integer max_num_flav
@@ -12,6 +13,27 @@
       logical keep
       real * 8 powheginput
       external powheginput
+
+
+      st_bornorder=3
+      if(powheginput("#minlo").eq.1) then
+         flg_minlo=.true.
+         if(powheginput("#minlo_nnll").eq.1) then
+            flg_minlo_nnll=.true.
+         else
+            flg_minlo_nnll=.false.
+         endif
+         flg_minlo_real=.false.
+      else
+         flg_minlo=.false.
+         flg_minlo_nnll=.false.
+         flg_minlo_real=.false.
+      endif
+
+
+
+
+
 
 c     the default value 1d-6 could be too small
       par_isrtinycsi = 1d-4

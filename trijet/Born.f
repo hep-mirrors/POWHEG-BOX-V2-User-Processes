@@ -36,6 +36,8 @@ c convert bflav to an equivalent flavor structure with only u's and d's
  
       call sborn_proc(p,sflav,born,bornjk,bmunu)
 
+c      write(*,*) bflav,born,bornjk,bmunu
+
 c      write(*,*) 'Born ',born
 
 

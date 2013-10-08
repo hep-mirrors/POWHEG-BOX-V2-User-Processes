@@ -16,11 +16,11 @@ c  pwhgfill  :  fills the histograms with data
       integer maxjet
       parameter (maxjet=4)
       integer nptmin
-      parameter (nptmin=5)
+      parameter (nptmin=6)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-020','-040','-060','-080','-100'/
-      data ptminarr/   20d0,  40d0,  60d0,  80d0, 100d0/
+      data cptmin/  '-000','-020','-040','-060','-080','-100'/
+      data ptminarr/ 0d0, 20d0,  40d0,  60d0,  80d0, 100d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -66,7 +66,7 @@ c  pwhgfill  :  fills the histograms with data
      $        0.5d0,0d0,20d0)
       enddo
 
-      goto 300
+c      goto 300
 
       do j=1,maxjet-1
          do k=j+1,maxjet
@@ -138,7 +138,7 @@ c      include 'LesHouches.h'
       integer   jetvec(maxtrack),itrackhep(maxtrack)
       character * 1 cnum(9)
       integer nptmin
-      parameter (nptmin=5)
+      parameter (nptmin=6)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)      
       common/infohist/ptminarr,cnum,cptmin
@@ -270,7 +270,7 @@ c     copy momenta to construct jets
 
 
 
-      goto 111
+c      goto 111
 
 
       if (ntracks.eq.0) then
@@ -316,7 +316,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          
 
 c********************************************************
-         if (mininvmass.lt.100d0) exit
+c         if (mininvmass.lt.100d0) exit
 c********************************************************
 
 
@@ -358,31 +358,31 @@ c     call filld('ptrel'//cnum(j)//cptmin(i),ptrel(j), dsig)
          
 
 
-c$$$         do j=1,mjets
-c$$$            do k=j+1,mjets
-c$$$               call getyetaptmass(pj(:,j)+pj(:,k),y,eta,pt,m)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
-c$$$     $              y, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
-c$$$     $              eta, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
-c$$$     $              pt, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
-c$$$     $              m, dsig)
-c$$$            enddo
-c$$$         enddo
-c$$$         
-c$$$         do j=1,mjets
-c$$$            do k=j+1,mjets
-c$$$               prefix = 'j'//cnum(j)//'j'//cnum(k)               
-c$$$               call getdydetadphidr(pj(:,j),pj(:,k),dy,deta,delphi,dr)
-c$$$               call filld(prefix//'-dy'//cptmin(i),dy,dsig)
-c$$$               call filld(prefix//'-deta'//cptmin(i),deta,dsig)
-c$$$               call filld(prefix//'-delphi'//cptmin(i),delphi,dsig)
-c$$$               call filld(prefix//'-dr'//cptmin(i),dr,dsig)
-c$$$            enddo
-c$$$         enddo
-c$$$
+         do j=1,mjets
+            do k=j+1,mjets
+               call getyetaptmass(pj(:,j)+pj(:,k),y,eta,pt,m)
+               call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
+     $              y, dsig)
+               call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
+     $              eta, dsig)
+               call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
+     $              pt, dsig)
+               call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
+     $              m, dsig)
+            enddo
+         enddo
+         
+         do j=1,mjets
+            do k=j+1,mjets
+               prefix = 'j'//cnum(j)//'j'//cnum(k)               
+               call getdydetadphidr(pj(:,j),pj(:,k),dy,deta,delphi,dr)
+               call filld(prefix//'-dy'//cptmin(i),dy,dsig)
+               call filld(prefix//'-deta'//cptmin(i),deta,dsig)
+               call filld(prefix//'-delphi'//cptmin(i),delphi,dsig)
+               call filld(prefix//'-dr'//cptmin(i),dr,dsig)
+            enddo
+         enddo
+
          
       enddo
 

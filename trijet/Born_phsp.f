@@ -720,18 +720,27 @@ c     suppress regions with high rapidities
       external powheginput
       save ini,fixedscale,muref
       if (ini) then
-         muref=powheginput("#fixedscale")
-         print *,"************************************************"
-         print *,"*                                              *"
-         if(muref.lt.0) then
-            print *,"*           Dynamical scale is used            *"
-            fixedscale=.false.
-         else
-            print *,"*         Fixed scale is used with: ",muref
+         if(powheginput("#minlo").eq.1) then
+            write(*,*) '****************************************'
+            write(*,*) '*******          MINLO ACTIVE    *******'
+            write(*,*) '****************************************'
+            write(*,*) '*******     FIXED SCALES!          *****'
             fixedscale=.true.
+            muref=100d0
+         else        
+            muref=powheginput("#fixedscale")                        
+            print *,"********************************************"
+            print *,"*                                          *"
+            if(muref.lt.0) then
+               print *,"*         Dynamical scale is used          *"
+               fixedscale=.false.
+            else
+               print *,"*       Fixed scale is used with: ",muref
+               fixedscale=.true.
+            endif
+            print *,"*                                          *"
+            print *,"********************************************"
          endif
-         print *,"*                                              *"
-         print *,"************************************************"
          ini=.false.
       endif
       if (.not.fixedscale) then
