@@ -2,12 +2,11 @@
       implicit none
       integer ntr,m
       real * 8 clusters(4,ntr)
-c Constructs a clusterization of the input tracks. Tracks that are
-c given zero 4 momentum are ignored. Recombinatio is as in POWHEG.
+c Constructs a clusterization of the input clusters. Clusters that are
+c given zero 4 momentum are ignored. Recombination is as in POWHEG.
 c ntr: number of initial clusters
-c tracks(1:4): tracks four momenta: x y z t
+c clusters(4,ntr): clusters four momenta: x y z t
 c m: desired final number of clusters
-c clusters: array with ntr clusters.
       real * 8 ptmin
       parameter (ptmin=0.1d-10)
       real * 8 dst,dsttmp
