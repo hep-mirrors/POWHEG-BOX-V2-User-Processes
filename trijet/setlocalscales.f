@@ -369,10 +369,18 @@ C ------------------------------------------------ C
       real * 8 lam2
       logical isQuark
       real * 8 theExponentN,theExponentD,tmp
-      logical ini
+      integer icount,icount1
+      data icount,icount1/0,0/
+      save icount,icount1
+      logical ini,hwjsudakov
       data ini/.true./
-      save ini
+      save ini,hwjsudakov
       if(ini) then
+         if(powheginput("#HWJsudakov").eq.1) then
+            hwjsudakov = .true.
+         else
+            hwjsudakov = .false.
+         endif
 c         call sudakov_plotter
          ini=.false.
       endif
@@ -391,23 +399,43 @@ c         call sudakov_plotter
          isQuark=.true.
       endif
       if(q2l.le.q20) then
-        call sudakov_exponent(q20,q2h,q2h,theExponentN,
-     $                         isQuark,2,.true.)
-        call sudakov_exponent_HWJ(q20,q2h,tmp,isQuark,2)
-        write(*,*) 'q2l<q20',
-     1       abs(tmp-theExponentN)/(abs(tmp)+abs(theExponentN))
-        sudakov=exp(theExponentN)
+         if(hwjsudakov) then
+            call sudakov_exponent_HWJ(q20,q2h,theExponentN,isQuark,2)
+         else
+            call sudakov_exponent(q20,q2h,q2h,theExponentN,
+     $           isQuark,2,.true.)
+         endif
+c        call sudakov_exponent_HWJ(q20,q2h,tmp,isQuark,2)
+c        tmp=abs(tmp-theExponentN)/(abs(tmp)+abs(theExponentN))
+c        icount = icount+1
+c        if(tmp.gt.0.1d0) then
+c           icount1 = icount1+1
+c           write(*,*) 'q2l<q20', tmp, q20, q2h,  float(icount1)/icount
+c        endif
+         sudakov=exp(theExponentN)
       else
-         call sudakov_exponent(q20,q2h,q2h,theExponentN,
+         if(hwjsudakov) then
+            call sudakov_exponent_HWJ(q20,q2h,theExponentN,isQuark,2)
+            call sudakov_exponent_HWJ(q20,q2l,theExponentD,isQuark,2)
+         else
+            call sudakov_exponent(q20,q2h,q2h,theExponentN,
      $                         isQuark,2,.true.)
-        call sudakov_exponent_HWJ(q20,q2h,tmp,isQuark,2)
-        write(*,*) 'ExpN',
-     1       abs(tmp-theExponentN)/(abs(tmp)+abs(theExponentN))
-         call sudakov_exponent(q20,q2l,q2l,theExponentD,
-     $                         isQuark,2,.true.)
-        call sudakov_exponent_HWJ(q20,q2l,tmp,isQuark,2)
-        write(*,*) 'ExpD',
-     1       abs(tmp-theExponentD)/(abs(tmp)+abs(theExponentD))
+            call sudakov_exponent(q20,q2l,q2l,theExponentD,
+     $           isQuark,2,.true.)
+         endif
+c         call sudakov_exponent_HWJ(q20,q2h,tmp,isQuark,2)
+c         tmp=abs(tmp-theExponentN)/(abs(tmp)+abs(theExponentN))
+c         icount = icount+1
+c         if(tmp.gt.0.1d0) then
+c            icount1 = icount1+1
+c            write(*,*) 'ExpN', tmp, float(icount1)/icount
+c         endif
+c         tmp=abs(tmp-theExponentD)/(abs(tmp)+abs(theExponentD))
+c         icount = icount+1
+c         if(tmp.gt.0.1d0) then
+c            icount1 = icount1+1
+c            write(*,*) 'ExpD', tmp, float(icount1)/icount
+c         endif
          sudakov=exp(theExponentN-theExponentD)
       endif
  999  continue
