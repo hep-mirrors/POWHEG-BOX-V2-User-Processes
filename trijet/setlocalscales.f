@@ -375,6 +375,8 @@ C ------------------------------------------------ C
       logical ini,hwjsudakov
       data ini/.true./
       save ini,hwjsudakov
+      real * 8 powheginput
+      external powheginput
       if(ini) then
          if(powheginput("#HWJsudakov").eq.1) then
             hwjsudakov = .true.
