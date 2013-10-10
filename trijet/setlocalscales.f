@@ -25,7 +25,7 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
 c op stands for old momenta (momenta at the previous calls)
             if(op(mu,j).ne.kn_cmpborn(mu,j)) then
                do k=1,flst_nborn
-c i fmomenta have changes, the old results (for each underlying born) is invalidated
+c if momenta have changed, the old results (for each underlying born) are invalidated
                   valid(k)=.false.
                enddo
                op=kn_cmpborn
@@ -74,14 +74,17 @@ c i fmomenta have changes, the old results (for each underlying born) is invalid
       integer j,k,l,lflav(nlegborn),jmerge,kmerge,inlofac
       integer mergedfl
       real * 8 q2merge,q2merge0,renfac2,facfact2,alphas,mu2,muf2
-      real * 8 sudakov,expsudakov,pwhg_alphas,b0,powheginput
-      external sudakov,expsudakov,pwhg_alphas,powheginput
+      real * 8 sudakov,expsudakov,expsudakov_HWJ,pwhg_alphas,b0,
+     $     powheginput
+      external sudakov,expsudakov,expsudakov_HWJ,pwhg_alphas,
+     $     powheginput
       real * 8 q2mergeMAX
       logical dijetflag
       common/cdijetflag/dijetflag
       logical raisingscales,ini
       save raisingscales,ini
       data ini/.true./
+      real * 8 as, y
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
             raisingscales = .false.
@@ -556,6 +559,79 @@ c in this case everything is zero, irrelevant
      2      - c/pi*(0.25d0*log(q2l/q20)**2 - b*log(q2l/q20))
       endif
       end
+
+
+
+
+
+C     Inputs:                                      
+C     *******                                      
+C     q2h  : Upper node scale / bound on Sudakov   
+C     q20  : Lower node scale / bound on Sudakov   
+C     flav : flavour index for the evolving parton 
+C                                               
+C     Outputs:                                     
+C     ********                                     
+C     expsudakov : the expansion at order alpha_s of the exponent of the Sudakov form factor
+c                  with a minus sign in front, without the alpha_s factor.
+c     See Eq. (2.9) of arXiv:1212.4504
+      function expsudakov_HWJ(q20,q2h,q2l,flav)
+      implicit none
+      real * 8 expsudakov_HWJ,q2h,q2l,q20
+      integer flav
+      include 'pwhg_st.h'
+      include 'pwhg_math.h'
+      include 'pwhg_flg.h'
+      real * 8 b0,a1,b1,hlog,llog
+      real * 8 powheginput
+      logical ini,sudscalevar
+      data ini/.true./
+      save ini,sudscalevar,b0
+
+      if(ini) then
+         b0=(11*CA-2*st_nlight)/(12*pi)
+         ini = .false.
+      endif
+
+      if (q2l.ge.q2h.or.q2h.le.q20.or.flg_bornonly) then
+         expsudakov_HWJ=0
+         return
+      endif
+
+      if(flav.eq.0) then
+         A1 =  CA
+         B1 = -(11d0*CA-2d0*st_nlight)/6 
+      else
+         A1 = CF 
+         B1 = -3d0/2*CF
+      endif
+
+c     we need the coefficients for A(as) and B(as) written as
+c     A(as) = sum_n A_n (as)^n,     B(as) = sum_n B_n (as)^n,   i.e. no "pi" factors
+      A1 = A1/pi
+      B1 = B1/pi
+c     introduce scale dependence
+c      B1 = B1 + 2*A1*logf 
+
+      if(q2l.le.q20) then
+c     Add an extra 1/2 in front of the expansion, since this is the sqrt of the final Sudakov
+c     Add an overall minus sign, since this is to be subtracted to the Bbar function 
+         hlog = log(q20/q2h)
+c     Eq. (2.9) of arXiv:1212.4504
+         expsudakov_HWJ = -1d0/2 * (-1d0/2 * A1 * hlog**2 + B1 * hlog) 
+      else
+         hlog  = log(q20/q2h)
+         llog = log(q20/q2l)
+         expsudakov_HWJ = -1d0/2 * (-1d0/2 * A1 * hlog**2 + B1 * hlog) 
+     $                 -( -1d0/2 * (-1d0/2 * A1 * llog**2 + B1 * llog))
+      endif
+      end
+
+
+
+
+
+
 
 C ---------------------------------------------- C
 C - Inputs:                                    - C
