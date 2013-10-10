@@ -8,10 +8,24 @@ c elements and set the event-by-event couplings constant
       real * 8 p(0:3,nlegreal)
       integer rflav(nlegreal)
       real * 8 amp2
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+
+      if(idvecbos.eq.-24) then
+         call cconj(rflav,nlegreal)
+         call pconj(p,nlegreal)
+      endif
+
       call set_ebe_couplings
       call sreal_proc(p,rflav,amp2)
 c Cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
-      amp2 = amp2/(st_alpha/(2d0*pi))     
+      amp2 = amp2/(st_alpha/(2d0*pi))  
+
+      if(idvecbos.eq.-24) then
+         call cconj(rflav,nlegreal)
+         call pconj(p,nlegreal)
+      endif
+   
       end
 
 

@@ -27,6 +27,8 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 pgosam(dim_mom_array)
 C     real * 8 pgosam(5*nlegborn)
       real * 8 params(10),muren,res(4)
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
       data(vflav_gosam(i,   12),i=1,nlegborn)/
      $      -1,
      $       2,
@@ -219,7 +221,12 @@ C     real * 8 pgosam(5*nlegborn)
      $       5,
      $      -5,
      $      -4/
-      
+ 
+      if(idvecbos.eq.-24) then
+         call cconj(vflav,nlegborn)
+         call pconj(p,nlegborn)
+      endif
+     
       do i=0,flst_nborn-1
          if (equalintlists(nlegborn,vflav,vflav_gosam(1,i))) then
             proc=i
@@ -248,4 +255,13 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     The as/(2pi) factor is attached at a later point
 C     We have then to multiply for 2*pi
      $                * (2*pi)
+
+
+      if(idvecbos.eq.-24) then
+         call cconj(vflav,nlegborn)
+         call pconj(p,nlegborn)
+      endif
+
+c      write(*,*) 'virt ',virtual 
+
       end

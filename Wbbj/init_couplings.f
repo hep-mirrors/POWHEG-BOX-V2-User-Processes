@@ -2,14 +2,19 @@
       implicit none
       include "coupl.inc"
       include 'PhysPars.h'
-
-      real * 8 powheginput
-      external powheginput
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
       logical called
+      real * 8 powheginput
+      external powheginput
       data called/.false./
       save called
+      integer idvecbos,vdecaymode,Vdecmod
+      common/cvecbos/idvecbos,vdecaymode
+      real *8 lepmass(3),decmass
+      common/clepmass/lepmass,decmass
+      data lepmass/0.51099891d-3,0.1056583668d0,1.77684d0/
+
       if(called) then
          return
       else
@@ -36,6 +41,68 @@ c$$$      physpar_mq(3)=0.50d0     ! strange
 c$$$      physpar_mq(4)=1.50d0     ! charm
 c$$$      physpar_mq(5)=4.80d0     ! bottom
       call golem_initialize
+
+c******************************************************
+c     Choose the process to be implemented
+c******************************************************
+c    ID of vector boson produced
+      idvecbos=powheginput('idvecbos')
+c   decay products of the vector boson
+      Vdecmod=powheginput('vdecaymode')
+      
+      if(idvecbos.eq.24) then
+         if (Vdecmod.eq.1) then
+            vdecaymode=-11
+         elseif (Vdecmod.eq.2) then
+            vdecaymode=-13
+         elseif (Vdecmod.eq.3) then
+            vdecaymode=-15
+         else
+            write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
+     $           ' is not allowed '
+            call pwhg_exit(1)
+         endif
+         write(*,*) 
+         write(*,*) ' POWHEG: W+ b bbar I production and decay ' 
+         if (vdecaymode.eq.-11) write(*,*) '         to e+ ve '
+         if (vdecaymode.eq.-13) write(*,*) '         to mu+ vmu'
+         if (vdecaymode.eq.-15) write(*,*) '         to tau+ vtau'
+         write(*,*) 
+      elseif(idvecbos.eq.-24) then
+         if (Vdecmod.eq.1) then
+            vdecaymode=11
+         elseif (Vdecmod.eq.2) then
+            vdecaymode=13
+         elseif (Vdecmod.eq.3) then
+            vdecaymode=15
+         else
+            write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
+     $           ' is not allowed '
+            call pwhg_exit(1)
+         endif
+         write(*,*) 
+         write(*,*) ' POWHEG: W- b bbar J production and decay '
+         if (vdecaymode.eq.11) write(*,*) '         to e- ve~ '
+         if (vdecaymode.eq.13) write(*,*) '         to mu- vmu~'
+         if (vdecaymode.eq.15) write(*,*) '         to tau- vtau~'
+         write(*,*)    
+      else
+         write(*,*) 'ERROR: The ID of vector boson you selected ',
+     $        idvecbos, ' is not allowed (24: W+ -24: W-)'
+         call pwhg_exit(1)
+      endif
+
+c     set lepton mass
+      decmass=lepmass(Vdecmod)   
+
+      if (ph_Wmass2low.lt.decmass**2) then
+         write(*,*) 'min_w_mass less than the minimun invariant mass of'
+         write(*,*) 'the final-state leptonic system ',decmass
+         write(*,*) 'POWHEG aborts'
+         call pwhg_exit(-1)
+      endif
+
+
       end
 
 
@@ -86,16 +153,19 @@ c madgraph routines not to blow.
       wwidth=2.0476d0
       twidth=1.5083d0
 
+      ph_Wmass2low=powheginput("min_w_mass")**2
+      ph_Wmass2high=powheginput("max_w_mass")**2
+      ph_bmass=powheginput("bmass")
+
 c      hmass = 125d0
 c      hwidth = 0.403d-2
 
 c      hmass = powheginput('hmass')
 c      hwidth = powheginput('hwidth')
-c      ph_Hmass2low=powheginput("hmasslow")**2
+C      ph_Hmass2low=powheginput("hmasslow")**2
 C      ph_Hmass2high=powheginput("hmasshigh")**2
-      ph_Wmass2low=powheginput("wmasslow")**2
-      ph_Wmass2high=powheginput("wmasshigh")**2
-      ph_bmass=powheginput("bmass")
+C      ph_Wmass2low=powheginput("wmasslow")**2
+C      ph_Wmass2high=powheginput("wmasshigh")**2
 C      ph_Zmass2low=powheginput("zmasslow")**2
 C      ph_Zmass2high=powheginput("zmasshigh")**2
 

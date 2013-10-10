@@ -3,9 +3,17 @@
       include "nlegborn.h"
       include "pwhg_flst.h"
       include "pwhg_st.h"
+      include "pwhg_flg.h"
       include "coupl.inc"
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
       integer i
- 
+      real * 8 powheginput
+      external powheginput
+
+
+      idvecbos=powheginput('idvecbos')
+
       call init_processes_born
       call init_processes_real
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -28,7 +36,7 @@ c     endif
             exit
          endif
       enddo
- 
+      return
       end
  
  
@@ -37,7 +45,10 @@ c     endif
       implicit none
       include "nlegborn.h"
       include "pwhg_flst.h"
- 
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+      integer jborn
+
       flst_born(   1,   1)=          -1
       flst_born(   2,   1)=           2
       flst_born(   3,   1)=         -11
@@ -232,15 +243,35 @@ c     endif
  
       flst_nborn=          24
  
+      if(idvecbos.eq.-24) then
+         do jborn=1,flst_nborn
+            call cconj(flst_born(:,jborn),nlegborn)
+         enddo
+      endif
+
+      return
       end
- 
+
+      subroutine cconj(flav,nflav)
+      implicit none
+      integer nflav,flav(nflav)
+      integer k
+      do k=1,nflav
+         if(flav(k).ne.25) then
+            flav(k)=-flav(k)
+         endif
+      enddo
+      end 
  
  
       subroutine init_processes_real
       implicit none
       include "nlegborn.h"
       include "pwhg_flst.h"
- 
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+      integer jreal
+
       flst_real(   1,   1)=          -1
       flst_real(   2,   1)=          -1
       flst_real(   3,   1)=         -11
@@ -1863,6 +1894,12 @@ c     endif
  
       flst_nreal=         180
  
+      if(idvecbos.eq.-24) then
+         do jreal=1,flst_nreal
+            call cconj(flst_real(:,jreal),nlegreal)
+         enddo
+      endif
+
       return
       end
  
