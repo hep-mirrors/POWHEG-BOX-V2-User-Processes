@@ -182,11 +182,11 @@ c in semileptonic decays, id1 is always the lepton
          if(islepton(id2).and.isquark(id1)) return
 c in lepton - neutrino, first is the lepton
          if(islepton(id2).and.isnu(id1)) return
-c in quark - neutrino, first is the lepton
+c in quark - neutrino, first is the quark
          if(isquark(id2).and.isnu(id1)) return
 c if up and down types, ups are first
          if(isutype(id2).and.isdtype(id1)) return
-c if they are both of the same type, order by increasing id
+c if they are both of the same EW type, order by increasing id
          if((islepton(id1).and.islepton(id2).or.
      1        isutype(id1).and.isutype(id2).or.
      2        isdtype(id1).and.isdtype(id2).or.

@@ -21,10 +21,14 @@ c  pwhgfill  :  fills the histograms with data
       include  'LesHouches.h'
       include 'pwhg_math.h'
 
+      call setupmulti(9)
       call inihists
 
 c     total cross section sanity check
       call bookupeqbins('total',1d0,0d0,1d0)
+
+c     total cross section sanity check
+      call bookupeqbins('totalcut',1d0,0d0,1d0)
 
       call bookupeqbins('lep1_y',0.2d0,-4d0,4d0)
       call bookupeqbins('lep1_eta',0.2d0,-4d0,4d0)
@@ -117,9 +121,9 @@ c     total cross section sanity check
       
       end
      
-      subroutine analysis(dsig)
+      subroutine analysis(dsig0)
       implicit none
-      real * 8 dsig
+      real * 8 dsig0,dsig(10)
       include 'hepevt.h'
       include 'pwhg_math.h' 
       include  'LesHouches.h'
@@ -140,15 +144,27 @@ c     we need to tell to this analysis file which program is running it
       integer dec1p,dec1a,dec2p,dec2a
       save dec1p,dec1a,dec2p,dec2a
       real * 8 plep1(4),plep2(4),palp1(4),palp2(4)
-      real * 8 httot,y,eta,pt,m
+      real * 8 httot,y,eta,pt,m,mmin,mm1,mm2
       real * 8 dy,deta,delphi,dr
       integer ihep,itmp
       real * 8 powheginput,random
       external powheginput,random
-      logical comesfrom
+      logical comesfrom,isnu,isquark,islepton
       external comesfrom
 
-      if(dsig.eq.0) return
+      if(dsig0.eq.0) return
+
+      dsig = 0
+      dsig(1) = dsig0
+
+c dsig(1) = full
+c      2  = leptonic
+c      3  = hadronic
+c      4  = semileptonic
+c      5  = hadrons + miss
+c      6  = leptons + miss
+c      7  = neutrinos
+
       if(ini) then
          if(whcprg.eq.'NLO') then
             write(*,*) '       NLO analysis'
@@ -229,6 +245,45 @@ c In ZZ production, always have dec1p >= dec2p
          endif
       endif
 
+
+c momenta before randomizing id's of identical leptons
+
+      plep1=phep(1:4,lep1)
+      palp1=phep(1:4,alp1)
+      plep2=phep(1:4,lep2)
+      palp2=phep(1:4,alp2)
+    
+      mmin = 1d16
+
+c      if (idhep(lep1)+idhep(alp1).eq.0 
+c     1    .and.  .not.(isnu(idhep(lep1)))
+c     2     ) then 
+      call getyetaptmass(plep1+palp1,y,eta,pt,m)
+      mmin = min(m,mmin) 
+      mm1 = m
+c      endif
+c      if (idhep(lep2)+idhep(alp2).eq.0
+c     1     .and.  .not.(isnu(idhep(lep2)))
+c     2     ) then 
+      call getyetaptmass(plep2+palp2,y,eta,pt,m)
+      mmin = min(m,mmin) 
+      mm2 = m
+c      endif
+c      if (idhep(lep1)+idhep(alp2).eq.0
+c     1    .and.   .not.(isnu(idhep(lep1)))
+c     2     ) then 
+      call getyetaptmass(plep1+palp2,y,eta,pt,m)
+      mmin = min(m,mmin) 
+c      endif
+c      if (idhep(lep2)+idhep(alp1).eq.0
+c     1    .and.   .not.(isnu(idhep(lep2)))
+c     2     ) then 
+      call getyetaptmass(plep2+palp1,y,eta,pt,m)
+      mmin = min(m,mmin) 
+c      endif
+
+
+
 c If there are any pair of identical particles, swap them
 c with 50% probability
       if(idhep(lep1).eq.idhep(lep2)) then
@@ -238,6 +293,7 @@ c with 50% probability
             lep1=itmp
          endif
       endif
+
             
       if(idhep(alp1).eq.idhep(alp2)) then
          if(random().gt.0.5d0) then
@@ -255,6 +311,59 @@ c find a match with the required decay mode
       if(dec2p.gt.0.and.dec2p.ne.idhep(lep2)) return
       if(dec2a.gt.0.and.dec2a.ne.-idhep(alp2)) return
 
+      if( isquark(idhep(lep1)) .and. isquark(idhep(lep2)) )then
+         dsig(3) = dsig(1)
+      endif
+
+      if(       (islepton(idhep(lep1)).or.islepton(idhep(alp1)))
+     1     .and.(islepton(idhep(lep2)).or.islepton(idhep(alp2))))then
+         dsig(2) = dsig(1)
+      endif
+
+      if(  (     (islepton(idhep(lep1)).or.islepton(idhep(alp1)))
+     1     .and. isquark(idhep(lep2))  )
+     2     .or.
+     3     (     (islepton(idhep(lep2)).or.islepton(idhep(alp2)))
+     1     .and. isquark(idhep(lep1))  )        ) then
+            dsig(4) = dsig(1)
+      endif
+
+      if(  (     (isnu(idhep(lep1)).or.isnu(idhep(alp1)))
+     1     .and. isquark(idhep(lep2))  )
+     2     .or.
+     3     (     (isnu(idhep(lep2)).or.isnu(idhep(alp2)))
+     1     .and. isquark(idhep(lep1))  )        ) then
+         dsig(5) = dsig(1)
+      endif
+
+      if(  (     (isnu(idhep(lep1)).or.isnu(idhep(alp1)))
+     1     .and. (islepton(idhep(lep2)).or.islepton(idhep(alp2))) )
+     2     .or.
+     3     (     (isnu(idhep(lep2)).or.isnu(idhep(alp2)))
+     1     .and. (islepton(idhep(lep1)).or.islepton(idhep(alp1))) ))then
+         dsig(6) = dsig(1)
+      endif
+
+
+      if(        (isnu(idhep(lep1)).or.isnu(idhep(alp1)))
+     1     .and. (isnu(idhep(lep2)).or.isnu(idhep(alp2))) )then
+         dsig(7) = dsig(1)
+      endif
+
+
+      if(  idhep(lep1) .eq. idhep(lep2) ) then
+         dsig(8) = dsig(1)
+      endif
+
+      if(  idhep(lep1) .ne. idhep(lep2) ) then
+         dsig(9) = dsig(1)
+      endif
+
+
+      if (mmin .gt. 20d0 .and.
+     1     min(mm1,mm2) .gt. 80 .and. max(mm1,mm2).lt.100 )
+     2     call filld('totalcut',0.5d0,dsig)
+
 
       call filld('total',0.5d0,dsig)
 
@@ -265,6 +374,7 @@ c find a match with the required decay mode
       palp1=phep(1:4,alp1)
       plep2=phep(1:4,lep2)
       palp2=phep(1:4,alp2)
+
 
       call yetaptmassplot(plep1,dsig,'lep1')
       if(lep1.eq.lep2) then
@@ -352,7 +462,7 @@ c jets
 
       subroutine yetaptmassplot(p,dsig,prefix)
       implicit none
-      real * 8 p(4),dsig
+      real * 8 p(4),dsig(*)
       character *(*) prefix
       real * 8 y,eta,pt,m
       call getyetaptmass(p,y,eta,pt,m)
@@ -364,7 +474,7 @@ c jets
 
       subroutine deltaplot(p1,p2,dsig,prefix)
       implicit none
-      real * 8 p1(4),p2(4),dsig
+      real * 8 p1(4),p2(4),dsig(*)
       character *(*) prefix
       real * 8 dy,deta,delphi,dr
       call getdydetadphidr(p1,p2,dy,deta,delphi,dr)
@@ -454,8 +564,8 @@ c     arrays to reconstruct jets, radius parameter rr
       integer   ntracks,njets
       integer   j,k,mu,jb
       real * 8 r,palg,ptmin,pp,tmp
-      logical islept
-      external islept
+      logical islepton
+      external islepton
 C - Initialize arrays and counters for output jets
       do j=1,maxtrack
          do mu=1,4
@@ -473,7 +583,7 @@ C - Initialize arrays and counters for output jets
       if(iflag.eq.1) then
 C     - Extract final state particles to feed to jet finder
          do j=1,nhep
-            if (isthep(j).eq.1.and..not.islept(idhep(j))) then
+            if (isthep(j).eq.1.and..not.islepton(idhep(j))) then
                if(ntracks.eq.maxtrack) then
                   write(*,*) 'analyze: need to increase maxtrack!'
                   write(*,*) 'ntracks: ',ntracks
@@ -488,7 +598,7 @@ C     - Extract final state particles to feed to jet finder
          enddo
       else
          do j=1,nup
-            if (istup(j).eq.1.and..not.islept(idup(j))) then
+            if (istup(j).eq.1.and..not.islepton(idup(j))) then
                if(ntracks.eq.maxtrack) then
                   write(*,*) 'analyze: need to increase maxtrack!'
                   write(*,*) 'ntracks: ',ntracks
@@ -574,15 +684,4 @@ c bubble sort
             endif
          enddo
       enddo
-      end
-
-      function islept(j)
-      implicit none
-      logical islept
-      integer j
-      if(abs(j).ge.11.and.abs(j).le.15) then
-         islept = .true.
-      else
-         islept = .false.
-      endif
       end
