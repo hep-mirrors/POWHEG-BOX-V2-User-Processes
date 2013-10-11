@@ -75,7 +75,7 @@ c  pwhgfill  :  fills the histograms with data
       include 'pwhg_weights.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
-      integer   maxjet,mjets,njets,numjets,ntracks
+      integer   maxjet,mjets,numjets,ntracks
       parameter (maxjet=2048)
       real * 8  ktj(maxjet),etaj(maxjet),rapj(maxjet),
      1    phij(maxjet),pj(4,maxjet),rr,ptrel(4),ptot(4)
@@ -197,20 +197,23 @@ c     palg=1 is standard kt, -1 is antikt
 
 c      write(*,*) 'numjets ',numjets
 
+      ktj(1)=0d0
+      ktj(2)=0d0
+      do j=1,min(maxnumjets,numjets)
+         ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
+      enddo
 
       do i=1,nptmin        
-         njets=0    
-         do j=1,min(maxnumjets,numjets)
-            ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
-         enddo
+
 c The first jet should have MinFirstJetPt pt, while the second
 c ptminarr(i):
 c         print *,"ktj(1): ",ktj(1)
 c         print *,"ktj(2): ",ktj(2)
 c         print *,"ptminarr(i): ",ptminarr(i)
-         if ((ktj(1).lt.MinFirstJetPt).or.
-     >       (ktj(2).lt.ptminarr(i))) then
-           exit
+         if ((ktj(1).le.MinFirstJetPt).or.
+     >       (ktj(2).le.ptminarr(i))) then
+c     since the ptminarr array is ordered, if the second jet is not passing the cut, it will never do
+           return
          endif
 
          call filld('sigtot'//cptmin(i),1d0,dsig)
