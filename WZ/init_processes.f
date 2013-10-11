@@ -263,6 +263,10 @@ c User's can easily add their own case.
          if(.not.islepton(idfz)) return
          if(.not.isquark(idfw)) return
       endif
+      if(powheginput("#lll").eq.1) then
+         if(.not.islepton(idfz)) return
+         if(.not.(islepton(idfw).or.isnu(idfw))) return
+      endif
 c End User's restrictions to processes
 
       if(wch3.gt.0) then

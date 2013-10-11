@@ -149,7 +149,7 @@ c     colored particles
       include 'LesHouches.h'
       logical isdtype
       if(nup.eq.9) then
-         if(idup(9).ne.0) then
+         if(idup(9).ne.21) then
             call randomizeckm(idup(9),idup(9))
          endif
       endif
