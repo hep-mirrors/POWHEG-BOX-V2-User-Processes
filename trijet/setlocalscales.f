@@ -84,7 +84,6 @@ c if momenta have changed, the old results (for each underlying born) are invali
       logical raisingscales,ini
       save raisingscales,ini
       data ini/.true./
-      real * 8 as, y
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
             raisingscales = .false.
@@ -582,16 +581,24 @@ c     See Eq. (2.9) of arXiv:1212.4504
       include 'pwhg_st.h'
       include 'pwhg_math.h'
       include 'pwhg_flg.h'
-      real * 8 b0,a1,b1,hlog,llog
+      real * 8 b0,a1,b1,hlog,llog,lam2
       real * 8 powheginput
       logical ini,sudscalevar
       data ini/.true./
-      save ini,sudscalevar,b0
+      save ini,sudscalevar,b0,lam2
 
       if(ini) then
          b0=(11*CA-2*st_nlight)/(12*pi)
+         lam2=st_lambda5MSB**2
          ini = .false.
       endif
+
+      if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
+c in this case everything is zero, irrelevant
+         expsudakov_HWJ=0
+         return
+      endif
+
 
       if (q2l.ge.q2h.or.q2h.le.q20.or.flg_bornonly) then
          expsudakov_HWJ=0
