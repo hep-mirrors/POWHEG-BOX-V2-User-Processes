@@ -149,7 +149,7 @@ c     we need to tell to this analysis file which program is running it
       integer ihep,itmp
       real * 8 powheginput,random
       external powheginput,random
-      logical comesfrom,isnu,isquark,islepton
+      logical comesfrom,isnu,isquark,islepton,condition
       external comesfrom
 
       if(dsig0.eq.0) return
@@ -359,10 +359,13 @@ c find a match with the required decay mode
          dsig(9) = dsig(1)
       endif
 
-
-      if (mmin .gt. 20d0 .and.
-     1     min(mm1,mm2) .gt. 80 .and. max(mm1,mm2).lt.100 )
-     2     call filld('totalcut',0.5d0,dsig)
+      condition = .true.
+      condition = condition .and. mmin .gt. 20d0
+      if( idhep(ihepv1).eq.23 )
+     1 condition = condition .and. mm1 .gt. 80 .and. mm1 .lt.100 
+      if( idhep(ihepv2).eq.23 )
+     1 condition = condition .and. mm2 .gt. 80 .and. mm2 .lt.100 
+      if(condition) call filld('totalcut',0.5d0,dsig)
 
 
       call filld('total',0.5d0,dsig)

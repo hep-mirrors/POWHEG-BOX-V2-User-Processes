@@ -4,6 +4,7 @@
       include 'pwhg_math.h'
       include 'pwhg_st.h'
       real * 8 deltas,asmzopi,asmwopi
+      real * 8  gammado,gammal,gammanu,gammaup,norm
       real * 8 pwhg_alphas
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
@@ -37,7 +38,7 @@ c with contributions up to as**4 then ph_Wwidth = 2.099, ph_Zwidth = 2.511
 c      deltas=asmzopi+1.409*asmzopi**2-12.77*asmzopi**3-80*asmzopi**4
 c with contributions up to as**1 then ph_Wwidth = 2.098, ph_Zwidth = 2.509
       deltas=asmwopi
-      ph_deltas = deltas 
+      ph_deltasw = deltas 
 
 c     ph_Wwidth =  2.085 +- 0.042, PDG 7-7-2011
 c 2.0995 with this formula, 0.7% difference, 0.34 standard deviations
@@ -45,6 +46,7 @@ c 2.0995 with this formula, 0.7% difference, 0.34 standard deviations
      1 *(3+3*2*(1+deltas))
 
       deltas=asmzopi
+      ph_deltasz = deltas 
 c     ph_Zwidth = 2.4952 +- 0.0023, PDG 7-7-2011
 c 2.5106 with this formula, 0.6% differemnce, 6.7 standard deviations
       ph_Zwidth = ph_gmu*ph_Zmass**3/(6*sqrt(2d0)*pi)*(
@@ -60,9 +62,25 @@ c down quarks
      5     3*3*((-0.5d0+2*1d0/3d0*ph_sthw2)**2+(-0.5d0)**2) 
      6    )*(1+deltas) )
 c
+      norm = ph_gmu*ph_Zmass**3/(6*sqrt(2d0)*pi)
+      gammanu = norm*(  3*((0.5d0)**2+(0.5d0)**2) )
+      gammal =  norm*(  3*((-0.5d0+2*ph_sthw2)**2+(-0.5d0)**2) )
+      gammaup = norm*(  3*2*((0.5d0-2*2d0/3d0*ph_sthw2)**2+(0.5d0)**2) )
+     1     *(1+deltas)
+      gammado = norm*(3*3*((-0.5d0+2*1d0/3d0*ph_sthw2)**2+(-0.5d0)**2) )
+     6     *(1+deltas)
+
       write(*,*) ' 1/alpha',1/ph_alphaem
       write(*,*) ' W width',ph_Wwidth
       write(*,*) ' Z width',ph_Zwidth
+
+      write(*,*) ' Z branch. nu   ',gammanu/ph_Zwidth
+      write(*,*) ' Z branch. lept ',gammal/ph_Zwidth
+      write(*,*) ' Z branch. u+c  ',gammaup/ph_Zwidth
+      write(*,*) ' Z branch. d+s+b',gammado/ph_Zwidth
+
+      write(*,*) ' Wbranch lep ', 3/(3+3*2*(1+ph_deltasw))
+      write(*,*) ' Wbranch had ', 1-3/(3+3*2*(1+ph_deltasw))
 
       ph_ZmZw = ph_Zmass * ph_Zwidth
       ph_unit_e = sqrt(4*pi*ph_alphaem)

@@ -174,11 +174,11 @@ c flavours of the produced partons
       normbr = 1
 
       if(isquark(id1)) then
-         normbr=normbr*(1d0+ph_deltas)*3
+         normbr=normbr*(1d0+ph_deltasw)*3
       endif
 
       if(isquark(id2)) then
-         normbr=normbr*(1d0+ph_deltas)*3
+         normbr=normbr*(1d0+ph_deltasz)*3
       endif
 
       if(.not.isnu(id2)) then
