@@ -414,8 +414,8 @@ c---  4th term (l-h only) contains two W propagators
          if(interference) then
             if(iloop.eq.2) then
 c     this is for testing:
-c     msqv(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
-               msq= xmsq(1) *
+c     msqv=(xmsq(1)+xmsq(2))/2 *
+               msqv= xmsq(1) *
      1              (1+xmsq(3)/(xmsq(1)+xmsq(2)))
             endif
          else

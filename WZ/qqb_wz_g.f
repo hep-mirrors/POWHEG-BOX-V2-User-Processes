@@ -437,7 +437,7 @@ c     .                 *prop34*prop56*v2(polz)
             if(interference) then
                if(iloop.eq.2) then
 c     this is for testing:
-c     msq(j,k)=(xmsq(1,j,k)+xmsq(2,j,k))/2 *
+c       msq=(xmsq(1)+xmsq(2))/2 *
                   msq= xmsq(1) *
      1                 (1+xmsq(3)/(xmsq(1)+xmsq(2)))
                endif
