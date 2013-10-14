@@ -24,14 +24,10 @@ F77=gfortran -fno-automatic
 OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb -pg
-ifdef DEBUG
-OPT=
-endif
 endif
 
 ifeq ("$(COMPILER)","ifort")
 F77 = ifort -save  -extend_source
-CXX = icpc
 LIBS = -limf
 #FFLAGS =  -check
 ## For floating point exception trapping  uncomment the following 
@@ -41,6 +37,9 @@ OPT = -O3 #-fast
 #DEBUG= -debug -g
 endif
 
+ifdef DEBUG
+OPT=-O0
+endif
 
 OBJ=obj-$(COMPILER)
 

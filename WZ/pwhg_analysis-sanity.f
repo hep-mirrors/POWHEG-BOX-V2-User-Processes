@@ -351,11 +351,13 @@ c find a match with the required decay mode
       endif
 
 
-      if(  idhep(lep1) .eq. idhep(lep2) ) then
+      if(  idhep(lep1) .eq. idhep(lep2) .or.
+     1     idhep(alp1) .eq. idhep(alp2) ) then
          dsig(8) = dsig(1)
       endif
 
-      if(  idhep(lep1) .ne. idhep(lep2) ) then
+      if(  idhep(lep1) .ne. idhep(lep2) .and.
+     1     idhep(alp1) .ne. idhep(alp2) ) then
          dsig(9) = dsig(1)
       endif
 

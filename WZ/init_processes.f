@@ -235,6 +235,14 @@ c User's can easily add their own case.
          if(idfz.ne.13) return
          if(idfw.ne.11.and.idaw.ne.-11) return
       endif
+      if(powheginput("#e+mumu").eq.1) then
+         if(idfz.ne.13) return
+         if(idaw.ne.-11) return
+      endif
+      if(powheginput("#e-mumu").eq.1) then
+         if(idfz.ne.13) return
+         if(idfw.ne.11) return
+      endif
       if(powheginput("#muee").eq.1) then
          if(idfz.ne.11) return
          if(idfw.ne.13.and.idaw.ne.-13) return
