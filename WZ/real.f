@@ -11,6 +11,8 @@
       include 'PhysPars.h'
       real * 8 pin(0:3,nlegreal)
       integer rflav(nlegreal)
+      integer flavrad
+      common/cflavrad/flavrad
       real * 8 amp2real
       real * 8 suppfact2e
 
@@ -18,6 +20,7 @@
       double precision p(mxpart,4),msq
 
       ason2pi = st_alpha/2d0/pi
+      flavrad = rflav(9)
 
       call setzcoupl(rflav(1),rflav(2),
 c          id1      iad1     id2      idw
@@ -97,6 +100,5 @@ c         Vsum(rflav(1)) = Vsq(rflav(1),-rflav(nlegreal))
       amp2real = amp2real * normbr
 
 c      write(*,'(a,1x,d15.9,3x,9(i3,1x))') 'real',amp2real,rflav
-
 
       end

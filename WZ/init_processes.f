@@ -187,6 +187,7 @@ c idw: W id, returns 0 if not allowed
       integer wch3
       data charge3 /-2,1,-2,1,-2,1,0,-1,2,-1,2,-1,2/
       logical isquark,islepton,isnu,isewup
+      integer ewgeneration
       real * 8 powheginput
 c idw=0: not allowed
       idw = 0
@@ -199,12 +200,10 @@ c one of i1,i2,i9 must be a gluon;
       if(i9.eq.0) then
          if(vsq(i1,i2).eq.0) return
       endif
-c if there is a radiated quark, take it as if CKM is diagonal.
-c Flavour changing interactions are introduced at the LH level.
       if(i1.eq.0) then
-         if(abs(i2-i9).gt.1) return
+         if(vsq(i2,-i9).eq.0) return
       elseif(i2.eq.0) then
-         if(abs(i1-i9).gt.1) return
+         if(vsq(i1,-i9).eq.0) return
       endif
       if(isewup(idfw)) then
          if(wch3.lt.0) return
@@ -284,5 +283,3 @@ c End User's restrictions to processes
       endif
       end
 
-
-      

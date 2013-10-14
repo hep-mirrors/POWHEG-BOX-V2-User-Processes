@@ -22,6 +22,8 @@ c     for the moment --- radiation only from initial line
       include 'pwhg_st.h'
       include 'pwhg_math.h'
       include 'vvsettings.f'
+      integer flavrad
+      common/cflavrad/flavrad
       integer j,k,ip,polg,polz,minus,mplus,jp,kp
       double precision FAC,FACM,FAC1
       double complex prop12(3),prop34(3),prop56(3)
@@ -296,122 +298,111 @@ c     .                 *prop34*prop56*v2(polz)
          elseif ((j .gt. 0) .and. (k .eq. 0)) then
 c---  case u-g
 
-            if (Vsum(j).ne.0d0) then
-               do polg=1,2
-                  do polz=1,2
-                     A(polg,polz)=((c1(polz)*qu_gg(ip,2,polg,polz)
-     .                    +c2(polz)*qu_gg(ip,3,polg,polz))*FAC
-     .                    +(cotw*v2(polz)*prop56(ip)
-     .                    *qu_gg(ip,1,polg,polz)
-     .                    +q1*qu_gg(ip,10,polg,polz))
-     .                    *prop12(ip)*FACM)*prop34(ip)
-     .                    +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
-     .                    *prop12(ip)*qu_gg(ip,5,polg,polz)
-     .                    +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
-     .                    *prop12(ip)*qu_gg(ip,4,polg,polz)
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *qu_gg(ip,6,polg,polz)*wl1
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *qu_gg(ip,7,polg,polz)*wl2)
-                     
+            do polg=1,2
+               do polz=1,2
+                  A(polg,polz)=((c1(polz)*qu_gg(ip,2,polg,polz)
+     .                 +c2(polz)*qu_gg(ip,3,polg,polz))*FAC
+     .                 +(cotw*v2(polz)*prop56(ip)
+     .                 *qu_gg(ip,1,polg,polz)
+     .                 +q1*qu_gg(ip,10,polg,polz))
+     .                 *prop12(ip)*FACM)*prop34(ip)
+     .                 +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
+     .                 *prop12(ip)*qu_gg(ip,5,polg,polz)
+     .                 +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
+     .                 *prop12(ip)*qu_gg(ip,4,polg,polz)
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *qu_gg(ip,6,polg,polz)*wl1
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *qu_gg(ip,7,polg,polz)*wl2)
+                  
 c     A(polg,polz)=((c1*qu_gg(2,polg,polz)
 c     .                  +c2*qu_gg(3,polg,polz))*FAC
 c     .                  +cotw*prop12*qu_gg(1,polg,polz)*FACM)
 c     .                 *prop34*prop56*v2(polz)
-                  enddo
                enddo
-            endif
-            ave=xn*aveqg*Vsum(j)
+            enddo
+            ave=xn*aveqg*Vsq(j,-flavrad)
          elseif ((j .lt. 0) .and. (k .eq. 0)) then
 c---  case db-g
-            if (Vsum(j).ne.0d0) then
-               do polg=1,2
-                  do polz=1,2
-                     A(polg,polz)=((c1(polz)*qb_gg(ip,2,polg,polz)
-     .                    +c2(polz)*qb_gg(ip,3,polg,polz))*FAC
-     .                    +(cotw*v2(polz)*prop56(ip)
-     .                    *qb_gg(ip,1,polg,polz)
-     .                    +q1*qb_gg(ip,10,polg,polz))
-     .                    *prop12(ip)*FACM)*prop34(ip)
-     .                    +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
-     .                    *prop12(ip)*qb_gg(ip,5,polg,polz)
-     .                    +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
-     .                    *prop12(ip)*qb_gg(ip,4,polg,polz)
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *qb_gg(ip,6,polg,polz)*wl1
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *qb_gg(ip,7,polg,polz)*wl2)
-                     
+            do polg=1,2
+               do polz=1,2
+                  A(polg,polz)=((c1(polz)*qb_gg(ip,2,polg,polz)
+     .                 +c2(polz)*qb_gg(ip,3,polg,polz))*FAC
+     .                 +(cotw*v2(polz)*prop56(ip)
+     .                 *qb_gg(ip,1,polg,polz)
+     .                 +q1*qb_gg(ip,10,polg,polz))
+     .                 *prop12(ip)*FACM)*prop34(ip)
+     .                 +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
+     .                 *prop12(ip)*qb_gg(ip,5,polg,polz)
+     .                 +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
+     .                 *prop12(ip)*qb_gg(ip,4,polg,polz)
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *qb_gg(ip,6,polg,polz)*wl1
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *qb_gg(ip,7,polg,polz)*wl2)
+                  
 c     A(polg,polz)=((c1*qb_gg(2,polg,polz)
 c     .                  +c2*qb_gg(3,polg,polz))*FAC
 c     .                  +cotw*prop12*qb_gg(1,polg,polz)*FACM)
 c     .                 *prop34*prop56*v2(polz)
-                  enddo
                enddo
-            endif
+            enddo
             
-            ave=xn*aveqg*Vsum(j)
+            ave=xn*aveqg*Vsq(j,-flavrad)
          elseif ((j .eq. 0) .and. (k .gt. 0)) then
 c---  case g-u
-            if (Vsum(k).ne.0d0) then
-               
-               do polg=1,2
-                  do polz=1,2
-                     A(polg,polz)=((c1(polz)*gg_qu(ip,2,polg,polz)
-     .                    +c2(polz)*gg_qu(ip,3,polg,polz))*FAC
-     .                    +(cotw*v2(polz)*prop56(ip)
-     .                    *gg_qu(ip,1,polg,polz)
-     .                    +q1*gg_qu(ip,10,polg,polz))
-     .                    *prop12(ip)*FACM)*prop34(ip)
-     .                    +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
-     .                    *prop12(ip)*gg_qu(ip,5,polg,polz)
-     .                    +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
-     .                    *prop12(ip)*gg_qu(ip,4,polg,polz)
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *gg_qu(ip,6,polg,polz)*wl1
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *gg_qu(ip,7,polg,polz)*wl2)
-                     
+            do polg=1,2
+               do polz=1,2
+                  A(polg,polz)=((c1(polz)*gg_qu(ip,2,polg,polz)
+     .                 +c2(polz)*gg_qu(ip,3,polg,polz))*FAC
+     .                 +(cotw*v2(polz)*prop56(ip)
+     .                 *gg_qu(ip,1,polg,polz)
+     .                 +q1*gg_qu(ip,10,polg,polz))
+     .                 *prop12(ip)*FACM)*prop34(ip)
+     .                 +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
+     .                 *prop12(ip)*gg_qu(ip,5,polg,polz)
+     .                 +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
+     .                 *prop12(ip)*gg_qu(ip,4,polg,polz)
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *gg_qu(ip,6,polg,polz)*wl1
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *gg_qu(ip,7,polg,polz)*wl2)
+                  
 c     A(polg,polz)=((c1(polz)*gg_qu(2,polg,polz)
 c     .                  +c2(polz)*gg_qu(3,polg,polz))*FAC
 c     .                  +cotw*prop12*gg_qu(1,polg,polz)*FACM)
 c     .                 *prop34*prop56*v2(polz)
-                  enddo
                enddo
-            endif
-            ave=xn*aveqg*Vsum(k)
+            enddo
+            ave=xn*aveqg*Vsq(k,-flavrad)
          elseif ((j .eq. 0) .and. (k .lt. 0)) then
 c---  case g-db
-
-            if (Vsum(k).ne.0d0) then
-               
-               do polg=1,2
-                  do polz=1,2
-                     A(polg,polz)=((c1(polz)*gg_qb(ip,2,polg,polz)
-     .                    +c2(polz)*gg_qb(ip,3,polg,polz))*FAC
-     .                    +(cotw*v2(polz)*prop56(ip)
-     .                    *gg_qb(ip,1,polg,polz)
-     .                    +q1*gg_qb(ip,10,polg,polz))
-     .                    *prop12(ip)*FACM)*prop34(ip)
-     .                    +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
-     .                    *prop12(ip)*gg_qb(ip,5,polg,polz)
-     .                    +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
-     .                    *prop12(ip)*gg_qb(ip,4,polg,polz)
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *gg_qb(ip,6,polg,polz)*wl1
-     .                    +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
-     .                    *gg_qb(ip,7,polg,polz)*wl2)
-                     
+            do polg=1,2
+               do polz=1,2
+                  A(polg,polz)=((c1(polz)*gg_qb(ip,2,polg,polz)
+     .                 +c2(polz)*gg_qb(ip,3,polg,polz))*FAC
+     .                 +(cotw*v2(polz)*prop56(ip)
+     .                 *gg_qb(ip,1,polg,polz)
+     .                 +q1*gg_qb(ip,10,polg,polz))
+     .                 *prop12(ip)*FACM)*prop34(ip)
+     .                 +FAC*((en1*v2(polz)*prop56(ip)+q1*(-1d0)*cl1)
+     .                 *prop12(ip)*gg_qb(ip,5,polg,polz)
+     .                 +(en2*v2(polz)*prop56(ip)+q1*(-1d0)*cl2)
+     .                 *prop12(ip)*gg_qb(ip,4,polg,polz)
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *gg_qb(ip,6,polg,polz)*wl1
+     .                 +wwflag*0.5d0*prop34(ip)*prop12(ip)/xw
+     .                 *gg_qb(ip,7,polg,polz)*wl2)
+                  
 c     A(polg,polz)=((c1*gg_qb(2,polg,polz)
 c     .                  +c2*gg_qb(3,polg,polz))*FAC
 c     .                  +cotw*prop12*gg_qb(1,polg,polz)*FACM)
 c     .                 *prop34*prop56*v2(polz)
-                     
-                  enddo
+                  
                enddo
-            endif
+            enddo
             
-            ave=xn*aveqg*Vsum(k)
+            ave=xn*aveqg*Vsq(k,-flavrad)
 
          else
             ave=0d0

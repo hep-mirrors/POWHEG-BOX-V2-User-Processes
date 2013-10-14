@@ -148,11 +148,7 @@ c     colored particles
       implicit none
       include 'LesHouches.h'
       logical isdtype
-      if(nup.eq.9) then
-         if(idup(9).ne.21) then
-            call randomizeckm(idup(9),idup(9))
-         endif
-      endif
+
       if(isdtype(idup(5))) then
          call randomizeckm(idup(5),idup(5))
       elseif(isdtype(idup(6))) then
