@@ -214,6 +214,11 @@ c i.e. always id1>=id2
          ihepv2=itmp
       endif
 
+      if(powheginput("#W+Z").eq.1) then
+c keep only W+ in WZ
+         if(idhep(ihepv1).eq.-24) return
+      endif
+
 c     find vector decay products
       do ihep=1,nhep
          if(isthep(ihep).eq.1) then
