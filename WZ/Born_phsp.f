@@ -17,7 +17,7 @@
       double precision p12(4),p34(4),p56(4)
       double precision wt
       double precision m34,m56,smin,smax,s,z
-      double precision xmin,taumin,sqrts
+      double precision xmin,taumin,tauw,sqrts
       integer i,k
       real * 8 powheginput
       external powheginput
@@ -27,7 +27,9 @@
       real * 8 mllminz
       save ini,mllminz
 
-      double precision lntaum,ymax,ycm
+      double precision lntaum,lntauw,ymax,ycm
+      logical oldmap
+      save oldmap
 
       if (debug)  write(*,*) 'Entering Born_phsp: ndiminteg', ndiminteg
       if(ini) then
@@ -37,6 +39,8 @@
          kn_masses(nlegreal)=0
          mllminz=0.1d0
          ini=.false.
+         oldmap = .true.
+         if(powheginput("#oldmap").eq.0) oldmap = .false.
       endif
 
 C     
@@ -67,8 +71,27 @@ c 2 pi
 
       taumin = ((m34+m56)/sqrts)**2
       lntaum = dlog(taumin)
-      tau = dexp(lntaum*(1d0-xborn(9)))
-      xjac = xjac*(-lntaum*tau)
+      if(oldmap) then
+         tau = dexp(lntaum*(1d0-xborn(9)))
+         xjac = xjac*(-lntaum*tau)
+      else
+         tauw=(ph_wmass/sqrts)**2
+         if(tauw.lt.taumin) then
+            taumin = ((m34+m56)/sqrts)**2
+            tau = dexp(lntaum*(1d0-xborn(9)))
+            xjac = xjac*(-lntaum*tau)
+         else
+            lntauw = log(tauw)
+            if(xborn(9).lt.0.5d0) then
+               tau = dexp( lntaum*(1-2*xborn(9))
+     1                    + 2*xborn(9)*lntauw)
+               xjac = xjac*2*(lntauw-lntaum)*tau
+            else
+               tau = dexp( lntauw*2*(1-xborn(9)))
+               xjac = xjac*2*(-lntauw)*tau
+            endif
+         endif
+      endif
 
       kn_sborn = kn_sbeams*tau
 
