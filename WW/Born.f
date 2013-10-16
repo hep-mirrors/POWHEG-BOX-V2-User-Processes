@@ -111,7 +111,7 @@ c     colored particles
          write(*,*) ' invalid flavour'
          call pwhg_exit(-1)
       endif
-      if(isquark(5)) then
+      if(isquark(idup(5))) then
          icolup(1,5)=502
          icolup(2,5)=0
          icolup(1,6)=0
@@ -120,7 +120,7 @@ c     colored particles
          icolup(:,5)=0
          icolup(:,6)=0
       endif
-      if(isquark(7)) then
+      if(isquark(idup(7))) then
          icolup(1,7)=503
          icolup(2,7)=0
          icolup(1,8)=0
