@@ -199,8 +199,7 @@ c one of i1,i2,i9 must be a gluon;
       if(abs(wch3).ne.3) return
       if(i9.eq.0) then
          if(vsq(i1,i2).eq.0) return
-      endif
-      if(i1.eq.0) then
+      elseif(i1.eq.0) then
          if(vsq(i2,-i9).eq.0) return
       elseif(i2.eq.0) then
          if(vsq(i1,-i9).eq.0) return
@@ -221,6 +220,10 @@ c User's can easily add their own case.
       if(powheginput("#only-e").eq.1) then
          if(idfz.ne.11) return
          if(idfw.ne.11.and.idaw.ne.-11) return
+      endif
+      if(powheginput("#e+ee").eq.1) then
+         if(idfz.ne.11) return
+         if(idaw.ne.-11) return
       endif
       if(powheginput("#only-mu").eq.1) then
          if(idfz.ne.13) return
