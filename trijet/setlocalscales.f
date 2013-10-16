@@ -379,6 +379,10 @@ C ------------------------------------------------ C
       save ini,hwjsudakov
       real * 8 powheginput
       external powheginput
+      integer count, count1
+      save count, count1
+      data count,count1/0,0/
+      
       if(ini) then
          if(powheginput("#HWJsudakov").eq.1) then
             hwjsudakov = .true.
@@ -389,7 +393,7 @@ c         call sudakov_plotter
          ini=.false.
       endif
       lam2=st_lambda5MSB**2
-      if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
+      if(q20.le.2*lam2.or.q2l.lt.2*lam2.or.q2h.lt.2*lam2) then
          sudakov=0
          goto 999
       endif
@@ -443,6 +447,13 @@ c         endif
          sudakov=exp(theExponentN-theExponentD)
       endif
  999  continue
+
+      count=count+1
+
+      if (sudakov.gt.1.01d0) then
+         count1=count1+1
+         write(*,*) 'ratio ', float(count1)/count
+      endif
       end
 
 
@@ -468,7 +479,7 @@ C ------------------------------------------------ C
       include 'pwhg_math.h'
       real * 8 b0,c,b,lam2
       lam2=st_lambda5MSB**2
-      if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
+      if(q20.le.2*lam2.or.q2l.lt.2*lam2.or.q2h.lt.2*lam2) then
          LO_sudakov=0
          goto 999
       endif
@@ -532,7 +543,7 @@ C ------------------------------------------------ C
       include 'pwhg_flg.h'
       real * 8 b0,c,b,lam2
       lam2=st_lambda5MSB**2
-      if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
+      if(q20.le.2*lam2.or.q2l.lt.2*lam2.or.q2h.lt.2*lam2) then
 c in this case everything is zero, irrelevant
          expsudakov=0
          return
@@ -593,7 +604,7 @@ c     See Eq. (2.9) of arXiv:1212.4504
          ini = .false.
       endif
 
-      if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
+      if(q20.le.2*lam2.or.q2l.lt.2*lam2.or.q2h.lt.2*lam2) then
 c in this case everything is zero, irrelevant
          expsudakov_HWJ=0
          return
