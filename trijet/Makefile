@@ -9,9 +9,13 @@ PDF=lhapdf
 #Choose Analysis: dummy, process specific
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=dummy
-ANALYSIS=trijet
+# trijet     : all-round analysis
+# minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
+# various pt cuts on the second hardest
+# minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
+ANALYSIS=minlo
 ## For static linking uncomment the following
-#STATIC= -static
+STATIC= -static
 #
 
 OBJ=obj-$(COMPILER)
@@ -43,7 +47,7 @@ CXX=icpc
 #FFLAGS =  -checkm
 ## For floating point exception trapping  uncomment the following 
 #FPE = -fpe0
-OPT = -O3 #-fast
+OPT = -O3 #-fast -check -ftrapuv 
 ## For debugging uncomment the following
 #DEBUG=  -g
 ifdef DEBUG
@@ -85,6 +89,7 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
+PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
 ifeq ("$(ANALYSIS)","trijet")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
@@ -95,8 +100,22 @@ PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis.o observables.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
 PWHGANAL+=  fastjetfortran.o fastjetfortran-BBUY.o
-else
-PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
+endif
+ifeq ("$(ANALYSIS)","minlo")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo.o observables.o
+PWHGANAL+=  fastjetfortran.o
+endif
+ifeq ("$(ANALYSIS)","minlo-ycut")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo-ycut.o observables.o
+PWHGANAL+=  fastjetfortran.o
 endif
 
 
@@ -112,7 +131,7 @@ endif
 %.o: %.cc | $(OBJ)
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS) $(CXXFLAGS)
 
-USER=init_processes_born_real.o init_processes.o  init_couplings.o \
+USER= init_processes_born_real.o init_processes.o  init_couplings.o \
      Born_phsp.o Born.o virtual.o real.o  $(PWHGANAL)
 
 
@@ -175,13 +194,13 @@ main-PYTHIA-lhef: $(PYTHIA)
 XFFLAGS=$(DEBUG) $(OPT)
 
 libdhelas3.a:
-	cd DHELAS ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"; wait
+	cd DHELAS ; make -j 2 FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"; wait
 
 libmadgraph.a:
-	cd Madlib ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"; wait
+	cd Madlib ; make -j 2 FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"; wait
 
 libnlojet.a:
-	cd nlojet ; make -j CC="$(CXX)" CDEBUG="$(DEBUG)"  CXXFLAGS="$(CXXFLAGS)" OBJ="$(OBJ)"; wait
+	cd nlojet ; make -j 2 CC="$(CXX)" CDEBUG="$(DEBUG)"  CXXFLAGS="$(CXXFLAGS)" OBJ="$(OBJ)"; wait
 
 
 ifeq ("$(COMPILER)","gfortran")
