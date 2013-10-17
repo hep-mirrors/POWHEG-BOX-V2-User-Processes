@@ -69,28 +69,21 @@ c 2 pi
       xjac=xjac*wt/(2*pi)
       m56=sqrt(s)
 
-      taumin = ((m34+m56)/sqrts)**2
-      lntaum = dlog(taumin)
-      if(oldmap) then
+      if(oldmap.or.zerowidth) then
+         taumin = ((m34+m56)/sqrts)**2
+         lntaum = dlog(taumin)
          tau = dexp(lntaum*(1d0-xborn(9)))
          xjac = xjac*(-lntaum*tau)
       else
-         tauw=(ph_wmass/sqrts)**2
-         if(tauw.lt.taumin) then
-            taumin = ((m34+m56)/sqrts)**2
-            tau = dexp(lntaum*(1d0-xborn(9)))
-            xjac = xjac*(-lntaum*tau)
-         else
-            lntauw = log(tauw)
-            if(xborn(9).lt.0.5d0) then
-               tau = dexp( lntaum*(1-2*xborn(9))
-     1                    + 2*xborn(9)*lntauw)
-               xjac = xjac*2*(lntauw-lntaum)*tau
-            else
-               tau = dexp( lntauw*2*(1-xborn(9)))
-               xjac = xjac*2*(-lntauw)*tau
-            endif
-         endif
+         z = xborn(9)
+         smin = (m34+m56)**2
+         smax = kn_sbeams
+         call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
+c jacobian from z to s (i.e. ds = wt dz)
+         xjac = xjac*wt
+         tau = s/kn_sbeams
+c jacobian from s to tau (d tau = ds/kn_sbeams
+         xjac = xjac/kn_sbeams
       endif
 
       kn_sborn = kn_sbeams*tau
@@ -130,7 +123,16 @@ c     neg rapidity
 C     total incoming momentum 
       p12 = p1+p2 
 
-      call phi1_2(xborn(3),xborn(4),p12,p34,p56,m34,m56,wt)
+
+      if(oldmap) then
+         z = xborn(3)
+      else
+c this map from 0 to 1 has vanishing derivatives in 0 and 1
+c (needs some importance sampling for costh near -1 and 1
+         z = 3*xborn(3)**2-2*xborn(3)**3
+         xjac = xjac*6*xborn(3)*(1-xborn(3))
+      endif
+      call phi1_2(z,xborn(4),p12,p34,p56,m34,m56,wt)
       xjac=xjac*wt
       call phi3m0(xborn(7),xborn(8),p34,p3,p4,wt)
       xjac=xjac*wt
