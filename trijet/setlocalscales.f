@@ -448,12 +448,12 @@ c         endif
       endif
  999  continue
 
-      count=count+1
+c      count=count+1
 
-      if (sudakov.gt.1.01d0) then
-         count1=count1+1
-         write(*,*) 'ratio ', float(count1)/count
-      endif
+c      if (sudakov.gt.1.01d0) then
+c         count1=count1+1
+c         write(*,*) 'ratio ', float(count1)/count
+c      endif
       end
 
 
