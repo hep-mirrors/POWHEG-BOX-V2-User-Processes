@@ -39,13 +39,17 @@ testplots  0       ! (default 0, do not) do NLO and PWHG distributions
 #rand1     -1      ! initialize random number sequence 
 #rand2     -1      ! initialize random number sequence 
 
-#manyseeds  1       ! Used to perform multiple runs with different random
+manyseeds  1       ! Used to perform multiple runs with different random
                    ! seeds in the same directory.
                    ! If set to 1, the program asks for an integer j;
                    ! The file pwgseeds.dat at line j is read, and the
                    ! integer at line j is used to initialize the random
                    ! sequence for the generation of the event.
                    ! The event file is called pwgevents-'j'.lhe
+
+xgriditeration 1
+parallelstage 1
+
 
 
 

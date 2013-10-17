@@ -203,7 +203,9 @@ c one of i1,i2,i9 must be a gluon;
 
 c User's restrictions to processes;
 c do only mu+ e
-c      if(id1.ne.14.or.id2.ne.11) return
+      if(powheginput("#e+mu-").eq.1) then
+         if(ida1.ne.-11.or.id2.ne.13) return
+      endif
 c End User's restrictions to processes
       idw1=24
       idw2=-24

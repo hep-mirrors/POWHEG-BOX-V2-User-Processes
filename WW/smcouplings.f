@@ -62,6 +62,8 @@ c
       write(*,*) ' 1/alpha',1/ph_alphaem
       write(*,*) ' W width',ph_Wwidth
       write(*,*) ' Z width',ph_Zwidth
+      write(*,*) ' Wbranch lep ', 3/(3+3*2*(1+ph_deltas))
+      write(*,*) ' Wbranch had ', 1-3/(3+3*2*(1+ph_deltas))
 
       ph_ZmZw = ph_Zmass * ph_Zwidth
       ph_unit_e = sqrt(4*pi*ph_alphaem)
