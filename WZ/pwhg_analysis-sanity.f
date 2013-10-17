@@ -272,6 +272,9 @@ c     1     .and.  .not.(isnu(idhep(lep2)))
 c     2     ) then 
       call getyetaptmass(plep2+palp2,y,eta,pt,m)
       mmin = min(m,mmin) 
+
+      if(m.lt.30) return
+
       mm2 = m
 c      endif
 c      if (idhep(lep1)+idhep(alp2).eq.0
@@ -286,6 +289,7 @@ c     2     ) then
       call getyetaptmass(plep2+palp1,y,eta,pt,m)
       mmin = min(m,mmin) 
 c      endif
+
 
 
 

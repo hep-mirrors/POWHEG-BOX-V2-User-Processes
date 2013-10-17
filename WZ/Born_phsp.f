@@ -17,7 +17,7 @@
       double precision p12(4),p34(4),p56(4)
       double precision wt
       double precision m34,m56,smin,smax,s,z
-      double precision xmin,taumin,tauw,sqrts
+      double precision xmin,taumin,tauw,sqrts,mwl,mwh
       integer i,k
       real * 8 powheginput
       external powheginput
@@ -29,7 +29,7 @@
 
       double precision lntaum,lntauw,ymax,ycm
       logical oldmap
-      save oldmap
+      save oldmap,mwl,mwh
 
       if (debug)  write(*,*) 'Entering Born_phsp: ndiminteg', ndiminteg
       if(ini) then
@@ -38,9 +38,11 @@
          enddo
          kn_masses(nlegreal)=0
          mllminz=0.1d0
+         mwl = ph_wmass - 4d0*ph_wwidth 
+         mwh = ph_wmass + 4d0*ph_wwidth 
+         oldmap = .false.
+         if(powheginput("#oldmap").eq.1) oldmap = .true.
          ini=.false.
-         oldmap = .true.
-         if(powheginput("#oldmap").eq.0) oldmap = .false.
       endif
 
 C     
@@ -75,14 +77,41 @@ c 2 pi
          tau = dexp(lntaum*(1d0-xborn(9)))
          xjac = xjac*(-lntaum*tau)
       else
-         z = xborn(9)
          smin = (m34+m56)**2
          smax = kn_sbeams
-         call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
-c jacobian from z to s (i.e. ds = wt dz)
+         if (smin .gt. mwh) then 
+            z = xborn(9)
+            call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
+         elseif (smin .gt. mwl) then 
+            if(xborn(9).lt.0.5d0) then
+               z = 2*xborn(9)
+               xjac= xjac*2
+               call breitw(z,smin,mwh,ph_wmass,ph_wwidth,s,wt)
+            else
+               z = 2*(xborn(9)-0.5d0)
+               xjac= xjac*2
+               call breitw(z,mwh,kn_sbeams,ph_wmass,ph_wwidth,s,wt)
+            endif
+         else
+c     smin< Mwl
+            if(xborn(9).lt.0.25d0) then
+               z = 4*xborn(9)
+               xjac= xjac*4
+               call breitw(z,smin,mwl,ph_wmass,ph_wwidth,s,wt)
+            elseif(xborn(9).lt.0.75d0) then
+               z = 2*(xborn(9)-0.25d0)
+               xjac= xjac*2
+               call breitw(z,mwl,mwh,ph_wmass,ph_wwidth,s,wt)
+            else
+               z = 4*(xborn(9)-0.75d0)
+               xjac= xjac*4
+               call breitw(z,mwh,smax,ph_wmass,ph_wwidth,s,wt)
+            endif
+         endif
+c     jacobian from z to s (i.e. ds = wt dz)
          xjac = xjac*wt
          tau = s/kn_sbeams
-c jacobian from s to tau (d tau = ds/kn_sbeams
+c     jacobian from s to tau (d tau = ds/kn_sbeams
          xjac = xjac/kn_sbeams
       endif
 
