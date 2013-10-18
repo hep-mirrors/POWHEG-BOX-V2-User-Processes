@@ -23,12 +23,14 @@
       logical debug,ini
       data ini/.true./
       data debug/.false./
-      real * 8 mllminz
-      save ini,mllminz
+      real * 8 mllminz,gamcut
+      save ini,mllminz,gamcut
 
       double precision lntaum,lntauw,ymax,ycm
       logical oldmap
       save oldmap,mwl,mwh
+      logical needsmllmin
+      common/cneedsmllmin/needsmllmin
 
       if (debug)  write(*,*) 'Entering Born_phsp: ndiminteg', ndiminteg
       if(ini) then
@@ -37,6 +39,15 @@
          enddo
          kn_masses(nlegreal)=0
          mllminz=0.1d0
+         if(needsmllmin) then
+            gamcut = powheginput("#mllmin")
+            if(gamcut.le.0) then
+               write(*,*)
+     1              ' You have the Z decaying into charged particles',
+     2              ' you must set mllmin > 0 !!!! '
+               call pwhg_exit(-1)
+            endif
+         endif
          mwl = ph_wmass - 4d0*ph_wwidth 
          mwh = ph_wmass + 4d0*ph_wwidth 
          oldmap = .false.
@@ -55,7 +66,12 @@ c     First determine virtualities of lepton pairs
       xjac=2*xborn(1)
 c breitw, if zerowidth is true, does the right thing
 c TM here there different min for the W mll 
-      call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      if(needsmllmin) then
+         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
+     1        gamcut,1d0,s,wt)
+      else
+         call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      endif
 c wt is the Jacobian from z to s; we do ds/(2 pi), so provide
 c 2 pi
       xjac=xjac*wt/(2*pi)
@@ -78,7 +94,10 @@ c 2 pi
          smin = (m34+m56)**2
          smax = kn_sbeams
          z = xborn(9)
-         call breitplusgam(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
+c use breit plus gamma importance sampling, even if it is a W;
+c in decaying into gamma*+W it needs that
+         call breitplusgam(z,smin,smax,ph_wmass,ph_wwidth,ph_wmass,
+     1        5*ph_wmass/ph_wwidth,s,wt)
 c     jacobian from z to s (i.e. ds = wt dz)
          xjac = xjac*wt
          tau = s/kn_sbeams

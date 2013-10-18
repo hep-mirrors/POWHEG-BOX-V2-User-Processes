@@ -18,12 +18,16 @@
       integer ckmint, srint
       include 'cvecbos.h'
       include 'vvsettings.f'
-      
-c      par_isrtinycsi = 0
-c      par_isrtinyy = 0
-c      par_fsrtinycsi = 0
-c      par_fsrtinyy = 0
+      logical needsmllmin
+      common/cneedsmllmin/needsmllmin
+c This will be set to true if there are processes with Z->charged particles
+      needsmllmin = .false.
 
+c     par_isrtinycsi = 0
+c     par_isrtinyy = 0
+c     par_fsrtinycsi = 0
+c     par_fsrtinyy = 0
+      
       if (powheginput("#zerowidth").eq.1) then 
          zerowidth = .true. 
          write(*,*) 'Zerowidth approximation' 
@@ -189,6 +193,8 @@ c idw: W id, returns 0 if not allowed
       logical isquark,islepton,isnu,isewup
       integer ewgeneration
       real * 8 powheginput
+      logical needsmllmin
+      common/cneedsmllmin/needsmllmin
 c idw=0: not allowed
       idw = 0
       if(.not.(isquark(idfw).or.islepton(idfw).or.isnu(idfw))) return
@@ -284,5 +290,11 @@ c End User's restrictions to processes
       else
          idw=-24
       endif
+
+c if there are charge particles in Z decays check the flag
+      if(.not.isnu(idfz)) then
+         needsmllmin = .true.
+      endif
+
       end
 

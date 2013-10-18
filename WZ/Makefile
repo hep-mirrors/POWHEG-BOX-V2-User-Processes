@@ -114,8 +114,8 @@ endif
 
 USER=init_couplings.o smcouplings.o init_processes.o Born_phsp.o Born.o \
      suppfact2e.o virtual.o cpropfac.o real.o phi1_2.o phi3m0.o boost.o \
-     breit.o couplz.o qqb_wz.o amps_anom.o spinoru.o a6tree.o t.o \
-     qqb_wz_v.o lnrat.o fa.o vpole.o a6loop.o lfunctions.o L34_12.o \
+     breit.o breitplusgam.o couplz.o qqb_wz.o amps_anom.o spinoru.o a6tree.o \
+     t.o qqb_wz_v.o lnrat.o fa.o vpole.o a6loop.o lfunctions.o L34_12.o \
      i3m.o dclaus.o BigT.o qqb_wz_g.o wzamps.o a7tree.o \
      b7tree.o setckmmatrix.o setanomcoup.o $(PWHGANAL)
 
