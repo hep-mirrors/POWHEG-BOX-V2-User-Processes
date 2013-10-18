@@ -9,7 +9,6 @@
       include 'vvsettings.f'
       real * 8 xborn(ndiminteg-3)
       real * 8 xjac,tau,beta,vec(3)
-
       integer mu
       double precision p1(4),p2(4),p3(4),p4(4),p5(4),p6(4)
       double precision p(4,6)
@@ -50,26 +49,25 @@ C
       sqrts = sqrt(kn_sbeams)
       xjac=1
 c     First determine virtualities of lepton pairs
-      smin=0d0
+      smin=mllminz**2
       smax=(sqrts-mllminz)**2
       z=xborn(1)**2
       xjac=2*xborn(1)
 c breitw, if zerowidth is true, does the right thing
 c TM here there different min for the W mll 
-      call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
-!      call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
 c wt is the Jacobian from z to s; we do ds/(2 pi), so provide
 c 2 pi
       xjac=xjac*wt/(2*pi)
-      m34=sqrt(s)
-      smin=mllminz**2
-      smax=(sqrts-m34)**2
+      m56=sqrt(s)
+      smin=0
+      smax=(sqrts-m56)**2
       z=xborn(2)**4
       xjac=xjac*4*xborn(2)**3
 
-      call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
       xjac=xjac*wt/(2*pi)
-      m56=sqrt(s)
+      m34=sqrt(s)
 
       if(oldmap.or.zerowidth) then
          taumin = ((m34+m56)/sqrts)**2
@@ -79,35 +77,8 @@ c 2 pi
       else
          smin = (m34+m56)**2
          smax = kn_sbeams
-         if (smin .gt. mwh) then 
-            z = xborn(9)
-            call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
-         elseif (smin .gt. mwl) then 
-            if(xborn(9).lt.0.5d0) then
-               z = 2*xborn(9)
-               xjac= xjac*2
-               call breitw(z,smin,mwh,ph_wmass,ph_wwidth,s,wt)
-            else
-               z = 2*(xborn(9)-0.5d0)
-               xjac= xjac*2
-               call breitw(z,mwh,kn_sbeams,ph_wmass,ph_wwidth,s,wt)
-            endif
-         else
-c     smin< Mwl
-            if(xborn(9).lt.0.25d0) then
-               z = 4*xborn(9)
-               xjac= xjac*4
-               call breitw(z,smin,mwl,ph_wmass,ph_wwidth,s,wt)
-            elseif(xborn(9).lt.0.75d0) then
-               z = 2*(xborn(9)-0.25d0)
-               xjac= xjac*2
-               call breitw(z,mwl,mwh,ph_wmass,ph_wwidth,s,wt)
-            else
-               z = 4*(xborn(9)-0.75d0)
-               xjac= xjac*4
-               call breitw(z,mwh,smax,ph_wmass,ph_wwidth,s,wt)
-            endif
-         endif
+         z = xborn(9)
+         call breitplusgam(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
 c     jacobian from z to s (i.e. ds = wt dz)
          xjac = xjac*wt
          tau = s/kn_sbeams
