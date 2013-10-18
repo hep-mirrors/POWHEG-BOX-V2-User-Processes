@@ -283,7 +283,16 @@ c User's can easily add their own case.
          if(.not.islepton(idfz)) return
          if(.not.(islepton(idfw).or.isnu(idfw))) return
       endif
+c Enter here more conditions if you need them; recall that:
+c idfz is the particle decay product of the Z (i.e. 11 for electron, etc.
+c and idfz>0), and idfw is the particle decay product of the W
+c (i.e. 1,3,11,13,15 for W-, and 2,4,12,14,16 for W+), while
+c idaw is the flavour of the antifermion in the W decay
+c (i.e. -2,-4,-12,-14,-16 for W-, and  -1,-3,-11,-13,-15 for W+).
+
 c End User's restrictions to processes
+
+
 
       if(wch3.gt.0) then
          idw=24

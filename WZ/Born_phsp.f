@@ -27,8 +27,7 @@
       save ini,mllminz,gamcut
 
       double precision lntaum,lntauw,ymax,ycm
-      logical oldmap
-      save oldmap,mwl,mwh
+      save mwl,mwh
       logical needsmllmin
       common/cneedsmllmin/needsmllmin
 
@@ -39,6 +38,7 @@
          enddo
          kn_masses(nlegreal)=0
          mllminz=0.1d0
+         gamcut = 0
          if(needsmllmin) then
             gamcut = powheginput("#mllmin")
             if(gamcut.le.0) then
@@ -50,8 +50,6 @@
          endif
          mwl = ph_wmass - 4d0*ph_wwidth 
          mwh = ph_wmass + 4d0*ph_wwidth 
-         oldmap = .false.
-         if(powheginput("#oldmap").eq.1) oldmap = .true.
          ini=.false.
       endif
 
@@ -66,7 +64,7 @@ c     First determine virtualities of lepton pairs
       xjac=2*xborn(1)
 c breitw, if zerowidth is true, does the right thing
 c TM here there different min for the W mll 
-      if(needsmllmin.and..not.zerowidth.and..not.oldmap) then
+      if(needsmllmin.and..not.zerowidth) then
          call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
      1        gamcut,1d0,s,wt)
       else
@@ -81,7 +79,7 @@ c 2 pi
       z=xborn(2)**4
       xjac=xjac*4*xborn(2)**3
 
-      if(needsmllmin.and..not.zerowidth.and..not.oldmap) then
+      if(needsmllmin.and..not.zerowidth) then
          call breitplusgam(z,smin,smax,ph_wmass,ph_wwidth,
      1        ph_wmass,1d0,s,wt)
       else
@@ -90,7 +88,7 @@ c 2 pi
       xjac=xjac*wt/(2*pi)
       m34=sqrt(s)
 
-      if(oldmap.or.zerowidth) then
+      if(zerowidth) then
          taumin = ((m34+m56)/sqrts)**2
          lntaum = dlog(taumin)
          tau = dexp(lntaum*(1d0-xborn(9)))
@@ -118,18 +116,6 @@ c     jacobian from s to tau (d tau = ds/kn_sbeams
       xx(1)=sqrt(tau)*exp(ycm)
       xx(2)=tau/xx(1)
 
-      if (xborn(10) .eq. 0d0) then 
-         write(*,*) 'xborn(10).eq 0: xborn',xborn
-      endif
-
-c---if x's out of normal range abort
-c      if   ((xx(1) .gt. 1d0)
-c     & .or. (xx(2) .gt. 1d0)
-c     & .or. (xx(1) .lt. xmin)
-c     & .or. (xx(2) .lt. xmin)) then
-c         write(*,*) ' error in Born phase space!, x1,x2 our of range'
-c         call exit(-1)
-c      endif
 
 C     NB positive energy even if incoming, i.e. p1+p2 = \sum_3^8 p_i   
 c     pos rapidity
@@ -148,14 +134,11 @@ C     total incoming momentum
       p12 = p1+p2 
 
 
-      if(oldmap) then
-         z = xborn(3)
-      else
 c this map from 0 to 1 has vanishing derivatives in 0 and 1
 c (needs some importance sampling for costh near -1 and 1
-         z = 3*xborn(3)**2-2*xborn(3)**3
-         xjac = xjac*6*xborn(3)*(1-xborn(3))
-      endif
+      z = 3*xborn(3)**2-2*xborn(3)**3
+      xjac = xjac*6*xborn(3)*(1-xborn(3))
+
       call phi1_2(z,xborn(4),p12,p34,p56,m34,m56,wt)
       xjac=xjac*wt
       call phi3m0(xborn(7),xborn(8),p34,p3,p4,wt)
