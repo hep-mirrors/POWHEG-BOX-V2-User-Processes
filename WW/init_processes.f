@@ -202,10 +202,44 @@ c one of i1,i2,i9 must be a gluon;
       if(id1.eq.6.or.id2.eq.6.or.ida1.eq.-6.or.ida2.eq.-6) return
 
 c User's restrictions to processes;
+c do only e+e-
+      if(powheginput("#e+e-").eq.1) then
+         if(ida1.ne.-11.or.id2.ne.11) return
+      endif
+c do only e+e-
+      if(powheginput("#mu+mu-").eq.1) then
+         if(ida1.ne.-13.or.id2.ne.13) return
+      endif
+c do only tau+tau-
+      if(powheginput("#tau+tau-").eq.1) then
+         if(ida1.ne.-15.or.id2.ne.15) return
+      endif
+c do fully leptonic 
+      if(powheginput("#leptonic").eq.1) then
+         if(.not.(islepton(ida1).and.islepton(id2))) return
+      endif
+c do fully hadronic
+      if(powheginput("#hadronic").eq.1) then
+         if(.not.(isquark(ida1).and.isquark(id2))) return
+      endif
+c do fully semi-leptonic
+      if(powheginput("#semileptonic").eq.1) then
+         if(.not.((islepton(ida1).and.isquark(id2)) .or. 
+     1 (islepton(id2).and.isquark(ida1)))) return
+      endif
+
 c do only mu+ e
       if(powheginput("#e+mu-").eq.1) then
          if(ida1.ne.-11.or.id2.ne.13) return
       endif
+c Enter here more conditions if you need them; recall that:
+c id1 and ida1 are the particle and antiparticle decay products
+c of the W+; thus, for leptons, id1 is a neutrino, ida1 is an antilepton;
+c for hadrons: id1 is a u/c quark, ida1 is a dbar/sbar;
+c id2 and ida2 are the particle and antiparticle decay products
+c of the W-; thus, for leptons, id2 is a lepton, ida2 is an antineutrino
+c for hadrons: id2 is a d/s quark, ida2 is a ubar/cbar;
+
 c End User's restrictions to processes
       idw1=24
       idw2=-24

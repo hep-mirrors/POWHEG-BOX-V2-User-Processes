@@ -1,9 +1,9 @@
-<TeXmacs|1.0.7.3>
+<TeXmacs|1.0.7.14>
 
 <style|article>
 
 <\body>
-  <doc-data|<doc-title|The POWHEG-BOX-WW manual>|>
+  <doc-data|<doc-title|The POWHEG-BOX-V2/WW manual>|>
 
   <section|Introduction>
 
@@ -11,137 +11,116 @@
   production of <math|W<with|math-level|2|<rsup|+>>
   W<rsup|<with|math-level|1|->>> events in hadronic collisions, with the
   <math|W>-bosons decaying into leptons or hadrons, to NLO accuracy in QCD,
-  in such a way that matching with a full shower program is possible. In case
-  of decays into hadrons, NLO corrections to the decay processes are not
+  in such a way that matching with a shower program is possible. In case of
+  decays into hadrons, NLO corrections to the decay processes are not
   included. This is unlikely to be necessary: most shower Monte Carlo do
   already a good job in dressing the <math|W> decay with QCD radiation, since
-  they have been fit to LEP2 data.
+  <math|W> hadronic decays have been fit to LEP2 data.
 
-  This generator is based upon the calculation of refs. <cite|Dixon:1998py>,
+  This generator is based upon the calculations of refs. <cite|Dixon:1998py>,
   <cite|Campbell:1999ah>, <cite|Campbell:2011bn>. The effect of off-shell
-  singly resonant graphs is fully included in the calculation. Anomalous
-  coupling can also be included.\ 
+  singly resonant graphs is fully included. The CKM matrix is by default the
+  Cabibbo matrix. Anomalous coupling can also be included.
 
-  \ If the <math|W >-bosons decay into a leptons of the same flavour (e.g.
-  <math|e<rsup|+> e<rsup|->>), then the <math|ZZ > production of this signal
-  should be considered separately using the POWHEG-BOX-ZZ program.
-  Interference between these two process is negligible (see <cite|noi>) and
-  is not included. \ This document describes the input parameters that are
-  specific to this implementation. The parameters that are common to all
+  \ If the <math|W>-bosons decay into leptons of the same flavour (e.g.
+  <math|e<rsup|+> e<rsup|->\<nu\><rsub|e><wide|\<nu\>|\<bar\>><rsub|e>>),
+  then the <math|ZZ > production of this signal should be considered
+  separately using the POWHEG-BOX-V2/ZZ program. Interference between these
+  two processes is negligible (see <cite|noi>) and is not included. \ This
+  document describes the input parameters that are specific to this
+  implementation. The parameters that are common to all
   <with|font-family|tt|POWHEG BOX> implementation are given in the
-  <with|font-family|tt|manual-BOX.pdf> document, in the
-  <with|font-family|tt|POWHEG-BOX/Docs> directory.
+  <with|font-family|tt|POWHEG-BOX-V2/Docs> directory. The
+  <with|font-family|tt|V2> version of the <math|W W> process has been built
+  by extending the <verbatim|V1> version, allowing for the possibility of all
+  decays, that can now be generated in a single run.
 
   <section|Generation of events>
 
-  Do<next-line><with|font-family|tt|$ cd POWHEG-BOX/WW><next-line><with|font-family|tt|$
-  make pwhg_main><next-line>Then do (for example)<next-line><with|font-family|tt|$
+  In the <math|W W> directory do<next-line><with|font-family|tt|$ make
+  pwhg_main><next-line>Then do (for example)<next-line><with|font-family|tt|$
   cd test><next-line><with|font-family|tt|$ ../pwhg_main><next-line>At the
   end of the run, the file <with|font-family|tt|pwgevents.lhe> will contain
   events for <math|W >-pair production in the Les Houches format. In order to
   shower them with <with|font-family|tt|PYTHIA>:<next-line><with|font-family|tt|$
-  cd POWHEG-BOX/WW><next-line><with|font-family|tt|$ make
-  main-PYTHIA-lhef><next-line><with|font-family|tt|$ cd
+  make main-PYTHIA-lhef><next-line><with|font-family|tt|$ cd
   test><next-line><with|font-family|tt|$ ../main-PYTHIA-lhef>
 
   <section|Input parameters>
 
   Parameters in <with|font-family|tt|powheg.input> that are specific to
-  <math|W W> pair production:<next-line><with|font-family|tt|vdecaymodeWp -11
-  \ \ \ ! decay mode of W+ (-1=dbar, -3=sbar, -7=dbar or sbar,<next-line>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -11=e+, -13=mu+,
-  -15=tau+.)><next-line><with|font-family|tt|vdecaymodeWm 13 \ \ \ \ ! decay
-  mode \ of W- (1=d, 3=s, 7=d or s, <next-line>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 11=e-,13=mu-,15=tau-.)><with|font-family|tt|<next-line><with|font-family|tt|dronly
-  \ \ \ \ \ \ 0 \ \ \ \ \ ! (default 0), if 1 include only double<next-line>
+  <math|W W> pair production:<with|font-family|tt|
+  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ! dronly \ \ \ \ \ \ 0 \ \ \ \ \ !
+  (default 0), if 1 include only double<next-line>
   \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ! resonant
-  contributions><next-line>zerowidth \ \ \ 0 \ \ \ \ \ ! (default 0), if 1
-  use on-shell <with|mode|math|W>-bosons only>
-  <next-line><with|font-family|tt|runningwidth 0 \ \ \ \ \ ! (default 0), if
-  1 use running width> \ \ <next-line><with|font-family|tt|fixedscale \ \ -1
-  \ \ \ \ ! (default -1) if \<gtr\>= 0, use fixed scale mu = M_W
-  \ \ \ \ \ \ \ \ ><with|font-family|tt|btlscalereal 0 \ \ \ \ \ ! (default
-  0) if 1, changes scale for real emission>
-  <next-line><with|font-family|tt|btlscalect \ \ 0 \ \ \ \ \ ! (default 0) if
-  1, sets scale in counterterm<next-line>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ! \ same as Born scale>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <next-line><with|font-family|tt|withdamp
-  \ \ \ \ 1 \ \ \ \ \ ! (default 1) use Born-zero damping factor >
-
-  \;
-
-  The CKM matrix is assumed diagonal. As an
-  example<next-line><with|font-family|tt|vdecaymodeWp -7 \ \ \ \ ! decay mode
-  of W+ (-1=dbar, -3=sbar, -7=dbar or sbar,<next-line>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -11=e+, -13=mu+,
-  -15=tau+.)><next-line><with|font-family|tt|vdecaymodeWm 13 \ \ \ \ ! decay
-  mode \ of W- (1=d, 3=s, 7=d or s, <next-line>
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !
-  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 11=e-,13=mu-,15=tau-.)><next-line>is
-  the semileptonic decay <math|\<mu\> <wide|\<nu\>|\<bar\>><rsub|><rsub|\<mu\>>
-  + hadrons>.
-
-  \;
-
-  If <with|font-family|tt|zerowidth> is absent or equal to zero, the
+  contributions<next-line>zerowidth \ \ \ 0 \ \ \ \ \ ! (default 0), if 1 use
+  on-shell <math|W>-bosons only> <next-line><with|font-family|tt|runningwidth
+  0 \ \ \ \ \ ! (default 0), if 1 use running width>
+  \ \ <next-line><with|font-family|tt|fixedscale \ \ 0 \ \ \ \ \ ! (default
+  0) if 1 use fixed scale mu = M_W><next-line>If
+  <with|font-family|tt|zerowidth> is absent or equal to zero, the
   <math|W>-boson's are given finite width. Singly resonant graphs are also
   included by default, unless the <with|font-family|tt|dronly> flag is set to
   1. If zerowidth is set to true, dronly is set to true regardless of what is
   in the powheg.input file. Dynamic widths can be used by setting the
-  <with|font-family|tt|runningwidth> flag to 1. As a consequence of the
-  unitarity property of the CKM matrix, using PDG values for this matrix
-  gives the same result as setting it to a diagonal matrix. For convenience,
-  a diagonal CKM matrix is used. Seven anomalous couplings are used:
-  <with|font-family|tt|delg1_z>, <with|font-family|tt|de1g1_g>,
+  <with|font-family|tt|runningwidth> flag to 1. Seven anomalous couplings are
+  used: <with|font-family|tt|delg1_z>, <with|font-family|tt|de1g1_g>,
   <with|font-family|tt|lambda_z>, <with|font-family|tt|lambda_g>,
   <with|font-family|tt|delk_g>, <with|font-family|tt|delk_z>,
   <with|font-family|tt|tevscale> (see section 3.2 of <cite|noi> and
   references therein for a definition of these). These are set to 0 by
   default, unless a non zero value is given in the
-  <strong|><with|font-family|tt|powheg.input> file. Note that in POWHEG,
-  these couplings are independent of one another. If there are any relations
-  (e.g. due to symmetry considerations) between couplings, these should be
-  calculated independently and the input set accordingly.
+  <strong|><with|font-family|tt|powheg.input> file. Note that in
+  <with|font-family|tt|POWHEG>, these couplings are independent of one
+  another. If there are any relations (e.g. due to symmetry considerations)
+  between couplings, these should be calculated independently and the input
+  set accordingly.
 
-  If the flag <with|font-family|tt|fixedscale> is set greater than or equal
-  to 0, then the factorization and renormalization scales are fixed at
-  <with|mode|math|M<rsub|W>> <with|mode|math|>. Otherwise, a dynamic scale of
-  the mass of the <math|><with|mode|math|><with|mode|math|W>-boson pair will
-  be used. If the flag <with|font-family|tt|btlscalereal> is set to 1, then
-  the real contribution will be calculated using the transverse momentum of
-  the hardest jet as a scale.
+  If the flag <with|font-family|tt|fixedscale> is set equal to 1, then the
+  factorization and renormalization scales are fixed at <math|M<rsub|W>>.
+  Otherwise, a dynamic scale of the mass of the <math|W>-boson pair will be
+  used.
 
-  It is also necessary to employ a Born-zero damping factor, to prevent
-  enhancement of the NLO due to small Born terms. For this reason, the flag
-  <with|font-family|tt|withdamp> should be set to 1. For further details, see
-  appendix B of Ref. <cite|noi>.
+  Several decay modes can be selected by an approriate flag in the
+  <with|font-family|tt|powheg.input> file:<next-line><with|font-family|tt|semileptonic
+  1 ! one W goes to hadrons, one goes to leptons><next-line><with|font-family|tt|e+e-
+  1 \ \ \ \ \ \ \ \ ! only electrons><next-line><with|font-family|tt|mu+mu- 1
+  \ \ \ \ \ \ ! only muons><next-line><with|font-family|tt|tau+tau- 1
+  \ \ \ \ ! only taus><next-line><with|font-family|tt|leptonic 1 \ \ \ \ !
+  both W's go into leptons><next-line><with|font-family|tt|hadronic 1
+  \ \ \ \ ! both W's go into hadrons><next-line><next-line>More conditions
+  can be easily added, by editing the <with|font-family|tt|alloweddec>
+  function in the <with|font-family|tt|init_processes.f> file. Notice that
+  conditions must all be fulfilled. If no conditions are specified, you get
+  all possible decays.<no-indent*>
 
   <\bibliography|bib|JHEP|paper.bib>
     <\bib-list|1>
       <bibitem*|1><label|bib-noi>T.<nbsp>Melia, P.<nbsp>Nason,
-      R.<nbsp>Rontsch, and G.<nbsp>Zanderighi.
+      R.<nbsp>Rontsch, and G.<nbsp>Zanderighi, <with|font-shape|italic|W+W-,
+      WZ and ZZ production in the POWHEG BOX>, <with|font-shape|italic|JHEP>
+      <with|font-series|bold|1111> (2011) 078,
+      [<hlink|<with|font-family|tt|1107.5051>|http://xxx.lanl.gov/abs/1107.5051>].
 
       <bibitem*|2><label|bib-Dixon:1998py>L.<nbsp>J. Dixon, Z.<nbsp>Kunszt,
       and A.<nbsp>Signer, <with|font-shape|italic|Helicity amplitudes for
-      O(alpha-s) production of <math|W<rsup|+>W<rsup|->>,
-      <math|W<rsup|\<pm\>>Z>, <math|Z*Z>, <math|W<rsup|\<pm\>>\<gamma\>>, or
-      <math|Z\<gamma\>> pairs at hadron colliders>,
+      O(alpha-s) production of <math|W<rsup|+>*W<rsup|->>,
+      <math|W<rsup|\<pm\>>*Z>, <math|Z*Z>, <math|W<rsup|\<pm\>>*\<gamma\>>,
+      or <math|Z*\<gamma\>> pairs at hadron colliders>,
       <with|font-shape|italic|Nucl.Phys.> <with|font-series|bold|B531> (1998)
       3--23, [<hlink|<with|font-family|tt|hep-ph/9803250>|http://xxx.lanl.gov/abs/hep-ph/9803250>].
 
       <bibitem*|3><label|bib-Campbell:1999ah>J.<nbsp>M. Campbell and
-      R.<nbsp>Ellis, <with|font-shape|italic|An Update on vector boson pair
-      production at hadron colliders>, <with|font-shape|italic|Phys.Rev.>
-      <with|font-series|bold|D60> (1999) 113006,
-      [<hlink|<with|font-family|tt|hep-ph/9905386>|http://xxx.lanl.gov/abs/hep-ph/9905386>].
+      R.<nbsp>K. Ellis, <with|font-shape|italic|An Update on vector boson
+      pair production at hadron colliders>,
+      <with|font-shape|italic|Phys.Rev.> <with|font-series|bold|D60> (1999)
+      113006, [<hlink|<with|font-family|tt|hep-ph/9905386>|http://xxx.lanl.gov/abs/hep-ph/9905386>].
 
-      <bibitem*|4><label|bib-Campbell:2011bn>J.<nbsp>M. Campbell,
-      R.<nbsp>Ellis, and C.<nbsp>Williams, <with|font-shape|italic|Vector
-      boson pair production at the LHC>, <hlink|<with|font-family|tt|arXiv:1105.0020>|http://xxx.lanl.gov/abs/arXiv:1105.0020>.
-      * Temporary entry *.
+      <bibitem*|4><label|bib-Campbell:2011bn>J.<nbsp>M. Campbell, R.<nbsp>K.
+      Ellis, and C.<nbsp>Williams, <with|font-shape|italic|Vector boson pair
+      production at the LHC>, <with|font-shape|italic|JHEP>
+      <with|font-series|bold|1107> (2011) 018,
+      [<hlink|<with|font-family|tt|1105.0020>|http://xxx.lanl.gov/abs/1105.0020>].
     </bib-list>
   </bibliography>
 </body>

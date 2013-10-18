@@ -252,20 +252,18 @@ c      endif
       logical fixedscale
       save fixedscale,ini
       if (ini) then
-
-         if (powheginput("#fixedscale").lt.0) then
-
-             write(*,*) '*************************************'
-            write(*,*) '    Factorization and renormalization'
-            write(*,*) '    Scales mur=muf=M(WW)               '
-            write(*,*) '*************************************'
-            fixedscale=.false.
-         else
+         if (powheginput("#fixedscale").eq.1) then
             write(*,*) '*************************************'
             write(*,*) '    Factorization and renormalization'
             write(*,*) '    Scales mur=muf=MW               '
             write(*,*) '*************************************'
             fixedscale=.true.
+         else
+            write(*,*) '*************************************'
+            write(*,*) '    Factorization and renormalization'
+            write(*,*) '    Scales mur=muf=M(WW)               '
+            write(*,*) '*************************************'
+            fixedscale=.false.
          endif
          ini=.false.
       endif
