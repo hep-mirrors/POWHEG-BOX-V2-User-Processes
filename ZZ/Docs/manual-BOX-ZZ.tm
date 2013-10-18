@@ -1,48 +1,50 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.14>
 
 <style|article>
 
 <\body>
-  <doc-data|<doc-title|The POWHEG-BOX-ZZ manual>|>
+  <doc-data|<doc-title|The POWHEG-BOX-V2 ZZ manual>|>
 
   <section|Introduction>
 
-  The POWHEG-BOX-ZZ program <cite|noi> can be used to generate the QCD
-  production of <math|Z Z> events, with the <math|Z> bosons decaying into
-  leptons, in hadronic collisions, with NLO accuracy in QCD, in such a way
-  that matching with a full shower program is possible. It is based upon the
-  calculation of refs. <cite|Dixon:1998py>, <cite|Campbell:1999ah>,
-  <cite|Campbell:2011bn>. The effect of <math|Z>-<math|\<gamma\>>
-  interference, as well as the effect of off-shell singly resonant graphs,
-  are fully included in the calculation.
+  The <with|font-family|tt|POWHEG-BOX-V2/ZZ> program <cite|noi> can be used
+  to generate the QCD production of <math|Z Z> events in hadronic collisions,
+  with the <math|Z> bosons decaying into leptons, neutrinos or quarks, \ at
+  NLO accuracy in QCD, in such a way that matching with a full shower program
+  is possible. It is based upon the calculation of refs. <cite|Dixon:1998py>,
+  <cite|Campbell:1999ah>, <cite|Campbell:2011bn>. The effect of
+  <math|Z>-<math|\<gamma\>> interference, as well as the effect of off-shell
+  singly resonant graphs, are fully included in the calculation. In case of
+  decays into hadrons, NLO corrections to the decay processes are not
+  included. This is unlikely to be necessary: most shower Monte Carlo do
+  already a good job in dressing the <math|W> decay with QCD radiation, since
+  <math|W> hadronic decays have been fit to LEP2 data.
 
   \ This document describes the input parameters that are specific to this
   implementation. The parameters that are common to all
-  <with|font-family|tt|POWHEG BOX> implementation are given in the
-  <with|font-family|tt|manual-BOX.pdf> document, in the
-  <with|font-family|tt|POWHEG-BOX/Docs> directory.
+  <with|font-family|tt|POWHEG BOX> implementation are given in the manual in
+  the <with|font-family|tt|POWHEG-BOX-V2/Docs> directory.
 
   <section|Generation of events>
 
-  Do<next-line><with|font-family|tt|$ cd POWHEG-BOX/ZZ><next-line><with|font-family|tt|$
+  Do<next-line><with|font-family|tt|$ cd POWHEG-BOX-V2/ZZ><next-line><with|font-family|tt|$
   make pwhg_main><next-line>Then do (for example)<next-line><with|font-family|tt|$
   cd test><next-line><with|font-family|tt|$ ../pwhg_main><next-line>At the
   end of the run, the file <with|font-family|tt|pwgevents.lhe> will contain
   events for <math|Z> pair production in the Les Houches format. In order to
   shower them with <with|font-family|tt|PYTHIA>:<next-line><with|font-family|tt|$
-  cd POWHEG-BOX/ZZ><next-line><with|font-family|tt|$ make
+  cd POWHEG-BOX-V2/ZZ><next-line><with|font-family|tt|$ make
   main-PYTHIA-lhef><next-line><with|font-family|tt|$ cd
   test><next-line><with|font-family|tt|$ ../main-PYTHIA-lhef>
 
   <section|Input parameters>
 
   Parameters in <with|font-family|tt|powheg.input> that are specific to
-  <math|Z Z> pair production:<next-line><with|font-family|tt|semileptonic 1
-  \ \ \ \ \ \ ! one Z goes to hadrons, one goes to
-  leptons><next-line><with|font-family|tt|only-e 1 \ \ \ \ \ \ ! leptons can
-  only be electrons><next-line><with|font-family|tt|only-mu 1 \ \ \ \ \ !
-  leptons can only be muons><next-line><with|font-family|tt|only-tau 1
-  \ \ \ \ ! leptons can only be taus><next-line><with|font-family|tt|e-mu 1
+  <math|Z Z> pair production:<next-line><with|font-family|tt|semileptonic 1 !
+  one Z goes to hadrons, one goes to leptons><next-line><with|font-family|tt|only-e
+  1 \ \ \ \ \ \ ! leptons can only be electrons><next-line><with|font-family|tt|only-mu
+  1 \ \ \ \ \ ! leptons can only be muons><next-line><with|font-family|tt|only-tau
+  1 \ \ \ \ ! leptons can only be taus><next-line><with|font-family|tt|e-mu 1
   \ \ \ \ \ \ \ \ ! one goes into e+e-, one in
   mu+mu-><next-line><with|font-family|tt|e-tau 1 \ \ \ \ \ \ \ ! one goes
   into e+e-, one in tau+tau--><next-line><with|font-family|tt|mu-tau 1
@@ -59,7 +61,8 @@
   decays into four electrons. As another example, if both
   <with|font-family|tt|semileptonic> and <with|font-family|tt|leptonic>
   appear, you get no events. If no conditions are specified, you get all
-  possible decays.<no-indent*>
+  possible decays.<no-indent*> Other options specific of the <math|Z Z>
+  process are
 
   <with|font-family|tt|mllmin 50 \ \ \ \ \ \ \ \ \ \ ! minimum mass of
   charged lepton-antilepton or<next-line>
@@ -78,29 +81,33 @@
   interference is accounted for. Singly resonant graphs are also included by
   default, unless the <with|font-family|tt|dronly> flag is set to 1.
 
-  <\bibliography|bib|tm-plain|paper.bib>
-    <\bib-list|4>
-      <bibitem*|1><label|bib-Campbell:1999ah>John M.<nbsp>Campbell<localize|
-      and >R. Keith<nbsp>Ellis.<newblock> An Update on vector boson pair
-      production at hadron colliders.<newblock>
-      <with|font-shape|italic|Phys.Rev.>, D60:113006, 1999.<newblock>
+  <\bibliography|bib|JHEP|paper.bib>
+    <\bib-list|1>
+      <bibitem*|1><label|bib-noi>T.<nbsp>Melia, P.<nbsp>Nason,
+      R.<nbsp>Rontsch, and G.<nbsp>Zanderighi, <with|font-shape|italic|W+W-,
+      WZ and ZZ production in the POWHEG BOX>, <with|font-shape|italic|JHEP>
+      <with|font-series|bold|1111> (2011) 078,
+      [<hlink|<with|font-family|tt|1107.5051>|http://xxx.lanl.gov/abs/1107.5051>].
 
-      <bibitem*|2><label|bib-Campbell:2011bn>John M.<nbsp>Campbell, R.
-      Keith<nbsp>Ellis<localize| and >Ciaran<nbsp>Williams.<newblock> Vector
-      boson pair production at the LHC.<newblock>
-      <with|font-shape|italic|JHEP>, 1107:18, 2011.<newblock>
-
-      <bibitem*|3><label|bib-Dixon:1998py>Lance J.<nbsp>Dixon,
-      Z.<nbsp>Kunszt<localize| and >A.<nbsp>Signer.<newblock> Helicity
-      amplitudes for O(alpha-s) production of <math|W<rsup|+>*W<rsup|->>,
+      <bibitem*|2><label|bib-Dixon:1998py>L.<nbsp>J. Dixon, Z.<nbsp>Kunszt,
+      and A.<nbsp>Signer, <with|font-shape|italic|Helicity amplitudes for
+      O(alpha-s) production of <math|W<rsup|+>*W<rsup|->>,
       <math|W<rsup|\<pm\>>*Z>, <math|Z*Z>, <math|W<rsup|\<pm\>>*\<gamma\>>,
-      or <math|Z*\<gamma\>> pairs at hadron colliders.<newblock>
-      <with|font-shape|italic|Nucl.Phys.>, B531:3--23, 1998.<newblock>
+      or <math|Z*\<gamma\>> pairs at hadron colliders>,
+      <with|font-shape|italic|Nucl.Phys.> <with|font-series|bold|B531> (1998)
+      3--23, [<hlink|<with|font-family|tt|hep-ph/9803250>|http://xxx.lanl.gov/abs/hep-ph/9803250>].
 
-      <bibitem*|4><label|bib-noi>Tom<nbsp>Melia, Paolo<nbsp>Nason,
-      Raoul<nbsp>Rontsch<localize| and >Giulia<nbsp>Zanderighi.<newblock>
-      W+W-, WZ and ZZ production in the POWHEG BOX.<newblock>
-      <with|font-shape|italic|JHEP>, 1111:78, 2011.<newblock>
+      <bibitem*|3><label|bib-Campbell:1999ah>J.<nbsp>M. Campbell and
+      R.<nbsp>K. Ellis, <with|font-shape|italic|An Update on vector boson
+      pair production at hadron colliders>,
+      <with|font-shape|italic|Phys.Rev.> <with|font-series|bold|D60> (1999)
+      113006, [<hlink|<with|font-family|tt|hep-ph/9905386>|http://xxx.lanl.gov/abs/hep-ph/9905386>].
+
+      <bibitem*|4><label|bib-Campbell:2011bn>J.<nbsp>M. Campbell, R.<nbsp>K.
+      Ellis, and C.<nbsp>Williams, <with|font-shape|italic|Vector boson pair
+      production at the LHC>, <with|font-shape|italic|JHEP>
+      <with|font-series|bold|1107> (2011) 018,
+      [<hlink|<with|font-family|tt|1105.0020>|http://xxx.lanl.gov/abs/1105.0020>].
     </bib-list>
   </bibliography>
 </body>
@@ -130,9 +137,9 @@
     <associate|bib-Alioli:2010xd|<tuple|2|?>>
     <associate|bib-Alwall:2006yp|<tuple|1|5>>
     <associate|bib-Boos:2001cv|<tuple|2|6>>
-    <associate|bib-Campbell:1999ah|<tuple|1|2>>
-    <associate|bib-Campbell:2011bn|<tuple|2|2>>
-    <associate|bib-Dixon:1998py|<tuple|3|2>>
+    <associate|bib-Campbell:1999ah|<tuple|3|2>>
+    <associate|bib-Campbell:2011bn|<tuple|4|2>>
+    <associate|bib-Dixon:1998py|<tuple|2|2>>
     <associate|bib-Frixione:2007nw|<tuple|1|?>>
     <associate|bib-Frixione:2007vw|<tuple|3|?>>
     <associate|bib-Frixione:2007zp|<tuple|3|6>>
@@ -140,7 +147,7 @@
     <associate|bib-Nason:1988xz|<tuple|5|6>>
     <associate|bib-Nason:1989zy|<tuple|6|6>>
     <associate|bib-Nason:2004rx|<tuple|7|6>>
-    <associate|bib-noi|<tuple|4|2>>
+    <associate|bib-noi|<tuple|1|2>>
   </collection>
 </references>
 

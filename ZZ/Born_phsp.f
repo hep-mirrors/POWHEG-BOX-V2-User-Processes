@@ -19,13 +19,14 @@
       double precision m34,m56,smin,smax,s,z
       double precision xmin,taumin,sqrts
       integer i,k
-      real * 8 mllmin34,mllmin56,mllmin
+      real * 8 mllmin34,mllmin56,mllmin,gamcut
       real * 8 powheginput
       external powheginput
       logical debug,ini,pwhg_isfinite
       data ini/.true./
       data debug/.false./
       save ini,mllmin34,mllmin56
+      save gamcut
 
       double precision lntaum,ymax,ycm
 
@@ -50,6 +51,15 @@ c very minimal mllmin; their real value will be achieved by setting
 c kn_jacborn = 0 depending upon the charge of the decay products
          mllmin34=1d-3
          mllmin56=1d-3
+         if(z1_to_ch.or.z2_to_ch) then
+            gamcut = powheginput("#mllmin")
+            if(gamcut.le.0) then
+               write(*,*)
+     1              ' You have the Z decaying into charged particles',
+     2              ' you must set mllmin > 0 !!!! '
+               call pwhg_exit(-1)
+            endif
+         endif
          ini=.false.
       endif
 C     
@@ -62,7 +72,12 @@ c First determine virtualities of lepton pairs
       z=xborn(1)**4
       xjac=xjac*4*xborn(1)**3
 c breitw, if zerowidth is true, does the right thing
-      call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      if(z1_to_ch.and..not.zerowidth) then
+         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
+     1        gamcut,1d0,s,wt)
+      else
+         call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      endif
 c wt is the Jacobian from z to s; we do ds/(2 pi), so provide
 c 2 pi
       xjac=xjac*wt/(2*pi)
@@ -72,14 +87,34 @@ c
       smax=(sqrts-m34)**2
       z=xborn(2)**4
       xjac=xjac*4*xborn(2)**3
-      call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      if(z2_to_ch.and..not.zerowidth) then
+         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
+     1        gamcut,1d0,s,wt)
+      else
+         call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
+      endif
       xjac=xjac*wt/(2*pi)
       m56=sqrt(s)
 
-      taumin = ((m34+m56)/sqrts)**2
-      lntaum = dlog(taumin)
-      tau = dexp(lntaum*(1d0-xborn(9)))
-      xjac = xjac*(-lntaum*tau)
+      if(zerowidth) then
+         taumin = ((m34+m56)/sqrts)**2
+         lntaum = dlog(taumin)
+         tau = dexp(lntaum*(1d0-xborn(9)))
+         xjac = xjac*(-lntaum*tau)
+      else
+         z = xborn(9)
+         smin = (m34+m56)**2
+         smax = kn_sbeams
+c use breit plus gamma importance sampling, even if it is a W;
+c in decaying into gamma*+W it needs that
+         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,ph_zmass,
+     1        5*ph_zmass/ph_zwidth,s,wt)
+c     jacobian from z to s (i.e. ds = wt dz)
+         xjac = xjac*wt
+         tau = s/kn_sbeams
+c     jacobian from s to tau (d tau = ds/kn_sbeams
+         xjac = xjac/kn_sbeams
+      endif
 
       kn_sborn = kn_sbeams*tau
 
@@ -109,7 +144,12 @@ c     neg rapidity
 C     total incoming momentum 
       p12 = p1+p2 
 
-      call phi1_2(xborn(3),xborn(4),p12,p34,p56,m34,m56,wt)
+c this map from 0 to 1 has vanishing derivatives in 0 and 1
+c (needs some importance sampling for costh near -1 and 1
+      z = 3*xborn(3)**2-2*xborn(3)**3
+      xjac = xjac*6*xborn(3)*(1-xborn(3))
+
+      call phi1_2(z,xborn(4),p12,p34,p56,m34,m56,wt)
       xjac=xjac*wt
       call phi3m0(xborn(7),xborn(8),p34,p3,p4,wt)
       xjac=xjac*wt

@@ -19,27 +19,27 @@ lhans2   21100    ! pdf set for hadron 2 (LHA numbering)
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
 
-ncall1   400000   ! number of calls for initializing the integration grid
-itmx1    4        ! number of iterations for initializing the integration grid
-ncall2   1000000  ! number of calls for computing the integral and finding upper bounds
-itmx2    5        ! number of iterations for computing the integral and finding upper bound
+ncall1   30000    ! number of calls for initializing the integration grid
+itmx1    1        ! number of iterations for initializing the integration grid
+ncall2   100000   ! number of calls for computing the integral and finding upper bound
+itmx2    1        ! number of iterations for computing the integral and finding upper bound
 foldcsi   1       ! number of folds on csi integration
 foldy     1       ! number of folds on  y  integration
 foldphi   1       ! number of folds on phi integration
-nubound  1000000  ! number of bbarra calls to setup norm of upper bounding function
+nubound 50000     ! number of bbarra calls to setup norm of upper bounding function
 
 ! OPTIONAL PARAMETERS
 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
-#bornonly   0     ! (default 0) if 1 do Born only
-#testplots  0     ! (default 0, do not) do NLO and PWHG distributions
+#bornonly   0      ! (default 0) if 1 do Born only
+#testplots  0      ! (default 0, do not) do NLO and PWHG distributions
 
 #iseed    12345    ! initialize random number sequence 
 #rand1     -1      ! initialize random number sequence 
 #rand2     -1      ! initialize random number sequence 
 
-#manyseeds  1      ! Used to perform multiple runs with different random
+manyseeds  1       ! Used to perform multiple runs with different random
                    ! seeds in the same directory.
                    ! If set to 1, the program asks for an integer j;
                    ! The file pwgseeds.dat at line j is read, and the
@@ -47,11 +47,10 @@ nubound  1000000  ! number of bbarra calls to setup norm of upper bounding funct
                    ! sequence for the generation of the event.
                    ! The event file is called pwgevents-'j'.lhe
 
+xgriditeration 1
+parallelstage 1
 
 #leptonic 1
-
-
-
 
 #dronly 0           ! default 0; if 1 only double resonant diagrams
 #zerowidth 0        ! default 0 (offshell Zs); if 1 generate Z's on shell

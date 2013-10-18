@@ -31,7 +31,6 @@ endif
 
 ifeq ("$(COMPILER)","ifort")
 F77 = ifort -save  -extend_source
-CXX = icpc
 LIBS = -limf
 #FFLAGS =  -check
 ## For floating point exception trapping  uncomment the following 
@@ -128,7 +127,7 @@ endif
 
 
 USER=init_couplings.o smcouplings.o init_processes.o Born_phsp.o Born.o \
-     virtual.o real.o phi1_2.o phi3m0.o boost.o breit.o \
+     virtual.o real.o phi1_2.o phi3m0.o boost.o breit.o  breitplusgam.o\
      cpropfac.o spinoru.o qqb_zz.o t.o a6tree.o couplz.o vpole.o a6loop.o \
      qqb_zz_v.o lnrat.o fa.o lfunctions.o L34_12.o i3m.o dclaus.o \
      BigT.o qqb_zz_g.o zzamps.o a7tree.o a7treesingres.o zzsingres.o \

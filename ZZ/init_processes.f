@@ -195,7 +195,9 @@ c if they are both of the same EW type, order by increasing id
 
 c Now decay types are ordered: leptons before hadrons, ups before downs,
 c leptons before nus, and everything being equal, by increasing id.
-c Check which decay configurations we want to keep
+/
+c User's restrictions to processes; Below are some examples.
+c User's can easily add their own case.
       if(powheginput("#semileptonic").eq.1.and.
      1     .not.(islepton(id1).and.isquark(id2))) return
       if(powheginput("#e-mu").eq.1.and..not.(id1.eq.11.and.id2.eq.13))
@@ -217,7 +219,15 @@ c Check which decay configurations we want to keep
       if(powheginput("#only-tau").eq.1.and.(id1.ne.15.or.id2.ne.15))
      2     return
 
-c Add here other options at will, if you like;
+c Enter here more conditions if you need them; recall that:
+c id1 is the particle decay product of one Z (i.e. 11 for electron, etc.
+c and id1 > 0), and id2 is the particle decay product of the other Z
+c Notice that the above example use the fact that the decay types are
+c ordered: leptons before hadrons, ups before downs,
+c leptons before nus, and everything being equal, by increasing id.
+c However, for safety one can put conditions that do not assume any ordering.
+
+c End User's restrictions to processes
 
 
       alloweddec = .true.
