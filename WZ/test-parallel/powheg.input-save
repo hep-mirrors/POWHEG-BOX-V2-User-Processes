@@ -1,7 +1,7 @@
-! WZ boson production parameters
-mllmin 20d0         ! default 0.1 GeV this is minimum invar mass for Z leptons
+! WW boson production parameters
 
-numevts 500000   ! number of events to be generated
+
+numevts 500000    ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
 ebeam1 3500d0     ! energy of beam 1
@@ -18,14 +18,18 @@ lhans2   21100    ! pdf set for hadron 2 (LHA numbering)
 ! Parameters to allow or not the use of stored data
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
-ncall1  400000   ! number of calls for initializing the integration grid
-itmx1    4       ! number of iterations for initializing the integration grid
-ncall2   1000000     ! number of calls for computing the integral and finding upper bound
-itmx2    5  ! number of iterations for computing the integral and finding upper bound
-foldcsi   1    ! number of folds on csi integration
-foldy     1     ! number of folds on  y  integration
-foldphi   1      ! number of folds on phi integration
-nubound  1000000    ! number of bbarra calls to setup norm of upper bounding function
+
+ncall1   30000    ! number of calls for initializing the integration grid
+itmx1    1        ! number of iterations for initializing the integration grid
+! This very large number of call is really needed if you need to get
+! correctly the features of single-resonant graphs. Otherwise, a value
+! 5 times smaller is also acceptable. 
+ncall2   100000   ! number of calls for computing the integral and finding upper bound
+itmx2    1        ! number of iterations for computing the integral and finding upper bound
+foldcsi   1       ! number of folds on csi integration
+foldy     1       ! number of folds on  y  integration
+foldphi   1       ! number of folds on phi integration
+nubound 50000     ! number of bbarra calls to setup norm of upper bounding function
 
 ! OPTIONAL PARAMETERS
 
@@ -34,11 +38,11 @@ nubound  1000000    ! number of bbarra calls to setup norm of upper bounding fun
 #bornonly   0      ! (default 0) if 1 do Born only
 #testplots  0      ! (default 0, do not) do NLO and PWHG distributions
 
-#iseed    1234    ! initialize random number sequence 
+#iseed    12345    ! initialize random number sequence 
 #rand1     -1      ! initialize random number sequence 
 #rand2     -1      ! initialize random number sequence 
 
-#manyseeds  1       ! Used to perform multiple runs with different random
+manyseeds  1       ! Used to perform multiple runs with different random
                    ! seeds in the same directory.
                    ! If set to 1, the program asks for an integer j;
                    ! The file pwgseeds.dat at line j is read, and the
@@ -46,12 +50,11 @@ nubound  1000000    ! number of bbarra calls to setup norm of upper bounding fun
                    ! sequence for the generation of the event.
                    ! The event file is called pwgevents-'j'.lhe
 
+xgriditeration 1
+parallelstage 1
+
+
 #e-mumu 1          ! Do only W-> e-nu, Z-> mumu
-
-
-
-
-
 #zerowidth 0         ! if 1 (true) use zero width approximatrion (default 0)
 #withinterference 1  ! if 1 (true) include interference for like flavour charged leptons
 #                    ! (default 1)

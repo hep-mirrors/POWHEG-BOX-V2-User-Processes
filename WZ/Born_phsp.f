@@ -66,7 +66,7 @@ c     First determine virtualities of lepton pairs
       xjac=2*xborn(1)
 c breitw, if zerowidth is true, does the right thing
 c TM here there different min for the W mll 
-      if(needsmllmin) then
+      if(needsmllmin.and..not.zerowidth.and..not.oldmap) then
          call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
      1        gamcut,1d0,s,wt)
       else
@@ -81,7 +81,12 @@ c 2 pi
       z=xborn(2)**4
       xjac=xjac*4*xborn(2)**3
 
-      call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
+      if(needsmllmin.and..not.zerowidth.and..not.oldmap) then
+         call breitplusgam(z,smin,smax,ph_wmass,ph_wwidth,
+     1        ph_wmass,1d0,s,wt)
+      else
+         call breitw(z,smin,smax,ph_wmass,ph_wwidth,s,wt)
+      endif
       xjac=xjac*wt/(2*pi)
       m34=sqrt(s)
 
