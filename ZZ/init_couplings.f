@@ -76,6 +76,7 @@ c     number of light flavors
       include 'qcdcouple.f'
       include 'pwhg_st.h'
       include 'pwhg_math.h'
+      include 'pwhg_flg.h'
       include 'pwhg_physpar.h'
       include 'cvecbos.h'
       include 'vvsettings.f'
@@ -141,7 +142,7 @@ c     number of light flavors
       if(.not.isnu(id1)) then
          m1=sqrt(kn_cmpborn(0,3)**2-kn_cmpborn(1,3)**2
      1        -kn_cmpborn(2,3)**2-kn_cmpborn(3,3)**2)
-         if(m1.lt.mllmin) then
+         if(m1.lt.mllmin.and..not.flg_in_smartsig) then
             normbr = 0
          endif
       endif
@@ -149,7 +150,7 @@ c     number of light flavors
       if(.not.isnu(id2)) then
          m2=sqrt(kn_cmpborn(0,4)**2-kn_cmpborn(1,4)**2
      1        -kn_cmpborn(2,4)**2-kn_cmpborn(3,4)**2)
-         if(m2.lt.mllmin) then
+         if(m2.lt.mllmin.and..not.flg_in_smartsig) then
             normbr = 0
          endif
       endif
@@ -173,7 +174,7 @@ c impose mllmin cut also upon the crossed pairs
      2           (kn_cmpborn(1,6)+kn_cmpborn(1,7))**2-
      3           (kn_cmpborn(2,6)+kn_cmpborn(2,7))**2-
      4           (kn_cmpborn(3,6)+kn_cmpborn(3,7))**2  )
-            if(min(m1,m2).lt.mllmin) then
+            if(min(m1,m2).lt.mllmin.and..not.flg_in_smartsig) then
                normbr = 0
             endif
          endif

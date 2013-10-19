@@ -195,7 +195,7 @@ c if they are both of the same EW type, order by increasing id
 
 c Now decay types are ordered: leptons before hadrons, ups before downs,
 c leptons before nus, and everything being equal, by increasing id.
-/
+
 c User's restrictions to processes; Below are some examples.
 c User's can easily add their own case.
       if(powheginput("#semileptonic").eq.1.and.
