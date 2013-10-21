@@ -74,7 +74,7 @@ c First determine virtualities of lepton pairs
 c breitw, if zerowidth is true, does the right thing
       if(z1_to_ch.and..not.zerowidth) then
          call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
-     1        gamcut,1d0,s,wt)
+     1        gamcut,4d0,s,wt)
       else
          call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
       endif
@@ -89,7 +89,7 @@ c
       xjac=xjac*4*xborn(2)**3
       if(z2_to_ch.and..not.zerowidth) then
          call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,
-     1        gamcut,1d0,s,wt)
+     1        gamcut,4d0,s,wt)
       else
          call breitw(z,smin,smax,ph_zmass,ph_zwidth,s,wt)
       endif
@@ -107,8 +107,8 @@ c
          smax = kn_sbeams
 c use breit plus gamma importance sampling, even if it is a W;
 c in decaying into gamma*+W it needs that
-         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,ph_zmass,
-     1        5*ph_zmass/ph_zwidth,s,wt)
+         call breitplusgam(z,smin,smax,ph_zmass,ph_zwidth,gamcut,
+     1        20d0,s,wt)        
 c     jacobian from z to s (i.e. ds = wt dz)
          xjac = xjac*wt
          tau = s/kn_sbeams

@@ -24,9 +24,6 @@ F77=gfortran -fno-automatic
 OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb -pg
-ifdef DEBUG
-OPT=
-endif
 endif
 
 ifeq ("$(COMPILER)","ifort")
@@ -38,6 +35,10 @@ LIBS = -limf
 OPT = -O3 #-fast
 ## For debugging uncomment the following
 #DEBUG= -debug -g
+endif
+
+ifdef DEBUG
+OPT=-O0
 endif
 
 
