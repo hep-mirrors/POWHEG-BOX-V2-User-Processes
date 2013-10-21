@@ -114,6 +114,9 @@ C  %%CITATION = HEP-PH 9402223;%%
       argdlx=-argx
       argdly=-argy
 
+      if(argdlx-1d0.lt.1d-6) argdlx = 1d0
+      if(argdly-1d0.lt.1d-6) argdly = 1d0
+
       if ((argdlx .gt. 1d0) .or. (argdly .gt. 1d0)) then
       write(6,*) 'problems with call of I3m1b'
       write(6,*) 'argdlx',argdlx

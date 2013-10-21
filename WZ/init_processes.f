@@ -23,6 +23,20 @@
 c This will be set to true if there are processes with Z->charged particles
       needsmllmin = .false.
 
+c invert default behaviour for the following flags:
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#storemintupb').eq.0d0) then
+         flg_storemintupb = .false.
+      else
+         flg_storemintupb = .true.
+      endif
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#fastbtlbound').eq.0d0) then
+         flg_fastbtlbound = .false.
+      else
+         flg_fastbtlbound = .true.
+      endif
+
 c     par_isrtinycsi = 0
 c     par_isrtinyy = 0
 c     par_fsrtinycsi = 0
