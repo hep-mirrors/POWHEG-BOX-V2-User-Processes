@@ -1,5 +1,5 @@
 ! WW boson production parameters
-
+mllmin 20d0         ! default 0.1 GeV this is minimum invar mass for Z leptons
 
 numevts 500000    ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
