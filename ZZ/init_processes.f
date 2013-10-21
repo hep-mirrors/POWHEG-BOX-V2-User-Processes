@@ -18,6 +18,20 @@ c     lepton masses
       external alloweddec
       include 'vvsettings.f'
 
+c invert default behaviour for the following flags:
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#storemintupb').eq.0d0) then
+         flg_storemintupb = .false.
+      else
+         flg_storemintupb = .true.
+      endif
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#fastbtlbound').eq.0d0) then
+         flg_fastbtlbound = .false.
+      else
+         flg_fastbtlbound = .true.
+      endif
+
       z1_to_ch=.false.
       z2_to_ch=.false.
 

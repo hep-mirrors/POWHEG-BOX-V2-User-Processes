@@ -44,8 +44,12 @@ c      endif
       s3=m3**2
       lambda=((s1-s2-s3)**2-4d0*s2*s3)
       if (lambda .lt. 0d0) then 
-         write(*,*) s1,s2,s3
-         stop 'phi1_2: lambda < 0 ?' 
+         if(lambda/s1**2.gt.-1d-6) then
+            lambda = 0
+         else
+            write(*,*) lambda,sqrt(s1),sqrt(s2),sqrt(s3)
+            stop 'phi1_2: lambda < 0 ?' 
+         endif
       endif
       lambda=dsqrt(lambda)
       wt=wt0*lambda/s1

@@ -283,6 +283,25 @@ c     2     ) then
 c      endif
 
 
+c cut on opposite flavours, charged lepton pairs
+      if(idhep(lep1)+idhep(alp1).eq.0.and..not.isnu(idhep(lep1))) then
+         call getyetaptmass(plep1+palp1,y,eta,pt,m)
+         if(m.lt.20) return
+      endif
+      if(idhep(lep1)+idhep(alp2).eq.0.and..not.isnu(idhep(lep1))) then
+         call getyetaptmass(plep1+palp2,y,eta,pt,m)
+         if(m.lt.20) return
+      endif
+      if(idhep(lep2)+idhep(alp1).eq.0.and..not.isnu(idhep(lep2))) then
+         call getyetaptmass(plep2+palp1,y,eta,pt,m)
+         if(m.lt.20) return
+      endif
+      if(idhep(lep2)+idhep(alp2).eq.0.and..not.isnu(idhep(lep2))) then
+         call getyetaptmass(plep2+palp2,y,eta,pt,m)
+         if(m.lt.20) return
+      endif
+
+
 
 c If there are any pair of identical particles, swap them
 c with 50% probability
