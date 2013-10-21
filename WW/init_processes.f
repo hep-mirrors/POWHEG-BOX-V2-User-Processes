@@ -19,9 +19,21 @@ c     vector boson id and decay
 c     lepton masses
       include 'cvecbos.h'
       include 'vvsettings.f'
-      real *8 lepmass(3),decmass,decmass1,decmass2
-      common/clepmass/lepmass,decmass,decmass1,decmass2
       logical condition
+
+c invert default behaviour for the following flags:
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#storemintupb').eq.0d0) then
+         flg_storemintupb = .false.
+      else
+         flg_storemintupb = .true.
+      endif
+c whether to save btilde calls to set up upper bounding envelope
+      if(powheginput('#fastbtlbound').eq.0d0) then
+         flg_fastbtlbound = .false.
+      else
+         flg_fastbtlbound = .true.
+      endif
 
 c      par_isrtinycsi = 0
 c      par_isrtinyy = 0
@@ -151,14 +163,6 @@ c      stop
       call exit(-1)
       end
  
-
-      block data lepmass_data
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
-      data lepmass /0.51099891d-3,0.1056583668d0,1.77684d0/
-      end
-
-
       subroutine alloweddec(i1,i2,i9,id1,id2,ida1,ida2,idw1,idw2)
       implicit none
 c i1,i2: incoming partons; i9:outgoing parton;
