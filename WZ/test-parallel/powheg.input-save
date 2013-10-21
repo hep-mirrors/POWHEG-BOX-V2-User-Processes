@@ -21,9 +21,6 @@ use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound
 
 ncall1   30000    ! number of calls for initializing the integration grid
 itmx1    1        ! number of iterations for initializing the integration grid
-! This very large number of call is really needed if you need to get
-! correctly the features of single-resonant graphs. Otherwise, a value
-! 5 times smaller is also acceptable. 
 ncall2   100000   ! number of calls for computing the integral and finding upper bound
 itmx2    1        ! number of iterations for computing the integral and finding upper bound
 foldcsi   1       ! number of folds on csi integration
