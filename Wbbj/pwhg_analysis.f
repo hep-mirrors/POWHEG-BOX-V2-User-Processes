@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-001',  '-010',  '-020'/
-      data ptminarr/   1d0,     10d0,    20d0/
+      data cptmin/  '-010',  '-020',  '-050'/
+      data ptminarr/   10d0,     20d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 Hmass,Hwidth,powheginput
@@ -33,25 +33,9 @@ c  pwhgfill  :  fills the histograms with data
       dpt=10d0
       dr=0.2d0
 
-      Hmass = powheginput('hmass')
-      Hwidth = powheginput('hwidth')
-
-      
       do i=1,nptmin
-c     total cross section sanity check
-
       call bookupeqbins('sigtot'//cptmin(i),1d0,0.5d0,1.5d0)
-      
-      call bookupeqbins('Nevents'//cptmin(i),2.5d0,0,2d2)
-
       call bookupeqbins('Njet'//cptmin(i),1d0,-0.5d0,5.5d0)
-
-      call bookupeqbins('H-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('H-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('H-m'//cptmin(i),Hwidth,Hmass-20*Hwidth,
-     $     Hmass+20*Hwidth)
-c      call bookupeqbins('H-m'//cptmin(i),0.2d-2,124.98d0,125.020d0)
 
       call bookupeqbins('W-y'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('W-eta'//cptmin(i),dy,-5d0,5d0)
@@ -62,104 +46,33 @@ c      call bookupeqbins('H-m'//cptmin(i),0.2d-2,124.98d0,125.020d0)
       call bookupeqbins('lept-pt'//cptmin(i),dpt,0d0,500d0)
       call bookupeqbins('miss-pt'//cptmin(i),dpt,0d0,500d0)
 
-      call bookupeqbins('HW-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('HW-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('HW-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('HW-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('HW-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('HW-ptzoom3'//cptmin(i),0.001d0,0d0,0.2d0)
-      call bookupeqbins('HW-m'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('b1-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('b1-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('b1-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('b1-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('b1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('b1-m'//cptmin(i),dpt,0d0,400d0) 
 
+      call bookupeqbins('b2-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('b2-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('b2-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('b2-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('b2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('b2-m'//cptmin(i),dpt,0d0,400d0) 
 
-      do j=1,maxjet
-         call bookupeqbins('j'//cnum(j)//'-y'//cptmin(i),dy,-5d0,5d0)
-         call bookupeqbins('j'//cnum(j)//'-eta'//cptmin(i),dy,-5d0,5d0)
-         call bookupeqbins('j'//cnum(j)//'-pt'//cptmin(i),dpt,0d0,400d0)
-         call bookupeqbins('j'//cnum(j)//'-ptzoom'//cptmin(i),
-     $        2d0,1d0,151d0)
-         call bookupeqbins('j'//cnum(j)//'-m'//cptmin(i),dpt,0d0,400d0) 
-         call bookupeqbins('j'//cnum(j)//'-ptzoom2'//cptmin(i),
-     $        0.5d0,0d0,20d0)
-      enddo
+      call bookupeqbins('j1-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('j1-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('j1-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('j1-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('j1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('j1-m'//cptmin(i),dpt,0d0,400d0) 
 
-
-      do j=1,maxjet-1
-         do k=j+1,maxjet
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-y'//cptmin(i),dy,-5d0,5d0)  
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-eta'//cptmin(i),dy,-5d0,5d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-pt'//cptmin(i),dpt,0d0,400d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-m'//cptmin(i),dpt,0d0,400d0)  
-         enddo
-      enddo
-  
- 
-      do j=1,maxjet-1
-         do k=j+1,maxjet
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-dy'//cptmin(i),dy,-5d0,5d0)  
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-deta'//cptmin(i),dy,-5d0,5d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-delphi'//cptmin(i),pi/20,0d0,pi)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-dr'//cptmin(i),dr,0d0,10d0)  
-         enddo
-      enddo
-  
-      do j=1,maxjet-1
-            call bookupeqbins('j'//cnum(j)//'lept'//
-     1           '-dy'//cptmin(i),dy,-5d0,5d0)  
-            call bookupeqbins('j'//cnum(j)//'lept'//
-     1           '-deta'//cptmin(i),dy,-5d0,5d0)
-            call bookupeqbins('j'//cnum(j)//'lept'//
-     1           '-delphi'//cptmin(i),pi/20,0d0,pi)
-            call bookupeqbins('j'//cnum(j)//'lept'//
-     1           '-dr'//cptmin(i),dr,0d0,10d0)  
-      enddo
-
-    
-c      do j=1,maxjet-1
-c      do k=j+1,maxjet
-c         call bookupeqbins('Hj'//cnum(j)//'-j'//cnum(k)//
-c     1        '-dy'//cptmin(i),dy,-5d0,5d0)  
-c         call bookupeqbins('Hj'//cnum(j)//'-j'//cnum(k)//
-c     1        '-deta'//cptmin(i),dy,-5d0,5d0)
-c         call bookupeqbins('Hj'//cnum(j)//'-j'//cnum(k)//
-c     1        '-delphi'//cptmin(i),pi/20,0d0,pi)
-c         call bookupeqbins('Hj'//cnum(j)//'-j'//cnum(k)//
-c     1        '-dr'//cptmin(i),dr,0d0,20d0)  
-c      enddo
-c      enddo
-
-c      if(maxjet.ge.3) then
-c         call bookupeqbins('Hj1j2-j3-dy'//cptmin(i),dy,-5d0,5d0)  
-c         call bookupeqbins('Hj1j2-j3-deta'//cptmin(i),dy,-5d0,5d0)
-c         call bookupeqbins('Hj1j2-j3-delphi'//cptmin(i),pi/20,0d0,pi)
-c         call bookupeqbins('Hj1j2-j3-dr'//cptmin(i),dr,0d0,20d0)
-c      endif
-
-c      do j=1,maxjet
-c         call bookupeqbins('ptrel'//cnum(j)//cptmin(i),0.5d0,0d0,20d0)
-c      enddo      
-c$$$
-c$$$      do j=1,maxjet
-c$$$         call bookupeqbins('ptrel'//cnum(j)//'qqqq'//cptmin(i),
-c$$$     $        0.5d0,0d0,20d0)
-c$$$         call bookupeqbins('ptrel'//cnum(j)//'qqgg'//cptmin(i),
-c$$$     $        0.5d0,0d0,20d0)
-c$$$         call bookupeqbins('ptrel'//cnum(j)//'ggqq'//cptmin(i),
-c$$$     $        0.5d0,0d0,20d0)
-c$$$         call bookupeqbins('ptrel'//cnum(j)//'gggg'//cptmin(i),
-c$$$     $        0.5d0,0d0,20d0)
-c$$$         call bookupeqbins('ptrel'//cnum(j)//'qgqg'//cptmin(i),
-c$$$     $        0.5d0,0d0,20d0)
-c$$$      enddo      
-c$$$
-
+      call bookupeqbins('j2-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('j2-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('j2-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('j2-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
       enddo
       end
      
@@ -192,6 +105,7 @@ c      include 'LesHouches.h'
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)      
+      real * 8 ptb1min,ptb2min,ybmax,yjmax
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       integer j,k,i,jj
@@ -239,6 +153,7 @@ c      common /crescfac/rescfac1,rescfac2
       integer nbjet_array(maxnumlep),
      $     nbbarjet_array(maxnumlep),jetinfo(maxjet),ib,ibbar,id,nb,
      $     nbbar,nbjet,nbbarjet,typeb1,typeb2,wrong_bb_sequence
+      real * 8 pthardjet
 
 c      call reweightifneeded(dsig0,dsig)
 
@@ -306,35 +221,35 @@ c     if idvecbos=24 idl and idnu are ok
          isthep_loc(ihep) = isthep(ihep)
       enddo
       
-      if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
-         do ihep=1,nhep            
-            if(idhep(ihep).eq.idl) then
-               ilep=ihep
-               do mu=1,4
-                  plep(mu,1)=phep(mu,ihep)
-               enddo
-            elseif(idhep(ihep).eq.idnu) then
-               ivl=ihep
-               do mu=1,4
-                  pvl(mu,1)=phep(mu,ihep)
-               enddo              
-            elseif(is_B_hadron(idhep(ihep))) then
-               ib=ihep
-               do mu=1,4
-                  pbquark(mu)=phep(mu,ihep)
-               enddo              
-            elseif(is_BBAR_hadron(idhep(ihep))) then
-               ibbar=ihep
-               do mu=1,4
-                  pbbarquark(mu)=phep(mu,ihep)
-               enddo              
-            endif
-         enddo
-      endif
+c$$$      if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
+c$$$         do ihep=1,nhep            
+c$$$            if(idhep(ihep).eq.idl) then
+c$$$               ilep=ihep
+c$$$               do mu=1,4
+c$$$                  plep(mu,1)=phep(mu,ihep)
+c$$$               enddo
+c$$$            elseif(idhep(ihep).eq.idnu) then
+c$$$               ivl=ihep
+c$$$               do mu=1,4
+c$$$                  pvl(mu,1)=phep(mu,ihep)
+c$$$               enddo              
+c$$$            elseif(is_B_hadron(idhep(ihep))) then
+c$$$               ib=ihep
+c$$$               do mu=1,4
+c$$$                  pbquark(mu)=phep(mu,ihep)
+c$$$               enddo              
+c$$$            elseif(is_BBAR_hadron(idhep(ihep))) then
+c$$$               ibbar=ihep
+c$$$               do mu=1,4
+c$$$                  pbbarquark(mu)=phep(mu,ihep)
+c$$$               enddo              
+c$$$            endif
+c$$$         enddo
+c$$$      endif
+c$$$
 
 
-c     Analysis after MC shower
-      if((WHCPRG.eq.'HERWIG').or.(WHCPRG.eq.'PYTHIA')) then
+c      if((WHCPRG.eq.'HERWIG').or.(WHCPRG.eq.'PYTHIA')) then
 c     Loop again over final state particles to find products of W decay, by
 c     looking into the shower branchings.
          nlep=0
@@ -396,7 +311,7 @@ c            write(*,*) 'PROGRAM ABORT'
             plep(mu,nlep)=phep(mu,ilep)
             pvl(mu,nvl)=phep(mu,ivl)
          enddo
-      endif
+c      endif
 
       if (ilep*ivl.eq.0) then
          write(*,*) 
@@ -576,46 +491,32 @@ c     if there is only one b jet, then return
       
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
+      ptb1min=0d0
+      ptb2min=0d0
+      ybmax=1000d0
+      yjmax=1000d0
 
+c*****************************************************
+c     total number of jets minus the 2 b jets
+c***  change the following for different analysis  ***
+      njets=numjets-2
+      
       do i=1,nptmin        
-         njets=0         
-         do j=1,min(3,numjets)
-            ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )
-            if (ktj(j).gt.ptminarr(i)) then
-               njets=njets+1
-            endif
-         enddo
-         
-c     since ptminarr(1) is the smallest value, the following return is correct
-         if (processid.eq.'HWJ') then
-            if(njets.eq.0) return
+         pthardjet = sqrt(phardjet(1)**2+phardjet(2)**2)
+         if (pthardjet.lt.ptminarr(i)) then
+c     since ptminarr is pt ordered, the following return is correct
+            return
          endif
+
+         call filld('sigtot'//cptmin(i),1d0,dsig)         
          
-         call filld('sigtot'//cptmin(i),1d0,dsig)
-         
-         call filld('Nevents'//cptmin(i),abs(dsig),1d0)
-         
-         if(njets.eq.0) then
-            call filld('Njet'//cptmin(i),0d0,dsig)
-         elseif(njets.eq.1) then
+         if(found_hardjet.and..not.found_nexthardjet) then
             call filld('Njet'//cptmin(i),1d0,dsig)
-         elseif(njets.eq.2) then
-            call filld('Njet'//cptmin(i),2d0,dsig)
-         elseif(njets.eq.3) then
-            call filld('Njet'//cptmin(i),3d0,dsig)
-         elseif(njets.eq.4) then
-            call filld('Njet'//cptmin(i),4d0,dsig)
-         elseif(njets.eq.5) then
-            call filld('Njet'//cptmin(i),5d0,dsig)
-         else
-c     write(*,*) ' Njet?',mjets
          endif
-c     Higgs
-         call getyetaptmass(ph,y,eta,pt,m)
-         call filld('H-y'//cptmin(i),    y, dsig)
-         call filld('H-eta'//cptmin(i),eta, dsig)
-         call filld('H-pt'//cptmin(i),  pt, dsig)
-         call filld('H-m'//cptmin(i), m, dsig)
+         if(found_nexthardjet) then
+            call filld('Njet'//cptmin(i),2d0,dsig)
+         endif
+
 c     W
          call getyetaptmass(pw,y,eta,pt,m)
          call filld('W-y'//cptmin(i),    y, dsig)
@@ -629,63 +530,45 @@ c     lepton
 c     neutrino
          call getyetaptmass(pvl(:,1),y,eta,pt,m)
          call filld('miss-pt'//cptmin(i),  pt, dsig)
-c     HW
-         call getyetaptmass(ph+pw,y,eta,pt,m)
 
-c         if (pt.gt.0.09d0 .and. pt.lt.0.11d0) then
-c            write(*,*) 'ci siamo'
-c            write(*,*) rescfac1,rescfac2
-c         endif
+c     hardest b jet
+         call getyetaptmass(pbjet1,y,eta,pt,m)
+         call filld('b1-y'//cptmin(i),     y, dsig)
+         call filld('b1-eta'//cptmin(i), eta, dsig)
+         call filld('b1-pt'//cptmin(i),   pt, dsig)
+         call filld('b1-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('b1-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('b1-m'//cptmin(i),     m, dsig)
+        
+c     next-to-hardest b jet
+         call getyetaptmass(pbjet2,y,eta,pt,m)
+         call filld('b2-y'//cptmin(i),     y, dsig)
+         call filld('b2-eta'//cptmin(i), eta, dsig)
+         call filld('b2-pt'//cptmin(i),   pt, dsig)
+         call filld('b2-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('b2-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('b2-m'//cptmin(i),     m, dsig)
 
+c     hardest jet         
+         call getyetaptmass(phardjet,y,eta,pt,m)
+         call filld('j1-y'//cptmin(i),     y, dsig)
+         call filld('j1-eta'//cptmin(i), eta, dsig)
+         call filld('j1-pt'//cptmin(i),   pt, dsig)
+         call filld('j1-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('j1-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('j1-m'//cptmin(i),     m, dsig)
+   
 
-         call filld('HW-y'//cptmin(i),    y, dsig)
-         call filld('HW-eta'//cptmin(i),eta, dsig)
-         call filld('HW-pt'//cptmin(i),  pt, dsig)
-         call filld('HW-ptzoom'//cptmin(i),  pt, dsig)
-         call filld('HW-ptzoom2'//cptmin(i),  pt, dsig)
-         call filld('HW-ptzoom3'//cptmin(i),  pt, dsig)
-         call filld('HW-m'//cptmin(i), m, dsig)
-         
-c     jets
-         mjets=min(njets,2)
-         
-         do j=1,mjets
-            call getyetaptmass(pj(:,j),y,eta,pt,m)
-            call filld('j'//cnum(j)//'-y'//cptmin(i),     y, dsig)
-            call filld('j'//cnum(j)//'-eta'//cptmin(i), eta, dsig)
-            call filld('j'//cnum(j)//'-pt'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-m'//cptmin(i),     m, dsig)
-c     call filld('ptrel'//cnum(j)//cptmin(i),ptrel(j), dsig)         
-         enddo
-         
-         do j=1,mjets
-            do k=j+1,mjets
-               call getyetaptmass(pj(:,j)+pj(:,k),y,eta,pt,m)
-               call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
-     $              y, dsig)
-               call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
-     $              eta, dsig)
-               call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
-     $              pt, dsig)
-               call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
-     $              m, dsig)
-            enddo
-         enddo
-         
-         do j=1,mjets
-            do k=j+1,mjets
-               call deltaplot(pj(:,j),pj(:,k),dsig,
-     1              'j'//cnum(j)//'j'//cnum(k),cptmin(i))
-            enddo
-         enddo
-         
-         do j=1,mjets
-            call deltaplot(pj(:,j),plep(:,1),dsig,
-     1           'j'//cnum(j)//'lept',cptmin(i))
-         enddo
-         
+         if (found_nexthardjet) then
+c     next-to-hardest jet         
+            call getyetaptmass(pnexthardjet,y,eta,pt,m)
+            call filld('j2-y'//cptmin(i),     y, dsig)
+            call filld('j2-eta'//cptmin(i), eta, dsig)
+            call filld('j2-pt'//cptmin(i),   pt, dsig)
+            call filld('j2-ptzoom'//cptmin(i),   pt, dsig)
+            call filld('j2-ptzoom2'//cptmin(i),   pt, dsig)
+            call filld('j2-m'//cptmin(i),     m, dsig)
+         endif
       enddo
       end
 

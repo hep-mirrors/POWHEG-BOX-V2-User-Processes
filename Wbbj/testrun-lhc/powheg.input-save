@@ -1,15 +1,10 @@
 idvecbos          -24
 vdecaymode        1
 
-
 bmass 4.2
-
-wmasslow     50d0
-wmasshigh 150d0
 
 min_w_mass  10d0
 max_w_mass 1000d0
-
 
 numevts 625000    ! number of events to be generated
 ih1 1             ! hadron 1 (1 for protons, -1 for antiprotons)
@@ -17,11 +12,11 @@ ih2 1             ! hadron 2 (1 for protons, -1 for antiprotons)
 ebeam1 4000d0     ! energy of beam 1
 ebeam2 4000d0     ! energy of beam 2
 
-bornktmin 0.26d0      ! (default 0d0) generation cut. Minimum kt in underlying Born
+bornktmin 5d0      ! (default 0d0) generation cut. Minimum kt in underlying Born
 bornsuppfact 10d0 ! (default 0d0)  mass param for Born suppression factor. If < 0 suppfact = 1
+
 #pdfreweight 1
 #bornzerodamp  1
-
 
 ! To be set only if using internal (mlm) pdfs
 ! 131 cteq4m
@@ -48,7 +43,7 @@ use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound
 ! the typical call uses 1/1400 seconds (1400 calls per second)
 ncall1 50000      ! Number of calls for the construction of the importance sampling grid
 itmx1 1           ! Number of iterations for grid
-ncall2 50000      ! Number of calls for the computation of the upper bounding envelope
+ncall2 100000      ! Number of calls for the computation of the upper bounding envelope
                   ! for the generation of radiation
 itmx2 1           ! Number of iterations for the above
 ! Notice: the total number of calls is ncall2*itmx2*foldcsi*foldy*foldphi

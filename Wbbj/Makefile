@@ -7,7 +7,8 @@ FC=$(COMPILER)
 PDF=lhapdf
 #Choose Analysis: dummy, process specific
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
-ANALYSIS=dummy
+#ANALYSIS=dummy
+ANALYSIS=Wbbj
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -53,13 +54,12 @@ GOSAMLIBS=$(shell cd GoSamlib ; echo *.f *.f90 ' ' | sed 's/qlonshellcutoff.f// 
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1/:../:$(OBJDIR):./GoSamlib/
+VPATH= ./:../:$(OBJDIR):./GoSamlib/
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
-INCLUDE1.2=$(shell dirname $(PWD))/Version-pre2-1/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE1.2) -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
@@ -82,12 +82,12 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
-ifeq ("$(ANALYSIS)","YOURPROCESS")
+ifeq ("$(ANALYSIS)","Wbbj")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-new.o pwhg_analysis.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis.o observables.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
