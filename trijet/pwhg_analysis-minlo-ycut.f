@@ -9,7 +9,7 @@ c  pwhgfill  :  fills the histograms with data
       implicit none
       include  'LesHouches.h'
       include 'pwhg_math.h'
-      integer j,k,i
+      integer j,k,i,l
       real * 8 dy,dpt,dr
       character * 1 cnum(9)
       data cnum/'1','2','3','4','5','6','7','8','9'/
@@ -18,15 +18,15 @@ c  pwhgfill  :  fills the histograms with data
       integer nptmin
       parameter (nptmin=5)
       integer nymax
-      parameter (nymax = 4)
+      parameter (nymax = 3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
       data cptmin/  '-000','-005','-020','-040','-060'/
       data ptminarr/ 0d0, 5d0, 20d0,  40d0,  60d0/
       character*4 cymax(nymax)
-      data cymax/ '2.0','2.5','3.0','inf' /
+      data cymax/ '2.0','3.0','inf' /
       real*8 ymaxarr(nymax)
-      data ymaxarr/2d0,2.5d0,3d0,1d10/
+      data ymaxarr/2d0,3d0,1d10/
       common/infohist/ptminarr,ymaxarr,cnum,cptmin,cymax
       save /infohist/
       real * 8 powheginput
@@ -38,28 +38,29 @@ c  pwhgfill  :  fills the histograms with data
       dr=0.2d0
       
       do i=1,nptmin
-      do k=1,nymax
+      do j=1,nymax
         call bookupeqbins('sigtot-ptmin'//cptmin(i)
-     >                    //'-ymax-'//cymax(k),1d0,0.5d0,1.5d0)
+     >                    //'-ymax-'//cymax(j),1d0,0.5d0,1.5d0)
 
-        do j=1,maxjet
-          call bookupeqbins('j'//cnum(j)//'-y-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),dy,-5d0,5d0)
-          call bookupeqbins('j'//cnum(j)//'-eta-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),dy,-5d0,5d0)
-          call bookupeqbins('j'//cnum(j)//'-pt-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),dpt,0d0,400d0)
-          call bookupeqbins('j'//cnum(j)//'-ptzoom-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),2d0,1d0,151d0)
-          call bookupeqbins('j'//cnum(j)//'-m-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),dpt,0d0,400d0) 
-          call bookupeqbins('j'//cnum(j)//'-ptzoom2-ptmin'//cptmin(i)
-     >                      //'-ymax-'//cymax(k),0.5d0,0d0,20d0)
+        do k=1,maxjet
+          call bookupeqbins('j'//cnum(k)//'-y-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),dy,-5d0,5d0)
+          call bookupeqbins('j'//cnum(k)//'-eta-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),dy,-5d0,5d0)
+          call bookupeqbins('j'//cnum(k)//'-pt-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),dpt,0d0,400d0)
+          call bookupeqbins('j'//cnum(k)//'-ptzoom-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),2d0,1d0,151d0)
+          call bookupeqbins('j'//cnum(k)//'-m-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),dpt,0d0,400d0) 
+          call bookupeqbins('j'//cnum(k)//'-ptzoom2-ptmin'//cptmin(i)
+     >                      //'-ymax-'//cymax(j),0.5d0,0d0,20d0)
         enddo
-      enddo
 
-c      do j=1,maxjet-1
-c         do k=j+1,maxjet
+        do k=1,maxjet-1
+          do l=k+1,maxjet
+            call bookupeqbins('j'//cnum(k)//'j'//cnum(l)//
+     1           '-R'//cptmin(i)//'-ymax-'//cymax(j),dr,0d0,5d0)  
 c            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
 c     1           '-y'//cptmin(i),dy,-5d0,5d0)  
 c            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
@@ -68,8 +69,9 @@ c            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
 c     1           '-pt'//cptmin(i),dpt,0d0,400d0)
 c            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
 c     1           '-m'//cptmin(i),dpt,0d0,400d0)  
-c         enddo
-c      enddo
+          enddo
+        enddo
+      enddo
 
       enddo
    
@@ -100,14 +102,14 @@ c      include 'LesHouches.h'
       integer nptmin
       parameter (nptmin=5)
       integer nymax
-      parameter (nymax = 4)
+      parameter (nymax = 3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)      
       character*4 cymax(nymax)
       real*8 ymaxarr(nymax)
       common/infohist/ptminarr,ymaxarr,cnum,cptmin,cymax
       save /infohist/
-      integer j,k,i,jj,ii
+      integer j,k,i,jj,ii,l
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
@@ -216,8 +218,8 @@ c     palg=1 is standard kt, -1 is antikt
 
 c      write(*,*) 'numjets ',numjets
 
-      ktj = 0d0
-      yj  = 0d0
+      ktj(1:maxnumjets) = 0d0
+      yj(1:maxnumjets)  = 0d0
       maxyj = 0d0
       do j=1,min(maxnumjets,numjets)
          ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
@@ -260,19 +262,22 @@ c     jets
          
 
 
-c         do j=1,mjets
-c            do k=j+1,mjets
-c               call getyetaptmass(pj(:,j)+pj(:,k),y,eta,pt,m)
-c               call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
-c     $              y, dsig)
-c               call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
-c     $              eta, dsig)
-c               call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
-c     $              pt, dsig)
-c               call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
-c     $              m, dsig)
-c            enddo
-c         enddo
+          do k=1,mjets
+            do l=k+1,mjets
+c              call getyetaptmass(pj(:,k)+pj(:,l),y,eta,pt,m)
+              call pwhg_getR_phiy(pj(:,k),pj(:,l),R)
+              call filld('j'//cnum(k)//'j'//cnum(l)//'-R'//cptmin(i)
+     >                   //'-ymax-'//cymax(j),R,dsig)
+c              call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
+c     $             y, dsig)
+c              call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
+c     $             eta, dsig)
+c              call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
+c     $             pt, dsig)
+c              call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
+c     $             m, dsig)
+            enddo
+          enddo
          
         enddo
       enddo
