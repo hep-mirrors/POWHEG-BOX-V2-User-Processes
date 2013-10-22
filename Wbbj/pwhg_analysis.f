@@ -213,7 +213,6 @@ c     if idvecbos=24 idl and idnu are ok
          ini=.false.
       endif
 
-
       ilep=0
       ivl=0
 
@@ -313,6 +312,7 @@ c            write(*,*) 'PROGRAM ABORT'
          enddo
 c      endif
 
+
       if (ilep*ivl.eq.0) then
          write(*,*) 
      $        'ERROR... have NOT found the electron/neutrino/Higgs'
@@ -405,7 +405,10 @@ c     loop over tracks
 
 c     we want two b jets for the current analysis
       if (nbjet*nbbarjet.eq.0) return
-
+      write(*,*) 'START'
+      write(*,*) 'nbjet,nbbarjet',nbjet,nbbarjet
+      write(*,*) 'nbjet_array(1) ',nbjet_array(1)
+      write(*,*) 'nbbarjet_array(1)',nbbarjet_array(1)
 
 c     jets are ordered in decreasing pt. Set up array of info on jets
 c     if jetinfo=0 then non-b jet
@@ -415,6 +418,7 @@ c     if jetinfo=-5 then bbar jet
           jetinfo(i)=0
        enddo
       do i=1,numjets
+c         write(*,*) 'i     =',i
          do j=1,nbjet
             if (i.eq.nbjet_array(j)) then
                jetinfo(i)=5
@@ -427,6 +431,10 @@ c     if jetinfo=-5 then bbar jet
          enddo
       enddo
 
+      write(*,*) 'numjets ',numjets
+      write(*,*) jetinfo(1), jetinfo(2), jetinfo(3) 
+
+       
 
       found_hardjet=.false.
       found_nexthardjet=.false.
@@ -484,11 +492,18 @@ c                  write(*,*) (jetinfo(i),i=1,numjets)
  111     continue
       enddo
 
+
+        if (found_bjet1.neqv..false..or.found_bjet2.neqv..false.
+     $     .or.found_hardjet.neqv..true.) then
+            write(*,*) 'PLOTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
+         endif
+
 c     if there is only one b jet, then return
       if (.not.(found_bjet1.and.found_bjet2.and.found_hardjet)) then
          return
       endif
-      
+          write(*,*) '4'
+     
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
       ptb1min=0d0
@@ -507,6 +522,7 @@ c***  change the following for different analysis  ***
 c     since ptminarr is pt ordered, the following return is correct
             return
          endif
+         write(*,*) '5'
 
          call filld('sigtot'//cptmin(i),1d0,dsig)         
          
