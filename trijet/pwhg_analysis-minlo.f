@@ -133,7 +133,7 @@ c
 c
 
       if (.not.pwhg_isfinite(dsig0)) then
-         write(*,*) '***PROBLEMS***'
+         write(*,*) '*** PROBLEMS in subroutine analysis ***'
          return
       endif
 
