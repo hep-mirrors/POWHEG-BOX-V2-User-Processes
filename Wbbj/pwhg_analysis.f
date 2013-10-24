@@ -9,7 +9,7 @@ c  pwhgfill  :  fills the histograms with data
       implicit none
       include  'LesHouches.h'
       include 'pwhg_math.h'
-      integer j,k,i
+      integer i
       real * 8 dy,dylep,dpt,dr
       character * 1 cnum(9)
       data cnum/'1','2','3','4','5','6','7','8','9'/
@@ -23,7 +23,7 @@ c  pwhgfill  :  fills the histograms with data
       data ptminarr/   10d0,     20d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
-      real * 8 Hmass,Hwidth,powheginput
+      real * 8 powheginput
       external powheginput
 
       call inihists
@@ -81,9 +81,9 @@ c  pwhgfill  :  fills the histograms with data
       real * 8 dsig0
       include 'hepevt.h'
       include 'nlegborn.h'
-      include 'pwhg_flst.h'
+c      include 'pwhg_flst.h'
       include 'pwhg_math.h' 
-      include 'pwhg_rad.h' 
+c      include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
@@ -93,13 +93,11 @@ c      include 'LesHouches.h'
       save ini
       integer   maxjet,mjets,njets,numjets,ntracks
       parameter (maxjet=2048)
-      real * 8  ktj(maxjet),etaj(maxjet),rapj(maxjet),
-     1    phij(maxjet),pj(4,maxjet),rr,ptrel(4)
+      real * 8 pj(4,maxjet)
       integer maxtrack
       parameter (maxtrack=2048)
       real * 8  ptrack(4,maxtrack)
-      integer   jetvec(maxtrack),itrackhep(maxtrack),
-     $     ihep_of_track(maxtrack)
+      integer   jetvec(maxtrack),ihep_of_track(maxtrack)
       character * 1 cnum(9)
       integer nptmin
       parameter (nptmin=3)
@@ -108,19 +106,16 @@ c      include 'LesHouches.h'
       real * 8 ptb1min,ptb2min,ybmax,yjmax
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
-      integer j,k,i,jj
+      integer j,i,k
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
-      integer il,inu
-      real * 8 ph(4),pl(4),pnu(4),pw(4)
-      real * 8 httot,y,eta,pt,m
-      real * 8 dy,deta,delphi,dr
+      real * 8 pw(4)
+      real * 8 y,eta,pt,m
       integer ihep
       real * 8 powheginput,dotp
       external powheginput,dotp
-      real * 8 ptmin
       integer idvecbos,Vdecmod,idl,idnu
       save idvecbos,Vdecmod,idl,idnu
       integer maxnumlep
@@ -128,15 +123,12 @@ c     we need to tell to this analysis file which program is running it
       real * 8 pvl(4,maxnumlep),plep(4,maxnumlep)
       integer mu,ilep,ivl,nlep,nvl
       logical is_W
-      real * 8 mV2,ptvb,mvb,ptlep,ptminfastjet,ptvl,R,ylep,yvb,yvl
-      real * 8 Wmass,Wwidth,Wmasslow,Wmasshigh
-      integer jpart, jjet
+      real * 8 ptminfastjet,R
       real * 8 palg
-      integer ii
       integer  minlo
       save minlo
       data minlo/0/
-      character * 20 processid
+c      character * 20 processid
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2
       real * 8 dsig(7)
@@ -148,12 +140,12 @@ c      common /crescfac/rescfac1,rescfac2
       real * 8 phardjet(4),pnexthardjet(4),pbjet1(4),pbjet2(4)
       logical is_B_hadron,is_BBAR_hadron
       external is_B_hadron,is_BBAR_hadron
-      real * 8 pbquark(4),pbbarquark(4),p_b(4,maxnumlep),
-     $     p_bbar(4,maxnumlep)
-      integer nbjet_array(maxnumlep),
-     $     nbbarjet_array(maxnumlep),jetinfo(maxjet),ib,ibbar,id,nb,
+      real * 8 p_b(4,maxnumlep),p_bbar(4,maxnumlep)
+      integer nbjet_array(maxjet),
+     $     nbbarjet_array(maxjet),jetinfo(maxjet),id,nb,
      $     nbbar,nbjet,nbbarjet,typeb1,typeb2,wrong_bb_sequence
       real * 8 pthardjet
+      integer dummy
 
 c      call reweightifneeded(dsig0,dsig)
 
@@ -251,67 +243,67 @@ c$$$
 c      if((WHCPRG.eq.'HERWIG').or.(WHCPRG.eq.'PYTHIA')) then
 c     Loop again over final state particles to find products of W decay, by
 c     looking into the shower branchings.
-         nlep=0
-         nvl=0
-         nb=0
-         nbbar=0
-         do ihep=1,nhep
+      nlep=0
+      nvl=0
+      nb=0
+      nbbar=0
+      do ihep=1,nhep
 c     works for POWHEG+HERWIG, POWHEG+PYHIA, HERWIG, PYTHIA and real in
 c     MC@NLO
 c            if(idhep(ihep).eq.25.and.isthep_loc(ihep).eq.1) then
 c               ph=phep(1:4,ihep)
 c               ih=ihep
 c            endif
-            if (isthep_loc(ihep).eq.1.and.(idhep(ihep).eq.idl .or.
-     $           idhep(ihep).eq.idnu)) then
+         if (isthep_loc(ihep).eq.1.and.(idhep(ihep).eq.idl .or.
+     $        idhep(ihep).eq.idnu)) then
 c     is_W = idhep(jmohep(1,jmohep(1,ihep))).eq.idvecbos .or.
 c     $         idhep(jmohep(1,jmohep(1,jmohep(1, ihep)))).eq.idvecbos
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c     if the hadronization is switched off, then the electrons and neutrinos
 c     that are found come only from the W decay
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-               is_W = .true.
-               if (is_W) then
+            is_W = .true.
+            if (is_W) then
 c     find first decay product
-                  if(idhep(ihep).eq.idl) then
-                     ilep=ihep
-                     nlep=nlep+1
+               if(idhep(ihep).eq.idl) then
+                  ilep=ihep
+                  nlep=nlep+1
 c     find second decay product
-                  elseif(idhep(ihep).eq.idnu) then
-                     ivl=ihep
-                     nvl=nvl+1
-                  endif
+               elseif(idhep(ihep).eq.idnu) then
+                  ivl=ihep
+                  nvl=nvl+1
                endif
             endif
-            if (isthep_loc(ihep).eq.1.and.(is_B_hadron(idhep(ihep))))
-     1           then  
-               nb=nb+1
-               do mu=1,4
-                  p_b(mu,nb)=phep(mu,ihep)
-               enddo  
-            endif
-            if (isthep_loc(ihep).eq.1.and.(is_BBAR_hadron(idhep(ihep))))
-     1           then  
-               nbbar=nbbar+1
-               do mu=1,4
-                  p_bbar(mu,nbbar)=phep(mu,ihep)
-               enddo  
-            endif
-         enddo
-
-         if(nvl.ne.1.or.nlep.ne.1) then
-            write(*,*) 'Problems with leptons from W decay'
-c            write(*,*) 'PROGRAM ABORT'
-            write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
-            call pwhg_exit(-1)
          endif
-            
-         do mu=1,4
-            plep(mu,nlep)=phep(mu,ilep)
-            pvl(mu,nvl)=phep(mu,ivl)
-         enddo
-c      endif
+         if (isthep_loc(ihep).eq.1.and.(is_B_hadron(idhep(ihep))))
+     1        then  
+            nb=nb+1
+            do mu=1,4
+               p_b(mu,nb)=phep(mu,ihep)
+            enddo  
+         endif
+         if (isthep_loc(ihep).eq.1.and.(is_BBAR_hadron(idhep(ihep))))
+     1        then  
+            nbbar=nbbar+1
+            do mu=1,4
+               p_bbar(mu,nbbar)=phep(mu,ihep)
+            enddo  
+         endif
+      enddo
+      
+      if(nvl.ne.1.or.nlep.ne.1) then
+         write(*,*) 'Problems with leptons from W decay'
+c     write(*,*) 'PROGRAM ABORT'
+         write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
+         call pwhg_exit(-1)
+      endif
+      
+      do mu=1,4
+         plep(mu,nlep)=phep(mu,ilep)
+         pvl(mu,nvl)=phep(mu,ivl)
+      enddo
 
+      
 
       if (ilep*ivl.eq.0) then
          write(*,*) 
@@ -326,7 +318,7 @@ c      endif
          if (((nb.eq.0).and.(nbbar.ne.0)).or.
      $        ((nb.ne.0).and.(nbbar.eq.0))) then
             write(*,*) 'SEVERE WARNING: ***** One b is missing ******' 
-c            write(*,*) 'ihepb,ihepbbar ',ihepb,ihepbbar            
+c     write(*,*) 'ihepb,ihepbbar ',ihepb,ihepbbar            
             return
          endif
       endif
@@ -340,7 +332,7 @@ c     W momentum
       do mu=1,4
          pw(mu)=plep(mu,1) + pvl(mu,1)
       enddo
-
+      
 c     set up arrays for jet finding
 c      do jpart=1,maxtrack
 c         do mu=1,4
@@ -384,8 +376,8 @@ c     palg=1 is standard kt, -1 is antikt
 c         call fastjetktwhich(ptrack,ntracks,ptminfastjet,R,
 c     $        pj,mjets,jetvec) 
       endif
-
-
+      
+      
 
 c     find in which ptrack the B hadrons ended up
       nbjet=0
@@ -405,20 +397,23 @@ c     loop over tracks
 
 c     we want two b jets for the current analysis
       if (nbjet*nbbarjet.eq.0) return
-      write(*,*) 'START'
-      write(*,*) 'nbjet,nbbarjet',nbjet,nbbarjet
-      write(*,*) 'nbjet_array(1) ',nbjet_array(1)
-      write(*,*) 'nbbarjet_array(1)',nbbarjet_array(1)
+c      write(*,*) 'START'
+c      write(*,*) 'nbjet,nbbarjet',nbjet,nbbarjet
+c      write(*,*) 'nbjet_array(1) ',nbjet_array(1)
+c      write(*,*) 'nbbarjet_array(1)',nbbarjet_array(1)
+c      write(*,*) 'numjets ',numjets
+
 
 c     jets are ordered in decreasing pt. Set up array of info on jets
 c     if jetinfo=0 then non-b jet
 c     if jetinfo=5 then b jet
 c     if jetinfo=-5 then bbar jet
+c      do i=1,numjets
+c         jetinfo(i)=0
+c      enddo
+      
       do i=1,numjets
-          jetinfo(i)=0
-       enddo
-      do i=1,numjets
-c         write(*,*) 'i     =',i
+         jetinfo(i)=0
          do j=1,nbjet
             if (i.eq.nbjet_array(j)) then
                jetinfo(i)=5
@@ -427,13 +422,9 @@ c         write(*,*) 'i     =',i
          do j=1,nbbarjet
             if (i.eq.nbbarjet_array(j)) then
                jetinfo(i)=-5
-            endif
+             endif
          enddo
       enddo
-
-      write(*,*) 'numjets ',numjets
-      write(*,*) jetinfo(1), jetinfo(2), jetinfo(3) 
-
        
 
       found_hardjet=.false.
@@ -493,16 +484,15 @@ c                  write(*,*) (jetinfo(i),i=1,numjets)
       enddo
 
 
-        if (found_bjet1.neqv..false..or.found_bjet2.neqv..false.
-     $     .or.found_hardjet.neqv..true.) then
-            write(*,*) 'PLOTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
-         endif
+c        if (found_bjet1.neqv..false..or.found_bjet2.neqv..false.
+c     $     .or.found_hardjet.neqv..true.) then
+c            write(*,*) 'PLOTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
+c         endif
 
 c     if there is only one b jet, then return
       if (.not.(found_bjet1.and.found_bjet2.and.found_hardjet)) then
          return
       endif
-          write(*,*) '4'
      
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
@@ -522,7 +512,6 @@ c***  change the following for different analysis  ***
 c     since ptminarr is pt ordered, the following return is correct
             return
          endif
-         write(*,*) '5'
 
          call filld('sigtot'//cptmin(i),1d0,dsig)         
          

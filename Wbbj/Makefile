@@ -41,12 +41,14 @@ F77 = ifort -save  -extend_source  -module $(OBJ)
 #FFLAGS =  -checkm
 ## For floating point exception trapping  uncomment the following 
 #FPE = -fpe0
-OPT = -O3 #-fast
+# DO NOT USE O2 or O3 for trijet code since the optimization fails 
+# to compile correctly the analysis file
+OPT = -O1 #-fast
 ## For debugging uncomment the following
-#DEBUG= -debug -g
+#DEBUG=  -g
 ifdef DEBUG
-OPT=-O0 
-FPE = -fpe0
+OPT=-O0
+FPE = -fpe0 
 endif
 endif
 
