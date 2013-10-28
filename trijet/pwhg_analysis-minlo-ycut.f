@@ -88,6 +88,7 @@ c     1           '-m'//cptmin(i),dpt,0d0,400d0)
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
+      include 'pwhg_kn.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer   maxjet,mjets,numjets,ntracks
@@ -154,7 +155,7 @@ c
 c
 
       if (.not.pwhg_isfinite(dsig0)) then
-         write(*,*) '***PROBLEMS***'
+         write(*,*) '*** PROBLEMS in subroutine analysis ***'
          return
       endif
 

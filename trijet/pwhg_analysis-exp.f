@@ -323,6 +323,7 @@ c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
+c      include 'pwhg_kn.h' 
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer   maxjet,mjets,njets,numjets,ntracks
@@ -442,8 +443,9 @@ c These declarations for the jet shapes:
       parameter (MaxJetRapshapes = 2.8d0)
 c
 
+
       if (.not.pwhg_isfinite(dsig0)) then
-         write(*,*) '***PROBLEMS***'
+         write(*,*) '*** PROBLEMS in subroutine analysis ***'
          return
       endif
 

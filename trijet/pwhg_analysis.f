@@ -126,6 +126,7 @@ c      goto 300
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
+c      include 'pwhg_kn.h' 
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer   maxjet,mjets,njets,numjets,ntracks
@@ -197,7 +198,8 @@ c      common /crescfac/rescfac1,rescfac2
       real*8 mj1,mj2,mj3
 
       if (.not.pwhg_isfinite(dsig0)) then
-         write(*,*) '***PROBLEMS***'
+         write(*,*) '*** PROBLEMS in subroutine analysis ***'
+c     in general the following quantities are NOT available. They should be at the NLO stage
          return
       endif
 
