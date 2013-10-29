@@ -10,41 +10,8 @@ c  pwhgfill  :  fills the histograms with data
       include  'LesHouches.h'
       include 'pwhg_math.h'
       integer j,k,i
-      real * 8 dy,dpt,dr
-      character * 1 cnum(9)
-      data cnum/'1','2','3','4','5','6','7','8','9'/
-      integer maxjet
-      parameter (maxjet=4)
-      integer nptmin
-      parameter (nptmin=5)
-      character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin)
-      data cptmin/  '-020','-040','-060','-080','-100'/
-      data ptminarr/   20d0,  40d0,  60d0,  80d0, 100d0/
-      common/infohist/ptminarr,cnum,cptmin
-      save /infohist/
       real * 8 powheginput
       external powheginput
-      integer nptbins1
-      parameter (nptbins1 = 20)
-      integer nptbins2
-      parameter (nptbins2 = 20)
-      integer netabins
-      parameter (netabins = 20)
-      real*8 ptbins1(nptbins1 + 1)
-      real*8 ptbins2(nptbins2 + 1)
-      real*8 etabins(netabins + 1)
-      data ptbins1/60d0, 86.8d0, 117.8d0,153.1d0,192.6d0,236.3d0,
-     1             284.3d0,336.5d0,392.9d0,453.5d0,518.4d0,587.5d0,
-     2             660.9d0,738.5d0,820.3d0,906.3d0,996.6d0,1091.1d0,
-     3             1189.8d0,1292.8d0,1400d0/
-      data ptbins2/60d0,72.8d0,87.6d0,104.5d0,123.3d0,144.2d0,
-     1             167.1d0,192d0,219d0,248d0,278.9d0,312d0,347d0,
-     2             384d0,423.1d0,464.2d0,507.3d0,552.5d0,599.6d0,
-     3             648.8d0,700d0/
-      data etabins/-2.8d0,-2.52d0,-2.24d0,-1.96d0,-1.68d0,-1.4d0,
-     1     -1.12d0,-0.84d0,-0.56d0,-0.28d0,0.0d0,0.28d0,0.56d0,
-     2     0.84d0,1.12d0,1.4d0,1.68d0,1.96d0,2.24d0,2.52d0,2.8d0/
 c
       integer ndphibins1
       parameter (ndphibins1 = 15)
@@ -106,73 +73,6 @@ c
       data jetmassmaxsub/220d0,220d0,310d0,310d0/
 c
       call inihists
-
-      dy=0.5d0
-      dpt=10d0
-      dr=0.2d0
-      
-      do i=1,nptmin
-      call bookupeqbins('sigtot'//cptmin(i),1d0,0.5d0,1.5d0)      
-      call bookupeqbins('Njet'//cptmin(i),1d0,-0.5d0,5.5d0)
-
-      do j=1,maxjet
-         call bookupeqbins('j'//cnum(j)//'-y'//cptmin(i),dy,-5d0,5d0)
-         call bookupeqbins('j'//cnum(j)//'-eta'//cptmin(i),dy,-5d0,5d0)
-         call bookupeqbins('j'//cnum(j)//'-pt'//cptmin(i),dpt,0d0,400d0)
-         call bookupeqbins('j'//cnum(j)//'-ptzoom'//cptmin(i),
-     $        2d0,1d0,151d0)
-         call bookupeqbins('j'//cnum(j)//'-m'//cptmin(i),dpt,0d0,400d0) 
-         call bookupeqbins('j'//cnum(j)//'-ptzoom2'//cptmin(i),
-     $        0.5d0,0d0,20d0)
-      enddo
-
-      goto 300
-
-      do j=1,maxjet-1
-         do k=j+1,maxjet
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-y'//cptmin(i),dy,-5d0,5d0)  
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-eta'//cptmin(i),dy,-5d0,5d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-pt'//cptmin(i),dpt,0d0,400d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-m'//cptmin(i),dpt,0d0,400d0)  
-         enddo
-      enddo
-   
-      do j=1,maxjet-1
-         do k=j+1,maxjet
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-dy'//cptmin(i),dy,-5d0,5d0)  
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-deta'//cptmin(i),dy,-5d0,5d0)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-delphi'//cptmin(i),pi/20,0d0,pi)
-            call bookupeqbins('j'//cnum(j)//'j'//cnum(k)//
-     1           '-dr'//cptmin(i),dr,0d0,10d0)  
-         enddo
-      enddo
-  
-      do j=1,maxjet
-         call bookupeqbins('ptrel'//cnum(j)//cptmin(i),0.5d0,0d0,20d0)
-      enddo   
-
- 300  continue
-
-      enddo
-      
-      call bookupeqbins('sigma',1.0d0,0.0d0,3.0d0)
-      call bookupeqbins('njet',1d0,-0.5d0,5.5d0)
-      call bookup('J pt 1st',nptbins1,ptbins1)
-      call bookup('J pt 2nd',nptbins1,ptbins1)
-      call bookup('J pt 3rd',nptbins2,ptbins2)
-      call bookup('y 1st',netabins,etabins)
-      call bookup('y 2nd',netabins,etabins)
-      call bookup('y 3rd',netabins,etabins)
-      call bookup('eta 1st',netabins,etabins)
-      call bookup('eta 2nd',netabins,etabins)
-      call bookup('eta 3rd',netabins,etabins)
 
 c vvvvvvvvvvvv This part concerns the azimuthal decorrelation vvvvvvvv
 c **** arXiv:1102.2696 ****
@@ -334,13 +234,6 @@ c      include 'LesHouches.h'
       parameter (maxtrack=2048)
       real * 8  ptrack(4,maxtrack)
       integer   jetvec(maxtrack),itrackhep(maxtrack)
-      character * 1 cnum(9)
-      integer nptmin
-      parameter (nptmin=5)
-      character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin)      
-      common/infohist/ptminarr,cnum,cptmin
-      save /infohist/
       integer j,k,i,jj,ii
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
@@ -381,16 +274,6 @@ c      common /crescfac/rescfac1,rescfac2
 c
       real*8 dy12,deta12,dr12,dphi12
 c
-      real*8 MinJetPt
-      parameter (MinJetPt = 60d0)
-      real*8 Min1stJetPt
-      parameter (Min1stJetPt = 80d0)
-      real*8 MaxEtaJet
-      parameter (MaxEtaJet = 2.8d0)
-      real*8 MaxRapJet
-      parameter (MaxRapJet = 2.8d0)
-      real*8 Rpar
-      parameter (Rpar = 0.4d0)
       real*8 pj1(4),pj2(4),pj3(4)
       real*8 ptj1,ptj2,ptj3
       real*8 etaj1,etaj2,etaj3
@@ -449,12 +332,6 @@ c
          return
       endif
 
-c      write(*,*) 'nhep ',nhep
-
-      maxnumjets=4
-
-c      call reweightifneeded(dsig0,dsig)
-
       if(inimulti) then
          if(weights_num.eq.0) then
             call setupmulti(1)
@@ -485,19 +362,6 @@ c      call reweightifneeded(dsig0,dsig)
          ini=.false.
       endif
 
-c     set up arrays for jet finding
-c      do jpart=1,maxtrack
-c         do mu=1,4
-c            ptrack(mu,jpart)=0d0
-c         enddo
-c         jetvec(jpart)=0
-c      enddo      
-c      do jjet=1,maxjet
-c         do mu=1,4
-c            pj(mu,jjet)=0d0
-c         enddo
-c      enddo
-
       ntracks=0
       mjets=0
 c     Loop over final state particles to find jets 
@@ -515,184 +379,6 @@ c     copy momenta to construct jets
            enddo
         endif
       enddo
-
-
-
-      goto 111
-
-
-      if (ntracks.eq.0) then
-         numjets=0
-      else
-c     palg=1 is standard kt, -1 is antikt
-         palg = -1d0
-         R = 0.5d0              ! radius parameter
-c         ptminfastjet = 1d0
-         ptminfastjet = ptminarr(1)
-         call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
-     $        pj,numjets,jetvec)
-c         call fastjetktwhich(ptrack,ntracks,ptminfastjet,R,
-c     $        pj,mjets,jetvec) 
-      endif
-
-c      write(*,*) 'numjets ',numjets
-
-
-      do i=1,nptmin        
-         njets=0    
-         do j=1,min(maxnumjets,numjets)
-            ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
-            if (ktj(j).gt.ptminarr(i)) then
-               njets=njets+1
-            endif
-         enddo
-
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-         if (njets.lt.minnumjets) exit
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-
-         mininvmass=1d30
-         do ii=1,njets
-            do j=ii+1,njets
-               ptot(:)=pj(:,ii)+pj(:,j)
-               call pwhg_getinvmass(ptot(:),m)
-               mininvmass=min(mininvmass,m)
-            enddo
-         enddo
-         
-
-c********************************************************
-         if (mininvmass.lt.100d0) exit
-c********************************************************
-
-
-
-c         write(*,*) 'njets ',njets
-
-
-         call filld('sigtot'//cptmin(i),1d0,dsig)
-                  
-         if(njets.eq.0) then
-            call filld('Njet'//cptmin(i),0d0,dsig)
-         elseif(njets.eq.1) then
-            call filld('Njet'//cptmin(i),1d0,dsig)
-         elseif(njets.eq.2) then
-            call filld('Njet'//cptmin(i),2d0,dsig)
-         elseif(njets.eq.3) then
-            call filld('Njet'//cptmin(i),3d0,dsig)
-         elseif(njets.eq.4) then
-            call filld('Njet'//cptmin(i),4d0,dsig)
-         elseif(njets.eq.5) then
-            call filld('Njet'//cptmin(i),5d0,dsig)
-         else
-c     write(*,*) ' Njet?',mjets
-         endif
-         
-c     jets
-         mjets=min(njets,maxnumjets)
-         
-         do j=1,mjets
-            call getyetaptmass(pj(:,j),y,eta,pt,m)
-            call filld('j'//cnum(j)//'-y'//cptmin(i),     y, dsig)
-            call filld('j'//cnum(j)//'-eta'//cptmin(i), eta, dsig)
-            call filld('j'//cnum(j)//'-pt'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('j'//cnum(j)//'-m'//cptmin(i),     m, dsig)
-c     call filld('ptrel'//cnum(j)//cptmin(i),ptrel(j), dsig)         
-         enddo
-         
-
-
-c$$$         do j=1,mjets
-c$$$            do k=j+1,mjets
-c$$$               call getyetaptmass(pj(:,j)+pj(:,k),y,eta,pt,m)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-y'//cptmin(i),
-c$$$     $              y, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-eta'//cptmin(i),
-c$$$     $              eta, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-pt'//cptmin(i),
-c$$$     $              pt, dsig)
-c$$$               call filld('j'//cnum(j)//'j'//cnum(k)//'-m'//cptmin(i), 
-c$$$     $              m, dsig)
-c$$$            enddo
-c$$$         enddo
-c$$$         
-c$$$         do j=1,mjets
-c$$$            do k=j+1,mjets
-c$$$               prefix = 'j'//cnum(j)//'j'//cnum(k)               
-c$$$               call getdydetadphidr(pj(:,j),pj(:,k),dy,deta,delphi,dr)
-c$$$               call filld(prefix//'-dy'//cptmin(i),dy,dsig)
-c$$$               call filld(prefix//'-deta'//cptmin(i),deta,dsig)
-c$$$               call filld(prefix//'-delphi'//cptmin(i),delphi,dsig)
-c$$$               call filld(prefix//'-dr'//cptmin(i),dr,dsig)
-c$$$            enddo
-c$$$         enddo
-c$$$
-         
-      enddo
-
-c      call fastjetppgenkt_BBUY(ptrack,ntracks,Rpar,-1d0,MinJetPt,
-c     $     MaxRapJet,pj,njets,jetvec)
-
-
-
-
- 111  continue
-
-      palg = -1d0
-      R = 0.4d0                 ! radius parameter
-c     ptminfastjet = 1d0
-      ptminfastjet = 60d0
-      call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
-     $     pj,njets,jetvec)
-      
-c We need at least 3 jets:
-      if (njets.lt.3) goto 222
-c
-c We calculate the pt's, eta's and rapidities for the three leading jets:
-      pj1 = pj(:,1)
-      pj2 = pj(:,2)
-      pj3 = pj(:,3)
-c
-      call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
-      call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
-      call getyetaptmass(pj3,yj3,etaj3,ptj3,mj3)
-
-c     we require the first to be harder
-      if (ptj1.lt.80d0) return
-      if (abs(yj1).gt.2.8.or.abs(yj2).gt.2.8.or.abs(yj3).gt.2.8) 
-     >  goto 222
-
-      call filld('sigma',1.5d0,dsig)
-
-      if(njets.eq.0) then
-         call filld('njet',0d0,dsig)
-      elseif(njets.eq.1) then
-         call filld('njet',1d0,dsig)
-      elseif(njets.eq.2) then
-         call filld('njet',2d0,dsig)
-      elseif(njets.eq.3) then
-         call filld('njet',3d0,dsig)
-      elseif(njets.eq.4) then
-         call filld('njet',4d0,dsig)
-      elseif(njets.eq.5) then
-         call filld('njet',5d0,dsig)
-      endif
-      call filld('J pt 1st',ptj1,dsig)
-      call filld('J pt 2nd',ptj2,dsig)
-      call filld('J pt 3rd',ptj3,dsig)
-      call filld('y 1st',yj1,dsig)
-      call filld('y 2nd',yj2,dsig)
-      call filld('y 3rd',yj3,dsig)
-      call filld('eta 1st',etaj1,dsig)
-      call filld('eta 2nd',etaj2,dsig)
-      call filld('eta 3rd',etaj3,dsig)
-
- 222  continue
-
 
 c vvvvvvvvvvvv This part concerns the azimuthal decorrelation vvvvvvvv
 c We can only do this analysis if minlo is activated:
