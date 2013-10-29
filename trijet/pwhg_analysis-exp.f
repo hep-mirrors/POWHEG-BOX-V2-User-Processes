@@ -231,9 +231,9 @@ c Integrated jet shapes:
       end do
       do j=1,nptrangebins
         do k=1,nyrangebins
-          call bookup('psi(r) '//cptrange(j)//' < pt < '//
-     >                cptrange(j+1)//cyrange(k)//' < |y| < '//
-     >                cyrange(k+1),deltar,0d0,Rparshapes)
+          call bookupeqbins('psi(r) '//cptrange(j)//' < pt < '//
+     >                      cptrange(j+1)//cyrange(k)//' < |y| < '//
+     >                      cyrange(k+1),deltar,0d0,Rparshapes)
         end do
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -257,7 +257,7 @@ c Jet pt, eta mass and substructure related observables:
      >                  10d0,0d0,250d0)
       call bookupeqbins('mass, antikt, R=1.0, |y| < 2, 300 < pt < 400',
      >                  10d0,0d0,250d0)
-      call bookupeqbins('mass, CA, R=1.2, |y| < 2, 300 < pt < 400, '//
+      call bookupeqbins('mass,CA,R=1.2,|y|<2,300<pt<400,'//
      >                  'splitfilt',10d0,0d0,250d0)
 c \sqrt{d_{12}}:
       call bookupeqbins('sd12, antikt, R=1.0, |y| < 2, 300 < pt < 400',
@@ -280,14 +280,14 @@ c jet mass with CA-algorithm without filtering:
       end do
 c jet mass with CA-algorithm with filtering:
       do j=1,nptbins
-        call bookupeqbins('jetmass, CA splitfilt, R=1.2, |y| < 2, '//
-     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+        call bookupeqbins('jetmass,CA splitfilt,R=1.2,|y|<2,'//
+     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
      >                    10d0,0d0,jetmassmaxsub(j))
       end do
 c jet mass with antikt-algorithm without filtering:
       do j=1,nptbins
-        call bookupeqbins('jetmass, antikt, R=1.0, |y| < 2, '//
-     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+        call bookupeqbins('jetmass,antikt,R=1.0,|y|<2,'//
+     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
      >                    10d0,0d0,jetmassmaxsub(j))
       end do
 c \sqrt{d_{12}} part:
@@ -299,8 +299,8 @@ c \sqrt{d_{12}} with CA-algorithm without filtering:
       end do
 c \sqrt{d_{12}} with CA-algorithm with filtering:
       do j=1,nptbins
-        call bookupeqbins('sqrt(d12), CA splitfilt, R=1.2, |y| < 2, '//
-     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+        call bookupeqbins('sqrt(d12),CA splitfilt,R=1.2,|y|<2,'//
+     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
      >                    5d0,0d0,100d0)
       end do
 c \sqrt{d_{12}} with antikt-algorithm without filtering:
