@@ -197,8 +197,7 @@ c     palg=1 is standard kt, -1 is antikt
 
 c      write(*,*) 'numjets ',numjets
 
-      ktj(1)=0d0
-      ktj(2)=0d0
+      ktj(1:maxnumjets) = 0d0
       do j=1,min(maxnumjets,numjets)
          ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
       enddo

@@ -88,7 +88,7 @@ c     1           '-m'//cptmin(i),dpt,0d0,400d0)
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
-      include 'pwhg_kn.h'
+      include 'pwhg_bookhist-multi.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer   maxjet,mjets,numjets,ntracks
@@ -134,7 +134,7 @@ c     we need to tell to this analysis file which program is running it
       real * 8 palg
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2
-      real * 8 dsig(7)
+      real * 8 dsig(maxmulti)
       integer nweights
       logical ini
       data ini/.true./
@@ -243,7 +243,7 @@ c     since the ptminarr array is ordered, if the second jet is not passing the 
      >               //'-ymax-'//cymax(j),1d0,dsig)
                   
 c     jets
-          mjets=numjets
+          mjets=min(maxnumjets,numjets)
          
           do k=1,mjets
             call getyetaptmass(pj(:,k),y,eta,pt,m)
