@@ -157,6 +157,10 @@ c Straighten up colour and flavour
       subroutine finalize_lh
 c Specify here if resonances need be written in the event file.
       implicit none
+
+c     The general reshuffling procedure.
+      call lhefinitemasses
+
       end
 
 

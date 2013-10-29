@@ -2,6 +2,7 @@
       implicit none
       include "coupl.inc"
       include 'PhysPars.h'
+      include 'pwhg_physpar.h'
 
       real * 8 powheginput
       external powheginput
@@ -26,16 +27,14 @@ c somewhere else
 
       call madtophys
 
-c Are these needed?
-c$$$      physpar_ml(1)=0.511d-3
-c$$$      physpar_ml(2)=0.1057d0
-c$$$      physpar_ml(3)=1.777d0
-c$$$      physpar_mq(1)=0.33d0     ! up
-c$$$      physpar_mq(2)=0.33d0     ! down
-c$$$      physpar_mq(3)=0.50d0     ! strange
-c$$$      physpar_mq(4)=1.50d0     ! charm
-c$$$      physpar_mq(5)=4.80d0     ! bottom
-c      call golem_initialize
+      physpar_ml(1) = 0.511d-3
+      physpar_ml(2) = 0.1057d0
+      physpar_ml(3) = 1.777d0
+      physpar_mq(1) = 0.33d0     ! up
+      physpar_mq(2) = 0.33d0     ! down
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = 4.80d0     ! bottom
       end
 
 

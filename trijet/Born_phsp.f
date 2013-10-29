@@ -679,10 +679,10 @@ c an emitter and obtain all the other regions by momentum swapping:
          endif
          fact = 1/scale**p/(1/scale+1/pt1sq)**p
      1        * 1/scale**p/(1/scale+1/pt2sq)**p
-     1        * 1/scale**p/(1/scale+1/pt3sq)**p
-     1        * 1/scale**p/(1/scale+1/msq12)**p
-     1        * 1/scale**p/(1/scale+1/msq23)**p
-     1        * 1/scale**p/(1/scale+1/msq31)**p
+     2        * 1/scale**p/(1/scale+1/pt3sq)**p
+     3        * 1/scale**p/(1/scale+1/msq12)**p
+     4        * 1/scale**p/(1/scale+1/msq23)**p
+     5        * 1/scale**p/(1/scale+1/msq31)**p
       else
 c     In the case of MINLO evaluation sum of pt's are used:
          pt1 = sqrt(pt1sq)
