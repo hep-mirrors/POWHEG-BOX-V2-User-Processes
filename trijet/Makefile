@@ -13,9 +13,9 @@ PDF=lhapdf
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
-ANALYSIS=minlo
+ANALYSIS=exp
 ## For static linking uncomment the following
-STATIC= -static
+#STATIC= -static
 #
 
 OBJ=obj-$(COMPILER)
@@ -116,6 +116,14 @@ LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo-ycut.o observables.o
 PWHGANAL+=  fastjetfortran.o
+endif
+ifeq ("$(ANALYSIS)","exp")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-exp.o observables.o 
+PWHGANAL+=  fastjetfortran.o fastjet-addon.o bra_ket_subroutines.o pdfdummies.o
 endif
 
 
