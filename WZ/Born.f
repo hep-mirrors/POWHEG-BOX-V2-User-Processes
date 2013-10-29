@@ -72,19 +72,9 @@ C     -- no gluons, so no spin correlated Born
       
       bornjk=0d0
 C     -- here the bornjk is very simple B_i j = B C_i
-      do j=1,nlegs
-         if(abs(bflav(j)).le.6) then
-            do k=j+1,nlegs
-               if(abs(bflav(k)).le.6) then
-                  colcf=cf
-                  bornjk(j,k)=born*colcf
-                  bornjk(k,j)=bornjk(j,k)
-               endif
-            enddo
-         endif
-      enddo
-      
 
+      bornjk(1,2)=born*cf
+      bornjk(2,1)=bornjk(1,2)
 
       end
 
