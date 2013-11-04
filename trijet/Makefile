@@ -95,7 +95,7 @@ ifeq ("$(ANALYSIS)","trijet")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis.o observables.o
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
@@ -106,7 +106,7 @@ ifeq ("$(ANALYSIS)","minlo")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo.o observables.o
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo.o
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","minlo-ycut")
@@ -114,7 +114,7 @@ ifeq ("$(ANALYSIS)","minlo-ycut")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo-ycut.o observables.o
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo-ycut.o
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","exp")
@@ -122,7 +122,7 @@ ifeq ("$(ANALYSIS)","exp")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-exp.o observables.o 
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-exp.o
 PWHGANAL+=  fastjetfortran.o fastjet-addon.o bra_ket_subroutines.o pdfdummies.o
 endif
 
@@ -154,6 +154,7 @@ PWHG= $(USER) pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	reshufflemoms.o \
 	sigcollsoft.o sigvirtual.o  ubprojections.o                     \
 	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o          \
+	merging.o observables.o
 	validflav.o $(PDFPACK) $(FPEOBJ)
 
 LIBDIRMG=$(OBJ)
