@@ -13,9 +13,9 @@ PDF=lhapdf
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
-ANALYSIS=exp
+ANALYSIS=minlo-ycut
 ## For static linking uncomment the following
-#STATIC= -static
+STATIC= -static
 #
 
 OBJ=obj-$(COMPILER)
@@ -154,7 +154,7 @@ PWHG= $(USER) pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	reshufflemoms.o \
 	sigcollsoft.o sigvirtual.o  ubprojections.o                     \
 	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o          \
-	merging.o observables.o
+	merging.o observables.o \
 	validflav.o $(PDFPACK) $(FPEOBJ)
 
 LIBDIRMG=$(OBJ)
