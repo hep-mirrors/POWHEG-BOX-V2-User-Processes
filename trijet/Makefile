@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -8,14 +8,13 @@ FC=$(COMPILER)
 PDF=lhapdf
 #Choose Analysis: dummy, process specific
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
-#ANALYSIS=dummy
 # trijet     : all-round analysis
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
 ANALYSIS=minlo-ycut
 ## For static linking uncomment the following
-STATIC= -static
+#STATIC= -static
 #
 
 OBJ=obj-$(COMPILER)
@@ -35,7 +34,7 @@ OPT=-O2
 #DEBUG= -ggdb 
 ifdef DEBUG
 OPT=-O0
-FPE=-ffpe-trap=invalid,zero,overflow,underflow
+#FPE=-ffpe-trap=invalid,zero,overflow,underflow
 endif
 endif
 

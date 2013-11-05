@@ -83,8 +83,8 @@ c if momenta have changed, the old results (for each underlying born) are invali
       common/cdijetflag/dijetflag
       logical raisingscales,ini
       save raisingscales,ini
-      logical ktmerge
-      save ktmerge
+      logical ktmerging
+      save ktmerging
       data ini/.true./
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
@@ -92,8 +92,8 @@ c if momenta have changed, the old results (for each underlying born) are invali
          else
             raisingscales = .true.
          endif
-         ktmerge = .false.
-         if (powheginput("#ktmerge").gt.0d0) ktmerge = .true.
+         ktmerging = .false.
+         if (powheginput("#ktmerging").gt.0d0) ktmerging = .true.
          ini = .false.
       endif
       renfac2=st_renfact**2
@@ -150,7 +150,7 @@ c provide alpha_S reweighting
                inlofac=inlofac+1
             endif
             if(jmerge.gt.2) then
-              if (ktmerge) then
+              if (ktmerging) then
                 call ktmerge(p(:,jmerge),p(:,kmerge),p(:,jmerge))
               else
                 p(:,jmerge)=p(:,jmerge)+p(:,kmerge)
