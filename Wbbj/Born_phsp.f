@@ -164,7 +164,12 @@ c      pause
       kn_pborn(1:3,6) = p6(1:3)
       kn_pborn(1:3,7) = p7(1:3)
 
-      kn_jacborn = xjac/(2d0*pi)
+
+c*******************************************************
+c     c'e o non c'e' la divisione per 2pi?????????
+c*******************************************************
+c      kn_jacborn = xjac/(2d0*pi)
+      kn_jacborn = xjac
 
 c      write(*,*) kn_jacborn
 

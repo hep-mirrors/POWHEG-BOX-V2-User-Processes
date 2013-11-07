@@ -178,25 +178,25 @@ c    u
 c    c
 c    t
 
-      Vud=0.97428d0
-      Vus=0.2253d0
-      Vub=0.00347d0
-      Vcd=0.2252d0
-      Vcs=0.97345d0
-      Vcb=0.0410d0
-      Vtd=0.00862d0
-      Vts=0.0403d0
-      Vtb=0.999152d0
+c$$$      Vud=0.97428d0
+c$$$      Vus=0.2253d0
+c$$$      Vub=0.00347d0
+c$$$      Vcd=0.2252d0
+c$$$      Vcs=0.97345d0
+c$$$      Vcb=0.0410d0
+c$$$      Vtd=0.00862d0
+c$$$      Vts=0.0403d0
+c$$$      Vtb=0.999152d0
 
-c$$$      Vud=1d0
-c$$$      Vus=1d-10
-c$$$      Vub=1d-10
-c$$$      Vcd=1d-10
-c$$$      Vcs=1d0
-c$$$      Vcb=1d-10
-c$$$      Vtd=1d-10
-c$$$      Vts=1d-10
-c$$$      Vtb=1d0
+      Vud=1d0
+      Vus=1d-10
+      Vub=1d-10
+      Vcd=1d-10
+      Vcs=1d0
+      Vcb=1d-10
+      Vtd=1d-10
+      Vts=1d-10
+      Vtb=1d0
 
       end
 
