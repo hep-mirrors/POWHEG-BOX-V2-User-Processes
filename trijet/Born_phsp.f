@@ -656,12 +656,16 @@ c an emitter and obtain all the other regions by momentum swapping:
       parameter (p=2d0)
       real * 8 pwhg_rapidity
       external pwhg_rapidity
-      save ini,scale,rapsuppfact
+      real * 8 scale2
+      save ini,scale,scale2,rapsuppfact
       ptsqrel(i,j)=2*dotp(kn_cmpborn(0,i),kn_cmpborn(0,j))
      1     *  kn_cmpborn(0,i)*kn_cmpborn(0,j)
      2     /(kn_cmpborn(0,i)**2+kn_cmpborn(0,j)**2)
       if (ini) then
-         scale = powheginput("bornsuppfact")**2
+         scale2 = powheginput("#suppnominlo")
+         if(scale2.lt.0) scale2 = 0
+         scale2 = scale2**2
+         scale  = powheginput("bornsuppfact")**2
          rapsuppfact = powheginput("#rapsuppfact")
          if (rapsuppfact.lt.0d0) rapsuppfact=0d0
          ini = .false.
@@ -677,12 +681,31 @@ c an emitter and obtain all the other regions by momentum swapping:
             fact = 0
             return
          endif
-         fact = 1/scale**p/(1/scale+1/pt1sq)**p
-     1        * 1/scale**p/(1/scale+1/pt2sq)**p
-     2        * 1/scale**p/(1/scale+1/pt3sq)**p
-     3        * 1/scale**p/(1/scale+1/msq12)**p
-     4        * 1/scale**p/(1/scale+1/msq23)**p
-     5        * 1/scale**p/(1/scale+1/msq31)**p
+         if(scale2.gt.0) then
+            fact = exp(-scale2**p*(
+     1           1/pt1sq**p
+     2           +1/pt2sq**p
+     3           +1/pt3sq**p
+     4           +1/msq12**p
+     5           +1/msq23**p
+     6           +1/msq31**p ))
+            pt1 = sqrt(pt1sq)
+            pt2 = sqrt(pt2sq)
+            pt3 = sqrt(pt3sq)
+            Ht  = pt1 + pt2 + pt3
+            if (Ht.lt.minHt) then
+               fact = 0d0
+               return
+            end if
+            fact = fact/scale**p/(1d0/scale + 1d0/Ht**2)**p
+         else
+            fact = 1/scale**p/(1/scale+1/pt1sq)**p
+     1           * 1/scale**p/(1/scale+1/pt2sq)**p
+     2           * 1/scale**p/(1/scale+1/pt3sq)**p
+     3           * 1/scale**p/(1/scale+1/msq12)**p
+     4           * 1/scale**p/(1/scale+1/msq23)**p
+     5           * 1/scale**p/(1/scale+1/msq31)**p
+         endif
       else
 c     In the case of MINLO evaluation sum of pt's are used:
          pt1 = sqrt(pt1sq)
@@ -726,7 +749,7 @@ c     suppress regions with high rapidities
             write(*,*) '****************************************'
             write(*,*) '*******     FIXED SCALES!          *****'
             fixedscale=.true.
-            muref=100d0
+            muref=300d0
          else        
             muref=powheginput("#fixedscale")                        
             print *,"********************************************"

@@ -1,8 +1,8 @@
-      subroutine setlocalscales(iuborn,imode,rescfac)
+      subroutine setlocalscales(iuborn,iimode,rescfac)
 c returns the rescaling factor including sudakov form factors and
 c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       implicit none
-      integer iuborn,imode
+      integer iuborn,iimode
       real * 8 rescfac
       include 'nlegborn.h'
       include 'pwhg_flst.h'
@@ -10,7 +10,7 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       include 'pwhg_flg.h'
       include 'pwhg_par.h'
       include 'pwhg_st.h'
-      integer j,k,mu
+      integer j,k,mu,imode
       logical samekin,sameflv
       integer flav(nlegborn)
       real * 8 op(0:3,nlegborn),basicfac,bornfac,nlofac
@@ -20,6 +20,16 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       save savbasicfac,savbornfac,savnlofac,savmuf2,valid
       save op
       data valid/maxprocborn*.false./
+      logical tmpflag
+      common/ctmpflag/tmpflag
+      save /ctmpflag/
+      if(iimode.ge.10) then
+         imode = iimode/10
+         tmpflag = .true.
+      else
+         tmpflag = .false.
+         imode = iimode
+      endif
       do j=1,nlegborn
          do mu=0,3
 c op stands for old momenta (momenta at the previous calls)
@@ -47,6 +57,13 @@ c if momenta have changed, the old results (for each underlying born) are invali
          savbornfac(iuborn)=bornfac
          savmuf2(iuborn)=st_mufact2
          valid(iuborn)=.true.
+      endif
+      if(iimode.ge.10) then
+         write(111,*) ' Minlo factors:'
+         write(111,*) 'basicfac:',basicfac
+         write(111,*) 'bornfac:',bornfac
+         write(111,*) 'nlofac:',nlofac
+         write(111,*) 'st_mufact',sqrt(st_mufact2)
       endif
       if(imode.eq.1) then
          if(flg_bornonly) then
@@ -86,6 +103,9 @@ c if momenta have changed, the old results (for each underlying born) are invali
       logical ktmerging
       save ktmerging
       data ini/.true./
+      logical tmpflag
+      common/ctmpflag/tmpflag
+      save /ctmpflag/
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
             raisingscales = .false.
@@ -126,6 +146,9 @@ c save this scale; it is the Q_0 scale that appears in all Sudakovs
 c     Provide alpha_S reweighting for the first merge
                alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
      1              st_lambda5MSB,st_nlight)
+               if(tmpflag) then
+                  write(*,*) '1st merg. alphas=',alphas/st_alpha
+               endif
                basicfac=alphas/st_alpha
                nlofac=basicfac
                mu2=max(q2merge*renfac2,1d0)
@@ -144,6 +167,9 @@ c provide Sudakov
 c provide alpha_S reweighting
                alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
      1              st_lambda5MSB,st_nlight)
+               if(tmpflag) then
+                  write(*,*) '2st merg. alphas=',alphas/st_alpha
+               endif
                basicfac=basicfac*alphas/st_alpha
                mu2=mu2*max(q2merge*renfac2,1d0)
                nlofac=nlofac+alphas/st_alpha
@@ -222,6 +248,9 @@ c If scales(1)=0 no merge has taken place: no sudakovs.
       if(st_bornorder.gt.inlofac) then
          alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
      1           st_lambda5MSB,st_nlight)
+         if(tmpflag) then
+            write(*,*) 'last merg. alphas=',alphas/st_alpha
+         endif
 c         do j=inlofac+1,st_bornorder
 c            mu2=mu2*max(q2merge*renfac2,1d0)
 c            nlofac=nlofac+alphas/st_alpha

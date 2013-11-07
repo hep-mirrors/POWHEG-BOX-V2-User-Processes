@@ -113,7 +113,7 @@ ifeq ("$(ANALYSIS)","minlo-ycut")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo-ycut.o
+PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut.o
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","exp")
@@ -153,8 +153,7 @@ PWHG= $(USER) pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	reshufflemoms.o \
 	sigcollsoft.o sigvirtual.o  ubprojections.o                     \
 	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o          \
-	merging.o observables.o \
-	validflav.o $(PDFPACK) $(FPEOBJ)
+	merging.o validflav.o $(PDFPACK) $(FPEOBJ)
 
 LIBDIRMG=$(OBJ)
 LINKMGLIBS =  -L$(LIBDIRMG)  -lmadgraph -lmodel -ldhelas3 

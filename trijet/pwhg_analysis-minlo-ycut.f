@@ -152,6 +152,7 @@ c
 c
       real*8 MinFirstJetPt
       parameter(MinFirstJetPt = 70d0)
+      real * 8 rescfac
 c
 
       if (.not.pwhg_isfinite(dsig0)) then
@@ -244,6 +245,14 @@ c     since the ptminarr array is ordered, if the second jet is not passing the 
                   
 c     jets
           mjets=min(maxnumjets,numjets)
+
+
+c          if(i.eq.1.and.j.eq.1.and.mjets.ge.3.and.ktj(3).gt.300) then
+c             write(111,*) '*** checking minlo rescfac formation *** '
+c             call setlocalscales(rad_ubornidx,10,rescfac)
+c          endif
+
+
          
           do k=1,mjets
             call getyetaptmass(pj(:,k),y,eta,pt,m)
