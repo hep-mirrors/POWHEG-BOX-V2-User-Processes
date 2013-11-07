@@ -8,7 +8,7 @@
       real * 8 xborn(ndiminteg-3)
       integer k
       real * 8 xjac,smin,smax,z,s,wt,sqrts,
-     1     m34,taumin,zp,s3456,
+     1     m34,taumin,zp,zpp,s3456,
      2     tau,ymax,y,xx(2),p1(4),p2(4),p3(4),p4(4),p5(4),p6(4),p7(4),
      3     p12(4),p127(4),p34(4),p56(4),beta,vec(3),s3456min,s56min,
      4     s3456max,sratio,lnsratio,expon,lntaum,ycm
@@ -50,14 +50,13 @@ c     set initial- and final-state masses for Born and real
          return
       endif
 
-c      s3456 = (s3456max - s3456min)*xborn(4)**3 + s3456min
-c      xjac = xjac*(s3456max - s3456min)*3*xborn(4)**2
-
       sratio = s3456min/s3456max
       lnsratio = log(sratio)
+
       expon=1d0/4
       s3456 = exp(lnsratio*(xborn(4)**expon))*s3456max
       xjac  = xjac*(-lnsratio*s3456)*expon*xborn(4)**(expon-1)
+
 
       expon=1d0/5
       taumin = (kn_ktmin + sqrt(s3456 + kn_ktmin**2))**2/kn_sbeams
@@ -109,18 +108,17 @@ C     total incoming momentum
          write(*,*) sqrt(p7(1)**2+p7(2)**2),' < ',kn_ktmin         
          write(*,*) 'The POWHEG BOX continues'
       endif
-
       
       z=xborn(7)**3 
       xjac=xjac*3*xborn(7)**2
       
       zp=xborn(8)
-      zp = -2*zp**3 + 3*zp**2
+      zpp = -2*zp**3 + 3*zp**2
       xjac=xjac*(-6*zp**2 + 6*zp)
 
       s56min=(kn_masses(5)+kn_masses(6))**2 
 
-      call phi1_2m_nobw(m34,z,zp,xborn(9),
+      call phi1_2m_nobw(m34,z,zpp,xborn(9),
      1                  s56min,p127,p34,p56,wt)
       xjac=xjac*wt
 

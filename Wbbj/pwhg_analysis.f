@@ -496,10 +496,20 @@ c     if there is only one b jet, then return
      
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
-      ptb1min=0d0
-      ptb2min=0d0
+      ptb1min=20d0
+      ptb2min=20d0
       ybmax=1000d0
       yjmax=1000d0
+
+
+      if (sqrt(pbjet1(1)**2+pbjet1(2)**2).lt.ptb1min) then
+         return
+      endif
+
+      if (sqrt(pbjet2(1)**2+pbjet2(2)**2).lt.ptb2min) then
+         return
+      endif
+
 
 c*****************************************************
 c     total number of jets minus the 2 b jets
@@ -512,6 +522,7 @@ c***  change the following for different analysis  ***
 c     since ptminarr is pt ordered, the following return is correct
             return
          endif
+
 
          call filld('sigtot'//cptmin(i),1d0,dsig)         
          
@@ -547,6 +558,7 @@ c     hardest b jet
         
 c     next-to-hardest b jet
          call getyetaptmass(pbjet2,y,eta,pt,m)
+
          call filld('b2-y'//cptmin(i),     y, dsig)
          call filld('b2-eta'//cptmin(i), eta, dsig)
          call filld('b2-pt'//cptmin(i),   pt, dsig)
