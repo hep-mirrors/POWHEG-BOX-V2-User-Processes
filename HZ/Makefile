@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
@@ -37,7 +37,7 @@ F77 = ifort -save  -extend_source  -module $(OBJ)
 #FFLAGS =  -checkm
 ## For floating point exception trapping  uncomment the following 
 #FPE = -fpe0
-OPT = -O3 #-fast
+OPT = -O1 #-fast
 ## For debugging uncomment the following
 #DEBUG= -debug -g
 ifdef DEBUG
@@ -46,20 +46,19 @@ FPE = -fpe0
 endif
 endif
 
-PWD=$(shell pwd)
-WDNAME=$(shell basename $(PWD))
 
 OBJ=obj-$(COMPILER)
 OBJDIR:=$(OBJ)
 
-
-VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1/:../:$(OBJDIR):
+PWD=$(shell pwd)
+WDNAME=$(shell basename $(PWD))
+VPATH= ./:../:$(OBJDIR)
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
-INCLUDE1.2=$(shell dirname $(PWD))/Version-pre2-1/include
+
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE1.2) -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 

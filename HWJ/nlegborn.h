@@ -1,4 +1,5 @@
-      
+c -*- Fortran -*-    
+
       integer nlegborn,nlegreal
       parameter (nlegborn=           6 )
       parameter (nlegreal=nlegborn+1)
@@ -7,5 +8,7 @@
       parameter (ndiminteg=(nlegreal-2)*3-4+2+1)
       
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=999,maxprocreal=999)
+      parameter (maxprocborn=36,maxprocreal=342)
       
+      integer maxalr
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)
