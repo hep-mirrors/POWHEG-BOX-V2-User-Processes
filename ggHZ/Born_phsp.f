@@ -185,7 +185,7 @@ c     now boost everything BACK along z-axis
          else
             write(*,*) '****************************************'
             write(*,*) '****************************************'
-            write(*,*) '**   mur=muf=MH+MW                    **'
+            write(*,*) '**   mur=muf=MH+MZ                    **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'            
          endif
@@ -206,15 +206,8 @@ c     now boost everything BACK along z-axis
          if(mur.lt.2) mur=2
          muf=mur         
       else
-
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC    SISTEMARE CCCCCCCCCCCCCCCCCCCCCCCC
-c         muf=ph_hmass+ph_Zmass
-c         mur=ph_hmass+ph_Zmass
-
-
-         muf=ph_hmass+ph_Wmass
-         mur=ph_hmass+ph_Wmass
+         muf=ph_hmass+ph_Zmass
+         mur=ph_hmass+ph_Zmass
       endif
       end
 
