@@ -67,7 +67,7 @@ c     decay products of the vector boson
       if (vdecaymode.eq.-11) write(*,*) '         to e+ e- '
       if (vdecaymode.eq.-13) write(*,*) '         to mu+ mu-'
       if (vdecaymode.eq.-15) write(*,*) '         to tau+ tau-'
-      if (vdecaymode.eq.-12) write(*,*) '         to ve anti_ve'
+      if (vdecaymode.eq.-12) write(*,*) '         to antinue nue'
       if (vdecaymode.eq.-14) write(*,*) '         to antinumu numu'
       if (vdecaymode.eq.-16) write(*,*) '         to antinutau nutau'
 
@@ -136,17 +136,10 @@ c via powheginput. All others are needed for the
 c madgraph routines not to blow.
 
       alpha= 1/132.50698d0
-
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      alpha=7.555786d-03
-      
-
       gfermi = 0.1166390d-4
       alfas = 0.119d0
       zmass = 91.188d0
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC  set mtop to 172.5
-      tmass = 172d0
+      tmass = 172.5d0
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
@@ -157,14 +150,6 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC  set mtop to 172.5
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
-
-
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
-      wmass=80.399d0
-
-
-
 
       twidth=1.5083d0
 
@@ -178,9 +163,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       ph_Zmass2high=powheginput("max_z_mass")**2
 
 
-c   set back to this value!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c      zwidth=2.441d0
-      zwidth=2.4952d0
+      zwidth=2.441d0
       wwidth=2.0476d0
 
 c     POWHEG CKM matrix

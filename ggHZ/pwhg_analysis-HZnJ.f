@@ -14,17 +14,13 @@ c  pwhgfill  :  fills the histograms with data
       character * 1 cnum(9)
       data cnum/'1','2','3','4','5','6','7','8','9'/
       integer maxjet
-      parameter (maxjet=0)
+      parameter (maxjet=3)
       integer nptmin
-      parameter (nptmin=1)
+      parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-c      data cptmin/  '-001',  '-010',  '-020'/
-c      data ptminarr/   1d0,     10d0,    20d0/
-
-      data cptmin/  '-001'/
-      data ptminarr/   1d0/
-
+      data cptmin/  '-001',  '-010',  '-020'/
+      data ptminarr/   1d0,     10d0,    20d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 Hmass,Hwidth,powheginput
@@ -32,9 +28,7 @@ c      data ptminarr/   1d0,     10d0,    20d0/
 
       call inihists
 
-c      dy=0.5d0
-       dy=0.4d0
-
+      dy=0.5d0
       dylep=0.4d0
       dpt=10d0
       dr=0.2d0
@@ -53,14 +47,10 @@ c     total cross section sanity check
       call bookupeqbins('Njet'//cptmin(i),1d0,-0.5d0,5.5d0)
 
       call bookupeqbins('H-y'//cptmin(i),dy,-5d0,5d0)
-
       call bookupeqbins('H-eta'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,400d0)
-c      call bookupeqbins('H-m'//cptmin(i),Hwidth,
-c     $     max(Hmass-20*Hwidth,0d0),Hmass+20*Hwidth)
-
-      call bookupeqbins('H-m'//cptmin(i),30d0,0d0,1500d0)
-
+      call bookupeqbins('H-m'//cptmin(i),Hwidth,Hmass-20*Hwidth,
+     $     Hmass+20*Hwidth)
 c      call bookupeqbins('H-m'//cptmin(i),0.2d-2,124.98d0,125.020d0)
 
       call bookupeqbins('Z-y'//cptmin(i),dy,-5d0,5d0)
@@ -198,7 +188,7 @@ c      include 'LesHouches.h'
       integer   jetvec(maxtrack),itrackhep(maxtrack)
       character * 1 cnum(9)
       integer nptmin
-      parameter (nptmin=1)
+      parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)      
       common/infohist/ptminarr,cnum,cptmin
@@ -439,7 +429,7 @@ c     $        pj,mjets,jetvec)
       do i=1,nptmin        
          njets=0
          
-         do j=1,min(0,numjets)
+         do j=1,min(3,numjets)
             ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )
             if (ktj(j).gt.ptminarr(i)) then
                njets=njets+1
