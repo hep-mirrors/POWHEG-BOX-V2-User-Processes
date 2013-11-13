@@ -63,7 +63,6 @@ nubound 2000000 ! number of calls to set up the upper bounding norms for radiati
 ! OPTIONAL PARAMETERS
 
 withnegweights 1  ! (default 0) if on (1) use negative weights
-#bornonly 1        ! (default 0) if 1 do Born only
 #ptsqmin    0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
 #charmthr   1.5    ! (default 1.5 GeV) charm treshold for gluon splitting 
 #bottomthr  5.0    ! (default 5.0 GeV) bottom treshold for gluon splitting
@@ -97,3 +96,5 @@ nohad   1
 
 
 LOevents 1
+# with LOevents equal 1, bornonly must be set equal to 1
+parallel_mode_neutrino
