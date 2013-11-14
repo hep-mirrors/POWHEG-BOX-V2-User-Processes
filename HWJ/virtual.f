@@ -17,8 +17,8 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 p(0:3,nlegborn)
       integer vflav(nlegborn)
       real * 8 virtual
-      
-      integer proc, i
+      integer vflavloc(nlegborn)
+      integer proc, i, iprod,iq1,iq2
       integer vflav_gosam(1:nlegborn,0:maxprocborn-1)
       logical equalintlists
       external equalintlists
@@ -27,6 +27,9 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 pgosam(dim_mom_array)
 C     real * 8 pgosam(5*nlegborn)
       real * 8 params(10),muren,res(4)
+      real * 8 virtualold
+      logical debug
+      parameter (debug=.false.)
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
       data(vflav_gosam(i,   30),i=1,nlegborn)/
@@ -286,9 +289,27 @@ C     real * 8 pgosam(5*nlegborn)
          call cconj(vflav,nlegborn)
          call pconj(p,nlegborn)
       endif
-      
+
+c     transfer the flavor list into a list with only up and down quark or antiquark
+      vflavloc=vflav
+      iq1 = 0
+      iq2 = 0
+      do i=1,nlegborn
+         if (vflavloc(i).ne.0) then
+            if (mod(abs(vflavloc(i)),2).eq.1.and.abs(vflavloc(i)).le.5) 
+     $           then
+               iq1 = abs(vflavloc(i))
+               vflavloc(i)=sign(1,vflavloc(i))
+            elseif (mod(abs(vflavloc(i)),2).eq.0.and.
+     $              abs(vflavloc(i)).le.5) then
+               iq2 = abs(vflavloc(i))
+               vflavloc(i)=sign(2,vflavloc(i))
+            endif
+         endif
+      enddo
+
       do i=0,flst_nborn-1
-         if (equalintlists(nlegborn,vflav,vflav_gosam(1,i))) then
+         if (equalintlists(nlegborn,vflavloc,vflav_gosam(1,i))) then
             proc=i
             goto 222
          endif
@@ -304,7 +325,44 @@ C     real * 8 pgosam(5*nlegborn)
       
       call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
       virtual=res(3)
-      
+     
+c     trick to figure out which case we are dealing with
+c     iq1    iq2    iq1*iq2
+c      1      2        2  
+c      1      4        4
+c      3      2        6
+c      3      4       12
+c      5      2       10
+c      5      4       20
+      iprod=iq1*iq2
+      if (iprod.eq.4) then
+         virtual=virtual*ph_CKM(2,1)**2 /ph_CKM(1,1)**2
+      elseif (iprod.eq.6) then
+         virtual=virtual*ph_CKM(1,2)**2 /ph_CKM(1,1)**2
+      elseif (iprod.eq.12) then
+         virtual=virtual*ph_CKM(2,2)**2 /ph_CKM(1,1)**2
+      elseif (iprod.eq.10) then
+         virtual=virtual*ph_CKM(1,3)**2 /ph_CKM(1,1)**2
+      elseif (iprod.eq.20) then
+         virtual=virtual*ph_CKM(2,3)**2 /ph_CKM(1,1)**2
+
+      endif
+
+
+      if (debug) then
+         do i=0,flst_nborn-1
+            if (equalintlists(nlegborn,vflav,vflav_gosam(1,i))) then
+               proc=i
+               goto 987
+            endif
+         enddo
+ 182     call exit(1)         
+ 987     call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
+         virtualold=res(3)                 
+         write(*,*) 'MUST be 1 ===> ',virtualold/virtual
+      endif
+
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     GOSAM returns Virtual with NO gs factor ==>
 C     virt_gosam ->  virt_gosam * (gs^2)^AlphasPower =  
@@ -320,7 +378,5 @@ C     We have then to multiply for 2*pi
          call cconj(vflav,nlegborn)
          call pconj(p,nlegborn)
       endif
-
-c      write(*,*) 'virt ',virtual 
 
       end
