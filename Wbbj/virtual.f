@@ -230,7 +230,7 @@ C     real * 8 pgosam(5*nlegborn)
          call pconj(p,nlegborn)
       endif
 
-c     transfor the flavor list into a list with only up and down quark or antiquark
+c     transfer the flavor list into a list with only up and down quark or antiquark
       vflavloc=vflav
       iq1 = 0
       iq2 = 0
@@ -257,7 +257,6 @@ c     transfor the flavor list into a list with only up and down quark or antiqu
  111  write(*,*) 'NO matching flavour string between POWHEG and GoSam'
       write(*,*) 'PROGRAM ABORT'
       call exit(1)
-
       
  222  call gosam_momenta(p,pgosam)
       
