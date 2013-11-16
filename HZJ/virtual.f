@@ -27,6 +27,15 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 pgosam(dim_mom_array)
 C     real * 8 pgosam(5*nlegborn)
       real * 8 params(10),muren,res(4)
+      integer vflavloc(nlegborn)
+      logical debug
+      parameter (debug=.false.)
+      logical inidebug
+      data inidebug/.true./
+      save inidebug
+      real * 8 eps
+      parameter (eps=1d-12)
+      real * 8 virtual old
       data(vflav_gosam(i,   12),i=1,nlegborn)/
      $      -1,
      $       1,
@@ -238,8 +247,23 @@ C     real * 8 pgosam(5*nlegborn)
      $      11,
      $       5/
       
+
+      vflavloc=vflav
+      do i=1,nlegborn
+         if (vflavloc(i).ne.0) then     
+            if (mod(abs(vflavloc(i)),2).eq.1.and.abs(vflavloc(i)).le.5) 
+     $           then
+               vflavloc(i)=sign(1,vflavloc(i))
+            elseif (mod(abs(vflavloc(i)),2).eq.0.and.
+     $              abs(vflavloc(i)).le.5) then
+               vflavloc(i)=sign(2,vflavloc(i))
+            endif
+         endif
+      enddo
+
+
       do i=0,flst_nborn-1
-         if (equalintlists(nlegborn,vflav,vflav_gosam(1,i))) then
+         if (equalintlists(nlegborn,vflavloc,vflav_gosam(1,i))) then
             proc=i
             goto 222
          endif
@@ -256,6 +280,30 @@ C     real * 8 pgosam(5*nlegborn)
       call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
       virtual=res(3)
       
+
+
+      if (debug) then
+         do i=0,flst_nborn-1
+            if (equalintlists(nlegborn,vflav,vflav_gosam(1,i))) then
+               proc=i
+               goto 987
+            endif
+         enddo
+ 182     call exit(1)         
+ 987     call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
+         virtualold=res(3)  
+         if (inidebug) then
+            write(*,*) 'Writing ratios of the two virtual when'
+            write(*,*) 'difference with 1 is > ',eps
+            inidebug=.false.
+         endif
+         if (abs(virtualold/virtual-1).gt.eps) then 
+            write(*,*) 'MUST be 1 ===> ',virtualold/virtual
+         endif
+      endif
+
+
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     GOSAM returns Virtual with NO gs factor ==>
 C     virt_gosam ->  virt_gosam * (gs^2)^AlphasPower =  

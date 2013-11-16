@@ -29,7 +29,12 @@ C     real * 8 pgosam(5*nlegborn)
       real * 8 params(10),muren,res(4)
       real * 8 virtualold
       logical debug
-      parameter (debug=.false.)
+      parameter (debug=.true.)
+      logical inidebug
+      data inidebug/.true./
+      save inidebug
+      real * 8 eps
+      parameter (eps=1d-6)
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
       data(vflav_gosam(i,   30),i=1,nlegborn)/
@@ -358,10 +363,18 @@ c      5      4       20
          enddo
  182     call exit(1)         
  987     call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
-         virtualold=res(3)                 
-         write(*,*) 'MUST be 1 ===> ',virtualold/virtual
+         virtualold=res(3)  
+         if (inidebug) then
+            write(*,*) 'Writing ratios of the two virtual when'
+            write(*,*) 'difference with 1 is > ',eps
+            inidebug=.false.
+         endif
+         if (abs(virtualold/virtual-1).gt.eps) then 
+            write(*,*) 'MUST be 1 ===> ',virtualold/virtual
+         endif
       endif
 
+c      write(*,*) virtualold
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     GOSAM returns Virtual with NO gs factor ==>
