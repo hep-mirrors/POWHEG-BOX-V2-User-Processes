@@ -12,7 +12,7 @@ PDF=lhapdf
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
-ANALYSIS=minlo-ycut
+ANALYSIS=paper
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -20,7 +20,7 @@ ANALYSIS=minlo-ycut
 OBJ=obj-$(COMPILER)
 
 ifeq ("$(COMPILER)","gfortran")	
-F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
+F77=gfortran -fno-automatic
 CXX=g++
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -39,7 +39,7 @@ endif
 endif
 
 ifeq ("$(COMPILER)","ifort")
-F77 = ifort -save  -extend_source  -module $(OBJ)
+F77 = ifort -save  -extend_source
 CXX=icpc
 #CXX = g++
 #LIBS = -limf
@@ -114,6 +114,14 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut.o
+PWHGANAL+=  fastjetfortran.o
+endif
+ifeq ("$(ANALYSIS)","paper")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut-paper.o
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","exp")
