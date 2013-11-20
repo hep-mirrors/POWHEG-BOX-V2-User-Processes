@@ -48,7 +48,7 @@ c  pwhgfill  :  fills the histograms with data
 
          call bookupeqbins('j3-pt'//'-ymax-'//cymax(jy),dpt,0d0,400d0)
          call bookupeqbins('j3-ptzoom'//'-ymax-'//cymax(jy),
-     1        2d0,0d0,150d0)
+     1        0.5d0,0d0,20d0)
 
          do ipt=1,nptmin3
             call bookupeqbins('j3-y'//'-pt3min'//cptmin3(ipt)//
@@ -59,19 +59,19 @@ c  pwhgfill  :  fills the histograms with data
             call bookupeqbins('j3-pt'//'-pt2min'//cptmin2(ipt)//
      1           '-ymax-'//cymax(jy),dpt,0d0,400d0)
             call bookupeqbins('j3-ptzoom'//'-pt2min'//cptmin2(ipt)//
-     1           '-ymax-'//cymax(jy),2d0,0d0,150d0)
+     1           '-ymax-'//cymax(jy),0.5d0,0d0,20d0)
          enddo
 
 c here ymax is intended inclusivly, i.e. only upon the observed jet
          call bookupeqbins('j-pt'//'-yjmax-'//cymax(jy),
      1        dpt,0d0,400d0)
          call bookupeqbins('j-ptzoom'//'-yjmax-'//cymax(jy),
-     1        2d0,0d0,150d0)
+     1        0.5d0,0d0,20d0)
          
       enddo
 
       do ipt=1,nptmin2
-         call bookupeqbins('j-y'//'-ptjmin-'//cptmin2(ipt),
+         call bookupeqbins('j-y'//'-ptjmin'//cptmin2(ipt),
      1        dy,-5d0,5d0)
       enddo
       
@@ -254,7 +254,7 @@ c inclusive jet plots
       do ipt=1,nptmin2
          do j=1,njets
             if(ktj(j).gt.ptminarr2(ipt)) then
-               call filld('j-y'//'-ptjmin-'//cptmin2(ipt),
+               call filld('j-y'//'-ptjmin'//cptmin2(ipt),
      1              yj(j),dsig)
             endif
          enddo

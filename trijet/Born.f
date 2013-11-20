@@ -13,7 +13,6 @@ c and set the event-by-event couplings constant
       logical ini,bornonly
       data ini/.true./
       save bornonly,ini
-
       if (ini) then
          ini=.false.
          bornonly=(powheginput("#bornonly").eq.1d0)
