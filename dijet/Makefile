@@ -1,13 +1,13 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort
-COMPILER=gfortran
+COMPILER=ifort
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
-PDF=native
+PDF=lhapdf
 ## Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed
 ## separately (see below)
-ANALYSIS=dummy
+ANALYSIS=default
 ## For static linking uncomment the following
 #STATIC= -static
 #
