@@ -650,10 +650,9 @@ c an emitter and obtain all the other regions by momentum swapping:
       integer i,j
       real * 8 ptsqrel
       real*8 pt1,pt2,pt3,Ht
-      real * 8 minHt,minscale,p,rapsuppfact,y1,y2,y3
-      parameter (minHt=0d0)
-      parameter (minscale=0d0)      
+      real * 8 p,pp,rapsuppfact,y1,y2,y3
       parameter (p=2d0)
+      parameter (pp=1d0)
       real * 8 pwhg_rapidity
       external pwhg_rapidity
       real * 8 scale2
@@ -662,9 +661,14 @@ c an emitter and obtain all the other regions by momentum swapping:
      1     *  kn_cmpborn(0,i)*kn_cmpborn(0,j)
      2     /(kn_cmpborn(0,i)**2+kn_cmpborn(0,j)**2)
       if (ini) then
-         scale2 = powheginput("#suppnominlo")
-         if(scale2.lt.0) scale2 = 0
-         scale2 = scale2**2
+         if (powheginput("#suppnominlo").gt.0) then
+            write(*,*) 'suppnominlo flag NOT supported.'//
+     $           ' Remove from powheg.input file'
+            call pwhg_exit(-1)
+         endif
+c         scale2 = powheginput("#suppnominlo")
+c         if(scale2.lt.0) scale2 = 0
+c         scale2 = scale2**2        
          scale  = powheginput("bornsuppfact")**2
          rapsuppfact = powheginput("#rapsuppfact")
          if (rapsuppfact.lt.0d0) rapsuppfact=0d0
@@ -677,45 +681,33 @@ c an emitter and obtain all the other regions by momentum swapping:
       msq23 = ptsqrel(4,5)
       msq31 = ptsqrel(5,3)
       if (.not.flg_minlo) then
-         if (min(pt1sq,pt2sq,pt3sq,msq12,msq23,msq31).lt.minscale) then
-            fact = 0
-            return
-         endif
-         if(scale2.gt.0) then
-            fact = exp(-scale2**p*(
-     1           1/pt1sq**p
-     2           +1/pt2sq**p
-     3           +1/pt3sq**p
-     4           +1/msq12**p
-     5           +1/msq23**p
-     6           +1/msq31**p ))
-            pt1 = sqrt(pt1sq)
-            pt2 = sqrt(pt2sq)
-            pt3 = sqrt(pt3sq)
-            Ht  = pt1 + pt2 + pt3
-            if (Ht.lt.minHt) then
-               fact = 0d0
-               return
-            end if
-            fact = fact/scale**p/(1d0/scale + 1d0/Ht**2)**p
-         else
-            fact = 1/scale**p/(1/scale+1/pt1sq)**p
-     1           * 1/scale**p/(1/scale+1/pt2sq)**p
-     2           * 1/scale**p/(1/scale+1/pt3sq)**p
-     3           * 1/scale**p/(1/scale+1/msq12)**p
-     4           * 1/scale**p/(1/scale+1/msq23)**p
-     5           * 1/scale**p/(1/scale+1/msq31)**p
-         endif
+c$$$         if(scale2.gt.0) then
+c$$$            fact = exp(-scale2**p*   0.1d0 * (
+c$$$     1           1/pt1sq**p
+c$$$     2           +1/pt2sq**p
+c$$$     3           +1/pt3sq**p
+c$$$     4           +1/msq12**p
+c$$$     5           +1/msq23**p
+c$$$     6           +1/msq31**p ))
+c$$$            pt1 = sqrt(pt1sq)
+c$$$            pt2 = sqrt(pt2sq)
+c$$$            pt3 = sqrt(pt3sq)
+c$$$            Ht  = pt1 + pt2 + pt3
+c$$$            fact = fact/scale**p/(1d0/scale + 1d0/Ht**2)**p
+c$$$         else
+            fact = 1/scale**pp/(1/scale+1/pt1sq)**pp
+     1           * 1/scale**pp/(1/scale+1/pt2sq)**pp
+     2           * 1/scale**pp/(1/scale+1/pt3sq)**pp
+     3           * 1/scale**pp/(1/scale+1/msq12)**pp
+     4           * 1/scale**pp/(1/scale+1/msq23)**pp
+     5           * 1/scale**pp/(1/scale+1/msq31)**pp
+c         endif
       else
 c     In the case of MINLO evaluation sum of pt's are used:
          pt1 = sqrt(pt1sq)
          pt2 = sqrt(pt2sq)
          pt3 = sqrt(pt3sq)
          Ht  = pt1 + pt2 + pt3
-         if (Ht.lt.minHt) then
-            fact = 0d0
-            return
-         end if
          fact = 1d0/scale**p/(1d0/scale + 1d0/Ht**2)**p
       endif 
 c     suppress regions with high rapidities
@@ -733,6 +725,7 @@ c     suppress regions with high rapidities
       include 'nlegborn.h'
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
+      include 'PhysPars.h'
       logical ini,fixedscale
       data ini/.true./
       real * 8 muf,mur
@@ -749,7 +742,7 @@ c     suppress regions with high rapidities
             write(*,*) '****************************************'
             write(*,*) '*******     FIXED SCALES!          *****'
             fixedscale=.true.
-            muref=300d0
+            muref=ph_Zmass
          else        
             muref=powheginput("#fixedscale")                        
             print *,"********************************************"

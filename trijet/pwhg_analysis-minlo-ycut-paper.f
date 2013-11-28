@@ -60,6 +60,8 @@ c  pwhgfill  :  fills the histograms with data
      1           '-ymax-'//cymax(jy),dpt,0d0,400d0)
             call bookupeqbins('j3-ptzoom'//'-pt2min'//cptmin2(ipt)//
      1           '-ymax-'//cymax(jy),0.5d0,0d0,20d0)
+            call bookupeqbins('j3-inc-pt'//'-pt2min'//cptmin2(ipt)//
+     1           '-ymax-'//cymax(jy),dpt,0d0,400d0)
          enddo
 
 c here ymax is intended inclusivly, i.e. only upon the observed jet
@@ -247,6 +249,15 @@ c inclusive jet plots
      1              ktj(j),dsig)
                call filld('j-ptzoom'//'-yjmax-'//cymax(jy),
      1              ktj(j),dsig)
+               if(j.ge.3) then
+                  do ipt=1,nptmin2
+                     if(ktj(2).gt.ptminarr2(ipt)) then
+                        call filld('j3-inc-pt'//'-pt2min'//cptmin2(ipt)
+     1                       //'-ymax-'//cymax(jy),
+     1                       ktj(j),dsig)
+                     endif
+                  enddo
+               endif
             endif
          enddo
       enddo

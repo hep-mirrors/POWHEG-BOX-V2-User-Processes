@@ -46,7 +46,7 @@ CXX=icpc
 #FFLAGS =  -checkm
 ## For floating point exception trapping  uncomment the following 
 #FPE = -fpe0
-OPT = -O3 #-fast -check -ftrapuv 
+OPT = -O1 #-fast -check -ftrapuv 
 ## For debugging uncomment the following
 #DEBUG=  -g
 ifdef DEBUG
@@ -196,7 +196,7 @@ main-HERWIG-lhef: $(HERWIG)
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
-	$(PWHGANAL) lhefread.o newunit.o 	\
+	$(PWHGANAL) lhefread.o newunit.o bra_ket_subroutines.o	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
 

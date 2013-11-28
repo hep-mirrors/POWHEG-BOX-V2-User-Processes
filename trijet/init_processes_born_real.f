@@ -1669,7 +1669,9 @@
       implicit none
       include "nlegborn.h"
       include "pwhg_flst.h"
- 
+c      integer i, rflav(6),ridot(2),j,rflavcp(6), min, pivot,jmin,
+c     $     jminprec,valid(6)
+
       flst_real(   1,   1)=          -1
       flst_real(   2,   1)=          -1
       flst_real(   3,   1)=           1
@@ -7908,7 +7910,37 @@
       flst_real(   6, 891)=           0
  
       flst_nreal=         891
- 
-      return
+
+c$$$      do i=1,flst_nreal
+c$$$         rflavcp(:) = flst_real(:,i)
+c$$$         rflav(1)=rflavcp(1)
+c$$$         rflav(2)=rflavcp(2)
+c$$$
+c$$$         valid(:)=1
+c$$$         pivot=2
+c$$$
+c$$$ 10      jminprec=0
+c$$$         min=1000
+c$$$         do j=3,nlegreal
+c$$$            if (rflavcp(j).le.min.and.valid(j)) then
+c$$$               min=rflavcp(j)
+c$$$               if (jminprec.ne.0) then
+c$$$                  jminprec=jmin
+c$$$                  valid(jminprec)=1
+c$$$               else
+c$$$                  jminprec=j
+c$$$               endif
+c$$$               jmin=j
+c$$$               valid(jmin)=0
+c$$$            endif
+c$$$         enddo
+c$$$         if (pivot.lt.nlegreal) then
+c$$$            pivot=pivot+1
+c$$$            rflav(pivot)=min
+c$$$            goto 10
+c$$$         endif
+c$$$
+c$$$         flst_real(:,i)=rflav(:)
+c$$$      enddo
       end
  
