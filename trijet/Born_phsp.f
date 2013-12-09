@@ -4,11 +4,19 @@
       include 'pwhg_kn.h'
       include 'coupl.inc'
       real * 8 xborn(ndiminteg-3),jac,tmpvec(0:3),bwcutoff
-      integer k
+      integer i,j,k
       logical ini,fullphsp
       data ini/.true./
       save ini,fullphsp
       real * 8 powheginput
+c
+      real*8 pt1,pt2,pt3,m12,m13,m23
+      real*8 ptsqrel
+      real*8 dotp
+      external dotp
+      ptsqrel(i,j)=2*dotp(kn_cmpborn(0,i),kn_cmpborn(0,j))
+     1     *  kn_cmpborn(0,i)*kn_cmpborn(0,j)
+     2     /(kn_cmpborn(0,i)**2+kn_cmpborn(0,j)**2)
       if(ini) then
 c     set initial- and final-state masses for Born and real
          do k=1,nlegborn
@@ -161,6 +169,21 @@ c     minimal final state mass
 c     kn_minmass=sqrt(ph_Hmass2low)
 c      kn_minmass=kn_ktmin + sqrt(kn_ktmin**2 + kn_masses(3)**2)
       kn_minmass=2*kn_ktmin
+c
+c We include an extra cut on the pt's and invariant masses of
+c final state particles:
+      pt1 = sqrt(abs(kn_cmpborn(1,3)**2 + kn_cmpborn(2,3)**2))
+      pt2 = sqrt(abs(kn_cmpborn(1,4)**2 + kn_cmpborn(2,4)**2))
+      pt3 = sqrt(abs(kn_cmpborn(1,5)**2 + kn_cmpborn(2,5)**2))
+      m12 = sqrt(abs(ptsqrel(3,4)))
+      m13 = sqrt(abs(ptsqrel(3,5)))
+      m23 = sqrt(abs(ptsqrel(4,5)))
+c We put the jacobian to zero for sufficiently small pt's and
+c invariant masses:
+      if (min(pt1,pt2,pt3,m12,m13,m23).lt.0.1d0) then
+        kn_jacborn = 0d0
+        call increasecnt("Small pt or inv. mass")
+      end if
       end
 
          

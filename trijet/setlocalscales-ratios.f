@@ -206,7 +206,7 @@ c Dijet case: use the scalar sum of the pt of the two partons
                q2merge=sqrt(p(1,j)**2+p(2,j)**2)+q2merge
             endif
          enddo
-         q2merge = q2merge/ipart
+c         q2merge = q2merge/ipart
          q2merge=q2merge**2
          if(raisingscales) then
             q2merge=max(q2mergeMAX,q2merge)
