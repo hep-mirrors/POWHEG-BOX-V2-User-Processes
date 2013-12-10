@@ -400,8 +400,6 @@ c         call fastjetktwhich(ptrack,ntracks,ptminfastjet,R,
 c     $        pj,mjets,jetvec) 
       endif
       
-      if (numjets.lt.3) return
-
 
 c     find in which ptrack the B hadrons ended up
       nbjet=0
@@ -531,6 +529,8 @@ c      call getyetaptmass(phardjet,y,eta,pt,m)
 c      if (abs(y).gt.yjmax) return
 
 
+      
+      
 
 c*****************************************************
 c     total number of jets minus the 2 b jets
@@ -607,9 +607,7 @@ c     next-to-hardest jet
             call filld('j2-m'//cptmin(i),     m, dsig)
          endif
 
-         do mu=1,4
-            px(mu)=pj(mu,1)
-         enddo 
+         px(:)=pj(:,1)
          call getyetaptmass(px,y,eta,pt,m)
          call filld('jx1-y'//cptmin(i),     y, dsig)
          call filld('jx1-eta'//cptmin(i), eta, dsig)
@@ -618,9 +616,7 @@ c     next-to-hardest jet
          call filld('jx1-ptzoom2'//cptmin(i),   pt, dsig)
          call filld('jx1-m'//cptmin(i),     m, dsig)
 
-         do mu=1,4
-            px(mu)=pj(mu,2)
-         enddo 
+         px(:)=pj(:,2)
          call getyetaptmass(px,y,eta,pt,m)
          call filld('jx2-y'//cptmin(i),     y, dsig)
          call filld('jx2-eta'//cptmin(i), eta, dsig)
@@ -629,9 +625,7 @@ c     next-to-hardest jet
          call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
          call filld('jx2-m'//cptmin(i),     m, dsig)
 
-         do mu=1,4
-            px(mu)=pj(mu,3)
-         enddo 
+         px(:)=pj(:,3)
          call getyetaptmass(px,y,eta,pt,m)
          call filld('jx3-y'//cptmin(i),     y, dsig)
          call filld('jx3-eta'//cptmin(i), eta, dsig)
