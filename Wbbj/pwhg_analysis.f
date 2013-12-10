@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-010',  '-020',  '-050'/
-      data ptminarr/   10d0,     20d0,    50d0/
+      data cptmin/  '-020',  '-030',  '-050'/
+      data ptminarr/   20d0,     30d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -30,7 +30,7 @@ c  pwhgfill  :  fills the histograms with data
 
       dy=0.5d0
       dylep=0.4d0
-      dpt=10d0
+      dpt=5d0
       dr=0.2d0
 
       do i=1,nptmin
@@ -73,6 +73,28 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('j2-ptzoom'//cptmin(i),2d0,1d0,151d0)
       call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
       call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
+
+      call bookupeqbins('jx1-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx1-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx1-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('jx1-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('jx1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('jx1-m'//cptmin(i),dpt,0d0,400d0) 
+
+      call bookupeqbins('jx2-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx2-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx2-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('jx2-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('jx2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('jx2-m'//cptmin(i),dpt,0d0,400d0) 
+
+      call bookupeqbins('jx3-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx3-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('jx3-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('jx3-ptzoom'//cptmin(i),2d0,1d0,151d0)
+      call bookupeqbins('jx3-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+      call bookupeqbins('jx3-m'//cptmin(i),dpt,0d0,400d0) 
+
       enddo
       end
      
@@ -137,14 +159,14 @@ c      common /crescfac/rescfac1,rescfac2
       data inimulti/.true./
       save inimulti
       logical found_hardjet,found_nexthardjet,found_bjet1,found_bjet2
-      real * 8 phardjet(4),pnexthardjet(4),pbjet1(4),pbjet2(4)
+      real * 8 phardjet(4),pnexthardjet(4),pbjet1(4),pbjet2(4),px(4)
       logical is_B_hadron,is_BBAR_hadron
       external is_B_hadron,is_BBAR_hadron
       real * 8 p_b(4,maxnumlep),p_bbar(4,maxnumlep)
       integer nbjet_array(maxjet),
      $     nbbarjet_array(maxjet),jetinfo(maxjet),id,nb,
      $     nbbar,nbjet,nbbarjet,typeb1,typeb2,wrong_bb_sequence
-      real * 8 pthardjet
+      real * 8 pthardjet, ptbjet1, ptbjet2
       integer dummy
 
 c      call reweightifneeded(dsig0,dsig)
@@ -364,20 +386,22 @@ c     copy momenta to construct jets
            enddo
         endif
       enddo
+
       if (ntracks.eq.0) then
          numjets=0
       else
 c     palg=1 is standard kt, -1 is antikt
          palg = -1d0
          R = 0.5d0              ! radius parameter
-         ptminfastjet = 1d0
+         ptminfastjet = 20d0
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)
 c         call fastjetktwhich(ptrack,ntracks,ptminfastjet,R,
 c     $        pj,mjets,jetvec) 
       endif
       
-      
+      if (numjets.lt.3) return
+
 
 c     find in which ptrack the B hadrons ended up
       nbjet=0
@@ -484,11 +508,6 @@ c                  write(*,*) (jetinfo(i),i=1,numjets)
       enddo
 
 
-c        if (found_bjet1.neqv..false..or.found_bjet2.neqv..false.
-c     $     .or.found_hardjet.neqv..true.) then
-c            write(*,*) 'PLOTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT'
-c         endif
-
 c     if there is only one b jet, then return
       if (.not.(found_bjet1.and.found_bjet2.and.found_hardjet)) then
          return
@@ -498,17 +517,19 @@ c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus lept
 c     we can start plotting 
       ptb1min=20d0
       ptb2min=20d0
-      ybmax=1000d0
-      yjmax=1000d0
+      ybmax=4.5d0
+      yjmax=4.5d0
 
 
-      if (sqrt(pbjet1(1)**2+pbjet1(2)**2).lt.ptb1min) then
-         return
-      endif
+      call getyetaptmass(pbjet1,y,eta,pt,m)
+      if (pt.lt.ptb1min) return
+c      if (abs(y).gt.ybmax) return
+      call getyetaptmass(pbjet2,y,eta,pt,m)
+      if (pt.lt.ptb2min) return
+c      if (abs(y).gt.ybmax) return
+c      call getyetaptmass(phardjet,y,eta,pt,m)
+c      if (abs(y).gt.yjmax) return
 
-      if (sqrt(pbjet2(1)**2+pbjet2(2)**2).lt.ptb2min) then
-         return
-      endif
 
 
 c*****************************************************
@@ -518,11 +539,11 @@ c***  change the following for different analysis  ***
       
       do i=1,nptmin        
          pthardjet = sqrt(phardjet(1)**2+phardjet(2)**2)
+
          if (pthardjet.lt.ptminarr(i)) then
 c     since ptminarr is pt ordered, the following return is correct
             return
          endif
-
 
          call filld('sigtot'//cptmin(i),1d0,dsig)         
          
@@ -558,7 +579,6 @@ c     hardest b jet
         
 c     next-to-hardest b jet
          call getyetaptmass(pbjet2,y,eta,pt,m)
-
          call filld('b2-y'//cptmin(i),     y, dsig)
          call filld('b2-eta'//cptmin(i), eta, dsig)
          call filld('b2-pt'//cptmin(i),   pt, dsig)
@@ -586,6 +606,40 @@ c     next-to-hardest jet
             call filld('j2-ptzoom2'//cptmin(i),   pt, dsig)
             call filld('j2-m'//cptmin(i),     m, dsig)
          endif
+
+         do mu=1,4
+            px(mu)=pj(mu,1)
+         enddo 
+         call getyetaptmass(px,y,eta,pt,m)
+         call filld('jx1-y'//cptmin(i),     y, dsig)
+         call filld('jx1-eta'//cptmin(i), eta, dsig)
+         call filld('jx1-pt'//cptmin(i),   pt, dsig)
+         call filld('jx1-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('jx1-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('jx1-m'//cptmin(i),     m, dsig)
+
+         do mu=1,4
+            px(mu)=pj(mu,2)
+         enddo 
+         call getyetaptmass(px,y,eta,pt,m)
+         call filld('jx2-y'//cptmin(i),     y, dsig)
+         call filld('jx2-eta'//cptmin(i), eta, dsig)
+         call filld('jx2-pt'//cptmin(i),   pt, dsig)
+         call filld('jx2-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('jx2-m'//cptmin(i),     m, dsig)
+
+         do mu=1,4
+            px(mu)=pj(mu,3)
+         enddo 
+         call getyetaptmass(px,y,eta,pt,m)
+         call filld('jx3-y'//cptmin(i),     y, dsig)
+         call filld('jx3-eta'//cptmin(i), eta, dsig)
+         call filld('jx3-pt'//cptmin(i),   pt, dsig)
+         call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
+         call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
+         call filld('jx3-m'//cptmin(i),     m, dsig)
+
       enddo
       end
 
