@@ -1,0 +1,292 @@
+      VLCAmpAx3m4p5m  =         AmpAxBorn(-1)*(-2*epsinv2 + 
+     -     epsinv*(-1.5 - lnrat(mu2,-s(k2,k5)) - 
+     -        lnrat(mu2,-s(k5,k1))) + 
+     -     (-6 - lnrat(mu2,-s(k2,k5))**2 - 3*lnrat(mu2,-s(k5,k1)) - 
+     -        lnrat(mu2,-s(k5,k1))**2)/2.) + 
+     -  (2*pZsq*((1 - 2*betap)*L0(-s(k5,k1),-pZsq)*za(k2,k3)*
+     -         zb(k2,k1)*zb(k4,k1) - 
+     -        AmpAxBorn(-1)*Lsm1(-s(k2,k5),-pZsq,-s(k5,k1),-pZsq)*
+     -         zb(k5,k1)*zb(k5,k2)) - 
+     -     (-1 + 2*betap)*L1(-s(k5,k1),-pZsq)*za(k2,k3)*
+     -      zb(k2,k1)**2*(za(k1,k2)*zb(k4,k1) + 
+     -        za(k2,k5)*zb(k5,k4)))/
+     -   (2.*pZsq*zb(k5,k1)*zb(k5,k2))
+      VLCAmpAx3p4m5m  =         AmpAxBorn(1)*(-2*epsinv2 + 
+     -     epsinv*(-1.5 - lnrat(mu2,-s(k2,k5)) - 
+     -        lnrat(mu2,-s(k5,k1))) + 
+     -     (-6 - lnrat(mu2,-s(k2,k5))**2 - 3*lnrat(mu2,-s(k5,k1)) - 
+     -        lnrat(mu2,-s(k5,k1))**2)/2.) - 
+     -  (-2*pZsq*((-1 + 2*betap)*L0(-s(k5,k1),-pZsq)*za(k2,k4)*
+     -         zb(k2,k1)*zb(k3,k1) - 
+     -        AmpAxBorn(1)*Lsm1(-s(k2,k5),-pZsq,-s(k5,k1),-pZsq)*
+     -         zb(k5,k1)*zb(k5,k2)) - 
+     -     (-1 + 2*betap)*L1(-s(k5,k1),-pZsq)*za(k2,k4)*
+     -      zb(k2,k1)**2*(za(k1,k2)*zb(k3,k1) + 
+     -        za(k2,k5)*zb(k5,k3)))/
+     -   (2.*pZsq*zb(k5,k1)*zb(k5,k2))
+      VLCAmpAx3m4m5m  =         -3*AmpAxBorn(-3) - (3*epsinv*AmpAxBorn(-3))/2. - 
+     -  2*epsinv2*AmpAxBorn(-3) - 
+     -  epsinv*AmpAxBorn(-3)*lnrat(mu2,-s(k2,k5)) - 
+     -  (AmpAxBorn(-3)*lnrat(mu2,-s(k2,k5))**2)/2. - 
+     -  (3*AmpAxBorn(-3)*lnrat(mu2,-s(k5,k1)))/2. - 
+     -  epsinv*AmpAxBorn(-3)*lnrat(mu2,-s(k5,k1)) - 
+     -  (AmpAxBorn(-3)*lnrat(mu2,-s(k5,k1))**2)/2. - 
+     -  AmpAxBorn(-3)*Lsm1(-s(k2,k5),-pZsq,-s(k5,k1),-pZsq) + 
+     -  (mX*L0(-s(k5,k1),-pZsq)*za(k2,k3)*zb(k2,k1)*zb(k3,k1))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k1,k2)*za(k2,k3)*
+     -     zb(k2,k1)**2*zb(k3,k1))/
+     -   (2.*pZsq*za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L0(-s(k5,k1),-pZsq)*za(k2,k4)*zb(k2,k1)*zb(k4,k1))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k1,k2)*za(k2,k4)*
+     -     zb(k2,k1)**2*zb(k4,k1))/
+     -   (2.*pZsq*za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k2,k3)*za(k2,k5)*
+     -     zb(k2,k1)**2*zb(k5,k3))/
+     -   (2.*pZsq*za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k2,k4)*za(k2,k5)*
+     -     zb(k2,k1)**2*zb(k5,k4))/
+     -   (2.*pZsq*za(k3,k4)*zb(k5,k1)*zb(k5,k2))
+      VLCAmpAx3p4p5m  =         -3*AmpAxBorn(3) - (3*epsinv*AmpAxBorn(3))/2. - 
+     -  2*epsinv2*AmpAxBorn(3) - 
+     -  epsinv*AmpAxBorn(3)*lnrat(mu2,-s(k2,k5)) - 
+     -  (AmpAxBorn(3)*lnrat(mu2,-s(k2,k5))**2)/2. - 
+     -  (3*AmpAxBorn(3)*lnrat(mu2,-s(k5,k1)))/2. - 
+     -  epsinv*AmpAxBorn(3)*lnrat(mu2,-s(k5,k1)) - 
+     -  (AmpAxBorn(3)*lnrat(mu2,-s(k5,k1))**2)/2. - 
+     -  AmpAxBorn(3)*Lsm1(-s(k2,k5),-pZsq,-s(k5,k1),-pZsq) + 
+     -  (mX*L0(-s(k5,k1),-pZsq)*za(k2,k3)*zb(k2,k1)*zb(k3,k1))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k1,k2)*za(k2,k3)*
+     -     zb(k2,k1)**2*zb(k3,k1))/
+     -   (2.*pZsq*zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L0(-s(k5,k1),-pZsq)*za(k2,k4)*zb(k2,k1)*zb(k4,k1))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k1,k2)*za(k2,k4)*
+     -     zb(k2,k1)**2*zb(k4,k1))/
+     -   (2.*pZsq*zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k2,k3)*za(k2,k5)*
+     -     zb(k2,k1)**2*zb(k5,k3))/
+     -   (2.*pZsq*zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L1(-s(k5,k1),-pZsq)*za(k2,k4)*za(k2,k5)*
+     -     zb(k2,k1)**2*zb(k5,k4))/
+     -   (2.*pZsq*zb(k4,k3)*zb(k5,k1)*zb(k5,k2))
+      VSLCAmpAx3m4p5m  =         -(AmpAxBorn(-1)*(-epsinv2 + 
+     -       epsinv*(-1.5 - lnrat(mu2,-s(k2,k1))) + 
+     -       (-7 - 3*lnrat(mu2,-pZsq) - lnrat(mu2,-s(k2,k1))**2)/2.)) 
+     -   + ((-1 + 2*betap)*((4*L0(-s(k5,k1),-pZsq)*za(k2,k5)*
+     -          zb(k4,k2)*(-(za(k2,k3)*zb(k2,k1)) + 
+     -            za(k3,k5)*zb(k5,k1))*zb(k5,k2)**2)/pZsq - 
+     -       (2*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*zb(k4,k1)*
+     -          (-(za(k2,k3)*zb(k2,k1)) + za(k3,k5)*zb(k5,k1))*
+     -          zb(k5,k2)**2)/zb(k5,k1) - 
+     -       (2*L0(-pZsq,-s(k2,k1))*za(k2,k5)*zb(k2,k1)*
+     -          zb(k4,k2)*zb(k5,k2)*
+     -          (za(k1,k3)*zb(k5,k1) + za(k2,k3)*zb(k5,k2)))/
+     -        s(k2,k1) - (2*L0(-pZsq,-s(k5,k1))*za(k2,k5)*
+     -          zb(k4,k2)*zb(k5,k1)*zb(k5,k2)*
+     -          (za(k1,k3)*zb(k2,k1) + za(k3,k5)*zb(k5,k2)))/
+     -        s(k5,k1) + (L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*
+     -          zb(k4,k2)*zb(k5,k1)*zb(k5,k2)**2*
+     -          (za(k1,k3)*zb(k2,k1) + za(k3,k5)*zb(k5,k2)))/
+     -        s(k5,k1)**2 - 
+     -       (2*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k3,k5)*
+     -          zb(k2,k1)*zb(k5,k2)**2*zb(k5,k4))/s(k2,k1)**2 + 
+     -       (2*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*
+     -          zb(k2,k1)**2*
+     -          (za(k1,k3)*zb(k5,k1) + za(k2,k3)*zb(k5,k2))*
+     -          zb(k5,k4))/zb(k5,k1) + 
+     -       (za(k3,k5)*zb(k5,k2)**2*
+     -          (za(k1,k2)*za(k2,k5)*zb(k4,k2) - 
+     -            za(k1,k5)*za(k2,k5)*zb(k5,k4) - 
+     -            za(k1,k5)*
+     -             (za(k1,k2)*zb(k4,k1) + za(k2,k5)*zb(k5,k4))))
+     -         /(za(k1,k2)*za(k1,k5))))/(2.*zb(k5,k2)**3)
+      VSLCAmpAx3p4m5m  =         -(AmpAxBorn(1)*(-epsinv2 + 
+     -       epsinv*(-1.5 - lnrat(mu2,-s(k2,k1))) + 
+     -       (-7 - 3*lnrat(mu2,-pZsq) - lnrat(mu2,-s(k2,k1))**2)/2.)) 
+     -   + ((-1 + 2*betap)*((-4*L0(-s(k5,k1),-pZsq)*za(k2,k5)*
+     -          zb(k3,k2)*(-(za(k2,k4)*zb(k2,k1)) + 
+     -            za(k4,k5)*zb(k5,k1))*zb(k5,k2)**2)/pZsq + 
+     -       (2*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*zb(k3,k1)*
+     -          (-(za(k2,k4)*zb(k2,k1)) + za(k4,k5)*zb(k5,k1))*
+     -          zb(k5,k2)**2)/zb(k5,k1) + 
+     -       (2*L0(-pZsq,-s(k2,k1))*za(k2,k5)*zb(k2,k1)*
+     -          zb(k3,k2)*zb(k5,k2)*
+     -          (za(k1,k4)*zb(k5,k1) + za(k2,k4)*zb(k5,k2)))/
+     -        s(k2,k1) + (2*L0(-pZsq,-s(k5,k1))*za(k2,k5)*
+     -          zb(k3,k2)*zb(k5,k1)*zb(k5,k2)*
+     -          (za(k1,k4)*zb(k2,k1) + za(k4,k5)*zb(k5,k2)))/
+     -        s(k5,k1) - (L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*
+     -          zb(k3,k2)*zb(k5,k1)*zb(k5,k2)**2*
+     -          (za(k1,k4)*zb(k2,k1) + za(k4,k5)*zb(k5,k2)))/
+     -        s(k5,k1)**2 + 
+     -       (2*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k4,k5)*
+     -          zb(k2,k1)*zb(k5,k2)**2*zb(k5,k3))/s(k2,k1)**2 - 
+     -       (2*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*
+     -          zb(k2,k1)**2*
+     -          (za(k1,k4)*zb(k5,k1) + za(k2,k4)*zb(k5,k2))*
+     -          zb(k5,k3))/zb(k5,k1) - 
+     -       (za(k4,k5)*zb(k5,k2)**2*
+     -          (za(k1,k2)*za(k2,k5)*zb(k3,k2) - 
+     -            za(k1,k5)*za(k2,k5)*zb(k5,k3) - 
+     -            za(k1,k5)*
+     -             (za(k1,k2)*zb(k3,k1) + za(k2,k5)*zb(k5,k3))))
+     -         /(za(k1,k2)*za(k1,k5))))/(2.*zb(k5,k2)**3)
+      VSLCAmpAx3m4m5m  =         (7*AmpAxBorn(-3))/2. + (3*epsinv*AmpAxBorn(-3))/2. + 
+     -  epsinv2*AmpAxBorn(-3) + (3*AmpAxBorn(-3)*lnrat(mu2,-pZsq))/2. + 
+     -  epsinv*AmpAxBorn(-3)*lnrat(mu2,-s(k2,k1)) + 
+     -  (AmpAxBorn(-3)*lnrat(mu2,-s(k2,k1))**2)/2. - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*za(k3,k5)*
+     -     zb(k3,k2)*zb(k5,k1))/(2.*s(k5,k1)**2*za(k3,k4)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*za(k4,k5)*
+     -     zb(k4,k2)*zb(k5,k1))/(2.*s(k5,k1)**2*za(k3,k4)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k1,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2)*zb(k5,k1))/
+     -   (s(k2,k1)*za(k3,k4)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k1,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2)*zb(k5,k1))/
+     -   (s(k5,k1)*za(k3,k4)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k1,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2)*zb(k5,k1))/
+     -   (s(k2,k1)*za(k3,k4)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k1,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2)*zb(k5,k1))/
+     -   (s(k5,k1)*za(k3,k4)*zb(k5,k2)**2) + 
+     -  (mX*za(k3,k5)*zb(k3,k1))/(2.*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k3,k5)*
+     -     zb(k3,k1))/(za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*za(k2,k5)*za(k3,k5)*zb(k3,k2))/
+     -   (2.*za(k1,k5)*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k2,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2))/(s(k2,k1)*za(k3,k4)*zb(k5,k2)) + 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2))/(pZsq*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*za(k4,k5)*zb(k4,k1))/(2.*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k4,k5)*
+     -     zb(k4,k1))/(za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*za(k2,k5)*za(k4,k5)*zb(k4,k2))/
+     -   (2.*za(k1,k5)*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k2,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2))/(s(k2,k1)*za(k3,k4)*zb(k5,k2)) + 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2))/(pZsq*za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k2,k3)*
+     -     zb(k2,k1)*zb(k3,k1))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k2,k4)*
+     -     zb(k2,k1)*zb(k4,k1))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k2,k5)*za(k3,k5)*zb(k3,k2)*
+     -     zb(k5,k1))/(s(k5,k1)*za(k3,k4)*zb(k5,k2)) - 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k5)*za(k3,k5)*zb(k3,k2)*
+     -     zb(k5,k1))/(pZsq*za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k1,k3)*za(k2,k5)**2*
+     -     zb(k2,k1)*zb(k3,k2)*zb(k5,k1))/
+     -   (2.*s(k5,k1)**2*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k2,k5)*za(k4,k5)*zb(k4,k2)*
+     -     zb(k5,k1))/(s(k5,k1)*za(k3,k4)*zb(k5,k2)) - 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k5)*za(k4,k5)*zb(k4,k2)*
+     -     zb(k5,k1))/(pZsq*za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k1,k4)*za(k2,k5)**2*
+     -     zb(k2,k1)*zb(k4,k2)*zb(k5,k1))/
+     -   (2.*s(k5,k1)**2*za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k1,k3)*
+     -     zb(k2,k1)**2*zb(k5,k3))/(za(k3,k4)*zb(k5,k2)**3) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k2,k3)*
+     -     zb(k2,k1)**2*zb(k5,k3))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)**2) + 
+     -  (mX*za(k2,k5)*za(k3,k5)*zb(k5,k3))/
+     -   (za(k1,k2)*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k3,k5)*
+     -     zb(k2,k1)*zb(k5,k3))/
+     -   (s(k2,k1)**2*za(k3,k4)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k1,k4)*
+     -     zb(k2,k1)**2*zb(k5,k4))/(za(k3,k4)*zb(k5,k2)**3) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k2,k4)*
+     -     zb(k2,k1)**2*zb(k5,k4))/
+     -   (za(k3,k4)*zb(k5,k1)*zb(k5,k2)**2) + 
+     -  (mX*za(k2,k5)*za(k4,k5)*zb(k5,k4))/
+     -   (za(k1,k2)*za(k3,k4)*zb(k5,k2)) + 
+     -  (mX*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k4,k5)*
+     -     zb(k2,k1)*zb(k5,k4))/
+     -   (s(k2,k1)**2*za(k3,k4)*zb(k5,k2))
+      VSLCAmpAx3p4p5m  =         (7*AmpAxBorn(3))/2. + (3*epsinv*AmpAxBorn(3))/2. + 
+     -  epsinv2*AmpAxBorn(3) + (3*AmpAxBorn(3)*lnrat(mu2,-pZsq))/2. + 
+     -  epsinv*AmpAxBorn(3)*lnrat(mu2,-s(k2,k1)) + 
+     -  (AmpAxBorn(3)*lnrat(mu2,-s(k2,k1))**2)/2. - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*za(k3,k5)*
+     -     zb(k3,k2)*zb(k5,k1))/(2.*s(k5,k1)**2*zb(k4,k3)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k2,k5)**2*za(k4,k5)*
+     -     zb(k4,k2)*zb(k5,k1))/(2.*s(k5,k1)**2*zb(k4,k3)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k1,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2)*zb(k5,k1))/
+     -   (s(k2,k1)*zb(k4,k3)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k1,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2)*zb(k5,k1))/
+     -   (s(k5,k1)*zb(k4,k3)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k1,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2)*zb(k5,k1))/
+     -   (s(k2,k1)*zb(k4,k3)*zb(k5,k2)**2) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k1,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2)*zb(k5,k1))/
+     -   (s(k5,k1)*zb(k4,k3)*zb(k5,k2)**2) + 
+     -  (mX*za(k3,k5)*zb(k3,k1))/(2.*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k3,k5)*
+     -     zb(k3,k1))/(zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*za(k2,k5)*za(k3,k5)*zb(k3,k2))/
+     -   (2.*za(k1,k5)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k2,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2))/(s(k2,k1)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k3)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k3,k2))/(pZsq*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*za(k4,k5)*zb(k4,k1))/(2.*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k4,k5)*
+     -     zb(k4,k1))/(zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*za(k2,k5)*za(k4,k5)*zb(k4,k2))/
+     -   (2.*za(k1,k5)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k2,k1))*za(k2,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2))/(s(k2,k1)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k4)*za(k2,k5)*zb(k2,k1)*
+     -     zb(k4,k2))/(pZsq*zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k2,k3)*
+     -     zb(k2,k1)*zb(k3,k1))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k2,k5),-pZsq)*za(k2,k4)*
+     -     zb(k2,k1)*zb(k4,k1))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k2,k5)*za(k3,k5)*zb(k3,k2)*
+     -     zb(k5,k1))/(s(k5,k1)*zb(k4,k3)*zb(k5,k2)) - 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k5)*za(k3,k5)*zb(k3,k2)*
+     -     zb(k5,k1))/(pZsq*zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k1,k3)*za(k2,k5)**2*
+     -     zb(k2,k1)*zb(k3,k2)*zb(k5,k1))/
+     -   (2.*s(k5,k1)**2*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*L0(-pZsq,-s(k5,k1))*za(k2,k5)*za(k4,k5)*zb(k4,k2)*
+     -     zb(k5,k1))/(s(k5,k1)*zb(k4,k3)*zb(k5,k2)) - 
+     -  (2*mX*L0(-s(k5,k1),-pZsq)*za(k2,k5)*za(k4,k5)*zb(k4,k2)*
+     -     zb(k5,k1))/(pZsq*zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*L1(-pZsq,-s(k5,k1))*za(k1,k4)*za(k2,k5)**2*
+     -     zb(k2,k1)*zb(k4,k2)*zb(k5,k1))/
+     -   (2.*s(k5,k1)**2*zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k1,k3)*
+     -     zb(k2,k1)**2*zb(k5,k3))/(zb(k4,k3)*zb(k5,k2)**3) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k2,k3)*
+     -     zb(k2,k1)**2*zb(k5,k3))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)**2) + 
+     -  (mX*za(k2,k5)*za(k3,k5)*zb(k5,k3))/
+     -   (za(k1,k2)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k3,k5)*
+     -     zb(k2,k1)*zb(k5,k3))/
+     -   (s(k2,k1)**2*zb(k4,k3)*zb(k5,k2)) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k1,k4)*
+     -     zb(k2,k1)**2*zb(k5,k4))/(zb(k4,k3)*zb(k5,k2)**3) - 
+     -  (mX*Lsm1(-s(k2,k1),-pZsq,-s(k5,k1),-pZsq)*za(k2,k4)*
+     -     zb(k2,k1)**2*zb(k5,k4))/
+     -   (zb(k4,k3)*zb(k5,k1)*zb(k5,k2)**2) + 
+     -  (mX*za(k2,k5)*za(k4,k5)*zb(k5,k4))/
+     -   (za(k1,k2)*zb(k4,k3)*zb(k5,k2)) + 
+     -  (mX*pZsq*L1(-pZsq,-s(k2,k1))*za(k2,k5)*za(k4,k5)*
+     -     zb(k2,k1)*zb(k5,k4))/
+     -   (s(k2,k1)**2*zb(k4,k3)*zb(k5,k2))
