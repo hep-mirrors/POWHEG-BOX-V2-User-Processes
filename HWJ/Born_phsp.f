@@ -174,19 +174,28 @@ c     now boost everything BACK along z-axis
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
       real * 8 fact,ptmin,ptminW
-      real * 8 pt2,pt2W
+      real * 8 pt2,pt2W,ptVlow,ptVhigh,Vstep,ptW,stepfun
       logical ini
       data ini/.true./
       real * 8 powheginput
-      save ini,ptmin,ptminW    
+      save ini,ptmin,ptminW,ptVlow,ptVhigh,Vstep
       if (ini) then
          ptmin=powheginput("#bornsuppfact")      
          ptminW=powheginput("#bornsuppfactW")      
+         ptVlow=powheginput("#ptVlow")      
+         ptVhigh=powheginput("#ptVhigh")      
+         Vstep=powheginput("#Vstep") 
          if (ptmin.lt.0d0) then
             ptmin=0d0
          endif
          if (ptminW.lt.0d0) then
             ptminW=0d0
+         endif
+         if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0.and.
+     $        flg_weightedev) then
+            write(*,*) "**********************************"
+            write(*,*) " Stepwise function applied to ptW "
+            write(*,*) "**********************************"
          endif
          ini=.false.
       endif
@@ -196,6 +205,17 @@ c     now boost everything BACK along z-axis
          pt2W=(kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
      $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2
          fact=fact*(pt2W+1d0)/(pt2W+1d0+ptminW**2)
+         if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
+            ptw=sqrt(pt2W)
+            if (ptw.lt.ptVlow) then
+               stepfun=1d0
+            elseif (ptw.gt.ptVlow.and.ptw.lt.ptVhigh) then
+               stepfun=(Vstep-1d0)/(ptVhigh-ptVlow)*(ptw-ptVhigh)+Vstep
+            else
+               stepfun=Vstep
+            endif
+            fact=fact*stepfun
+         endif
       else
          fact=1
       endif
