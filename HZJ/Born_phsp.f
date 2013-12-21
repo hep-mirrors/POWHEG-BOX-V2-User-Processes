@@ -173,31 +173,52 @@ c     now boost everything BACK along z-axis
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
-      real * 8 fact,ptmin,ptminZ
-      real * 8 pt2,pt2Z
+      real * 8 fact,ptmin,ptminV
+      real * 8 pt2,pt2V,ptVlow,ptVhigh,Vstep,ptV,stepfun
       logical ini
       data ini/.true./
       real * 8 powheginput
-      save ini,ptmin,ptminZ    
+      save ini,ptmin,ptminV,ptVlow,ptVhigh,Vstep
       if (ini) then
          ptmin=powheginput("#bornsuppfact")      
-         ptminZ=powheginput("#bornsuppfactZ")      
+         ptminV=powheginput("#bornsuppfactV")      
+         ptVlow=powheginput("#ptVlow")      
+         ptVhigh=powheginput("#ptVhigh")      
+         Vstep=powheginput("#Vstep") 
          if (ptmin.lt.0d0) then
             ptmin=0d0
          endif
-         if (ptminZ.lt.0d0) then
-            ptminZ=0d0
+         if (ptminV.lt.0d0) then
+            ptminV=0d0
+         endif
+         if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
+            write(*,*) "**********************************"
+            write(*,*) " Stepwise function applied to ptV "
+            write(*,*) "**********************************"
          endif
          ini=.false.
       endif
+
+      fact=1
+            
       if(flg_weightedev) then
          pt2=kn_cmpborn(1,6)**2+kn_cmpborn(2,6)**2
-         fact = pt2/(ptmin**2+pt2)
-         pt2Z=(kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
+         fact = fact*pt2/(ptmin**2+pt2)
+         pt2V=(kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
      $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2
-         fact=fact*(pt2Z+1d0)/(pt2Z+1d0+ptminZ**2)
-      else
-         fact=1
+         fact=fact*(pt2V+1d0)/(pt2V+1d0+ptminV**2)
+      endif
+      if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
+         ptV=sqrt((kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
+     $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2)
+         if (ptV.lt.ptVlow) then
+            stepfun=1d0
+         elseif (ptV.gt.ptVlow.and.ptV.lt.ptVhigh) then
+            stepfun=(Vstep-1d0)/(ptVhigh-ptVlow)*(ptV-ptVhigh)+Vstep
+         else
+            stepfun=Vstep
+         endif
+         fact=fact*stepfun
       endif
       end
 
