@@ -170,16 +170,16 @@ c     kn_minmass=sqrt(ph_Hmass2low)
 c      kn_minmass=kn_ktmin + sqrt(kn_ktmin**2 + kn_masses(3)**2)
       kn_minmass=2*kn_ktmin
 c
-c We include an extra cut on the pt's and invariant masses of
-c final state particles:
-      pt1 = sqrt(abs(kn_cmpborn(1,3)**2 + kn_cmpborn(2,3)**2))
-      pt2 = sqrt(abs(kn_cmpborn(1,4)**2 + kn_cmpborn(2,4)**2))
-      pt3 = sqrt(abs(kn_cmpborn(1,5)**2 + kn_cmpborn(2,5)**2))
+c We include an extra cut on the pts and invariant masses of
+c final-state particles
+      pt1 = sqrt(kn_cmpborn(1,3)**2 + kn_cmpborn(2,3)**2)
+      pt2 = sqrt(kn_cmpborn(1,4)**2 + kn_cmpborn(2,4)**2)
+      pt3 = sqrt(kn_cmpborn(1,5)**2 + kn_cmpborn(2,5)**2)
       m12 = sqrt(abs(ptsqrel(3,4)))
       m13 = sqrt(abs(ptsqrel(3,5)))
       m23 = sqrt(abs(ptsqrel(4,5)))
-c We put the jacobian to zero for sufficiently small pt's and
-c invariant masses:
+c We set the jacobian to zero for sufficiently small pts and
+c invariant masses
       if (min(pt1,pt2,pt3,m12,m13,m23).lt.0.1d0) then
         kn_jacborn = 0d0
         call increasecnt("Small pt or inv. mass")
@@ -724,6 +724,11 @@ c$$$         else
      3           * 1/scale**pp/(1/scale+1/msq12)**pp
      4           * 1/scale**pp/(1/scale+1/msq23)**pp
      5           * 1/scale**pp/(1/scale+1/msq31)**pp
+            pt1 = sqrt(pt1sq)
+            pt2 = sqrt(pt2sq)
+            pt3 = sqrt(pt3sq)
+            Ht  = pt1 + pt2 + pt3
+            fact = fact/scale**p/(1d0/scale + 1d0/Ht**2)**p
 c         endif
       else
 c     In the case of MINLO evaluation sum of pt's are used:

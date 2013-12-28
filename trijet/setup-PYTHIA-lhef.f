@@ -7,7 +7,9 @@ C   100       A : Rick Field's CDF Tune A                     (Oct 2002)
 C   103      DW : Rick Field's CDF Tune DW                    (Apr 2006)
 C   320 Perugia 0 : "Perugia" update of S0-Pro                (Feb 2009)
 
-      tunevar = 350
+c      tunevar = 350
+c      tunevar = 340
+      tunevar = 320
       call PYTUNE(tunevar)
       if (tunevar.ne.0) then
         print *,"*****************************************************"

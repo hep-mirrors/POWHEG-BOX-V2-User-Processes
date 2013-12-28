@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=gfortran
+COMPILER=ifort
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -187,9 +187,9 @@ lhef_analysis:$(LHEF)
 
 
 # target to read event file, shower events with HERWIG + analysis
-HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o $(PWHGANAL) lhefread.o	\
-	pdfdummies.o opencount.o $(FPEOBJ) 
+HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o bra_ket_subroutines.o	\
+	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
