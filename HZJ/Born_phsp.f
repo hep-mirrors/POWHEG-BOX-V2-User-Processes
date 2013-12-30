@@ -207,18 +207,18 @@ c     now boost everything BACK along z-axis
          pt2V=(kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
      $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2
          fact=fact*(pt2V+1d0)/(pt2V+1d0+ptminV**2)
-      endif
-      if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
-         ptV=sqrt((kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
-     $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2)
-         if (ptV.lt.ptVlow) then
-            stepfun=1d0
-         elseif (ptV.gt.ptVlow.and.ptV.lt.ptVhigh) then
-            stepfun=(Vstep-1d0)/(ptVhigh-ptVlow)*(ptV-ptVhigh)+Vstep
-         else
-            stepfun=Vstep
+         if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
+            ptV=sqrt((kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
+     $           (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2)
+            if (ptV.lt.ptVlow) then
+               stepfun=1d0
+            elseif (ptV.gt.ptVlow.and.ptV.lt.ptVhigh) then
+               stepfun=(Vstep-1d0)/(ptVhigh-ptVlow)*(ptV-ptVhigh)+Vstep
+            else
+               stepfun=Vstep
+            endif
+            fact=fact*stepfun
          endif
-         fact=fact*stepfun
       endif
       end
 
