@@ -18,17 +18,33 @@ ostream & operator<<(ostream &, const PseudoJet &);
 //----------------------------------------------------------------------
 // forward declaration for ktscales:
 //----------------------------------------------------------------------
-void ktscales(const PseudoJet &,double &,double &);
+void ktscales(const PseudoJet &,const double &,double &,double &);
+
+
+//----------------------------------------------------------------------
+// forward declaration for nsubjettiness:
+//----------------------------------------------------------------------
+void nsubjettiness(const PseudoJet &, const double &, const int &, double &);
+
+void PressEnterToContinue()
+  {
+        std::cout << "Press ENTER to continue... " << flush;
+	std::cin.ignore( std::numeric_limits <std::streamsize> ::max(), '\n' );
+  }
 
 
 extern "C" { // !extern
 
-void fastjetalg_(const double *p, const int &npart, const int &jetalg, 
-                 const double &R, const bool &filt, 
+void fastjetalg_(const double *p, const int &npart, const double &R, 
+                 const double &jetalg, 
+		 const bool &filt, const bool &ktsplit, const bool &subjet,
 		 const double &ptmin, const double &ymax, 
-		 int &njets, double *pjet)
+		 double *pjets, int &njets, 
+		 double *sd12arr, double *sd23arr, 
+		 double *tau21arr,double *tau32arr)
 {
   signed itrack;
+  double sd12,sd23;
 // We fill up the tracks:
   vector<PseudoJet> particles;
   for (itrack = 0; itrack < npart; itrack++){
@@ -60,13 +76,108 @@ void fastjetalg_(const double *p, const int &npart, const int &jetalg,
 // Counting down the surviving jets:
   njets = cut_jets.size();
 
-// If filtering is requested we loop over the jets:
-  splitandfilt filter();
+// We define the filtering routine:
+  splitandfilt filter(0.67,0.09,0.3);
+// Temporary jet is declared:
+  PseudoJet jet_tmp;
+// The filtered jets are stored elsewhere:
+  vector<PseudoJet> filtered_jets;
+// The number of jets can also change:
+  int nfiltjets = 0;
+
+  if (njets == 0) return;
   if (filt){
+// If filtering is requested we loop over the jets:
+//    cout << "Filtering is on..." << endl;
+//    cout << "Number of jets is: " << njets << endl;
     for (int i =0; i < njets; i++){
+// We filter each and every jet:
+//      cout << "The jet under filtering is: " << cut_jets[i] << endl;
+      jet_tmp = filter(cut_jets[i]);
+// If the jet had substructure and suitable for filtering it is
+// added to filtered jets:
+      if (jet_tmp != 0){
+	nfiltjets += 1;
+	filtered_jets.push_back(jet_tmp);
+      }
+    }
+// The number of jets is made equal to the number of filtered jets:
+    njets = nfiltjets;
+//    cout << "Number of filtered jets is: " << njets << endl;
+  }
+
+// transfer jets -> pjets[4*ijet+0..3]
+  for (int i=0; i<njets; i++) {
+    for (int j=0;j<=3; j++) {
+      if (!filt){
+        *pjets = cut_jets[i][j];
+      }
+      else{
+        *pjets = filtered_jets[i][j];
+      }
+      pjets++;
     }
   }
 
+// We calculate the kt splitting scales if needed:
+  if (ktsplit){
+    for (int i = 0; i < njets; i++){
+// Only when jets are not filtered!
+      if (!filt){
+	ktscales(cut_jets[i],R,sd12,sd23);
+	*sd12arr++ = sd12;
+	*sd23arr++ = sd23;
+      }
+      else{
+	ktscales(filtered_jets[i],R,sd12,sd23);
+	*sd12arr++ = sd12;
+	*sd23arr++ = sd23;
+      }
+    }
+  }
+
+// We calculate the subjettiness if needed:
+  if (subjet){
+    double tau1,tau2,tau3;
+    for (int i = 0; i < njets; i++){
+      if (!filt){
+	nsubjettiness(cut_jets[i],R,1,tau1);
+	nsubjettiness(cut_jets[i],R,2,tau2);
+	nsubjettiness(cut_jets[i],R,3,tau3);
+	if ((tau1 > 0) && ( tau2 > 0)){
+	  *tau21arr++ = tau2/tau1;
+	}
+	else{
+	  *tau21arr++ = 0.0;
+        }
+	if ((tau2 > 0) && ( tau3 > 0)){
+	  *tau32arr++ = tau3/tau2;
+	}
+	else{
+	  *tau32arr++ = 0.0;
+	}
+      }
+      else{
+	nsubjettiness(filtered_jets[i],R,1,tau1);
+	nsubjettiness(filtered_jets[i],R,2,tau2);
+	nsubjettiness(filtered_jets[i],R,3,tau3);
+	if ((tau1 > 0) && ( tau2 > 0)){
+	  *tau21arr++ = tau2/tau1;
+	}
+	else{
+	  *tau21arr++ = 0.0;
+        }
+	if ((tau2 > 0) && ( tau3 > 0)){
+	  *tau32arr++ = tau3/tau2;
+	}
+	else{
+	  *tau32arr++ = 0.0;
+	}
+      }
+    }
+  }
+
+//  PressEnterToContinue();
 
   return;
 }
@@ -161,8 +272,86 @@ void ktscales(const PseudoJet &jet,const double &R,double &sd12,double &sd23){
 // We perform the clustering:
   ClusterSequence cs(particles,jet_def);
 
+// It is possible that a jet contains less than 3 particles in
+// this case sd23 cannot be calculated, when the jet only contains
+// 1 particle not even sd12 is calculable:
+  if (particles.size() < 2){
+    sd12 = -1.0;
+    sd23 = -1.0;
+    return;
+  }
+
 // We extract two jets:
   vector<PseudoJet> subjet12 = cs.exclusive_jets(2);
+//  cout << "The content of subjet12: " << endl;
+//  cout << "subjet no. 1: " << subjet12[0] << endl;
+//  cout << "subjet no. 2: " << subjet12[1] << endl;
+  sd12 = min(subjet12[0].perp2(),subjet12[1].perp2()) *
+	 subjet12[0].squared_distance(subjet12[1]);
+// So far this is the square of the scale:
+  sd12 = sqrt(sd12);
+
+// When we have less than 3 particles sd23 cannot be calculated:
+  if (particles.size() < 3){
+    sd23 = -1.0;
+    return;
+  }
+
+// we extract three jets:
+  vector<PseudoJet> subjet123 = cs.exclusive_jets(3);
+//  cout << "The content of subjet123: " << endl;
+//  cout << "subjet no. 1: " << subjet123[0] << endl;
+//  cout << "subjet no. 2: " << subjet123[1] << endl;
+//  cout << "subjet no. 3: " << subjet123[2] << endl;
+//  A careful look at the subjets revealed that the pseudojets
+//  combined in the penultimate step are situating at the first 
+//  two positions:
+  sd23 = min(subjet123[0].perp2(),subjet123[1].perp2()) *
+	 subjet123[0].squared_distance(subjet123[1]);
+// So far this is the square of the scale:
+  sd23 = sqrt(sd23);
+//  cout << "sd12, sd23: " << sd12 << " " << sd23 << endl;
+
+  return;
+}
+
+void nsubjettiness(const PseudoJet &jet, const double &R, const int &n, double &taun){
+
+// We have to extract the constituents of the jet:
+  vector<PseudoJet> particles = jet.constituents();
+
+// Setting up the jet algorithm:
+  JetDefinition jet_def(kt_algorithm, R);
+
+// We perform the clustering:
+  ClusterSequence cs(particles,jet_def);
+
+// It is possible that we ask for more subjets than the number of particles
+// building up the original one, if this happens we give back a negative taun:
+  if (particles.size() < n){
+    taun = -10000.0;
+    return;
+  }
+
+// From the cluster we extract n subjets:
+  vector<PseudoJet> subjets = cs.exclusive_jets(n);
+
+// We calculate d0:
+  double d0 = 0;
+  for (int k = 0; k < particles.size(); k++){
+    d0 += R*particles[k].perp();
+  }
+
+// To calculate tauN we have to go through all the constituents:
+  taun = 0.0;
+  for (int k = 0; k < particles.size(); k++){
+// We have to determine the minimal distance of the kth constituent from the N subjets:
+    double minR = 1000000.0;
+    for (int i = 0; i < subjets.size(); i++){
+      minR = min(minR,sqrt(particles[k].squared_distance(subjets[i])));
+    }
+    taun += 1/d0*particles[k].perp()*minR;
+  }
 
   return;
 }

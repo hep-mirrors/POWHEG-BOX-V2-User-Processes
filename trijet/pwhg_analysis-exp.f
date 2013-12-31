@@ -69,8 +69,130 @@ c
       data ptbins/200d0,300d0,400d0,500d0,600d0/
       character*3 cptrangesub(nptbins + 1)
       data cptrangesub/'200','300','400','500','600'/
-      real*8 jetmassmaxsub(nptbins)
-      data jetmassmaxsub/220d0,220d0,310d0,310d0/
+c plot limits used with CA without filtering:
+      real*8 jetmassCAminsub(nptbins)
+      data jetmassCAminsub/10d0,10d0,20d0,20d0/
+      real*8 jetmassCAmaxsub(nptbins)
+      data jetmassCAmaxsub/190d0,190d0,290d0,290d0/
+c plot limits used with CA with filtering:
+      real*8 jetmassCASFminsub(nptbins)
+      data jetmassCASFminsub/20d0,30d0,40d0,50d0/
+      real*8 jetmassCASFmaxsub(nptbins)
+      data jetmassCASFmaxsub/160d0,190d0,290d0,290d0/
+c plot limits used with antikt:
+      real*8 jetmassantiktminsub(nptbins)
+      data jetmassantiktminsub/10d0,10d0,20d0,20d0/
+      real*8 jetmassantiktmaxsub(nptbins)
+      data jetmassantiktmaxsub/140d0,190d0,230d0,290d0/
+c
+      integer nptrangeR32
+      parameter (nptrangeR32 = 27)
+      real*8 ptrangeR32(nptrangeR32 + 1)
+      data ptrangeR32/250d0,275d0,300d0,330d0,360d0,390d0,420d0,450d0,
+     >               480d0,510d0,540d0,570d0,600d0,640d0,680d0,720d0,
+     >               760d0,800d0,850d0,900d0,950d0,1000d0,1060d0,
+     >               1120d0,1180d0,1250d0,1320d0,1390d0/
+c
+      integer nptrangesveto
+      parameter (nptrangesveto = 7)
+      real*8 ptrangesveto(nptrangesveto + 1)
+      data ptrangesveto/70d0,90d0,120d0,150d0,180d0,210d0,240d0,270d0/
+      character*3 cptrangesveto(nptrangesveto + 1)
+      data cptrangesveto/' 70',' 90','120','150',
+     >                   '180','210','240','270'/
+      integer nyrangesveto
+      parameter (nyrangesveto = 5)
+      real*8 yrangesveto(nyrangesveto + 1)
+      data yrangesveto/1d0,2d0,3d0,4d0,5d0,6d0/
+      character*1 cyrangesveto(nyrangesveto + 1)
+      data cyrangesveto/'1','2','3','4','5','6'/
+      integer nptbinsveto
+      parameter (nptbinsveto = 18)
+      real*8 ptbinsveto(nptbinsveto + 1)
+      data ptbinsveto/50d0,60d0,70d0,80d0,90d0,105d0,120d0,135d0,150d0,
+     >                180d0,210d0,240d0,270d0,300d0,340d0,380d0,420d0,
+     >                460d0,500d0/
+c
+      integer nyrangesdiffxs
+      parameter (nyrangesdiffxs = 5)
+      real*8 yrangesdiffxs(nyrangesdiffxs + 1)
+      data yrangesdiffxs/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0/
+      character*3 cyrangesdiffxs(nyrangesdiffxs + 1)
+      data cyrangesdiffxs/'0.0','0.5','1.0','1.5','2.0','2.5'/
+c Inclusive jet 0.0 < |y| < 0.5:
+      integer nptbinsdiffxs1
+      parameter (nptbinsdiffxs1 = 33)
+      real*8 ptbinsdiffxs1(nptbinsdiffxs1 + 1)
+      data ptbinsdiffxs1/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                   507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                   846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                   1248d0,1327d0,1410d0,1497d0,1588d0,1784d0,
+     >                   2116d0/
+c Inclusive jet, 0.5 < |y| < 1.0:
+      integer nptbinsdiffxs2
+      parameter (nptbinsdiffxs2 = 30)
+      real*8 ptbinsdiffxs2(nptbinsdiffxs2 + 1)
+      data ptbinsdiffxs2/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                   507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                   846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                   1248d0,1327d0,1410d0,1784d0/
+c Inclusive jet, 1.0 < |y| < 1.5:
+      integer nptbinsdiffxs3
+      parameter (nptbinsdiffxs3 = 27)
+      real*8 ptbinsdiffxs3(nptbinsdiffxs3 + 1)
+      data ptbinsdiffxs3/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                   507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                   846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                   1684d0/
+c Inclusive jet, 1.5 < |y| < 2.0:
+      integer nptbinsdiffxs4
+      parameter (nptbinsdiffxs4 = 24)
+      real*8 ptbinsdiffxs4(nptbinsdiffxs4 + 1)
+      data ptbinsdiffxs4/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                   507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                   846d0,905d0,967d0,1248d0/
+c Inclusive jet, 2.0 < |y| < 2.5:
+      integer nptbinsdiffxs5
+      parameter (nptbinsdiffxs5 = 19)
+      real*8 ptbinsdiffxs5(nptbinsdiffxs5 + 1)
+      data ptbinsdiffxs5/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                   507d0,548d0,592d0,638d0,686d0,905d0/
+c Dijet mass, 0.0 < |y| < 0.5:
+      integer nptbinsdiffxs6
+      parameter (nptbinsdiffxs6 = 13)
+      real*8 ptbinsdiffxs6(nptbinsdiffxs6 + 1)
+      data ptbinsdiffxs6/197d0,296d0,419d0,565d0,740d0,944d0,1181d0,
+     >                   1455d0,1770d0,2132d0,2546d0,3019d0,3416d0,
+     >                   4010d0/
+c Dijet mass, 0.5 < |y| < 1.0:
+      integer nptbinsdiffxs7
+      parameter (nptbinsdiffxs7 = 12)
+      real*8 ptbinsdiffxs7(nptbinsdiffxs7 + 1)
+      data ptbinsdiffxs7/270d0,386d0,526d0,693d0,890d0,1118d0,1383d0,
+     >                   1687d0,2037d0,2438d0,2895d0,3416d0,4010d0/
+c Dijet mass, 1.0 < |y| < 1.5:
+      integer nptbinsdiffxs8
+      parameter (nptbinsdiffxs8 = 11)
+      real*8 ptbinsdiffxs8(nptbinsdiffxs8 + 1)
+      data ptbinsdiffxs8/419d0,565d0,740d0,944d0,1181d0,1455d0,1770d0,
+     >                   2132d0,2546d0,3147d0,3854d0,4509d0/
+c Dijet mass, 1.5 < |y| < 2.0:
+      integer nptbinsdiffxs9
+      parameter (nptbinsdiffxs9 = 10)
+      real*8 ptbinsdiffxs9(nptbinsdiffxs9 + 1)
+      data ptbinsdiffxs9/565d0,740d0,944d0,1181d0,1455d0,1770d0,2132d0,
+     >                   2546d0,3019d0,3558d0,5058d0/
+c Dijet mass, 2.0 < |y| < 2.5:
+      integer nptbinsdiffxs10
+      parameter (nptbinsdiffxs10 = 8)
+      real*8 ptbinsdiffxs10(nptbinsdiffxs10 + 1)
+      data ptbinsdiffxs10/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,
+     >                    3147d0,3704d0,5058d0/
 c
       call inihists
 
@@ -113,103 +235,173 @@ c vvvvvvvvvvvv This part concerns the jet shapes vvvvvvvvvvvvvvvvvvvvv
 c **** arXiv:1101.0070 ****
 c Differential jet shapes:
       do j=1,nptrangebins
+        call bookupeqbins('sigma rho(r) '//cptrange(j)//' < pt < '//
+     >                    cptrange(j+1),1d0,0.5d0,1.5d0)
         call bookupeqbins('rho(r) '//cptrange(j)//' < pt < '//
      >                    cptrange(j+1),deltar,0d0,Rparshapes)
       end do
       do j=1,nptrangebins
         do k=1,nyrangebins
+          call bookupeqbins('sigma rho(r) '//cptrange(j)//' < pt < '//
+     >                      cptrange(j+1)//' '//cyrange(k)
+     >                      //' < |y| < '//cyrange(k+1),1d0,0.5d0,1.5d0)
           call bookupeqbins('rho(r) '//cptrange(j)//' < pt < '//
-     >                      cptrange(j+1)//cyrange(k)//' < |y| < '//
-     >                      cyrange(k+1),deltar,0d0,Rparshapes)
+     >                      cptrange(j+1)//' '//cyrange(k)
+     >                      //' < |y| < '//cyrange(k+1),
+     >                      deltar,0d0,Rparshapes)
         end do
       end do
 c Integrated jet shapes:
-      call bookup('1 - psi(r=0.3) ',nptrangebins,ptrangebins)
-      do j=1,nptrangebins
-        call bookup('1 - psi(r=0.3) '//cptrange(j)//' < pt < '//
-     >              cptrange(j+1),nyrangebins,yrangebins)
-      end do
-      do j=1,nptrangebins
-        do k=1,nyrangebins
-          call bookupeqbins('psi(r) '//cptrange(j)//' < pt < '//
-     >                      cptrange(j+1)//cyrange(k)//' < |y| < '//
-     >                      cyrange(k+1),deltar,0d0,Rparshapes)
-        end do
+      call bookup('sigma 1 - psi(r=0.3)',nptrangebins,ptrangebins)
+      call bookup('1 - psi(r=0.3)',nptrangebins,ptrangebins)
+      do k=1,nyrangebins
+        call bookup('sigma 1 - psi(r=0.3) '//cyrange(k)//' < |y| < '//
+     >              cyrange(k+1),nptrangebins,ptrangebins)
+        call bookup('1 - psi(r=0.3) '//cyrange(k)//' < |y| < '//
+     >              cyrange(k+1),nptrangebins,ptrangebins)
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 c vvvvvvvvvvvv This part concerns the jet substructures vvvvvvvvvvvvvv
 c **** arXiv:1203.4606 ****
-c Jet pt, eta mass and substructure related observables:
-      call bookupeqbins('pt, CA, R=1.2, |y| < 2, 200 < pt',
-     >                  100d0,200d0,1000d0)
-      call bookupeqbins('pt, antikt, R=1.0, |y| < 2, 200 < pt',
-     >                  100d0,200d0,1000d0)
-      call bookupeqbins('pt, CA, R=1.2, |y| < 2, 200 < pt, '//
-     >                  'splitfilt',100d0,200d0,1000d0)
-      call bookupeqbins('eta, CA, R=1.2, 200 < pt',
-     >                  0.5d0,-2.5d0,2.5d0)
-      call bookupeqbins('eta, antikt, R=1.0, 200 < pt',
-     >                  0.5d0,-2.5d0,2.5d0)
-      call bookupeqbins('eta, CA, R=1.2, 200 < pt, '//
-     >                  'splitfilt',0.5d0,-2.5d0,2.5d0)
-      call bookupeqbins('mass, CA, R=1.2, |y| < 2, 300 < pt < 400',
-     >                  10d0,0d0,250d0)
-      call bookupeqbins('mass, antikt, R=1.0, |y| < 2, 300 < pt < 400',
-     >                  10d0,0d0,250d0)
-      call bookupeqbins('mass,CA,R=1.2,|y|<2,300<pt<400,'//
-     >                  'splitfilt',10d0,0d0,250d0)
-c \sqrt{d_{12}}:
-      call bookupeqbins('sd12, antikt, R=1.0, |y| < 2, 300 < pt < 400',
-     >                  5d0,0d0,100d0)
-c \sqrt{d_{23}}:
-      call bookupeqbins('sd23, antikt, R=1.0, |y| < 2, 300 < pt < 400',
-     >                  2d0,0d0,40d0)
-c \tau_{21}:
-      call bookupeqbins('tau21, antikt, R=1.0, |y| < 2, 300 < pt < 400',
-     >                  0.08d0,0d0,1.2d0)
-c \tau_{32}:
-      call bookupeqbins('tau32, antikt, R=1.0, |y| < 2, 300 < pt < 400',
-     >                  0.08d0,0d0,1.2d0)
-c Jet Mass part:
-c jet mass with CA-algorithm without filtering:
+c Jet masses with CA and without filtering:
       do j=1,nptbins
-        call bookupeqbins('jetmass, CA, R=1.2, |y| < 2, '//
+        call bookupeqbins('sigma mass, CA, R=1.2, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//
+     >                    cptrangesub(j+1),1d0,0.5d0,1.5d0)
+        call bookupeqbins('mass, CA, R=1.2, |y| < 2, '//
      >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
-     >                    10d0,0d0,jetmassmaxsub(j))
+     >                    10d0,jetmassCAminsub(j),jetmassCAmaxsub(j))
       end do
-c jet mass with CA-algorithm with filtering:
+c Jet masses with CA and with filtering:
       do j=1,nptbins
-        call bookupeqbins('jetmass,CA splitfilt,R=1.2,|y|<2,'//
-     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
-     >                    10d0,0d0,jetmassmaxsub(j))
+        call bookupeqbins('sigma mass, CA SF, R=1.2, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//
+     >                    cptrangesub(j+1),1d0,0.5d0,1.5d0)
+        call bookupeqbins('mass, CA SF, R=1.2, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    10d0,jetmassCASFminsub(j),
+     >                    jetmassCASFmaxsub(j))
       end do
-c jet mass with antikt-algorithm without filtering:
+c Jet masses with antikt:
       do j=1,nptbins
-        call bookupeqbins('jetmass,antikt,R=1.0,|y|<2,'//
-     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
-     >                    10d0,0d0,jetmassmaxsub(j))
+        call bookupeqbins('sigma mass, antikt, R=1.0, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//
+     >                    cptrangesub(j+1),1d0,0.5d0,1.5d0)
+        call bookupeqbins('mass, antikt, R=1.0, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    10d0,jetmassantiktminsub(j),
+     >                    jetmassantiktmaxsub(j))
       end do
-c \sqrt{d_{12}} part:
-c \sqrt{d_{12}} with CA-algorithm without filtering:
+c kt splitting scales with antikt:
       do j=1,nptbins
-        call bookupeqbins('sqrt(d12), CA, R=1.2, |y| < 2, '//
+        call bookupeqbins('sd12, antikt, R=1.0, |y| < 2, '//
      >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
      >                    5d0,0d0,100d0)
       end do
-c \sqrt{d_{12}} with CA-algorithm with filtering:
       do j=1,nptbins
-        call bookupeqbins('sqrt(d12),CA splitfilt,R=1.2,|y|<2,'//
-     >                    cptrangesub(j)//'<pt<'//cptrangesub(j+1),
-     >                    5d0,0d0,100d0)
-      end do
-c \sqrt{d_{12}} with antikt-algorithm without filtering:
-      do j=1,nptbins
-        call bookupeqbins('sqrt(d12), antikt, R=1.0, |y| < 2, '//
+        call bookupeqbins('sd23, antikt, R=1.0, |y| < 2, '//
      >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
-     >                    5d0,0d0,100d0)
+     >                    2d0,0d0,36d0)
+      end do
+c subjettiness with CA without filtering:
+      do j=1,nptbins
+        call bookupeqbins('tau21, CA, R=1.2, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    0.08d0,0.08d0,1.2d0)
+      end do
+      do j=1,nptbins
+        call bookupeqbins('tau32, CA, R=1.2, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    0.08d0,0.32d0,1.12d0)
+      end do
+c subjettiness with antikt:
+      do j=1,nptbins
+        call bookupeqbins('tau21, antikt, R=1.0, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    0.08d0,0.08d0,1.2d0)
+      end do
+      do j=1,nptbins
+        call bookupeqbins('tau32, antikt, R=1.0, |y| < 2, '//
+     >                    cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                    0.08d0,0.32d0,1.12d0)
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvvv This part concerns the incl. 3-jet and 2-jet ratio vvvvvvvvv
+c**** arXiv:1307.7498 ****
+      call bookup('R32, incl. 2jet',nptrangeR32,ptrangeR32)
+      call bookup('R32, incl. 3jet',nptrangeR32,ptrangeR32)
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvvv This part concerns the dijet production with a veto vvvvvvvv
+c**** arXiv:1107.1641 ****
+c The gap fraction as a function of rapidity difference when the two
+c hardest jets are selected:
+      do j=1,nptrangesveto
+        call bookupeqbins('gap tot leadpt, '//cptrangesveto(j)//
+     >                    ' < avg. pt < '//cptrangesveto(j+1),
+     >                    0.5d0,0d0,6d0)
+        call bookupeqbins('gap nojet leadpt, '//cptrangesveto(j)//
+     >                    ' < avg. pt < '//cptrangesveto(j+1),
+     >                    0.5d0,0d0,6d0)
+      end do
+c The gap fraction as a function of rapidity difference when the most
+c forward/backward jets are selected:
+      do j=1,nptrangesveto
+        call bookupeqbins('gap tot maxdy, '//cptrangesveto(j)//
+     >                    ' < avg. pt < '//cptrangesveto(j+1),
+     >                    0.5d0,0d0,6d0)
+        call bookupeqbins('gap nojet maxdy, '//cptrangesveto(j)//
+     >                    ' < avg. pt < '//cptrangesveto(j+1),
+     >                    0.5d0,0d0,6d0)
+      end do
+c The gap function as the average leading pt for various rapidity
+c difference bins:
+      do j=1,nyrangesveto
+        call bookup('gap tot leadpt, '//cyrangesveto(j)//
+     >              ' < dy < '//cyrangesveto(j+1),
+     >                    nptbinsveto,ptbinsveto)
+        call bookup('gap nojet leadpt, '//cyrangesveto(j)//
+     >              ' < dy < '//cyrangesveto(j+1),
+     >                    nptbinsveto,ptbinsveto)
+      end do
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvv This part concerns the differential jet cross sections vvvvvv
+c**** arXiv:1212.6660 ****
+c
+c Inclusive jet, 0.0 < |y| < 0.5:
+      call bookup('inclusive jet, '//cyrangesdiffxs(1)//' < |y| < '//
+     >            cyrangesdiffxs(2),nptbinsdiffxs1,ptbinsdiffxs1)
+c Inclusive jet, 0.5 < |y| < 1.0:
+      call bookup('inclusive jet, '//cyrangesdiffxs(2)//' < |y| < '//
+     >            cyrangesdiffxs(3),nptbinsdiffxs2,ptbinsdiffxs2)
+c Inclusive jet, 1.0 < |y| < 1.5:
+      call bookup('inclusive jet, '//cyrangesdiffxs(3)//' < |y| < '//
+     >            cyrangesdiffxs(4),nptbinsdiffxs3,ptbinsdiffxs3)
+c Inclusive jet, 1.5 < |y| < 2.0:
+      call bookup('inclusive jet, '//cyrangesdiffxs(4)//' < |y| < '//
+     >            cyrangesdiffxs(5),nptbinsdiffxs4,ptbinsdiffxs4)
+c Inclusive jet, 2.0 < |y| < 2.5:
+      call bookup('inclusive jet, '//cyrangesdiffxs(5)//' < |y| < '//
+     >            cyrangesdiffxs(6),nptbinsdiffxs5,ptbinsdiffxs5)
+c
+c Dijet mass, 0.0 < |y|_max < 0.5:
+      call bookup('dijet mass, '//cyrangesdiffxs(1)//' < |y| < '//
+     >            cyrangesdiffxs(2),nptbinsdiffxs6,ptbinsdiffxs6)
+c Dijet mass, 0.5 < |y|_max < 1.0:
+      call bookup('dijet mass, '//cyrangesdiffxs(2)//' < |y| < '//
+     >            cyrangesdiffxs(3),nptbinsdiffxs7,ptbinsdiffxs7)
+c Dijet mass, 1.0 < |y|_max < 1.5:
+      call bookup('dijet mass, '//cyrangesdiffxs(3)//' < |y| < '//
+     >            cyrangesdiffxs(4),nptbinsdiffxs8,ptbinsdiffxs8)
+c Dijet mass, 1.5 < |y|_max < 2.0:
+      call bookup('dijet mass, '//cyrangesdiffxs(4)//' < |y| < '//
+     >            cyrangesdiffxs(5),nptbinsdiffxs9,ptbinsdiffxs9)
+c Dijet mass, 2.0 < |y|_max < 2.5:
+      call bookup('dijet mass, '//cyrangesdiffxs(5)//' < |y| < '//
+     >            cyrangesdiffxs(6),nptbinsdiffxs10,ptbinsdiffxs10)
 
       end
      
@@ -286,11 +478,20 @@ c
       real*8 calcrho,calcpsi
       external calcrho,calcpsi
 c
+      integer ijet
+      real*8 p_j(4)
+      real*8 pt_j,eta_j,y_j,m_j
+c
+      integer ijetymax,ijetymin
+      real*8 ptavg12
+c
 c These declarations are needed for azimuthal decorrelations:
       real*8 MinJetPtdphi
       parameter (MinJetPtdphi = 100d0)
-      real*8 MaxRapJetdphi
-      parameter (MaxRapJetdphi = 0.8d0)
+      real*8 MaxJetRapdphi
+      parameter (MaxJetRapdphi = 2.8d0)
+      real*8 MaxRapJ1J2dphi
+      parameter (MaxRapJ1J2dphi = 0.8d0)
       real*8 Rpardphi
       parameter (Rpardphi = 0.6d0)
 c
@@ -324,6 +525,82 @@ c These declarations for the jet shapes:
       parameter (Rparshapes = 0.6d0)
       real*8 MaxJetRapshapes
       parameter (MaxJetRapshapes = 2.8d0)
+      real*8 MinJetPtshapes
+      parameter (MinJetPtshapes = 30d0)
+c
+c These declarations for the jet subtructure and jet mass:
+      integer nptbins
+      parameter (nptbins = 4)
+      real*8 ptbins(nptbins + 1)
+      data ptbins/200d0,300d0,400d0,500d0,600d0/
+      character*3 cptrangesub(nptbins + 1)
+      data cptrangesub/'200','300','400','500','600'/
+      real*8 jetmassmaxsub(nptbins)
+      data jetmassmaxsub/220d0,220d0,310d0,310d0/
+c
+      real*8 RparCAsub
+      parameter (RparCAsub = 1.2d0)
+      real*8 RparAntiKTsub
+      parameter (RparAntiKTsub = 1.0d0)
+      real*8 MaxJetRapsub
+      parameter (MaxJetRapsub = 2.0d0)
+      real*8 MinJetPtsub
+      parameter (MinJetPtsub = 200d0)
+      real*8 sd12(maxjet),sd23(maxjet)
+      real*8 tau21(maxjet),tau32(maxjet)
+c
+c These declarations for the R32 ratio:
+      real*8 MinJetPtR32
+      parameter (MinJetPtR32 = 150d0)
+      real*8 MaxJetRapR32
+      parameter (MaxJetRapR32 = 2.5d0)
+      real*8 RparR32
+      parameter (RparR32 = 0.7d0)
+c
+c These declarations for the dijet veto:
+      integer nptrangesveto
+      parameter (nptrangesveto = 7)
+      real*8 ptrangesveto(nptrangesveto + 1)
+      data ptrangesveto/70d0,90d0,120d0,150d0,180d0,210d0,240d0,270d0/
+      character*3 cptrangesveto(nptrangesveto + 1)
+      data cptrangesveto/' 70',' 90','120','150',
+     >                   '180','210','240','270'/
+      integer nyrangesveto
+      parameter (nyrangesveto = 5)
+      real*8 yrangesveto(nyrangesveto + 1)
+      data yrangesveto/1d0,2d0,3d0,4d0,5d0,6d0/
+      character*1 cyrangesveto(nyrangesveto + 1)
+      data cyrangesveto/'1','2','3','4','5','6'/
+c
+      real*8 MinJetPtVeto
+      parameter (MinJetPtVeto = 20d0)
+      real*8 MaxJetRapVeto
+      parameter (MaxJetRapVeto = 4.4d0)
+      real*8 MinAvgPt12Veto
+      parameter (MinAvgPt12Veto = 50d0)
+      real*8 RparVeto
+      parameter (RparVeto = 0.6d0)
+      real*8 Q0Veto
+      parameter (Q0Veto = 20d0)
+      real*8 MaxRapDiff12Veto
+      parameter (MaxRapDiff12Veto = 6d0)
+c
+c These declarations for the differential cross sections:
+      real*8 Min1stJetPtdiffxs
+      parameter (Min1stJetPtdiffxs = 60d0)
+      real*8 Min2ndJetPtdiffxs
+      parameter (Min2ndJetPtdiffxs = 30d0)
+      real*8 MaxJetRapdiffxs
+      parameter (MaxJetRapdiffxs = 2.5d0)
+      real*8 Rpardiffxs
+      parameter (Rpardiffxs = 0.7d0)
+c
+      integer nyrangesdiffxs
+      parameter (nyrangesdiffxs = 5)
+      real*8 yrangesdiffxs(nyrangesdiffxs + 1)
+      data yrangesdiffxs/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0/
+      character*3 cyrangesdiffxs(nyrangesdiffxs + 1)
+      data cyrangesdiffxs/'0.0','0.5','1.0','1.5','2.0','2.5'/
 c
 
 
@@ -386,7 +663,7 @@ c We can only do this analysis if minlo is activated:
       R = Rpardphi
       palg = -1d0
       call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
-     $                        MinJetPtdphi,MaxRapJetdphi,
+     $                        MinJetPtdphi,MaxJetRapdphi,
      $                        pj,njets,jetvec)
 c
       if (njets.lt.2) goto 333
@@ -399,6 +676,10 @@ c
       call getdydetadphidr(pj1,pj2,dy12,deta12,dphi12,dr12)
 c
       dphi12 = dphi12/pi
+c
+c The two leading jets should be very central:
+      if ((abs(yj1).gt.MaxRapJ1J2dphi).or.
+     >    (abs(yj2).gt.MaxRapJ1J2dphi)) goto 333
 c
       do j=1,nptmaxbins
         if ((ptj1.gt.dptmaxbins(j)).and.(ptj1.lt.dptmaxbins(j+1))) then
@@ -435,11 +716,24 @@ c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-c *+*+*+*+*
-
 c vvvvvvvvvvvv This part concerns the jet shapes vvvvvvvvvvvvvvvvvvvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
+c
+      R = Rparshapes
+      palg = -1d0
+      call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                        MinJetPtshapes,MaxJetRapshapes,
+     $                        pj,njets,jetvec)
+c
+      if (njets.lt.1) goto 333
+c
+c      print *,"njets: ",njets
+c      do j=1,njets
+c        print *,"j: ",j
+c        print *,sqrt(pj(1,j)**2 + pj(2,j)**2)
+c      end do
+c      read(*,*)
 c
 c Differential in pt:
       do j=1,nptrangebins
@@ -448,8 +742,10 @@ c Differential in pt:
      >                  ptrangebins(j),ptrangebins(j+1),
      >                  0d0,yrangebins(nyrangebins+1),
      >                  Rparshapes,deltar,deltar/2d0 + deltar*l)
+          call filld('sigma rho(r) '//cptrange(j)//' < pt < '//
+     >               cptrange(j+1),1d0,rho*dsig)
           call filld('rho(r) '//cptrange(j)//' < pt < '//
-     >               cptrange(j+1),deltar/2d0 + deltar*l,rho)
+     >               cptrange(j+1),deltar/2d0 + deltar*l,rho*dsig)
         end do
       end do
 c
@@ -463,54 +759,386 @@ c Loop over the total rapidity range:
      >                    ptrangebins(j),ptrangebins(j+1),
      >                    yrangebins(k),yrangebins(k+1),
      >                    Rparshapes,deltar,deltar/2d0 + deltar*l)
+            call filld('sigma rho(r) '//cptrange(j)//' < pt < '//
+     >                 cptrange(j+1)//' '//cyrange(k)//' < |y| < '//
+     >                 cyrange(k+1),1d0,rho*dsig)
             call filld('rho(r) '//cptrange(j)//' < pt < '//
-     >                 cptrange(j+1)//cyrange(k)//' < |y| < '//
-     >                 cyrange(k+1),deltar/2d0 + deltar*l,rho)
+     >                 cptrange(j+1)//' '//cyrange(k)//' < |y| < '//
+     >                 cyrange(k+1),deltar/2d0 + deltar*l,rho*dsig)
           end do
         end do
       end do
 c
-c We calculate psi(r = 0.3) for different pt regions:
+c We calculate psi(r = 0.3) for different pt ranges:
+c We plot 1 - psi(r = 0.3) as a function of jet pt:
       do j=1,nptrangebins
         psi = calcpsi(ntracks,njets,ptrack,pj,jetvec,
-     >                ptrangebins(1),ptrangebins(nptrangebins + 1),
      >                ptrangebins(j),ptrangebins(j + 1),
      >                yrangebins(1),yrangebins(nyrangebins + 1),
+     >                ptrangebins(j),ptrangebins(j + 1),
      >                yrangebins(1),yrangebins(nyrangebins + 1),
      >                Rparshapes,0.3d0)
-        call filld('1 - psi(r=0.3) ',(ptrangebins(j+1) + 
-     >             ptrangebins(j))/2d0,1d0 - psi)
+        if (psi.ge.0d0) then
+          call filld('sigma 1 - psi(r=0.3)',(ptrangebins(j+1) + 
+     >               ptrangebins(j))/2d0,dsig)
+          call filld('1 - psi(r=0.3)',(ptrangebins(j+1) + 
+     >               ptrangebins(j))/2d0,(1d0 - psi)*dsig)
+        end if
       end do
+c we plot 1 - psi(r = 0.3) as a function of jet pt, in fixed y range:
       do j=1,nptrangebins
         do k=1,nyrangebins
           psi = calcpsi(ntracks,njets,ptrack,pj,jetvec,
      >                  ptrangebins(j),ptrangebins(j + 1),
+     >                  yrangebins(k),yrangebins(k + 1),
      >                  ptrangebins(j),ptrangebins(j + 1),
-     >                  yrangebins(1),yrangebins(nyrangebins + 1),
      >                  yrangebins(k),yrangebins(k + 1),
      >                  Rparshapes,0.3d0)
-          call filld('1 - psi(r=0.3) '//cptrange(j)//' < pt < '//
-     >               cptrange(j+1),(yrangebins(k) + 
-     >               yrangebins(k+1))/2d0,1d0 - psi)
-c
-          do l=0,5
-            psi = calcpsi(ntracks,njets,ptrack,pj,jetvec,
-     >                    ptrangebins(j),ptrangebins(j + 1),
-     >                    ptrangebins(j),ptrangebins(j + 1),
-     >                    yrangebins(k),yrangebins(k + 1),
-     >                    yrangebins(k),yrangebins(k + 1),
-     >                    Rparshapes,deltar + l*deltar)
-            call filld('psi(r) '//cptrange(j)//' < pt < '//
-     >                 cptrange(j+1)//cyrange(k)//' < |y| < '//
-     >                 cyrange(k+1),deltar/2d0 + l*deltar,psi)
-          end do
+          if (psi.ge.0d0) then
+            call filld('sigma 1 - psi(r=0.3) '//
+     >                 cyrange(k)//' < |y| < '//
+     >                 cyrange(k+1),(ptrangebins(j+1) + 
+     >                 ptrangebins(j))/2d0,dsig)
+            call filld('1 - psi(r=0.3) '//cyrange(k)//' < |y| < '//
+     >                 cyrange(k+1),(ptrangebins(j+1) + 
+     >                 ptrangebins(j))/2d0,(1d0 - psi)*dsig)
+          end if
         end do
       end do
 c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
- 333  continue
+333   continue
+
+c vvvvvvvvv This part concerns the jet substructure and mass vvvvvvvvv
+c
+c We can only do this analysis if minlo is activated:
+      if (minlo.eq.1) then !<minlo>
+c First we do the analysis with CA, R=1.2:
+      R = RparCAsub
+      palg = 0d0
+      call fastjetalg(ptrack,ntracks,R,palg,.false.,.false.,.true.,
+     >                MinJetPtsub,MaxJetRapsub,
+     >                pj,njets,sd12,sd23,tau21,tau32)
+c The Jet mass should be plotted for various pt windows:
+c We go through the jets, if it qualifies for actual ptrange
+c we plot it:
+      do ijet=1,njets
+        p_j = pj(:,ijet)
+        call getyetaptmass(p_j,y,eta,pt,m)
+c loop over pt ranges:
+        do j=1,nptbins
+          if ((pt.gt.ptbins(j)).and.(pt.lt.ptbins(j+1))) then
+            call filld('sigma mass, CA, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 1d0,dsig)
+            call filld('mass, CA, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 m,dsig)
+            call filld('tau21, CA, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 tau21(ijet),dsig)
+            call filld('tau32, CA, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 tau32(ijet),dsig)
+          end if
+        end do
+      end do
+c We do the analysis with CA with Split and Filtering, R=1.2:
+      R = RparCAsub
+      palg = 0d0
+      call fastjetalg(ptrack,ntracks,R,palg,.true.,.false.,.false.,
+     >                MinJetPtsub,MaxJetRapsub,
+     >                pj,njets,sd12,sd23,tau21,tau32)
+c The Jet mass should be plotted for various pt windows:
+c We go through the jets, if it qualifies for actual ptrange
+c we plot it:
+c      print *,"Number of jets is: ",njets
+      do ijet=1,njets
+        p_j = pj(:,ijet)
+        call getyetaptmass(p_j,y,eta,pt,m)
+c        print *,"ijet: ",ijet
+c        print *,"m: ",m
+c loop over pt ranges:
+        do j=1,nptbins
+          if ((pt.gt.ptbins(j)).and.(pt.lt.ptbins(j+1))) then
+            call filld('sigma mass, CA SF, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 1d0,dsig)
+            call filld('mass, CA SF, R=1.2, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 m,dsig)
+          end if
+        end do
+      end do
+c We do the analysis with antikt:
+      R = RparAntiKTsub
+      palg = -1d0
+      call fastjetalg(ptrack,ntracks,R,palg,.false.,.true.,.false.,
+     >                MinJetPtsub,MaxJetRapsub,
+     >                pj,njets,sd12,sd23,tau21,tau32)
+c The Jet mass should be plotted for various pt windows:
+c We go through the jets, if it qualifies for actual ptrange
+c we plot it:
+c      print *,"Number of jets is: ",njets
+      do ijet=1,njets
+        p_j = pj(:,ijet)
+        call getyetaptmass(p_j,y,eta,pt,m)
+c        print *,"ijet: ",ijet
+c        print *,"m: ",m
+c        print *,"sd12: ",sd12(ijet)
+c        print *,"sd23: ",sd23(ijet)
+c loop over pt ranges:
+        do j=1,nptbins
+          if ((pt.gt.ptbins(j)).and.(pt.lt.ptbins(j+1))) then
+            call filld('sigma mass, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 1d0,dsig)
+            call filld('mass, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 m,dsig)
+c we use the same loop to plot the kt splitting scales:
+c for these we did not define a cross section histo, we use the one
+c set up for the jet mass:
+            call filld('sd12, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 sd12(ijet),dsig)
+            call filld('sd23, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 sd23(ijet),dsig)
+            call filld('tau21, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 tau21(ijet),dsig)
+            call filld('tau32, antikt, R=1.0, |y| < 2, '//
+     >                 cptrangesub(j)//' < pt < '//cptrangesub(j+1),
+     >                 tau32(ijet),dsig)
+          end if
+        end do
+      end do
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvvvvvvv This part concerns the R32 ratio calculation vvvvvvvvvvv
+c We can only do this analysis if minlo is activated:
+      if (minlo.eq.1) then !<minlo>
+      R = RparR32
+      palg = -1d0
+      call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                        MinJetPtR32,MaxJetRapR32,
+     $                        pj,njets,jetvec)
+c
+      if (njets.lt.2) goto 444
+c
+      pj1 = pj(:,1)
+      pj2 = pj(:,2)
+c
+      call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+      call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c
+      ptavg12 = (ptj1 + ptj2)/2d0
+c
+      if (njets.ge.2) call filld('R32, incl. 2jet',ptavg12,dsig)
+      if (njets.ge.3) call filld('R32, incl. 3jet',ptavg12,dsig)
+c
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+444   continue
+
+c vvvvvvvvvvvvvvvv This part concerns the dijet veto vvvvvvvvvvvvvvvvv
+c We can only do this analysis if minlo is activated:
+      if (minlo.eq.1) then !<minlo>
+      R = RparVeto
+      palg = -1d0
+      call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                        MinJetPtVeto,MaxJetRapVeto,
+     $                        pj,njets,jetvec)
+c
+      if (njets.lt.2) goto 555
+c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c **** In this part we start with the two hardest jets: ****
+c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c We select the dijet system by their pt which is required to be the
+c two hardest:
+      pj1 = pj(:,1)
+      pj2 = pj(:,2)
+c
+      call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+      call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c
+      ptavg12 = (ptj1 + ptj2)/2d0
+      dy12 = abs(yj1 - yj2)
+c
+c We have an additional cut on the average pt of the dijet system
+      if (ptavg12.lt.MinAvgPt12Veto) goto 566
+c We have a maximal difference in rapidity too:
+      if (dy12.gt.MaxRapDiff12Veto) goto 566
+c To calculate the gap fraction we need the cross section for all
+c jets passing the cuts:
+c For different pt ranges:
+      do j=1,nptrangesveto
+        if ((ptavg12.gt.ptrangesveto(j)).and.
+     >      (ptavg12.lt.ptrangesveto(j+1))) then
+          call filld('gap tot leadpt, '//cptrangesveto(j)//
+     >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
+        end if
+      end do
+c For different \Delta y ranges:
+      do j=1,nyrangesveto
+        if ((dy12.gt.yrangesveto(j)).and.
+     >      (dy12.lt.yrangesveto(j+1))) then
+          call filld('gap tot leadpt, '//cyrangesveto(j)//
+     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig)
+        end if
+      end do
+c We should have no jet between the two hardest:
+      do j=3,njets
+        p_j = pj(:,j)
+        call getyetaptmass(p_j,y_j,eta_j,pt_j,m_j)
+        if ((pt_j.gt.Q0Veto).and.
+     >      (y_j.gt.min(yj1,yj2)).and.
+     >      (y_j.lt.max(yj1,yj2))) goto 566
+      end do
+c We go through all pt ranges and we try to fill in the adequate one:
+      do j=1,nptrangesveto
+        if ((ptavg12.gt.ptrangesveto(j)).and.
+     >      (ptavg12.lt.ptrangesveto(j+1))) then
+          call filld('gap nojet leadpt, '//cptrangesveto(j)//
+     >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
+        end if
+      end do
+c We do the same but with \Delta y ranges:
+      do j=1,nyrangesveto
+        if ((dy12.gt.yrangesveto(j)).and.
+     >      (dy12.lt.yrangesveto(j+1))) then
+c We have to divide by the width of the rapidity window to obtain the
+c correct differential cross section:
+          dy = yrangesveto(j+1) - yrangesveto(j)
+          call filld('gap nojet leadpt, '//cyrangesveto(j)//
+     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig/dy)
+        end if
+      end do
+c
+566   continue
+c
+c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c **** In this part we start with the two furthest jets: ****
+c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c We go through the jets and select the two most further ones:
+c j1 should have the most positive rapidity while j2 the opposite:
+      yj1 = -1d5
+      yj2 = 1d5
+      do j=1,njets
+        p_j = pj(:,j)
+        call getyetaptmass(p_j,y_j,eta_j,pt_j,m_j)
+        if (y_j.gt.yj1) then
+          yj1 = y_j
+          ijetymax = j
+        end if
+        if (y_j.lt.yj2) then
+          yj2 = y_j
+          ijetymin = j
+        end if
+      end do
+
+      pj1 = pj(:,ijetymax)
+      pj2 = pj(:,ijetymin)
+c
+      call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+      call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c
+      ptavg12 = (ptj1 + ptj2)/2d0
+      dy12 = abs(yj1 - yj2)
+c
+c We have an additional cut on the average pt of the dijet system
+      if (ptavg12.lt.MinAvgPt12Veto) goto 577
+c We have a maximal difference in rapidity too:
+      if (dy12.gt.MaxRapDiff12Veto) goto 577
+c To calculate the gap fraction we need the cross section for all
+c jets passing the cuts:
+      do j=1,nptrangesveto
+        if ((ptavg12.gt.ptrangesveto(j)).and.
+     >      (ptavg12.lt.ptrangesveto(j+1))) then
+          call filld('gap tot maxdy, '//cptrangesveto(j)//
+     >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
+        end if
+      end do
+c We should have no jet between the two hardest:
+      do j=1,njets
+c We go through all the jets and skip the furthest ones:
+        if ((j.eq.ijetymax).or.(j.eq.ijetymin)) cycle
+        p_j = pj(:,j)
+        call getyetaptmass(p_j,y_j,eta_j,pt_j,m_j)
+        if ((pt_j.gt.Q0Veto).and.
+     >      (y_j.gt.min(yj1,yj2)).and.
+     >      (y_j.lt.max(yj1,yj2))) goto 577
+      end do
+c We go through all pt ranges and we try to fill in the adequate one:
+      do j=1,nptrangesveto
+        if ((ptavg12.gt.ptrangesveto(j)).and.
+     >      (ptavg12.lt.ptrangesveto(j+1))) then
+          call filld('gap nojet maxdy, '//cptrangesveto(j)//
+     >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
+        end if
+      end do
+c
+577   continue
+c
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+555   continue
+
+c vvvvvvvv This part concerns the differential cross sections vvvvvvvv
+c We can only do this analysis if minlo is activated:
+      if (minlo.eq.1) then !<minlo>
+      R = Rpardiffxs
+      palg = -1d0
+      call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                        Min2ndJetPtdiffxs,MaxJetRapdiffxs,
+     $                        pj,njets,jetvec)
+c
+c For the inclusive jet study we need at least one reconstructed jet:
+      if (njets.lt.1) goto 666
+c
+c We go through all the jets and plot their pt's:
+      do j=1,njets
+        pj1   = pj(:,j)
+        call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+        do k=1,nyrangesdiffxs
+          if ((abs(yj1).gt.yrangesdiffxs(k)).and.
+     >        (abs(yj1).lt.yrangesdiffxs(k+1))) then
+            call filld('inclusive jet, '//cyrangesdiffxs(k)//
+     >                 ' < |y| < '//cyrangesdiffxs(k+1),ptj1,dsig)
+          end if
+        end do
+      end do
+c For dijet mass we need at least two jets to be present:
+      if (njets.lt.2) goto 666
+c We only interested in the first two jets:
+      pj1   = pj(:,1)
+      pj2   = pj(:,2)
+      call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+      call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c The first jet has to have a larger transvere momentum:
+      if (ptj1.lt.Min1stJetPtdiffxs) goto 666
+c
+      call pwhg_getinvmass(pj1 + pj2,m)
+c We go through all the y ranges and plot the mass where it belongs:
+        do k=1,nyrangesdiffxs
+          if ((max(abs(yj1),abs(yj2)).gt.yrangesdiffxs(k)).and.
+     >        (max(abs(yj1),abs(yj2)).lt.yrangesdiffxs(k+1))) then
+            call filld('dijet mass, '//cyrangesdiffxs(k)//
+     >                 ' < |y| < '//cyrangesdiffxs(k+1),m,dsig)
+          end if
+        end do
+c 
+c
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+666   continue
 
       end
 
@@ -642,7 +1270,7 @@ c
       integer numjets
       real*8 p_j(4)
       real*8 pt_j,y_j
-      real*8 pt_dr
+      real*8 pt_dr,pt_r
 c
       real*8 calcptdr
       external calcptdr
@@ -665,10 +1293,14 @@ c jets considered for rho:
 c we calculate the pt contribution of an annulus between r - \Delta r/2
 c and r + \Delta r/2
         pt_dr = calcptdr(ijet,p_j,ntrack,ptrack,jetvec,r,dr)
-        calcrho = calcrho + pt_dr/pt_j
+c We calculate the summed pt of all the clusters in the jet:
+        pt_r = calcptdr(ijet,p_j,ntrack,ptrack,jetvec,
+     >                  Rpar/2d0,Rpar)
+C        calcrho = calcrho + pt_dr/pt_j
+        calcrho = calcrho + pt_dr/pt_r
       end do
 c normalization:
-      if (numjets.gt.0) calcrho = calcrho/dr/numjets
+      if (numjets.gt.0) calcrho = calcrho/numjets/dr
 c
       end function calcrho
 c
@@ -748,7 +1380,8 @@ c
       real*8 calcptdr
       external calcptdr
 c
-      calcpsi = 0d0
+c We set psi to an unphysical value:
+      calcpsi = -1d5
       numjets = 0
 c
 c we loop over all jets:
@@ -761,16 +1394,19 @@ c We only consider those jets for which the pt is in a given range:
 c We even include the possibility to make cuts on rapidity:
         if ((abs(y_j).lt.ymin).or.(abs(y_j).gt.ymax)) cycle
         numjets = numjets + 1
+c If we have at least one jet the psi is initialized to be physical:
+        if (numjets.eq.1) calcpsi = 0d0
         if ((pt_j.lt.ptwmin).or.(pt_j.gt.ptwmax)) cycle
         if ((abs(y_j).lt.ywmin).or.(abs(y_j).gt.ywmax)) cycle
 c The next few lines are needed for the window:
 c we calculate the pt contribution of between 0 and r:
 c we can use the previously implemented calcptdr function 
-c with parameters: r = -r/2 and dr = r/2, with this
+c with parameters: r = r/2 and dr = r, with this
 c parameter choice the function calculates the pt 
 c contribution from tracks situating in an annulus between 
 c zero and r
-        pt_r = calcptdr(ijet,p_j,ntrack,ptrack,jetvec,-r/2d0,r/2d0)
+        pt_r = calcptdr(ijet,p_j,ntrack,ptrack,jetvec,r/2d0,r)
+        pt_j = calcptdr(ijet,p_j,ntrack,ptrack,jetvec,Rpar/2d0,Rpar)
         calcpsi = calcpsi + pt_r/pt_j
       end do
 c normalization:

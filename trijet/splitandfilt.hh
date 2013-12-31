@@ -3,10 +3,13 @@
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/tools/Transformer.hh"
+#include "fastjet/WrappedStructure.hh"
+
 using namespace std;
 using namespace fastjet;
 
 class splitandfilt;
+class splitandfiltStructure;
 
 class splitandfilt : public Transformer {
 public:
@@ -16,6 +19,9 @@ public:
     : _mu_cut(mu_cut), _v_cut(v_cut), _dRj1j2(dRj1j2){};
 
   virtual PseudoJet result(const PseudoJet & jet) const;
+
+// the type of Structure returned
+  typedef splitandfiltStructure StructureType;
 
   virtual std::string description() const;
 
@@ -28,6 +34,18 @@ protected:
   double _mu_cut;
   double _v_cut;
   double _dRj1j2;
+};
+
+class splitandfiltStructure : public WrappedStructure{
+public:
+  /// default ctor
+  ///  \param result_jet   the jet for which we have to keep the
+  ///                      structure
+  splitandfiltStructure(const PseudoJet & result_jet)
+    : WrappedStructure(result_jet.structure_shared_ptr()){}
+
+protected:
+  friend class splitandfilt; ///< to allow setting the internal information
 };
 
 #endif // __SPLITANDFILT_HH__ 
