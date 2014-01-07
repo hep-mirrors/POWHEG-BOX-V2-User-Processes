@@ -8,6 +8,8 @@
       include 'pwhg_em.h'
       include 'LesHouches.h'
       include 'pwhg_flg.h'
+      include 'pwhg_physpar.h'
+      include 'pwhg_st.h'
       integer i1,i2,i3,i4,i5,k,ii(nlegreal)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
      #  (i4,ii(4)),(i5,ii(5))
@@ -27,7 +29,7 @@ c     lepton masses
       common/clepmass/lepmass,decmass
       real *8 kt2minqed
       common/showerqed/kt2minqed
-
+      real * 8 cmass, bmass
 c Must include photon!
       pdf_nparton = 22
       flg_with_em = .true.
@@ -118,6 +120,22 @@ c     not yet implemented
      #        'not yet implemented'
          stop
       endif   
+
+c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
+      do j=1,st_nlight         
+         physpar_mq(j)=0d0
+      enddo
+      do j=1,3
+         physpar_ml(j)=lepmass(j)
+      enddo
+c     read eventual c and b masses from the input file
+      cmass=powheginput("#cmass_lhe")
+      if (cmass.gt.0d0) physpar_mq(4)=cmass
+      bmass=powheginput("#bmass_lhe")
+      if (bmass.gt.0d0) physpar_mq(5)=bmass
+
+
+
 c*********************************************************     
 c
 c     index of the first light particle in the final state

@@ -309,5 +309,6 @@ c     vector boson id and decay
       common/cvecbos/idvecbos,vdecaymode
 
       call add_resonance(idvecbos,3,4)
+      call lhefinitemasses
 
       end
