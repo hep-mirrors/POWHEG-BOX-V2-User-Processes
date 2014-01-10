@@ -161,6 +161,7 @@ c     Make PI0 stable as in herwig default
 ccccccc      subroutine UPEVNT
       subroutine UPEVNT
       implicit none
+      include 'hepevt.h'
       include 'LesHouches.h'
       include 'pwhg_physpar.h'
       real * 8 powheginput
@@ -169,6 +170,9 @@ ccccccc      subroutine UPEVNT
       save ini,changescalup
       real * 8 weight
       common/weight2cc/weight
+      integer oldnevhep
+      data oldnevhep/-1/
+      save oldnevhep
       if(ini) then
          if(powheginput("#changescalup").eq.1) then
             print *,"SCALUP is changed..."
@@ -178,6 +182,11 @@ ccccccc      subroutine UPEVNT
          endif
          ini=.false.
       endif
+      if(nevhep.eq.oldnevhep) then
+         call pwhgaccumup
+         call lhefwritev(6)
+      endif
+      oldnevhep = nevhep
       call lhefreadev(97)
       weight=xwgtup
       if(changescalup) call py_change_scalup
