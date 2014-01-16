@@ -9,7 +9,7 @@ c  pwhgfill  :  fills the histograms with data
       implicit none
       include  'LesHouches.h'
       include 'pwhg_math.h'
-      integer j,k,i
+      integer i,j,k
       real * 8 powheginput
       external powheginput
 c
@@ -163,38 +163,120 @@ c Inclusive jet, 2.0 < |y| < 2.5:
      >                   272d0,300d0,330d0,362d0,395d0,430d0,468d0,
      >                   507d0,548d0,592d0,638d0,686d0,905d0/
 c Dijet mass, 0.0 < |y| < 0.5:
-      integer nptbinsdiffxs6
-      parameter (nptbinsdiffxs6 = 13)
-      real*8 ptbinsdiffxs6(nptbinsdiffxs6 + 1)
-      data ptbinsdiffxs6/197d0,296d0,419d0,565d0,740d0,944d0,1181d0,
+      integer nmbinsdiffxs6
+      parameter (nmbinsdiffxs6 = 13)
+      real*8 mbinsdiffxs6(nmbinsdiffxs6 + 1)
+      data mbinsdiffxs6/197d0,296d0,419d0,565d0,740d0,944d0,1181d0,
      >                   1455d0,1770d0,2132d0,2546d0,3019d0,3416d0,
      >                   4010d0/
 c Dijet mass, 0.5 < |y| < 1.0:
-      integer nptbinsdiffxs7
-      parameter (nptbinsdiffxs7 = 12)
-      real*8 ptbinsdiffxs7(nptbinsdiffxs7 + 1)
-      data ptbinsdiffxs7/270d0,386d0,526d0,693d0,890d0,1118d0,1383d0,
+      integer nmbinsdiffxs7
+      parameter (nmbinsdiffxs7 = 12)
+      real*8 mbinsdiffxs7(nmbinsdiffxs7 + 1)
+      data mbinsdiffxs7/270d0,386d0,526d0,693d0,890d0,1118d0,1383d0,
      >                   1687d0,2037d0,2438d0,2895d0,3416d0,4010d0/
 c Dijet mass, 1.0 < |y| < 1.5:
-      integer nptbinsdiffxs8
-      parameter (nptbinsdiffxs8 = 11)
-      real*8 ptbinsdiffxs8(nptbinsdiffxs8 + 1)
-      data ptbinsdiffxs8/419d0,565d0,740d0,944d0,1181d0,1455d0,1770d0,
+      integer nmbinsdiffxs8
+      parameter (nmbinsdiffxs8 = 11)
+      real*8 mbinsdiffxs8(nmbinsdiffxs8 + 1)
+      data mbinsdiffxs8/419d0,565d0,740d0,944d0,1181d0,1455d0,1770d0,
      >                   2132d0,2546d0,3147d0,3854d0,4509d0/
 c Dijet mass, 1.5 < |y| < 2.0:
-      integer nptbinsdiffxs9
-      parameter (nptbinsdiffxs9 = 10)
-      real*8 ptbinsdiffxs9(nptbinsdiffxs9 + 1)
-      data ptbinsdiffxs9/565d0,740d0,944d0,1181d0,1455d0,1770d0,2132d0,
+      integer nmbinsdiffxs9
+      parameter (nmbinsdiffxs9 = 10)
+      real*8 mbinsdiffxs9(nmbinsdiffxs9 + 1)
+      data mbinsdiffxs9/565d0,740d0,944d0,1181d0,1455d0,1770d0,2132d0,
      >                   2546d0,3019d0,3558d0,5058d0/
 c Dijet mass, 2.0 < |y| < 2.5:
-      integer nptbinsdiffxs10
-      parameter (nptbinsdiffxs10 = 8)
-      real*8 ptbinsdiffxs10(nptbinsdiffxs10 + 1)
-      data ptbinsdiffxs10/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,
+      integer nmbinsdiffxs10
+      parameter (nmbinsdiffxs10 = 8)
+      real*8 mbinsdiffxs10(nmbinsdiffxs10 + 1)
+      data mbinsdiffxs10/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,
      >                    3147d0,3704d0,5058d0/
 c
+c Differential cross section, Atlas:
+      integer nystarrangesdiffxsAtlas
+      parameter (nystarrangesdiffxsAtlas = 6)
+      real*8 ystarrangesdiffxsAtlas(nystarrangesdiffxsAtlas + 1)
+      data ystarrangesdiffxsAtlas/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0,3.0d0/
+      character*3 cystarrangesdiffxsAtlas(nystarrangesdiffxsAtlas + 1)
+      data cystarrangesdiffxsAtlas/'0.0','0.5','1.0','1.5','2.0','2.5',
+     >                             '3.0'/
+      integer nRpardiffxsAtlas
+      parameter (nRpardiffxsAtlas = 2)
+      real*8 RpardiffxsAtlas(nRpardiffxsAtlas)
+      data RpardiffxsAtlas/0.4d0,0.6d0/
+      character*3 cRpardiffxsAtlas(nRpardiffxsAtlas)
+      data cRpardiffxsAtlas/'0.4','0.6'/
+c Dijet mass, ystar < 0.5:
+      integer nmbinsdiffxsAtlas1
+      parameter (nmbinsdiffxsAtlas1 = 21)
+      real*8 mbinsdiffxsAtlas1(nmbinsdiffxsAtlas1 + 1)
+      data mbinsdiffxsAtlas1/260d0,310d0,370d0,440d0,510d0,590d0,
+     >                        670d0,760d0,850d0,950d0,1060d0,1180d0,
+     >                        1310d0,1450d0,1600d0,1760d0,1940d0,2120d0,
+     >                        2330d0,2550d0,2780d0,4270d0/
+c Dijet mass, 0.5 < ystar < 1.0:
+      integer nmbinsdiffxsAtlas2
+      parameter (nmbinsdiffxsAtlas2 = 21)
+      real*8 mbinsdiffxsAtlas2(nmbinsdiffxsAtlas2 + 1)
+      data mbinsdiffxsAtlas2/310d0,370d0,440d0,510d0,590d0,670d0,760d0,
+     >                        850d0,950d0,1060d0,1180d0,1310d0,1450d0,
+     >                        1600d0,1760d0,1940d0,2120d0,2330d0,2550d0,
+     >                        2780d0,3040d0,4270d0/
+c Dijet mass, 1.0 < ystar < 1.5:
+      integer nmbinsdiffxsAtlas3
+      parameter (nmbinsdiffxsAtlas3 = 19)
+      real*8 mbinsdiffxsAtlas3(nmbinsdiffxsAtlas3 + 1)
+      data mbinsdiffxsAtlas3/510d0,590d0,670d0,760d0,850d0,950d0,
+     >                        1060d0,1180d0,1310d0,1450d0,1600d0,1760d0,
+     >                        1940d0,2120d0,2330d0,2550d0,2780d0,3040d0,
+     >                        3310d0,4640d0/
+c Dijet mass, 1.5 < ystar < 2.0:
+      integer nmbinsdiffxsAtlas4
+      parameter (nmbinsdiffxsAtlas4 = 17)
+      real*8 mbinsdiffxsAtlas4(nmbinsdiffxsAtlas4 + 1)
+      data mbinsdiffxsAtlas4/760d0,850d0,950d0,1060d0,1180d0,1310d0,
+     >                        1450d0,1600d0,1760d0,1940d0,2120d0,2330d0,
+     >                        2550d0,2780d0,3040d0,3310d0,3610d0,4640d0/
+c Dijet mass, 2.0 < ystar < 2.5:
+      integer nmbinsdiffxsAtlas5
+      parameter (nmbinsdiffxsAtlas5 = 8)
+      real*8 mbinsdiffxsAtlas5(nmbinsdiffxsAtlas5 + 1)
+      data mbinsdiffxsAtlas5/1310d0,1450d0,1600d0,1760d0,2120d0,
+     >                        2550d0,3040d0,3610d0,5040d0/
+c Dijet mass, 2.5 < ystar < 3.0:
+      integer nmbinsdiffxsAtlas6
+      parameter (nmbinsdiffxsAtlas6 = 4)
+      real*8 mbinsdiffxsAtlas6(nmbinsdiffxsAtlas6 + 1)
+      data mbinsdiffxsAtlas6/2120d0,2550d0,3040d0,3930d0,5040d0/
+c
+c Trijet mass following CMS PAS
+      integer nymaxrangesdiffxsCMSPAS
+      parameter (nymaxrangesdiffxsCMSPAS = 2)
+      real*8 ymaxrangesdiffxsCMSPAS(nymaxrangesdiffxsCMSPAS + 1)
+      data ymaxrangesdiffxsCMSPAS/0d0,1d0,2d0/
+      character*3 cymaxrangesdiffxsCMSPAS(nymaxrangesdiffxsCMSPAS + 1)
+      data cymaxrangesdiffxsCMSPAS/'0.0','1.0','2.0'/
+c
+      integer nRpardiffxsCMSPAS
+      parameter (nRpardiffxsCMSPAS = 1)
+      real*8 RpardiffxsCMSPAS(nRpardiffxsCMSPAS)
+      data RpardiffxsCMSPAS/0.7d0/
+      character*3 cRpardiffxsCMSPAS(nRpardiffxsCMSPAS)
+      data cRpardiffxsCMSPAS/'0.7'/
+c
+      integer nm123binsdiffxsCMSPAS
+      parameter (nm123binsdiffxsCMSPAS = 21)
+      real*8 m123binsdiffxsCMSPAS(nm123binsdiffxsCMSPAS + 1)
+      data m123binsdiffxsCMSPAS/
+     >     310d0,370d0,440d0,510d0,590d0,670d0,760d0,
+     >     850d0,950d0,1060d0,1180d0,1310d0,1450d0,
+     >     1600d0,1760d0,1940d0,2120d0,2330d0,2550d0,
+     >     2780d0,3040d0,4270d0/
+c
       call inihists
+c
 
 c vvvvvvvvvvvv This part concerns the azimuthal decorrelation vvvvvvvv
 c **** arXiv:1102.2696 ****
@@ -389,19 +471,68 @@ c Inclusive jet, 2.0 < |y| < 2.5:
 c
 c Dijet mass, 0.0 < |y|_max < 0.5:
       call bookup('dijet mass, '//cyrangesdiffxs(1)//' < |y| < '//
-     >            cyrangesdiffxs(2),nptbinsdiffxs6,ptbinsdiffxs6)
+     >            cyrangesdiffxs(2),nmbinsdiffxs6,mbinsdiffxs6)
 c Dijet mass, 0.5 < |y|_max < 1.0:
       call bookup('dijet mass, '//cyrangesdiffxs(2)//' < |y| < '//
-     >            cyrangesdiffxs(3),nptbinsdiffxs7,ptbinsdiffxs7)
+     >            cyrangesdiffxs(3),nmbinsdiffxs7,mbinsdiffxs7)
 c Dijet mass, 1.0 < |y|_max < 1.5:
       call bookup('dijet mass, '//cyrangesdiffxs(3)//' < |y| < '//
-     >            cyrangesdiffxs(4),nptbinsdiffxs8,ptbinsdiffxs8)
+     >            cyrangesdiffxs(4),nmbinsdiffxs8,mbinsdiffxs8)
 c Dijet mass, 1.5 < |y|_max < 2.0:
       call bookup('dijet mass, '//cyrangesdiffxs(4)//' < |y| < '//
-     >            cyrangesdiffxs(5),nptbinsdiffxs9,ptbinsdiffxs9)
+     >            cyrangesdiffxs(5),nmbinsdiffxs9,mbinsdiffxs9)
 c Dijet mass, 2.0 < |y|_max < 2.5:
       call bookup('dijet mass, '//cyrangesdiffxs(5)//' < |y| < '//
-     >            cyrangesdiffxs(6),nptbinsdiffxs10,ptbinsdiffxs10)
+     >            cyrangesdiffxs(6),nmbinsdiffxs10,mbinsdiffxs10)
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvv This part concerns the differential dijet cross sections vvvvvv
+c**** arXiv:1312.3524 ****
+c 
+      do i=1,nRpardiffxsAtlas
+c Dijet mass, y* < 0.5:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(1)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(2),
+     >              nmbinsdiffxsAtlas1,mbinsdiffxsAtlas1)
+c Dijet mass, 0.5 < y* < 1.0:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(2)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(3),
+     >              nmbinsdiffxsAtlas2,mbinsdiffxsAtlas2)
+c Dijet mass, 1.0 < y* < 1.5:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(3)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(4),
+     >              nmbinsdiffxsAtlas3,mbinsdiffxsAtlas3)
+c Dijet mass, 1.5 < y* < 2.0:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(4)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(5),
+     >              nmbinsdiffxsAtlas4,mbinsdiffxsAtlas4)
+c Dijet mass, 2.0 < y* < 2.5:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(5)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(6),
+     >              nmbinsdiffxsAtlas5,mbinsdiffxsAtlas5)
+c Dijet mass, 2.5 < y* < 3.0:
+        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(6)//' < y* < '//
+     >              cystarrangesdiffxsAtlas(7),
+     >              nmbinsdiffxsAtlas6,mbinsdiffxsAtlas6)
+      end do
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvv This part concerns the trijet invariant mass distro. vvvvvv
+c**** CMS PAS SMP-12-027 ****
+      do i=1,nRpardiffxsCMSPAS
+        do j=1,nymaxrangesdiffxsCMSPAS
+          call bookup('m123, R='//cRpardiffxsCMSPAS(i)//', '//
+     >                cymaxrangesdiffxsCMSPAS(j)//' < |ymax| < '//
+     >                cymaxrangesdiffxsCMSPAS(j+1),
+     >                nm123binsdiffxsCMSPAS,m123binsdiffxsCMSPAS)
+        end do
+      end do
 
       end
      
@@ -484,6 +615,12 @@ c
 c
       integer ijetymax,ijetymin
       real*8 ptavg12
+c
+      real*8 ystar
+      real*8 dystar
+c
+      real*8 ymax
+      real*8 dymax
 c
 c These declarations are needed for azimuthal decorrelations:
       real*8 MinJetPtdphi
@@ -601,6 +738,48 @@ c
       data yrangesdiffxs/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0/
       character*3 cyrangesdiffxs(nyrangesdiffxs + 1)
       data cyrangesdiffxs/'0.0','0.5','1.0','1.5','2.0','2.5'/
+c
+c These declarations for the differential cross section of Atlas:
+      real*8 Min1stJetPtdiffxsAtlas
+      parameter (Min1stJetPtdiffxsAtlas = 100d0)
+      real*8 Min2ndJetPtdiffxsAtlas
+      parameter (Min2ndJetPtdiffxsAtlas = 50d0)
+      real*8 MaxJetRapdiffxsAtlas
+      parameter (MaxJetRapdiffxsAtlas = 3.0d0)
+c
+      integer nystarrangesdiffxsAtlas
+      parameter (nystarrangesdiffxsAtlas = 6)
+      real*8 ystarrangesdiffxsAtlas(nystarrangesdiffxsAtlas + 1)
+      data ystarrangesdiffxsAtlas/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0,3.0d0/
+      character*3 cystarrangesdiffxsAtlas(nystarrangesdiffxsAtlas + 1)
+      data cystarrangesdiffxsAtlas/'0.0','0.5','1.0','1.5','2.0','2.5',
+     >                             '3.0'/
+      integer nRpardiffxsAtlas
+      parameter (nRpardiffxsAtlas = 2)
+      real*8 RpardiffxsAtlas(nRpardiffxsAtlas)
+      data RpardiffxsAtlas/0.4d0,0.6d0/
+      character*3 cRpardiffxsAtlas(nRpardiffxsAtlas)
+      data cRpardiffxsAtlas/'0.4','0.6'/
+c
+c These declarations are needed for the three-jet invariant mass, CMS PAS:
+      real*8 MinJetPtdiffxsCMSPAS
+      parameter (MinJetPtdiffxsCMSPAS = 100d0)
+      real*8 MaxJetRapdiffxsCMSPAS
+      parameter (MaxJetRapdiffxsCMSPAS = 3.0d0)
+c
+      integer nRpardiffxsCMSPAS
+      parameter (nRpardiffxsCMSPAS = 1)
+      real*8 RpardiffxsCMSPAS(nRpardiffxsCMSPAS)
+      data RpardiffxsCMSPAS/0.7d0/
+      character*3 cRpardiffxsCMSPAS(nRpardiffxsCMSPAS)
+      data cRpardiffxsCMSPAS/'0.7'/
+c
+      integer nymaxrangesdiffxsCMSPAS
+      parameter (nymaxrangesdiffxsCMSPAS = 2)
+      real*8 ymaxrangesdiffxsCMSPAS(nymaxrangesdiffxsCMSPAS + 1)
+      data ymaxrangesdiffxsCMSPAS/0d0,1d0,2d0/
+      character*3 cymaxrangesdiffxsCMSPAS(nymaxrangesdiffxsCMSPAS + 1)
+      data cymaxrangesdiffxsCMSPAS/'0.0','1.0','2.0'/
 c
 
 
@@ -1121,7 +1300,7 @@ c We only interested in the first two jets:
       pj2   = pj(:,2)
       call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
       call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
-c The first jet has to have a larger transvere momentum:
+c The first jet has to have a larger transverse momentum:
       if (ptj1.lt.Min1stJetPtdiffxs) goto 666
 c
       call pwhg_getinvmass(pj1 + pj2,m)
@@ -1140,6 +1319,85 @@ c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 666   continue
 
+c vvvv This part concerns the differential cross sections at Atlas vvvv
+c We can only do this analysis if minlo is activated:
+      if (minlo.eq.1) then !<minlo>
+      do i=1,nRpardiffxsAtlas !<sweep through R's>
+        palg = -1d0
+        R = RpardiffxsAtlas(i)
+        call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                          Min2ndJetPtdiffxsAtlas,
+     $                          MaxJetRapdiffxsAtlas,
+     $                          pj,njets,jetvec)
+c
+c For dijet mass we need at least two jets to be present:
+        if (njets.lt.2) cycle
+c We only interested in the first two jets:
+        pj1   = pj(:,1)
+        pj2   = pj(:,2)
+        call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+        call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c The first jet has to have a larger transverse momentum:
+        if (ptj1.lt.Min1stJetPtdiffxsAtlas) cycle
+c
+        call pwhg_getinvmass(pj1 + pj2,m)
+c We go through all the ystar ranges and plot the mass where it belongs:
+        ystar = abs(yj1 - yj2)/2d0
+        do k=1,nystarrangesdiffxsAtlas
+          if ((ystar.gt.ystarrangesdiffxsAtlas(k)).and.
+     >        (ystar.lt.ystarrangesdiffxsAtlas(k+1))) then
+c We calculate the width of the ystar bin:
+            dystar = ystarrangesdiffxsAtlas(k+1)
+     >             - ystarrangesdiffxsAtlas(k)
+            call filld('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
+     >                 cystarrangesdiffxsAtlas(k)//' < y* < '//
+     >                 cystarrangesdiffxsAtlas(k+1),m,dsig/dystar)
+          end if
+        end do
+c 
+      end do !<sweep through R's>
+c
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvv This part concerns the trijet invariant mass, CMS PAS vvvv
+      do i=1,nRpardiffxsCMSPAS !<sweep through R's>
+        palg = -1d0
+        R = RpardiffxsCMSPAS(i)
+        call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     $                          MinJetPtdiffxsCMSPAS,
+     $                          MaxJetRapdiffxsCMSPAS,
+     $                          pj,njets,jetvec)
+c
+c For trijet mass we need at least three jets to be present:
+        if (njets.lt.3) cycle
+c We only interested in the first two jets:
+        pj1   = pj(:,1)
+        pj2   = pj(:,2)
+        pj3   = pj(:,3)
+c
+        call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+        call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+        call getyetaptmass(pj3,yj3,etaj3,ptj3,mj3)
+c
+        call pwhg_getinvmass(pj1 + pj2 + pj3,m)
+c We go through all the ymax ranges and plot the mass where it belongs:
+        ymax = sign(max(abs(yj1),abs(yj2),abs(yj3)),
+     >              abs(max(yj1,yj2,yj3)) - abs(min(yj1,yj2,yj3)))
+        do k=1,nymaxrangesdiffxsCMSPAS
+          if ((abs(ymax).gt.ymaxrangesdiffxsCMSPAS(k)).and.
+     >        (abs(ymax).lt.ymaxrangesdiffxsCMSPAS(k+1))) then
+c We calculate the width of the ystar bin:
+            dymax = 2d0*(ymaxrangesdiffxsCMSPAS(k+1)
+     >             - ymaxrangesdiffxsCMSPAS(k))
+            call filld('m123, R='//cRpardiffxsCMSPAS(i)//', '//
+     >                 cymaxrangesdiffxsCMSPAS(k)//' < |ymax| < '//
+     >                 cymaxrangesdiffxsCMSPAS(k+1),m,dsig/dymax)
+          end if
+        end do
+c 
+      end do !<sweep through R's>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       end
 
 
