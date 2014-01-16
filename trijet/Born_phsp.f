@@ -1,4 +1,4 @@
-      subroutine born_phsp(xborn)
+ 1    subroutine born_phsp(xborn)
       implicit none
       include 'brinclude.h'
       include 'pwhg_kn.h'
@@ -180,7 +180,7 @@ c final-state particles
       m23 = sqrt(abs(ptsqrel(4,5)))
 c We set the jacobian to zero for sufficiently small pts and
 c invariant masses
-      if (min(pt1,pt2,pt3,m12,m13,m23).lt.0.1d0) then
+      if (min(pt1,pt2,pt3,m12,m13,m23).lt.0.3d0) then
         kn_jacborn = 0d0
         call increasecnt("Small pt or inv. mass")
       end if
@@ -678,8 +678,8 @@ c an emitter and obtain all the other regions by momentum swapping:
       parameter (pp=1d0)
       real * 8 pwhg_rapidity
       external pwhg_rapidity
-      real * 8 scale2
-      save ini,scale,scale2,rapsuppfact
+      real * 8 scale2,scale3
+      save ini,scale,scale2,scale3,rapsuppfact
       ptsqrel(i,j)=2*dotp(kn_cmpborn(0,i),kn_cmpborn(0,j))
      1     *  kn_cmpborn(0,i)*kn_cmpborn(0,j)
      2     /(kn_cmpborn(0,i)**2+kn_cmpborn(0,j)**2)
@@ -687,6 +687,21 @@ c an emitter and obtain all the other regions by momentum swapping:
          scale2 = powheginput("#suppnominlo")
          if(scale2.lt.0) scale2 = 0
          scale2 = scale2**2        
+
+         if(scale2.eq.0) then
+            scale3 = powheginput("#otherscale")
+            if(scale3.lt.0) scale3 = 0
+            if(scale3.eq.0) then
+               write(*,*) ' you should specify either '//
+     1              'suppnominlo or otherscale'//
+     2              ' in the powheg.input file!'
+               call pwhg_exit(-1)
+            endif
+            scale3 = scale3**2
+         else
+            scale3 = 0
+         endif
+
          scale  = powheginput("bornsuppfact")**2
          rapsuppfact = powheginput("#rapsuppfact")
          if (rapsuppfact.lt.0d0) rapsuppfact=0d0
@@ -713,12 +728,12 @@ c an emitter and obtain all the other regions by momentum swapping:
             Ht  = pt1 + pt2 + pt3
             fact = fact/scale**p/(1d0/scale + 1d0/Ht**2)**p
          else
-            fact = 1/scale**pp/(1/scale+1/pt1sq)**pp
-     1           * 1/scale**pp/(1/scale+1/pt2sq)**pp
-     2           * 1/scale**pp/(1/scale+1/pt3sq)**pp
-     3           * 1/scale**pp/(1/scale+1/msq12)**pp
-     4           * 1/scale**pp/(1/scale+1/msq23)**pp
-     5           * 1/scale**pp/(1/scale+1/msq31)**pp
+            fact = 1/scale3**pp/(1/scale3+1/pt1sq)**pp
+     1           * 1/scale3**pp/(1/scale3+1/pt2sq)**pp
+     2           * 1/scale3**pp/(1/scale3+1/pt3sq)**pp
+     3           * 1/scale3**pp/(1/scale3+1/msq12)**pp
+     4           * 1/scale3**pp/(1/scale3+1/msq23)**pp
+     5           * 1/scale3**pp/(1/scale3+1/msq31)**pp
             pt1 = sqrt(pt1sq)
             pt2 = sqrt(pt2sq)
             pt3 = sqrt(pt3sq)
@@ -802,6 +817,8 @@ c     suppress regions with high rapidities
 c     We use the Ht/2:
          muref = Ht/2
       endif
+c freeze alpha to avoid NaN's from alpha_s
+      muref = max(muref,0.4d0)
       muf=muref
       mur=muref
       end

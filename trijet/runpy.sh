@@ -11,7 +11,7 @@ cp powheg.input-save powheg.input
 
 for file in pwgevents-*.lhe
 do
-log=log`echo $file | sed 's/pwgevents// ; s/lhe//'`log
+log=log-PY`echo $file | sed 's/pwgevents// ; s/lhe//'`log
 echo $file | $prg > $log &
 done
 

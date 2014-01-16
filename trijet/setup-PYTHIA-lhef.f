@@ -184,7 +184,7 @@ ccccccc      subroutine UPEVNT
       endif
       if(nevhep.eq.oldnevhep) then
          call pwhgaccumup
-         call lhefwritev(6)
+c         call lhefwritev(6)
       endif
       oldnevhep = nevhep
       call lhefreadev(97)

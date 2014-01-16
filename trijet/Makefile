@@ -12,7 +12,8 @@ PDF=lhapdf
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
-ANALYSIS=paper
+ANALYSIS=paper-Rdep
+#ANALYSIS=paper
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -34,7 +35,7 @@ OPT=-O2
 #DEBUG= -ggdb 
 ifdef DEBUG
 OPT=-O0
-#FPE=-ffpe-trap=invalid,zero,overflow,underflow
+FPE=-ffpe-trap=invalid,zero,overflow
 endif
 endif
 
@@ -59,11 +60,11 @@ CXXFLAGS=$(OPT)
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1/:../:$(OBJ):./
+VPATH= ./:../progress/:../:$(OBJ)
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
-INCLUDE1.2=$(shell dirname $(PWD))/Version-pre2-1/include
+INCLUDE1.2=$(shell dirname $(PWD))/progress/include
 INCLUDE2=$(shell dirname $(PWD))/include
 FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE1.2) -I$(INCLUDE2)
 
@@ -122,6 +123,14 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut-paper.o
+PWHGANAL+=  fastjetfortran.o
+endif
+ifeq ("$(ANALYSIS)","paper-Rdep")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut-paper-Rdep.o
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","exp")
@@ -197,6 +206,7 @@ main-HERWIG-lhef: $(HERWIG)
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
 	$(PWHGANAL) lhefread.o newunit.o bra_ket_subroutines.o	\
+        reshufflemoms.o \
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
 
