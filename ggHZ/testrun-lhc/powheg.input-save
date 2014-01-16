@@ -97,4 +97,5 @@ nohad   1
 
 LOevents 1
 # with LOevents equal 1, bornonly must be set equal to 1
-parallel_mode_neutrino
+bornonly 1 
+
