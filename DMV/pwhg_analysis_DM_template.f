@@ -47,7 +47,6 @@ c
       integer j,mu,ihep,iDM(2),nDM
       double precision pX(4),pXbar(4),pinv(4),pinv_true(4),pt_X,y_X
      $     ,phi_X,pt_Xbar,y_Xbar,phi_Xbar
-
 c     save variables
       logical ini
       data ini/.true./
@@ -55,6 +54,8 @@ c     save variables
       integer idDM
       double precision min_Etmiss,min_pt_j1,max_eta_j
       save min_Etmiss,min_pt_j1,max_eta_j,idDM
+
+      double precision powheginput
 
       cut = ' Etm>350'
 
@@ -67,6 +68,12 @@ c     save variables
          min_pt_j1=110
          max_eta_j=4.5
          idDM=19
+         if(WHCPRG.eq.'NLO   '.or.WHCPRG.eq.'LHE
+     $        '.or.WHCPRG.eq.'PYTHIA') then
+            if(powheginput('#idDM').gt.0) then
+               idDM=powheginput('#idDM')
+            endif
+         endif
          if(WHCPRG.eq.'NLO') then
             weights_num=1
          endif
@@ -92,7 +99,8 @@ c     find DM particles...
      $     .or.WHCPRG.eq.'PYTHIA') then
          do ihep=1,nhep
             if(isthep(ihep).eq.1) then
-               if(abs(idhep(ihep)).eq.idDM) then
+               if(abs(idhep(ihep)).eq.idDM.or.abs(idhep(ihep)).eq.19)
+     $              then
                   nDM=nDM+1
                   iDM(nDM)=ihep
                endif

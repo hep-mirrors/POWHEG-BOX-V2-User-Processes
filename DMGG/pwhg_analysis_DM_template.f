@@ -56,6 +56,8 @@ c     save variables
       double precision min_Etmiss,min_pt_j1,max_eta_j
       save min_Etmiss,min_pt_j1,max_eta_j,idDM,idhiggs
 
+      double precision powheginput
+
       cut = ' Etm>350'
 
       if(ini) then
@@ -67,6 +69,12 @@ c     save variables
          min_pt_j1=110
          max_eta_j=4.5
          idDM=19
+         if(WHCPRG.eq.'NLO   '.or.WHCPRG.eq.'LHE   '
+     $        .or.WHCPRG.eq.'PYTHIA') then
+            if(powheginput('#idDM').gt.0) then
+               idDM=powheginput('#idDM')
+            endif
+         endif
          idHiggs=25
          if(WHCPRG.eq.'NLO') then
             weights_num=1

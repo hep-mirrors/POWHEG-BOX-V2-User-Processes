@@ -806,6 +806,12 @@ c kinematics defined in the Les Houches interface
       include 'LesHouches.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      double precision powheginput
+      logical ini
+      data ini/.true./
+      save ini
+      integer idDM
+      save idDM
 c colours of incoming quarks, antiquarks
       integer icolqi(2),icolai(2),icolgi(2),
      $        icolqf(2),icolaf(2),icolgf(2)
@@ -828,6 +834,15 @@ c neutral particles
          icolup(2,3)=0
          icolup(1,4)=0
          icolup(2,4)=505
+      endif
+
+      if(ini) then
+         idDM=powheginput('#idDM')
+         ini=.false.
+      endif
+      if(idup(3).eq.19.and.idDM.gt.0) then
+         idup(3)=idDM
+         idup(4)=-idDM
       endif
 
       do j=1,nlegborn

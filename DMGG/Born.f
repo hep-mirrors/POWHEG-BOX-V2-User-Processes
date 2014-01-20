@@ -86,10 +86,19 @@ c a (leading) color structure to an event.
       double precision m2,m_1,m_2,vecmag,pX_hcm(0:3),pXbar_hcm(0:3),
      $     costheta,phi,beta(3),betainv(3),modbeta,ptemp(0:3)
       double precision random
-      integer particleid
-      parameter (particleid=19)
+      double precision powheginput
+      logical ini
+      data ini/.true./
+      save ini
+      integer idDM
+      save idDM
 c     !: several changes in all this subroutine, 
 c     to include decay products
+      if(ini) then
+         idDM=powheginput('#idDM')
+         if(idDM.lt.0) idDM=19
+         ini=.false.
+      endif
 cccccccccccccccccccccccccccccccccccccccccccc
 c     'Higgs' has to have resonance status
       istup(3)=2
@@ -136,7 +145,7 @@ ccccccccccccccccccccccccccccccccccccccccccccc
 c     Add X
       nup=nup+1
       istup(nup)=1
-      idup(nup)=particleid
+      idup(nup)=idDM
       mothup(1,nup)=3
       mothup(2,nup)=3
       icolup(1,nup)=0
@@ -152,7 +161,7 @@ cccccccccccccccccccccccccccccccccccccccccccccc
 c     Add Xbar
       nup=nup+1
       istup(nup)=1
-      idup(nup)=-particleid
+      idup(nup)=-idDM
       mothup(1,nup)=3
       mothup(2,nup)=3
       icolup(1,nup)=0
