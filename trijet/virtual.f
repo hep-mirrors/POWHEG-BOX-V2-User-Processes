@@ -11,7 +11,9 @@ C     The virtual amplitude is generated using GoSam.
       include 'pwhg_kn.h'
       include 'pwhg_flst.h'
       include 'pwhg_math.h'
+      include 'pwhg_flg.h'
       real * 8 p(0:3,nlegborn)
+      real * 8 oldp(0:3,nlegborn)
       integer vflav(nlegborn)
       real * 8 virtual
       
@@ -30,6 +32,36 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 prefact
 
       real * 8 virtual_gosam, ratio
+      integer j,k,l,m
+      real * 8 dotp,sss(10)
+      data oldp/20*0d0/
+      save oldp
+
+c Look for almost identical invariants (they cause troubles in
+c the virtual routines). Set the virtual to 0 if this is the case.
+      if(.not.flg_in_smartsig) then
+         l=1
+         do j=1,5
+            do k=j+1,5
+               sss(l) = dotp(p(:,j),p(:,k))
+               do m=l-1,1,-1
+                  if(abs(abs(sss(l))-abs(sss(m)))/
+     1                 (abs(sss(l))+abs(sss(m))).lt.1d-6) then
+                     virtual = 0
+                     if(abs(sum(oldp-p)/sum(oldp+p)).gt.0d0) then
+                        write(*,*)
+     1                  ' skipped risky kinematic point in setvirtual'
+                        call increasecnt
+     1                       ("risky kinematic points in setvirtual")
+                        oldp = p
+                     endif
+                     return
+                  endif
+               enddo
+               l=l+1
+            enddo
+         enddo
+      endif
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCC              GOSAM          CCCCCCCCCC      
@@ -104,9 +136,6 @@ c     call the nlojet wrapper
 c     fix all missing factors
       virt = virt*prefactor(iptrn)/prefact
       virtual = virt*2.d0*pi*(4.d0*pi*st_alpha)**3*4d0*pi
-
-c      write(*,*) 'virtual ',virtual
-
 
       end
 
