@@ -12,6 +12,8 @@ PDF=lhapdf
 # minlo      : an analysis to test the minlo option with a pt cut on the hardest jet and 
 # various pt cuts on the second hardest
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
+# lhc        : Analyses originally used by various experiments at LHC
+# tev        : Analysis originally used by various experiments at TeVatron
 ANALYSIS=paper-Rdep
 #ANALYSIS=paper
 ## For static linking uncomment the following
@@ -133,13 +135,22 @@ FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-minlo-ycut-paper-Rdep.o
 PWHGANAL+=  fastjetfortran.o
 endif
-ifeq ("$(ANALYSIS)","exp")
+ifeq ("$(ANALYSIS)","lhc")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-exp.o
-PWHGANAL+=  fastjetfortran.o fastjet-addon.o bra_ket_subroutines.o pdfdummies.o
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-lhc.o
+PWHGANAL+= fastjetfortran.o fastjet-addon.o pdfdummies.o splitandfilt.o \
+	   observables.o
+endif
+ifeq ("$(ANALYSIS)","tev")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-tev.o
+PWHGANAL+= pdfdummies.o splitandfilt.o observables.o fastjetD0RunIIConewrap.o
 endif
 
 

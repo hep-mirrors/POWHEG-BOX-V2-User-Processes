@@ -260,20 +260,22 @@ c Trijet mass following CMS PAS
       data cymaxrangesdiffxsCMSPAS/'0.0','1.0','2.0'/
 c
       integer nRpardiffxsCMSPAS
-      parameter (nRpardiffxsCMSPAS = 1)
+      parameter (nRpardiffxsCMSPAS = 2)
       real*8 RpardiffxsCMSPAS(nRpardiffxsCMSPAS)
-      data RpardiffxsCMSPAS/0.7d0/
+      data RpardiffxsCMSPAS/0.5d0,0.7d0/
       character*3 cRpardiffxsCMSPAS(nRpardiffxsCMSPAS)
-      data cRpardiffxsCMSPAS/'0.7'/
+      data cRpardiffxsCMSPAS/'0.5','0.7'/
 c
       integer nm123binsdiffxsCMSPAS
-      parameter (nm123binsdiffxsCMSPAS = 21)
+      parameter (nm123binsdiffxsCMSPAS = 42)
       real*8 m123binsdiffxsCMSPAS(nm123binsdiffxsCMSPAS + 1)
       data m123binsdiffxsCMSPAS/
-     >     310d0,370d0,440d0,510d0,590d0,670d0,760d0,
-     >     850d0,950d0,1060d0,1180d0,1310d0,1450d0,
-     >     1600d0,1760d0,1940d0,2120d0,2330d0,2550d0,
-     >     2780d0,3040d0,4270d0/
+     >     150d0,177d0,207d0,240d0,275d0,313d0,354d0,398d0,445d0,
+     >     495d0,548d0,604d0,664d0,727d0,794d0,864d0,938d0,1016d0,
+     >     1098d0,1184d0,1274d0,1369d0,1469d0,1573d0,1682d0,1796d0,
+     >     1916d0,2041d0,2172d0,2309d0,2452d0,2602d0,2758d0,2921d0,
+     >     3092d0,3270d0,3456d0,3650d0,3852d0,4063d0,4283d0,4513d0,
+     >     4753d0/
 c
       call inihists
 c
@@ -768,11 +770,11 @@ c These declarations are needed for the three-jet invariant mass, CMS PAS:
       parameter (MaxJetRapdiffxsCMSPAS = 3.0d0)
 c
       integer nRpardiffxsCMSPAS
-      parameter (nRpardiffxsCMSPAS = 1)
+      parameter (nRpardiffxsCMSPAS = 2)
       real*8 RpardiffxsCMSPAS(nRpardiffxsCMSPAS)
-      data RpardiffxsCMSPAS/0.7d0/
+      data RpardiffxsCMSPAS/0.5d0,0.7d0/
       character*3 cRpardiffxsCMSPAS(nRpardiffxsCMSPAS)
-      data cRpardiffxsCMSPAS/'0.7'/
+      data cRpardiffxsCMSPAS/'0.5','0.7'/
 c
       integer nymaxrangesdiffxsCMSPAS
       parameter (nymaxrangesdiffxsCMSPAS = 2)
