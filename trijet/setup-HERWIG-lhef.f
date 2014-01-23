@@ -121,6 +121,7 @@ c     check parameters
             call HWUPUP         !hepeup
             call hwuepr         !all the event
          endif
+         call pwhgaccumup
          return
       endif
       if(abs(idwtup).eq.3) xwgtup=xwgtup*xsecup(1)
