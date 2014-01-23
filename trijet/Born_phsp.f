@@ -684,24 +684,26 @@ c an emitter and obtain all the other regions by momentum swapping:
      1     *  kn_cmpborn(0,i)*kn_cmpborn(0,j)
      2     /(kn_cmpborn(0,i)**2+kn_cmpborn(0,j)**2)
       if (ini) then
-         scale2 = powheginput("#suppnominlo")
-         if(scale2.lt.0) scale2 = 0
-         scale2 = scale2**2        
+         if (.not.flg_minlo) then
 
-         if(scale2.eq.0) then
-            scale3 = powheginput("#otherscale")
-            if(scale3.lt.0) scale3 = 0
-            if(scale3.eq.0) then
-               write(*,*) ' you should specify either '//
-     1              'suppnominlo or otherscale'//
-     2              ' in the powheg.input file!'
-               call pwhg_exit(-1)
+            scale2 = powheginput("#suppnominlo")
+            if(scale2.lt.0) scale2 = 0
+            scale2 = scale2**2        
+            
+            if(scale2.eq.0) then
+               scale3 = powheginput("#otherscale")
+               if(scale3.lt.0) scale3 = 0
+               if(scale3.eq.0) then
+                  write(*,*) ' you should specify either '//
+     1                 'suppnominlo or otherscale'//
+     2                 ' in the powheg.input file!'
+                  call pwhg_exit(-1)
+               endif
+               scale3 = scale3**2
+            else
+               scale3 = 0
             endif
-            scale3 = scale3**2
-         else
-            scale3 = 0
          endif
-
          scale  = powheginput("bornsuppfact")**2
          rapsuppfact = powheginput("#rapsuppfact")
          if (rapsuppfact.lt.0d0) rapsuppfact=0d0
