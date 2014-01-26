@@ -156,13 +156,20 @@ c minimal final state mass
       include 'pwhg_kn.h'
       include 'coupl.inc'
       include 'pwhg_flg.h'
-      real * 8 fact,pt2,ptmin
-      ptmin=20
+      logical ini
+      data ini/.true./
+      real * 8 fact,ptsupp,pt2,powheginput
+      save ptsupp,ini
+      external powheginput
+      if(ini) then
+         ptsupp=powheginput("#bornsuppfact")
+         ini=.false.
+      endif
       if(flg_weightedev) then
 c         print*, 'born_suppression called, but not yet validated here'
 c         stop
          pt2=kn_cmpborn(1,4)**2+kn_cmpborn(2,4)**2
-         fact=pt2/(pt2+ptmin**2)
+         fact=pt2/(pt2+ptsupp**2)
       else
          fact=1
       endif

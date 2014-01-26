@@ -1,7 +1,7 @@
 # minimum suggested values for ncall and itmx: 
 # (ncall1,itmx1,ncall2,itmx2) = (250K,5,1M,5)
 
-idDM 1000022    ! id of DM particles 
+idDM 1000021    ! id of DM particles 
                 ! (+- 19 is the default, but might not always work.
                 ! Using the id of neutralinos is recommended)
 
