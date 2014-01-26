@@ -47,7 +47,6 @@ c
       integer j,mu,ihep,iDM(2),nDM
       double precision pX(4),pXbar(4),pinv(4),pinv_true(4),pt_X,y_X
      $     ,phi_X,pt_Xbar,y_Xbar,phi_Xbar
-
 c     save variables
       logical ini
       data ini/.true./
@@ -67,6 +66,8 @@ c     save variables
          write(*,*) 'Etm>350, ptj1>110, |etaj|<4.5'
          min_Etmiss=350
          min_pt_j1=110
+c$$$         min_Etmiss=1
+c$$$         min_pt_j1=1
          max_eta_j=4.5
          idDM=19
          if(WHCPRG.eq.'NLO   '.or.WHCPRG.eq.'LHE   '
@@ -76,7 +77,7 @@ c     save variables
             endif
          endif
          idHiggs=25
-         if(WHCPRG.eq.'NLO') then
+         if(WHCPRG.eq.'NLO'.or.WHCPRG.eq.'LHE   ') then
             weights_num=1
          endif
          if(weights_num.eq.0.and.WHCPRG.eq.'PYTHIA') weights_num=1
@@ -94,6 +95,7 @@ c     save variables
          dsig(1:weights_num)=weights_val(1:weights_num)
       endif
       if(sum(abs(dsig)).eq.0) return
+c      dsig=1
 
 c     find DM particles...
       nDM=0
@@ -109,7 +111,8 @@ c     find DM particles...
       elseif(WHCPRG.eq.'LHE   '.or.WHCPRG.eq.'PYTHIA') then
          do ihep=1,nhep
             if(isthep(ihep).eq.1) then
-               if(abs(idhep(ihep)).eq.idDM) then
+               if(abs(idhep(ihep)).eq.idDM.or.abs(idhep(ihep)).eq.19)
+     $              then
                   nDM=nDM+1
                   iDM(nDM)=ihep
                endif
@@ -241,8 +244,9 @@ c     loop over final state particles to find valid tracks
       do ihep=1,nhep
 c     exclude leptons, gauge and higgs bosons, but include gluons
          if ((isthep(ihep).eq.1).and.
-     1        (((abs(idhep(ihep)).le.10).or.(abs(idhep(ihep)).ge.40))
-     2        .or.(abs(idhep(ihep)).eq.21))) then
+     $        (((abs(idhep(ihep)).le.10).or.(abs(idhep(ihep)).ge.40))
+     $        .or.(abs(idhep(ihep)).eq.21)).and.abs(idhep(ihep)).ne.1000021)
+     $        then
             if(ntracks.eq.maxtrack) then
                write(*,*)
      $              'analyze: too many particles, increase maxtrack'
