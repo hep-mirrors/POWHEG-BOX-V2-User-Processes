@@ -22,6 +22,10 @@
          canveto=1
       endif
 
+      if(powheginput("#nohad") .eq. 1) then
+         call pythia_nohad
+      endif
+
       call init_hist
 
       call getmaxev(maxev)

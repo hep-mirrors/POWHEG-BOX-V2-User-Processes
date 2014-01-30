@@ -95,8 +95,12 @@ extern "C" {
     *(jmohep)[1] = 0 ;
   }
 
-}
+  void pythia_nohad_() {
+    pythia.readString("HadronLevel:all = off");
+    pythia.readString("PartonLevel:MPI = off");
+  }
 
+}
 
 // User-written routine that does the event generation and fills hepeup.
 // We do nothing here; we fill the common block on the fortran side
