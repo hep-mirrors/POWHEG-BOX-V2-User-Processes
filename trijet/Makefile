@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -90,6 +90,10 @@ else
 PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
+# PYTHIA 8
+PYTHIA8LOCATION=/home/nason/Pheno/pythia8183
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/ -I$(PYTHIA8LOCATION)/include/Pythia8
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
 ifeq ("$(ANALYSIS)","trijet")
@@ -223,6 +227,15 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
+
+# target to read event file, shower events with PYTHIA8 + analysis
+PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
+	$(PWHGANAL) opencount.o lhefread.o newunit.o pdfdummies.o \
+	random.o cernroutines.o \
+	$(FPEOBJ)
+
+main-PYTHIA8-lhef: $(PYTHIA8)
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean libdhelas3.a libmadgraph.a libmodel.a libnlojet.a
