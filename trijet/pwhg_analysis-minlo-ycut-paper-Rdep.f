@@ -79,8 +79,6 @@ c fourth jet
      1              cptmin3(ipt)//'-ymax-'//cymax(jy),dpt,0d0,400d0)
                call bookupeqbins('j4-ptzoom'//cr(jr)//'-pt3min'//
      1              cptmin3(ipt)//'-ymax-'//cymax(jy),0.5d0,0d0,20d0)
-               call bookupeqbins('j4-inc-pt'//cr(jr)//'-pt3min'//
-     1              cptmin3(ipt)//'-ymax-'//cymax(jy),dpt,0d0,400d0)
             enddo
 
 c third jet
