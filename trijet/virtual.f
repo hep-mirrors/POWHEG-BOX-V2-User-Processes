@@ -30,12 +30,13 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 pmom(0:4,nlegborn)
       real * 8 virt,tree
       real * 8 prefact
-
+      real * 8 det, ecmsq, Q(4,4)
       real * 8 virtual_gosam, ratio
       integer j,k,l,m
       real * 8 dotp,sss(10)
       data oldp/20*0d0/
       save oldp
+
 
 c Look for almost identical invariants (they cause troubles in
 c the virtual routines). Set the virtual to 0 if this is the case.
@@ -49,10 +50,10 @@ c the virtual routines). Set the virtual to 0 if this is the case.
      1                 (abs(sss(l))+abs(sss(m))).lt.1d-6) then
                      virtual = 0
                      if(abs(sum(oldp-p)/sum(oldp+p)).gt.0d0) then
-                        write(*,*)
-     1                  ' skipped risky kinematic point in setvirtual'
+c                        write(*,*)
+c     1                  'Skipped risky kinematic point in setvirtual'
                         call increasecnt
-     1                       ("risky kinematic points in setvirtual")
+     1                       ("Risky kinematic points in setvirtual")
                         oldp = p
                      endif
                      return
@@ -61,7 +62,35 @@ c the virtual routines). Set the virtual to 0 if this is the case.
                l=l+1
             enddo
          enddo
+
+c  Check if the 5 momenta are independent. Otherwise return virtual equal 0
+c  Construct a matrix Q (4x4) from invariants such that
+c  Q_ij = dot(p_i,p_j).
+c  If det(Q)=0, then p3 or p4 are parallel to the beam axis or the event is planar         
+         do i=1,3
+            do j=i+1,4
+               Q(i,j) = dotp(p(:,i),p(:,j))
+            enddo
+         enddo         
+         det = Q(1,2)**2*Q(3,4)**2 - 2*Q(1,2)*Q(2,3)*Q(3,4)*Q(1,4) 
+     $        - 2*Q(1,2)*Q(2,4)*Q(1,3)*Q(3,4) + Q(1,3)**2*Q(2,4)**2 
+     $        - 2*Q(1,3)*Q(2,4)*Q(2,3)*Q(1,4) + Q(2,3)**2*Q(1,4)**2         
+         ecmsq = 2*Q(1,2)
+c         write(*,*) det/ecmsq**4
+         if (abs(det/ecmsq**4).lt.1d-14) then
+            virtual=0
+            if(abs(sum(oldp-p)/sum(oldp+p)).gt.0d0) then
+c               write(*,*)
+c     1              ' Skipped risky kinematic point. Planar config'
+               call increasecnt
+     1              ("Risky kinematic points. Planar config")   
+               oldp = p
+            endif
+            return
+         endif
       endif
+
+      
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCC              GOSAM          CCCCCCCCCC      

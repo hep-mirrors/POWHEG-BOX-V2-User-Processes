@@ -55,13 +55,15 @@ MyUserHooks* MyHook=new MyUserHooks();
 extern "C" {
   // F77 interface to pythia8
   void pythia_init_() {
-  // Generator. Process selection. LHC initialization. Histogram.
+    // Generator. Process selection. LHC initialization. Histogram.
     //  pythia.readString("Beams:eCM = 8000.");    
     //  pythia.readString("HardQCD:all = on");    
     //  pythia.readString("PhaseSpace:pTHatMin = 20.");  
-  pythia.setUserHooksPtr(MyHook); 
-  pythia.init(&LHAinstance);
-}
+    //  pythia.setUserHooksPtr(MyHook); 
+    //    pythia.readString("HadronLevel:all = off");
+    //    pythia.readString("PartonLevel:MPI = off");
+    pythia.init(&LHAinstance);
+  }
 
   void pythia_next_(int & iret){
   // Begin event loop. Generate event. Skip if error. List first one.

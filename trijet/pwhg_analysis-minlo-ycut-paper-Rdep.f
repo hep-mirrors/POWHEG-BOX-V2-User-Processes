@@ -23,6 +23,14 @@ c  pwhgfill  :  fills the histograms with data
       real * 8 ptminarr2(nptmin2)
       data cptmin2/  '-000','-020','-040','-100','-150'/
       data ptminarr2/ 0d0, 20d0, 40d0,  100d0,  150d0/
+
+      integer nptmin4
+      parameter (nptmin4=5)
+      character * 4 cptmin4(nptmin4)
+      real * 8 ptminarr4(nptmin4)
+      data cptmin4/  '-000','-020','-040','-070','-100'/
+      data ptminarr4/ 0d0, 20d0, 40d0,70d0,100d0/
+
       integer nptmin3
       parameter (nptmin3=5)
       character * 4 cptmin3(nptmin3)
@@ -32,27 +40,50 @@ c  pwhgfill  :  fills the histograms with data
       character*4 cymax(nymax)
       data cymax/ '3.0','inf' /
       integer jr
-      character * 4 cr(4)
+      character * 4 cr(2)
       common/ccrpar/cr
       real*8 ymaxarr(nymax)
       data ymaxarr/3d0,1d10/
-      common/infohist/ptminarr2,ptminarr3,cptmin2,cptmin3,
-     1     ymaxarr,cymax,cnum
+      common/infohist/ptminarr2,ptminarr3,ptminarr4,
+     1     ymaxarr,cptmin2,cptmin3,cptmin4,cymax,cnum
       save /infohist/
       real * 8 powheginput
       external powheginput
       save /ccrpar/
       call inihists
 
-      cr=(/'-r05','-r07','-r10','-r13'/)
+      cr=(/'-r05','-r10'/)
 
       dy=0.2d0
       dpt=10d0
       dr=0.2d0
 
-      do jr=1,4
-         do jy=1,nymax
+      call bookupeqbins('htlh-cum',2d0,0d0,200d0)
+      call bookupeqbins('htlh',10d0,0d0,2000d0)
 
+      do jr=1,2
+         do jy=1,nymax
+c fourth jet
+            call bookupeqbins('j4-pt'//cr(jr)//'-ymax-'//cymax(jy),
+     1           dpt,0d0,400d0)
+            call bookupeqbins('j4-ptzoom'//cr(jr)//'-ymax-'//cymax(jy),
+     1           0.5d0,0d0,20d0)
+            
+            do ipt=1,nptmin4
+               call bookupeqbins('j4-y'//cr(jr)//'-pt4min'//cptmin4(ipt)
+     1           //'-ymax-'//cymax(jy),dy,-5d0,5d0)
+            enddo
+            
+            do ipt=1,nptmin3
+               call bookupeqbins('j4-pt'//cr(jr)//'-pt3min'//
+     1              cptmin3(ipt)//'-ymax-'//cymax(jy),dpt,0d0,400d0)
+               call bookupeqbins('j4-ptzoom'//cr(jr)//'-pt3min'//
+     1              cptmin3(ipt)//'-ymax-'//cymax(jy),0.5d0,0d0,20d0)
+               call bookupeqbins('j4-inc-pt'//cr(jr)//'-pt3min'//
+     1              cptmin3(ipt)//'-ymax-'//cymax(jy),dpt,0d0,400d0)
+            enddo
+
+c third jet
             call bookupeqbins('j3-pt'//cr(jr)//'-ymax-'//cymax(jy),
      1           dpt,0d0,400d0)
             call bookupeqbins('j3-ptzoom'//cr(jr)//'-ymax-'//cymax(jy),
@@ -100,6 +131,7 @@ c here ymax is intended inclusivly, i.e. only upon the observed jet
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
       include 'pwhg_bookhist-multi.h'
+      include 'LesHouches.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer   maxjet,mjets,numjets,ntracks
@@ -121,12 +153,18 @@ c      include 'LesHouches.h'
       parameter (nptmin3=5)
       character * 4 cptmin3(nptmin3)
       real * 8 ptminarr3(nptmin3)
+
+      integer nptmin4
+      parameter (nptmin4=5)
+      character * 4 cptmin4(nptmin4)
+      real * 8 ptminarr4(nptmin4)
+
       character*4 cymax(nymax)
       real*8 ymaxarr(nymax)
-      common/infohist/ptminarr2,ptminarr3,cptmin2,cptmin3,
-     1     ymaxarr,cymax,cnum
+      common/infohist/ptminarr2,ptminarr3,ptminarr4,
+     1     ymaxarr,cptmin2,cptmin3,cptmin4,cymax,cnum
       integer jr
-      character * 4 cr(4)
+      character * 4 cr(2)
       common/ccrpar/cr
       save /infohist/
       integer j,jy,ipt,njets
@@ -138,7 +176,7 @@ c     we need to tell to this analysis file which program is running it
       real * 8 powheginput,dotp
       external powheginput,dotp
       integer irjet
-      real * 8 palg,ptminfastjet,rjet
+      real * 8 palg,ptminfastjet,rjet,htlh,htlhcut
       real * 8 dsig(maxmulti)
       integer nweights
       logical ini
@@ -149,14 +187,36 @@ c     we need to tell to this analysis file which program is running it
       data minlo/0/
       save inimulti,minlo,ini
       integer minnumjets,maxnumjets
-      logical pwhg_isfinite
+      logical pwhg_isfinite,isatrack,nohad
       external pwhg_isfinite
       character * 4 prefix
+      logical negweightsonly
+      save negweightsonly,nohad
+      if(ini) then
+         nohad = powheginput("#nohad").eq.1
+         htlhcut =  powheginput("#htlhcut")
+         if(powheginput("#negweightsonly").eq.1) then
+            negweightsonly = .true.
+         else
+            negweightsonly = .false.
+         endif
+         ini = .false.
+      endif
+
 c
       if (.not.pwhg_isfinite(dsig0)) then
          write(*,*) '*** PROBLEMS in subroutine analysis ***'
          return
       endif
+
+      if (negweightsonly) then
+         if (dsig0.lt.0d0) then
+            dsig0=-dsig0
+         else
+            return
+         endif
+      endif
+
 
 c      write(*,*) 'nhep ',nhep
 
@@ -184,14 +244,42 @@ c      call reweightifneeded(dsig0,dsig)
 
       if(sum(abs(dsig)).eq.0) return
 
+c Les Houches HT
+      htlh = 0
+      do j=3,nup
+         htlh = htlh + sqrt(pup(1,j)**2+pup(2,j)**2)
+      enddo
+
+      do j=0,99
+         if(htlh.gt.j*2d0) then
+            call filld('htlh-cum',j*2d0+1,2*dsig)
+         else
+            exit
+         endif
+      enddo
+
+      call filld('htlh',htlh,dsig)
+
+c if the Les Houches HT is greater than 10, the cross section
+c overcomes the total inelastic cross section; discard
+
+      if(htlh.lt.htlhcut) return
+
+
 c This routine should be used with minlo for trijet:
       minnumjets = 2
 
       ntracks=0
       mjets=0
+      ptot = 0
 c     Loop over final state particles to find jets 
       do ihep=1,nhep
-         if (isthep(ihep).eq.1) then
+         if(WHCPRG.eq.'HERWIG'.and.nohad) then
+            isatrack = isthep(ihep).ge.147.and.isthep(ihep).le.149
+         else
+            isatrack = isthep(ihep).eq.1
+         endif
+         if (isatrack) then
             if (ntracks.eq.maxtrack) then
                write(*,*) 'Too many particles. Increase maxtrack.'//
      #          ' PROGRAM ABORTS'
@@ -200,8 +288,11 @@ c     Loop over final state particles to find jets
 c     copy momenta to construct jets 
             ntracks=ntracks+1
             ptrack(1:4,ntracks) = phep(1:4,ihep)
+            ptot = ptot + phep(1:4,ihep)
          endif
       enddo
+
+c      write(*,*) ' total momentum:', ptot
 
       if (ntracks.eq.0) then
          numjets=0
@@ -209,7 +300,7 @@ c     copy momenta to construct jets
       endif
 
 c no indentation!
-      do jr=1,4
+      do jr=1,2
 
 c     palg=1 is standard kt, -1 is antikt
       palg = -1d0
@@ -241,6 +332,32 @@ c      write(*,*) 'numjets ',numjets
       enddo
 
       do jy=1,nymax
+
+         if(njets.ge.4.and.maxyj(4).lt.ymaxarr(jy)) then
+c fill 3 jet observables
+            call filld('j4-pt'//cr(jr)//'-ymax-'//cymax(jy),ktj(4),dsig)
+            call filld('j4-ptzoom'//cr(jr)//'-ymax-'//cymax(jy),
+     1           ktj(4),dsig)
+            do ipt=1,nptmin4
+               if(ktj(4).gt.ptminarr4(ipt)) then
+                  call filld('j4-y'//cr(jr)//'-pt4min'//cptmin4(ipt)//
+     1                 '-ymax-'//cymax(jy),yj(4),dsig)
+               endif
+            enddo
+
+            do ipt=1,nptmin3
+               if(ktj(3).gt.ptminarr3(ipt)) then
+                  call filld('j4-pt'//cr(jr)//'-pt3min'//cptmin3(ipt)//
+     1                 '-ymax-'//cymax(jy),ktj(4),dsig)
+                  call filld('j4-ptzoom'//cr(jr)//'-pt3min'
+     1                 //cptmin3(ipt)//
+     1                 '-ymax-'//cymax(jy),ktj(4),dsig)
+               endif
+            enddo
+            
+         endif
+
+
          if(njets.ge.3.and.maxyj(3).lt.ymaxarr(jy)) then
 c fill 3 jet observables
             call filld('j3-pt'//cr(jr)//'-ymax-'//cymax(jy),ktj(3),dsig)

@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=gfortran
+COMPILER=ifort
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -14,6 +14,7 @@ PDF=lhapdf
 # minlo-ycut : the same as the previous, but this with an additional rapidity cut on all jets 
 # lhc        : Analyses originally used by various experiments at LHC
 # tev        : Analysis originally used by various experiments at TeVatron
+#ANALYSIS=lh-sh
 ANALYSIS=paper-Rdep
 #ANALYSIS=paper
 ## For static linking uncomment the following
@@ -158,6 +159,16 @@ PWHGANAL+= pdfdummies.o splitandfilt.o observables.o fastjetD0RunIIConewrap.o
 endif
 
 
+ifeq ("$(ANALYSIS)","lh-sh")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o observables.o pwhg_analysis-lh-sh.o
+PWHGANAL+=  fastjetfortran.o
+endif
+
+
 %.o: %.f $(INCLUDE) | $(OBJ)
 	$(FF) -c -o $(OBJ)/$@ $<
 
@@ -212,7 +223,7 @@ lhef_analysis:$(LHEF)
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o bra_ket_subroutines.o	\
-	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
+	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o changescalup.o	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
@@ -221,7 +232,7 @@ main-HERWIG-lhef: $(HERWIG)
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
 	$(PWHGANAL) lhefread.o newunit.o bra_ket_subroutines.o	\
-        reshufflemoms.o \
+        reshufflemoms.o changescalup.o \
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
 
@@ -231,7 +242,7 @@ main-PYTHIA-lhef: $(PYTHIA)
 # target to read event file, shower events with PYTHIA8 + analysis
 PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(PWHGANAL) opencount.o lhefread.o newunit.o pdfdummies.o \
-	random.o cernroutines.o \
+	random.o cernroutines.o bra_ket_subroutines.o changescalup.o \
 	$(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)

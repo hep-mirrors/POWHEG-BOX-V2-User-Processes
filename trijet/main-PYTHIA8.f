@@ -10,6 +10,7 @@
       integer canveto
       real * 8 vetoscale
       common/resonancevetos/vetoscale,canveto
+      logical changescalup
       real * 8 powheginput
       external powheginput
 
@@ -26,6 +27,12 @@
          call pythia_nohad
       endif
 
+      if(powheginput("#changescalup").eq.1) then
+         changescalup = .true.
+      else
+         changescalup = .false.
+      endif
+
       call init_hist
 
       call getmaxev(maxev)
@@ -39,6 +46,7 @@
       do l=1,maxev
 
          call lhefreadev(97)
+         if(changescalup) call py_change_scalup
          vetoscale = scalup
 
          do m=1,5
@@ -117,8 +125,8 @@ C--- Opens input file and counts number of events, setting MAXEV;
       common/cpwgprefix/pwgprefix,lprefix
       include 'pwhg_rnd.h'
       if(rnd_cwhichseed.ne.'none') then
-         filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA8-output-'
-     1        //rnd_cwhichseed
+         filename=pwgprefix(1:lprefix)// '-'//rnd_cwhichseed //'-'//
+     1        'POWHEG+PYTHIA8-output'
       else
          filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA8-output'
       endif
@@ -150,3 +158,4 @@ c...writes event information to a les houches events file on unit nlf.
  210  format(1p,2(1x,i8),4(1x,e12.5))
  220  format(1p,i8,5(1x,i5),5(1x,e16.9),1x,e12.5,1x,e10.3)
       end
+
