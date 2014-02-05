@@ -22,6 +22,13 @@
 
       real*8 anorm,anbw,anlog,pbw,csi
 
+      real * 8 masswindow_low,masswindow_high,
+     1     phsp_Zmass2low,phsp_Zmass2high
+      real * 8 phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw
+      save phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw,
+     1       phsp_Zmass2low,phsp_Zmass2high
+
+      real * 8 powheginput
       if(ini) then
 c     set initial- and final-state masses for Born and real
          do k=1,2
@@ -31,6 +38,30 @@ c     set initial- and final-state masses for Born and real
          kn_masses(4)=decmass
          kn_masses(nlegreal)=0
          ini=.false.
+         phsp_Zm=powheginput('#phsp_Zm')
+         phsp_Zw=powheginput('#phsp_Zw')
+         if(phsp_Zm.lt.0) phsp_Zm=ph_Zmass
+         if(phsp_Zw.lt.0) phsp_Zw=ph_Zwidth
+         phsp_Zmass2=phsp_Zm**2
+         phsp_ZmZw=phsp_Zm*phsp_Zw
+
+c     mass window
+         masswindow_low = powheginput("#masswindow_low")
+         if (masswindow_low.le.0d0) masswindow_low=30d0
+         masswindow_high = powheginput("#masswindow_high")
+         if (masswindow_high.le.0d0) masswindow_high=30d0
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccc   DEPENDENT QUANTITIES       
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+c     set mass window around W-mass peak in unit of ph_Wwidth
+c     It is used in the generation of the Born phase space
+         phsp_Zmass2low=max(decmass*10d0,phsp_Zm-masswindow_low*phsp_Zw)
+         phsp_Zmass2low=phsp_Zmass2low**2
+         phsp_Zmass2high=phsp_Zm+masswindow_high*phsp_Zw
+         phsp_Zmass2high=min(kn_sbeams,phsp_Zmass2high**2)
+
       endif
 c Phase space:
 c 1 /(16 pi S) d m^2 d cth d y
@@ -39,30 +70,30 @@ c 1 /(16 pi S) d m^2 d cth d y
 
       pbw=0.5d0
 
-      zlow=atan((ph_Zmass2low  - ph_Zmass2)/ph_ZmZw)
-      zhigh=atan((ph_Zmass2high  - ph_Zmass2)/ph_ZmZw)
+      zlow=atan((phsp_Zmass2low  - phsp_Zmass2)/phsp_ZmZw)
+      zhigh=atan((phsp_Zmass2high  - phsp_Zmass2)/phsp_ZmZw)
 
-      anbw = (zhigh - zlow)/ph_ZmZw
+      anbw = (zhigh - zlow)/phsp_ZmZw
 
-      anlog = log(ph_Zmass2high/ph_Zmass2low)
+      anlog = log(phsp_Zmass2high/phsp_Zmass2low)
 
       anorm = pbw*anbw + (1d0-pbw)*anlog
 
 c      z=zlow+(zhigh-zlow)*xborn(1)
-c      m2=ph_ZmZw*tan(z)+ph_Zmass2
+c      m2=phsp_ZmZw*tan(z)+phsp_Zmass2
 
       if (xborn(1).lt.pbw) then
-          s = ph_Zmass2 + ph_ZmZw*tan(ph_ZmZw*anbw*xborn(2)+zlow)
+          s = phsp_Zmass2 + phsp_ZmZw*tan(phsp_ZmZw*anbw*xborn(2)+zlow)
       else
-          s = exp(anlog*xborn(2)) * ph_Zmass2low
+          s = exp(anlog*xborn(2)) * phsp_Zmass2low
       endif
 
       xjac = xjac /
-     &        ( pbw/((s-ph_Zmass2)**2+ph_ZmZw**2)/anbw
+     &        ( pbw/((s-phsp_Zmass2)**2+phsp_ZmZw**2)/anbw
      &         + (1.d0-pbw)/s/anlog)
 c d m^2 jacobian
 c      xjac=xjac*(zhigh-zlow)
-c      xjac=xjac*ph_ZmZw/cos(z)**2
+c      xjac=xjac*phsp_ZmZw/cos(z)**2
 c d x1 d x2 = d tau d y;
       tau=s/kn_sbeams
       kn_sborn=s
@@ -123,7 +154,7 @@ c      call checkmomzero(nlegborn,kn_pborn)
 c      call checkmass(2,kn_pborn(0,3))
 
 c minimal final state mass 
-      kn_minmass=sqrt(ph_Zmass2low)
+      kn_minmass=sqrt(phsp_Zmass2low)
 
       end
 
