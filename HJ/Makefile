@@ -60,16 +60,13 @@ PWD=$(shell pwd)
 OBJ=$(PWD)/obj-$(COMPILER)
 WDNAME=$(shell basename $(PWD))
 HJ=$(PWD)
-VPATH= ./:../Version-pre2-1/progress/:../Version-pre2-1/:../:./Madlib/:./MODEL/:./DHELAS/:$(OBJ)/
+VPATH= ./:../:./Madlib/:./MODEL/:./DHELAS/:$(OBJ)/
 
 
-INCLUDE0=$(PWD)/include/
-INCLUDE0.1=$(shell dirname $(PWD))/Version-pre2-1/progress/include/
-INCLUDE0.2=$(shell dirname $(PWD))/Version-pre2-1/include/
 INCLUDE1=$(HJ)
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=$(HJ)/MCFM_Include 
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0)  -I$(INCLUDE0.1)  -I$(INCLUDE0.2) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
 
 LIBFILES=$(shell  for dir in $(HJ)/Madlib $(HJ)/MODEL $(HJ)/DHELAS ; do cd $$dir ; echo *.[fF] ' ' | sed 's/[fF] /o /g' ; cd .. ; done  )
 

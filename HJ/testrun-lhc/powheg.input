@@ -58,7 +58,7 @@ nubound 200000    ! number of bbarra calls to setup norm of upper bounding funct
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
 
-bornktmin 0.26    ! Minimum transverse momentum if the Higgs at the underlying Born level
+bornktmin 0.26    ! Minimum transverse momentum of the Higgs at the underlying Born level
 
 #nohad 1            ! no hadronization and U.E. in pythia 
 

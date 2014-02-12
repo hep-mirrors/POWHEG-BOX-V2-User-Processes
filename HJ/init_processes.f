@@ -10,6 +10,10 @@
       real * 8 tmp
       real * 8 powheginput
       external powheginput
+
+c The following should be on by default ...
+      if(powheginput("#evenmaxrat").ne.0) flg_evenmaxrat = .true.
+
 c defaults for powheg running
       st_bornorder = 3
       call minlo_checks
