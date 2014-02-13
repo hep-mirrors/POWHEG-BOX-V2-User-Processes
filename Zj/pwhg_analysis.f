@@ -7,7 +7,7 @@ c  pwhgfill  :  fills the histograms with data
 
       subroutine init_hist
       implicit none
-      include '../pwhg_book.h'
+      include 'pwhg_book.h'
       real * 8 pi,pi2
       parameter(pi = 3.141592653589793D0, pi2 = 9.869604401089358D0)
       integer nptZcutmax,nptZcut

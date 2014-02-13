@@ -14,6 +14,8 @@
       external powheginput
 c     check nlegborn. This is only a sanity check while we are TESTING 
 c     the code and we change often from one process to the other
+      flg_evenmaxrat = .true.
+      if(powheginput("#evenmaxrat").eq.0) flg_evenmaxrat = .false.
       if (nlegborn.ne.5) then
          write(*,*) ' ERROR: set nlegborn to the appropriate value'
          write(*,*) ' for this process in nlegborn.h'
@@ -102,8 +104,8 @@ c     exclude gg -> Z gg
  11         continue
          enddo
       enddo
+      write(*,*) ' real processes',flst_nreal
       if (debug) then
-         write(*,*) ' real processes',flst_nreal
          do j=1,flst_nreal
             write(*,*) (flst_real(k,j),k=1,nlegreal)
          enddo
@@ -141,8 +143,8 @@ c a quark and a gluon
  21         continue
          enddo
       enddo
+      write(*,*) ' born processes',flst_nborn
       if (debug) then
-         write(*,*) ' born processes',flst_nborn
          do j=1,flst_nborn
             write(*,*) (flst_born(k,j),k=1,5)
          enddo

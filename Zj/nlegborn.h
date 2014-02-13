@@ -15,4 +15,7 @@ c     the resonance's masses
       parameter (ndiminteg=(nlegreal-2)*3-4+2-1)
 
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=200,maxprocreal=500)
+      parameter (maxprocborn=30,maxprocreal=175)
+
+      integer maxalr
+      parameter (maxalr=380)

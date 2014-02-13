@@ -80,16 +80,17 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
+
+PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi.o
+
 ifeq ("$(ANALYSIS)","default")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o 
+PWHGANAL=pwhg_analysis.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o 
-else
-PWHGANAL=pwhg_analysis-dummy.o
 endif
 
 %.o: %.f $(INCLUDE)
@@ -110,10 +111,12 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+        pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	reshufflemoms.o                                                 \
-	sigcollsoft.o sigvirtual.o  $(PDFPACK) $(USER) $(FPEOBJ)
+	sigcollsoft.o sigvirtual.o setlocalscales.o validflav.o mint_upb.o  \
+	pwhgreweight.o opencount.o ubprojections.o \
+        $(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
