@@ -126,10 +126,11 @@ c  SISTEMARE *****************************************
       real * 8 powheginput
       external powheginput      
       logical changescalup,ini
-      save changescalup,ini
       data ini/.true./
-      integer pyevntcounts
-      common/cpyevnt/pyevntcounts
+      integer oldnevhep
+      data oldnevhep/-1/
+      save changescalup,ini,oldnevhep
+      
       if (ini) then
          changescalup = powheginput("#changescalup").eq.1d0 
          if (changescalup) then
@@ -140,6 +141,15 @@ c  SISTEMARE *****************************************
          ini=.false.
       endif
       pyevntcounts=pyevntcounts+1
+      if(nevhep.eq.oldnevhep) then
+c the main program increases nevhep after each pythia call.
+c We enter here if pythia fails to shower an event, and tries with
+c a new one. We should call pwhgaccumup in this case, since
+c the analysis is not called, and not doing so spoils the cross
+c section value.
+         call pwhgaccumup
+      endif
+      oldnevhep = nevhep
       call lhefreadev(97)
       if (changescalup) then
          call py_change_scalup
@@ -193,7 +203,6 @@ c     check parameters
 c Assuming that killed events will not end up in the
 c analysis, they should be counted in order to get
 c a correct cross section in the physical region.
-         call pwhgaccumup 
          return
       endif
       nevhep=nevhep+1
