@@ -150,22 +150,34 @@ c CAVEAT!!!  process dependent subroutine
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
-      real * 8 muf,mur
+      real * 8 muf,mur,powheginput
       logical ini
       data ini/.true./
       logical runningscales
-      parameter (runningscales=.true.)
       real * 8 pt2
-      if (runningscales) then
-         if (ini) then
+      save ini,runningscales
+      if(ini) then
+         if(powheginput("#runningscales").eq.1) then
+            runningscales = .true.
             write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '**   mur=pt  used for Bbar function   **'
             write(*,*) '**   muf=pt  used for Bbar function   **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
-            ini=.false.            
+         else
+c fixed scale is the default
+            runningscales = .false.
+            write(*,*) '********************************************'
+            write(*,*) '********************************************'
+            write(*,*) '**   mur=Z mass  used for Bbar function   **'
+            write(*,*) '**   muf=Z mass  used for Bbar function   **'
+            write(*,*) '********************************************'
+            write(*,*) '********************************************'
          endif
+         ini=.false.
+      endif
+      if (runningscales) then
          pt2=kn_pborn(1,5)**2+kn_pborn(2,5)**2
          mur=sqrt(pt2)
          muf=mur

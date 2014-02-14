@@ -9,7 +9,7 @@ c     to define here rad_bottomthr2
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
-      real * 8 masswindow_low,masswindow_high
+      real * 8 masswindow_low,masswindow_high,zmasslow,zmasshigh
       real *8 powheginput,pwhg_alphas
       external powheginput,pwhg_alphas
       flg_withdamp=.true.
@@ -76,11 +76,22 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c     set mass windows around Z-mass peak in unit of ph_Zwidth
 c     It is used in the generation of the Born phase space
-      masswindow_low = 25
-      masswindow_high = 35
-      ph_Zmass2low=max(0d0,ph_Zmass-masswindow_low*ph_Zwidth)
-      ph_Zmass2low=ph_Zmass2low**2
-      ph_Zmass2high=(ph_Zmass+masswindow_high*ph_Zwidth)**2
+      zmasslow = powheginput("#min_Z_mass")
+      zmasshigh = powheginput("#max_Z_mass")
+      if(zmasslow.gt.0) then
+         ph_Zmass2low=zmasslow**2
+      else
+         masswindow_low = 15
+         ph_Zmass2low=max(0d0,ph_Zmass-masswindow_low*ph_Zwidth)
+         ph_Zmass2low=ph_Zmass2low**2
+      endif
+      if(zmasshigh.gt.0) then
+         ph_Zmass2high=zmasshigh**2
+      else
+         masswindow_high = 15
+         ph_Zmass2high=(ph_Zmass+masswindow_high*ph_Zwidth)**2
+      endif
+
       ph_ZmZw = ph_Zmass * ph_Zwidth
       ph_unit_e = sqrt(4*pi*ph_alphaem)
 

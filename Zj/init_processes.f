@@ -4,6 +4,7 @@
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
+      include 'pwhg_st.h'
       integer i1,i2,i3,i4,i5,i6,k,ii(6)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
      #  (i4,ii(4)),(i5,ii(5)),(i6,ii(6))
@@ -16,6 +17,9 @@ c     check nlegborn. This is only a sanity check while we are TESTING
 c     the code and we change often from one process to the other
       flg_evenmaxrat = .true.
       if(powheginput("#evenmaxrat").eq.0) flg_evenmaxrat = .false.
+c minlo setup
+      st_bornorder = 1
+      call minlo_checks
       if (nlegborn.ne.5) then
          write(*,*) ' ERROR: set nlegborn to the appropriate value'
          write(*,*) ' for this process in nlegborn.h'
