@@ -262,13 +262,13 @@ main-PYTHIA8-lhef: $(PYTHIA8)
 XFFLAGS=$(DEBUG) $(OPT)
 
 libdhelas3.a:
-	cd DHELAS ; make -j 2 FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"; wait
+	cd DHELAS ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"; wait
 
 libmadgraph.a:
-	cd Madlib ; make -j 2 FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"; wait
+	cd Madlib ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"; wait
 
 libnlojet.a:
-	cd nlojet ; make -j 2 CC="$(CXX)" CDEBUG="$(DEBUG)"  CXXFLAGS="$(CXXFLAGS)" OBJ="$(OBJ)"; wait
+	cd nlojet ; make -j CC="$(CXX)" CDEBUG="$(DEBUG)"  CXXFLAGS="$(CXXFLAGS)" OBJ="$(OBJ)"; wait
 
 
 ifeq ("$(COMPILER)","gfortran")
