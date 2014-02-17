@@ -32,11 +32,12 @@ c  pwhgfill  :  fills the histograms with data
       data ptminarr4/ 0d0, 20d0, 40d0,70d0,100d0/
 
       integer nptmin3
-      parameter (nptmin3=5)
+      parameter (nptmin3=8)
       character * 4 cptmin3(nptmin3)
       real * 8 ptminarr3(nptmin3)
-      data cptmin3/  '-000','-020','-040','-070','-100'/
-      data ptminarr3/ 0d0, 20d0, 40d0,70d0,100d0/
+      data cptmin3/  '-000','-020','-040','-070','-100','-150',
+     $     '-200','-250'/
+      data ptminarr3/ 0d0, 20d0, 40d0,70d0,100d0,150d0,200d0,250d0/
       character*4 cymax(nymax)
       data cymax/ '3.0','inf' /
       integer jr
@@ -115,7 +116,6 @@ c here ymax is intended inclusivly, i.e. only upon the observed jet
          enddo
          
       enddo
-      
       end
      
 
@@ -148,7 +148,7 @@ c      include 'LesHouches.h'
       character * 4 cptmin2(nptmin2)
       real * 8 ptminarr2(nptmin2)      
       integer nptmin3
-      parameter (nptmin3=5)
+      parameter (nptmin3=8)
       character * 4 cptmin3(nptmin3)
       real * 8 ptminarr3(nptmin3)
 
@@ -189,7 +189,7 @@ c     we need to tell to this analysis file which program is running it
       external pwhg_isfinite
       character * 4 prefix
       logical negweightsonly
-      save negweightsonly,nohad
+      save negweightsonly,nohad,htlhcut
       if(ini) then
          nohad = powheginput("#nohad").eq.1
          htlhcut =  powheginput("#htlhcut")
@@ -274,6 +274,18 @@ c     Loop over final state particles to find jets
       do ihep=1,nhep
          if(WHCPRG.eq.'HERWIG'.and.nohad) then
             isatrack = isthep(ihep).ge.147.and.isthep(ihep).le.149
+c            if(isatrack.and.idhep(ihep).eq.22) then
+c               write(*,*) 'EVENT WITH PHOTON'
+c               write(*,*) 'scalup=',scalup
+c               call HWUPUP
+c               call HWUEPR
+c               write(*,*) 'END EVENT WITH PHOTON'
+c            endif
+c            if(isatrack.and.idhep(ihep).eq.22.and.htlh.lt.10) then
+c               call filld('gamma-pt-htlh-10',
+c     1              sqrt(phep(1,ihep)**2+phep(2,ihep)**2),dsig)
+c            endif
+c            if(nogammahw.and.isatrack.and.idhep(ihep).eq.22) return
          else
             isatrack = isthep(ihep).eq.1
          endif
@@ -319,6 +331,18 @@ c      write(*,*) 'numjets ',numjets
          ktj(j) = sqrt(pj(1,j)**2 + pj(2,j)**2 )            
          call pwhg_getrapidity(pj(:,j),yj(j))
       enddo
+
+c      if(jr.eq.1.and.htlh.lt.10.and.ktj(1).gt.50) then
+c Print Les Houches event and hep event record
+cc         call lhefwritev(11)
+c         write(*,*) ' ABNORMAL EVENT'
+c         write(*,*) ' scalup is ',scalup
+c         if(WHCPRG.eq.'HERWIG') then
+c            call HWUPUP
+c            call HWUEPR
+c         endif
+c         write(*,*) 'END ABNORMAL EVENT'
+c      endif
 
       maxyj(1:maxnumjets) = 0d0
       do j=1,njets

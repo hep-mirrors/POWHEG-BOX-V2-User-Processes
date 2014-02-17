@@ -36,6 +36,10 @@ c      PTMIN=100.
       endif
 c----DO NOT USE SOFT ME CORRECTION     
       SOFTME=.FALSE.
+c---- Inhibit photon radiation by the shower
+c this causes problems due to events that have very small total HT at the Les Houches level,
+c and nevertheless shower a very energetic photon.
+      VPCUT=1d30
       end
 
       subroutine getmaxev(numev)

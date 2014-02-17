@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -228,6 +228,14 @@ HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o bra_ket_subroutines
 
 main-HERWIG-lhef: $(HERWIG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+
+# target to read event file, shower events with HERWIG + analysis
+HERWIGNOHAD=main-HERWIG-nohad.o setup-HERWIG-lhef.o herwig.o boostrot.o bra_ket_subroutines.o	\
+	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o changescalup.o	\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o $(FPEOBJ) 
+
+main-HERWIGNOHAD-lhef: $(HERWIGNOHAD)
+	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIGNOHAD))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \

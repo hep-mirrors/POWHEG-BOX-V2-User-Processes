@@ -14,26 +14,20 @@
       real * 8 powheginput
       external powheginput
 
+      flg_doublefsr = .true.
+      if(powheginput("#doublefsr").eq.0) flg_doublefsr=.false.
+      flg_evenmaxrat = .true.
+      if(powheginput("#evenmaxrat").eq.0) flg_evenmaxrat = .false.
 
       st_bornorder=3
-      if(powheginput("#minlo").eq.1) then
+c MiNLO activated by default
+      if(powheginput("#minlo").ne.0) then
          flg_minlo=.true.
-         if(powheginput("#minlo_nnll").eq.1) then
-            flg_minlo_nnll=.true.
-         else
-            flg_minlo_nnll=.false.
-         endif
          flg_minlo_real=.false.
       else
          flg_minlo=.false.
-         flg_minlo_nnll=.false.
          flg_minlo_real=.false.
       endif
-
-
-
-
-
 
 c     the default value 1d-6 could be too small
       par_isrtinycsi = 1d-4
