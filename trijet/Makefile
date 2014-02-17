@@ -283,12 +283,12 @@ libmodel.a:
 
 clean:
 	rm -f $(patsubst %,$(OBJ)/%,$(USER) $(PWHG) $(LHEF) $(HERWIG) $(PYTHIA)) pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef  $(OBJ)/libnlojet.a
+	main-PYTHIA-lhef main-PYTHIA8-lhef main-HERWIGNOHAD-lhef  $(OBJ)/libnlojet.a
 
 
 veryclean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef
+	main-PYTHIA-lhef main-PYTHIA8-lhef main-HERWIGNOHAD-lhef
 
 # target to generate object directory if it does not exist
 $(OBJ):
