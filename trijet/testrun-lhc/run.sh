@@ -3,7 +3,7 @@
 # example of a run script for a parallel run on a 8 core framework
 
 function runthem {
-for i in {1..8}
+for i in {1..48}
 do
 echo $i | $prg > $logfile-$i.log 2>&1 &
 done
@@ -17,7 +17,7 @@ echo "***********************************************"
 echo " stage " $parstage
 echo "***********************************************"
 
-for xgrid in 1
+for xgrid in {1..2}
 do
 
 cat powheg.input-save | sed "s/parallelstage.*/parallelstage $parstage/ ; s/xgriditeration.*/xgriditeration $xgrid/">powheg.input
@@ -40,8 +40,6 @@ logfile=run-$parstage
 runthem
 wait
 rm powheg.input
-
-exit
 
 
 parstage=3
