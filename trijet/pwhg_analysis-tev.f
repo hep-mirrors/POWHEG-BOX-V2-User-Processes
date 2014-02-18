@@ -272,8 +272,8 @@ c     we need to tell to this analysis file which program is running it
       logical inimulti
       data inimulti/.true./
       integer  minlo
-      data minlo/0/
-      save inimulti,minlo,ini
+c      data minlo/0/
+      save inimulti,minlo,ini,
 c
       logical pwhg_isfinite
       external pwhg_isfinite
@@ -352,12 +352,13 @@ c
       real*8 MinRsepMjjj
       parameter (MinRsepMjjj = 1.4d0)
 c
-c
+c     
       if (ini) then
-        if (powheginput("#minlo").gt.0d0) minlo = 1
-        ini = .false.
+         minlo=1
+         if (powheginput("#minlo").eq.0d0) minlo = 0
+         ini = .false.
       end if
-c
+c     
       if (.not.pwhg_isfinite(dsig0)) then
          write(*,*) '*** PROBLEMS in subroutine analysis ***'
          return

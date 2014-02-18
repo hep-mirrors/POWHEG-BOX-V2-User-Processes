@@ -590,8 +590,8 @@ c      common /crescfac/rescfac1,rescfac2
       logical inimulti
       data inimulti/.true./
       integer  minlo
-      data minlo/0/
-      save inimulti,minlo,ini
+c      data minlo/1/
+      save inimulti,minlo,ini,minnumjets
       integer minnumjets,maxnumjets
       logical pwhg_isfinite
       external pwhg_isfinite
@@ -811,11 +811,13 @@ c
       if(sum(abs(dsig)).eq.0) return
 
       if (ini) then
-         minlo=powheginput('#minlo')
-         if (minlo.eq.1) then
-            minnumjets = 2
-         else
+         minlo=powheginput('#minlo')                           
+         if (minlo.eq.0) then
             minnumjets = 3
+            minlo=0
+         else
+            minnumjets = 2
+            minlo=1
          endif
          ini=.false.
       endif
@@ -837,6 +839,8 @@ c     copy momenta to construct jets
            enddo
         endif
       enddo
+      
+      jetvec=0
 
 c vvvvvvvvvvvv This part concerns the azimuthal decorrelation vvvvvvvv
 c We can only do this analysis if minlo is activated:
@@ -897,6 +901,7 @@ c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+      jetvec=0
 c vvvvvvvvvvvv This part concerns the jet shapes vvvvvvvvvvvvvvvvvvvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
@@ -1099,7 +1104,7 @@ c set up for the jet mass:
       end do
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+      jetvec=0
 c vvvvvvvvvvv This part concerns the R32 ratio calculation vvvvvvvvvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
@@ -1126,7 +1131,7 @@ c
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 444   continue
-
+      jetvec=0
 c vvvvvvvvvvvvvvvv This part concerns the dijet veto vvvvvvvvvvvvvvvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
@@ -1270,7 +1275,7 @@ c
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 555   continue
-
+      jetvec=0
 c vvvvvvvv This part concerns the differential cross sections vvvvvvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
@@ -1320,7 +1325,7 @@ c
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 666   continue
-
+      jetvec=0
 c vvvv This part concerns the differential cross sections at Atlas vvvv
 c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
@@ -1361,7 +1366,7 @@ c
 c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+      jetvec=0
 c vvvv This part concerns the trijet invariant mass, CMS PAS vvvv
       do i=1,nRpardiffxsCMSPAS !<sweep through R's>
         palg = -1d0
