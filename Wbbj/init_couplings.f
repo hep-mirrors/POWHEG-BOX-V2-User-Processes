@@ -1,10 +1,12 @@
       subroutine init_couplings
       implicit none
       include "coupl.inc"
-      include 'PhysPars.h'
+      include "PhysPars.h"
+      include "pwhg_physpar.h"
+      include "pwhg_st.h"
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
-      logical called
+      logical called, init_golem
       real * 8 powheginput
       external powheginput
       data called/.false./
@@ -14,7 +16,7 @@ c but never closed ...
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
       data lepmass/0.51099891d-3,0.1056583668d0,1.77684d0/
-
+      integer j
       if(called) then
          return
       else
@@ -31,16 +33,17 @@ c somewhere else
 
       call madtophys
 
-c Are these needed?
-c$$$      physpar_ml(1)=0.511d-3
-c$$$      physpar_ml(2)=0.1057d0
-c$$$      physpar_ml(3)=1.777d0
-c$$$      physpar_mq(1)=0.33d0     ! up
-c$$$      physpar_mq(2)=0.33d0     ! down
-c$$$      physpar_mq(3)=0.50d0     ! strange
-c$$$      physpar_mq(4)=1.50d0     ! charm
-c$$$      physpar_mq(5)=4.80d0     ! bottom
-      call golem_initialize
+      init_golem = .true.
+      if (powheginput("dummyvirtual").eq.1) then
+         write(*,*) '*****************************************' 
+         write(*,*) 'WARNING: using dummy virtual amplitude!!!'
+         write(*,*) '*****************************************' 
+         init_golem = .false.
+      endif
+      if (powheginput("bornonly").eq.1) then
+         init_golem = .false.
+      endif
+      if (init_golem) call golem_initialize
 
 c******************************************************
 c     Choose the process to be implemented
@@ -103,6 +106,19 @@ c     set lepton mass
       endif
 
 
+c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
+      do j=1,st_nlight         
+         physpar_mq(j)=0d0
+      enddo
+      physpar_mq(5)=ph_bmass
+
+      do j=1,3
+         physpar_ml(j)=lepmass(j)
+      enddo
+c     read eventual c and b masses from the input file
+      cmass=powheginput("#cmass_lhe")
+      if (cmass.gt.0d0) physpar_mq(4)=cmass
+
       end
 
 
@@ -136,7 +152,7 @@ c madgraph routines not to blow.
       alpha= 1/132.50698d0
       gfermi = 0.1166390d-4
       alfas = 0.119d0
-      zmass = 91.188d0
+      zmass = 91.1876d0
       tmass = 172.5d0
       lmass = 0d0
       mcMS = 0d0
@@ -149,8 +165,10 @@ c madgraph routines not to blow.
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
 
+      wmass=80.419d0
+
       zwidth=2.441d0
-      wwidth=2.0476d0
+      wwidth=2.1054d0
       twidth=1.5083d0
 
       ph_Wmass2low=powheginput("min_w_mass")**2
@@ -178,25 +196,25 @@ c    u
 c    c
 c    t
 
-c$$$      Vud=0.97428d0
-c$$$      Vus=0.2253d0
-c$$$      Vub=0.00347d0
-c$$$      Vcd=0.2252d0
-c$$$      Vcs=0.97345d0
-c$$$      Vcb=0.0410d0
-c$$$      Vtd=0.00862d0
-c$$$      Vts=0.0403d0
-c$$$      Vtb=0.999152d0
+      Vud=0.97428d0
+      Vus=0.2253d0
+      Vub=0.00347d0
+      Vcd=0.2252d0
+      Vcs=0.97345d0
+      Vcb=0.0410d0
+      Vtd=0.00862d0
+      Vts=0.0403d0
+      Vtb=0.999152d0
 
-      Vud=1d0
-      Vus=1d-10
-      Vub=1d-10
-      Vcd=1d-10
-      Vcs=1d0
-      Vcb=1d-10
-      Vtd=1d-10
-      Vts=1d-10
-      Vtb=1d0
+c      Vud=1d0
+c      Vus=1d0
+c      Vub=1d0
+c      Vcd=1d0
+c      Vcs=1d0
+c      Vcb=1d0
+c      Vtd=1d0
+c      Vts=1d0
+c      Vtb=1d0
 
       end
 
@@ -205,8 +223,22 @@ c$$$      Vtb=0.999152d0
       include 'pwhg_st.h'
       include 'pwhg_math.h'
       include "coupl.inc"
+      include "PhysPars.h"
+      real * 8 pwhg_alphas
+      external pwhg_alphas
+
 c QCD coupling constant
+C      write(*,*) "lambda5", st_lambda5MSB
+C      st_alpha=0.11490435614197572d0
+C      write(*,*) "alpha_S=",st_alpha
+C      write(*,*)"alpha_S(Mz)=",pwhg_alphas(ph_Zmass**2,st_lambda5MSB,4)
+C      write(*,*)"alpha_S(Mw)=",pwhg_alphas(ph_Wmass**2,st_lambda5MSB,4)
+C      pause
       G=sqrt(st_alpha*4d0*pi)
+
+c--- to check LO (assumes NLO running for alpha_S)
+C      G=1.310135925996010d0
+
       GG(1)=-G
       GG(2)=-G
 
@@ -524,7 +556,7 @@ C     Parameter definition
       
 C     Initialize virtual code
       
-      path = '../GoSam_POWHEG/orderfile.olc'
+      path = '../GoSamlib/orderfile.olc'
       
       call OLP_Start(path,ioerr,parallelstage,rndiwhichseed)
       call check_gosam_err('olp_start routine',ierr)

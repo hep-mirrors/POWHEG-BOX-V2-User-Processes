@@ -82,6 +82,10 @@ c a (leading) color structure to an event.
       subroutine finalize_lh
 c Specify here if resonances need be written in the event file.
       implicit none
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+      call add_resonance(idvecbos,3,4)
+      
       end
 
 c$$$      subroutine finalize_lh

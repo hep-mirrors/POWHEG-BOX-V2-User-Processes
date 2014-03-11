@@ -43,7 +43,7 @@ F77 = ifort -save  -extend_source  -module $(OBJ)
 #FPE = -fpe0
 # DO NOT USE O2 or O3 for trijet code since the optimization fails 
 # to compile correctly the analysis file
-OPT = -O1 #-fast
+OPT = -O2 #-fast
 ## For debugging uncomment the following
 #DEBUG=  -g
 ifdef DEBUG
@@ -89,7 +89,7 @@ ifeq ("$(ANALYSIS)","Wbbj")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis.o observables.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-WBBnJ.o observables.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o

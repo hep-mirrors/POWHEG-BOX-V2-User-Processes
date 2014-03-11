@@ -217,7 +217,7 @@ c     now boost everything BACK along z-axis
       endif
       if(flg_weightedev) then
          pt2=kn_cmpborn(1,7)**2+kn_cmpborn(2,7)**2
-         fact = pt2/(ptmin**2+pt2)
+         fact = (pt2/(ptmin**2+pt2))**2
          pt2W=(kn_cmpborn(1,3)+kn_cmpborn(1,4))**2+
      $        (kn_cmpborn(2,3)+kn_cmpborn(2,4))**2
          fact=fact*(pt2W+1d0)/(pt2W+1d0+ptminW**2)

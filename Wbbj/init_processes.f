@@ -11,7 +11,6 @@
       real * 8 powheginput
       external powheginput
 
-
       idvecbos=powheginput('idvecbos')
 
       call init_processes_born
@@ -36,7 +35,7 @@ c     endif
             exit
          endif
       enddo
-      return
+
       end
  
  

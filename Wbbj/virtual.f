@@ -19,6 +19,8 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 virtual
       integer vflavloc(nlegborn)
       integer proc, i, iprod,iq1,iq2
+      real * 8 powheginput
+      external powheginput
       integer vflav_gosam(1:nlegborn,0:maxprocborn-1)
       logical equalintlists
       external equalintlists
@@ -27,6 +29,9 @@ C     The virtual amplitude is generated using GoSam.
       real * 8 pgosam(dim_mom_array)
 C     real * 8 pgosam(5*nlegborn)
       real * 8 params(10),muren,res(4)
+      integer bflav(nlegborn)
+      real * 8 bmunu(0:3,0:3,nlegborn),born
+      real * 8 bornjk(nlegborn,nlegborn)
       real * 8 virtualold
       logical debug
       parameter (debug=.false.)
@@ -224,6 +229,13 @@ C     real * 8 pgosam(5*nlegborn)
      $       5,
      $      -5,
      $      -4/
+
+C     call to the born for dummy virtual:
+      if (powheginput("dummyvirtual").eq.1) then
+         call setborn(p,vflav,born,bornjk,bmunu)
+         virtual = 0.3d0*born*(2*pi/st_alpha)
+         return
+      endif
  
       if(idvecbos.eq.-24) then
          call cconj(vflav,nlegborn)
