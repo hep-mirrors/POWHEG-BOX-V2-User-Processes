@@ -273,7 +273,7 @@ c     we need to tell to this analysis file which program is running it
       data inimulti/.true./
       integer  minlo
 c      data minlo/0/
-      save inimulti,minlo,ini,
+      save inimulti,minlo,ini
 c
       logical pwhg_isfinite
       external pwhg_isfinite
@@ -308,8 +308,7 @@ c
       real*8 MinPtJetIncJet
       parameter (MinPtJetIncJet = 50d0)
       real*8 MaxRapJetIncJet
-      parameter (MaxRapJetIncJet = 1.0d3)
-c      parameter (MaxRapJetIncJet = 2.4d0)
+      parameter (MaxRapJetIncJet = 2.4d0)
 c
 c Declarations for the dijet mass:
       integer nymaxrangesMjj
@@ -325,7 +324,6 @@ c
       parameter (MinPtJetMjj = 40d0)
       real*8 MaxRapJetMjj
       parameter (MaxRapJetMjj = 1.0d3)
-c      parameter (MaxRapJetMjj = 2.4d0)
 c
 c Declarations for the trijet mass:
       integer nyrangesMjjj
@@ -348,7 +346,7 @@ c
       real*8 MinPt3rdJetMjjj
       parameter (MinPt3rdJetMjjj = 40d0)
       real*8 MaxRapJetMjjj
-      parameter (MaxRapJetMjjj = 2.4d0)
+      parameter (MaxRapJetMjjj = 1.0d3)
       real*8 MinRsepMjjj
       parameter (MinRsepMjjj = 1.4d0)
 c
@@ -449,6 +447,7 @@ c
 c We need at least two jets:
         if (njets.lt.2) goto 222
 c
+c We select the two hardest jets in the event:
         pj1 = pj(:,1)
         pj2 = pj(:,2)
 c
@@ -477,13 +476,14 @@ c vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 c Trijet mass:
       R = RconeMjjj
       MinPtJet = MinPt3rdJetMjjj
-      MaxRapJet = 1000d0
+      MaxRapJet = MaxRapJetMjjj
       call fastjetd0runiicone(ptrack,ntracks,R,ptmin,overlapfact,
      >                        MinPtJet,MaxRapJet,pj,njets,jetptrel)
 c
 c We need at least two jets:
       if (njets.lt.3) goto 333
 c
+c The three hardest jets are selected:
       pj1 = pj(:,1)
       pj2 = pj(:,2)
       pj3 = pj(:,3)
@@ -513,9 +513,7 @@ c
      >               cpt3rangesMjjj(1)//' < ptj3, D0',
      >             m,dsig)
           if (iy.eq.nyrangesMjjj) then
-c Filling up histos with different pt ranges, the fastjet
-c routine contains a cut on the rapidity set to 2.4, hence
-c no further cut on rapidity should be applied:
+c Filling up histos with different pt ranges:
             do ipt=2,npt3rangesMjjj
               if (ptj3.gt.pt3rangesMjjj(ipt)) then
                 call filld('mjjj, |y| < '//cyrangesMjjj(iy)//', '//

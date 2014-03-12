@@ -13,6 +13,11 @@ c  pwhgfill  :  fills the histograms with data
       real * 8 powheginput
       external powheginput
 c
+      integer nnum
+      parameter (nnum = 9)
+      character*1 cnum(nnum)
+      data cnum/'1','2','3','4','5','6','7','8','9'/
+c
       integer ndphibins1
       parameter (ndphibins1 = 15)
       integer ndphibins2
@@ -194,7 +199,7 @@ c Dijet mass, 2.0 < |y| < 2.5:
       data mbinsdiffxs10/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,
      >                    3147d0,3704d0,5058d0/
 c
-c Differential cross section, Atlas:
+c Differential dijet cross section, Atlas:
       integer nystarrangesdiffxsAtlas
       parameter (nystarrangesdiffxsAtlas = 6)
       real*8 ystarrangesdiffxsAtlas(nystarrangesdiffxsAtlas + 1)
@@ -276,6 +281,225 @@ c
      >     1916d0,2041d0,2172d0,2309d0,2452d0,2602d0,2758d0,2921d0,
      >     3092d0,3270d0,3456d0,3650d0,3852d0,4063d0,4283d0,4513d0,
      >     4753d0/
+c
+c Inclusive jet and dijet production, ATLAS
+c arXiv:1112.6297
+      integer nyrangesIncjetAtlas
+      parameter (nyrangesIncjetAtlas = 7)
+      real*8 yrangesIncjetAtlas(nyrangesIncjetAtlas + 1)
+      data yrangesIncjetAtlas/0d0,0.3d0,0.8d0,1.2d0,2.1d0,
+     >                        2.8d0,3.6d0,4.4d0/
+      character*3 cyrangesIncjetAtlas(nyrangesIncjetAtlas + 1)
+      data cyrangesIncjetAtlas/'0.0','0.3','0.8','1.2','2.1',
+     >                         '2.8','3.6','4.4'/
+      integer nRparIncjetAtlas
+      parameter (nRparIncjetAtlas = 2)
+      real*8 RparIncjetAtlas(nRparIncjetAtlas)
+      data RparIncjetAtlas/0.4d0,0.6d0/
+      character*3 cRparIncjetAtlas(nRparIncjetAtlas)
+      data cRparIncjetAtlas/'0.4','0.6'/
+c pt bins for 0.0 < |y| < 0.3
+      integer nptbinsIncjetAtlas1
+      parameter (nptbinsIncjetAtlas1 = 16)
+      real*8 ptbinsIncjetAtlas1(nptbinsIncJetAtlas1 + 1)
+      data ptbinsIncjetAtlas1/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >     400d0,500d0,600d0,800d0,1000d0,1200d0,1500d0/
+c pt bins for 0.3 < |y| < 0.8
+      integer nptbinsIncjetAtlas2
+      parameter (nptbinsIncjetAtlas2 = 16)
+      real*8 ptbinsIncjetAtlas2(nptbinsIncJetAtlas2 + 1)
+      data ptbinsIncjetAtlas2/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >     400d0,500d0,600d0,800d0,1000d0,1200d0,1500d0/
+c pt bins for 0.8 < |y| < 1.2
+      integer nptbinsIncjetAtlas3
+      parameter (nptbinsIncjetAtlas3 = 16)
+      real*8 ptbinsIncjetAtlas3(nptbinsIncJetAtlas3 + 1)
+      data ptbinsIncjetAtlas3/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >     400d0,500d0,600d0,800d0,1000d0,1200d0,1500d0/
+c pt bins for 1.2 < |y| < 2.1
+      integer nptbinsIncjetAtlas4
+      parameter (nptbinsIncjetAtlas4 = 15)
+      real*8 ptbinsIncjetAtlas4(nptbinsIncJetAtlas4 + 1)
+      data ptbinsIncjetAtlas4/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >     400d0,500d0,600d0,800d0,1000d0,1200d0/
+c pt bins for 2.1 < |y| < 2.8
+      integer nptbinsIncjetAtlas5
+      parameter (nptbinsIncjetAtlas5 = 12)
+      real*8 ptbinsIncjetAtlas5(nptbinsIncJetAtlas5 + 1)
+      data ptbinsIncjetAtlas5/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >     400d0,500d0,600d0/
+c pt bins for 2.8 < |y| < 3.6
+      integer nptbinsIncjetAtlas6
+      parameter (nptbinsIncjetAtlas6 = 9)
+      real*8 ptbinsIncjetAtlas6(nptbinsIncJetAtlas6 + 1)
+      data ptbinsIncjetAtlas6/
+     >     20d0,30d0,45d0,60d0,80d0,110d0,160d0,210d0,260d0,310d0/
+c pt bins for 3.6 < |y| < 4.4
+      integer nptbinsIncjetAtlas7
+      parameter (nptbinsIncjetAtlas7 = 6)
+      real*8 ptbinsIncjetAtlas7(nptbinsIncJetAtlas7 + 1)
+      data ptbinsIncjetAtlas7/20d0,30d0,45d0,60d0,80d0,110d0,160d0/
+c These declarations are needed for the dijet mass:
+      integer nystarrangesm12Atlas
+      parameter (nystarrangesm12Atlas = 9)
+      real*8 ystarrangesm12Atlas(nystarrangesm12Atlas + 1)
+      data ystarrangesm12Atlas/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0,3d0,
+     >                         3.5d0,4d0,4.4d0/
+      character*3 cystarrangesm12Atlas(nystarrangesm12Atlas + 1)
+      data cystarrangesm12Atlas/'0.0','0.5','1.0','1.5','2.0','2.5',
+     >                          '3.0','3.5','4.0','4.4'/
+c m12 bins for 0.0 < ystar < 0.5:
+      integer nm12binsm12Atlas1
+      parameter (nm12binsm12Atlas1 = 20)
+      real*8 m12binsm12Atlas1(nm12binsm12Atlas1 + 1)
+      data m12binsm12Atlas1/70d0,110d0,160d0,210d0,260d0,310d0,370d0,
+     >                      440d0,510d0,590d0,670d0,760d0,850d0,950d0,
+     >                      1060d0,1180d0,1310d0,1450d0,1600d0,1940d0,
+     >                      2780d0/
+c m12 bins for 0.5 < ystar < 1.0:
+      integer nm12binsm12Atlas2
+      parameter (nm12binsm12Atlas2 = 20)
+      real*8 m12binsm12Atlas2(nm12binsm12Atlas2 + 1)
+      data m12binsm12Atlas2/110d0,160d0,210d0,260d0,310d0,370d0,
+     >                      440d0,510d0,590d0,670d0,760d0,850d0,950d0,
+     >                      1060d0,1180d0,1310d0,1450d0,1600d0,1760d0,
+     >                      2120d0,3310d0/
+c m12 bins for 1.0 < ystar < 1.5:
+      integer nm12binsm12Atlas3
+      parameter (nm12binsm12Atlas3 = 21)
+      real*8 m12binsm12Atlas3(nm12binsm12Atlas3 + 1)
+      data m12binsm12Atlas3/160d0,210d0,260d0,310d0,370d0,
+     >                      440d0,510d0,590d0,670d0,760d0,850d0,950d0,
+     >                      1060d0,1180d0,1310d0,1450d0,1600d0,1760d0,
+     >                      1940d0,2120d0,2550d0,3610d0/
+c m12 bins for 1.5 < ystar < 2.0:
+      integer nm12binsm12Atlas4
+      parameter (nm12binsm12Atlas4 = 20)
+      real*8 m12binsm12Atlas4(nm12binsm12Atlas4 + 1)
+      data m12binsm12Atlas4/260d0,310d0,370d0,
+     >                      440d0,510d0,590d0,670d0,760d0,850d0,950d0,
+     >                      1060d0,1180d0,1310d0,1450d0,1600d0,1760d0,
+     >                      1940d0,2120d0,2330d0,2780d0,3930d0/
+c m12 bins for 2.0 < ystar < 2.5:
+      integer nm12binsm12Atlas5
+      parameter (nm12binsm12Atlas5 = 19)
+      real*8 m12binsm12Atlas5(nm12binsm12Atlas5 + 1)
+      data m12binsm12Atlas5/370d0,
+     >                      440d0,510d0,590d0,670d0,760d0,850d0,950d0,
+     >                      1060d0,1180d0,1310d0,1450d0,1600d0,1760d0,
+     >                      1940d0,2120d0,2330d0,2550d0,3040d0,4270d0/
+c m12 bins for 2.5 < ystar < 3.0:
+      integer nm12binsm12Atlas6
+      parameter (nm12binsm12Atlas6 = 16)
+      real*8 m12binsm12Atlas6(nm12binsm12Atlas6 + 1)
+      data m12binsm12Atlas6/670d0,760d0,850d0,950d0,1060d0,1180d0,
+     >                      1310d0,1450d0,1600d0,1760d0,1940d0,2120d0,
+     >                      2330d0,2550d0,2780d0,3310d0,4640d0/
+c m12 bins for 3.0 < ystar < 3.5:
+      integer nm12binsm12Atlas7
+      parameter (nm12binsm12Atlas7 = 12)
+      real*8 m12binsm12Atlas7(nm12binsm12Atlas7 + 1)
+      data m12binsm12Atlas7/1180d0,1310d0,1450d0,1600d0,1760d0,1940d0,
+     >                      2120d0,2330d0,2550d0,2780d0,3040d0,3610d0,
+     >                      5040d0/
+c m12 bins for 3.5 < ystar < 4.0:
+      integer nm12binsm12Atlas8
+      parameter (nm12binsm12Atlas8 = 9)
+      real*8 m12binsm12Atlas8(nm12binsm12Atlas8 + 1)
+      data m12binsm12Atlas8/1760d0,1940d0,2120d0,2330d0,2550d0,2780d0,
+     >                      3040d0,3310d0,3930d0,5470d0/
+c m12 bins for 4.0 < ystar < 4.4:
+      integer nm12binsm12Atlas9
+      parameter (nm12binsm12Atlas9 = 2)
+      real*8 m12binsm12Atlas9(nm12binsm12Atlas9 + 1)
+      data m12binsm12Atlas9/2550d0,3040d0,4270d0/
+c
+c Declarations for multi-jet cross section analysis of Atlas:
+      integer nptbinsMultiJetAtlas1
+      parameter (nptbinsMultiJetAtlas1 = 9)
+      real*8 ptbinsMultiJetAtlas1(nptbinsMultiJetAtlas1 + 1)
+      data ptbinsMultiJetAtlas1/80d0,110d0,160d0,210d0,260d0,310d0,
+     >                          400d0,500d0,600d0,800d0/
+      integer nptbinsMultiJetAtlas2
+      parameter (nptbinsMultiJetAtlas2 = 10)
+      real*8 ptbinsMultiJetAtlas2(nptbinsMultiJetAtlas2 + 1)
+      data ptbinsMultiJetAtlas2/60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >                          400d0,500d0,600d0,800d0/
+      integer nptbinsMultiJetAtlas3
+      parameter (nptbinsMultiJetAtlas3 = 8)
+      real*8 ptbinsMultiJetAtlas3(nptbinsMultiJetAtlas3 + 1)
+      data ptbinsMultiJetAtlas3/60d0,80d0,110d0,160d0,210d0,260d0,310d0,
+     >                          400d0,500d0/
+      integer nptbinsMultiJetAtlas4
+      parameter (nptbinsMultiJetAtlas4 = 4)
+      real*8 ptbinsMultiJetAtlas4(nptbinsMultiJetAtlas4 + 1)
+      data ptbinsMultiJetAtlas4/60d0,80d0,110d0,160d0,210d0/
+c Ht binsizes:
+      integer nhtbinsMultiJetAtlas1
+      parameter (nhtbinsMultijetAtlas1 = 9)
+      real*8 htbinsMultijetAtlas1(nhtbinsMultiJetAtlas1 + 1)
+      data htbinsMultiJetAtlas1/140d0,200d0,260d0,350d0,450d0,600d0,
+     >                          790d0,1030d0,1300d0,1600d0/
+c
+      integer nhtbinsMultiJetAtlas2
+      parameter (nhtbinsMultijetAtlas2 = 8)
+      real*8 htbinsMultijetAtlas2(nhtbinsMultiJetAtlas2 + 1)
+      data htbinsMultiJetAtlas2/200d0,260d0,350d0,450d0,600d0,790d0,
+     >                          1030d0,1300d0,1600d0/
+c
+      integer nhtbinsMultiJetAtlas3
+      parameter (nhtbinsMultijetAtlas3 = 6)
+      real*8 htbinsMultijetAtlas3(nhtbinsMultiJetAtlas3 + 1)
+      data htbinsMultiJetAtlas3/260d0,350d0,450d0,600d0,790d0,1030d0,
+     >                          1300d0/
+c Declarations for the three-to-two ratios:
+      integer nRpar3to2MultiJetAtlas
+      parameter (nRpar3to2MultiJetAtlas = 2)
+      real*8 Rpar3to2MultiJetAtlas(nRpar3to2MultiJetAtlas)
+      data Rpar3to2MultiJetAtlas/0.4d0,0.6d0/
+      character*3 cRpar3to2MultiJetAtlas(nRpar3to2MultiJetAtlas)
+      data cRpar3to2MultiJetAtlas/'0.4','0.6'/
+c
+      integer nptcut1st3to2MultiJetAtlas
+      parameter (nptcut1st3to2MultiJetAtlas = 3)
+      real*8 ptcut1st3to2MultiJetAtlas(nptcut1st3to2MultiJetAtlas)
+      data ptcut1st3to2MultiJetAtlas/80d0,110d0,160d0/
+      character*3 cptcut1st3to2MultiJetAtlas(nptcut1st3to2MultiJetAtlas)
+      data cptcut1st3to2MultiJetAtlas/' 80','110','160'/
+      integer nptcut2nd3to2MultiJetAtlas
+      parameter (nptcut2nd3to2MultiJetAtlas = 3)
+      real*8 ptcut2nd3to2MultiJetAtlas(nptcut2nd3to2MultiJetAtlas)
+      data ptcut2nd3to2MultiJetAtlas/60d0,80d0,110d0/
+      character*3 cptcut2nd3to2MultiJetAtlas(nptcut2nd3to2MultiJetAtlas)
+      data cptcut2nd3to2MultiJetAtlas/' 60',' 80','110'/
+c
+      integer nptbins3to2MultiJetAtlas1
+      parameter (nptbins3to2MultiJetAtlas1 = 9)
+      real*8 ptbins3to2MultiJetAtlas1(nptbins3to2MultiJetAtlas1 + 1)
+      data ptbins3to2MultiJetAtlas1/80d0,110d0,160d0,210d0,260d0,310d0,
+     >                              400d0,500d0,600d0,800d0/
+      integer nptbins3to2MultiJetAtlas2
+      parameter (nptbins3to2MultiJetAtlas2 = 8)
+      real*8 ptbins3to2MultiJetAtlas2(nptbins3to2MultiJetAtlas2 + 1)
+      data ptbins3to2MultiJetAtlas2/110d0,160d0,210d0,260d0,310d0,400d0,
+     >                              500d0,600d0,800d0/
+      integer nptbins3to2MultiJetAtlas3
+      parameter (nptbins3to2MultiJetAtlas3 = 7)
+      real*8 ptbins3to2MultiJetAtlas3(nptbins3to2MultiJetAtlas3 + 1)
+      data ptbins3to2MultiJetAtlas3/160d0,210d0,260d0,310d0,400d0,500d0,
+     >                              600d0,800d0/
+c
+c pt sum of the first two hardest jet:
+      integer nht2bins3to2MultiJetAtlas
+      parameter (nht2bins3to2MultiJetAtlas = 8)
+      real*8 ht2bins3to2MultiJetAtlas(nht2bins3to2MultiJetAtlas + 1)
+      data ht2bins3to2MultiJetAtlas/140d0,200d0,260d0,350d0,450d0,600d0,
+     >                              790d0,1030d0,1300d0/
 c
       call inihists
 c
@@ -456,35 +680,35 @@ c vvvvvv This part concerns the differential jet cross sections vvvvvv
 c**** arXiv:1212.6660 ****
 c
 c Inclusive jet, 0.0 < |y| < 0.5:
-      call bookup('inclusive jet, '//cyrangesdiffxs(1)//' < |y| < '//
+      call bookup('ptjet CMS, '//cyrangesdiffxs(1)//' < |y| < '//
      >            cyrangesdiffxs(2),nptbinsdiffxs1,ptbinsdiffxs1)
 c Inclusive jet, 0.5 < |y| < 1.0:
-      call bookup('inclusive jet, '//cyrangesdiffxs(2)//' < |y| < '//
+      call bookup('ptjet CMS, '//cyrangesdiffxs(2)//' < |y| < '//
      >            cyrangesdiffxs(3),nptbinsdiffxs2,ptbinsdiffxs2)
 c Inclusive jet, 1.0 < |y| < 1.5:
-      call bookup('inclusive jet, '//cyrangesdiffxs(3)//' < |y| < '//
+      call bookup('ptjet CMS, '//cyrangesdiffxs(3)//' < |y| < '//
      >            cyrangesdiffxs(4),nptbinsdiffxs3,ptbinsdiffxs3)
 c Inclusive jet, 1.5 < |y| < 2.0:
-      call bookup('inclusive jet, '//cyrangesdiffxs(4)//' < |y| < '//
+      call bookup('ptjet CMS, '//cyrangesdiffxs(4)//' < |y| < '//
      >            cyrangesdiffxs(5),nptbinsdiffxs4,ptbinsdiffxs4)
 c Inclusive jet, 2.0 < |y| < 2.5:
-      call bookup('inclusive jet, '//cyrangesdiffxs(5)//' < |y| < '//
+      call bookup('ptjet CMS, '//cyrangesdiffxs(5)//' < |y| < '//
      >            cyrangesdiffxs(6),nptbinsdiffxs5,ptbinsdiffxs5)
 c
 c Dijet mass, 0.0 < |y|_max < 0.5:
-      call bookup('dijet mass, '//cyrangesdiffxs(1)//' < |y| < '//
+      call bookup('m12 CMS, '//cyrangesdiffxs(1)//' < |y| < '//
      >            cyrangesdiffxs(2),nmbinsdiffxs6,mbinsdiffxs6)
 c Dijet mass, 0.5 < |y|_max < 1.0:
-      call bookup('dijet mass, '//cyrangesdiffxs(2)//' < |y| < '//
+      call bookup('m12 CMS, '//cyrangesdiffxs(2)//' < |y| < '//
      >            cyrangesdiffxs(3),nmbinsdiffxs7,mbinsdiffxs7)
 c Dijet mass, 1.0 < |y|_max < 1.5:
-      call bookup('dijet mass, '//cyrangesdiffxs(3)//' < |y| < '//
+      call bookup('m12 CMS, '//cyrangesdiffxs(3)//' < |y| < '//
      >            cyrangesdiffxs(4),nmbinsdiffxs8,mbinsdiffxs8)
 c Dijet mass, 1.5 < |y|_max < 2.0:
-      call bookup('dijet mass, '//cyrangesdiffxs(4)//' < |y| < '//
+      call bookup('m12 CMS, '//cyrangesdiffxs(4)//' < |y| < '//
      >            cyrangesdiffxs(5),nmbinsdiffxs9,mbinsdiffxs9)
 c Dijet mass, 2.0 < |y|_max < 2.5:
-      call bookup('dijet mass, '//cyrangesdiffxs(5)//' < |y| < '//
+      call bookup('m12 CMS, '//cyrangesdiffxs(5)//' < |y| < '//
      >            cyrangesdiffxs(6),nmbinsdiffxs10,mbinsdiffxs10)
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -493,33 +717,33 @@ c**** arXiv:1312.3524 ****
 c 
       do i=1,nRpardiffxsAtlas
 c Dijet mass, y* < 0.5:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(1)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(1)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(2),
      >              nmbinsdiffxsAtlas1,mbinsdiffxsAtlas1)
 c Dijet mass, 0.5 < y* < 1.0:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(2)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(2)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(3),
      >              nmbinsdiffxsAtlas2,mbinsdiffxsAtlas2)
 c Dijet mass, 1.0 < y* < 1.5:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(3)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(3)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(4),
      >              nmbinsdiffxsAtlas3,mbinsdiffxsAtlas3)
 c Dijet mass, 1.5 < y* < 2.0:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(4)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(4)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(5),
      >              nmbinsdiffxsAtlas4,mbinsdiffxsAtlas4)
 c Dijet mass, 2.0 < y* < 2.5:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(5)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(5)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(6),
      >              nmbinsdiffxsAtlas5,mbinsdiffxsAtlas5)
 c Dijet mass, 2.5 < y* < 3.0:
-        call bookup('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >              cystarrangesdiffxsAtlas(6)//' < y* < '//
+        call bookup('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >              cystarrangesdiffxsAtlas(6)//' < ystar < '//
      >              cystarrangesdiffxsAtlas(7),
      >              nmbinsdiffxsAtlas6,mbinsdiffxsAtlas6)
       end do
@@ -533,6 +757,168 @@ c**** CMS PAS SMP-12-027 ****
      >                cymaxrangesdiffxsCMSPAS(j)//' < |ymax| < '//
      >                cymaxrangesdiffxsCMSPAS(j+1),
      >                nm123binsdiffxsCMSPAS,m123binsdiffxsCMSPAS)
+        end do
+      end do
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvv Inclusive jet and dijet production, ATLAS vvvvvv
+c**** arXiv:1112.6297 ****
+      do i=1,nRparIncjetAtlas
+c 0.0 < |y| < 0.3:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(1)//' < |y| < '//
+     >              cyrangesIncjetAtlas(2),nptbinsIncjetAtlas1,
+     >              ptbinsIncjetAtlas1)
+c 0.3 < |y| < 0.8:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(2)//' < |y| < '//
+     >              cyrangesIncjetAtlas(3),nptbinsIncjetAtlas2,
+     >              ptbinsIncjetAtlas2)
+c 0.8 < |y| < 1.2:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(3)//' < |y| < '//
+     >              cyrangesIncjetAtlas(4),nptbinsIncjetAtlas3,
+     >              ptbinsIncjetAtlas3)
+c 1.2 < |y| < 2.1:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(4)//' < |y| < '//
+     >              cyrangesIncjetAtlas(5),nptbinsIncjetAtlas4,
+     >              ptbinsIncjetAtlas4)
+c 2.1 < |y| < 2.8:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(5)//' < |y| < '//
+     >              cyrangesIncjetAtlas(6),nptbinsIncjetAtlas5,
+     >              ptbinsIncjetAtlas5)
+c 2.8 < |y| < 3.6:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(6)//' < |y| < '//
+     >              cyrangesIncjetAtlas(7),nptbinsIncjetAtlas6,
+     >              ptbinsIncjetAtlas6)
+c 3.6 < |y| < 4.4:
+        call bookup('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >              cyrangesIncjetAtlas(7)//' < |y| < '//
+     >              cyrangesIncjetAtlas(8),nptbinsIncjetAtlas7,
+     >              ptbinsIncjetAtlas7)
+      end do
+c dijet cross sections:
+      do i=1,nRparIncjetAtlas
+c 0.0 < ystar < 0.5
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(1)//' < ystar < '//
+     >              cystarrangesm12Atlas(2),
+     >              nm12binsm12Atlas1,m12binsm12Atlas1)
+c 0.5 < ystar < 1.0
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(2)//' < ystar < '//
+     >              cystarrangesm12Atlas(3),
+     >              nm12binsm12Atlas2,m12binsm12Atlas2)
+c 1.0 < ystar < 1.5
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(3)//' < ystar < '//
+     >              cystarrangesm12Atlas(4),
+     >              nm12binsm12Atlas3,m12binsm12Atlas3)
+c 1.5 < ystar < 2.0
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(4)//' < ystar < '//
+     >              cystarrangesm12Atlas(5),
+     >              nm12binsm12Atlas4,m12binsm12Atlas4)
+c 2.0 < ystar < 2.5
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(5)//' < ystar < '//
+     >              cystarrangesm12Atlas(6),
+     >              nm12binsm12Atlas5,m12binsm12Atlas5)
+c 2.5 < ystar < 3.0
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(6)//' < ystar < '//
+     >              cystarrangesm12Atlas(7),
+     >              nm12binsm12Atlas6,m12binsm12Atlas6)
+c 3.0 < ystar < 3.5
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(7)//' < ystar < '//
+     >              cystarrangesm12Atlas(8),
+     >              nm12binsm12Atlas7,m12binsm12Atlas7)
+c 3.5 < ystar < 4.0
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(8)//' < ystar < '//
+     >              cystarrangesm12Atlas(9),
+     >              nm12binsm12Atlas8,m12binsm12Atlas8)
+c 4.0 < ystar < 4.4
+        call bookup('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >              cystarrangesm12Atlas(9)//' < ystar < '//
+     >              cystarrangesm12Atlas(10),
+     >              nm12binsm12Atlas9,m12binsm12Atlas9)
+      end do
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+c vvvvvvvv Multi-jet cross sections with Atlas vvvvvvvvvv
+c**** arXiv:1107.2092 ****
+c Inclusive jet multiplicity:
+      call bookupeqbins('Inclusive Jet Multiplicity, Atlas',
+     >                  1d0,1.5d0,6.5d0)
+c pt 1st leading jet:
+      call bookup('pt 1st leading jet, Atlas',nptbinsMultiJetAtlas1,
+     >            ptbinsMultiJetAtlas1)
+c pt 2nd leading jet:
+      call bookup('pt 2nd leading jet, Atlas',nptbinsMultiJetAtlas2,
+     >            ptbinsMultiJetAtlas2)
+c pt 3rd leading jet:
+      call bookup('pt 3rd leading jet, Atlas',nptbinsMultiJetAtlas3,
+     >            ptbinsMultiJetAtlas3)
+c pt 4th leading jet:
+      call bookup('pt 4th leading jet, Atlas',nptbinsMultiJetAtlas4,
+     >            ptbinsMultiJetAtlas4)
+c     Ht for events with njet >= 2:
+      call bookup('Ht, njet >= 2, Atlas',nhtbinsMultiJetAtlas1,
+     >            htbinsMultiJetAtlas1)
+c     Ht for events with njet >= 3:
+      call bookup('Ht, njet >= 3, Atlas',nhtbinsMultiJetAtlas2,
+     >            htbinsMultiJetAtlas2)
+c     Ht for events with njet >= 4:
+      call bookup('Ht, njet >= 4, Atlas',nhtbinsMultiJetAtlas3,
+     >            htbinsMultiJetAtlas3)
+c three-to-two ratios:
+      do i=1,nRpar3to2MultiJetAtlas ! R-parameter for jet recon.
+        do j=2,3 ! Number of jets
+          call bookup('ptj1, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(1)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(1),
+     >                nptbins3to2MultiJetAtlas1,
+     >                ptbins3to2MultiJetAtlas1)
+          call bookup('ptj1, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(2)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(2),
+     >                nptbins3to2MultiJetAtlas2,
+     >                ptbins3to2MultiJetAtlas2)
+          call bookup('ptj1, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(3)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(3),
+     >                nptbins3to2MultiJetAtlas3,
+     >                ptbins3to2MultiJetAtlas3)
+        end do
+      end do
+      do i=1,nRpar3to2MultiJetAtlas ! R-parameter for jet recon.
+        do j=2,3 ! Number of jets
+          call bookup('Ht2, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(1)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(1),
+     >                nHt2bins3to2MultiJetAtlas,
+     >                Ht2bins3to2MultiJetAtlas)
+          call bookup('Ht2, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(2)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(2),
+     >                nHt2bins3to2MultiJetAtlas,
+     >                Ht2bins3to2MultiJetAtlas)
+          call bookup('Ht2, Atlas, njet>='//cnum(j)//
+     >                ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                ', ptj1>'//cptcut1st3to2MultiJetAtlas(3)//
+     >                ', ptj2>'//cptcut2nd3to2MultiJetAtlas(3),
+     >                nHt2bins3to2MultiJetAtlas,
+     >                Ht2bins3to2MultiJetAtlas)
         end do
       end do
 
@@ -554,7 +940,7 @@ c      include 'LesHouches.h'
       integer   maxjet,mjets,njets,numjets,ntracks
       parameter (maxjet=2048)
       real * 8  ktj(maxjet),etaj(maxjet),rapj(maxjet),
-     1    phij(maxjet),pj(4,maxjet),rr,ptrel(4),ptot(4)
+     1    phij(maxjet),pj(4,maxjet),rr,ptrel(4),ptot(4),pjnew(4,maxjet)
       integer maxtrack
       parameter (maxtrack=2048)
       real * 8  ptrack(4,maxtrack)
@@ -597,6 +983,8 @@ c      data minlo/1/
       external pwhg_isfinite
       character * 4 prefix
 c
+      real*8 MinJetPt,MaxJetRap
+c
       real*8 dy12,deta12,dr12,dphi12
 c
       real*8 pj1(4),pj2(4),pj3(4)
@@ -623,6 +1011,13 @@ c
 c
       real*8 ymax
       real*8 dymax
+c
+      real*8 Ht
+c
+      integer nnum
+      parameter (nnum = 9)
+      character*1 cnum(nnum)
+      data cnum/'1','2','3','4','5','6','7','8','9'/
 c
 c These declarations are needed for azimuthal decorrelations:
       real*8 MinJetPtdphi
@@ -782,6 +1177,70 @@ c
       data ymaxrangesdiffxsCMSPAS/0d0,1d0,2d0/
       character*3 cymaxrangesdiffxsCMSPAS(nymaxrangesdiffxsCMSPAS + 1)
       data cymaxrangesdiffxsCMSPAS/'0.0','1.0','2.0'/
+c These declarations for inclusive jet and dijet cross sections
+c at Atlas
+      integer nyrangesIncjetAtlas
+      parameter (nyrangesIncjetAtlas = 7)
+      real*8 yrangesIncjetAtlas(nyrangesIncjetAtlas + 1)
+      data yrangesIncjetAtlas/0d0,0.3d0,0.8d0,1.2d0,2.1d0,
+     >                        2.8d0,3.6d0,4.4d0/
+      character*3 cyrangesIncjetAtlas(nyrangesIncjetAtlas + 1)
+      data cyrangesIncjetAtlas/'0.0','0.3','0.8','1.2','2.1',
+     >                         '2.8','3.6','4.4'/
+      integer nRparIncjetAtlas
+      parameter (nRparIncjetAtlas = 2)
+      real*8 RparIncjetAtlas(nRparIncjetAtlas)
+      data RparIncjetAtlas/0.4d0,0.6d0/
+      character*3 cRparIncjetAtlas(nRparIncjetAtlas)
+      data cRparIncjetAtlas/'0.4','0.6'/
+c
+      real*8 MinJetPtIncjetAtlas
+      parameter (MinJetPtIncjetAtlas = 20d0)
+      real*8 MaxJetRapIncjetAtlas
+      parameter (MaxJetRapIncjetAtlas = 4.4d0)
+c
+      real*8 Min1stJetPtm12Atlas
+      parameter (Min1stJetPtm12Atlas = 30d0)
+c
+      integer nystarrangesm12Atlas
+      parameter (nystarrangesm12Atlas = 9)
+      real*8 ystarrangesm12Atlas(nystarrangesm12Atlas + 1)
+      data ystarrangesm12Atlas/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0,3d0,
+     >                         3.5d0,4d0,4.4d0/
+      character*3 cystarrangesm12Atlas(nystarrangesm12Atlas + 1)
+      data cystarrangesm12Atlas/'0.0','0.5','1.0','1.5','2.0','2.5',
+     >                          '3.0','3.5','4.0','4.4'/
+c 
+c Declarations for multi-jet cross section with Atlas:
+      real*8 Min1stJetPtMultiJetAtlas
+      parameter (Min1stJetPtMultiJetAtlas = 80d0)
+      real*8 Min2ndJetPtMultiJetAtlas
+      parameter (Min2ndJetPtMultiJetAtlas = 60d0)
+      real*8 MaxJetRapMultiJetAtlas
+      parameter (MaxJetRapMultiJetAtlas = 2.8d0)
+c
+      real*8 RparMultiJetAtlas
+      parameter (RparMultiJetAtlas = 0.4d0)
+c
+      integer nRpar3to2MultiJetAtlas
+      parameter (nRpar3to2MultiJetAtlas = 2)
+      real*8 Rpar3to2MultiJetAtlas(nRpar3to2MultiJetAtlas)
+      data Rpar3to2MultiJetAtlas/0.4d0,0.6d0/
+      character*3 cRpar3to2MultiJetAtlas(nRpar3to2MultiJetAtlas)
+      data cRpar3to2MultiJetAtlas/'0.4','0.6'/
+c
+      integer nptcut1st3to2MultiJetAtlas
+      parameter (nptcut1st3to2MultiJetAtlas = 3)
+      real*8 ptcut1st3to2MultiJetAtlas(nptcut1st3to2MultiJetAtlas)
+      data ptcut1st3to2MultiJetAtlas/80d0,110d0,160d0/
+      character*3 cptcut1st3to2MultiJetAtlas(nptcut1st3to2MultiJetAtlas)
+      data cptcut1st3to2MultiJetAtlas/' 80','110','160'/
+      integer nptcut2nd3to2MultiJetAtlas
+      parameter (nptcut2nd3to2MultiJetAtlas = 3)
+      real*8 ptcut2nd3to2MultiJetAtlas(nptcut2nd3to2MultiJetAtlas)
+      data ptcut2nd3to2MultiJetAtlas/60d0,80d0,110d0/
+      character*3 cptcut2nd3to2MultiJetAtlas(nptcut2nd3to2MultiJetAtlas)
+      data cptcut2nd3to2MultiJetAtlas/' 60',' 80','110'/
 c
 
 
@@ -1295,7 +1754,7 @@ c We go through all the jets and plot their pt's:
         do k=1,nyrangesdiffxs
           if ((abs(yj1).gt.yrangesdiffxs(k)).and.
      >        (abs(yj1).lt.yrangesdiffxs(k+1))) then
-            call filld('inclusive jet, '//cyrangesdiffxs(k)//
+            call filld('ptjet CMS, '//cyrangesdiffxs(k)//
      >                 ' < |y| < '//cyrangesdiffxs(k+1),ptj1,dsig)
           end if
         end do
@@ -1315,7 +1774,7 @@ c We go through all the y ranges and plot the mass where it belongs:
         do k=1,nyrangesdiffxs
           if ((max(abs(yj1),abs(yj2)).gt.yrangesdiffxs(k)).and.
      >        (max(abs(yj1),abs(yj2)).lt.yrangesdiffxs(k+1))) then
-            call filld('dijet mass, '//cyrangesdiffxs(k)//
+            call filld('m12 CMS, '//cyrangesdiffxs(k)//
      >                 ' < |y| < '//cyrangesdiffxs(k+1),m,dsig)
           end if
         end do
@@ -1332,9 +1791,10 @@ c We can only do this analysis if minlo is activated:
       do i=1,nRpardiffxsAtlas !<sweep through R's>
         palg = -1d0
         R = RpardiffxsAtlas(i)
+        MinJetPt = Min2ndJetPtdiffxsAtlas
+        MaxJetRap = MaxJetRapdiffxsAtlas
         call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
-     $                          Min2ndJetPtdiffxsAtlas,
-     $                          MaxJetRapdiffxsAtlas,
+     $                          MinJetPt,MaxJetRap,
      $                          pj,njets,jetvec)
 c
 c For dijet mass we need at least two jets to be present:
@@ -1356,8 +1816,8 @@ c We go through all the ystar ranges and plot the mass where it belongs:
 c We calculate the width of the ystar bin:
             dystar = ystarrangesdiffxsAtlas(k+1)
      >             - ystarrangesdiffxsAtlas(k)
-            call filld('dijet mass, R='//cRpardiffxsAtlas(i)//', '//
-     >                 cystarrangesdiffxsAtlas(k)//' < y* < '//
+            call filld('m12 Atlas2013, R='//cRpardiffxsAtlas(i)//', '//
+     >                 cystarrangesdiffxsAtlas(k)//' < ystar < '//
      >                 cystarrangesdiffxsAtlas(k+1),m,dsig/dystar)
           end if
         end do
@@ -1372,9 +1832,9 @@ c vvvv This part concerns the trijet invariant mass, CMS PAS vvvv
         palg = -1d0
         R = RpardiffxsCMSPAS(i)
         call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
-     $                          MinJetPtdiffxsCMSPAS,
-     $                          MaxJetRapdiffxsCMSPAS,
-     $                          pj,njets,jetvec)
+     >                          MinJetPtdiffxsCMSPAS,
+     >                          MaxJetRapdiffxsCMSPAS,
+     >                          pj,njets,jetvec)
 c
 c For trijet mass we need at least three jets to be present:
         if (njets.lt.3) cycle
@@ -1405,6 +1865,140 @@ c We calculate the width of the ystar bin:
 c 
       end do !<sweep through R's>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+cvvvvvvv Inclusive jet and dijet xs at Atlas vvvvvvvvv
+      if (minlo.eq.1) then !<minlo>
+      jetvec = 0
+      do i=1,nRparIncjetAtlas
+        R = RparIncjetAtlas(i)
+        palg = -1d0
+        MinJetPt = MinJetPtIncjetAtlas
+        MaxJetRap = MaxJetRapIncjetAtlas
+        jetvec = 0
+        call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     >                          MinJetPt,MaxJetRap,
+     >                          pj,njets,jetvec)
+c For the inclusive jet we need at least one jet:
+        if (njets.lt.1) cycle
+        do ijet=1,njets
+          p_j = pj(:,ijet)
+          call getyetaptmass(p_j,y,eta,pt,m)
+          do j=1,nyrangesIncjetAtlas
+            if ((y.gt.yrangesIncjetAtlas(j)).and.
+     >          (y.lt.yrangesIncjetAtlas(j+1))) then
+              dy = yrangesIncjetAtlas(j+1) - yrangesIncjetAtlas(j)
+              call filld('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
+     >                   cyrangesIncjetAtlas(j)//' < |y| < '//
+     >                   cyrangesIncjetAtlas(j+1),pt,dsig/dy)
+            end if
+          end do
+        end do
+c For the dijet cross section we need at least two jets:
+        if (njets.gt.1) then
+          pj1   = pj(:,1)
+          pj2   = pj(:,2)
+c
+          call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
+          call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+c
+c For the dijet cross section we have a higher minimal pt for the
+c hardest jet: 
+          if (ptj1.lt.Min1stJetPtm12Atlas) cycle
+          call pwhg_getinvmass(pj1+pj2,m)
+          ystar = abs(yj1 - yj2)/2d0
+          do j=1,nystarrangesm12Atlas
+            if ((ystar.gt.ystarrangesm12Atlas(j)).and.
+     >          (ystar.lt.ystarrangesm12Atlas(j+1))) then
+              dystar = (ystarrangesm12Atlas(j+1) 
+     >               -  ystarrangesm12Atlas(j))
+              call filld('m12 Atlas, R='//cRparIncJetAtlas(i)//', '//
+     >                   cystarrangesm12Atlas(j)//' < ystar < '//
+     >                   cystarrangesm12Atlas(j+1),m,dsig/dystar)
+            end if
+          end do
+        end if
+      end do
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+cvvvvvvvvvv Multi-Jet inclusive cross section Atlas vvvvvvvvvvvvvv
+      if (minlo.eq.1) then !<minlo>
+      do i=1,nRpar3to2MultiJetAtlas
+        jetvec = 0
+        R = Rpar3to2MultiJetAtlas(i)
+        palg = -1d0
+        MinJetPt = Min2ndJetPtMultiJetAtlas
+        MaxJetRap = MaxJetRapMultiJetAtlas
+        jetvec = 0
+        call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
+     >                          MinJetPt,MaxJetRap,
+     >                          pj,njets,jetvec)
+        do j=2,3 ! Least number of jets
+c Only the number of different pt cuts is important for the 
+c do loop:
+          do k=1,nptcut2nd3to2MultiJetAtlas ! pt cuts
+c We apply a new pt cut on the jets:
+            MinJetPt = ptcut2nd3to2MultiJetAtlas(k)
+            call posterjetcuts(njets,pj,MinJetPt,mjets,pjnew)
+c We need at least j jets:
+            if (mjets.lt.j) cycle
+c For the first jet a higher cut is needed, ptj1 is calculated:
+            ptj1 = sqrt(pjnew(1,1)**2 + pjnew(2,1)**2)
+c for later purposes we calculate the pt of the second hardest jet:
+            ptj2 = sqrt(pjnew(1,2)**2 + pjnew(2,2)**2)
+c For the first jet we have a higher minimal pt:
+            if (ptj1.lt.ptcut1st3to2MultiJetAtlas(k)) cycle
+c We bin the multiplicity, pt's and Ht if the conditions are
+c least severe:
+c For these observables we need:
+c R = 0.4
+c ptj1 > 80 GeV, ptj2 > 60 GeV
+c njets >= 2
+            if ((i.eq.1).and.(j.eq.2).and.(k.eq.1)) then
+c binning the jet multiplicity:
+              call filld('Inclusive Jet Multiplicity, Atlas',
+     >                   dble(njets),dsig)
+c We calcute the Ht too:
+              Ht = 0d0
+              do ijet=1,njets
+                p_j = pj(:,ijet)
+                call getyetaptmass(p_j,y,eta,pt,m)
+c Ht is the sum of jet pts:
+                Ht = Ht + pt
+c binning the jet pt's:
+                if (ijet.eq.1) call filld('pt 1st leading jet, Atlas',
+     >                                    pt,dsig)
+                if (ijet.eq.2) call filld('pt 2nd leading jet, Atlas',
+     >                                    pt,dsig)
+                if (ijet.eq.3) call filld('pt 3rd leading jet, Atlas',
+     >                                    pt,dsig)
+                if (ijet.eq.4) call filld('pt 4th leading jet, Atlas',
+     >                                    pt,dsig)
+              end do
+c Binning Ht:
+              if (njets.ge.2) call filld('Ht, njet >= 2, Atlas',Ht,dsig)
+              if (njets.ge.3) call filld('Ht, njet >= 3, Atlas',Ht,dsig)
+              if (njets.ge.4) call filld('Ht, njet >= 4, Atlas',Ht,dsig)
+            end if
+c We bin the leading jet pt for the 3-to-2 ratio:
+            call filld('ptj1, Atlas, njet>='//cnum(j)//
+     >                 ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                 ', ptj1>'//cptcut1st3to2MultiJetAtlas(k)//
+     >                 ', ptj2>'//cptcut2nd3to2MultiJetAtlas(k),
+     >                  ptj1,dsig)
+c We also bin the sum of the pt of the first two leading jets:
+            call filld('Ht2, Atlas, njet>='//cnum(j)//
+     >                 ', R='//cRpar3to2MultiJetAtlas(i)//
+     >                 ', ptj1>'//cptcut1st3to2MultiJetAtlas(k)//
+     >                 ', ptj2>'//cptcut2nd3to2MultiJetAtlas(k),
+     >                  ptj1 + ptj2,dsig)
+          end do
+        end do
+      end do
+c
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+777   continue 
       end
 
 
@@ -1678,3 +2272,26 @@ c normalization:
       if (numjets.gt.0) calcpsi = calcpsi/numjets
 c
       end function calcpsi
+c
+c This routine applies a pt cut on jet momenta a posteriori:
+      subroutine posterjetcuts(njets,pjet,minpt,njetsout,pjetout)
+      implicit none
+c
+      integer njets,njetsout
+      real*8 pjet(4,njets),pjetout(4,njets)
+      real*8 minpt
+c
+      integer ijet
+      real*8 pt_tmp
+c
+c
+      njetsout = 0
+      do ijet=1,njets
+        pt_tmp = sqrt(pjet(1,ijet)**2 + pjet(2,ijet)**2)
+        if (pt_tmp.gt.minpt) then
+          njetsout = njetsout + 1
+          pjetout(:,njetsout) = pjet(:,ijet)
+        end if
+      end do
+c
+      end subroutine posterjetcuts
