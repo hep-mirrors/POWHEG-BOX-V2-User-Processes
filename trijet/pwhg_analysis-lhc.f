@@ -90,6 +90,7 @@ c plot limits used with antikt:
       real*8 jetmassantiktmaxsub(nptbins)
       data jetmassantiktmaxsub/140d0,190d0,230d0,290d0/
 c
+c Ratio of 3-jet xs to 2-jet, arXiv:1304.7498, CMS
       integer nptrangeR32
       parameter (nptrangeR32 = 27)
       real*8 ptrangeR32(nptrangeR32 + 1)
@@ -636,7 +637,7 @@ c subjettiness with antikt:
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-c vvvvvvv This part concerns the incl. 3-jet and 2-jet ratio vvvvvvvvv
+c vvvvv This part concerns the incl. 3-jet and 2-jet ratio, Alas vvvvv
 c**** arXiv:1307.7498 ****
       call bookup('R32, incl. 2jet',nptrangeR32,ptrangeR32)
       call bookup('R32, incl. 3jet',nptrangeR32,ptrangeR32)
@@ -1569,17 +1570,26 @@ c We can only do this analysis if minlo is activated:
       if (minlo.eq.1) then !<minlo>
       R = RparR32
       palg = -1d0
+      MinJetPt = MinJetPtR32
+      MaxJetRap = 1d10
       call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
-     $                        MinJetPtR32,MaxJetRapR32,
+     $                        MinJetPt,MaxJetRap,
      $                        pj,njets,jetvec)
 c
       if (njets.lt.2) goto 444
 c
       pj1 = pj(:,1)
       pj2 = pj(:,2)
+      if (njets.gt.2) pj3 = pj(:,3)
 c
+c yj3 initially put to zero:
+      yj3 = 0d0
       call getyetaptmass(pj1,yj1,etaj1,ptj1,mj1)
       call getyetaptmass(pj2,yj2,etaj2,ptj2,mj2)
+      if (njets.gt.2) call getyetaptmass(pj3,yj3,etaj3,ptj3,mj3)
+c
+c The first two(three) jets should be central:
+      if (max(abs(yj1),abs(yj2),abs(yj3)).gt.MaxJetRapR32) goto 444
 c
       ptavg12 = (ptj1 + ptj2)/2d0
 c
