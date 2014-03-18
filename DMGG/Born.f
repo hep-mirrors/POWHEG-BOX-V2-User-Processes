@@ -92,6 +92,18 @@ c a (leading) color structure to an event.
       save ini
       integer idDM
       save idDM
+      include 'pwhg_flg.h'
+c     include 'nlegborn.h'
+c     include 'pwhg_kn.h'
+c     If user has selected the LOonly flag, then set scalup equal to the
+c     generated jets. The default would be the total energy in the
+c     partonic CoM frame. In the paper, however, I've used the choice
+c     below, that is more consistent with the fact that we already have a 
+c     jet at LO.
+      if(flg_LOevents) then
+         scalup=sqrt(pup(1,4)**2+pup(2,4)**2)
+      endif
+
 c     !: several changes in all this subroutine, 
 c     to include decay products
       if(ini) then

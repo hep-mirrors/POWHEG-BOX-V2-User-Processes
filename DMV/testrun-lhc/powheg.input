@@ -17,7 +17,9 @@ DMLambda    500 ! UV scale
 #DMVwidth 100
 
 testplots  1      ! (default 0, do not) do NLO and PWHG distributions
-bornonly   0      ! (default 0) if 1 do Born only
+
+#bornonly 1        ! (default 0) if 1 do Born only in fixed-order
+#LOevents 1        ! (default 0) if 1, produce LOPS events (scalup=ptj)
 
 runningscale 3    ! (default 3) 0, 1, 2, 3 correspond to 2mX (fixed), ptj, XXbar invmass, Ht/2
                  ! Details in Born_phsp.f
