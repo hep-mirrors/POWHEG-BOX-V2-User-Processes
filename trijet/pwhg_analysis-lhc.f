@@ -502,6 +502,90 @@ c pt sum of the first two hardest jet:
       data ht2bins3to2MultiJetAtlas/140d0,200d0,260d0,350d0,450d0,600d0,
      >                              790d0,1030d0,1300d0/
 c
+c Inclusive jet and dijet differential cross section, CMS, arXiv:1212.6660
+c |y| < 0.5
+      integer nyrangesIncJetCMS
+      parameter (nyrangesIncJetCMS = 5)
+      real*8 yrangesIncJetCMS(nyrangesIncJetCMS + 1)
+      data yrangesIncJetCMS/0d0,0.5d0,1d0,1.5d0,2d0,2.5d0/
+      character*3 cyrangesIncJetCMS(nyrangesIncJetCMS + 1)
+      data cyrangesIncJetCMS/'0.0','0.5','1.0','1.5','2.0','2.5'/
+c
+      integer nptbinsIncJetCMS1
+      parameter (nptbinsIncJetCMS1 = 33)
+      real*8 ptbinsIncJetCMS1(nptbinsIncJetCMS1 + 1)
+      data ptbinsIncJetCMS1/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                      272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                      507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                      846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                      1248d0,1327d0,1410d0,1497d0,1588d0,1784d0,
+     >                      2116d0/
+c 0.5 < |y| < 1.0
+      integer nptbinsIncJetCMS2
+      parameter (nptbinsIncJetCMS2 = 30)
+      real*8 ptbinsIncJetCMS2(nptbinsIncJetCMS2 + 1)
+      data ptbinsIncJetCMS2/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                      272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                      507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                      846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                      1248d0,1327d0,1410d0,1784d0/
+c 1.0 < |y| < 1.5
+      integer nptbinsIncJetCMS3
+      parameter (nptbinsIncJetCMS3 = 27)
+      real*8 ptbinsIncJetCMS3(nptbinsIncJetCMS3 + 1)
+      data ptbinsIncJetCMS3/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                      272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                      507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                      846d0,905d0,967d0,1032d0,1101d0,1172d0,
+     >                      1684d0/
+c 1.5 < |y| < 2.0
+      integer nptbinsIncJetCMS4
+      parameter (nptbinsIncJetCMS4 = 24)
+      real*8 ptbinsIncJetCMS4(nptbinsIncJetCMS4 + 1)
+      data ptbinsIncJetCMS4/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                      272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                      507d0,548d0,592d0,638d0,686d0,737d0,790d0,
+     >                      846d0,905d0,967d0,1248d0/
+c 2.0 < |y| < 2.5
+      integer nptbinsIncJetCMS5
+      parameter (nptbinsIncJetCMS5 = 19)
+      real*8 ptbinsIncJetCMS5(nptbinsIncJetCMS5 + 1)
+      data ptbinsIncJetCMS5/114d0,133d0,153d0,174d0,196d0,220d0,245d0,
+     >                      272d0,300d0,330d0,362d0,395d0,430d0,468d0,
+     >                      507d0,548d0,592d0,638d0,686d0,905d0/
+c
+c |ystar| < 0.5 
+      integer nm12binsCMS1
+      parameter (nm12binsCMS1 = 13)
+      real*8 m12binsCMS1(nm12binsCMS1 + 1)
+      data m12binsCMS1/197d0,296d0,419d0,565d0,740d0,944d0,1181d0,
+     >                 1455d0,1770d0,2132d0,2546d0,3019d0,3416d0,
+     >                 4010d0/
+c 0.5 < |ystar| < 1.0 
+      integer nm12binsCMS2
+      parameter (nm12binsCMS2 = 12)
+      real*8 m12binsCMS2(nm12binsCMS2 + 1)
+      data m12binsCMS2/270d0,386d0,526d0,693d0,890d0,1118d0,1383d0,
+     >                 1687d0,2037d0,2438d0,2895d0,3416d0,4010d0/
+c 1.0 < |ystar| < 1.5 
+      integer nm12binsCMS3
+      parameter (nm12binsCMS3 = 11)
+      real*8 m12binsCMS3(nm12binsCMS3 + 1)
+      data m12binsCMS3/419d0,565d0,740d0,944d0,1181d0,1455d0,1770d0,
+     >                 2132d0,2546d0,3147d0,3854d0,4509d0/
+c 1.5 < |ystar| < 2.0 
+      integer nm12binsCMS4
+      parameter (nm12binsCMS4 = 10)
+      real*8 m12binsCMS4(nm12binsCMS4 + 1)
+      data m12binsCMS4/565d0,740d0,944d0,1181d0,1455d0,1770d0,2132d0,
+     >                 2546d0,3019d0,3558d0,5058d0/
+c 2.0 < |ystar| < 2.5 
+      integer nm12binsCMS5
+      parameter (nm12binsCMS5 = 8)
+      real*8 m12binsCMS5(nm12binsCMS5 + 1)
+      data m12binsCMS5/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,3147d0,
+     >                 3704d0,5058d0/
+c
       call inihists
 c
 
@@ -681,35 +765,35 @@ c vvvvvv This part concerns the differential jet cross sections vvvvvv
 c**** arXiv:1212.6660 ****
 c
 c Inclusive jet, 0.0 < |y| < 0.5:
-      call bookup('ptjet CMS, '//cyrangesdiffxs(1)//' < |y| < '//
+      call bookup('jetpt CMS, R=0.7, '//cyrangesdiffxs(1)//' < |y| < '//
      >            cyrangesdiffxs(2),nptbinsdiffxs1,ptbinsdiffxs1)
 c Inclusive jet, 0.5 < |y| < 1.0:
-      call bookup('ptjet CMS, '//cyrangesdiffxs(2)//' < |y| < '//
+      call bookup('jetpt CMS, R=0.7, '//cyrangesdiffxs(2)//' < |y| < '//
      >            cyrangesdiffxs(3),nptbinsdiffxs2,ptbinsdiffxs2)
 c Inclusive jet, 1.0 < |y| < 1.5:
-      call bookup('ptjet CMS, '//cyrangesdiffxs(3)//' < |y| < '//
+      call bookup('jetpt CMS, R=0.7, '//cyrangesdiffxs(3)//' < |y| < '//
      >            cyrangesdiffxs(4),nptbinsdiffxs3,ptbinsdiffxs3)
 c Inclusive jet, 1.5 < |y| < 2.0:
-      call bookup('ptjet CMS, '//cyrangesdiffxs(4)//' < |y| < '//
+      call bookup('jetpt CMS, R=0.7, '//cyrangesdiffxs(4)//' < |y| < '//
      >            cyrangesdiffxs(5),nptbinsdiffxs4,ptbinsdiffxs4)
 c Inclusive jet, 2.0 < |y| < 2.5:
-      call bookup('ptjet CMS, '//cyrangesdiffxs(5)//' < |y| < '//
+      call bookup('jetpt CMS, R=0.7, '//cyrangesdiffxs(5)//' < |y| < '//
      >            cyrangesdiffxs(6),nptbinsdiffxs5,ptbinsdiffxs5)
 c
 c Dijet mass, 0.0 < |y|_max < 0.5:
-      call bookup('m12 CMS, '//cyrangesdiffxs(1)//' < |y| < '//
+      call bookup('m12 CMS, R=0.7, '//cyrangesdiffxs(1)//' < |y| < '//
      >            cyrangesdiffxs(2),nmbinsdiffxs6,mbinsdiffxs6)
 c Dijet mass, 0.5 < |y|_max < 1.0:
-      call bookup('m12 CMS, '//cyrangesdiffxs(2)//' < |y| < '//
+      call bookup('m12 CMS, R=0.7, '//cyrangesdiffxs(2)//' < |y| < '//
      >            cyrangesdiffxs(3),nmbinsdiffxs7,mbinsdiffxs7)
 c Dijet mass, 1.0 < |y|_max < 1.5:
-      call bookup('m12 CMS, '//cyrangesdiffxs(3)//' < |y| < '//
+      call bookup('m12 CMS, R=0.7, '//cyrangesdiffxs(3)//' < |y| < '//
      >            cyrangesdiffxs(4),nmbinsdiffxs8,mbinsdiffxs8)
 c Dijet mass, 1.5 < |y|_max < 2.0:
-      call bookup('m12 CMS, '//cyrangesdiffxs(4)//' < |y| < '//
+      call bookup('m12 CMS, R=0.7, '//cyrangesdiffxs(4)//' < |y| < '//
      >            cyrangesdiffxs(5),nmbinsdiffxs9,mbinsdiffxs9)
 c Dijet mass, 2.0 < |y|_max < 2.5:
-      call bookup('m12 CMS, '//cyrangesdiffxs(5)//' < |y| < '//
+      call bookup('m12 CMS, R=0.7, '//cyrangesdiffxs(5)//' < |y| < '//
      >            cyrangesdiffxs(6),nmbinsdiffxs10,mbinsdiffxs10)
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -922,6 +1006,7 @@ c three-to-two ratios:
      >                Ht2bins3to2MultiJetAtlas)
         end do
       end do
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
       end
      
@@ -1764,7 +1849,7 @@ c We go through all the jets and plot their pt's:
         do k=1,nyrangesdiffxs
           if ((abs(yj1).gt.yrangesdiffxs(k)).and.
      >        (abs(yj1).lt.yrangesdiffxs(k+1))) then
-            call filld('ptjet CMS, '//cyrangesdiffxs(k)//
+            call filld('jetpt CMS, R=0.7, '//cyrangesdiffxs(k)//
      >                 ' < |y| < '//cyrangesdiffxs(k+1),ptj1,dsig)
           end if
         end do
@@ -1784,7 +1869,7 @@ c We go through all the y ranges and plot the mass where it belongs:
         do k=1,nyrangesdiffxs
           if ((max(abs(yj1),abs(yj2)).gt.yrangesdiffxs(k)).and.
      >        (max(abs(yj1),abs(yj2)).lt.yrangesdiffxs(k+1))) then
-            call filld('m12 CMS, '//cyrangesdiffxs(k)//
+            call filld('m12 CMS, R=0.7, '//cyrangesdiffxs(k)//
      >                 ' < |y| < '//cyrangesdiffxs(k+1),m,dsig)
           end if
         end do
