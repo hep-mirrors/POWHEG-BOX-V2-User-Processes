@@ -750,12 +750,22 @@ c forward/backward jets are selected:
      >                    0.5d0,0d0,6d0)
       end do
 c The gap function as the average leading pt for various rapidity
-c difference bins:
+c difference bins when the two leading jets are selected:
       do j=1,nyrangesveto
         call bookup('gap tot leadpt, '//cyrangesveto(j)//
      >              ' < dy < '//cyrangesveto(j+1),
      >                    nptbinsveto,ptbinsveto)
         call bookup('gap nojet leadpt, '//cyrangesveto(j)//
+     >              ' < dy < '//cyrangesveto(j+1),
+     >                    nptbinsveto,ptbinsveto)
+      end do
+c The gap function as the average leading pt for various rapidity
+c difference bins when the most further jets are selected:
+      do j=1,nyrangesveto
+        call bookup('gap tot maxdy, '//cyrangesveto(j)//
+     >              ' < dy < '//cyrangesveto(j+1),
+     >                    nptbinsveto,ptbinsveto)
+        call bookup('gap nojet maxdy, '//cyrangesveto(j)//
      >              ' < dy < '//cyrangesveto(j+1),
      >                    nptbinsveto,ptbinsveto)
       end do
@@ -1754,9 +1764,8 @@ c We do the same but with \Delta y ranges:
      >      (dy12.lt.yrangesveto(j+1))) then
 c We have to divide by the width of the rapidity window to obtain the
 c correct differential cross section:
-          dy = yrangesveto(j+1) - yrangesveto(j)
           call filld('gap nojet leadpt, '//cyrangesveto(j)//
-     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig/dy)
+     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig)
         end if
       end do
 c
@@ -1804,6 +1813,14 @@ c jets passing the cuts:
      >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
         end if
       end do
+c For different \Delta y ranges:
+      do j=1,nyrangesveto
+        if ((dy12.gt.yrangesveto(j)).and.
+     >      (dy12.lt.yrangesveto(j+1))) then
+          call filld('gap tot maxdy, '//cyrangesveto(j)//
+     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig)
+        end if
+      end do
 c We should have no jet between the two hardest:
       do j=1,njets
 c We go through all the jets and skip the furthest ones:
@@ -1820,6 +1837,16 @@ c We go through all pt ranges and we try to fill in the adequate one:
      >      (ptavg12.lt.ptrangesveto(j+1))) then
           call filld('gap nojet maxdy, '//cptrangesveto(j)//
      >               ' < avg. pt < '//cptrangesveto(j+1),dy12,dsig)
+        end if
+      end do
+c We do the same but with \Delta y ranges:
+      do j=1,nyrangesveto
+        if ((dy12.gt.yrangesveto(j)).and.
+     >      (dy12.lt.yrangesveto(j+1))) then
+c We have to divide by the width of the rapidity window to obtain the
+c correct differential cross section:
+          call filld('gap nojet maxdy, '//cyrangesveto(j)//
+     >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig)
         end if
       end do
 c
