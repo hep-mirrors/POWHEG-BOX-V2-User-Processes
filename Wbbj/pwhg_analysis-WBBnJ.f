@@ -538,15 +538,20 @@ c***  change the following for different analysis  ***
       njets=numjets-2
       
       do i=1,nptmin        
-         pthardjet = sqrt(phardjet(1)**2+phardjet(2)**2)
 
-         if (pthardjet.lt.ptminarr(i)) then
+         if (found_hardjet) then
+            pthardjet = sqrt(phardjet(1)**2+phardjet(2)**2)
+            if (pthardjet.lt.ptminarr(i)) then
 c     since ptminarr is pt ordered, the following return is correct
-            return
+               return
+            endif
          endif
 
          call filld('sigtot'//cptmin(i),1d0,dsig)         
          
+         if(.not.found_hardjet.and..not.found_nexthardjet) then
+            call filld('Njet'//cptmin(i),0d0,dsig)
+         endif
          if(found_hardjet.and..not.found_nexthardjet) then
             call filld('Njet'//cptmin(i),1d0,dsig)
          endif
@@ -586,15 +591,16 @@ c     next-to-hardest b jet
          call filld('b2-ptzoom2'//cptmin(i),   pt, dsig)
          call filld('b2-m'//cptmin(i),     m, dsig)
 
+         if (found_hardjet) then
 c     hardest jet         
-         call getyetaptmass(phardjet,y,eta,pt,m)
-         call filld('j1-y'//cptmin(i),     y, dsig)
-         call filld('j1-eta'//cptmin(i), eta, dsig)
-         call filld('j1-pt'//cptmin(i),   pt, dsig)
-         call filld('j1-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('j1-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('j1-m'//cptmin(i),     m, dsig)
-   
+            call getyetaptmass(phardjet,y,eta,pt,m)
+            call filld('j1-y'//cptmin(i),     y, dsig)
+            call filld('j1-eta'//cptmin(i), eta, dsig)
+            call filld('j1-pt'//cptmin(i),   pt, dsig)
+            call filld('j1-ptzoom'//cptmin(i),   pt, dsig)
+            call filld('j1-ptzoom2'//cptmin(i),   pt, dsig)
+            call filld('j1-m'//cptmin(i),     m, dsig)
+         endif
 
          if (found_nexthardjet) then
 c     next-to-hardest jet         
@@ -625,15 +631,17 @@ c     next-to-hardest jet
          call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
          call filld('jx2-m'//cptmin(i),     m, dsig)
 
-         px(:)=pj(:,3)
-         call getyetaptmass(px,y,eta,pt,m)
-         call filld('jx3-y'//cptmin(i),     y, dsig)
-         call filld('jx3-eta'//cptmin(i), eta, dsig)
-         call filld('jx3-pt'//cptmin(i),   pt, dsig)
-         call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('jx3-m'//cptmin(i),     m, dsig)
-
+         if (found_hardjet) then
+            px(:)=pj(:,3)
+            call getyetaptmass(px,y,eta,pt,m)
+            call filld('jx3-y'//cptmin(i),     y, dsig)
+            call filld('jx3-eta'//cptmin(i), eta, dsig)
+            call filld('jx3-pt'//cptmin(i),   pt, dsig)
+            call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
+            call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
+            call filld('jx3-m'//cptmin(i),     m, dsig)
+         endif
+            
          if (found_nexthardjet) then
             px(:)=pj(:,4)
             call getyetaptmass(px,y,eta,pt,m)

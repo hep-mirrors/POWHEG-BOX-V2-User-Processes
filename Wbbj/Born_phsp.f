@@ -233,31 +233,37 @@ c     now boost everything BACK along z-axis
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
+      include 'pwhg_flg.h'
       include 'PhysPars.h'
       real * 8 muf,mur
       logical ini
       data ini/.true./
       integer runningscales
-      real * 8 pt1,pt2,ptHsq,Ht
+      real * 8 mtw,mtb,mtbbar,pt1,pt2
+      real * 8 Ht
       real * 8 powheginput
       external powheginput      
       save ini,runningscales
-
       if (ini) then
          runningscales=powheginput("#runningscales")
-
          if(powheginput("#minlo").eq.1) then
             write(*,*) '****************************************'
-            write(*,*) '*******          MINLO ACTIVE    *******'
+            write(*,*) '*******       MINLO ACTIVE       *******'
             write(*,*) '****************************************'
-            write(*,*) '*******     FIXED SCALES!          *****'
+            write(*,*) '*******       FIXED SCALES!        *****'
+            write(*,*) '****************************************'
             runningscales=0
          endif
 
          if (runningscales.eq.1) then
             write(*,*) '****************************************'
             write(*,*) '****************************************'
-            write(*,*) '**   mur=muf=sqrt(pT_lep*pT_neut)     **'
+            write(*,*) '**   Dynamical scale is used:         **'
+            write(*,*) '**                                    **'
+            write(*,*) '**   mur=muf=HT/2   where             **'
+            write(*,*) '**                                    **'
+            write(*,*) '** HT=Mt_W+Mt_b+Mt_bbar+pt_j1(+pt_j2) **'
+            write(*,*) '**                                    **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
          else
@@ -271,11 +277,32 @@ c     now boost everything BACK along z-axis
       endif
       
       if (runningscales.eq.1) then
-         pt1=sqrt(kn_pborn(1,3)**2+kn_pborn(2,3)**2)
-         pt2=sqrt(kn_pborn(1,4)**2+kn_pborn(2,4)**2)
-         mur=sqrt(pt1*pt2)
-         if(mur.lt.2) mur=2
-         muf=mur         
+            mtw    = sqrt(
+     $        (kn_pborn(0,3)+kn_pborn(0,4))**2-
+     $        (kn_pborn(1,3)+kn_pborn(1,4))**2-
+     $        (kn_pborn(2,3)+kn_pborn(2,4))**2-
+     $        (kn_pborn(3,3)+kn_pborn(3,4))**2+
+     $        (kn_pborn(1,3)+kn_pborn(1,4))**2+
+     $        (kn_pborn(2,3)+kn_pborn(2,4))**2)         
+            mtb    = sqrt(ph_bmass**2+kn_pborn(1,5)**2+kn_pborn(2,5)**2)
+            mtbbar = sqrt(ph_bmass**2+kn_pborn(1,6)**2+kn_pborn(2,6)**2)
+            
+            if ((flg_btildepart.eq.'b').or.(flg_btildepart.eq.'c')) then
+               pt1=sqrt(kn_pborn(1,7)**2+kn_pborn(2,7)**2)
+               HT = mtw+mtb+mtbbar+pt1
+            elseif ((flg_btildepart.eq.'r')) then
+               pt1=sqrt(kn_preal(1,7)**2+kn_preal(2,7)**2)
+               pt2=sqrt(kn_preal(1,8)**2+kn_preal(2,8)**2)
+               HT = mtw+mtb+mtbbar+pt1+pt2
+            else
+               print *,"Problem occured in set_fac_ren_scales"
+               print *,"flg_btildepart: ",flg_btildepart
+               call pwhg_exit(-1)
+            endif
+c     HT scale:
+         mur = HT/2d0
+c         if(mur.lt.2) mur=2
+         muf = mur         
       else
          muf=ph_wmass
          mur=ph_wmass

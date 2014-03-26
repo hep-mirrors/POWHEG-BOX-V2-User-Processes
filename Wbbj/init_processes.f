@@ -35,6 +35,8 @@ c     endif
             exit
          endif
       enddo
+c     Treat massive b as massless in find_regions:
+c      flst_lightpart=5
 
       end
  

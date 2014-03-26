@@ -66,7 +66,7 @@ c   decay products of the vector boson
             call pwhg_exit(1)
          endif
          write(*,*) 
-         write(*,*) ' POWHEG: W+ b bbar I production and decay ' 
+         write(*,*) ' POWHEG: W+ b bbar J production and decay ' 
          if (vdecaymode.eq.-11) write(*,*) '         to e+ ve '
          if (vdecaymode.eq.-13) write(*,*) '         to mu+ vmu'
          if (vdecaymode.eq.-15) write(*,*) '         to tau+ vtau'
