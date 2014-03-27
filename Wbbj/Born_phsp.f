@@ -277,31 +277,39 @@ c     now boost everything BACK along z-axis
       endif
       
       if (runningscales.eq.1) then
+         if ((flg_btildepart.eq.'b').or.(flg_btildepart.eq.'c')) then
             mtw    = sqrt(
-     $        (kn_pborn(0,3)+kn_pborn(0,4))**2-
-     $        (kn_pborn(1,3)+kn_pborn(1,4))**2-
-     $        (kn_pborn(2,3)+kn_pborn(2,4))**2-
-     $        (kn_pborn(3,3)+kn_pborn(3,4))**2+
-     $        (kn_pborn(1,3)+kn_pborn(1,4))**2+
-     $        (kn_pborn(2,3)+kn_pborn(2,4))**2)         
+     $           (kn_pborn(0,3)+kn_pborn(0,4))**2-
+     $           (kn_pborn(1,3)+kn_pborn(1,4))**2-
+     $           (kn_pborn(2,3)+kn_pborn(2,4))**2-
+     $           (kn_pborn(3,3)+kn_pborn(3,4))**2+
+     $           (kn_pborn(1,3)+kn_pborn(1,4))**2+
+     $           (kn_pborn(2,3)+kn_pborn(2,4))**2)         
             mtb    = sqrt(ph_bmass**2+kn_pborn(1,5)**2+kn_pborn(2,5)**2)
             mtbbar = sqrt(ph_bmass**2+kn_pborn(1,6)**2+kn_pborn(2,6)**2)
-            
-            if ((flg_btildepart.eq.'b').or.(flg_btildepart.eq.'c')) then
-               pt1=sqrt(kn_pborn(1,7)**2+kn_pborn(2,7)**2)
-               HT = mtw+mtb+mtbbar+pt1
-            elseif ((flg_btildepart.eq.'r')) then
-               pt1=sqrt(kn_preal(1,7)**2+kn_preal(2,7)**2)
-               pt2=sqrt(kn_preal(1,8)**2+kn_preal(2,8)**2)
-               HT = mtw+mtb+mtbbar+pt1+pt2
-            else
-               print *,"Problem occured in set_fac_ren_scales"
-               print *,"flg_btildepart: ",flg_btildepart
-               call pwhg_exit(-1)
-            endif
-c     HT scale:
+            pt1    = sqrt(kn_pborn(1,7)**2+kn_pborn(2,7)**2)
+            HT     = mtw+mtb+mtbbar+pt1
+         elseif ((flg_btildepart.eq.'r')) then
+            mtw    = sqrt(
+     $           (kn_preal(0,3)+kn_preal(0,4))**2-
+     $           (kn_preal(1,3)+kn_preal(1,4))**2-
+     $           (kn_preal(2,3)+kn_preal(2,4))**2-
+     $           (kn_preal(3,3)+kn_preal(3,4))**2+
+     $           (kn_preal(1,3)+kn_preal(1,4))**2+
+     $           (kn_preal(2,3)+kn_preal(2,4))**2)         
+            mtb    = sqrt(ph_bmass**2+kn_preal(1,5)**2+kn_preal(2,5)**2)
+            mtbbar = sqrt(ph_bmass**2+kn_preal(1,6)**2+kn_preal(2,6)**2)
+            pt1    = sqrt(kn_preal(1,7)**2+kn_preal(2,7)**2)
+            pt2    = sqrt(kn_preal(1,8)**2+kn_preal(2,8)**2)
+            HT     = mtw+mtb+mtbbar+pt1+pt2
+         else
+            print *,"Problem occured in set_fac_ren_scales"
+            print *,"flg_btildepart: ",flg_btildepart
+            call pwhg_exit(-1)
+         endif
+c     HT/2 scale:
          mur = HT/2d0
-c         if(mur.lt.2) mur=2
+c     if(mur.lt.2) mur=2
          muf = mur         
       else
          muf=ph_wmass
