@@ -250,6 +250,74 @@ void fastjetppgenkt_pty_(const double * p, const int & npart,
     
    }
 
+void fastjetppgenkt_pteta_(const double * p, const int & npart,                   
+                     const double & R, const double & palg, 
+		     const double & ptmin, const double & maxeta,
+                     double * f77jets, int & njets, int * f77jetvec) {
+
+    // transfer p[4*ipart+0..3] -> input_particles[i]
+    vector<PseudoJet> input_particles;   
+    for (int i=0; i<npart; i++) {
+      valarray<double> mom(4); // mom[0..3]
+      for (int j=0;j<=3; j++) {
+         mom[j] = *(p++);
+      }
+      PseudoJet psjet(mom);
+      input_particles.push_back(psjet);    
+      // label input_particles entries
+      input_particles[i].set_user_index(i+1);
+    }
+    
+    // prepare jet def and run fastjet
+    JetDefinition jet_def;
+    if (palg == 1.0) {
+      jet_def = JetDefinition(kt_algorithm, R);
+    }  else if (palg == 0.0) {
+      jet_def = JetDefinition(cambridge_algorithm, R);
+    }  else if (palg == -1.0) {
+      jet_def = JetDefinition(antikt_algorithm, R);
+    } else {
+      jet_def = JetDefinition(genkt_algorithm, R, palg);
+    }
+
+    
+    // perform clustering
+    ClusterSequence cs(input_particles, jet_def);
+    // We have an additional rapidity cut as well:
+    Selector select_eta = SelectorAbsEtaMax(maxeta);
+    Selector select_pt = SelectorPtMin(ptmin);
+    Selector select_both = select_eta && select_pt;
+    vector<PseudoJet> jets = select_both(cs.inclusive_jets());
+    jets = sorted_by_pt(jets);
+    njets = jets.size();
+
+    // find particles inside i-th jet
+    vector<PseudoJet> *constit;
+    constit=new vector<PseudoJet>[njets];
+    for(int i=0; i<njets; i++) {
+      constit[i] = cs.constituents(jets[i]); 
+      //cout<<"jet "<<i<<endl;
+      //cout<<"mult "<<constit[i].size()<<endl;
+      for(int j=0; j<constit[i].size(); j++) {
+	*(f77jetvec + constit[i][j].user_index()-1) = i+1;
+      }
+    }
+
+
+
+    // transfer jets -> f77jets[4*ijet+0..3]
+    for (int i=0; i<njets; i++) {
+      for (int j=0;j<=3; j++) {
+        *f77jets = jets[i][j];
+        f77jets++;
+      } 
+    }
+
+    // clean up
+    delete [] constit;
+    
+   }
+
 } // !extern
 
 // This routine calculates the kt splitting scales: \sqrt{d_{12}} and

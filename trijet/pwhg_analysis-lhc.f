@@ -586,6 +586,59 @@ c 2.0 < |ystar| < 2.5
       data m12binsCMS5/1000d0,1246d0,1530d0,1856d0,2231d0,2659d0,3147d0,
      >                 3704d0,5058d0/
 c
+c Hadronic event shapes with CMS:
+c arXiv:1102.0068:
+      integer nptrangesEvntShapeCMS
+      parameter (nptrangesEvntShapeCMS = 3)
+      real*8 ptrangesEvntShapeCMS(nptrangesEvntShapeCMS + 1)
+      data ptrangesEvntShapeCMS/90d0,125d0,200d0,1d10/
+      character*3 cptrangesEvntShapeCMS(nptrangesEvntShapeCMS + 1)
+      data cptrangesEvntShapeCMS/' 90','125','200','inf'/
+c Transverse, central thrust for 90 < pt < 125:
+      integer nTauPerpCbinsEvntShapeCMS1
+      parameter (nTauPerpCbinsEvntShapeCMS1 = 13)
+      real*8 TauPerpCbinsEvntShapeCMS1(nTauPerpCbinsEvntShapeCMS1 + 1)
+      data TauPerpCbinsEvntShapeCMS1/
+     >     -13.75d0,-11.15d0,-9.2d0,-7.9d0,-6.6d0,-5.95d0,-5.3d0,
+     >     -4.65d0,-4.0d0,-3.35d0,-2.7d0,-2.05d0,-1.4d0,-0.75d0/
+c Transverse, central thrust for 125 < pt < 200:
+      integer nTauPerpCbinsEvntShapeCMS2
+      parameter (nTauPerpCbinsEvntShapeCMS2 = 14)
+      real*8 TauPerpCbinsEvntShapeCMS2(nTauPerpCbinsEvntShapeCMS2 + 1)
+      data TauPerpCbinsEvntShapeCMS2/
+     >     -13.75d0,-11.15d0,-9.2d0,-7.9d0,-7.25d0,-6.6d0,-5.95d0,
+     >     -5.3d0,-4.65d0,-4.0d0,-3.35d0,-2.7d0,-2.05d0,-1.4d0,-0.75d0/
+c Transverse, central thrust for 200 < pt <:
+      integer nTauPerpCbinsEvntShapeCMS3
+      parameter (nTauPerpCbinsEvntShapeCMS3 = 12)
+      real*8 TauPerpCbinsEvntShapeCMS3(nTauPerpCbinsEvntShapeCMS3 + 1)
+      data TauPerpCbinsEvntShapeCMS3/
+     >     -13.75d0,-11.3125d0,-8.875d0,-8.0625d0,-7.25d0,-6.4375d0,
+     >     -5.625d0,-4.8125d0,-4.0d0,-3.1875d0,-2.375d0,-1.5625d0,
+     >     -0.75d0/
+c Minor, central thrust for 90 < pt < 125:
+      integer nTMinorCbinsEvntShapeCMS1
+      parameter (nTMinorCbinsEvntShapeCMS1 = 13)
+      real*8 TMinorCbinsEvntShapeCMS1(nTMinorCbinsEvntShapeCMS1 + 1)
+      data TMinorCbinsEvntShapeCMS1/
+     >     -6.25d0,-5.05d0,-4.15d0,-3.55d0,-2.95d0,-2.65d0,-2.35d0,
+     >     -2.05d0,-1.75d0,-1.45d0,-1.15d0,-0.85d0,-0.55d0,-0.25d0/
+c Minor, central thrust for 125 < pt < 200:
+      integer nTMinorCbinsEvntShapeCMS2
+      parameter (nTMinorCbinsEvntShapeCMS2 = 14)
+      real*8 TMinorCbinsEvntShapeCMS2(nTMinorCbinsEvntShapeCMS2 + 1)
+      data TMinorCbinsEvntShapeCMS2/
+     >     -6.25d0,-5.05d0,-4.15d0,-3.55d0,-3.25d0,-2.95d0,-2.65d0,
+     >     -2.35d0,-2.05d0,-1.75d0,-1.45d0,-1.15d0,-0.85d0,-0.55d0,
+     >     -0.25d0/
+c Minor, central thrust for 200 < pt:
+      integer nTMinorCbinsEvntShapeCMS3
+      parameter (nTMinorCbinsEvntShapeCMS3 = 12)
+      real*8 TMinorCbinsEvntShapeCMS3(nTMinorCbinsEvntShapeCMS3 + 1)
+      data TMinorCbinsEvntShapeCMS3/
+     >     -6.25d0,-5.125d0,-4.0d0,-3.625d0,-3.25d0,-2.875d0,-2.5d0,
+     >     -2.125d0,-1.75d0,-1.375d0,-1.0d0,-0.625d0,-0.25d0/
+c
       call inihists
 c
 
@@ -756,6 +809,10 @@ c difference bins when the two leading jets are selected:
      >              ' < dy < '//cyrangesveto(j+1),
      >                    nptbinsveto,ptbinsveto)
         call bookup('gap nojet leadpt, '//cyrangesveto(j)//
+     >              ' < dy < '//cyrangesveto(j+1),
+     >                    nptbinsveto,ptbinsveto)
+c These histos are needed for the mean number of jets in the gap:
+        call bookup('gap njets leadpt, '//cyrangesveto(j)//
      >              ' < dy < '//cyrangesveto(j+1),
      >                    nptbinsveto,ptbinsveto)
       end do
@@ -1018,6 +1075,57 @@ c three-to-two ratios:
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+c vvvvvvvvvvv Hadronic event shapes with CMS vvvvvvvvvvvv
+c**** arXiv:1102.0068 ****
+c Corresponding cross sections:
+      do i=1,nptrangesEvntShapeCMS
+c The cross section should be the same in the following two
+c histos, both are kept for better readibility and transparency:
+        call bookupeqbins('sigma logTauPerpC CMS, '//
+     >         cptrangesEvntShapeCMS(i)//' < pt < '//
+     >         cptrangesEvntShapeCMS(i+1),1d0,0.5d0,1.5d0)
+        call bookupeqbins('sigma logTMinorC CMS, '//
+     >         cptrangesEvntShapeCMS(i)//' < pt < '//
+     >         cptrangesEvntShapeCMS(i+1),1d0,0.5d0,1.5d0)
+      end do
+c log of transverse thrust, central, 90 < pt < 125:
+      call bookup('logTauPerpC CMS, '//
+     >            cptrangesEvntShapeCMS(1)//' < pt < '//
+     >            cptrangesEvntShapeCMS(2),
+     >            nTauPerpCbinsEvntShapeCMS1,
+     >            TauPerpCbinsEvntShapeCMS1)
+c log of minor thrust, central, 90 < pt < 125:
+      call bookup('logTMinorC CMS, '//
+     >            cptrangesEvntShapeCMS(1)//' < pt < '//
+     >            cptrangesEvntShapeCMS(2),
+     >            nTMinorCbinsEvntShapeCMS1,
+     >            TMinorCbinsEvntShapeCMS1)
+c log of transverse thrust, central, 125 < pt < 200:
+      call bookup('logTauPerpC CMS, '//
+     >            cptrangesEvntShapeCMS(2)//' < pt < '//
+     >            cptrangesEvntShapeCMS(3),
+     >            nTauPerpCbinsEvntShapeCMS2,
+     >            TauPerpCbinsEvntShapeCMS2)
+c log of minor thrust, central, 125 < pt < 200:
+      call bookup('logTMinorC CMS, '//
+     >            cptrangesEvntShapeCMS(2)//' < pt < '//
+     >            cptrangesEvntShapeCMS(3),
+     >            nTMinorCbinsEvntShapeCMS2,
+     >            TMinorCbinsEvntShapeCMS2)
+c log of transverse thrust, central, 200 < pt:
+      call bookup('logTauPerpC CMS, '//
+     >            cptrangesEvntShapeCMS(3)//' < pt < '//
+     >            cptrangesEvntShapeCMS(4),
+     >            nTauPerpCbinsEvntShapeCMS3,
+     >            TauPerpCbinsEvntShapeCMS3)
+c log of minor thrust, central, 200 < pt:
+      call bookup('logTMinorC CMS, '//
+     >            cptrangesEvntShapeCMS(3)//' < pt < '//
+     >            cptrangesEvntShapeCMS(4),
+     >            nTMinorCbinsEvntShapeCMS3,
+     >            TMinorCbinsEvntShapeCMS3)
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
       end
      
 
@@ -1079,7 +1187,7 @@ c      data minlo/1/
       external pwhg_isfinite
       character * 4 prefix
 c
-      real*8 MinJetPt,MaxJetRap
+      real*8 MinJetPt,MaxJetRap,MaxJetPseudorap
 c
       real*8 dy12,deta12,dr12,dphi12
 c
@@ -1109,6 +1217,10 @@ c
       real*8 dymax
 c
       real*8 Ht
+c
+      integer njets_gap
+c
+      real*8 tauperpC,TminorC
 c
       integer nnum
       parameter (nnum = 9)
@@ -1337,6 +1449,23 @@ c
       data ptcut2nd3to2MultiJetAtlas/60d0,80d0,110d0/
       character*3 cptcut2nd3to2MultiJetAtlas(nptcut2nd3to2MultiJetAtlas)
       data cptcut2nd3to2MultiJetAtlas/' 60',' 80','110'/
+c Hadronic event shapes with CMS:
+c arXiv:1102.0068:
+      integer nptrangesEvntShapeCMS
+      parameter (nptrangesEvntShapeCMS = 3)
+      real*8 ptrangesEvntShapeCMS(nptrangesEvntShapeCMS + 1)
+      data ptrangesEvntShapeCMS/90d0,125d0,200d0,1d10/
+      character*3 cptrangesEvntShapeCMS(nptrangesEvntShapeCMS + 1)
+      data cptrangesEvntShapeCMS/' 90','125','200','inf'/
+c
+      real*8 MaxJetPseudorapEvntShapeCMS
+      parameter (MaxJetPseudorapEvntShapeCMS = 5d0)
+      real*8 MaxJetPseudorapCentralEvntShapeCMS
+      parameter (MaxJetPseudorapCentralEvntShapeCMS = 1.3d0)
+      real*8 MinJetPtEvntShapeCMS
+      parameter (MinJetPtEvntShapeCMS = 30d0)
+      real*8 RparEvntShapeCMS
+      parameter (RparEvntShapeCMS = 0.5d0)
 c
 
 
@@ -1742,6 +1871,24 @@ c For different \Delta y ranges:
      >               ' < dy < '//cyrangesveto(j+1),ptavg12,dsig)
         end if
       end do
+c We count the number of jets in the gap:
+      njets_gap = 0
+      do j=3,njets
+        p_j = pj(:,j)
+        call getyetaptmass(p_j,y_j,eta_j,pt_j,m_j)
+        if ((pt_j.gt.Q0Veto).and.
+     >      (y_j.gt.min(yj1,yj2)).and.
+     >      (y_j.lt.max(yj1,yj2))) njets_gap = njets_gap + 1
+      end do
+c We store the number of jets contained by the gap:
+      do j=1,nyrangesveto
+        if ((dy12.gt.yrangesveto(j)).and.
+     >      (dy12.lt.yrangesveto(j+1))) then
+          call filld('gap njets leadpt, '//cyrangesveto(j)//
+     >               ' < dy < '//cyrangesveto(j+1),
+     >               ptavg12,njets_gap*dsig)
+        end if
+      end do
 c We should have no jet between the two hardest:
       do j=3,njets
         p_j = pj(:,j)
@@ -2121,6 +2268,62 @@ c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 777   continue 
+
+cvvvvvvvvvvvvvvvvvvvvvv Event shapes, CMS vvvvvvvvvvvvvvvvvvvvvvvvvvvv
+      if (minlo.eq.1) then !<minlo>
+        R = RparEvntShapeCMS
+        palg = -1d0
+        MinJetPt = MinJetPtEvntShapeCMS
+        MaxJetPseudorap = MaxJetPseudorapEvntShapeCMS
+        jetvec = 0
+        call fastjetppgenkt_pteta(ptrack,ntracks,R,palg,
+     >                            MinJetPt,MaxJetPseudorap,
+     >                            pj,njets,jetvec)
+c The first jet should have a higher pt:
+         p_j = pj(:,1)
+         call getyetaptmass(p_j,y,eta,pt,m)
+         if (pt.lt.ptrangesEvntShapeCMS(1)) goto 888
+         if (abs(eta).gt.MaxJetPseudorapCentralEvntShapeCMS) goto 888
+c We go through all the jets and consider only those which are central
+c enough:
+         mjets = 0
+         do i=1,njets
+           p_j = pj(:,i)
+           call getyetaptmass(p_j,y,eta,pt,m)
+           if (abs(eta).gt.MaxJetPseudorapCentralEvntShapeCMS) cycle
+c The jet satisfies the central criteria, hence added to the list:
+           mjets = mjets + 1
+           pjnew(:,mjets) = pj(:,i)
+         end do
+c We need at least two jests in the central region:
+         if (mjets.lt.2) goto 888
+c We calculate the transverse thrust and thrust minor for the selected,
+c central jets:
+         call CalcThrustPerp(mjets,pjnew,tauperpC,TminorC)
+c The first jet should be the same so the original can be used to 
+c trigger the binning:
+         p_j = pj(:,1)
+         call getyetaptmass(p_j,y,eta,pt,m)
+         do i=1,nptrangesEvntShapeCMS
+           if ((pt.gt.ptrangesEvntShapeCMS(i)).and.
+     >         (pt.lt.ptrangesEvntShapeCMS(i+1))) then
+             call filld('sigma logTauPerpC CMS, '//
+     >                  cptrangesEvntShapeCMS(i)//' < pt < '//
+     >                  cptrangesEvntShapeCMS(i+1),1d0,dsig)
+             call filld('sigma logTMinorC CMS, '//
+     >                  cptrangesEvntShapeCMS(i)//' < pt < '//
+     >                  cptrangesEvntShapeCMS(i+1),1d0,dsig)
+             call filld('logTauPerpC CMS, '//
+     >                  cptrangesEvntShapeCMS(i)//' < pt < '//
+     >                  cptrangesEvntShapeCMS(i+1),log(tauperpC),dsig)
+             call filld('logTMinorC CMS, '//
+     >                  cptrangesEvntShapeCMS(i)//' < pt < '//
+     >                  cptrangesEvntShapeCMS(i+1),log(tauperpC),dsig)
+           end if
+         end do
+      end if !<minlo>
+c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+888   continue 
       end
 
 
@@ -2417,3 +2620,138 @@ c
       end do
 c
       end subroutine posterjetcuts
+c
+c This routine calculates the Thrust for a set of jets:
+c This routine uses the algorithm published by:
+c Yamamoto, J. Comput. Phys. 52, 597-601, (1983)
+      subroutine CalcThrust(njet,pjet,Thrust)
+      implicit none
+c
+      integer maxjet
+      parameter (maxjet = 2048)
+c
+      integer njet
+      real*8 pjet(4,maxjet)
+      real*8 Thrust
+c
+      integer i,j,k
+      integer si,sj,sk
+      real*8 pkpixpj,maxabssp,abssp,sumabsmom
+      real*8 nvec(3),pixpj(3),sumskpk(3),sumsp(3),maxsp(3)
+c
+c
+      maxabssp = 0d0
+      nvec = 0d0
+      do i=1,njet-1
+        do j=i+1,njet
+          pixpj(1) = pjet(2,i)*pjet(3,j) - pjet(3,i)*pjet(2,j)
+          pixpj(2) = pjet(3,i)*pjet(1,j) - pjet(1,i)*pjet(3,j)
+          pixpj(3) = pjet(1,i)*pjet(2,j) - pjet(2,i)*pjet(1,j)
+c For each (i,j) pair we calculate the sum of s_k*p_k: 
+          sumskpk = 0d0
+          do k=1,njet
+            if ((k.eq.i).or.(k.eq.j)) cycle
+            pkpixpj = pjet(1,k)*pixpj(1) + pjet(2,k)*pixpj(2)
+     >              + pjet(3,k)*pixpj(3)
+c This fixes sk:
+            sk = sign(1d0,pkpixpj)
+            sumskpk = sumskpk + sk*pjet(1:3,k)
+          end do
+          do si=-1,1,2
+            do sj=-1,1,2
+c We calculate the total sum of products: \sum_{l=1}^{n}s_l p_l for
+c each (si,sj) pair:
+              sumsp = sumskpk + si*pjet(1:3,i) + sj*pjet(1:3,j)
+              abssp = sqrt(sumsp(1)**2 + sumsp(2)**2 + sumsp(3)**2)
+              if (maxabssp.lt.abssp) then
+                maxabssp = abssp
+                nvec = sumsp/abssp
+              end if
+            end do
+          end do
+        end do
+      end do
+c
+      sumabsmom = 0d0
+      do i=1,njet
+        sumabsmom = sumabsmom + sqrt(pjet(1,i)**2 + pjet(2,i)**2
+     >            + pjet(3,i)**2)
+      end do
+c
+      Thrust = maxabssp/sumabsmom
+c
+      end subroutine CalcThrust
+c
+c This routine calculates the transverse thrust, and 
+c and heavily relies upon the previous routine:
+      subroutine CalcThrustperp(njet,pjet,Tau,Tminor)
+      implicit none
+c
+      integer maxjet
+      parameter (maxjet = 2048)
+c
+      integer njet
+      real*8 pjet(4,maxjet)
+      real*8 Tau,Tminor
+c
+      integer i,j
+      integer si,sj
+      real*8 Tperp
+      real*8 ptiptj,abssumspt,abssumspt_max,ptixnT,sumabspt
+      real*8 sumsjptj(2),sumspt(2),sumspt_max(2),nvec(2)
+c
+c
+      nvec = 0d0
+      abssumspt_max = 0d0
+      sumspt_max = 0d0
+c      print *,"number of jets: ",njet
+      do i=1,njet
+c This will contain the \sum_{j\ne i} s_j p_{\perp\,,j} sum:
+        sumsjptj = 0d0
+        do j=1,njet
+c When the two jets coincide simply cycle:
+          if (i.eq.j) cycle
+c The dotproduct of ptiptj fixes the sign for momentum pj: 
+          ptiptj = pjet(1,i)*pjet(1,j) + pjet(2,i)*pjet(2,j)
+c          print *,"pti.ptj: ",ptiptj
+          sj = sign(1d0,ptiptj)
+c          print *,"sj: ",sj
+c The sum of the product of transverse momenta with appropriate signs:
+          sumsjptj = sumsjptj + sj*pjet(1:2,j)
+        end do
+c The sign of pti can take two values:
+        do si=-1,1,2
+          sumspt = sumsjptj + si*pjet(1:2,i)
+          abssumspt = sqrt(sumspt(1)**2 + sumspt(2)**2)
+          if (abssumspt_max.lt.abssumspt) then
+            abssumspt_max = abssumspt
+            sumspt_max = sumspt
+          end if
+        end do
+      end do
+c
+c We have to calculate the integer sum of pt's:
+      sumabspt = 0d0
+      do i=1,njet
+        sumabspt = sumabspt + sqrt(pjet(1,i)**2 + pjet(2,i)**2)
+      end do
+c The normal vector can be optained from \sum_{i=1}^{n}s_i p_{\perp\,,i}
+c by norming it: 
+      nvec = sumspt_max / sqrt(sumspt_max(1)**2 + sumspt_max(2)**2)
+c
+      Tperp = abssumspt_max/sumabspt
+c
+c We give back 1 - Tperp, instead:
+      Tau = 1d0 - Tperp
+c
+c We also calculate the transverse Thrust minor:
+      Tminor = 0d0
+      do i=1,njet
+c We have to calculate the cross product of the ith jet pt and nvec:
+        Tminor = Tminor + abs(pjet(1,i)*nvec(2) - pjet(2,i)*nvec(1))
+      end do
+      Tminor = Tminor / sumabspt
+c
+c      read(*,*)
+c
+      end subroutine CalcThrustperp
