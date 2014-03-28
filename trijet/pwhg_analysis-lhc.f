@@ -2318,7 +2318,7 @@ c trigger the binning:
      >                  cptrangesEvntShapeCMS(i+1),log(tauperpC),dsig)
              call filld('logTMinorC CMS, '//
      >                  cptrangesEvntShapeCMS(i)//' < pt < '//
-     >                  cptrangesEvntShapeCMS(i+1),log(tauperpC),dsig)
+     >                  cptrangesEvntShapeCMS(i+1),log(TminorC),dsig)
            end if
          end do
       end if !<minlo>
