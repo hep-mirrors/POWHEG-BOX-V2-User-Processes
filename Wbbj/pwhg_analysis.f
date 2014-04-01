@@ -368,6 +368,20 @@ c            pj(mu,jjet)=0d0
 c         enddo
 c      enddo
 
+
+
+
+
+
+
+
+c      jetvec=0
+
+
+
+
+
+
       ntracks=0
       mjets=0
 c     Loop over final state particles to find jets 
@@ -400,6 +414,8 @@ c         call fastjetktwhich(ptrack,ntracks,ptminfastjet,R,
 c     $        pj,mjets,jetvec) 
       endif
       
+      write(*,*) jetvec(1:numjets)
+
 
 c     find in which ptrack the B hadrons ended up
       nbjet=0

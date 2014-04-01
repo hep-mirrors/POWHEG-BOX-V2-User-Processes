@@ -37,6 +37,9 @@ C     real * 8 pgosam(5*nlegborn)
       parameter (debug=.false.)
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
+      logical ini,MSbarscheme,dummyvirtual
+      save ini,MSbarscheme,dummyvirtual
+      
       data(vflav_gosam(i,   12),i=1,nlegborn)/
      $      -1,
      $       2,
@@ -230,10 +233,20 @@ C     real * 8 pgosam(5*nlegborn)
      $      -5,
      $      -4/
 
+      
+      if (ini) then
+         MSbarscheme=.true.
+         if (powheginput("#MSbarscheme").eq.0) MSbarscheme=.false.
+         dummyvirtual=.false.
+         if (powheginput("#dummyvirtual").eq.1) dummyvirtual=.true.
+         ini=.false.
+      endif
+
 C     call to the born for dummy virtual:
-      if (powheginput("dummyvirtual").eq.1) then
+      if (dummyvirtual) then
          call setborn(p,vflav,born,bornjk,bmunu)
-         virtual = 0.3d0*born*(2*pi/st_alpha)
+c     the virtual will be multiplied by as/(2 pi) by the POWHEG BOX
+         virtual = born
          return
       endif
  
@@ -319,6 +332,18 @@ C     The as/(2pi) factor is attached at a later point
 C     We have then to multiply for 2*pi
      $                * (2*pi)
 
+
+      if (MSbarscheme) then
+         call call setborn(p,vflav,born,bornjk,bmunu)
+         if (vflav(1).ne.0.and.vflav(2).ne.0) then            
+c     a factor of as/(2 pi) will be attached by the BOX
+            virtual=virtual - 2*TF*log(st_muren2/ph_bmass**2)*born
+         elseif  (vflav(1).eq.0.or.vflav(2).eq.0) then    
+c     a factor of as/(2 pi) will be attached by the BOX
+            virtual = virtual + 2*TF*(1d0/3*log(st_mufact2/ph_bmass**2)
+     $           -log(st_muren2/ph_bmass**2))*born
+         endif
+      endif
       if(idvecbos.eq.-24) then
          call cconj(vflav,nlegborn)
          call pconj(p,nlegborn)

@@ -160,7 +160,10 @@ c madgraph routines not to blow.
       mtMS = 172.5d0
       mtaMS = 1.777d0
       cmass = 0d0
-      bmass = 4.2d0
+      bmass = powheginput("#bmass")
+      if (bmass.le.0) then
+         bmass = 4.2d0
+      endif
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
@@ -171,9 +174,6 @@ c madgraph routines not to blow.
       wwidth=2.1054d0
       twidth=1.5083d0
 
-      ph_Wmass2low=powheginput("min_w_mass")**2
-      ph_Wmass2high=powheginput("max_w_mass")**2
-      ph_bmass=powheginput("bmass")
 
 c      hmass = 125d0
 c      hwidth = 0.403d-2
@@ -206,15 +206,15 @@ c    t
       Vts=0.0403d0
       Vtb=0.999152d0
 
-c      Vud=1d0
-c      Vus=1d0
-c      Vub=1d0
-c      Vcd=1d0
-c      Vcs=1d0
-c      Vcb=1d0
-c      Vtd=1d0
-c      Vts=1d0
-c      Vtb=1d0
+c$$$      Vud=1d0
+c$$$      Vus=1d-10
+c$$$      Vub=1d-10
+c$$$      Vcd=1d-10
+c$$$      Vcs=1d0
+c$$$      Vcb=1d-10
+c$$$      Vtd=1d-10
+c$$$      Vts=1d-10
+c$$$      Vtb=1d0
 
       end
 
@@ -262,6 +262,8 @@ c HEFT coupling
       include 'PhysPars.h'
       include 'pwhg_math.h'
       real * 8 e_em,g_weak
+      real * 8 powheginput
+      external powheginput
 c
 c     Common to lh_readin and printout
 c
@@ -286,12 +288,18 @@ c
       ph_Zwidth = zwidth
       ph_Wwidth = wwidth
       ph_Hwidth = hwidth
+      ph_bmass = bmass
       ph_tmass = tmass
 
       ph_WmWw = ph_Wmass * ph_Wwidth
       ph_ZmZw = ph_Zmass * ph_Zwidth
       ph_Wmass2 = ph_Wmass**2
       ph_Zmass2 = ph_Zmass**2
+
+      ph_Wmass2low=powheginput("min_w_mass")**2
+      ph_Wmass2high=powheginput("max_w_mass")**2
+
+
 
 c     CKM from PDG 2010 (eq. 11.27)
       ph_CKM(1,1)=Vud

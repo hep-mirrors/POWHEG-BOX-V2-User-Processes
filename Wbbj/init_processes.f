@@ -15,28 +15,25 @@
 
       call init_processes_born
       call init_processes_real
+
+c     as for Wbb, set flg_withdamp always to true
+      flg_withdamp=.true.
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C    Set here the number of light flavours
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      st_nlight=4
-      call init_couplings
-c     if (tmass.eq.0d0) then
-c        st_nlight=6
-c     elseif(bmass.eq.0d0) then
-c        st_nlight=5
-c     elseif(cmass.eq.0d0) then
-c        st_nlight=4
-c     else
-c        st_nlight=3
-c     endif
-      do i=3,nlegreal
-         if (abs(flst_real(i,1)).le.st_nlight) then
-            flst_lightpart=i
-            exit
-         endif
-      enddo
+
+
+      
+      if (powheginput("#MSbarscheme").eq.0) then
+         st_nlight=4
+      else
+         st_nlight=5
+      endif
 c     Treat massive b as massless in find_regions:
-c      flst_lightpart=5
+      flst_lightpart=5
+
+      call init_couplings
 
       end
  
