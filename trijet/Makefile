@@ -146,7 +146,7 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-lhc.o
-PWHGANAL+= fastjetfortran.o fastjet-addon.o pdfdummies.o splitandfilt.o \
+PWHGANAL+= fastjetfortran.o fastjet-addon.o  splitandfilt.o \
 	   observables.o
 endif
 ifeq ("$(ANALYSIS)","tev")
@@ -155,7 +155,7 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-tev.o
-PWHGANAL+= pdfdummies.o splitandfilt.o observables.o fastjetD0RunIIConewrap.o
+PWHGANAL+=  splitandfilt.o observables.o fastjetD0RunIIConewrap.o
 endif
 
 
