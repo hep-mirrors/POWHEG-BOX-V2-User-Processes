@@ -8,3 +8,5 @@
       integer maxprocborn,maxprocreal
       parameter (maxprocborn=999,maxprocreal=999)
       
+      integer maxalr
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)

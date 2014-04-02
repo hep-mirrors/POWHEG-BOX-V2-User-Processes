@@ -50,15 +50,14 @@ endif
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
 
-VPATH= :./:../Version-pre2-1/progress:../Version-pre2-1:../:$(OBJ)/:./MCFMinterface:./MCFM/src/pwgplots/:./MCFM/src/Need/:./MCFM/src/Lib/:./MCFM/src/Phase/:./MCFM/src/W2jet/:./MCFM/src/W2jetvirt/:./MCFM/src/Wbb/:./MCFM/src/Zbb/
+VPATH= :./:../:$(OBJ)/:./MCFMinterface:./MCFM/src/pwgplots/:./MCFM/src/Need/:./MCFM/src/Lib/:./MCFM/src/Phase/:./MCFM/src/W2jet/:./MCFM/src/W2jetvirt/:./MCFM/src/Wbb/:./MCFM/src/Zbb/
 
-INCLUDEC=../Version-pre2-1/include
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=$(PWD)/MCFM/src/Inc/
 INCLUDE4=./MCFMinterface/Inc
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDEC) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3) -I$(INCLUDE4)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG)  -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3) -I$(INCLUDE4)
 
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
@@ -125,7 +124,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o 	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o reshufflemoms.o 		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o mint_upb.o opencount.o pwhgreweight.o \
         setlocalscales.o validflav.o  ubprojections.o  \
