@@ -37,8 +37,8 @@ C     real * 8 pgosam(5*nlegborn)
       parameter (debug=.false.)
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
-      logical ini,MSbarscheme,virtualborn
-      save ini,MSbarscheme,virtualborn
+      logical ini,MSbarscheme,dummyvirtual
+      save ini,MSbarscheme,dummyvirtual
       
       data(vflav_gosam(i,   12),i=1,nlegborn)/
      $      -1,
@@ -237,13 +237,13 @@ C     real * 8 pgosam(5*nlegborn)
       if (ini) then
          MSbarscheme=.true.
          if (powheginput("#MSbarscheme").eq.0) MSbarscheme=.false.
-         virtual=.false.
-         if (powheginput("#virtualborn").eq.1) virtualborn=.true.
+         dummyvirtual=.false.
+         if (powheginput("#dummyvirtual").eq.1) dummyvirtual=.true.
          ini=.false.
       endif
 
 C     call to the born for virtual:
-      if (virtualborn) then
+      if (dummyvirtual) then
          call setborn(p,vflav,born,bornjk,bmunu)
 c     the virtual will be multiplied by as/(2 pi) by the POWHEG BOX
          virtual = born

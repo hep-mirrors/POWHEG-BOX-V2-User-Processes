@@ -22,8 +22,6 @@ c     as for Wbb, set flg_withdamp always to true
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C    Set here the number of light flavours
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-
       
       if (powheginput("#MSbarscheme").eq.0) then
          st_nlight=4

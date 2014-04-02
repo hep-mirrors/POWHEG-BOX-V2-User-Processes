@@ -34,13 +34,13 @@ c somewhere else
       call madtophys
 
       init_golem = .true.
-      if (powheginput("dummyvirtual").eq.1) then
+      if (powheginput("#dummyvirtual").eq.1) then
          write(*,*) '*****************************************' 
          write(*,*) 'WARNING: using dummy virtual amplitude!!!'
          write(*,*) '*****************************************' 
          init_golem = .false.
       endif
-      if (powheginput("bornonly").eq.1) then
+      if (powheginput("#bornonly").eq.1) then
          init_golem = .false.
       endif
       if (init_golem) call golem_initialize

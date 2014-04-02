@@ -231,7 +231,7 @@ c     if idvecbos=24 idl and idnu are ok
 
          minlo=powheginput('#minlo')
          if (minlo.eq.1) then
-            processid='WBB'
+            processid='Wbb'
             write(*,*) '***********   MINLO ACTIVE   ************'
          else
             include 'pwhg_processid.h'
@@ -509,7 +509,7 @@ c                  write(*,*) (jetinfo(i),i=1,numjets)
 
 c     if there is only one b jet, then return
       if (.not.(found_bjet1.and.found_bjet2)) return
-      if (.not.(found_hardjet).and..not.(processid.eq.'WBB')) return
+      if (.not.(found_hardjet).and..not.(processid.eq.'Wbb')) return
 
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
