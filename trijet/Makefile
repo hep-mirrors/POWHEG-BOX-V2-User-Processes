@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=gfortran
+COMPILER=ifort
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -92,7 +92,7 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 # PYTHIA 8
-PYTHIA8LOCATION=/home/nason/Pheno/pythia8183
+PYTHIA8LOCATION=/home/oleari/fortran/pythia8183
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/ -I$(PYTHIA8LOCATION)/include/Pythia8
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
