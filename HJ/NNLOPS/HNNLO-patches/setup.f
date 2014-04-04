@@ -161,7 +161,7 @@ CC   Parameters used to define jets
       etajetmin=0d0
       etajetmax=20d0
 
-      Rcut=0.4d0
+      Rcut=0.7d0
 
 CC
 
