@@ -39,7 +39,8 @@ C     real * 8 pgosam(5*nlegborn)
       common/cvecbos/idvecbos,vdecaymode
       logical ini,MSbarscheme,dummyvirtual
       save ini,MSbarscheme,dummyvirtual
-      
+      data ini/.true./
+
       data(vflav_gosam(i,   12),i=1,nlegborn)/
      $      -1,
      $       2,
