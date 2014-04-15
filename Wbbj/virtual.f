@@ -337,10 +337,10 @@ C     We have then to multiply for 2*pi
       if (MSbarscheme) then
          call setborn(p,vflav,born,bornjk,bmunu)
          if (vflav(1).ne.0.and.vflav(2).ne.0) then            
-c     a factor of as/(2 pi) will be attached by the BOX
+c     a factor of as/(2 pi) will be attached by the BOX (Cacciari, Greco, Nason)
             virtual=virtual - 2*TF*log(st_muren2/ph_bmass**2)*born
          elseif  (vflav(1).eq.0.or.vflav(2).eq.0) then    
-c     a factor of as/(2 pi) will be attached by the BOX
+c     a factor of as/(2 pi) will be attached by the BOX (Cacciari, Greco, Nason)
             virtual = virtual + 2*TF*(1d0/3*log(st_mufact2/ph_bmass**2)
      $           -log(st_muren2/ph_bmass**2))*born
          endif
