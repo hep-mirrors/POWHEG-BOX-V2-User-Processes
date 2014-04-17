@@ -19,7 +19,6 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       if (ph_Wmass.le.0d0) ph_Wmass  = 80.398d0     
       ph_Wwidth = powheginput("#Wwidth")
       if (ph_Wwidth.le.0d0) ph_Wwidth =  2.141d0
-
       ph_alphaem = powheginput("#alphaem")
       if (ph_alphaem.le.0d0) ph_alphaem = 1d0/128.89d0
       ph_Zmass = powheginput("#Zmass")
@@ -100,11 +99,12 @@ C     the default vale is 30
 
       if(verbose) then
       write(*,*) '*************************************'
-      write(*,*) 'Z mass = ',ph_Zmass
-      write(*,*) 'Z width = ',ph_Zwidth
+c      write(*,*) 'Z mass = ',ph_Zmass
+c      write(*,*) 'Z width = ',ph_Zwidth
       write(*,*) 'W mass = ',ph_Wmass
       write(*,*) 'W width = ',ph_Wwidth
       write(*,*) '1/alphaem = ',1d0/ph_alphaem
+      write(*,*) 'alphaem = ',ph_alphaem
       write(*,*) 'sthw2 = ',ph_sthw2
       write(*,*) '(unit_e)^2 = ',ph_unit_e**2   
       write(*,*) '(g_w)^2 = ',ph_unit_e*ph_unit_e/ph_sthw2   
