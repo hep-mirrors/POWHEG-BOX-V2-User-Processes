@@ -774,8 +774,8 @@ c subjettiness with antikt:
       end do
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-c vvvvv This part concerns the incl. 3-jet and 2-jet ratio, Alas vvvvv
-c**** arXiv:1307.7498 ****
+c vvvvvvv This part concerns the incl. 3-jet and 2-jet ratio, ATLAS vvvvvvvvv
+c**** arXiv:1304.7498 ****
       call bookup('R32, incl. 2jet',nptrangeR32,ptrangeR32)
       call bookup('R32, incl. 3jet',nptrangeR32,ptrangeR32)
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1470,7 +1470,7 @@ c
 
 
       if (.not.pwhg_isfinite(dsig0)) then
-         write(*,*) '*** PROBLEMS in subroutine analysis ***'
+         write(*,*) '*** dsig0 is NaN in analysis subroutine ***'
          return
       endif
 
@@ -1535,7 +1535,7 @@ c We can only do this analysis if minlo is activated:
      $                        MinJetPtdphi,MaxJetRapdphi,
      $                        pj,njets,jetvec)
 c
-      if (njets.lt.2) goto 333
+      if (njets.lt.2) goto 111
 c
       pj1 = pj(:,1)
       pj2 = pj(:,2)
@@ -1548,7 +1548,7 @@ c
 c
 c The two leading jets should be very central:
       if ((abs(yj1).gt.MaxRapJ1J2dphi).or.
-     >    (abs(yj2).gt.MaxRapJ1J2dphi)) goto 333
+     >    (abs(yj2).gt.MaxRapJ1J2dphi)) goto 111
 c
       do j=1,nptmaxbins
         if ((ptj1.gt.dptmaxbins(j)).and.(ptj1.lt.dptmaxbins(j+1))) then
@@ -1585,6 +1585,7 @@ c
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+ 111  continue
       jetvec=0
 c vvvvvvvvvvvv This part concerns the jet shapes vvvvvvvvvvvvvvvvvvvvv
 c We can only do this analysis if minlo is activated:
@@ -1597,14 +1598,7 @@ c
      $                        pj,njets,jetvec)
 c
       if (njets.lt.1) goto 333
-c
-c      print *,"njets: ",njets
-c      do j=1,njets
-c        print *,"j: ",j
-c        print *,sqrt(pj(1,j)**2 + pj(2,j)**2)
-c      end do
-c      read(*,*)
-c
+
 c Differential in pt:
       do j=1,nptrangebins
         do l=0,5
@@ -2098,6 +2092,7 @@ c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       jetvec=0
 c vvvv This part concerns the trijet invariant mass, CMS PAS vvvv
       do i=1,nRpardiffxsCMSPAS !<sweep through R's>
+        jetvec=0
         palg = -1d0
         R = RpardiffxsCMSPAS(i)
         call fastjetppgenkt_pty(ptrack,ntracks,R,palg,
@@ -2153,12 +2148,14 @@ c For the inclusive jet we need at least one jet:
           p_j = pj(:,ijet)
           call getyetaptmass(p_j,y,eta,pt,m)
           do j=1,nyrangesIncjetAtlas
+c     use abs(y)
+            y = abs(y)
             if ((y.gt.yrangesIncjetAtlas(j)).and.
      >          (y.lt.yrangesIncjetAtlas(j+1))) then
               dy = yrangesIncjetAtlas(j+1) - yrangesIncjetAtlas(j)
               call filld('jetpt Atlas, R='//cRparIncjetAtlas(i)//', '//
      >                   cyrangesIncjetAtlas(j)//' < |y| < '//
-     >                   cyrangesIncjetAtlas(j+1),pt,dsig/dy)
+     >                   cyrangesIncjetAtlas(j+1),pt,dsig/dy/2)
             end if
           end do
         end do
@@ -2190,7 +2187,9 @@ c hardest jet:
       end if !<minlo>
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-cvvvvvvvvvv Multi-Jet inclusive cross section Atlas vvvvvvvvvvvvvv
+
+
+cvvvvvvvvvv Multi-Jet inclusive cross section Atlas. arXiv:1107.2092 vvvvvvvvvvvvvv
       if (minlo.eq.1) then !<minlo>
       do i=1,nRpar3to2MultiJetAtlas
         jetvec = 0
@@ -2222,19 +2221,19 @@ c least severe:
 c For these observables we need:
 c R = 0.4
 c ptj1 > 80 GeV, ptj2 > 60 GeV
-c njets >= 2
+c mjets >= 2
             if ((i.eq.1).and.(j.eq.2).and.(k.eq.1)) then
 c binning the jet multiplicity:
               call filld('Inclusive Jet Multiplicity, Atlas',
-     >                   dble(njets),dsig)
+     >                   dble(mjets),dsig)
 c We calcute the Ht too:
               Ht = 0d0
-              do ijet=1,njets
+              do ijet=1,mjets
                 p_j = pj(:,ijet)
                 call getyetaptmass(p_j,y,eta,pt,m)
 c Ht is the sum of jet pts:
                 Ht = Ht + pt
-c binning the jet pt's:
+c binning the jet pts
                 if (ijet.eq.1) call filld('pt 1st leading jet, Atlas',
      >                                    pt,dsig)
                 if (ijet.eq.2) call filld('pt 2nd leading jet, Atlas',
@@ -2244,12 +2243,12 @@ c binning the jet pt's:
                 if (ijet.eq.4) call filld('pt 4th leading jet, Atlas',
      >                                    pt,dsig)
               end do
-c Binning Ht:
-              if (njets.ge.2) call filld('Ht, njet >= 2, Atlas',Ht,dsig)
-              if (njets.ge.3) call filld('Ht, njet >= 3, Atlas',Ht,dsig)
-              if (njets.ge.4) call filld('Ht, njet >= 4, Atlas',Ht,dsig)
-            end if
-c We bin the leading jet pt for the 3-to-2 ratio:
+c Binning Ht
+              if (mjets.ge.2) call filld('Ht, njet >= 2, Atlas',Ht,dsig)
+              if (mjets.ge.3) call filld('Ht, njet >= 3, Atlas',Ht,dsig)
+              if (mjets.ge.4) call filld('Ht, njet >= 4, Atlas',Ht,dsig)
+            endif
+c We bin the leading jet pt for the 3-to-2 ratio
             call filld('ptj1, Atlas, njet>='//cnum(j)//
      >                 ', R='//cRpar3to2MultiJetAtlas(i)//
      >                 ', ptj1>'//cptcut1st3to2MultiJetAtlas(k)//
@@ -2269,7 +2268,7 @@ c
 c ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 777   continue 
 
-cvvvvvvvvvvvvvvvvvvvvvv Event shapes, CMS vvvvvvvvvvvvvvvvvvvvvvvvvvvv
+cvvvvvvvvvvvvvvvvvvvvvv Event shapes, CMS  arXiv:1102.0068  vvvvvvvvvvvvvvvvvvvvvvvvvvvv
       if (minlo.eq.1) then !<minlo>
         R = RparEvntShapeCMS
         palg = -1d0
