@@ -1,0 +1,159 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amssymb,enumerate}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{graphics}
+\usepackage{xspace}
+\usepackage{epsfig}
+\usepackage{subfigure}
+
+\setlength\paperwidth  {210mm}%
+\setlength\paperheight {300mm}%	
+
+\textwidth 160mm%		% DEFAULT FOR LATEX209 IS a4
+\textheight 235mm%
+
+\voffset -1in
+\topmargin   .05\paperheight	% FROM TOP OF PAGE TO TOP OF HEADING (0=1inch)
+\headheight  .02\paperheight	% HEIGHT OF HEADING BOX.
+\headsep     .03\paperheight	% VERT. SPACE BETWEEN HEAD AND TEXT.
+\footskip    .07\paperheight	% FROM END OF TEX TO BASE OF FOOTER. (40pt)
+
+
+\hoffset -1in				% TO ADJUST WITH PAPER:
+	\oddsidemargin .13\paperwidth	% LEFT MARGIN FOR ODD PAGES (10)
+	\evensidemargin .15\paperwidth	% LEFT MARGIN FOR EVEN PAGES (30)
+	\marginparwidth .10\paperwidth	% TEXTWIDTH OF MARGINALNOTES
+	\reversemarginpar		% BECAUSE OF TITLEPAGE.
+
+%%%%%%%%%% Start TeXmacs macros
+\newcommand{\tmtextit}[1]{{\itshape{#1}}}
+\newcommand{\tmtexttt}[1]{{\ttfamily{#1}}}
+\newenvironment{enumeratenumeric}{\begin{enumerate}[ 1.] }{\end{enumerate}}
+\newcommand\sss{\mathchoice%
+{\displaystyle}%
+{\scriptstyle}%
+{\scriptscriptstyle}%
+{\scriptscriptstyle}%
+}
+\newcommand\PSn{\Phi_{n}}
+\newcommand{\tmop}[1]{\ensuremath{\operatorname{#1}}}
+
+
+
+\newcommand\Lum{{\cal L}}
+\newcommand\matR{{\cal R}}
+\newcommand\Kinnpo{{\bf \Phi}_{n+1}}
+\newcommand\Kinn{{\bf \Phi}_n}
+\newcommand\PSnpo{\Phi_{n+1}}
+\newcommand\as{\alpha_{\sss\rm S}}
+\newcommand\asotpi{\frac{\as}{2\pi}}
+
+\newcommand\POWHEG{{\tt POWHEG}}
+\newcommand\POWHEGBOX{{\tt POWHEG BOX}}
+\newcommand\POWHEGBOXV{{\tt POWHEG-BOX-V2}}
+\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\POWHEGpPYTHIA{{\tt POWHEG+PYTHIA}}
+\newcommand\HERWIG{{\tt HERWIG}}
+
+\def\lq{\left[} 
+\def\rq{\right]} 
+\def\rg{\right\}} 
+\def\lg{\left\{} 
+\def\({\left(} 
+\def\){\right)} 
+
+\def\beq{\begin{equation}}
+\def\beqn{\begin{eqnarray}}
+\def\eeq{\end{equation}}
+\def\eeqn{\end{eqnarray}}
+
+\def\mr{\mathrm}
+\def\vbfevmv{VBF $e^+\nu_e\mu^-\bar\nu_\mu jj$\;}
+\def\vbfww{VBF $W^+W^-jj$\;}
+\def\wpm{W^+W^-}
+\def\evmv{e^+\nu_e\mu^+\nu_\mu}
+\def\pbox{{\tt POWHEG BOX}}
+\def\pwg{{\tt POWHEG}}
+\def\mc{\mathcal}
+
+%%%%%%%%%% End TeXmacs macros
+
+\title{Manual for  Higgs boson production via vector-boson fusion in association with three jets in the \POWHEGBOXV{}}
+\date{}
+
+\begin{document}
+\maketitle
+%
+\noindent
+The {\tt VBF\_HJJJ} program in the \POWHEGBOXV{} is an implementation of Higgs boson production via vector-boson fusion in association with three jets. Details of the calculation are described in Ref.~\cite{JSZ}. If you use this program, please quote Refs.~\cite{JSZ,Figy:2007kv,Alioli:2010xd}.
+%\\[2ex]
+%
+\section*{Running the program}
+%
+Download the \POWHEGBOXV{}, following the instructions at the web site 
+\\[2ex]
+{\tt http://powhegbox.mib.infn.it/}
+\\[2ex] 
+and go to the process directory by typing 
+\\[2ex]
+{\tt \$ cd \POWHEGBOXV/VBF\_HJJJ}  
+\\[2ex]
+Running is most conveniently done in a separate directory. Together with the code, we provide the directory {\tt testrun} that contains sample input and seed files. 
+\\[2ex]
+For your runs, generate your own directory, for instance by doing 
+\\[2ex]
+{\tt \$ mkdir myruns}
+\\[2ex]
+The directory must contain the {\tt powheg.input} file, a file {\tt vbfnlo.dat} where boson masses and electroweak input parameters are set, and, for
+parallel running, a {\tt pwgseeds.dat} file (see {\tt manual-BOX.pdf}
+and {\tt Manyseeds.pdf} in the  {\tt POWHEG-BOX-V2/Docs} directory).
+\\[2ex]
+Before compiling make sure that:
+\begin{itemize}
+\item 
+{\tt fastjet} is installed and {\tt fastjet-config} is in the path,
+\item 
+{\tt lhapdf} is installed and {\tt lhapdf-config} is in the path,
+\item
+{\tt gfortran}, {\tt ifort} or {\tt g77} is in the path, and the
+appropriate libraries are in the environment variable {\tt
+  LD\_LIBRARY\_PATH}. 
+\end{itemize}
+%\\[2ex]
+After compiling the executable {\tt pwhg\_main} in the {\tt VBF\_HJJJ} directory, enter the {\tt myruns} directory and perform all your runs there. 
+\\[2ex]
+We recommend running the program in a parallel mode in several consecutive steps by setting 
+\\[2ex]
+{\tt manyseeds   1}
+\\[2ex]
+in the file  {\tt powheg.input}. The four steps of grid generation, NLO calculation, upper bound generation, and event generation can then be performed in parallel, consecutively, as described, for instance, in the manual of the {\tt VBF\_Z\_Z} directory in the \POWHEGBOXV{}. 
+
+If the default analysis is activated by setting the flag 
+{\tt ANALYSIS=default} in the Makefile before compiling the code, after the completion of the NLO calculation for each parallel run a file {\tt  pwg-*-NLO.top} is generated (where the * denotes the integer
+identifier of the run). These files contain histogram information at fixed-order accuracy for a representative experimental setup in gnuplot-friendly format. The default analysis routine can easily be replaced with a personalized one by the user.  
+
+The events that are ultimately generated in Les Houches format can be processed by a generic Monte-Carlo program. We are providing an interface to \PYTHIA~{\tt 6.4.25} that can be used by generating the executable {\tt main-PYTHIA-lhef} and running it in the directory where the event files are stored. The program then generates an output file {\tt pwgPOWHEG+PYTHIA-output.top} that contains histograms at NLO+PS accuracy. The Monte-Carlo parameters can be modified by the user in the file {\tt setup-PYTHIA-lhef.f}. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\begin{thebibliography}{99}
+
+\bibitem{JSZ} B.~J\"ager, F.~Schissler, D.~Zeppenfeld {\em Parton-shower effects on Higgs boson production via vector-boson fusion in association with three jets}, arXiv:1405.6950 [hep-ph]. 
+
+\bibitem{Figy:2007kv}
+  T.~Figy, V.~Hankele and D.~Zeppenfeld,
+  {\em Next-to-leading order QCD corrections to Higgs plus three jet production in vector-boson fusion},
+  JHEP {\bf 0802} (2008) 076
+  [arXiv:0710.5621 [hep-ph]].
+
+\bibitem{Alioli:2010xd} S.~Alioli, P.~Nason, C.~Oleari and E. Re, {\em
+    A general framework for implementing NLO calculations in shower
+    Monte Carlo programs: the POWHEG BOX}, JHEP {\bf 1006} (2010)
+  043  [arXiv:1002.2581 [hep-ph]].
+
+\end{thebibliography}
+%%%%%%%%%%%%%%%%%%
+\end{document}
