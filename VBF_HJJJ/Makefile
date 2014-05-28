@@ -53,12 +53,11 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:dhelas:/:$(OBJ)/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=$(PWD)/..
 INCLUDEZ=vbfnlo-files
 
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0)  -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3) -I $(INCLUDEZ)  
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2) -I$(INCLUDE3) -I $(INCLUDEZ) 
 
 INCLUDE =$(wildcard ../include/*.h *.h)
 
