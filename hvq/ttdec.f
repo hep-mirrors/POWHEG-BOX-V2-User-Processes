@@ -19,8 +19,8 @@ c Madevent parameters
       parameter (itop=3,itbr=4,ijet=5)
       real * 8 mdecwp1,mdecwp2,mdecwm1,mdecwm2
       real * 8 xm2,s,q1q,tk,uk,q2q,w1h,w2h,x,y
-      real * 8 tpvirt2,tmvirt2,wpvirt2,ebp,wmvirt2,ebm,res,resmnr,rat,
-     #         cth2,ttenmnr,cmenmnr,krtop2,kpair,tten,cmen
+      real * 8 tpvirt2,tmvirt2,wpvirt2,ebp,wmvirt2,ebm,res(1),resmnr,
+     #         rat,cth2,ttenmnr,cmenmnr,krtop2,kpair,tten,cmen
       real * 8 xboundb
       character * 2 proc
       real * 8 boundnorm,ubound
@@ -246,7 +246,7 @@ c
          endif
       endif
 c /(2*s)
-      res=res/(4*dotprod(pp(1,1),pp(1,2)))
+      res(1)=res(1)/(4*dotprod(pp(1,1),pp(1,2)))
 c All subsequent factors are included in MadEvent, but not
 c in MNR
       xboundb=1
@@ -261,7 +261,7 @@ c Amplitude squared for top decay
      #                wdecamp(wpvirt2)*
      #                wdecamp(wmvirt2)
 c
-      rat=res/(xboundb*resmnr)
+      rat=res(1)/(xboundb*resmnr)
       if(rat.gt.boundnorm)
      #  call  increasecnt('topdecay upper bound violations')
       ubound=max(rat,ubound)

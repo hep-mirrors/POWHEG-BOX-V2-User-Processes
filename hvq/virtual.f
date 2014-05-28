@@ -74,10 +74,10 @@ c NR06:                                         as^3/4
       common/betfac/betfac,delta
       if(prc.eq.'gg')then
 c         write(*,*) 'gg:',ggqq1(s,t,xm2,xmur2,nl)/ggqq(s,t,xm2,xmur2,nl)
-        ppsv = ggqq1(s,t,xm2,xmur2,nl)
+        ppsv = ggqq1(s,t,xm2,xmur2)
       elseif(prc.eq.'qq')then
 c         write(*,*) 'aa:',qqqq1(s,t,xm2,xmur2,nl)/qqqq(s,t,xm2,xmur2,nl)
-        ppsv = qqqq1(s,t,xm2,xmur2,nl)
+        ppsv = qqqq1(s,t,xm2,xmur2)
       else
         write(*,*)'PPSV: non existent process ',prc
         call exit(-1)
@@ -677,7 +677,7 @@ c**********************
       integer nl
       character * 2 scheme
       common/nl/nl
-      common/betfac/betfac
+      common/betfac/betfac,delta
       common/scheme/scheme
       data pi/3.141 592 653 589 793/
       ro = 4*m2/s
@@ -793,7 +793,7 @@ c**********************
       integer nl
       character * 2 scheme
       common/nl/nl
-      common/betfac/betfac
+      common/betfac/betfac,delta
       common/scheme/scheme
       data pi/3.141 592 653 589 793/
       ro = 4*m2/s
@@ -897,7 +897,7 @@ c**********************
       integer nl
       character * 2 scheme
       common/nl/nl
-      common/betfac/betfac
+      common/betfac/betfac,delta
       common/scheme/scheme
       data pi/3.141 592 653 589 793/
       ro = 4*m2/s

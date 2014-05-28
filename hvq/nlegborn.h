@@ -17,4 +17,7 @@ c     1    + 1 )  ! one resonance
  
 
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=200,maxprocreal=500)
+      parameter (maxprocborn=11,maxprocreal=31)
+
+      integer maxalr
+      parameter (maxalr=51)
