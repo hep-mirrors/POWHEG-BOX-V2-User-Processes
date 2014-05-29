@@ -1,16 +1,15 @@
 #-- Makefile to be used for VBF pp->Hjjj
 ## Choose compiler: gfortran,g77,ifort
 COMPILER=gfortran
-## Choose PDF: native,lhapdf
+## PDFs should be taken from LHAPDF;
 ## LHAPDF package has to be installed separately
 PDF=lhapdf
-#PDF=native
 
 # Choose Analysis: none, default
 # default analysis requires FASTJET package, that has to be installed 
 # separately (see below)
-#ANALYSIS=none
-ANALYSIS=default
+ANALYSIS=none
+#ANALYSIS=default
 ## For static linking uncomment the following
 #STATIC= -static
 
@@ -87,7 +86,7 @@ PWHGANAL=pwhg_analysis_multi.o fastjetfortran.o pwhg_bookhist-multi.o
 # Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o 
 else
-PWHGANAL=pwhg_analysis-dummy.o
+PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi.o  
 endif
 
 LIBS+=$(LHAPDFLIB) -Lvbfnlo-files -lvbfnlo 
