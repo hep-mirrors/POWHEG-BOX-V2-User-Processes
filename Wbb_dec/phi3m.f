@@ -20,7 +20,7 @@ c      common/smin/smin
 
       smin=(m1+m2)**2
       if (s .lt. smin) then
-         write(*,*) 'PROBLEM!!!!!  phi3m: s < smin',s,smin 
+c         write(*,*) 'PROBLEM!!!!!  phi3m: s < smin',s,smin 
          s=smin+1d-8
       endif
 

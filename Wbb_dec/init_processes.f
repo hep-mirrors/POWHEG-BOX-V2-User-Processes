@@ -19,6 +19,10 @@
 c     as for Wbb, set flg_withdamp always to true
       flg_withdamp=.true.
 
+
+      st_bornorder=2
+
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C    Set here the number of light flavours
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -30,6 +34,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       endif
 c     Treat massive b as massless in find_regions:
       flst_lightpart=5
+
 
       call init_couplings
 
