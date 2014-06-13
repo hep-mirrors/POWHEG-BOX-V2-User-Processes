@@ -187,6 +187,7 @@ contains
 
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, ok, h)
+      use p0_dbaru_epnebbbar_model
       implicit none
       real(ki), dimension(6, 4), intent(in) :: vecs
       real(ki), intent(in) :: scale2
@@ -196,11 +197,23 @@ contains
       real(ki) :: rat2, sam_amp2, sam_amp3, kfac, zero
       integer spprec1, fpprec1, i
       real(ki), dimension(2:3) :: irp
-      integer :: tmp_red_int, spprec2, fpprec2 
+      integer :: tmp_red_int, spprec2, fpprec2
+      
+      write(*,*) "NF=", Nf
+
       call samplitudel01(vecs, scale2, amp, rat2, ok, h)
+
+      write(*,*) amp(2)/amp(1)
+      write(*,*) amp(3)/amp(1)
+      write(*,*) amp(4)/amp(1)
+
       if(PSP_check) then
       tmp_red_int=reduction_interoperation
       call ir_subtraction(vecs, scale2, irp)
+
+      write(*,*) irp(2)/amp(1)
+      write(*,*) irp(3)/amp(1)
+      
       if((amp(3)-irp(2)) .ne. 0.0_ki) then
          spprec1 = -int(log10(abs((amp(3)-irp(2))/irp(2))))
       else
@@ -304,12 +317,15 @@ contains
       complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
 
       ! Number of heavy quark flavours in loops.
-      real(ki), parameter :: NFh = 1.0_ki
+      !real(ki), parameter :: NFh = 1.0_ki
+      real(ki) :: NFh = 1.0_ki
 
       logical :: my_ok
 
       ! used for m=0 QCD renormalisation
       real(ki) :: beta0
+
+      if(NF.eq.5) NFh = 0.0_ki
 
       if(corrections_are_qcd) then
          nlo_coupling = 1.0_ki
