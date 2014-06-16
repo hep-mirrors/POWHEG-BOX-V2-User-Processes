@@ -312,7 +312,7 @@ contains
       ! used for m=0 QCD renormalisation
       real(ki) :: beta0
 
-      if(NF.eq.5) NFh = 0.0_k
+      if(NF.eq.5) NFh = 0.0_ki
 
       if(corrections_are_qcd) then
          nlo_coupling = 1.0_ki
