@@ -304,12 +304,15 @@ contains
       complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
 
       ! Number of heavy quark flavours in loops.
-      real(ki), parameter :: NFh = 1.0_ki
+      !real(ki), parameter :: NFh = 1.0_ki
+      real(ki) :: NFh = 1.0_ki
 
       logical :: my_ok
 
       ! used for m=0 QCD renormalisation
       real(ki) :: beta0
+
+      if(NF.eq.5) NFh = 0.0_k
 
       if(corrections_are_qcd) then
          nlo_coupling = 1.0_ki
