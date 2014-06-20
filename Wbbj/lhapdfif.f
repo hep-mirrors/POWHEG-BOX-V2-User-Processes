@@ -35,7 +35,11 @@ c     CT10nlo_nf4          : 11082
             write(*,*) "HARWIRED in the POWHEG BOX code and"
             write(*,*) "not the one from the pdfs"
             write(*,*) "*******************************"
-            asmz=0.1180d0
+            if (ndns.eq.11082) then
+               asmz=0.1180d0
+            elseif (ndns.eq.23300) then
+               asmz=0.12018d0
+            endif
          endif
          write(*,*) ' check: alpha_s(Mz)=',asmz
          call GetOrderAs(iord)
