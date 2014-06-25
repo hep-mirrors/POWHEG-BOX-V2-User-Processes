@@ -1,0 +1,4 @@
+In the course of the implementation of the squark processes several files of the POWHEG-BOX have been modified. 
+The modified files can be found in the top-folder of the disquark processes. When compiling the source files these 
+modified files are used automatically. However, it is not guaranteed that they work with future versions of the 
+POWHEG-BOX-V2 code. The latest successfully used revision is 2718.
