@@ -13,6 +13,8 @@
 
       idvecbos=powheginput('idvecbos')
 
+      st_bornorder=3
+
       call init_processes_born
       call init_processes_real
 
