@@ -1,0 +1,99 @@
+iseed 352349       ! uncomment to set the random seed to a value of your choice.
+                   ! It generates the call RM48IN(352345,0,0) (see the RM48 manual).
+                   ! THIS MAY ONLY AFFECTS THE GENERATION OF POWHEG EVENTS!
+                   ! If POWHEG is interfaced to a shower MC, refer to the shower MC
+                   ! documentation to set its seed.
+irand1  -1
+irand2  -1
+manyseeds 0
+
+numevts 1000   ! number of events to be generated
+ih1   1        ! hadron 1
+ih2   1        ! hadron 2
+#ndns1 131      ! pdf for hadron 1 (hvqpdf numbering)
+#ndns2 131      ! pdf for hadron 2
+lhans1  10050         ! pdf set for hadron 1 (LHA numbering)
+lhans2  10050         ! pdf set for hadron 2 (LHA numbering)
+ebeam1 7000    ! energy of beam 1
+ebeam2 7000    ! energy of beam 2
+
+SLHA  'input.slha' !  name of the SLHA input-file, should not be longer than 100 signs
+
+part1     'uL'  ! first squark: e.g. uL for sup-left and so on
+part2  'uLbar'  ! second squark (for antisquarks: uLbar)
+withcc      1   ! for squark pair production: consider also antisquarks
+
+!!! parameters for summing up all channels
+debug_sumup  0  ! sum up all contributions using degenerate mass-spectrum
+avgslhamass  0  ! if set: read SLHA-file, but form average of sq-masses
+msquark  500.0  ! mass of the degenerate squarks
+mgluino  500.0  ! gluino-mass
+mtop     175.0  ! top-mass
+
+partialsumup 0        ! if set to 1: read in a user-provided file
+SUMFLST  'flst.input' ! input file containing the flavour structures
+
+!!! scale settings
+facscfact       1 ! factorization scale factor: mufact=muref*facscfact 
+renscfact       1 ! renormalization scale factor: muren=muref*renscfact 
+fixedscale      1     ! fixed (1) or dynamic (0) scale
+#setscale        500.0 ! set mur=muf to a specific value
+dynscalechoice  1     ! 1: average of m_T, 2: m_sq1sq2
+
+use-old-grid   0  ! if 1 use old grid if file pwggrids.dat is present (# 1: regenerate)
+use-old-ubound 0  ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; # 1: regenerate
+
+ncall1 50000   ! number of calls for initializing the integration grid, default: 10000
+itmx1 5        ! number of iterations for initializing the integration grid
+ncall2 100000  ! number of calls for computing the integral and finding upper bound,default:100000
+itmx2 5        ! number of iterations for computing the integral and finding upper bound
+foldcsi  1     ! number of folds on x integration
+foldy    5     ! number of folds on y integration
+foldphi  5     ! number of folds on phi integration
+nubound 500000 ! number of bbarra calls to setup norm of upper bounding function
+
+!!! additional flags concerning decays
+decay       1  ! perform decays of squarks (1) or not (0)
+decchan1    1  ! decay-channel for first squark, (1): sq->q chi^0_1
+decchan2    1
+NLOwhich    3  ! NLO only in prod.(1), only in decay (2) or in both (3)
+CalcGatot   1  ! calculate Gamma^sq_tot (1) or read from SLHA file (0)
+NWAapproach 2  ! 1: do not expand NLO width in denominator, 2: expand all
+
+!!! cuts
+cuts      0      ! apply cuts in NLO-plots (1) or not (0)
+CUTS  'cuts.dat' ! name of the file where the cuts are specified
+
+!!!  parameters for the subtraction of real-on-shell-intermediate contributions
+flagsubmethod 1 ! 1: DS, 2: DR-I, 3: DR-II
+! in order to choose a specific DS scheme:
+flagsplit     3 ! 0: DS(*)-I, 2: DS-II, 3: DS*-III (gauge-invariant method)
+flagunexp     0 ! distinguish DS*-I (0) and DS-I (1)
+flagrestrict  1 !modify Jacobian for the subtracted residuum (1) or not (0)
+
+widthgluino  0.1 ! the regularizing width for the gluino 
+radcut       1.0 ! radiation cut applied to avoid negative R-values 
+
+!!! iterations for the split-regular parts
+ncall1split  1000000
+itmx1split   8
+ncall2split  3000000
+itmx2split   5
+
+flagownRCF 0 ! 0: POWHEG-BOX algorithm to assign real colour flows
+             ! 1: use colour flow decomposition
+flaggauge  1 ! in the real routines: use lightcone (1) or Feynman (2) gauge
+
+bornonly       0  ! replace btilde by born to generate events
+smartsig       0 
+withnegweights 1  
+testplots      1  ! some LO/NLO-plots
+bornzerodamp   1  ! use damping-factor
+hdamp          50 ! damping-factor hast the form h^2/(pt^2+h^2) in vicinity of soft/coll limit
+
+LOevents 0  
+
+!!! jet-parameters
+jetalgo  2     ! 1:kt, 2: antikt, 3: Cambridge-Aachen
+Rpara    0.7   ! jet radius parameter for the (anti)kt-algorithm
+ptjmin   1.0   ! minimal pt requested for the jets

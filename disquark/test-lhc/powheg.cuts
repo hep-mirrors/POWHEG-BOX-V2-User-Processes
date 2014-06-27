@@ -1,0 +1,34 @@
+# this file contains some basic cuts
+# if you add some: modify the pwhg_analysis.f-file and the readcuts-routine
+
+#######
+# JETS
+#######
+ptj_1   150.0   !pt_jet-cuts in GeV for hardest, second hardest and third hardest jet
+ptj_2   100.0   
+
+ptj_min   20.0   !if present: third hardest jet
+etaj   2.8       !eta_jet-cut
+
+#######
+# PTMISS 
+######
+ptinv  100.0  !minimal missing energy required
+
+##########
+# ATLAS 
+##########
+meffincl     1000.0    !minimal eff. mass calculated for all visible jets
+rptinvmeff      0.2    !minimal value for the ratio of ptinv/meff (meff for the first 2 jets)
+
+deltaphi_j1_ptinv  0.4 
+deltaphi_j2_ptinv  0.4
+deltaphi_j3_ptinv  0.4  !only taken into account if three jets present
+
+#########
+# SQUARKS
+#########
+ptsq_1   0.0 !cuts on the pt of the squarks (if no decays considered)
+ptsq_2   0.0
+
+ptsqsq  0.0 

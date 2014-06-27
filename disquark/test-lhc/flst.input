@@ -1,0 +1,5 @@
+# List of Flavour-structure for the partial-sumup-mode in POWHEG
+dL  dLbar
+dL  sLbar
+sL  dLbar
+sL  sLbar
