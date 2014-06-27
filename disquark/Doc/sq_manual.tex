@@ -1,0 +1,213 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amssymb,enumerate}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{graphics}
+\usepackage{xspace}
+\usepackage{epsfig}
+\usepackage{subfigure}
+\usepackage{slashed}
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % Input in ISO 8859-1 (Latin1)
+
+\setlength\paperwidth  {210mm}%
+\setlength\paperheight {300mm}%	
+
+\textwidth 160mm%		% DEFAULT FOR LATEX209 IS a4
+\textheight 230mm%
+
+\voffset -1in
+\topmargin   .05\paperheight	% FROM TOP OF PAGE TO TOP OF HEADING (0=1inch)
+\headheight  .02\paperheight	% HEIGHT OF HEADING BOX.
+\headsep     .03\paperheight	% VERT. SPACE BETWEEN HEAD AND TEXT.
+\footskip    .07\paperheight	% FROM END OF TEX TO BASE OF FOOTER. (40pt)
+
+
+\hoffset -1in				% TO ADJUST WITH PAPER:
+	\oddsidemargin .13\paperwidth	% LEFT MARGIN FOR ODD PAGES (10)
+	\evensidemargin .15\paperwidth	% LEFT MARGIN FOR EVEN PAGES (30)
+	\marginparwidth .10\paperwidth	% TEXTWIDTH OF MARGINALNOTES
+	\reversemarginpar		% BECAUSE OF TITLEPAGE.
+
+
+\newcommand{\PB}{\textsc{Powheg-Box}}
+
+\newcommand{\sq}{\tilde{q}}
+\newcommand{\sqbar}{\bar{\sq}}
+\newcommand{\neutone}{\tilde{\chi}^0_1}
+
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\eqsp}[2]{\begin{equation}\begin{align}#1\end{align}\label{#2}\end{equation}}
+
+\newcommand{\dGa}{\text{d}\Gamma^{\sq_1 \rightarrow \neutone q}}
+\newcommand{\dGb}{\text{d}\Gamma^{\sq_2 \rightarrow \neutone q}}
+\newcommand{\Ga}{\Gamma_{\text{tot}}^{\sq_1}}
+\newcommand{\Gb}{\Gamma_{\text{tot}}^{\sq_2}}
+\newcommand{\GaLO}{\Gamma_{\text{tot},0}^{\sq_1}}
+\newcommand{\GaNLO}{\Gamma_{\text{tot},1}^{\sq_1}}
+\newcommand{\GbLO}{\Gamma_{\text{tot},0}^{\sq_2}}
+\newcommand{\GbNLO}{\Gamma_{\text{tot},1}^{\sq_2}}
+\newcommand{\ds}{\text{d}\sigma}
+\newcommand{\as}{\alpha_s}
+\newcommand{\HWG}{\textsc{Herwig++}}
+\newcommand{\DS}{\textsc{Dipole-Shower}}
+\newcommand{\PYTH}{\textsc{Pythia}}
+
+\title{Squark Production and Decay in the \PB}
+\date{}
+%\author{}
+%\keywords{}
+%\abstract{}
+%\preprint{}
+
+
+\begin{document}
+\maketitle
+%
+\noindent
+This manual summarizes the parameters which are specific to the implementation of squark antisquark and squark pair production and decays in the \PB~framework. More details on the implementation of these processes can be found in~\cite{ownpaper} and~\cite{owndiss}. For a summary of the parameters which are common to all processes included in the \PB~see the main manual. 
+
+\section*{Compiling the program}
+The squark antisquark and squark pair production processes are implemented as two independent programs. The respective process-dependent routines can be found in the subfolders {\tt squark\_squark} and {\tt squark\_antisquark}, which contain each a sample  {\tt makefile}. In order to generate the executables change into the respective folder and run 
+{\tt make}. Per default the programs require {\tt fastjet} and {\tt lhapdf}, so make sure that {\tt fastjet-config} and 
+{\tt lhapdf-config} are set correctly in your path, otherwise you have to adapt the {\tt makefile}.%
+
+In order to run the generated executables you have to provide a {\tt powheg.input} file, which contains the settings for different technical parameters, and an SLHA file containing the masses of the sparticles. Some sample files can be found in the subfolder {\tt testrun-lhc}. Copy these files to a directory of your choice and adapt the parameters as desired. Then either execute {\tt pwhg\_main\_sqsq} or {\tt pwhg\_main\_sqantisq} from the folder which contains the input files. 
+
+\section*{Input parameters}
+The input parameters introduced in the course of the implementation of the processes are summarized in the following, the individual settings can be changed in the {\tt powheg.input} file.
+\bi
+\item \textbf{Spectrum file:} The user has to provide a file containing the masses, mixing matrices etc. of the considered scenario according to the SUSY Les Houches accord: 
+\begin{verbatim}
+SLHA   'input.slha' !  name of the SLHA input-file
+\end{verbatim}
+\item \textbf{Process choice:} There are three different ways to operate the code.
+The first option consists in specifying one specific final-state configuration by setting 
+\begin{verbatim}
+part1      'uL'  ! first squark: e.g. uL for sup-left and so on
+part2      'uL'  ! second squark (for antisquarks: uLbar)
+withcc     1     ! for squark pair production: consider also antisquarks
+\end{verbatim}
+where the flag {\tt withcc} is only used for squark pair production.
+
+ In the second option a list of Born flavour structures, which shall be considered in one run, is read from an external file:
+\begin{verbatim}
+partialsumup 0        ! if set to 1: read in a user-provided file
+SUMFLST  'flst.input' ! input file containing the flavour structures
+\end{verbatim}
+ In this case the masses in all given combinations have to be identical, otherwise the program stops. The flag {\tt smartsig} is set automatically in order to benefit from the considerable speed up. For a sample file see {\tt testrun-lhc/flst.input}.
+
+ In the third operation mode all squarks are treated as mass degenerate and all channels are summed up. This mode is invoked by setting
+\begin{verbatim}
+debug_sumup  0  ! sum up all contributions using degenerate mass-spectrum
+avgslhamass  0  ! if set: read SLHA-file, but form average of sq-masses
+msquark  500.0  ! mass of the degenerate squarks
+mgluino  500.0  ! gluino-mass
+mtop     175.0  ! top-mass
+\end{verbatim}
+If the flag {\tt avgslhamass} is set, the common squark mass is calculated by averaging the masses of all squarks occurring in the final state, using the masses provided in the SLHA file. In this case the top and gluino mass are read from this file, too. Otherwise the specified masses are used. Again, the flag {\tt smartsig} is set. 
+\item \textbf{Scale settings:} The renormalization and factorization scales, which are in any case identical, can be either set to a fixed value or a dynamic scale can be used.
+\begin{verbatim}
+fixedscale      1     ! fixed (1) or dynamic (0) scale
+setscale        500.0 ! set mur=muf to a specific value
+dynscalechoice  1     ! 1: average of m_T, 2: m_sq1sq2
+\end{verbatim}
+The fixed scale can be set to any value. If the {\tt setscale} keyword is not present in the input file, the average mass of the two final-state squarks is used as default value. Possible choices for dynamic scales are the average of the transverse masses of the two squarks or their invariant mass.
+\item \textbf{Decays:} The flags specifying the decays of the produced squarks are the following:
+\begin{verbatim}
+decay       0  ! perform decays of squarks (1) or not (0)
+decchan1    1  ! decay-channel for first squark, (1): sq->q chi^0_1
+decchan2    1
+NLOwhich    3  ! NLO only in prod.(1), only in decay (2) or in both (3)
+CalcGatot   1  ! calculate Gamma^sq_tot (1) or read from SLHA file (0)
+NWAapproach 2  ! 1: do not expand NLO width in denominator, 2: expand all
+\end{verbatim}
+At the moment only the decay mode $\tilde{q}\rightarrow q \tilde{\chi}^0_1$ is implemented, hence {\tt decchan1} and {\tt decchan2} have to be set to 1. The NLO corrections can be calculated for either only the production process, only the decay processes, or both. The total width used in the combination formulae for production and decay can be either calculated consistently (see \cite{owndiss} for details) or read from the specified SLHA file. Setting the flag {\tt NWAapproach} to 1 or 2 invokes the use of either
+ \eqsp{
+ \ds_{\text{tot}} = &\,\,\,\frac{1}{\Ga \Gb} \Biggl[\ds_0 \,\dGa_0 \dGb_0   + \as \bigl( \ds_0\, \dGa_1 \dGb_0 \\&+ \ds_0\, \dGa_0 \dGb_1 + \ds_1\, \dGa_0 \dGb_0  \bigr)\Biggr]}{eq:proddec2}
+or
+ \begin{align}
+ \label{eq:proddec1}
+ \ds_{\text{tot}} =& \,\,\,\frac{1}{\GaLO \GbLO} \Biggl[\ds_0\, \dGa_0 \,\dGb_0  \left(1-\frac{\as \GaNLO }{\GaLO }-\frac{\as \GbNLO }{\GbLO }\right) \\
+ &+ \as \left( \ds_0\, \dGa_1 \dGb_0 + \ds_0\, \dGa_0 \dGb_1 + \ds_1\, \dGa_0 \dGb_0  \right)\Biggr]\, \notag
+ \end{align}
+for the combination of production and decay, see \cite{owndiss} for details.
+
+\item \textbf{Cuts and jet parameters:} In the NLO analysis performed during the integration of the $\overline{\cal B}$ function some cuts on the jets, $\slashed{E}_T$ etc.~can be applied, which have to be specified in a separate file: 
+\begin{verbatim}
+cuts      0      ! apply cuts in NLO-plots (1) or not (0)
+CUTS  'cuts.dat' ! name of the file where the cuts are specified
+\end{verbatim}
+A sample file can be found in {\tt testrun-lhc/powheg.cuts}. In order to implement different cuts the corresponding analysis routine and the function {\tt readcuts} have to be adapted. 
+Moreover, if the decays of the squarks are taken into account a jet algorithm has to be applied to cluster the resulting partons. To this end the \textsc{Fastjet} package is used. For the choice of the jet algorithm, the jet radius parameter and the minimal transverse momentum of the jets the following parameters have to be set:
+\begin{verbatim}
+jetalgo  2     ! 1:kt, 2: antikt, 3: Cambridge-Aachen
+Rpara    0.7   ! jet radius parameter for the (anti)kt-algorithm
+ptjmin   1.0   ! minimal pt requested for the jets
+\end{verbatim}
+\item \textbf{Subtraction of on-shell gluinos:} Several different schemes for the subtraction of contributions with intermediate on-shell gluinos have been implemented. In order to choose a specific scheme the following parameters have to be modified:
+\begin{verbatim}
+flagsubmethod 1 ! 1: DS, 2: DR-I, 3: DR-II
+! in order to choose a specific DS scheme:
+flagsplit     3 ! 0: DS(*)-I, 2: DS-II, 3: DS*-III (gauge-invariant method)
+flagunexp     0 ! distinguish DS*-I (0) and DS-I (1)
+
+flagrestrict  1 !modify Jacobian for the subtracted residuum (1) or not (0)
+\end{verbatim}
+The meaning of the different schemes can be inferred from the discussion in \cite{ownpaper} and \cite{owndiss}. The option {\tt flagsplit = 1} is in principle equivalent to the DS-II approach, however, with this choice only the resonant amplitude squared, $|M_{\text{r}}|^2$, is treated as regular remnant. If the flag {\tt flagunexp} is set to 1, the analytical expansion in the poles is not performed for the DS-I scheme. In order to neglect the modification of the Jacobian for the reshuffled phase space, the flag {\tt flagrestrict} has to be set to 0.
+The parameters required for the different schemes are set as follows:
+\begin{verbatim}
+widthgluino  0.1 ! the regularizing width for the gluino 
+radcut       1.0 ! radiation cut applied to avoid negative R-values 
+\end{verbatim}
+The number of points and iterations for the integration of the remnant terms can be chosen differently from the settings for the $\overline{\cal B}$ integration:
+\begin{verbatim}
+ncall1split  100000
+itmx1split   8
+ncall2split  300000
+itmx2split   5
+\end{verbatim}
+These settings are only relevant if the DS scheme is used and {\tt flagsplit} $\neq 0$.
+\item \textbf{Miscellaneous options:}
+The colour flow for events with real emissions can be either determined according to the approximate algorithm implemented in the \PB, or using the colour flow decomposition for the real amplitude squared:
+\begin{verbatim}
+flagownRCF 0 ! 0: POWHEG-BOX algorithm to assign real colour flows
+             ! 1: use colour flow decomposition
+\end{verbatim}
+The real amplitudes can be either evaluated using the lightcone gauge or the Feynman gauge for the external gluons. 
+\begin{verbatim}
+flaggauge  1 ! in the real routines: use lightcone (1) or Feynman (2) gauge
+\end{verbatim}
+Both choices yield of course identical results.
+\ei
+
+\section*{Showering the generated events}
+As usually running the code generates a Les Houches event (LHE) file, which can be processed in turn by any parton shower program which supports this standard. We have tested this using the two Monte Carlo event generators \HWG~and \PYTH. By construction the \textsc{Powheg} method requires the radiation generated in the showering stage to take 	place at smaller $p_T$-values than the first radiation generated with the \PB. In principle this is achieved in the respective shower program by imposing a $p_T$-veto with the veto scale read from the LHE record of each event, which corresponds to the {\tt SCALUP} entry. However, in case of \PYTH a further subtlety occurs: if final-state resonances are present the mass of those has to be preserved by the reshuffling operations performed in the shower algorithm. Therefore, the showering of partons originating from the decays of these resonances is performed separately in \PYTH. The starting scale for these shower contributions is set to the invariant mass of all decay 
+products, hence in the case at hand to the mass of the respective squark. This scale is typically an order of magnitude larger than the {\tt SCALUP} value, leading to much more radiation and thus to a strong bias of the results. In order to correct for this effect, the \textsc{Pythia} routines had to be adapted to use the scale specified in the LHE file as starting scale in all individual contributions to the parton shower. A modified version of \textsc{Pythia 6.4.28} can be found in the subfolder {\tt Tools/Pythia6}. In order to override the normal operation mode of the code the flag  {\tt MSTJ(200)} has to be set to 1.
+
+\begin{thebibliography}{99}
+% \bibitem{pwgbox} S.~Alioli, P.~Nason, C.~Oleari, and E. Re, {\em
+%     A general framework for implementing NLO calculations in shower
+%     Monte Carlo programs: the POWHEG BOX}, JHEP {\bf 1006} (2010)
+%   043  [arXiv:1002.2581 [hep-ph]].
+  
+\bibitem{ownpaper}
+R.~Gavin, C.~Hangst, M.~Krämer, M.~Mühlleitner, M.~Pellen, E.~Popenda, and
+  M.~Spira, {\em {Matching Squark Pair Production at NLO with Parton Showers}}, JHEP {\bf 10} (2013)  187 [arXiv:hep-ph/1305.4061]
+%%CITATION = ARXIV:1305.4061;%%.
+
+\bibitem{owndiss}
+C.~Hangst, {\em {Matching Squark Production and Decay at Next-to-Leading Order
+  Accuracy with Parton Showers}}.
+\newblock Dissertation, Karlsruher Institut für Technologie, 2014.\\
+\newblock http://nbn-resolving.org/urn:nbn:de:swb:90-411555
+  
+
+\end{thebibliography}
+%%%%%%%%%%%%%%%%%%
+\end{document}
