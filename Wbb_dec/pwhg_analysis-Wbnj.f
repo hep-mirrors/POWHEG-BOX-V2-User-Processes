@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-020',  '-030',  '-050'/
-      data ptminarr/   20d0,     30d0,    50d0/
+      data cptmin/  '-000',  '-025',  '-050'/
+      data ptminarr/   0d0,     25d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -35,6 +35,7 @@ c  pwhgfill  :  fills the histograms with data
 
       do i=1,nptmin
       call bookupeqbins('sigtot'//cptmin(i),1d0,0.5d0,1.5d0)
+
       call bookupeqbins('Njet'//cptmin(i),1d0,-0.5d0,5.5d0)
 
       call bookupeqbins('W-y'//cptmin(i),dy,-5d0,5d0)
@@ -74,33 +75,33 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
       call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
 
-      call bookupeqbins('jx1-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx1-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx1-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('jx1-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('jx1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('jx1-m'//cptmin(i),dpt,0d0,400d0) 
-
-      call bookupeqbins('jx2-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx2-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx2-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('jx2-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('jx2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('jx2-m'//cptmin(i),dpt,0d0,400d0) 
-
-      call bookupeqbins('jx3-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx3-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx3-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('jx3-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('jx3-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('jx3-m'//cptmin(i),dpt,0d0,400d0) 
-
-      call bookupeqbins('jx4-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx4-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('jx4-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('jx4-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('jx4-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('jx4-m'//cptmin(i),dpt,0d0,400d0) 
+c$$$      call bookupeqbins('jx1-y'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx1-eta'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx1-pt'//cptmin(i),dpt,0d0,400d0)
+c$$$      call bookupeqbins('jx1-ptzoom'//cptmin(i),2d0,1d0,151d0)
+c$$$      call bookupeqbins('jx1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+c$$$      call bookupeqbins('jx1-m'//cptmin(i),dpt,0d0,400d0) 
+c$$$
+c$$$      call bookupeqbins('jx2-y'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx2-eta'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx2-pt'//cptmin(i),dpt,0d0,400d0)
+c$$$      call bookupeqbins('jx2-ptzoom'//cptmin(i),2d0,1d0,151d0)
+c$$$      call bookupeqbins('jx2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+c$$$      call bookupeqbins('jx2-m'//cptmin(i),dpt,0d0,400d0) 
+c$$$
+c$$$      call bookupeqbins('jx3-y'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx3-eta'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx3-pt'//cptmin(i),dpt,0d0,400d0)
+c$$$      call bookupeqbins('jx3-ptzoom'//cptmin(i),2d0,1d0,151d0)
+c$$$      call bookupeqbins('jx3-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+c$$$      call bookupeqbins('jx3-m'//cptmin(i),dpt,0d0,400d0) 
+c$$$
+c$$$      call bookupeqbins('jx4-y'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx4-eta'//cptmin(i),dy,-5d0,5d0)
+c$$$      call bookupeqbins('jx4-pt'//cptmin(i),dpt,0d0,400d0)
+c$$$      call bookupeqbins('jx4-ptzoom'//cptmin(i),2d0,1d0,151d0)
+c$$$      call bookupeqbins('jx4-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
+c$$$      call bookupeqbins('jx4-m'//cptmin(i),dpt,0d0,400d0) 
 
       enddo
       end
@@ -611,47 +612,47 @@ c     next-to-hardest jet
             call filld('j2-ptzoom2'//cptmin(i),   pt, dsig)
             call filld('j2-m'//cptmin(i),     m, dsig)
          endif
-
-         px(:)=pj(:,1)
-         call getyetaptmass(px,y,eta,pt,m)
-         call filld('jx1-y'//cptmin(i),     y, dsig)
-         call filld('jx1-eta'//cptmin(i), eta, dsig)
-         call filld('jx1-pt'//cptmin(i),   pt, dsig)
-         call filld('jx1-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('jx1-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('jx1-m'//cptmin(i),     m, dsig)
-
-         px(:)=pj(:,2)
-         call getyetaptmass(px,y,eta,pt,m)
-         call filld('jx2-y'//cptmin(i),     y, dsig)
-         call filld('jx2-eta'//cptmin(i), eta, dsig)
-         call filld('jx2-pt'//cptmin(i),   pt, dsig)
-         call filld('jx2-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('jx2-m'//cptmin(i),     m, dsig)
-
-         if (found_hardjet) then
-            px(:)=pj(:,3)
-            call getyetaptmass(px,y,eta,pt,m)
-            call filld('jx3-y'//cptmin(i),     y, dsig)
-            call filld('jx3-eta'//cptmin(i), eta, dsig)
-            call filld('jx3-pt'//cptmin(i),   pt, dsig)
-            call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('jx3-m'//cptmin(i),     m, dsig)
-         endif
-            
-         if (found_nexthardjet) then
-            px(:)=pj(:,4)
-            call getyetaptmass(px,y,eta,pt,m)
-            call filld('jx4-y'//cptmin(i),     y, dsig)
-            call filld('jx4-eta'//cptmin(i), eta, dsig)
-            call filld('jx4-pt'//cptmin(i),   pt, dsig)
-            call filld('jx4-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('jx4-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('jx4-m'//cptmin(i),     m, dsig)
-         endif
-         
+c$$$
+c$$$         px(:)=pj(:,1)
+c$$$         call getyetaptmass(px,y,eta,pt,m)
+c$$$         call filld('jx1-y'//cptmin(i),     y, dsig)
+c$$$         call filld('jx1-eta'//cptmin(i), eta, dsig)
+c$$$         call filld('jx1-pt'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx1-ptzoom'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx1-ptzoom2'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx1-m'//cptmin(i),     m, dsig)
+c$$$
+c$$$         px(:)=pj(:,2)
+c$$$         call getyetaptmass(px,y,eta,pt,m)
+c$$$         call filld('jx2-y'//cptmin(i),     y, dsig)
+c$$$         call filld('jx2-eta'//cptmin(i), eta, dsig)
+c$$$         call filld('jx2-pt'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx2-ptzoom'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
+c$$$         call filld('jx2-m'//cptmin(i),     m, dsig)
+c$$$
+c$$$         if (found_hardjet) then
+c$$$            px(:)=pj(:,3)
+c$$$            call getyetaptmass(px,y,eta,pt,m)
+c$$$            call filld('jx3-y'//cptmin(i),     y, dsig)
+c$$$            call filld('jx3-eta'//cptmin(i), eta, dsig)
+c$$$            call filld('jx3-pt'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx3-m'//cptmin(i),     m, dsig)
+c$$$         endif
+c$$$            
+c$$$         if (found_nexthardjet) then
+c$$$            px(:)=pj(:,4)
+c$$$            call getyetaptmass(px,y,eta,pt,m)
+c$$$            call filld('jx4-y'//cptmin(i),     y, dsig)
+c$$$            call filld('jx4-eta'//cptmin(i), eta, dsig)
+c$$$            call filld('jx4-pt'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx4-ptzoom'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx4-ptzoom2'//cptmin(i),   pt, dsig)
+c$$$            call filld('jx4-m'//cptmin(i),     m, dsig)
+c$$$         endif
+c$$$         
       enddo
       end
 

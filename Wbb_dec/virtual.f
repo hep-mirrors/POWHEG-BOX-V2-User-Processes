@@ -144,8 +144,9 @@ c     transfer the flavor list into a list with only up and down quark or antiqu
          endif
       enddo
  111  write(*,*) 'NO matching flavour string between POWHEG and GoSam'
+      write(*,*) 'vflav :', vflav(1:nlegborn)
       write(*,*) 'PROGRAM ABORT'
-      call exit(1)
+      call pwhg_exit(-1)
       
  222  call gosam_momenta(p,pgosam)
       
