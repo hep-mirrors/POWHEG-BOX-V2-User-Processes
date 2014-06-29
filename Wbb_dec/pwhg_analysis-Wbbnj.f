@@ -369,7 +369,7 @@ CC    Apply jet algorithm
       else
          palg = -1d0         ! Alg: 1 = kt, -1 = antikt
          R    = 0.5d0        ! Radius parameter
-         ptminfastjet = 20d0 ! Pt min
+         ptminfastjet = minval(ptminarr) ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
