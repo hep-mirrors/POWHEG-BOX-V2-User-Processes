@@ -514,8 +514,8 @@ c     if there is only one b jet, then return
 
 c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
 c     we can start plotting 
-      ptb1min=20d0
-      ptb2min=20d0
+      ptb1min=0d0
+      ptb2min=0d0
 
       call getyetaptmass(pbjet1,y,eta,pt,m)
       if(debug)  write(*,*) "ptb1 =", pt
