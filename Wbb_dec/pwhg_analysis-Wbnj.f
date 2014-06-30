@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-010',  '-030',  '-050'/
-      data ptminarr/   10d0,    30d0,    50d0/
+      data cptmin/  '-025',  '-030',  '-050'/
+      data ptminarr/   25d0,    30d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -270,7 +270,7 @@ c     copy momenta to be passed to jet algorithm
       else
          palg = -1d0            ! Alg: 1 = kt, -1 = antikt
          R    = 0.7d0           ! Radius parameter
-         ptminfastjet = 0d0     ! Pt min
+         ptminfastjet = 20d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
@@ -331,7 +331,11 @@ c     this jet contains a b and a bbar
          endif
       enddo
 
-      
+c      if (nbjet.eq.1) then
+c         write(*,*) njet,nbjet,nbbjet
+c      endif
+
+
       if (nbjet.eq.2) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b b analysis
