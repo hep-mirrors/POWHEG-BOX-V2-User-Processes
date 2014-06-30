@@ -250,7 +250,7 @@ C     W momentum
       
       ntracks=0
       jetvec = 0
-c     loop over final state particles, excluding the already found le[ton and neutrino
+c     loop over final state particles, excluding the already found lepton and neutrino
       do ihep=1,nhep
          if (isthep_loc(ihep).eq.1) then
             if (ntracks.eq.maxtrack) then
@@ -270,9 +270,9 @@ c     copy momenta to be passed to jet algorithm
       if (ntracks.eq.0) then
          numjets=0
       else
-         palg = -1d0            ! Alg: 1 = kt, -1 = antikt
+         palg = 0d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.7d0           ! Radius parameter
-         ptminfastjet = 20d0     ! Pt min
+         ptminfastjet = 25d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
@@ -427,8 +427,7 @@ c     next-to-hardest jet
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
-c     apply Campbell et al. cuts: hep-ph/0611348
-c     jet algo ?????????????????  palg = 0 
+c     apply Campbell et al. cuts: hep-ph/0611348.  Algo: palg = 0 
          ptcut = 25d0
          etamax= 2.5d0
          do i=1,min(2,njet)
