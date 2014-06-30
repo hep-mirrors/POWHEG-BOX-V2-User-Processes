@@ -37,6 +37,8 @@ xupbound 2d0    ! increase upper bound for radiation generation
 
 ! OPTIONAL PARAMETERS
 
+ckm_offdiag  1  ! (default 0): if 1, use non-diag CKM matrix at event generation level
+
 renscfact  1d0    ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 facscfact  1d0    ! (default 1d0) fac scale factor: mufact = muref * facscfact 
 #bornonly   1       ! (default 0) if 1 do Born only

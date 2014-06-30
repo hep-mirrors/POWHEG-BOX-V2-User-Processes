@@ -727,7 +727,27 @@ c
       
       real * 8 random
       integer i
+      integer HWW,HZZ
 
+
+c     fix CKM for VBF WW -> H 
+      call particle_identif(HWW,HZZ)
+      if (idup(3).eq.HWW) then   
+         if ((idup(1).ne.21).and.(idup(2).ne.21)) then 
+            call CKM_reshuffling(idup(1),idup(4),0)
+            call CKM_reshuffling(idup(2),idup(5),0)
+         elseif (idup(1).eq.21) then 
+            call CKM_reshuffling(idup(6),idup(4),1)
+            call CKM_reshuffling(idup(2),idup(5),0)
+         elseif (idup(2).eq.21) then 
+            call CKM_reshuffling(idup(1),idup(4),0)
+            call CKM_reshuffling(idup(6),idup(5),1)
+         else
+            print*, 'wrong idup assignment:', idup(1:6)
+            stop
+         endif
+      endif
+            
 c colours of incoming quarks, antiquarks
 
 c     Higgs Boson                
@@ -735,7 +755,6 @@ c     Higgs Boson
       icolup(2,3)=0
 c     change Higgs boson codification back to PDG
       idup(3) = 25
-
 
 c     -- colored particles
       icolup(1,1)=0
@@ -886,5 +905,43 @@ c     lepton masses
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
 
+      end
 
+      function signn(j)
+      implicit none
+      integer signn, j
+      if (j.eq.0) then
+         signn =0
+      else
+         signn =j/abs(j)
+      endif
+      end
+
+
+      subroutine CKM_reshuffling(flin,flout,gtype)
+      implicit none
+      integer flin,flout
+      integer i,j
+      logical ini
+      real * 8 CKM_sq(6,6)
+      include 'PhysPars.h' 
+      integer signn
+      external signn
+      save CKM_sq,ini
+      data ini/.true./
+      integer nf_max
+      integer gtype 
+c     no initial or final state t quark!!
+      nf_max = 4
+      if (ini) then
+         do j=1,nf_max
+            do i=1,nf_max
+               CKM_sq(i,j) = ph_CKM_matrix(i,j)**2
+            enddo
+         enddo
+         ini = .false.
+      endif      
+      call pick_random(nf_max,CKM_sq(1,abs(flin)),flout)
+
+      if (gtype.ne.1) flout = flout * signn(flin)
       end

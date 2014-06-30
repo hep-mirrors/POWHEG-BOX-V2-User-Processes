@@ -12,6 +12,11 @@
       integer i,j
 
       real*8 sthw,cthw,g2
+
+      real *8 powheginput
+      external powheginput 
+
+      integer ckm_offdiag
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
@@ -27,19 +32,41 @@ c fermion masses:
       physpar_mq(4)=1.50d0   ! charm
       physpar_mq(5)=4.80d0   ! bottom
 c
-c     DIAGONAL CKM 
-      ph_CKM(1,1)=1d0 
-      ph_CKM(1,2)=0d0 
-      ph_CKM(1,3)=0d0
-      ph_CKM(2,1)=0d0 
-      ph_CKM(2,2)=1d0 
-      ph_CKM(2,3)=0d0
-      ph_CKM(3,1)=0d0
-      ph_CKM(3,2)=0d0
-      ph_CKM(3,3)=1d0
-
 c     number of light flavors
       st_nlight = 4
+c
+c diagonal or non-diag. CKM matrix at event generation level? 
+c (note: fixed order MEs are always with diag. CKM)
+c     
+      ckm_offdiag = powheginput("#ckm_offdiag")
+      if (ckm_offdiag.ne.1) ckm_offdiag = 0
+
+c
+      if (ckm_offdiag.eq.0) then 
+c     DIAGONAL CKM 
+         ph_CKM(1,1)=1d0 
+         ph_CKM(1,2)=0d0 
+         ph_CKM(1,3)=0d0
+         ph_CKM(2,1)=0d0 
+         ph_CKM(2,2)=1d0 
+         ph_CKM(2,3)=0d0
+         ph_CKM(3,1)=0d0
+         ph_CKM(3,2)=0d0
+         ph_CKM(3,3)=1d0
+      else
+         ph_CKM(1,1)=0.9748 	
+         ph_CKM(1,2)=0.2225  	 
+         ph_CKM(1,3)=0.0036  	
+         ph_CKM(2,1)=0.2225  	
+         ph_CKM(2,2)=0.9740 	
+         ph_CKM(2,3)=0.041	
+         ph_CKM(3,1)=0.009    
+         ph_CKM(3,2)=0.0405   
+         ph_CKM(3,3)=0.9992
+      endif
+
+c     initialize CKM with flavor indexes
+      call inizialize_ph_CKM_matrix
 
       call coup_powheg_to_vbfnlo
 c fermion masses:
@@ -114,7 +141,7 @@ c Higgs parameters (not used)
       write(*,*) 'sthw2 = ',ph_sthw2
       write(*,*) '(unit_e)^2 = ',ph_unit_e**2   
       write(*,*) '(g_w)^2 = ',ph_unit_e*ph_unit_e/ph_sthw2   
-      write(*,*) 'CKM matrix' 
+      write(*,*) 'CKM matrix for events' 
       do i=1,3
          write(*,*) (ph_CKM(i,j),j=1,3)
       enddo
@@ -128,3 +155,30 @@ c convert couplings into format needed by EW matrixelements:
 
 
       
+
+      subroutine inizialize_ph_CKM_matrix
+      implicit none     
+      include 'PhysPars.h'  
+      integer i,j
+      do i=1,6
+         do j=1,6
+            ph_CKM_matrix(i,j) = 0d0
+         enddo
+      enddo
+      ph_CKM_matrix(1,2) = ph_CKM(1,1)
+      ph_CKM_matrix(1,4) = ph_CKM(2,1)
+      ph_CKM_matrix(1,6) = ph_CKM(3,1)
+      ph_CKM_matrix(2,3) = ph_CKM(1,2)
+      ph_CKM_matrix(2,5) = ph_CKM(1,3)
+      ph_CKM_matrix(3,4) = ph_CKM(2,2)
+      ph_CKM_matrix(3,6) = ph_CKM(3,2)
+      ph_CKM_matrix(4,5) = ph_CKM(2,3)
+      ph_CKM_matrix(5,6) = ph_CKM(3,3)
+      do i=1,6
+         do j=i+1,6
+            ph_CKM_matrix(j,i) = ph_CKM_matrix(i,j)
+         enddo
+      enddo
+      end
+
+
