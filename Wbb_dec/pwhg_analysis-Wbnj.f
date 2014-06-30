@@ -83,7 +83,9 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('XS Wbbj',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS Wbbjj',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS W(bb)jj',1d0,0.5d0,1.5d0)
-
+      call bookupeqbins('XS WbjX',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS WbbjX',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS W(bb)jX',1d0,0.5d0,1.5d0)
       
       end
      
@@ -461,6 +463,15 @@ c     jet algo ?????????????????  palg = 0
          endif
          if (nbbjet.eq.1.and.njet.eq.2) then
             call filld('XS W(bb)jj',1d0,dsig)
+         endif
+         if (nbjet.eq.1.and.njet.ge.1) then
+            call filld('XS WbjX',1d0,dsig)
+         endif
+         if (nbjet.eq.2.and.njet.ge.1) then
+            call filld('XS WbbjX',1d0,dsig)
+         endif
+         if (nbbjet.ge.1.and.njet.ge.1) then
+            call filld('XS W(bb)jX',1d0,dsig)
          endif
 
       endif
