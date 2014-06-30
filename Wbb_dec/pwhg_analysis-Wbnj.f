@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-000',  '-025',  '-050'/
-      data ptminarr/   0d0,     25d0,    50d0/
+      data cptmin/  '-010',  '-030',  '-050'/
+      data ptminarr/   10d0,    30d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -34,9 +34,9 @@ c  pwhgfill  :  fills the histograms with data
       dr=0.2d0
 
       do i=1,nptmin
-      call bookupeqbins('sigtot'//cptmin(i),1d0,0.5d0,1.5d0)
+      call bookupeqbins('sigtot Wbb'//cptmin(i),1d0,0.5d0,1.5d0)
 
-      call bookupeqbins('Njet'//cptmin(i),1d0,-0.5d0,5.5d0)
+      call bookupeqbins('Njet excl'//cptmin(i),1d0,-0.5d0,5.5d0)
 
       call bookupeqbins('W-y'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('W-eta'//cptmin(i),dy,-5d0,5d0)
@@ -74,36 +74,17 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('j2-ptzoom'//cptmin(i),2d0,1d0,151d0)
       call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
       call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
-
-c$$$      call bookupeqbins('jx1-y'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx1-eta'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx1-pt'//cptmin(i),dpt,0d0,400d0)
-c$$$      call bookupeqbins('jx1-ptzoom'//cptmin(i),2d0,1d0,151d0)
-c$$$      call bookupeqbins('jx1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-c$$$      call bookupeqbins('jx1-m'//cptmin(i),dpt,0d0,400d0) 
-c$$$
-c$$$      call bookupeqbins('jx2-y'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx2-eta'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx2-pt'//cptmin(i),dpt,0d0,400d0)
-c$$$      call bookupeqbins('jx2-ptzoom'//cptmin(i),2d0,1d0,151d0)
-c$$$      call bookupeqbins('jx2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-c$$$      call bookupeqbins('jx2-m'//cptmin(i),dpt,0d0,400d0) 
-c$$$
-c$$$      call bookupeqbins('jx3-y'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx3-eta'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx3-pt'//cptmin(i),dpt,0d0,400d0)
-c$$$      call bookupeqbins('jx3-ptzoom'//cptmin(i),2d0,1d0,151d0)
-c$$$      call bookupeqbins('jx3-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-c$$$      call bookupeqbins('jx3-m'//cptmin(i),dpt,0d0,400d0) 
-c$$$
-c$$$      call bookupeqbins('jx4-y'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx4-eta'//cptmin(i),dy,-5d0,5d0)
-c$$$      call bookupeqbins('jx4-pt'//cptmin(i),dpt,0d0,400d0)
-c$$$      call bookupeqbins('jx4-ptzoom'//cptmin(i),2d0,1d0,151d0)
-c$$$      call bookupeqbins('jx4-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-c$$$      call bookupeqbins('jx4-m'//cptmin(i),dpt,0d0,400d0) 
-
       enddo
+
+      call bookupeqbins('XS Wbj',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbb',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS W(bb)j',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbjj',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbbj',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbbjj',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS W(bb)jj',1d0,0.5d0,1.5d0)
+
+      
       end
      
       subroutine analysis(dsig0)
@@ -122,7 +103,7 @@ c      include 'LesHouches.h'
       logical ini
       data ini/.true./
       save ini
-      integer   maxjet,mjets,njets,numjets,ntracks
+      integer   maxjet,njets,numjets,ntracks
       parameter (maxjet=2048)
       real * 8 pj(4,maxjet)
       integer maxtrack
@@ -149,11 +130,8 @@ c     we need to tell to this analysis file which program is running it
       external powheginput,dotp
       integer idvecbos,Vdecmod,idl,idnu
       save idvecbos,Vdecmod,idl,idnu
-      integer maxnumlep
-      parameter (maxnumlep=10)
-      real * 8 pvl(4,maxnumlep),plep(4,maxnumlep)
+      real * 8 pvl(4),plep(4)
       integer mu,ilep,ivl,nlep,nvl
-      logical is_W
       real * 8 ptminfastjet,R,palg
       integer  minlo
       save minlo
@@ -166,22 +144,12 @@ c      common /crescfac/rescfac1,rescfac2
       logical inimulti
       data inimulti/.true./
       save inimulti
-      logical found_hardjet,found_nexthardjet,found_bjet1,found_bjet2
-      real * 8 phardjet(4),pnexthardjet(4),pbjet1(4),pbjet2(4),px(4)
       logical is_B_hadron,is_BBAR_hadron
       external is_B_hadron,is_BBAR_hadron
-      real * 8 p_b(4,maxnumlep),p_bbar(4,maxnumlep)
-      integer nbjet_array(maxjet),
-     $     nbbarjet_array(maxjet),jetinfo(maxjet),id,nb,
-     $     nbbar,nbjet,nbbarjet,typeb1,typeb2,wrong_bb_sequence
-      real * 8 pthardjet, ptbjet1, ptbjet2
-      integer dummy
-      logical debug
-
-      debug = .false.
-
-c      call reweightifneeded(dsig0,dsig)
-
+      integer jetinfo(0:maxjet),id
+      real * 8 pjet(4,maxjet),pbjet(4,maxjet),pbbjet(4,maxjet)
+      integer njet,nbjet,nbbjet,ptbmin,etamax, ptcut
+      
       if(inimulti) then
          if(weights_num.eq.0) then
             call setupmulti(1)
@@ -201,10 +169,7 @@ c      call reweightifneeded(dsig0,dsig)
       endif
 
       if(sum(abs(dsig)).eq.0) return
-
-c      if(dsig.eq.0) return
-
-
+      
       if (ini) then
          idvecbos=powheginput('idvecbos')
          Vdecmod=powheginput('vdecaymode')
@@ -240,110 +205,50 @@ c     if idvecbos=24 idl and idnu are ok
          ini=.false.
       endif
 
-      ilep = 0
-      ivl  = 0
-
+c     make a local copy of status of particles
       do ihep=1,nhep  
          isthep_loc(ihep) = isthep(ihep)
       enddo
 
-c     Loop again over final state particles to find products of W decay, by
-c     looking into the shower branchings.
-
+      ilep = 0
+      ivl  = 0
       nlep=0
       nvl=0
-      nb=0
-      nbbar=0
-
       do ihep=1,nhep
-         if (isthep_loc(ihep).eq.1.and.(idhep(ihep).eq.idl .or.
-     $        idhep(ihep).eq.idnu)) then
-            is_W = .true.
-            if (is_W) then
-c     find first decay product
-               if(idhep(ihep).eq.idl) then
-                  ilep=ihep
-                  nlep=nlep+1
-c     find second decay product
-               elseif(idhep(ihep).eq.idnu) then
-                  ivl=ihep
-                  nvl=nvl+1
-               endif
-            endif
-         endif
-         if (isthep_loc(ihep).eq.1.and.(is_B_hadron(idhep(ihep))))
-     1        then
-            nb=nb+1
-            do mu=1,4
-               p_b(mu,nb)=phep(mu,ihep)
-            enddo
-         endif
-         if (isthep_loc(ihep).eq.1.and.(is_BBAR_hadron(idhep(ihep))))
-     1        then
-            nbbar=nbbar+1
-            do mu=1,4
-               p_bbar(mu,nbbar)=phep(mu,ihep)
-            enddo
+         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
+c     lepton found
+            ilep=ihep
+            nlep=nlep+1
+         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
+c     neutrino found
+            ivl=ihep
+            nvl=nvl+1
          endif
       enddo
       
-      if(nvl.ne.1.or.nlep.ne.1) then
+      if(nvl.ne.1.and.nlep.ne.1) then
          write(*,*) 'Problems with leptons from W decay'
          write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
          write(*,*) 'PROGRAM ABORT'
          call pwhg_exit(-1)
       endif
 
-      if (ilep*ivl.eq.0) then
-         write(*,*) 'ERROR... have NOT found the electron/neutrino'
-         write(*,*) 'idhep'
-         write(*,*) (idhep(ihep),ihep=1,nhep)
-         call pwhg_exit(-1)
-      endif
-
       do mu=1,4
-         plep(mu,nlep)    = phep(mu,ilep)
-         pvl(mu,nvl)      = phep(mu,ivl)
+         plep(mu) = phep(mu,ilep)
+         pvl(mu)  = phep(mu,ivl)
       enddo 
 
-      if (nb*nbbar.eq.0) then
-         if (((nb.eq.0).and.(nbbar.ne.0)).or.
-     $        ((nb.ne.0).and.(nbbar.eq.0))) then
-            write(*,*) 'SEVERE WARNING: ***** One b is missing ******' 
-C           write(*,*) 'ihepb,ihepbbar ',ihepb,ihepbbar            
-            return
-         endif
-      endif
-        
-C     Change status of l vu 
-      isthep_loc(ilep)=10000
-      isthep_loc(ivl)=10000
+c     change status of l and vu 
+      isthep_loc(ilep) = 10000
+      isthep_loc(ivl)  = 10000
+
 
 C     W momentum
-      do mu=1,4
-         pw(mu)=plep(mu,1) + pvl(mu,1)
-      enddo
+      pw = plep + pvl
       
-c     set up arrays for jet finding
-c      do jpart=1,maxtrack
-c         do mu=1,4
-c            ptrack(mu,jpart)=0d0
-c         enddo
-c         jetvec(jpart)=0
-c      enddo      
-c      do jjet=1,maxjet
-c         do mu=1,4
-c            pj(mu,jjet)=0d0
-c         enddo
-c      enddo
-
       ntracks=0
-      mjets=0
       jetvec = 0
-
-      if(debug) write(*,*) ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-
-CC    Loop over final state particles to find colored partons
+c     loop over final state particles, excluding the already found le[ton and neutrino
       do ihep=1,nhep
          if (isthep_loc(ihep).eq.1) then
             if (ntracks.eq.maxtrack) then
@@ -351,309 +256,212 @@ CC    Loop over final state particles to find colored partons
                write(*,*) ' PROGRAM ABORTS'
                call pwhg_exit(-1)
             endif
-CC    Copy momenta to be passed to jet algorithm
+c     copy momenta to be passed to jet algorithm
             ntracks=ntracks+1
             ihep_of_track(ntracks)=ihep
-            if(debug) write(*,*) "=================================="
             do mu=1,4
                ptrack(mu,ntracks)=phep(mu,ihep)
-               if(debug) 
-     $              write(*,*) ntracks," -> ptrack(",mu,")",
-     $              ptrack(mu,ntracks)
+            enddo
+         endif
+      enddo
+      
+      if (ntracks.eq.0) then
+         numjets=0
+      else
+         palg = -1d0            ! Alg: 1 = kt, -1 = antikt
+         R    = 0.7d0           ! Radius parameter
+         ptminfastjet = 0d0     ! Pt min
+         call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
+     $        pj,numjets,jetvec)         
+      endif
+
+c     jetinfo :  0  no b
+c             :  1  b
+c             : -1  bbar
+c             :  2  b and bbar
+c     jetinfo(0) = NULL
+c     find in which jet the b's ended up
+      jetinfo=0
+      do i=1,ntracks
+         id=idhep(ihep_of_track(i))
+         if (is_B_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the bbar
+               jetinfo(jetvec(i)) = 1               
+            else
+c     this jet does contain already the bbar
+               jetinfo(jetvec(i)) = 2
+            endif               
+         elseif (is_BBAR_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the b
+               jetinfo(jetvec(i)) = -1               
+            else
+c     this jet does contain already the b
+               jetinfo(jetvec(i)) = 2
+            endif               
+         endif
+      enddo
+
+      njet=0
+      nbjet=0
+c     number of jets where the b and bbar have been assembled in the same jet
+      nbbjet=0
+      pjet=0d0
+      pbjet=0d0
+      pbbjet=0d0
+      do i=1,numjets
+         if (jetinfo(i).eq.0) then
+            njet=njet+1
+            do mu=1,4
+               pjet(mu,njet)=pj(mu,i)
+            enddo
+         elseif (abs(jetinfo(i)).eq.1) then
+c     in principle we could distiguish b and bbar partons/hadrons. But we are not interested in this
+            nbjet=nbjet+1
+            do mu=1,4
+               pbjet(mu,nbjet)=pj(mu,i)
+            enddo
+         elseif (jetinfo(i).eq.2) then
+c     this jet contains a b and a bbar
+            nbbjet=nbbjet+1
+            do mu=1,4
+               pbbjet(mu,nbbjet)=pj(mu,i)
             enddo
          endif
       enddo
 
-CC    Apply jet algorithm
-      if (ntracks.eq.0) then
-         numjets=0
-      else
-         palg = -1d0         ! Alg: 1 = kt, -1 = antikt
-         R    = 0.5d0        ! Radius parameter
-         ptminfastjet = minval(ptminarr) ! Pt min
-         call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
-     $        pj,numjets,jetvec)         
-      endif
-     
-CC    Jetvec(i): number of jet in which parton i ended up being
-      if(debug) then
-         write(*,*) "#######################--> jetvec"
-         write(*,*) jetvec(1),jetvec(2),jetvec(3),jetvec(4),jetvec(5)
-         write(*,*) "#######################-->"
-      endif
-
-CC    Find in which ptrack the B hadrons ended up
-      nbjet=0
-      nbbarjet=0
-CC    Loop over tracks
-      do i=1,ntracks
-         id=idhep(ihep_of_track(i))
-         if (is_B_hadron(id)) then
-            nbjet=nbjet+1
-            nbjet_array(nbjet)=jetvec(i)            
-         elseif (is_BBAR_hadron(id)) then   
-            nbbarjet=nbbarjet+1
-            nbbarjet_array(nbbarjet)=jetvec(i)                        
-         endif
-      enddo
-
       
-CC    We want two b jets for the current analysis
-      if (nbjet*nbbarjet.eq.0) return
-c---      write(*,*) 'START'
-c---      write(*,*) 'nbjet,nbbarjet',nbjet,nbbarjet
-c---      write(*,*) 'nbjet_array(1) ',nbjet_array(1)
-c---      write(*,*) 'nbbarjet_array(1)',nbbarjet_array(1)
-c---      write(*,*) 'numjets ',numjets
+      if (nbjet.eq.2) then
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
+CCCCCCCCCC                   W b b analysis
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
+      do i=1,nptmin      
+c     ptminarr is pt ordered
+         ptbmin = ptminarr(i)
+         call pwhg_getpt(pbjet(:,1),pt)
+         if (pt.lt.ptbmin) return
+         call pwhg_getpt(pbjet(:,2),pt)
+         if (pt.lt.ptbmin) return
 
-CC    Jets are ordered in decreasing pt. Set up array of info on jets
-CC    - if jetinfo = 0 then non-b jet
-CC    - if jetinfo = 5 then b jet
-CC    - if jetinfo =-5 then bbar jet
-
-      jetinfo=0
-
-      do k=1,nbjet
-         jetinfo(nbjet_array(k)) = 5
-      enddo
-      do k=1,nbbarjet
-         jetinfo(nbbarjet_array(k)) = -5
-      enddo
-
-c---      do i=1,numjets
-c---         do j=1,nbjet
-c---            if (i.eq.nbjet_array(j)) then
-c---               jetinfo(i)=5
-c---            endif
-c---         enddo
-c---         do j=1,nbbarjet
-c---            if (i.eq.nbbarjet_array(j)) then
-c---               jetinfo(i)=-5
-c---             endif
-c---         enddo
-c---      enddo
-
-      if(debug) then
-       write(*,*) "#######################--> jetinfo"
-       write(*,*) jetinfo(1),jetinfo(2),jetinfo(3),jetinfo(4),jetinfo(5)
-       write(*,*) "#######################-->"
-         
-       do i=1,numjets
-          do mu=1,4
-             write(*,*) i," -> pj(",mu,")", pj(mu,i)
-          enddo
-       enddo
-      endif
-
-      found_hardjet=.false.
-      found_nexthardjet=.false.
-      found_bjet1=.false.
-      found_bjet2=.false.
-      typeb1=0
-      typeb2=0
-      do i=1,numjets
-         if (jetinfo(i).eq.0) then
-            if (.not.found_hardjet) then
-               found_hardjet=.true.
-               do mu=1,4
-                  phardjet(mu)=pj(mu,i)
-               enddo            
-               goto 111
-            elseif (found_hardjet.and..not.found_nexthardjet) then
-               found_nexthardjet=.true.
-               do mu=1,4
-                  pnexthardjet(mu)=pj(mu,i)
-               enddo      
-               goto 111
-            endif
-         elseif (abs(jetinfo(i)).eq.5) then
-            if (.not.found_bjet1) then
-               found_bjet1=.true.
-c     keep track of b flavor of the 1st jet (quark or antiquark)
-               typeb1=jetinfo(i)
-               do mu=1,4
-                  pbjet1(mu)=pj(mu,i)
-               enddo 
-               goto 111
-            endif
-            if (.not.found_bjet2.and.found_bjet1) then
-               found_bjet2=.true.
-c     keep track of b flavor of the 2nd jet (quark or antiquark)
-               typeb2=jetinfo(i)
-               do mu=1,4
-                  pbjet2(mu)=pj(mu,i)
-               enddo 
-            endif
-            if (found_bjet1.and.found_bjet2) then
-c     they must come from a b-bbar couple. Otherwise, return
-               if (typeb1*typeb2.gt.0) then
-                  wrong_bb_sequence = wrong_bb_sequence + 1                  
-                  if (mod(wrong_bb_sequence,1).eq.0) then
-                     write(*,*) 'WARNING: 2 b or 2 bbar in sequence ', 
-     $                    wrong_bb_sequence
-                  endif
-c                  write(*,*) 'nbjet nbbarjet', nbjet,nbbarjet
-c                  write(*,*) (jetinfo(i),i=1,numjets)
-                  return
-               endif
-            endif
-         endif
- 111     continue
-      enddo
-
-      if(debug) then
-         write(*,*) "found_bjet1   =", found_bjet1
-         write(*,*) "found_bjet2   =", found_bjet2
-         write(*,*) "found_hardjet =", found_hardjet
-         write(*,*) "found_nexthj  =", found_nexthardjet
-      endif
-
-c     if there is only one b jet, then return
-      if (.not.(found_bjet1.and.found_bjet2)) return
-      if (.not.(found_hardjet).and..not.(processid.eq.'Wbb')) return
-
-c     now we have 2 B jet of opposite flavors and at least 1 hard jet (plus leptons)
-c     we can start plotting 
-      ptb1min=0d0
-      ptb2min=0d0
-
-      call getyetaptmass(pbjet1,y,eta,pt,m)
-      if(debug)  write(*,*) "ptb1 =", pt
-      if (pt.lt.ptb1min) return
-c      if (abs(y).gt.ybmax) return
-      call getyetaptmass(pbjet2,y,eta,pt,m)
-      if(debug)  write(*,*) "ptb2 =", pt
-      if (pt.lt.ptb2min) return
-c      if (abs(y).gt.ybmax) return
-c      call getyetaptmass(phardjet,y,eta,pt,m)
-c      if (abs(y).gt.yjmax) return
-
-      if(debug) then
-         write(*,*) "numjets =", numjets
-      endif
-
-c*****************************************************
-c     total number of jets minus the 2 b jets
-c***  change the following for different analysis  ***
-      njets=numjets-2
-      
-      do i=1,nptmin        
-
-         if (found_hardjet) then
-            pthardjet = sqrt(phardjet(1)**2+phardjet(2)**2)
-            if (pthardjet.lt.ptminarr(i)) then
-c     since ptminarr is pt ordered, the following return is correct
-               return
-            endif
+         if (njet.ge.1) then
+            call pwhg_getpt(pjet(:,1),pt)
+            if (pt.lt.ptminarr(i)) return ! ptminarr is pt ordered
          endif
 
-         call filld('sigtot'//cptmin(i),1d0,dsig)         
-         
-         if(.not.found_hardjet.and..not.found_nexthardjet) then
-            call filld('Njet'//cptmin(i),0d0,dsig)
-         endif
-         if(found_hardjet.and..not.found_nexthardjet) then
-            call filld('Njet'//cptmin(i),1d0,dsig)
-         endif
-         if(found_nexthardjet) then
-            call filld('Njet'//cptmin(i),2d0,dsig)
-         endif
+         call filld('sigtot Wbb'//cptmin(i),1d0,dsig)                  
 
+         if (njet.eq.0) then
+            call filld('Njet excl'//cptmin(i),0d0,dsig)
+         elseif (njet.eq.1) then
+            call filld('Njet excl'//cptmin(i),1d0,dsig)
+         elseif (njet.eq.2) then
+            call filld('Njet excl'//cptmin(i),2d0,dsig)
+         endif
 c     W
          call getyetaptmass(pw,y,eta,pt,m)
-         call filld('W-y'//cptmin(i),    y, dsig)
-         call filld('W-eta'//cptmin(i),eta, dsig)
-         call filld('W-pt'//cptmin(i),  pt, dsig)
-         call filld('W-m'//cptmin(i), m, dsig)
+         call filld('W-y'//cptmin(i),y,dsig)
+         call filld('W-eta'//cptmin(i),eta,dsig)
+         call filld('W-pt'//cptmin(i),pt,dsig)
+         call filld('W-m'//cptmin(i),m,dsig)
+
 c     lepton
-         call getyetaptmass(plep(:,1),y,eta,pt,m)
-         call filld('lept-eta'//cptmin(i),eta, dsig)
-         call filld('lept-pt'//cptmin(i),  pt, dsig)
+         call getyetaptmass(plep,y,eta,pt,m)
+         call filld('lept-eta'//cptmin(i),eta,dsig)
+         call filld('lept-pt'//cptmin(i),pt,dsig)
+
 c     neutrino
-         call getyetaptmass(pvl(:,1),y,eta,pt,m)
-         call filld('miss-pt'//cptmin(i),  pt, dsig)
+         call getyetaptmass(pvl,y,eta,pt,m)
+         call filld('miss-pt'//cptmin(i),pt,dsig)
 
 c     hardest b jet
-         call getyetaptmass(pbjet1,y,eta,pt,m)
-         call filld('b1-y'//cptmin(i),     y, dsig)
-         call filld('b1-eta'//cptmin(i), eta, dsig)
-         call filld('b1-pt'//cptmin(i),   pt, dsig)
-         call filld('b1-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('b1-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('b1-m'//cptmin(i),     m, dsig)
-        
+         call getyetaptmass(pbjet(:,1),y,eta,pt,m)
+         call filld('b1-y'//cptmin(i),y,dsig)
+         call filld('b1-eta'//cptmin(i),eta,dsig)
+         call filld('b1-pt'//cptmin(i),pt,dsig)
+         call filld('b1-ptzoom'//cptmin(i),pt,dsig)
+         call filld('b1-ptzoom2'//cptmin(i),pt,dsig)
+         call filld('b1-m'//cptmin(i),m,dsig)      
+
 c     next-to-hardest b jet
-         call getyetaptmass(pbjet2,y,eta,pt,m)
-         call filld('b2-y'//cptmin(i),     y, dsig)
-         call filld('b2-eta'//cptmin(i), eta, dsig)
-         call filld('b2-pt'//cptmin(i),   pt, dsig)
-         call filld('b2-ptzoom'//cptmin(i),   pt, dsig)
-         call filld('b2-ptzoom2'//cptmin(i),   pt, dsig)
-         call filld('b2-m'//cptmin(i),     m, dsig)
-
-         if (found_hardjet) then
-c     hardest jet         
-            call getyetaptmass(phardjet,y,eta,pt,m)
-            call filld('j1-y'//cptmin(i),     y, dsig)
-            call filld('j1-eta'//cptmin(i), eta, dsig)
-            call filld('j1-pt'//cptmin(i),   pt, dsig)
-            call filld('j1-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('j1-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('j1-m'//cptmin(i),     m, dsig)
+         call getyetaptmass(pbjet(:,2),y,eta,pt,m)
+         call filld('b2-y'//cptmin(i),y,dsig)
+         call filld('b2-eta'//cptmin(i),eta,dsig)
+         call filld('b2-pt'//cptmin(i),pt,dsig)
+         call filld('b2-ptzoom'//cptmin(i),pt,dsig)
+         call filld('b2-ptzoom2'//cptmin(i),pt,dsig)
+         call filld('b2-m'//cptmin(i),m,dsig)
+         
+         if (njet.ge.1) then
+c     hardest jet plots
+            call getyetaptmass(pjet(:,1),y,eta,pt,m)
+            call filld('j1-y'//cptmin(i),y,dsig)
+            call filld('j1-eta'//cptmin(i),eta,dsig)
+            call filld('j1-pt'//cptmin(i),pt,dsig)
+            call filld('j1-ptzoom'//cptmin(i),pt,dsig)
+            call filld('j1-ptzoom2'//cptmin(i),pt,dsig)
+            call filld('j1-m'//cptmin(i),m,dsig)
          endif
 
-         if (found_nexthardjet) then
+         if (njet.ge.2) then
 c     next-to-hardest jet         
-            call getyetaptmass(pnexthardjet,y,eta,pt,m)
-            call filld('j2-y'//cptmin(i),     y, dsig)
-            call filld('j2-eta'//cptmin(i), eta, dsig)
-            call filld('j2-pt'//cptmin(i),   pt, dsig)
-            call filld('j2-ptzoom'//cptmin(i),   pt, dsig)
-            call filld('j2-ptzoom2'//cptmin(i),   pt, dsig)
-            call filld('j2-m'//cptmin(i),     m, dsig)
+            call getyetaptmass(pjet(:,2),y,eta,pt,m)
+            call filld('j2-y'//cptmin(i),y,dsig)
+            call filld('j2-eta'//cptmin(i),eta,dsig)
+            call filld('j2-pt'//cptmin(i),pt,dsig)
+            call filld('j2-ptzoom'//cptmin(i),pt,dsig)
+            call filld('j2-ptzoom2'//cptmin(i),pt,dsig)
+            call filld('j2-m'//cptmin(i),m,dsig)
          endif
-c$$$
-c$$$         px(:)=pj(:,1)
-c$$$         call getyetaptmass(px,y,eta,pt,m)
-c$$$         call filld('jx1-y'//cptmin(i),     y, dsig)
-c$$$         call filld('jx1-eta'//cptmin(i), eta, dsig)
-c$$$         call filld('jx1-pt'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx1-ptzoom'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx1-ptzoom2'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx1-m'//cptmin(i),     m, dsig)
-c$$$
-c$$$         px(:)=pj(:,2)
-c$$$         call getyetaptmass(px,y,eta,pt,m)
-c$$$         call filld('jx2-y'//cptmin(i),     y, dsig)
-c$$$         call filld('jx2-eta'//cptmin(i), eta, dsig)
-c$$$         call filld('jx2-pt'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx2-ptzoom'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx2-ptzoom2'//cptmin(i),   pt, dsig)
-c$$$         call filld('jx2-m'//cptmin(i),     m, dsig)
-c$$$
-c$$$         if (found_hardjet) then
-c$$$            px(:)=pj(:,3)
-c$$$            call getyetaptmass(px,y,eta,pt,m)
-c$$$            call filld('jx3-y'//cptmin(i),     y, dsig)
-c$$$            call filld('jx3-eta'//cptmin(i), eta, dsig)
-c$$$            call filld('jx3-pt'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx3-ptzoom'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx3-ptzoom2'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx3-m'//cptmin(i),     m, dsig)
-c$$$         endif
-c$$$            
-c$$$         if (found_nexthardjet) then
-c$$$            px(:)=pj(:,4)
-c$$$            call getyetaptmass(px,y,eta,pt,m)
-c$$$            call filld('jx4-y'//cptmin(i),     y, dsig)
-c$$$            call filld('jx4-eta'//cptmin(i), eta, dsig)
-c$$$            call filld('jx4-pt'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx4-ptzoom'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx4-ptzoom2'//cptmin(i),   pt, dsig)
-c$$$            call filld('jx4-m'//cptmin(i),     m, dsig)
-c$$$         endif
-c$$$         
       enddo
+      endif   ! nbjet=2
+
+
+      if (nbjet.ge.1.or.nbbjet.gt.0) then
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
+CCCCCCCCCC                   W b analysis
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
+c     apply Campbell et al. cuts: hep-ph/0611348
+c     jet algo ?????????????????  palg = 0 
+         ptcut = 25d0
+         etamax= 2.5d0
+         do i=1,min(2,njet)
+            call getyetaptmass(pjet(:,i),y,eta,pt,m)
+            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
+         enddo
+         do i=1,min(2,nbjet)
+            call getyetaptmass(pbjet(:,i),y,eta,pt,m)
+            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
+         enddo
+         do i=1,min(1,nbbjet)
+            call getyetaptmass(pbbjet(:,i),y,eta,pt,m)
+            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
+         enddo
+         if (nbjet.eq.1.and.njet.eq.1) then
+            call filld('XS Wbj',1d0,dsig)
+         endif
+         if (nbjet.eq.2.and.njet.eq.0) then
+            call filld('XS Wbb',1d0,dsig)
+         endif
+         if (nbbjet.eq.1.and.njet.eq.1) then
+            call filld('XS W(bb)j',1d0,dsig)
+         endif
+         if (nbjet.eq.1.and.njet.eq.2) then
+            call filld('XS Wbjj',1d0,dsig)
+         endif
+         if (nbjet.eq.2.and.njet.eq.1) then
+            call filld('XS Wbbj',1d0,dsig)
+         endif
+         if (nbjet.eq.2.and.njet.eq.2) then
+            call filld('XS Wbbjj',1d0,dsig)
+         endif
+         if (nbbjet.eq.1.and.njet.eq.2) then
+            call filld('XS W(bb)jj',1d0,dsig)
+         endif
+
+      endif
+
+
       end
 
 

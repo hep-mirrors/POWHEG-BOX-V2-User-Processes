@@ -187,33 +187,31 @@ c      print*, "kn_jac_born=", kn_jacborn
       end
 
 
+c     Used to increase importance sampling at high-pt of the W
+c     The Born cross section is perfectly FINITE!!!
       subroutine born_suppression(fact)
       implicit none
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
-      real * 8 fact,ptmin,ptminW
-      real * 8 pt2W
+      real * 8 fact,ptmin
+      real * 8 pt2
       logical ini
       data ini/.true./
       real * 8 powheginput
-      save ini,ptmin,ptminW    
+      save ini,ptmin
       if (ini) then
          ptmin=powheginput("#bornsuppfact")      
-         ptminW=powheginput("#bornsuppfactW")      
          if (ptmin.lt.0d0) then
             ptmin=0d0
-         endif
-         if (ptminW.lt.0d0) then
-            ptminW=0d0
          endif
          ini=.false.
       endif
       if(flg_weightedev) then
-         pt2W=(kn_cmpborn(1,3)+kn_cmpborn(1,4))**2+
+         pt2=(kn_cmpborn(1,3)+kn_cmpborn(1,4))**2+
      $        (kn_cmpborn(2,3)+kn_cmpborn(2,4))**2
-         fact=(pt2W+1d0)/(pt2W+1d0+ptminW**2)
+         fact=(pt2+1d0)/(pt2+1d0+ptmin**2)
       else
          fact=1
       endif
