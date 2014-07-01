@@ -33,6 +33,9 @@ c  pwhgfill  :  fills the histograms with data
       dpt=10d0
       dr=0.2d0
 
+      call bookupeqbins('j1-pt no cuts',0.5d0,0d0,20d0)
+      call bookupeqbins('j2-pt no cuts',0.5d0,0d0,20d0)
+
       do i=1,nptmin
       call bookupeqbins('sigtot Wbb'//cptmin(i),1d0,0.5d0,1.5d0)
 
@@ -84,8 +87,9 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('XS Wbbjj',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS W(bb)jj',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS WbjX',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS WbbjX',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS WbbX',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS W(bb)jX',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS WbbjX',1d0,0.5d0,1.5d0)
       
       end
      
@@ -277,7 +281,7 @@ c     copy momenta to be passed to jet algorithm
       if (ntracks.eq.0) then
          numjets=0
       else
-         palg = 0d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
+         palg = 0d0             ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.7d0           ! Radius parameter
          ptminfastjet = 0d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
@@ -343,6 +347,20 @@ c     this jet contains a b and a bbar
 c      if (nbjet.eq.1) then
 c         write(*,*) njet,nbjet,nbbjet
 c      endif
+
+
+
+      if (njet.ge.1) then
+         call getyetaptmass(pjet(:,1),y,eta,pt,m)
+         call filld('j1-pt no cuts',pt,dsig)
+      endif
+      if (njet.ge.2) then
+         call getyetaptmass(pjet(:,2),y,eta,pt,m)
+         call filld('j2-pt no cuts',pt,dsig)
+      endif
+
+c     branching = 10.8d-2
+c     1/branching = 9.259259259
 
 
       if (nbjet.eq.2) then
@@ -488,6 +506,9 @@ c     TeVatron cuts
          endif
          if (nbjout.eq.2.and.njout.ge.1) then
             call filld('XS WbbjX',1d0,dsig)
+         endif
+         if (nbjout.eq.2.and.njout.ge.0) then
+            call filld('XS WbbX',1d0,dsig)
          endif
          if (nbbjout.ge.1.and.njout.ge.1) then
             call filld('XS W(bb)jX',1d0,dsig)
