@@ -19,8 +19,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-025',  '-030',  '-050'/
-      data ptminarr/   25d0,    30d0,    50d0/
+      data cptmin/  '-015',  '-025',  '-050'/
+      data ptminarr/   15d0,    25d0,    50d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
       real * 8 powheginput
@@ -146,12 +146,18 @@ c      common /crescfac/rescfac1,rescfac2
       logical inimulti
       data inimulti/.true./
       save inimulti
+      logical inicuts
+      data inicuts/.true./
+      save inicuts
       logical is_B_hadron,is_BBAR_hadron
       external is_B_hadron,is_BBAR_hadron
       integer jetinfo(0:maxjet),id
       real * 8 pjet(4,maxjet),pbjet(4,maxjet),pbbjet(4,maxjet)
-      integer njet,nbjet,nbbjet,ptbmin,etamax, ptcut
-      
+      integer njet,nbjet,nbbjet
+      real * 8 ptbmin,etamax, ptjmin
+      real * 8 pjout(4,maxjet),pbjout(4,maxjet),pbbjout(4,maxjet)
+      integer njout,nbjout,nbbjout
+      integer minnjet
       if(inimulti) then
          if(weights_num.eq.0) then
             call setupmulti(1)
@@ -250,6 +256,7 @@ C     W momentum
       
       ntracks=0
       jetvec = 0
+      numjets=0
 c     loop over final state particles, excluding the already found lepton and neutrino
       do ihep=1,nhep
          if (isthep_loc(ihep).eq.1) then
@@ -272,7 +279,7 @@ c     copy momenta to be passed to jet algorithm
       else
          palg = 0d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.7d0           ! Radius parameter
-         ptminfastjet = 25d0     ! Pt min
+         ptminfastjet = minval(ptminarr) ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
@@ -346,13 +353,20 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c     ptminarr is pt ordered
          ptbmin = ptminarr(i)
          call pwhg_getpt(pbjet(:,1),pt)
-         if (pt.lt.ptbmin) return
+         if (pt.lt.ptbmin) goto 111 
          call pwhg_getpt(pbjet(:,2),pt)
-         if (pt.lt.ptbmin) return
-
-         if (njet.ge.1) then
-            call pwhg_getpt(pjet(:,1),pt)
-            if (pt.lt.ptminarr(i)) return ! ptminarr is pt ordered
+         if (pt.lt.ptbmin) goto 111 
+         
+         if (processid.ne."Wbb") then
+            if (njet.lt.1) goto 111 
+         endif
+ 
+         
+         if (njet.ge.1) then            
+            do j=1,njet   
+               call pwhg_getpt(pjet(:,j),pt)
+               if (pt.lt.ptminarr(i)) goto 111 ! ptminarr is pt ordered
+            enddo
          endif
 
          call filld('sigtot Wbb'//cptmin(i),1d0,dsig)                  
@@ -423,53 +437,65 @@ c     next-to-hardest jet
       endif   ! nbjet=2
 
 
+
+ 111  continue
+
       if (nbjet.ge.1.or.nbbjet.gt.0) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 c     apply Campbell et al. cuts: hep-ph/0611348.  Algo: palg = 0 
-         ptcut = 25d0
-         etamax= 2.5d0
-         do i=1,min(2,njet)
-            call getyetaptmass(pjet(:,i),y,eta,pt,m)
-            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
-         enddo
-         do i=1,min(2,nbjet)
-            call getyetaptmass(pbjet(:,i),y,eta,pt,m)
-            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
-         enddo
-         do i=1,min(1,nbbjet)
-            call getyetaptmass(pbbjet(:,i),y,eta,pt,m)
-            if (pt.lt.ptcut.or.abs(eta).gt.etamax) return
-         enddo
-         if (nbjet.eq.1.and.njet.eq.1) then
+
+         if (inicuts) then
+            if (powheginput("ebeam1").eq.7000d0) then
+c     LHC cuts
+               write(*,*) 'CEMW LHC cuts'               
+               ptjmin = 25d0
+               etamax= 2.5d0
+            elseif (powheginput("ebeam1").eq.980d0) then
+c     TeVatron cuts
+               write(*,*) 'CEMW TeV cuts'
+               ptjmin = 15d0
+               etamax= 2d0
+            else
+               ptjmin = 0d0
+               etamax= 100d0
+            endif
+            inicuts=.false.
+         endif
+      
+         call applycuts(pjet,njet,ptjmin,etamax,pjout,njout)
+         call applycuts(pbjet,nbjet,ptjmin,etamax,pbjout,nbjout)
+         call applycuts(pbbjet,nbbjet,ptjmin,etamax,pbbjout,nbbjout)
+
+         if (nbjout.eq.1.and.njout.eq.1) then
             call filld('XS Wbj',1d0,dsig)
          endif
-         if (nbjet.eq.2.and.njet.eq.0) then
+         if (nbjout.eq.2.and.njout.eq.0) then
             call filld('XS Wbb',1d0,dsig)
          endif
-         if (nbbjet.eq.1.and.njet.eq.1) then
+         if (nbbjout.eq.1.and.njout.eq.1) then
             call filld('XS W(bb)j',1d0,dsig)
          endif
-         if (nbjet.eq.1.and.njet.eq.2) then
+         if (nbjout.eq.1.and.njout.eq.2) then
             call filld('XS Wbjj',1d0,dsig)
          endif
-         if (nbjet.eq.2.and.njet.eq.1) then
+         if (nbjout.eq.2.and.njout.eq.1) then
             call filld('XS Wbbj',1d0,dsig)
          endif
-         if (nbjet.eq.2.and.njet.eq.2) then
+         if (nbjout.eq.2.and.njout.eq.2) then
             call filld('XS Wbbjj',1d0,dsig)
          endif
-         if (nbbjet.eq.1.and.njet.eq.2) then
+         if (nbbjout.eq.1.and.njout.eq.2) then
             call filld('XS W(bb)jj',1d0,dsig)
          endif
-         if (nbjet.eq.1.and.njet.ge.1) then
+         if (nbjout.eq.1.and.njout.ge.1) then
             call filld('XS WbjX',1d0,dsig)
          endif
-         if (nbjet.eq.2.and.njet.ge.1) then
+         if (nbjout.eq.2.and.njout.ge.1) then
             call filld('XS WbbjX',1d0,dsig)
          endif
-         if (nbbjet.ge.1.and.njet.ge.1) then
+         if (nbbjout.ge.1.and.njout.ge.1) then
             call filld('XS W(bb)jX',1d0,dsig)
          endif
 
@@ -605,3 +631,25 @@ c bubble sort
      $     ((id.gt.-6000).and.(id.lt.-5000)).or.(id.eq.-5)
       end
 
+
+      subroutine applycuts(pin,nin,ptmin,etamax,pout,nout)
+      implicit none
+      integer nin 
+      real * 8 pin(4,nin)
+      real * 8 ptmin,etamax
+      integer nout
+      real *  8 pout(4,nout)
+      integer i,mu
+      real * 8 y,eta,pt,m
+      nout=0
+      pout=0
+      do i=1,nin
+         call getyetaptmass(pin(:,i),y,eta,pt,m)
+         if (pt.gt.ptmin .and. abs(eta).lt.etamax) then
+            nout=nout+1
+            do mu=1,4
+               pout(mu,nout)=pin(mu,i)
+            enddo
+         endif            
+      enddo
+      end
