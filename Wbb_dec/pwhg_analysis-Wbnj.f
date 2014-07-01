@@ -154,7 +154,7 @@ c      common /crescfac/rescfac1,rescfac2
       integer jetinfo(0:maxjet),id
       real * 8 pjet(4,maxjet),pbjet(4,maxjet),pbbjet(4,maxjet)
       integer njet,nbjet,nbbjet
-      real * 8 ptbmin,etamax, ptjmin
+      real * 8 ptbmin,etamax, ptjmin,etamaxWbb
       real * 8 pjout(4,maxjet),pbjout(4,maxjet),pbbjout(4,maxjet)
       integer njout,nbjout,nbbjout
       integer minnjet
@@ -279,7 +279,7 @@ c     copy momenta to be passed to jet algorithm
       else
          palg = 0d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.7d0           ! Radius parameter
-         ptminfastjet = minval(ptminarr) ! Pt min
+         ptminfastjet = 0d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
@@ -350,32 +350,26 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCC                   W b b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
       do i=1,nptmin      
-c     ptminarr is pt ordered
-         ptbmin = ptminarr(i)
-         call pwhg_getpt(pbjet(:,1),pt)
-         if (pt.lt.ptbmin) goto 111 
-         call pwhg_getpt(pbjet(:,2),pt)
-         if (pt.lt.ptbmin) goto 111 
-         
+         ptjmin = ptminarr(i)
+         etamaxWbb=100d0
+         call applycuts(pjet,njet,ptjmin,etamaxWbb,pjout,njout)
+         call applycuts(pbjet,nbjet,ptjmin,etamaxWbb,pbjout,nbjout)
+c         call applycuts(pbbjet,nbbjet,ptjmin,etamaxWbb,pbbjout,nbbjout)
+
+         if (nbjout.ne.2) cycle         
+                 
          if (processid.ne."Wbb") then
-            if (njet.lt.1) goto 111 
+            if (njout.lt.1) cycle 
          endif
- 
          
-         if (njet.ge.1) then            
-            do j=1,njet   
-               call pwhg_getpt(pjet(:,j),pt)
-               if (pt.lt.ptminarr(i)) goto 111 ! ptminarr is pt ordered
-            enddo
-         endif
 
          call filld('sigtot Wbb'//cptmin(i),1d0,dsig)                  
 
-         if (njet.eq.0) then
+         if (njout.eq.0) then
             call filld('Njet excl'//cptmin(i),0d0,dsig)
-         elseif (njet.eq.1) then
+         elseif (njout.eq.1) then
             call filld('Njet excl'//cptmin(i),1d0,dsig)
-         elseif (njet.eq.2) then
+         elseif (njout.eq.2) then
             call filld('Njet excl'//cptmin(i),2d0,dsig)
          endif
 c     W
@@ -395,7 +389,7 @@ c     neutrino
          call filld('miss-pt'//cptmin(i),pt,dsig)
 
 c     hardest b jet
-         call getyetaptmass(pbjet(:,1),y,eta,pt,m)
+         call getyetaptmass(pbjout(:,1),y,eta,pt,m)
          call filld('b1-y'//cptmin(i),y,dsig)
          call filld('b1-eta'//cptmin(i),eta,dsig)
          call filld('b1-pt'//cptmin(i),pt,dsig)
@@ -404,7 +398,7 @@ c     hardest b jet
          call filld('b1-m'//cptmin(i),m,dsig)      
 
 c     next-to-hardest b jet
-         call getyetaptmass(pbjet(:,2),y,eta,pt,m)
+         call getyetaptmass(pbjout(:,2),y,eta,pt,m)
          call filld('b2-y'//cptmin(i),y,dsig)
          call filld('b2-eta'//cptmin(i),eta,dsig)
          call filld('b2-pt'//cptmin(i),pt,dsig)
@@ -412,9 +406,9 @@ c     next-to-hardest b jet
          call filld('b2-ptzoom2'//cptmin(i),pt,dsig)
          call filld('b2-m'//cptmin(i),m,dsig)
          
-         if (njet.ge.1) then
+         if (njout.ge.1) then
 c     hardest jet plots
-            call getyetaptmass(pjet(:,1),y,eta,pt,m)
+            call getyetaptmass(pjout(:,1),y,eta,pt,m)
             call filld('j1-y'//cptmin(i),y,dsig)
             call filld('j1-eta'//cptmin(i),eta,dsig)
             call filld('j1-pt'//cptmin(i),pt,dsig)
@@ -423,9 +417,9 @@ c     hardest jet plots
             call filld('j1-m'//cptmin(i),m,dsig)
          endif
 
-         if (njet.ge.2) then
+         if (njout.ge.2) then
 c     next-to-hardest jet         
-            call getyetaptmass(pjet(:,2),y,eta,pt,m)
+            call getyetaptmass(pjout(:,2),y,eta,pt,m)
             call filld('j2-y'//cptmin(i),y,dsig)
             call filld('j2-eta'//cptmin(i),eta,dsig)
             call filld('j2-pt'//cptmin(i),pt,dsig)
