@@ -162,6 +162,9 @@ c      common /crescfac/rescfac1,rescfac2
       real * 8 pjout(4,maxjet),pbjout(4,maxjet),pbbjout(4,maxjet)
       integer njout,nbjout,nbbjout
       integer minnjet
+      real * 8 inv_branch
+      save etamax, ptjmin
+
       if(inimulti) then
          if(weights_num.eq.0) then
             call setupmulti(1)
@@ -361,18 +364,17 @@ c      endif
 
 c     branching = 10.8d-2
 c     1/branching = 9.259259259
-
+      inv_branch=9.259259259d0
 
       if (nbjet.eq.2) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
       do i=1,nptmin      
-         ptjmin = ptminarr(i)
          etamaxWbb=100d0
-         call applycuts(pjet,njet,ptjmin,etamaxWbb,pjout,njout)
-         call applycuts(pbjet,nbjet,ptjmin,etamaxWbb,pbjout,nbjout)
-c         call applycuts(pbbjet,nbbjet,ptjmin,etamaxWbb,pbbjout,nbbjout)
+         call applycuts(pjet,njet,ptminarr(i),etamaxWbb,pjout,njout)
+         call applycuts(pbjet,nbjet,ptminarr(i),etamaxWbb,pbjout,nbjout)
+c         call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
 
          if (nbjout.ne.2) cycle         
                  
@@ -481,37 +483,37 @@ c     TeVatron cuts
          call applycuts(pbbjet,nbbjet,ptjmin,etamax,pbbjout,nbbjout)
 
          if (nbjout.eq.1.and.njout.eq.1) then
-            call filld('XS Wbj',1d0,dsig)
+            call filld('XS Wbj',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.eq.0) then
-            call filld('XS Wbb',1d0,dsig)
+            call filld('XS Wbb',1d0,dsig*inv_branch)
          endif
          if (nbbjout.eq.1.and.njout.eq.1) then
-            call filld('XS W(bb)j',1d0,dsig)
+            call filld('XS W(bb)j',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.1.and.njout.eq.2) then
-            call filld('XS Wbjj',1d0,dsig)
+            call filld('XS Wbjj',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.eq.1) then
-            call filld('XS Wbbj',1d0,dsig)
+            call filld('XS Wbbj',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.eq.2) then
-            call filld('XS Wbbjj',1d0,dsig)
+            call filld('XS Wbbjj',1d0,dsig*inv_branch)
          endif
          if (nbbjout.eq.1.and.njout.eq.2) then
-            call filld('XS W(bb)jj',1d0,dsig)
+            call filld('XS W(bb)jj',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.1.and.njout.ge.1) then
-            call filld('XS WbjX',1d0,dsig)
+            call filld('XS WbjX',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.ge.1) then
-            call filld('XS WbbjX',1d0,dsig)
+            call filld('XS WbbjX',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.ge.0) then
-            call filld('XS WbbX',1d0,dsig)
+            call filld('XS WbbX',1d0,dsig*inv_branch)
          endif
          if (nbbjout.ge.1.and.njout.ge.1) then
-            call filld('XS W(bb)jX',1d0,dsig)
+            call filld('XS W(bb)jX',1d0,dsig*inv_branch)
          endif
 
       endif
@@ -665,6 +667,6 @@ c bubble sort
             do mu=1,4
                pout(mu,nout)=pin(mu,i)
             enddo
-         endif            
+         endif             
       enddo
       end
