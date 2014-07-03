@@ -77,6 +77,12 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('j2-ptzoom'//cptmin(i),2d0,1d0,151d0)
       call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
       call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
+
+      call bookupeqbins('Wbb-y'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('Wbb-eta'//cptmin(i),dy,-5d0,5d0)
+      call bookupeqbins('Wbb-pt'//cptmin(i),dpt,0d0,400d0)
+
+
       enddo
 
       call bookupeqbins('XS Wbj',1d0,0.5d0,1.5d0)
@@ -136,7 +142,7 @@ c     we need to tell to this analysis file which program is running it
       external powheginput,dotp
       integer idvecbos,Vdecmod,idl,idnu
       save idvecbos,Vdecmod,idl,idnu
-      real * 8 pvl(4),plep(4)
+      real * 8 pvl(4),plep(4),pWbb(4)
       integer mu,ilep,ivl,nlep,nvl
       real * 8 ptminfastjet,R,palg
       integer  minlo
@@ -447,6 +453,14 @@ c     next-to-hardest jet
             call filld('j2-ptzoom2'//cptmin(i),pt,dsig)
             call filld('j2-m'//cptmin(i),m,dsig)
          endif
+
+         do mu=1,4
+            pwbb(mu) = pw(mu) + pbjout(mu,1)+ pbjout(mu,2)
+         enddo
+         call getyetaptmass(pwbb,y,eta,pt,m)
+         call filld('Wbb-y'//cptmin(i),y,dsig)
+         call filld('Wbb-eta'//cptmin(i),eta,dsig)
+         call filld('Wbb-pt'//cptmin(i),pt,dsig)
       enddo
       endif   ! nbjet=2
 
