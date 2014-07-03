@@ -20,6 +20,7 @@
 
 c     as for Wbb, set flg_withdamp always to true
       flg_withdamp=.true.
+      flg_bornzerodamp=.true.
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C    Set here the number of light flavours

@@ -18,7 +18,7 @@
 
 c     as for Wbb, set flg_withdamp always to true
       flg_withdamp=.true.
-
+      flg_bornzerodamp=.true.
 
       st_bornorder=2
 
