@@ -411,8 +411,9 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       do i=1,nptmin      
          etamaxWbb=100d0
          call applycuts(pjet,njet,ptminarr(i),etamaxWbb,pjout,njout)
-         call applycuts(pbjet,nbjet,ptbminarr(j),etamaxWbb,pbjout,nbjout)
-c         call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
+         call applycuts(pbjet,nbjet,ptbminarr(j),etamaxWbb,pbjout,
+     $        nbjout)
+c        call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
 
          if (nbjout.ne.2) cycle         
                  
