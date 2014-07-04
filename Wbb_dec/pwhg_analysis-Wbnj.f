@@ -9,19 +9,25 @@ c  pwhgfill  :  fills the histograms with data
       implicit none
       include  'LesHouches.h'
       include 'pwhg_math.h'
-      integer i
+      integer i,j
       real * 8 dy,dylep,dpt,dr
       character * 1 cnum(9)
       data cnum/'1','2','3','4','5','6','7','8','9'/
-      integer maxjet
-      parameter (maxjet=3)
       integer nptmin
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-015',  '-025',  '-050'/
-      data ptminarr/   15d0,    25d0,    50d0/
-      common/infohist/ptminarr,cnum,cptmin
+      data cptmin/  '-000',  '-015',  '-025'/
+      data ptminarr/ 0d0,  15d0,    25d0/
+
+      integer nptbmin
+      parameter (nptbmin=2)
+      character * 4 cptbmin(nptbmin)
+      real * 8 ptbminarr(nptbmin)
+      data cptbmin/  '-000',  '-015'/
+      data ptbminarr/    0d0,    15d0/
+
+      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
       save /infohist/
       real * 8 powheginput
       external powheginput
@@ -35,54 +41,71 @@ c  pwhgfill  :  fills the histograms with data
 
       call bookupeqbins('j1-pt no cuts',0.5d0,0d0,20d0)
       call bookupeqbins('j2-pt no cuts',0.5d0,0d0,20d0)
+      call bookupeqbins('b1-pt no cuts',0.5d0,0d0,20d0)
 
+      do j=1,nptbmin
       do i=1,nptmin
-      call bookupeqbins('sigtot Wbb'//cptmin(i),1d0,0.5d0,1.5d0)
+      call bookupeqbins('sigtot Wbb'//cptmin(i)//cptbmin(j),
+     $         1d0,0.5d0,1.5d0)
 
-      call bookupeqbins('Njet excl'//cptmin(i),1d0,-0.5d0,5.5d0)
+      call bookupeqbins('Njet excl'//cptmin(i)//cptbmin(j),
+     $     1d0,-0.5d0,5.5d0)
 
-      call bookupeqbins('W-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('W-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('W-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('W-m'//cptmin(i),5d0,0d0,200d0)
+      call bookupeqbins('W-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('W-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('W-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('W-m'//cptmin(i)//cptbmin(j),5d0,0d0,200d0)
 
-      call bookupeqbins('lept-eta'//cptmin(i),dylep,-4d0,4d0)
-      call bookupeqbins('lept-pt'//cptmin(i),dpt,0d0,500d0)
-      call bookupeqbins('miss-pt'//cptmin(i),dpt,0d0,500d0)
+      call bookupeqbins('lept-eta'//cptmin(i)//cptbmin(j),dylep,
+     $     -4d0,4d0)
+      call bookupeqbins('lept-pt'//cptmin(i)//cptbmin(j),dpt,0d0,500d0)
+      call bookupeqbins('miss-pt'//cptmin(i)//cptbmin(j),dpt,0d0,500d0)
 
-      call bookupeqbins('b1-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('b1-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('b1-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('b1-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('b1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('b1-m'//cptmin(i),dpt,0d0,400d0) 
+      call bookupeqbins('b1-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('b1-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('b1-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('b1-ptzoom'//cptmin(i)//cptbmin(j),2d0,
+     $     1d0,151d0)
+      call bookupeqbins('b1-ptzoom2'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,20d0)
+      call bookupeqbins('b1-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
 
-      call bookupeqbins('b2-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('b2-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('b2-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('b2-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('b2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('b2-m'//cptmin(i),dpt,0d0,400d0) 
+      call bookupeqbins('b2-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('b2-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('b2-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('b2-ptzoom'//cptmin(i)//cptbmin(j),
+     $     2d0,1d0,151d0)
+      call bookupeqbins('b2-ptzoom2'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,20d0)
+      call bookupeqbins('b2-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
 
-      call bookupeqbins('j1-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('j1-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('j1-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('j1-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('j1-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('j1-m'//cptmin(i),dpt,0d0,400d0) 
+      call bookupeqbins('j1-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('j1-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('j1-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('j1-ptzoom'//cptmin(i)//cptbmin(j),
+     $     2d0,1d0,151d0)
+      call bookupeqbins('j1-ptzoom2'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,20d0)
+      call bookupeqbins('j1-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
 
-      call bookupeqbins('j2-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('j2-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('j2-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('j2-ptzoom'//cptmin(i),2d0,1d0,151d0)
-      call bookupeqbins('j2-ptzoom2'//cptmin(i),0.5d0,0d0,20d0)
-      call bookupeqbins('j2-m'//cptmin(i),dpt,0d0,400d0) 
+      call bookupeqbins('j2-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('j2-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('j2-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('j2-ptzoom'//cptmin(i)//cptbmin(j),
+     $     2d0,1d0,151d0)
+      call bookupeqbins('j2-ptzoom2'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,20d0)
+      call bookupeqbins('j2-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
 
-      call bookupeqbins('Wbb-y'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('Wbb-eta'//cptmin(i),dy,-5d0,5d0)
-      call bookupeqbins('Wbb-pt'//cptmin(i),dpt,0d0,400d0)
+      call bookupeqbins('Wbb-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('Wbb-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
+      call bookupeqbins('Wbb-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
+      call bookupeqbins('Wbb-ptzoom'//cptmin(i)//cptbmin(j),
+     $     2d0,1d0,151d0)
+      call bookupeqbins('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,20d0)
 
-
+      enddo
       enddo
 
       call bookupeqbins('XS Wbj',1d0,0.5d0,1.5d0)
@@ -126,10 +149,14 @@ c      include 'LesHouches.h'
       integer nptmin
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin)      
-      real * 8 ptb1min,ptb2min,ybmax,yjmax
-      common/infohist/ptminarr,cnum,cptmin
+      real * 8 ptminarr(nptmin) 
+      integer nptbmin
+      parameter (nptbmin=2)
+      character * 4 cptbmin(nptbmin)
+      real * 8 ptbminarr(nptbmin)     
+      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
       save /infohist/
+      real * 8 ptb1min,ptb2min,ybmax,yjmax
       integer j,i,k
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
@@ -367,6 +394,10 @@ c      endif
          call getyetaptmass(pjet(:,2),y,eta,pt,m)
          call filld('j2-pt no cuts',pt,dsig)
       endif
+      if (nbjet.ge.1) then 
+         call getyetaptmass(pbjet(:,1),y,eta,pt,m)
+         call filld('b1-pt no cuts',pt,dsig)
+      endif
 
 c     branching = 10.8d-2
 c     1/branching = 9.259259259
@@ -376,10 +407,11 @@ c     1/branching = 9.259259259
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
+      do j=1,nptbmin      
       do i=1,nptmin      
          etamaxWbb=100d0
          call applycuts(pjet,njet,ptminarr(i),etamaxWbb,pjout,njout)
-         call applycuts(pbjet,nbjet,ptminarr(i),etamaxWbb,pbjout,nbjout)
+         call applycuts(pbjet,nbjet,ptbminarr(j),etamaxWbb,pbjout,nbjout)
 c         call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
 
          if (nbjout.ne.2) cycle         
@@ -389,81 +421,84 @@ c         call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
          endif
          
 
-         call filld('sigtot Wbb'//cptmin(i),1d0,dsig)                  
+         call filld('sigtot Wbb'//cptmin(i)//cptbmin(j),1d0,dsig)                  
 
          if (njout.eq.0) then
-            call filld('Njet excl'//cptmin(i),0d0,dsig)
+            call filld('Njet excl'//cptmin(i)//cptbmin(j),0d0,dsig)
          elseif (njout.eq.1) then
-            call filld('Njet excl'//cptmin(i),1d0,dsig)
+            call filld('Njet excl'//cptmin(i)//cptbmin(j),1d0,dsig)
          elseif (njout.eq.2) then
-            call filld('Njet excl'//cptmin(i),2d0,dsig)
+            call filld('Njet excl'//cptmin(i)//cptbmin(j),2d0,dsig)
          endif
 c     W
          call getyetaptmass(pw,y,eta,pt,m)
-         call filld('W-y'//cptmin(i),y,dsig)
-         call filld('W-eta'//cptmin(i),eta,dsig)
-         call filld('W-pt'//cptmin(i),pt,dsig)
-         call filld('W-m'//cptmin(i),m,dsig)
+         call filld('W-y'//cptmin(i)//cptbmin(j),y,dsig)
+         call filld('W-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+         call filld('W-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('W-m'//cptmin(i)//cptbmin(j),m,dsig)
 
 c     lepton
          call getyetaptmass(plep,y,eta,pt,m)
-         call filld('lept-eta'//cptmin(i),eta,dsig)
-         call filld('lept-pt'//cptmin(i),pt,dsig)
+         call filld('lept-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+         call filld('lept-pt'//cptmin(i)//cptbmin(j),pt,dsig)
 
 c     neutrino
          call getyetaptmass(pvl,y,eta,pt,m)
-         call filld('miss-pt'//cptmin(i),pt,dsig)
+         call filld('miss-pt'//cptmin(i)//cptbmin(j),pt,dsig)
 
 c     hardest b jet
          call getyetaptmass(pbjout(:,1),y,eta,pt,m)
-         call filld('b1-y'//cptmin(i),y,dsig)
-         call filld('b1-eta'//cptmin(i),eta,dsig)
-         call filld('b1-pt'//cptmin(i),pt,dsig)
-         call filld('b1-ptzoom'//cptmin(i),pt,dsig)
-         call filld('b1-ptzoom2'//cptmin(i),pt,dsig)
-         call filld('b1-m'//cptmin(i),m,dsig)      
+         call filld('b1-y'//cptmin(i)//cptbmin(j),y,dsig)
+         call filld('b1-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+         call filld('b1-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b1-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b1-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b1-m'//cptmin(i)//cptbmin(j),m,dsig)      
 
 c     next-to-hardest b jet
          call getyetaptmass(pbjout(:,2),y,eta,pt,m)
-         call filld('b2-y'//cptmin(i),y,dsig)
-         call filld('b2-eta'//cptmin(i),eta,dsig)
-         call filld('b2-pt'//cptmin(i),pt,dsig)
-         call filld('b2-ptzoom'//cptmin(i),pt,dsig)
-         call filld('b2-ptzoom2'//cptmin(i),pt,dsig)
-         call filld('b2-m'//cptmin(i),m,dsig)
+         call filld('b2-y'//cptmin(i)//cptbmin(j),y,dsig)
+         call filld('b2-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+         call filld('b2-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b2-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('b2-m'//cptmin(i)//cptbmin(j),m,dsig)
          
          if (njout.ge.1) then
 c     hardest jet plots
             call getyetaptmass(pjout(:,1),y,eta,pt,m)
-            call filld('j1-y'//cptmin(i),y,dsig)
-            call filld('j1-eta'//cptmin(i),eta,dsig)
-            call filld('j1-pt'//cptmin(i),pt,dsig)
-            call filld('j1-ptzoom'//cptmin(i),pt,dsig)
-            call filld('j1-ptzoom2'//cptmin(i),pt,dsig)
-            call filld('j1-m'//cptmin(i),m,dsig)
+            call filld('j1-y'//cptmin(i)//cptbmin(j),y,dsig)
+            call filld('j1-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+            call filld('j1-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j1-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j1-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j1-m'//cptmin(i)//cptbmin(j),m,dsig)
          endif
 
          if (njout.ge.2) then
 c     next-to-hardest jet         
             call getyetaptmass(pjout(:,2),y,eta,pt,m)
-            call filld('j2-y'//cptmin(i),y,dsig)
-            call filld('j2-eta'//cptmin(i),eta,dsig)
-            call filld('j2-pt'//cptmin(i),pt,dsig)
-            call filld('j2-ptzoom'//cptmin(i),pt,dsig)
-            call filld('j2-ptzoom2'//cptmin(i),pt,dsig)
-            call filld('j2-m'//cptmin(i),m,dsig)
+            call filld('j2-y'//cptmin(i)//cptbmin(j),y,dsig)
+            call filld('j2-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+            call filld('j2-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j2-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('j2-m'//cptmin(i)//cptbmin(j),m,dsig)
          endif
 
          do mu=1,4
             pwbb(mu) = pw(mu) + pbjout(mu,1)+ pbjout(mu,2)
          enddo
          call getyetaptmass(pwbb,y,eta,pt,m)
-         call filld('Wbb-y'//cptmin(i),y,dsig)
-         call filld('Wbb-eta'//cptmin(i),eta,dsig)
-         call filld('Wbb-pt'//cptmin(i),pt,dsig)
+         call filld('Wbb-y'//cptmin(i)//cptbmin(j),y,dsig)
+         call filld('Wbb-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+         call filld('Wbb-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('Wbb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+         call filld('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+      enddo
       enddo
       endif   ! nbjet=2
-
+      
 
 
  111  continue
