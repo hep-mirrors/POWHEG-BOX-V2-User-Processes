@@ -9,125 +9,26 @@ c  pwhgfill  :  fills the histograms with data
       implicit none
       include  'LesHouches.h'
       include 'pwhg_math.h'
-      integer i,j
-      real * 8 dy,dylep,dpt,dr
-      character * 1 cnum(9)
-      data cnum/'1','2','3','4','5','6','7','8','9'/
-      integer nptmin
-      parameter (nptmin=3)
-      character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin)
-      data cptmin/  '-000',  '-015',  '-025'/
-      data ptminarr/ 0d0,  15d0,    25d0/
-
-      integer nptbmin
-      parameter (nptbmin=2)
-      character * 4 cptbmin(nptbmin)
-      real * 8 ptbminarr(nptbmin)
-      data cptbmin/  '-000',  '-025'/
-      data ptbminarr/    0d0,    25d0/
-
-      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
-      save /infohist/
-      real * 8 powheginput
-      external powheginput
+      integer nptmaxbins
+      parameter (nptmaxbins = 4)
+      real * 8 ptmaxbins(nptmaxbins + 1)
+      data ptmaxbins/25d0,30d0,40d0,60d0,140d0/
 
       call inihists
-      call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,1.5d0)
+
+      call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
+      call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
       call bookupeqbins('XS Wbb CMS',1d0,0.5d0,1.5d0)
-
-      call bookupeqbins('b-pt ATLAS 2',dpt,0d0,400d0)
-
-
-
-      dy=0.5d0
-      dylep=0.4d0
-      dpt=10d0
-      dr=0.2d0
-
-      call bookupeqbins('j1-pt no cuts',0.5d0,0d0,20d0)
-      call bookupeqbins('j2-pt no cuts',0.5d0,0d0,20d0)
-      call bookupeqbins('b1-pt no cuts',0.5d0,0d0,20d0)
-
-      do j=1,nptbmin
-      do i=1,nptmin
-      call bookupeqbins('sigtot Wbb'//cptmin(i)//cptbmin(j),
-     $         1d0,0.5d0,1.5d0)
-
-      call bookupeqbins('Njet excl'//cptmin(i)//cptbmin(j),
-     $     1d0,-0.5d0,5.5d0)
-
-      call bookupeqbins('W-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('W-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('W-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('W-m'//cptmin(i)//cptbmin(j),5d0,0d0,200d0)
-
-      call bookupeqbins('lept-eta'//cptmin(i)//cptbmin(j),dylep,
-     $     -4d0,4d0)
-      call bookupeqbins('lept-pt'//cptmin(i)//cptbmin(j),dpt,0d0,500d0)
-      call bookupeqbins('miss-pt'//cptmin(i)//cptbmin(j),dpt,0d0,500d0)
-
-      call bookupeqbins('b1-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('b1-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('b1-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('b1-ptzoom'//cptmin(i)//cptbmin(j),2d0,
-     $     1d0,151d0)
-      call bookupeqbins('b1-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-      call bookupeqbins('b1-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
-
-      call bookupeqbins('b2-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('b2-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('b2-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('b2-ptzoom'//cptmin(i)//cptbmin(j),
-     $     2d0,1d0,151d0)
-      call bookupeqbins('b2-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-      call bookupeqbins('b2-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
-
-      call bookupeqbins('j1-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('j1-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('j1-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('j1-ptzoom'//cptmin(i)//cptbmin(j),
-     $     2d0,1d0,151d0)
-      call bookupeqbins('j1-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-      call bookupeqbins('j1-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
-
-      call bookupeqbins('j2-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('j2-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('j2-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('j2-ptzoom'//cptmin(i)//cptbmin(j),
-     $     2d0,1d0,151d0)
-      call bookupeqbins('j2-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-      call bookupeqbins('j2-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0) 
-
-      call bookupeqbins('Wbb-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('Wbb-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('Wbb-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('Wbb-ptzoom'//cptmin(i)//cptbmin(j),
-     $     2d0,1d0,151d0)
-      call bookupeqbins('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-
-      enddo
-      enddo
-
-      call bookupeqbins('XS Wbj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbb',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS W(bb)j',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbjj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbbj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbbjj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS W(bb)jj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS WbjX',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS WbbX',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS W(bb)jX',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS WbbjX',1d0,0.5d0,1.5d0)
+      call bookup('b-pt 1j ATLAS 2', nptmaxbins,ptmaxbins)
+      call bookup('b-pt 2j ATLAS 2', nptmaxbins,ptmaxbins)
       
       end
+
+
+
+
+
+
      
       subroutine analysis(dsig0)
       implicit none
@@ -304,8 +205,7 @@ C     W momentum
       pw = plep + pvl
       
       ntracks=0
-      jetvec = 0
-      numjets=0
+
 c     loop over final state particles, excluding the already found lepton and neutrino
       do ihep=1,nhep
          if (isthep_loc(ihep).eq.1) then
@@ -323,11 +223,21 @@ c     copy momenta to be passed to jet algorithm
          endif
       enddo
       
+
+
+      
+
+
+
+
+
+      jetvec = 0
+      numjets=0
       if (ntracks.eq.0) then
          numjets=0
       else
-         palg = 0d0             ! Alg: 1 = kt, -1 = antikt, 0 C/A
-         R    = 0.7d0           ! Radius parameter
+         palg = -1d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
+         R    = 0.7           ! Radius parameter
          ptminfastjet = 0d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
@@ -389,34 +299,24 @@ c     this jet contains a b and a bbar
          endif
       enddo
 
-c      if (nbjet.eq.1) then
-c         write(*,*) njet,nbjet,nbbjet
-c      endif
+ 
 
 
-
-      if (njet.ge.1) then
-         call getyetaptmass(pjet(:,1),y,eta,pt,m)
-         call filld('j1-pt no cuts',pt,dsig)
-      endif
-      if (njet.ge.2) then
-         call getyetaptmass(pjet(:,2),y,eta,pt,m)
-         call filld('j2-pt no cuts',pt,dsig)
-      endif
-      if (nbjet.ge.1) then 
-         call getyetaptmass(pbjet(:,1),y,eta,pt,m)
-         call filld('b1-pt no cuts',pt,dsig)
-      endif
 
 c     branching = 10.8d-2
 c     1/branching = 9.259259259
       inv_branch=9.259259259d0
 
-      if (nbjet.ge.1) then
+
+
+
+      if (nbjet.eq.1.or.nbbjet.eq.1) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b analysis ATLAS
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
 C---  Lepton cuts:
+         
+
       call getyetaptmass(plep,y,etalep,ptlep,m)
       call getyetaptmass(pvl,y,eta,ptmiss,m)
       call getdydetadphidr(plep,pvl,dylep,detalep,delphilep,drlep)
@@ -523,6 +423,10 @@ c     next-to-hardest jet
       endif   ! lepton cuts
       endif   ! nbjet=2
       
+      enddo
+
+
+
 
 
  111  continue
