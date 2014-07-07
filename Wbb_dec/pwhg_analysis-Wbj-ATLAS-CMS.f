@@ -26,9 +26,6 @@ c  pwhgfill  :  fills the histograms with data
 
 
 
-
-
-
      
       subroutine analysis(dsig0)
       implicit none
@@ -224,12 +221,11 @@ c     copy momenta to be passed to jet algorithm
       enddo
       
 
-
-      
-
-
-
-
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                       C
+C              ATLAS Jets               C
+C                                       C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       jetvec = 0
       numjets=0
@@ -237,7 +233,7 @@ c     copy momenta to be passed to jet algorithm
          numjets=0
       else
          palg = -1d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
-         R    = 0.7           ! Radius parameter
+         R    = 0.4             ! Radius parameter
          ptminfastjet = 0d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
@@ -299,129 +295,82 @@ c     this jet contains a b and a bbar
          endif
       enddo
 
- 
-
-
-
 c     branching = 10.8d-2
 c     1/branching = 9.259259259
       inv_branch=9.259259259d0
 
-
-
-
       if (nbjet.eq.1.or.nbbjet.eq.1) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
-CCCCCCCCCC                   W b analysis ATLAS
+CCCCCCCCCC                   W b analysis ATLAS [JHEP06(2013)084]
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
 C---  Lepton cuts:
-         
+      ptminlep_ATLAS2  = 25d0
+      ptminmis_ATLAS2  = 25d0
+      etamaxlep_ATLAS2 = 2.5d0
+      mtminW_ATLAS2    = 60d0
 
       call getyetaptmass(plep,y,etalep,ptlep,m)
-      call getyetaptmass(pvl,y,eta,ptmiss,m)
-      call getdydetadphidr(plep,pvl,dylep,detalep,delphilep,drlep)
+      call pwhg_getpt(pvl,ptmiss)
+      call pwhg_getdelta_azi(plep,pvl,delphilep)
+
       mtW = sqrt(2d0*ptlep*ptmiss*(1d0-cos(delphilep)))
 
-      if  (ptlep .gt.25d0 .and.
-     $     ptmiss.gt.25d0 .and.
-     $     abs(etalep).gt.2.5d0 .and.
-     $     mtW.gt.60d0) then
+      if  (ptlep .gt.ptminlep_ATLAS2  .and.
+     $     ptmiss.gt.ptminmiss_ATLAS2 .and.
+     $     abs(etalep).lt.etamaxlep_ATLAS2 .and.
+     $     mtW.gt.mtminW_ATLAS2) then
 
-      do j=1,nptbmin      
-      do i=1,nptmin      
-         etamaxWbb=2.1d0
-         call applycuts(pjet,njet,ptminarr(i),etamaxWbb,pjout,njout)
-         call applycuts(pbjet,nbjet,ptbminarr(j),etamaxWbb,pbjout,
-     $        nbjout)
-c        call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
+C---  Jet cuts:
+      ptminjets_ATLAS2  = 25d0
+      etamaxjets_ATLAS2 = 2.1d0
 
-         
+      call applycuts(pjet,njet,ptminjets_ATLAS2,etamaxjets_ATLAS2,
+     $     pjout,njout)
+      call applycuts(pbjet,nbjet,ptminjets_ATLAS2,etamaxjets_ATLAS2,
+     $     pbjout,nbjout)
+      call applycuts(pbbjet,nbbjet,ptminjets_ATLAS2,etamaxjets_ATLAS2,
+     $     pbbjout,nbbjout)
 
-         if (nbjout.ne.2) cycle         
-                 
-         if (processid.ne."Wbb") then
-            if (njout.lt.1) cycle 
-         endif
-         
+      
+C--- Jet-lepton separation:
+C     we apply dR(j,lep) after cuts on the jets!!!! 
+      drminjlep = 0.5d0
 
-         call filld('sigtot Wbb'//cptmin(i)//cptbmin(j),1d0,dsig)                  
+      isolatedlep = .true.
 
-         if (njout.eq.0) then
-            call filld('Njet excl'//cptmin(i)//cptbmin(j),0d0,dsig)
-         elseif (njout.eq.1) then
-            call filld('Njet excl'//cptmin(i)//cptbmin(j),1d0,dsig)
-         elseif (njout.eq.2) then
-            call filld('Njet excl'//cptmin(i)//cptbmin(j),2d0,dsig)
-         endif
-c     W
-         call getyetaptmass(pw,y,eta,pt,m)
-         call filld('W-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('W-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('W-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('W-m'//cptmin(i)//cptbmin(j),m,dsig)
-
-c     lepton
-         call getyetaptmass(plep,y,eta,pt,m)
-         call filld('lept-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('lept-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-
-c     neutrino
-         call getyetaptmass(pvl,y,eta,pt,m)
-         call filld('miss-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-
-c     hardest b jet
-         call getyetaptmass(pbjout(:,1),y,eta,pt,m)
-         call filld('b1-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('b1-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('b1-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b1-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b1-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b1-m'//cptmin(i)//cptbmin(j),m,dsig)      
-
-c     next-to-hardest b jet
-         call getyetaptmass(pbjout(:,2),y,eta,pt,m)
-         call filld('b2-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('b2-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('b2-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b2-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('b2-m'//cptmin(i)//cptbmin(j),m,dsig)
-         
-         if (njout.ge.1) then
-c     hardest jet plots
-            call getyetaptmass(pjout(:,1),y,eta,pt,m)
-            call filld('j1-y'//cptmin(i)//cptbmin(j),y,dsig)
-            call filld('j1-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-            call filld('j1-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j1-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j1-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j1-m'//cptmin(i)//cptbmin(j),m,dsig)
-         endif
-
-         if (njout.ge.2) then
-c     next-to-hardest jet         
-            call getyetaptmass(pjout(:,2),y,eta,pt,m)
-            call filld('j2-y'//cptmin(i)//cptbmin(j),y,dsig)
-            call filld('j2-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-            call filld('j2-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j2-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
-            call filld('j2-m'//cptmin(i)//cptbmin(j),m,dsig)
-         endif
-
-         do mu=1,4
-            pwbb(mu) = pw(mu) + pbjout(mu,1)+ pbjout(mu,2)
-         enddo
-         call getyetaptmass(pwbb,y,eta,pt,m)
-         call filld('Wbb-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('Wbb-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('Wbb-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('Wbb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+      do i=1,njout
+         call pwhg_getR_phiy(plep,pjout(:,i),drjlep)
+         if(drjlep.lt.drminjlep) isolatedlep = .false.
       enddo
+      do i=1,nbjout
+         call pwhg_getR_phiy(plep,pbjout(:,i),drjlep)
+         if(drjlep.lt.drminjlep) isolatedlep = .false.
       enddo
+      do i=1,nbbjout
+         call pwhg_getR_phiy(plep,pbbjout(:,i),drjlep)
+         if(drjlep.lt.drminjlep) isolatedlep = .false.
+      enddo
+
+      if(isolatedlep) then
+
+      if (njout+nbjout+nbbjout.eq.1) then
+         call filld('XS Wbj ATLAS 2',1d0,dsig)
+      elseif (njout+nbjout+nbbjout.eq.2) then
+         call filld('XS Wbj ATLAS 2',1d0,dsig)
+      endif
+
+C     Hardest b jet
+      call getpt(pbjout(:,1),pt)
+      if (njout+nbjout+nbbjout.eq.1) then
+         call filld('b-pt 1j ATLAS 2',pt,dsig)
+      elseif (njout+nbjout+nbbjout.eq.2) then
+         call filld('b-pt 1j ATLAS 2',pt,dsig)
+      endif
+
+      
+      endif   ! isolated lepton
       endif   ! lepton cuts
-      endif   ! nbjet=2
+      endif   ! nbjet>1
       
       enddo
 
