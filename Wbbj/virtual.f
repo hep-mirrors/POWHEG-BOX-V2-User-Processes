@@ -333,6 +333,10 @@ C     The as/(2pi) factor is attached at a later point
 C     We have then to multiply for 2*pi
      $                * (2*pi)
 
+      if(idvecbos.eq.-24) then
+         call cconj(vflav,nlegborn)
+         call pconj(p,nlegborn)
+      endif
 
       if (MSbarscheme) then
          call setborn(p,vflav,born,bornjk,bmunu)
@@ -344,10 +348,6 @@ c     a factor of as/(2 pi) will be attached by the BOX (Cacciari, Greco, Nason)
             virtual = virtual + 2*TF*(1d0/3*log(st_mufact2/ph_bmass**2)
      $           -log(st_muren2/ph_bmass**2))*born
          endif
-      endif
-      if(idvecbos.eq.-24) then
-         call cconj(vflav,nlegborn)
-         call pconj(p,nlegborn)
       endif
 
       end
