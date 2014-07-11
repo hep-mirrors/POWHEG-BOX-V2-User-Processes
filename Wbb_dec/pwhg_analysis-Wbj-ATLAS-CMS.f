@@ -354,17 +354,17 @@ c     jet-lepton separation (eta-phi)
          enddo
 
          if (isolatedlep) then
-            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.2)) then   
+            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then   
                if (nbjout.eq.1) then
                   call pwhg_getpt(pbjout(:,1),pt)
                else
                   call pwhg_getpt(pbbjout(:,1),pt)
                endif      
-               if (njout.eq.1) then
+               if (njout.eq.0) then
 c     we consider only one lepton here
                   call filld('XS Wbj ATLAS 2',1d0,dsig)
                   call filld('b-pt 1j ATLAS 2',pt,dsig)
-               elseif (njout.eq.2) then
+               elseif (njout.eq.1) then
                   call filld('XS Wbj ATLAS 2',2d0,dsig)
                   call filld('b-pt 2j ATLAS 2',pt,dsig)
                endif                             
@@ -422,11 +422,11 @@ c     jet-lepton separation (eta-phi)
          enddo
 
          if (isolatedlep) then
-            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.2)) then    ! ??????????????????? njout ???
-               if (njout.eq.1) then
+            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then    ! ??????????????????? njout ???
+               if (njout.eq.0) then
 c     we consider only one lepton:
                   call filld('XS Wbj ATLAS 1',1d0,dsig)
-               elseif (njout.eq.2) then
+               elseif (njout.eq.1) then
                   call filld('XS Wbj ATLAS 1',2d0,dsig)
                endif                             
             endif
