@@ -361,12 +361,12 @@ c     jet-lepton separation (eta-phi)
                   call pwhg_getpt(pbbjout(:,1),pt)
                endif      
                if (njout.eq.1) then
-c     the factor of 2 takes care of the W decaying into electrons and muons
-                  call filld('XS Wbj ATLAS 2',1d0,2*dsig)
-                  call filld('b-pt 1j ATLAS 2',pt,2*dsig)
+c     we consider only one lepton here
+                  call filld('XS Wbj ATLAS 2',1d0,dsig)
+                  call filld('b-pt 1j ATLAS 2',pt,dsig)
                elseif (njout.eq.2) then
-                  call filld('XS Wbj ATLAS 2',2d0,2*dsig)
-                  call filld('b-pt 2j ATLAS 2',pt,2*dsig)
+                  call filld('XS Wbj ATLAS 2',2d0,dsig)
+                  call filld('b-pt 2j ATLAS 2',pt,dsig)
                endif                             
             endif
          endif  ! isolated lepton
@@ -423,16 +423,11 @@ c     jet-lepton separation (eta-phi)
 
          if (isolatedlep) then
             if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.2)) then    ! ??????????????????? njout ???
-               if (nbjout.eq.1) then
-                  call pwhg_getpt(pbjout(:,1),pt)
-               else
-                  call pwhg_getpt(pbbjout(:,1),pt)
-               endif      
                if (njout.eq.1) then
-c     the factor of 2 takes care of the W decaying into electrons and muons
-                  call filld('XS Wbj ATLAS 1',1d0,2*dsig)
+c     we consider only one lepton:
+                  call filld('XS Wbj ATLAS 1',1d0,dsig)
                elseif (njout.eq.2) then
-                  call filld('XS Wbj ATLAS 1',2d0,2*dsig)
+                  call filld('XS Wbj ATLAS 1',2d0,dsig)
                endif                             
             endif
          endif  ! isolated lepton
@@ -522,7 +517,7 @@ CCCCCCCCCC           W b b analysis CMS arXiv:1312.6608
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c     lepton cuts
       ptminlep_CMS  = 25d0
-      ptminmis_CMS  = 25d0   ! ???????????????????????????????????
+      ptminmis_CMS  = 25d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
       etamaxlep_CMS = 2.1d0
       mtWmin_CMS    = 45d0
 c     jet cuts
@@ -530,7 +525,7 @@ c     jet cuts
       etamaxjets_CMS = 2.4d0
 c      etamaxjets1_CMS = 4.5d0
 c     jet-lepton separation (eta-phi)
-      drminjlep = 0d0    !   ??????????????????????????????????????
+      drminjlep = 0.4d0    !   ?????????????????????????????????????? --> i would say dR>0.4
 
       call getyetaptmass(plep,y,etalep,ptlep,m)
       call pwhg_getpt(pvl,ptmiss)
