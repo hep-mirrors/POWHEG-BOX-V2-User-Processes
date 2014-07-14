@@ -225,17 +225,19 @@ c     The Born cross section is perfectly FINITE!!!
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
+      include 'pwhg_math.h'
+      include 'pwhg_st.h'
       include 'PhysPars.h'
       real * 8 muf,mur
       logical ini
       data ini/.true./
       integer runningscales
       real * 8 mtw,mtb,mtbbar,pt1,pt2
-      real * 8 Ht
+      real * 8 Ht,ptw2,mu2
       real * 8 ptot(0:3)
       integer i,nu
-      real * 8 powheginput
-      external powheginput      
+      real * 8 powheginput,dotp
+      external powheginput,dotp    
       save ini,runningscales
       if (ini) then
          runningscales=powheginput("#runningscales")
@@ -249,21 +251,10 @@ c     The Born cross section is perfectly FINITE!!!
          endif
 
          if (runningscales.eq.1) then
-c$$$            write(*,*) '****************************************'
-c$$$            write(*,*) '****************************************'
-c$$$            write(*,*) '**   Dynamical scale is used:         **'
-c$$$            write(*,*) '**                                    **'
-c$$$            write(*,*) '**   mur=muf=HT/2   where             **'
-c$$$            write(*,*) '**                                    **'
-c$$$            write(*,*) '**  HT=Mt_W+Mt_b+Mt_bbar(+pt_j1)      **'
-c$$$            write(*,*) '**                                    **'
-c$$$            write(*,*) '****************************************'
-c$$$            write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '**   Dynamical scale is used:         **'
-            write(*,*) '     mur=muf=sqrt( (pw+pb+pbbar)^2 )    '
-            write(*,*) '     at the underlying Born level       '
+            write(*,*) '**   check Born_phsp.f file           **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
          else
@@ -309,8 +300,11 @@ c$$$c     HT/2 scale:
 c$$$         mur = HT/2d0
 c$$$c     if(mur.lt.2) mur=2
 c$$$         muf = mur         
+
+
+c     use the invariant mass of the bb sysytem
          ptot=0
-         do i=3,6
+         do i=5,6
             do nu=0,3
                ptot(nu) = ptot(nu) + kn_cmpborn(nu,i)
             enddo

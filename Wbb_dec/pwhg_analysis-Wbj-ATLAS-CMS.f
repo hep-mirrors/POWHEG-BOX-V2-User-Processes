@@ -109,7 +109,7 @@ c      common /crescfac/rescfac1,rescfac2
      $     ptminjets_A1,ymaxjets_A1
       real * 8 ptminlep_CMS,ptminmis_CMS,etamaxlep_CMS,mtWmin_CMS,
      $     ptminjets_CMS,etamaxjets_CMS
-      logical isolatedlep
+      logical isolatedlep,vetojet
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -305,7 +305,7 @@ c     branching = 10.8d-2
 c     1/branching = 9.259259259
       inv_branch=9.259259259d0
 
-      if (nbjet.eq.1.or.nbbjet.eq.1) then
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCC           W b analysis ATLAS [JHEP06(2013)084]
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -424,7 +424,6 @@ c     jet-lepton separation (eta-phi)
          if (isolatedlep) then
             if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then    ! ??????????????????? njout ???
                if (njout.eq.0) then
-c     we consider only one lepton:
                   call filld('XS Wbj ATLAS 1',1d0,dsig)
                elseif (njout.eq.1) then
                   call filld('XS Wbj ATLAS 1',2d0,dsig)
@@ -432,8 +431,6 @@ c     we consider only one lepton:
             endif
          endif  ! isolated lepton
       endif ! lepton cuts
-      endif ! nbjet > 1 or nbbjet > 1
-
 
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -525,7 +522,7 @@ c     jet cuts
       etamaxjets_CMS = 2.4d0
 c      etamaxjets1_CMS = 4.5d0
 c     jet-lepton separation (eta-phi)
-      drminjlep = 0.4d0    !   ?????????????????????????????????????? --> i would say dR>0.4
+      drminjlep = 0.4d0    
 
       call getyetaptmass(plep,y,etalep,ptlep,m)
       call pwhg_getpt(pvl,ptmiss)
@@ -538,19 +535,26 @@ c     jet-lepton separation (eta-phi)
      $     abs(etalep).lt.etamaxlep_CMS .and.
      $     mtW.gt.mtWmin_CMS) then
          
+         vetojet=.true.
+         do i=1,njet
+            call getyetaptmass(pjet(:,i),y,eta,pt,m)
+            if (abs(eta).gt.etamaxjets_CMS.and.pt.gt.ptminjets_CMS) then
+               vetojet = .false.
+            endif
+         enddo
+
          call applycutseta(pjet,njet,ptminjets_CMS,etamaxjets_CMS,
      $        pjout,njout)
          call applycutseta(pbjet,nbjet,ptminjets_CMS,etamaxjets_CMS,
      $        pbjout,nbjout)
          call applycutseta(pbbjet,nbbjet,ptminjets_CMS,etamaxjets_CMS,
      $        pbbjout,nbbjout)
-         
+                 
          isolatedlep = .true.
-
-         do i=1,njout
-            call pwhg_getR_phieta(plep,pjout(:,i),drjlep)
-            if(drjlep.lt.drminjlep) isolatedlep = .false.
-         enddo
+c         do i=1,njout
+c            call pwhg_getR_phieta(plep,pjout(:,i),drjlep)
+c            if(drjlep.lt.drminjlep) isolatedlep = .false.
+c         enddo
          do i=1,nbjout
             call pwhg_getR_phieta(plep,pbjout(:,i),drjlep)
             if(drjlep.lt.drminjlep) isolatedlep = .false.
@@ -560,8 +564,8 @@ c     jet-lepton separation (eta-phi)
             if(drjlep.lt.drminjlep) isolatedlep = .false.
          enddo
 
-         if (isolatedlep) then
-            if(nbjout.eq.2.or.njout.eq.0) then   
+         if (isolatedlep.and.vetojet) then
+            if(nbjout.eq.2.and.njout.eq.0) then   
                call filld('XS Wbb CMS',1d0,dsig)
             endif
          endif  ! isolated lepton
