@@ -1,4 +1,3 @@
-
 for which in max min
 do
 case $which in
