@@ -770,7 +770,9 @@ contains
       real(ki) :: reg19
 !     I've added the following two lines. Carlo Oleari
       real(ki) :: gerpwg,gelpwg
+      real(ki) :: ghtpwg,ghzpwg
       common/Zlepcoupl/gerpwg,gelpwg
+      common/Hcoupl/ghtpwg,ghzpwg
       gAPP = (-1.0_ki)
       gWWAA = (-1.0_ki)
       gAAPP = (2.0_ki)
@@ -788,7 +790,9 @@ contains
       reg4 = cw/sw
       gWWZ = -(reg4)
       reg5 = mW/(reg2*sw)
-      gHZZ = reg5
+!     I've commented the following line and added the next one. Gionata Luisoni
+!      gHZZ = reg5
+      gHZZ = ghzpwg
       gW = (1.0_ki)/(sqrt2*sw)
       reg6 = mH*mH
       reg7 = mW*sw
@@ -908,7 +912,9 @@ contains
       gXS = reg6
       gSl = (gSa+gSv)
       gmul = (gmua+gmuv)
-      gHT = -(reg16)
+!     I've commented the following line and added the next one. Gionata Luisoni
+!      gHT = -(reg16)
+      gHT = ghtpwg
       gHU = -(reg3)
       gHS = -(reg6)
       gHD = -(reg4)

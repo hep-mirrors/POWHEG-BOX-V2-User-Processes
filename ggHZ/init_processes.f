@@ -21,8 +21,8 @@
 
 c$$$CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c$$$      if (powheginput("#LOevents").eq.1) then
-c$$$         flg_LOevents=.false.
-c$$$         flg_bornonly=.true.
+      flg_LOevents=.true.
+      flg_bornonly=.true.
 c$$$      endif
 
       end

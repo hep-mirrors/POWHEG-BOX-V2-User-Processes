@@ -21,6 +21,9 @@ c but never closed ...
       real * 8 ger,gel
       common/Zlepcoupl/ger,gel
       real * 8 t3lep,qlep,gev,gea
+      real * 8 ght,ghz
+      common/Hcoupl/ght,ghz
+      real * 8 kappa_ght, kappa_ghz
 
       if(called) then
          return
@@ -87,6 +90,30 @@ c     neutrino
       gea = t3lep/(2*ph_sthw*sqrt(1-ph_sthw**2))
       gel=gev+gea
       ger=gev-gea
+
+*********************************************************      
+***  MODIFICATION OF Higgs-top and Higgs-Z couplings:
+***  (we assume multiplicative kappa factors)
+***
+
+      if (powheginput('#compute_rwgt').eq.1) then
+         kappa_ght=powheginput("#kappa_ght")
+         if (kappa_ght.eq.-1000000d0) then
+            kappa_ght=1d0
+         endif
+         kappa_ghz=powheginput("#kappa_ghz")
+         if (kappa_ghz.eq.-1000000d0) then
+            kappa_ghz=1d0
+         endif
+      else
+         kappa_ght=1d0
+         kappa_ghz=1d0
+      endif
+
+      ght = (- 1d0/2d0*ph_tmass/(ph_Wmass*ph_sthw)) * kappa_ght
+      ghz = (ph_Wmass / ((1d0-ph_sthw2) * ph_sthw)) * kappa_ghz
+
+*********************************************************
 
       call golem_initialize
 
@@ -364,7 +391,7 @@ C     Parameter definition
       call check_gosam_err(param,ierr)
             
 C     Initialize virtual code
-      path = '../GoSam_POWHEG/orderfile.olc'
+      path = '../GoSamlib/orderfile.olc'
       
       call OLP_Start(path,ioerr,parallelstage,rndiwhichseed)
       call check_gosam_err('olp_start routine',ierr)
