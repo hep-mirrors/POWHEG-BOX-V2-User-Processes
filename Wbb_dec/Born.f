@@ -220,7 +220,14 @@ c Specify here if resonances need be written in the event file.
       implicit none
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
+
       call add_resonance(idvecbos,3,4)
+
+c     choose id of decaying particle according to the sign of the  W and the decay mode
+      id4=vdecaymode
+      id5=-vdecaymode + sign(1,idvecbos)
+      call change_id_particles(4,5,id4,id5)
+
 c     The general reshuffling procedure.
       call lhefinitemasses
       end
