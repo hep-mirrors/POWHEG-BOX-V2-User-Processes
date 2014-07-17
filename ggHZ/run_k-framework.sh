@@ -15,12 +15,12 @@ for icase in {1..7}
 do
     case $icase in
 	1)  kappa_ght=1.0  ; kappa_ghz=1.0  ;;
-	2)  kappa_ght=1.2  ; kappa_ghz=1.0  ;;
-	3)  kappa_ght=0.8  ; kappa_ghz=1.0  ;;
-	4)  kappa_ght=1.0  ; kappa_ghz=1.2  ;;
-	5)  kappa_ght=1.0  ; kappa_ghz=0.8  ;;
-	6)  kappa_ght=1.2  ; kappa_ghz=0.8  ;;
-	7)  kappa_ght=0.8  ; kappa_ghz=1.2  ;;
+	2)  kappa_ght=1.1  ; kappa_ghz=1.0  ;;
+	3)  kappa_ght=0.9  ; kappa_ghz=1.0  ;;
+	4)  kappa_ght=1.0  ; kappa_ghz=1.1  ;;
+	5)  kappa_ght=1.0  ; kappa_ghz=0.9  ;;
+	6)  kappa_ght=1.1  ; kappa_ghz=0.9  ;;
+	7)  kappa_ght=0.9  ; kappa_ghz=1.1  ;;
     esac
 
     cat  powheg.input-save | sed "s/storeinfo_rwgt/compute_rwgt/ ; s/kappa_ght.*/kappa_ght $kappa_ght/ ; s/kappa_ghz.*/kappa_ghz $kappa_ghz/ ; s/parallelstage/#parallelstage/ ; s/xgriditeration/#xgriditeration/; s/fastbtlbound/#fastbtlbound/" > powheg.input

@@ -13,7 +13,7 @@ done
 
 wait
 
-(echo 1 ; ls -c1 pwgLHEF_analysis-*.top ; echo "") | mergedata
+(echo 1 ; ls -c1 pwgLHEF_analysis-[0123456789][0123456789][0123456789][0123456789].top ; echo "") | mergedata
 
 mv fort.12 pwgLHEF_analysis.top
 
