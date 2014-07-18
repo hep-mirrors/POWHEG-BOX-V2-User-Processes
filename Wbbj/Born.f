@@ -85,7 +85,8 @@ c Specify here if resonances need be written in the event file.
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
       call add_resonance(idvecbos,3,4)
-      
+c     The general reshuffling procedure.
+      call lhefinitemasses      
       end
 
 c$$$      subroutine finalize_lh

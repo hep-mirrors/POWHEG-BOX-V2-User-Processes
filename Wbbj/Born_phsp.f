@@ -165,10 +165,7 @@ c      pause
       kn_pborn(1:3,7) = p7(1:3)
 
 
-c*******************************************************
-c     c'e o non c'e' la divisione per 2pi?????????
-c*******************************************************
-c      kn_jacborn = xjac/(2d0*pi)
+
       kn_jacborn = xjac
 
 c      write(*,*) kn_jacborn
@@ -241,6 +238,8 @@ c     now boost everything BACK along z-axis
       integer runningscales
       real * 8 mtw,mtb,mtbbar,pt1,pt2
       real * 8 Ht
+      real * 8 ptot(0:3)
+      integer i,nu
       real * 8 powheginput
       external powheginput      
       save ini,runningscales
@@ -256,14 +255,20 @@ c     now boost everything BACK along z-axis
          endif
 
          if (runningscales.eq.1) then
+c            write(*,*) '****************************************'
+c            write(*,*) '****************************************'
+c            write(*,*) '**   Dynamical scale is used:         **'
+c            write(*,*) '**                                    **'
+c            write(*,*) '**   mur=muf=HT/2   where             **'
+c            write(*,*) '**                                    **'
+c            write(*,*) '** HT=Mt_W+Mt_b+Mt_bbar+pt_j1(+pt_j2) **'
+c            write(*,*) '**                                    **'
+c            write(*,*) '****************************************'
+c            write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '**   Dynamical scale is used:         **'
-            write(*,*) '**                                    **'
-            write(*,*) '**   mur=muf=HT/2   where             **'
-            write(*,*) '**                                    **'
-            write(*,*) '** HT=Mt_W+Mt_b+Mt_bbar+pt_j1(+pt_j2) **'
-            write(*,*) '**                                    **'
+            write(*,*) '     check Born_phsp.f file             '
             write(*,*) '****************************************'
             write(*,*) '****************************************'
          else
@@ -277,40 +282,48 @@ c     now boost everything BACK along z-axis
       endif
       
       if (runningscales.eq.1) then
-         if ((flg_btildepart.eq.'b').or.(flg_btildepart.eq.'c')) then
-            mtw    = sqrt(
-     $           (kn_pborn(0,3)+kn_pborn(0,4))**2-
-     $           (kn_pborn(1,3)+kn_pborn(1,4))**2-
-     $           (kn_pborn(2,3)+kn_pborn(2,4))**2-
-     $           (kn_pborn(3,3)+kn_pborn(3,4))**2+
-     $           (kn_pborn(1,3)+kn_pborn(1,4))**2+
-     $           (kn_pborn(2,3)+kn_pborn(2,4))**2)         
-            mtb    = sqrt(ph_bmass**2+kn_pborn(1,5)**2+kn_pborn(2,5)**2)
-            mtbbar = sqrt(ph_bmass**2+kn_pborn(1,6)**2+kn_pborn(2,6)**2)
-            pt1    = sqrt(kn_pborn(1,7)**2+kn_pborn(2,7)**2)
-            HT     = mtw+mtb+mtbbar+pt1
-         elseif ((flg_btildepart.eq.'r')) then
-            mtw    = sqrt(
-     $           (kn_preal(0,3)+kn_preal(0,4))**2-
-     $           (kn_preal(1,3)+kn_preal(1,4))**2-
-     $           (kn_preal(2,3)+kn_preal(2,4))**2-
-     $           (kn_preal(3,3)+kn_preal(3,4))**2+
-     $           (kn_preal(1,3)+kn_preal(1,4))**2+
-     $           (kn_preal(2,3)+kn_preal(2,4))**2)         
-            mtb    = sqrt(ph_bmass**2+kn_preal(1,5)**2+kn_preal(2,5)**2)
-            mtbbar = sqrt(ph_bmass**2+kn_preal(1,6)**2+kn_preal(2,6)**2)
-            pt1    = sqrt(kn_preal(1,7)**2+kn_preal(2,7)**2)
-            pt2    = sqrt(kn_preal(1,8)**2+kn_preal(2,8)**2)
-            HT     = mtw+mtb+mtbbar+pt1+pt2
-         else
-            print *,"Problem occured in set_fac_ren_scales"
-            print *,"flg_btildepart: ",flg_btildepart
-            call pwhg_exit(-1)
-         endif
-c     HT/2 scale:
-         mur = HT/2d0
-c     if(mur.lt.2) mur=2
-         muf = mur         
+c$$$         if ((flg_btildepart.eq.'b').or.(flg_btildepart.eq.'c')) then
+c$$$            mtw    = sqrt(
+c$$$     $           (kn_pborn(0,3)+kn_pborn(0,4))**2-
+c$$$     $           (kn_pborn(1,3)+kn_pborn(1,4))**2-
+c$$$     $           (kn_pborn(2,3)+kn_pborn(2,4))**2-
+c$$$     $           (kn_pborn(3,3)+kn_pborn(3,4))**2+
+c$$$     $           (kn_pborn(1,3)+kn_pborn(1,4))**2+
+c$$$     $           (kn_pborn(2,3)+kn_pborn(2,4))**2)         
+c$$$            mtb    = sqrt(ph_bmass**2+kn_pborn(1,5)**2+kn_pborn(2,5)**2)
+c$$$            mtbbar = sqrt(ph_bmass**2+kn_pborn(1,6)**2+kn_pborn(2,6)**2)
+c$$$            pt1    = sqrt(kn_pborn(1,7)**2+kn_pborn(2,7)**2)
+c$$$            HT     = mtw+mtb+mtbbar+pt1
+c$$$         elseif ((flg_btildepart.eq.'r')) then
+c$$$            mtw    = sqrt(
+c$$$     $           (kn_preal(0,3)+kn_preal(0,4))**2-
+c$$$     $           (kn_preal(1,3)+kn_preal(1,4))**2-
+c$$$     $           (kn_preal(2,3)+kn_preal(2,4))**2-
+c$$$     $           (kn_preal(3,3)+kn_preal(3,4))**2+
+c$$$     $           (kn_preal(1,3)+kn_preal(1,4))**2+
+c$$$     $           (kn_preal(2,3)+kn_preal(2,4))**2)         
+c$$$            mtb    = sqrt(ph_bmass**2+kn_preal(1,5)**2+kn_preal(2,5)**2)
+c$$$            mtbbar = sqrt(ph_bmass**2+kn_preal(1,6)**2+kn_preal(2,6)**2)
+c$$$            pt1    = sqrt(kn_preal(1,7)**2+kn_preal(2,7)**2)
+c$$$            pt2    = sqrt(kn_preal(1,8)**2+kn_preal(2,8)**2)
+c$$$            HT     = mtw+mtb+mtbbar+pt1+pt2
+c$$$         else
+c$$$            print *,"Problem occured in set_fac_ren_scales"
+c$$$            print *,"flg_btildepart: ",flg_btildepart
+c$$$            call pwhg_exit(-1)
+c$$$         endif
+c$$$c     HT/2 scale:
+c$$$         mur = HT/2d0
+c$$$c     if(mur.lt.2) mur=2
+c$$$         muf = mur         
+         ptot=0
+         do i=3,6
+            do nu=0,3
+               ptot(nu) = ptot(nu) + kn_cmpborn(nu,i)
+            enddo
+         enddo
+         muf=sqrt(ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2)
+         mur=muf      
       else
          muf=ph_wmass
          mur=ph_wmass
