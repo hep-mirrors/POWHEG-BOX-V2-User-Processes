@@ -48,7 +48,7 @@ c     decay into muon
 c     decay into tau
          ph_lmass = 1776.82d-3   ! muon mass
       else
-         write(*,*) 'ERROR: The decay mode you selected ',vdecaymode
+         write(*,*) 'ERROR: The decay mode you selected ',vdecaymode,
      $        ' is not allowed '
          call pwhg_exit(1)
       endif
