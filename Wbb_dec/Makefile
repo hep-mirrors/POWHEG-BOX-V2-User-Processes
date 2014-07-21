@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
@@ -9,8 +9,8 @@ PDF=lhapdf
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=dummy
 #ANALYSIS=Wbbj
-#ANALYSIS=Wbj
-ANALYSIS=ATLAS-CMS
+ANALYSIS=Wbj
+#ANALYSIS=ATLAS-CMS
 ## For static linking uncomment the following
 #STATIC= -static
 #

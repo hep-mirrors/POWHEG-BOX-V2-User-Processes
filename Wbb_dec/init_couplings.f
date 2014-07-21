@@ -13,7 +13,7 @@ c but never closed ...
       save called
       integer idvecbos,vdecaymode,Vdecmod
       common/cvecbos/idvecbos,vdecaymode
-
+      real * 8 decmass
       integer j
       if(called) then
          return
@@ -93,13 +93,6 @@ c   decay products of the vector boson
          call pwhg_exit(1)
       endif
 
-      if (ph_Wmass2low.lt.decmass**2) then
-         write(*,*) 'min_w_mass less than the minimun invariant mass of'
-         write(*,*) 'the final-state leptonic system ',decmass
-         write(*,*) 'POWHEG aborts'
-         call pwhg_exit(-1)
-      endif
-
 c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
       physpar_ml(1) = 0.51099891d-3
       physpar_ml(2) = 0.1056583668d0
@@ -109,6 +102,17 @@ c     Set here lepton and quark masses for momentum reshuffle in the LHE event f
       physpar_mq(3) = 0.50d0     ! strange
       physpar_mq(4) = 1.50d0     ! charm
       physpar_mq(5) = ph_bmass   ! bottom
+
+      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)**2
+      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)**2
+      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)**2
+
+      if (ph_Wmass2low.lt.decmass**2) then
+         write(*,*) 'min_w_mass less than the minimun invariant mass of'
+         write(*,*) 'the final-state leptonic system ',decmass
+         write(*,*) 'POWHEG aborts'
+         call pwhg_exit(-1)
+      endif
 
       end
 
@@ -159,26 +163,9 @@ c madgraph routines not to blow.
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
 
-      wmass=80.419d0
-
       zwidth=2.441d0
       wwidth=2.1054d0
       twidth=1.5083d0
-
-
-c      hmass = 125d0
-c      hwidth = 0.403d-2
-
-c      hmass = powheginput('hmass')
-c      hwidth = powheginput('hwidth')
-C      ph_Hmass2low=powheginput("hmasslow")**2
-C      ph_Hmass2high=powheginput("hmasshigh")**2
-C      ph_Wmass2low=powheginput("wmasslow")**2
-C      ph_Wmass2high=powheginput("wmasshigh")**2
-C      ph_Zmass2low=powheginput("zmasslow")**2
-C      ph_Zmass2high=powheginput("zmasshigh")**2
-
-
 
 c     POWHEG CKM matrix
 c
