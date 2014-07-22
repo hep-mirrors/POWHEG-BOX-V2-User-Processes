@@ -21,9 +21,9 @@ c but never closed ...
       real * 8 ger,gel
       common/Zlepcoupl/ger,gel
       real * 8 t3lep,qlep,gev,gea
-      real * 8 ght,ghz
-      common/Hcoupl/ght,ghz
-      real * 8 kappa_ght, kappa_ghz
+      real * 8 ghb,ght,ghz
+      common/Hcoupl/ghb,ght,ghz
+      real * 8 kappa_ghb, kappa_ght, kappa_ghz
 
       if(called) then
          return
@@ -97,6 +97,10 @@ c     neutrino
 ***
 
       if (powheginput('#compute_rwgt').eq.1) then
+         kappa_ghb=powheginput("#kappa_ghb")
+         if (kappa_ghb.eq.-1000000d0) then
+            kappa_ghb=1d0
+         endif
          kappa_ght=powheginput("#kappa_ght")
          if (kappa_ght.eq.-1000000d0) then
             kappa_ght=1d0
@@ -106,10 +110,12 @@ c     neutrino
             kappa_ghz=1d0
          endif
       else
+         kappa_ghb=1d0
          kappa_ght=1d0
          kappa_ghz=1d0
       endif
 
+      ghb = (- 1d0/2d0*ph_bmass/(ph_Wmass*ph_sthw)) * kappa_ghb
       ght = (- 1d0/2d0*ph_tmass/(ph_Wmass*ph_sthw)) * kappa_ght
       ghz = (ph_Wmass / ((1d0-ph_sthw2) * ph_sthw)) * kappa_ghz
 

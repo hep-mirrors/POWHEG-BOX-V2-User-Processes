@@ -770,9 +770,9 @@ contains
       real(ki) :: reg19
 !     I've added the following two lines. Carlo Oleari
       real(ki) :: gerpwg,gelpwg
-      real(ki) :: ghtpwg,ghzpwg
+      real(ki) :: ghbpwg,ghtpwg,ghzpwg
       common/Zlepcoupl/gerpwg,gelpwg
-      common/Hcoupl/ghtpwg,ghzpwg
+      common/Hcoupl/ghbpwg,ghtpwg,ghzpwg
       gAPP = (-1.0_ki)
       gWWAA = (-1.0_ki)
       gAAPP = (2.0_ki)
@@ -824,7 +824,9 @@ contains
       gPtau = (mtau/reg9)
       gHPP = -(reg8)
       reg5 = (1.0_ki/2.0_ki)/reg7*mBMS
-      gHB = -(reg5)
+!     I've commented the following line and added the next one. Gionata Luisoni
+!      gHB = -(reg5)
+      gHB = ghbpwg
       gWWAZ = reg4
       reg4 = (1.0_ki/2.0_ki)/reg7*mtau
       gHtau = -(reg4)

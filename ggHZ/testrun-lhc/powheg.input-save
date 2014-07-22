@@ -59,29 +59,29 @@ nubound 30000 ! number of calls to set up the upper bounding norms for radiation
 
 ! OPTIONAL PARAMETERS
 
-withnegweights 1  ! (default 0) if on (1) use negative weights
+withnegweights 1   ! (default 0) if on (1) use negative weights
 #ptsqmin    0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
 #charmthr   1.5    ! (default 1.5 GeV) charm treshold for gluon splitting 
 #bottomthr  5.0    ! (default 5.0 GeV) bottom treshold for gluon splitting
-testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+testplots  1       ! (default 0, do not) do NLO and PWHG distributions
 #charmthrpdf  1.5  ! (default 1.5 GeV) pdf charm treshold
 #bottomthrpdf 5.0  ! (default 5.0 GeV) pdf bottom treshold
 
-#xupbound 2d0   ! increase upper bound for radiation generation
-#iseed    547         !  Start the random number generator with seed iseed
-#rand1     0          !  skipping  rand2*100000000+rand1 numbers.  
-#rand2     0          !  (see RM48 short writeup in CERNLIB)              
-manyseeds 1         ! Used to perform multiple runs with different random
-                     ! seeds in the same directory.
-                     ! If set to 1, the program asks for an integer j;
-                     ! The file pwgseeds.dat at line j is read, and the
-                     ! integer at line j is used to initialize the random
-                     ! sequence for the generation of the event.
-                     ! The event file is called pwgevents-'j'.lhe
+#xupbound 2d0      ! increase upper bound for radiation generation
+#iseed    547      !  Start the random number generator with seed iseed
+#rand1    0        !  skipping  rand2*100000000+rand1 numbers.  
+#rand2    0        !  (see RM48 short writeup in CERNLIB)              
+manyseeds 1        ! Used to perform multiple runs with different random
+                   ! seeds in the same directory.
+                   ! If set to 1, the program asks for an integer j;
+                   ! The file pwgseeds.dat at line j is read, and the
+                   ! integer at line j is used to initialize the random
+                   ! sequence for the generation of the event.
+                   ! The event file is called pwgevents-'j'.lhe
 
-parallelstage 1
+parallelstage  1
 xgriditeration 1
-fastbtlbound 1
+fastbtlbound   1
 storeinfo_rwgt 1   ! store info to allow for reweighting
 
 #pdfreweight 1
@@ -90,6 +90,7 @@ storeinfo_rwgt 1   ! store info to allow for reweighting
 nohad   1
 
 ! modification of Higgs-top and Higgs-Z couplings 
+#kappa_ghb      1.1      !  multiplicative k-factor of the Higgs-bottom coupling
 #kappa_ght      0.9      !  multiplicative k-factor of the Higgs-top coupling
 #kappa_ghz      1.0      !  multiplicative k-factor of the Higgs-Z coupling
 

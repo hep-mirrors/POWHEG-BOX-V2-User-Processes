@@ -27,7 +27,7 @@ done
 
 wait
 
-for i in {1..7}
+for i in {1..15}
 do
 (echo 1 ; ls -c1 pwgLHEF_analysis-00*-W$i.top ; echo "") | mergedata
 mv fort.12 pwgLHEF_analysis-W$i.top
