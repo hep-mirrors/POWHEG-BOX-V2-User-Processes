@@ -103,9 +103,9 @@ c     Set here lepton and quark masses for momentum reshuffle in the LHE event f
       physpar_mq(4) = 1.50d0     ! charm
       physpar_mq(5) = ph_bmass   ! bottom
 
-      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)**2
-      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)**2
-      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)**2
+      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)
+      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)
+      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)
 
       if (ph_Wmass2low.lt.decmass**2) then
          write(*,*) 'min_w_mass less than the minimun invariant mass of'
