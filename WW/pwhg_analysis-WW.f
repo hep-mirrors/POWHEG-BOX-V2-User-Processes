@@ -11,7 +11,6 @@ c  pwhgfill  :  fills the histograms with data
       subroutine init_hist
       implicit none
       include  'LesHouches.h'
-      include '../pwhg_book.h'
 
       call inihists
 
