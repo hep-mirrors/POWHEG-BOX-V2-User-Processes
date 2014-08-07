@@ -123,6 +123,7 @@ c  SISTEMARE *****************************************
 
       subroutine UPEVNT
       implicit none
+      include 'hepevt.h'
       real * 8 powheginput
       external powheginput      
       logical changescalup,ini
@@ -140,7 +141,7 @@ c  SISTEMARE *****************************************
          endif
          ini=.false.
       endif
-      pyevntcounts=pyevntcounts+1
+
       if(nevhep.eq.oldnevhep) then
 c the main program increases nevhep after each pythia call.
 c We enter here if pythia fails to shower an event, and tries with
