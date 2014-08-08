@@ -126,7 +126,9 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
 	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	sigcollsoft.o sigvirtual.o  mint_upb.o  $(PDFPACK) $(USER) $(FPEOBJ)
+	sigcollsoft.o sigvirtual.o  setlocalscales.o validflav.o mint_upb.o  \
+        pwhgreweight.o opencount.o ubprojections.o utils.o \
+        $(PDFPACK) $(USER) $(FPEOBJ)
 
 
 # target to generate LHEF output

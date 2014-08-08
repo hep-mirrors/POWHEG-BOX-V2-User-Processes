@@ -6,7 +6,6 @@
       include 'pwhg_pdf.h'
       include 'LesHouches.h'
       include 'pwhg_flg.h'
-      include 'pwhg_flg-add.h'
       include 'pwhg_par.h'
       integer i1,i2,i3,i4,i5,i6,i7,i8,i9,k,ii(nlegreal)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
