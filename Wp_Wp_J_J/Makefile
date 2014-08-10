@@ -62,9 +62,8 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:obj-$(FC)/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
-INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I F90 -I F90/obj-$(FC)
+INCLUDE1=$(shell dirname $(PWD))/include
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I F90 -I F90/obj-$(FC)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
@@ -138,6 +137,12 @@ pwhg_main: F90/obj-$(FC)/libWpWp2j.a $(QCDLOOP)/ql/libqcdloop.a $(QCDLOOP)/ff/li
 
 F90/obj-$(FC)/libWpWp2j.a:F90/*.f* F90/$(FC)/*.f*
 	(cd F90 ; make FC=$(FC))
+
+# These really depend upon the .mod files create when the library is built:
+Born.o: F90/obj-$(FC)/libWpWp2j.a
+real.o: F90/obj-$(FC)/libWpWp2j.a
+virtual.o: F90/obj-$(FC)/libWpWp2j.a
+
 
 $(QCDLOOP)/ql/libqcdloop.a:
 	(cd $(QCDLOOP)/ql; make FC=$(FC))
