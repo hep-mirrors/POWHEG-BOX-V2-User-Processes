@@ -27,7 +27,9 @@ c     vector boson id and decay
 c     lepton masses
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
-      flg_fastbtlbound=.true.
+
+      flg_fastbtlbound = .true.
+      flg_storemintupb = .true.
 
       par_isrtinycsi = 1d-6
       par_isrtinyy = 1d-6

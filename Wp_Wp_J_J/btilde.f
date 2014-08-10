@@ -12,6 +12,7 @@ c                 (this function does not support an avatar function)
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
       include 'pwhg_flg.h'
+      include 'pwhg_kn.h'
       include 'pwhg_math.h'
 c     independent variables for real graph: number of final state
 c     legs times 3, take away 4 for 4-momentum conservation, add 2
