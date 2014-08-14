@@ -14,6 +14,20 @@ c     to define here rad_bottomthr2
       external powheginput,pwhg_alphas
       logical verbose
       parameter(verbose=.true.)
+
+      if(powheginput("#par_isrtinycsi").gt.0) 
+     $     par_isrtinycsi = powheginput("#par_isrtinycsi")
+
+      if(powheginput("#par_fsrtinycsi").gt.0) 
+     $     par_fsrtinycsi = powheginput("#par_fsrtinycsi")
+
+      if(powheginput("#par_isrtinyy").gt.0) 
+     $     par_isrtinyy = powheginput("#par_isrtinyy")
+
+      if(powheginput("#par_fsrtinyy").gt.0) 
+     $     par_fsrtinyy = powheginput("#par_fsrtinyy")
+
+
       flg_withdamp=.true.
       flg_bornzerodamp=.true.
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
