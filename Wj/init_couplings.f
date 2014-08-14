@@ -6,12 +6,27 @@
       include 'pwhg_kn.h'
       include 'pwhg_math.h'
       include 'pwhg_physpar.h'      
+      include 'pwhg_par.h'      
       real * 8 masswindow_low,masswindow_high,wmasslow,wmasshigh
       real * 8 powheginput
       external powheginput
       logical verbose
       parameter(verbose=.true.)
       integer i,j
+      
+      if(powheginput("#par_isrtinycsi").gt.0) 
+     $     par_isrtinycsi = powheginput("#par_isrtinycsi")
+
+      if(powheginput("#par_fsrtinycsi").gt.0) 
+     $     par_fsrtinycsi = powheginput("#par_fsrtinycsi")
+
+      if(powheginput("#par_isrtinyy").gt.0) 
+     $     par_isrtinyy = powheginput("#par_isrtinyy")
+
+      if(powheginput("#par_fsrtinyy").gt.0) 
+     $     par_fsrtinyy = powheginput("#par_fsrtinyy")
+
+
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
