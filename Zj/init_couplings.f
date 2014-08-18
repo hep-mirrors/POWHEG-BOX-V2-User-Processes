@@ -9,6 +9,7 @@ c     to define here rad_bottomthr2
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
+      include 'pwhg_par.h'      
       real * 8 masswindow_low,masswindow_high,zmasslow,zmasshigh
       real *8 powheginput,pwhg_alphas
       external powheginput,pwhg_alphas
