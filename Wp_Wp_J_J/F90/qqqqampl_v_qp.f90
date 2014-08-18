@@ -74,20 +74,21 @@ contains
     Npart = size(pext_dp,dim=1)
     if (Npart < 4) stop 'generate_qpevent: Npart<4'
 
+    ninc=2
+    abeam(1) = 4 
+    abeam(2) = 4
+    iinc(1) = 1
+    iinc(2) = 2
 
-    ! -- get the incoming partons and the direction of the beam (x,y,z ?) 
-    ninc = 0 
-    do i=1,Npart
-       do j=2,4
-          if (abs(abs(pext_dp(i,j))-abs(pext_dp(i,1))) < sq2tol) then 
-             ninc = ninc+1 
-             if (ninc >2) stop 'generate_massless_qpevent: more than 2 incoming?'
-             iinc(ninc) = i 
-             abeam(ninc) = j 
-          end if
-       end do
-    end do
-    if (abeam(1) /= abeam(2)) stop 'generate_massless_qpevent: different abeams?' 
+!      Make sure that 1 and 2 are beams
+    if(pext_dp(1,2).ne.0.or.pext_dp(1,3).ne.0.       &
+       .or. abs(abs(pext_dp(1,1))-abs(pext_dp(1,4)))/abs(abs(pext_dp(1,1))+abs(pext_dp(1,4)))>sq2tol &
+       .or. pext_dp(2,2).ne.0.or.pext_dp(2,3).ne.0.  &
+       .or. abs(abs(pext_dp(2,1))-abs(pext_dp(2,4)))/abs(abs(pext_dp(2,1))+abs(pext_dp(2,4)))>sq2tol) then
+       write(*,*) 'generate_mless_qpevent: these do not look like incoming beams'
+       write(*,*) pext_dp(1,1:4)
+       write(*,*) pext_dp(2,1:4)
+    endif
 
     pext_qp = czero 
     do i=1,Npart
