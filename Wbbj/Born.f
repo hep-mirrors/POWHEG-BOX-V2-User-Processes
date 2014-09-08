@@ -84,103 +84,24 @@ c Specify here if resonances need be written in the event file.
       implicit none
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
+      integer id4, id5
+
       call add_resonance(idvecbos,3,4)
+
+c     choose id of decaying particle according to the sign of the  W and the decay mode
+      id4=vdecaymode
+      id5=-vdecaymode + sign(1,idvecbos)
+      call change_id_particles(4,5,id4,id5)
+
 c     The general reshuffling procedure.
-      call lhefinitemasses      
+      call lhefinitemasses
       end
 
-c$$$      subroutine finalize_lh
-c$$$c     Set up the resonances whose mass must be preserved
-c$$$c     on the Les Houches interface.
-c$$$c     
-c$$$c     vector boson id and decay
-c$$$      implicit none
-c$$$      integer idvecbos,vdecaymode
-c$$$      common/cvecbos/idvecbos,vdecaymode
-c$$$c     lepton masses
-c$$$      real *8 lepmass(3),decmass
-c$$$      common/clepmass/lepmass,decmass
-c$$$
-c$$$      call add_resonance(idvecbos,4,5)
-c$$$c     The following routine also performs the reshuffling of momenta if
-c$$$c     a massive decay is chosen
-c$$$      call momenta_reshuffle(4,5,6,decmass,0d0)
-c$$$
-c$$$c     fix here the W decay mode
-c$$$      id5=vdecaymode
-c$$$      id6=-vdecaymode + sign(1,idvecbos) 
-c$$$      call change_id_particles(5,6,id5,id6)
-c$$$
-c$$$      end
-c$$$
-c$$$
-c$$$
-c$$$      subroutine change_id_particles(i1,i2,id1,id2)
-c$$$      implicit none
-c$$$      include 'LesHouches.h'
-c$$$      integer i1,i2,id1,id2
-c$$$      idup(i1)=id1
-c$$$      idup(i2)=id2
-c$$$      end
-c$$$
-c$$$
-c$$$
-c$$$c     i1<i2
-c$$$      subroutine momenta_reshuffle(ires,i1,i2,m1,m2)
-c$$$      implicit none
-c$$$      include 'LesHouches.h'
-c$$$      integer ires,i1,i2
-c$$$      real * 8 m1,m2
-c$$$      real * 8 ptemp(0:3),pfin(0:3),beta(3),betainv(3),modbeta,m
-c$$$      real * 8 mod_pfin,m0
-c$$$      integer j,id,dec
-c$$$      if (i1.ge.i2) then
-c$$$         write(*,*) 'wrong sequence in momenta_reshuffle'
-c$$$         stop
-c$$$      endif
-c$$$cccccccccccccccccccccccccccccc
-c$$$c construct boosts from/to vector boson rest frame 
-c$$$      do j=1,3
-c$$$         beta(j)=-pup(j,ires)/pup(4,ires)
-c$$$      enddo
-c$$$      modbeta=sqrt(beta(1)**2+beta(2)**2+beta(3)**2)
-c$$$      do j=1,3
-c$$$         beta(j)=beta(j)/modbeta
-c$$$         betainv(j)=-beta(j)
-c$$$      enddo
-c$$$
-c$$$      m0 = pup(5,ires)
-c$$$      mod_pfin=
-c$$$     $     1/(2*m0)*sqrt(abs((m0**2-m1**2-m2**2)**2 - 4*m1**2*m2**2))
-c$$$               
-c$$$cccccccccccccccccccccccccccccccccccccccc
-c$$$c     loop of the two decay products
-c$$$      
-c$$$      do dec=1,2
-c$$$         if(dec.eq.1) then
-c$$$            id=i1
-c$$$            m=m1
-c$$$         else
-c$$$            id=i2
-c$$$            m=m2
-c$$$         endif
-c$$$         ptemp(0)=pup(4,id)
-c$$$         do j=1,3
-c$$$            ptemp(j)=pup(j,id)
-c$$$         enddo
-c$$$         call mboost(1,beta,modbeta,ptemp,ptemp)
-c$$$         pfin(0)=sqrt(mod_pfin**2 + m**2)
-c$$$         do j=1,3
-c$$$            pfin(j)=ptemp(j)*mod_pfin/ptemp(0)
-c$$$         enddo
-c$$$         call mboost(1,betainv,modbeta,pfin,ptemp)
-c$$$         do j=1,3
-c$$$            pup(j,id)=ptemp(j)
-c$$$         enddo
-c$$$         pup(4,id)=ptemp(0)
-c$$$         pup(5,id)=sqrt(abs(pup(4,id)**2-pup(1,id)**2
-c$$$     $        -pup(2,id)**2-pup(3,id)**2))
-c$$$         
-c$$$      enddo
-c$$$
-c$$$      end
+
+      subroutine change_id_particles(i1,i2,id1,id2)
+      implicit none
+      include 'LesHouches.h'
+      integer i1,i2,id1,id2
+      idup(i1)=id1
+      idup(i2)=id2
+      end
