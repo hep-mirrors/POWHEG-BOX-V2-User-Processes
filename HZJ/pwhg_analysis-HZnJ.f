@@ -222,6 +222,7 @@ c     we need to tell to this analysis file which program is running it
       save minlo
       data minlo/0/
       character * 20 processid
+      save processid
       real * 8 dsig(7)
       integer nweights
       logical inimulti
