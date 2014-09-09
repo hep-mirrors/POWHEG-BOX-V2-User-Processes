@@ -7,9 +7,9 @@ from os.path import basename, splitext
 
 
 def quadsum(mylist):
-
+    result=0
     for i in range(0,len(mylist)):
-        result=mylist[i]*mylist[i]
+        result=result+mylist[i]*mylist[i]
     
     return math.sqrt(result)
 
