@@ -1,0 +1,8 @@
+st1 xg1  Sun Aug 10 14:05:17 CEST 2014
+st1 xg2  Sun Aug 10 14:27:48 CEST 2014
+st2  Sun Aug 10 14:50:17 CEST 2014
+st2  Sun Aug 10 17:14:59 CEST 2014
+st2  Sun Aug 10 22:15:16 CEST 2014
+st3  Wed Aug 13 14:19:45 CEST 2014
+st4  Thu Aug 14 19:14:34 CEST 2014
+end  Tue Sep  2 08:25:48 CEST 2014
