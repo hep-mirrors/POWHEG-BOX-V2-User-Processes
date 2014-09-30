@@ -260,7 +260,7 @@ c     The Born cross section is perfectly FINITE!!!
          else
             write(*,*) '****************************************'
             write(*,*) '****************************************'
-            write(*,*) '**   mur=muf=MW                       **'
+            write(*,*) '**   mur=muf=89 GeV                       **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'            
          endif
@@ -312,8 +312,10 @@ c     use the invariant mass of the bb sysytem
          muf=sqrt(ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2)
          mur=muf     
       else
-         muf=ph_wmass
-         mur=ph_wmass
+c         muf=ph_wmass
+c         mur=ph_wmass
+         muf=89d0
+         mur=89d0
       endif
       end
 

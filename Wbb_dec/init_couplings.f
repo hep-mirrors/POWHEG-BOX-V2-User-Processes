@@ -149,6 +149,9 @@ c madgraph routines not to blow.
       alfas = 0.119d0
       zmass = 91.1876d0
       tmass = 172.5d0
+c     MCFM
+      tmass = 173.2d0
+
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
@@ -157,7 +160,8 @@ c madgraph routines not to blow.
       cmass = 0d0
       bmass = powheginput("#bmass")
       if (bmass.le.0) then
-         bmass = 4.2d0
+c     MCFM
+         bmass = 4.75d0
       endif
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
