@@ -198,6 +198,13 @@ c      common /crescfac/rescfac1,rescfac2
       integer minnjet
       real * 8 inv_branch
       save etamax, ptjmin
+      logical pwhg_isfinite
+      external pwhg_isfinite
+      
+      if (.not.pwhg_isfinite(dsig0)) then
+         write(*,*) "*** NaN in analysis ***"
+         return
+      endif
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -214,7 +221,7 @@ c      common /crescfac/rescfac1,rescfac2
          nweights=1
       else
          dsig(1:weights_num)=weights_val(1:weights_num)
-          nweights=weights_num
+         nweights=weights_num
       endif
 
       if(sum(abs(dsig)).eq.0) return
@@ -512,7 +519,9 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c     apply Campbell et al. cuts: hep-ph/0611348.  Algo: palg = 0 
 
          if (inicuts) then
-            if (powheginput("ebeam1").eq.7000d0) then
+            if ( powheginput("ebeam1").eq.7000d0.or.
+     $           powheginput("ebeam1").eq.3500d0.or.
+     $           powheginput("ebeam1").eq.4000d0) then
 c     LHC cuts
                write(*,*) 'CEMW LHC cuts'               
                ptjmin = 25d0

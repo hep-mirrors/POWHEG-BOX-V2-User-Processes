@@ -270,8 +270,10 @@ contains
                   write(42,'(2x,A8)')"</event>"
                endif
                ! Give back a Nan so that point is discarded
-               zero = log(1.0_ki)
-               amp(2)= 1.0_ki/zero
+!               zero = log(1.0_ki)
+!               amp(2)= 1.0_ki/zero
+!   I've changed this!!  Carlo Oleari
+               amp(2) = 0.0_ki
             else
                if(PSP_verbosity .eq. 2) write(*,*) "POINT SAVED !!"
                if(PSP_verbosity .ge. 2) write(*,*)
