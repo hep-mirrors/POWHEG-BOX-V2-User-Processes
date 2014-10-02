@@ -81,6 +81,7 @@ c     we need to tell to this analysis file which program is running it
       save minlo
       data minlo/0/
       character * 20 processid
+      save processid
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2
       real * 8 dsig(maxmulti)
@@ -363,9 +364,11 @@ c     jet-lepton separation (eta-phi)
                if (njout.eq.0) then
 c     we consider only one lepton here
                   call filld('XS Wbj ATLAS 2',1d0,dsig)
+                  call filld('XS Wbj ATLAS 2',3d0,dsig)
                   call filld('b-pt 1j ATLAS 2',pt,dsig)
                elseif (njout.eq.1) then
                   call filld('XS Wbj ATLAS 2',2d0,dsig)
+                  call filld('XS Wbj ATLAS 2',3d0,dsig)
                   call filld('b-pt 2j ATLAS 2',pt,dsig)
                endif                             
             endif
@@ -425,8 +428,10 @@ c     jet-lepton separation (eta-phi)
             if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then    ! ??????????????????? njout ???
                if (njout.eq.0) then
                   call filld('XS Wbj ATLAS 1',1d0,dsig)
+                  call filld('XS Wbj ATLAS 1',3d0,dsig)
                elseif (njout.eq.1) then
                   call filld('XS Wbj ATLAS 1',2d0,dsig)
+                  call filld('XS Wbj ATLAS 1',3d0,dsig)
                endif                             
             endif
          endif  ! isolated lepton
