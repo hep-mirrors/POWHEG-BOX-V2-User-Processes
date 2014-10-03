@@ -91,12 +91,19 @@ c If the virtual is not included, it must be omitted.
       data ini/.true./
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
+      logical Sudakovbb
+      save Sudakovbb
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
             raisingscales = .false.
          else
             raisingscales = .true.
          endif
+         if(powheginput("#sudakovbb").eq.0) then
+            Sudakovbb = .false.
+         else
+            Sudakovbb = .true.
+         endif         
          ini = .false.
       endif
       renfac2=st_renfact**2
@@ -133,6 +140,8 @@ c     Provide alpha_S reweighting for the first merge
                inlofac=1
             else
 c provide Sudakov
+               if (Sudakovbb.or..not.(abs(lflav(jmerge)).eq.5 
+     $              .and.abs(lflav(kmerge)).eq.5)) then
                basicfac=basicfac*
      1              sudakov(q2merge0,q2merge,lscalej,lflav(jmerge))
                basicfac=basicfac*
@@ -141,6 +150,8 @@ c provide Sudakov
      1              expsudakov(q2merge0,q2merge,lscalej,lflav(jmerge))
                bornfac=bornfac+
      1              expsudakov(q2merge0,q2merge,lscalek,lflav(kmerge))
+               endif
+
 c provide alpha_S reweighting
                alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
      1              st_lambda5MSB,st_nlight)
@@ -216,7 +227,9 @@ c Dijet case: use the scalar sum of the pt of the two partons
 
       if(scales(1).gt.0) then
          do j=1,nlegborn
-            if(abs(lflav(j)).le.minlo_nlight) then
+            if(abs(lflav(j)).le.minlo_nlight
+     $           .and. (Sudakovbb.or..not.abs(lflav(j)).eq.5) 
+     $           ) then
                basicfac=basicfac*
      1              sudakov(q2merge0,q2merge,scales(j),lflav(j))
                bornfac=bornfac+
@@ -1084,8 +1097,9 @@ c     d alpha/d log mu^2=-b0 alpha^2 - be1 alpha^3 -be2 alpha^4
       y = -as*b0*log(q20_lcl/q2h)
 
       if (y .ge. 1) then 
-         write(*,*) '-------> y',y
-         theExponent = -1000d0 
+         write(*,*) '*** in setlocalscales y > 1 ***',y
+         write(*,*) "as, q20_lcl, q2h", as, q20_lcl, q2h
+         theExponent = -200d0 
          return 
       endif
 
