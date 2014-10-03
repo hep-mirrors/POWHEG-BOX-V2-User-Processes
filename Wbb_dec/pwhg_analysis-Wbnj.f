@@ -121,7 +121,7 @@ c  pwhgfill  :  fills the histograms with data
       enddo
 
       call bookupeqbins('XS Wbj',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbb',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbb excl',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS W(bb)j',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS Wbjj',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS Wbbj',1d0,0.5d0,1.5d0)
@@ -562,7 +562,7 @@ c     TeVatron cuts
             call filld('XS Wbj',1d0,dsig*inv_branch)
          endif
          if (nbjout.eq.2.and.njout.eq.0) then
-            call filld('XS Wbb',1d0,dsig*inv_branch)
+            call filld('XS Wbb excl',1d0,dsig*inv_branch)
          endif
          if (nbbjout.eq.1.and.njout.eq.1) then
             call filld('XS W(bb)j',1d0,dsig*inv_branch)
