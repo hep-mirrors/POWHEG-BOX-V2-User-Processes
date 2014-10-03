@@ -24,7 +24,7 @@ c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
 
-      minlo_nlight=4
+      minlo_nlight=5
 
       do j=1,nlegborn
          do mu=0,3
@@ -165,6 +165,10 @@ c provide alpha_S reweighting
 
 c     No more merging is possible.
 
+
+c      write(*,*) 'lflav ', lflav
+
+
       if(.not.dijetflag) then
 c     Define the initial scale as
 c     the invariant mass of the remaining system
@@ -186,7 +190,7 @@ c     the invariant mass of the remaining system
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-         q2merge=max(q2mergeMAX,80.419d0**2)
+c         q2merge=max(q2mergeMAX,80.419d0**2)
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -389,7 +393,7 @@ C ------------------------------------------------ C
       include 'pwhg_math.h'
       real * 8 lam2
       logical isQuark
-      real * 8 theExponentN,theExponentD
+      real * 8 theExponentN,theExponentD,theExponent
       logical ini
       data ini/.true./
       save ini
@@ -412,14 +416,22 @@ c         call sudakov_plotter
          isQuark=.true.
       endif
       if(q2l.le.q20) then
-        call sudakov_exponent(q20,q2h,q2h,theExponentN,
-     $                         isQuark,2,.true.)
+c        call sudakov_exponent(q20,q2h,q2h,theExponentN,
+c     $                         isQuark,2,.true.)       
+        call sudakov_exponent_new(q20,q2h,theExponentN,
+     $       isquark,2)
         sudakov=exp(theExponentN)
       else
-         call sudakov_exponent(q20,q2h,q2h,theExponentN,
-     $                         isQuark,2,.true.)
-         call sudakov_exponent(q20,q2l,q2l,theExponentD,
-     $                         isQuark,2,.true.)
+c         call sudakov_exponent(q20,q2h,q2h,theExponentN,
+c     $                         isQuark,2,.true.)
+         call sudakov_exponent_new(q20,q2h,theExponentN,
+     $        isquark,2)
+c         write(*,*) "ratioN2 ",theExponentN/theExponent         
+c         call sudakov_exponent(q20,q2l,q2l,theExponentD,
+c     $                         isQuark,2,.true.)
+         call sudakov_exponent_new(q20,q2l,theExponentD,
+     $        isquark,2)
+c         write(*,*) "ratioD2 ",theExponentD/theExponent
          sudakov=exp(theExponentN-theExponentD)
       endif
  999  continue
@@ -1009,6 +1021,152 @@ c$$$      if(theExponent.gt.0d0) theExponent=0d0;
       endif
 
       end
+
+
+
+
+C     The integral of the Sudakov exponent. See appendix A and B of arXiv:1212.4504      
+C     isQuark = .true. for a quark propagator                        
+C     theAccuracy = 0 for 1-loop alphaS and A2=B2=0,                 
+C                 = 1 for 2-loop alphaS and Powheg A & B coeffs      
+C                 = 2 for 2-loop alphaS and NLL A & B coeffs         
+C                                                                     
+      subroutine sudakov_exponent_new(q20,q2h,theExponent,
+     $     isquark,theAccuracy)
+      implicit none 
+      include 'pwhg_st.h'
+      include 'pwhg_math.h'
+      logical isQuark 
+      integer theAccuracy
+      real * 8 q2h,q20,theExponent
+      real * 8 b0,be1,be2
+      real * 8 A1,A2,A3
+      real * 8 B1,B2
+      real * 8 y, as
+      real * 8 nf,K,logf,q20_lcl  
+      real * 8 EulerGamma,zeta3  
+      real * 8 f0,f1,f2,omy,lomy
+      real * 8 pwhg_alphas,powheginput
+      external pwhg_alphas,powheginput
+      logical ini,sudscalevar
+      data ini/.true./
+      save ini,sudscalevar
+      parameter (zeta3 = 1.2020569031595942854d0)
+      parameter (EulerGamma = 0.57721566490153286061d0)
+      
+      if(ini) then
+         if(powheginput("#sudscalevar").eq.1) then
+            sudscalevar = .true.
+         else
+            sudscalevar = .false.
+         endif
+         ini = .false.
+      endif
+
+      if(sudscalevar) then
+         logf = log(st_renfact)
+         q20_lcl = q20*st_renfact**2
+      else
+         logf = 0d0
+         q20_lcl = q20 
+      endif
+
+
+      nf = st_nlight         
+c     running coupling coefficients 
+c     d alpha/d log mu^2=-b0 alpha^2 - be1 alpha^3 -be2 alpha^4
+      b0 = (11d0*CA-2d0*nf)/(12*pi)
+      be1 = (153d0 - 19d0*nf)/(24*pi**2)
+      be2 = 0d0                 ! not needed 
+      K = (67d0/18d0-Pi**2/6d0)*CA-5d0/9d0*nf
+
+      as=pwhg_alphas(q2h,st_lambda5MSB,st_nlight)
+      y = -as*b0*log(q20_lcl/q2h)
+
+      if (y .ge. 1) then 
+         write(*,*) '-------> y',y
+         theExponent = -1000d0 
+         return 
+      endif
+
+c     Sudakov exponent coefficients for 
+c     A(as) = sum_n A_n (as/pi)^n,     B(as) = sum_n B_n (as/pi)^n,    
+c     A1, A2, B1, B2 taken from Catani, de Florian, Grazzini, hep-ph/0008184
+      if (isQuark) then 
+         A1 = CF  
+         A2 = CF*K/2
+         A3 = 0d0 ! not needed 
+         B1 = -3d0/2*CF 
+         B2 =  (CF**2 * (Pi**2-3d0/4-12*zeta3)
+     $        + CF*CA * (11d0*Pi**2/9-193d0/12+6*zeta3)
+     $        + CF*nf*0.5 * (17d0/3-4d0/9*Pi**2))/4
+      else
+         A1 = CA
+         A2 = CA*K/2
+         A3 = 0d0 ! not needed 
+         B1 = -(11d0*CA-2d0*nf)/6
+         B2 = ( CA**2 * (23d0/6+22*Pi**2/9-6*zeta3)
+     $        + 2*CF*nf
+     $        - CA*nf*(1d0/3+4d0*Pi**2/9) - 11d0/2*CA*CF)/4
+      endif
+
+c     we need the coefficients for A(as) and B(as) written as
+c     A(as) = sum_n A_n (as)^n,     B(as) = sum_n B_n (as)^n,   i.e. no "pi" factors
+      A1 = A1/pi
+      B1 = B1/pi
+      A2 = A2/pi**2
+      B2 = B2/pi**2
+
+c     qT space conversion
+      B2 = B2 + 2*A1**2*zeta3
+
+c     add logf dependence 
+      B2 = B2 + 2*A2*logf + 2*b0*A1*logf**2 
+      A2 = A2 + 2*b0*A1*logf
+      B1 = B1 + 2*A1*logf 
+
+c     scale variation induced by the scale variation of the H factor 
+      B2 = B2 + 2*(st_bornorder-1)*b0**2*logf
+
+c     switch off some coefficients according to accuracy wanted 
+      if(theAccuracy.eq.0) then
+         A2  = 0d0 ! NLL coefficient
+         B2  = 0d0 ! NNLL coefficient
+      elseif(theAccuracy.eq.2) then
+         B2  = 0d0 ! NNLL coefficient
+      elseif(theAccuracy.eq.3) then
+         B1  = 0d0 ! NLL coefficient
+         A2  = 0d0 ! NLL coefficient
+         B2  = 0d0 ! NNLL coefficient
+      endif
+
+      omy = 1-y 
+      lomy=log(omy)
+
+      f0 = A1/b0**2*(y+lomy)
+
+      f1=A1*be1/b0**3*(lomy**2/2+y/omy+lomy/omy)
+     $     -A2/b0**2*(lomy+y/omy)+B1/b0*lomy  
+
+      f2 = -B2/b0*y/omy+B1*be1/b0**2*(y+lomy)/omy
+     $     -A3/(2*b0**2)*(y/omy)**2
+     $     +A2*be1/(2*b0**3)*(3*y**2-2*y+(4*y-2)*lomy)/omy**2
+     $     + A1/(2*b0**4)/omy**2*(
+     $     be1**2*(1-2*y)*lomy**2
+     $     +2*(b0*be2*omy**2+be1**2*y*omy)*lomy
+     $     -3*b0*be2*y**2+be1**2*y**2+2*b0*be2*y)
+
+      theExponent = 1d0/as*f0+f1+as*f2 
+
+c     The Sudakov form factor computed up to now is the boson Sudakov form factor,
+c     obtained in MiNLO by squaring the one returned by this subroutine.
+c     For this reason, we have to divide the argument of the exponent by a factor of 2
+      theExponent =  theExponent/2
+
+      end
+
+
+
 
 
 C ***************************************************************** C
