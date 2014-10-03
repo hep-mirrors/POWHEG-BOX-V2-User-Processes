@@ -31,8 +31,20 @@ c  pwhgfill  :  fills the histograms with data
       save /infohist/
       real * 8 powheginput
       external powheginput
+      integer nptmaxbins
+      parameter (nptmaxbins = 4)
+      real * 8 ptmaxbins(nptmaxbins + 1)
+      data ptmaxbins/25d0,30d0,40d0,60d0,140d0/
 
       call inihists
+
+
+      call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
+      call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
+      call bookupeqbins('XS Wbb CMS',1d0,0.5d0,1.5d0)
+      call bookup('b-pt 1j ATLAS 2', nptmaxbins,ptmaxbins)
+      call bookup('b-pt 2j ATLAS 2', nptmaxbins,ptmaxbins)
+
 
       dy=0.5d0
       dylep=0.4d0
@@ -205,6 +217,10 @@ c      common /crescfac/rescfac1,rescfac2
          write(*,*) "*** NaN in analysis ***"
          return
       endif
+
+
+      call analysis_ATLAS_CMS(dsig0)
+
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -723,6 +739,618 @@ c bubble sort
       do i=1,nin
          call getyetaptmass(pin(:,i),y,eta,pt,m)
          if (pt.gt.ptmin .and. abs(eta).lt.etamax) then
+            nout=nout+1
+            do mu=1,4
+               pout(mu,nout)=pin(mu,i)
+            enddo
+         endif             
+      enddo
+      end
+
+
+
+
+
+     
+      subroutine analysis_ATLAS_CMS(dsig0)
+      implicit none
+      real * 8 dsig0
+      include 'hepevt.h'
+      include 'nlegborn.h'
+c      include 'pwhg_flst.h'
+      include 'pwhg_math.h' 
+c      include 'pwhg_rad.h' 
+      include 'pwhg_weights.h'
+      include 'pwhg_bookhist-multi.h'
+c      include 'pwhg_flg.h'
+c      include 'LesHouches.h'
+      integer isthep_loc(NMXHEP)  ! local copy of isthep
+      logical ini
+      data ini/.true./
+      save ini
+      integer   maxjet,njets,numjets,ntracks
+      parameter (maxjet=2048)
+      real * 8 pj(4,maxjet)
+      integer maxtrack
+      parameter (maxtrack=2048)
+      real * 8  ptrack(4,maxtrack)
+      integer   jetvec(maxtrack),ihep_of_track(maxtrack)
+      character * 1 cnum(9)
+      integer nptmin
+      parameter (nptmin=3)
+      character * 4 cptmin(nptmin)
+      real * 8 ptminarr(nptmin) 
+      integer nptbmin
+      parameter (nptbmin=2)
+      character * 4 cptbmin(nptbmin)
+      real * 8 ptbminarr(nptbmin)     
+      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
+      save /infohist/
+      real * 8 ptb1min,ptb2min,ybmax,yjmax
+      integer j,i,k
+c     we need to tell to this analysis file which program is running it
+      character * 6 WHCPRG
+      common/cWHCPRG/WHCPRG
+      data WHCPRG/'NLO   '/
+      real * 8 pw(4)
+      real * 8 y,eta,pt,m
+      integer ihep
+      real * 8 powheginput,dotp
+      external powheginput,dotp
+      integer idvecbos,Vdecmod,idl,idnu
+      save idvecbos,Vdecmod,idl,idnu
+      real * 8 pvl(4),plep(4),pWbb(4)
+      integer mu,ilep,ivl,nlep,nvl
+      real * 8 ptminfastjet,R,palg
+      integer  minlo
+      save minlo
+      data minlo/0/
+      character * 20 processid
+      save processid
+c      real * 8 rescfac1,rescfac2
+c      common /crescfac/rescfac1,rescfac2
+      real * 8 dsig(maxmulti)
+      integer nweights
+      logical inimulti
+      data inimulti/.true./
+      save inimulti
+      logical inicuts
+      data inicuts/.true./
+      save inicuts
+      logical is_B_hadron,is_BBAR_hadron
+      external is_B_hadron,is_BBAR_hadron
+      integer jetinfo(0:maxjet),id
+      real * 8 pjet(4,maxjet),pbjet(4,maxjet),pbbjet(4,maxjet)
+      integer njet,nbjet,nbbjet
+      real * 8 ptbmin,etamax, ptjmin, etamaxWbb
+      real * 8 ptlep, etalep, ptmiss, dylep, detalep,drlep
+      real * 8 pjout(4,maxjet),pbjout(4,maxjet),pbbjout(4,maxjet)
+      integer njout,nbjout,nbbjout
+      integer minnjet
+      real * 8 inv_branch
+      save etamax, ptjmin
+      real * 8 ptminlep_A2,ptminmis_A2,etamaxlep_A2,mtWmin_A2,
+     $     ptminjets_A2,ymaxjets_A2,drminjlep,mtW,delphilep,drjlep
+      real * 8 ptminlep_A1,ptminmis_A1,etamaxlep_A1,mtWmin_A1,
+     $     ptminjets_A1,ymaxjets_A1
+      real * 8 ptminlep_CMS,ptminmis_CMS,etamaxlep_CMS,mtWmin_CMS,
+     $     ptminjets_CMS,etamaxjets_CMS,etamaxjets1_CMS
+      logical isolatedlep,vetojet
+
+      if(inimulti) then
+         if(weights_num.eq.0) then
+            call setupmulti(1)
+         else
+            call setupmulti(weights_num)
+         endif
+         inimulti=.false.
+      endif
+
+      dsig=0
+      if(weights_num.eq.0) then
+         dsig(1)=dsig0
+         nweights=1
+      else
+         dsig(1:weights_num)=weights_val(1:weights_num)
+          nweights=weights_num
+      endif
+
+      if(sum(abs(dsig)).eq.0) return
+      
+      if (ini) then
+         idvecbos=powheginput('idvecbos')
+         Vdecmod=powheginput('vdecaymode')
+
+         if (WHCPRG.ne.'NLO   ') then
+            if (Vdecmod.eq.1) then
+               idl=-11
+               idnu=12
+            elseif (Vdecmod.eq.2) then
+               idl=-13
+               idnu=14
+            elseif (Vdecmod.eq.3) then
+               idl=-15
+               idnu=16
+            endif
+         else
+            idl=-11
+            idnu=12           
+         endif
+c     if idvecbos=24 idl and idnu are ok
+         if (idvecbos.eq.-24) then
+            idl = -idl
+            idnu= -idnu
+         endif
+
+         minlo=powheginput('#minlo')
+         if (minlo.eq.1) then
+            processid='Wbb'
+            write(*,*) '***********   MINLO ACTIVE   ************'
+         else
+            include 'pwhg_processid.h'
+         endif
+         ini=.false.
+      endif
+
+c     make a local copy of status of particles
+      do ihep=1,nhep  
+         isthep_loc(ihep) = isthep(ihep)
+      enddo
+
+      ilep = 0
+      ivl  = 0
+      nlep=0
+      nvl=0
+      do ihep=1,nhep
+         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
+c     lepton found
+            ilep=ihep
+            nlep=nlep+1
+         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
+c     neutrino found
+            ivl=ihep
+            nvl=nvl+1
+         endif
+      enddo
+      
+      if(nvl.ne.1.and.nlep.ne.1) then
+         write(*,*) 'Problems with leptons from W decay'
+         write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
+         write(*,*) 'PROGRAM ABORT'
+         call pwhg_exit(-1)
+      endif
+
+      do mu=1,4
+         plep(mu) = phep(mu,ilep)
+         pvl(mu)  = phep(mu,ivl)
+      enddo 
+
+c     change status of l and vu 
+      isthep_loc(ilep) = 10000
+      isthep_loc(ivl)  = 10000
+
+
+C     W momentum
+      pw = plep + pvl
+      
+      ntracks=0
+
+c     loop over final state particles, excluding the already found lepton and neutrino
+      do ihep=1,nhep
+         if (isthep_loc(ihep).eq.1) then
+            if (ntracks.eq.maxtrack) then
+               write(*,*) 'Too many particles. Increase maxtrack!'
+               write(*,*) ' PROGRAM ABORTS'
+               call pwhg_exit(-1)
+            endif
+c     copy momenta to be passed to jet algorithm
+            ntracks=ntracks+1
+            ihep_of_track(ntracks)=ihep
+            do mu=1,4
+               ptrack(mu,ntracks)=phep(mu,ihep)
+            enddo
+         endif
+      enddo
+      
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                       C
+C              ATLAS Jets               C
+C                                       C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+      jetvec = 0
+      numjets=0
+      if (ntracks.eq.0) then
+         numjets=0
+      else
+         palg = -1d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
+         R    = 0.4             ! Radius parameter
+         ptminfastjet = 0d0     ! Pt min
+         call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
+     $        pj,numjets,jetvec)         
+      endif
+
+c     jetinfo :  0  no b
+c             :  1  b
+c             : -1  bbar
+c             :  2  b and bbar
+c     jetinfo(0) = NULL
+c     find in which jet the b's ended up
+      jetinfo=0
+      do i=1,ntracks
+         id=idhep(ihep_of_track(i))
+         if (is_B_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the bbar
+               jetinfo(jetvec(i)) = 1               
+            else
+c     this jet does contain already the bbar
+               jetinfo(jetvec(i)) = 2
+            endif               
+         elseif (is_BBAR_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the b
+               jetinfo(jetvec(i)) = -1               
+            else
+c     this jet does contain already the b
+               jetinfo(jetvec(i)) = 2
+            endif               
+         endif
+      enddo
+
+      njet=0
+      nbjet=0
+c     number of jets where the b and bbar have been assembled in the same jet
+      nbbjet=0
+      pjet=0d0
+      pbjet=0d0
+      pbbjet=0d0
+      do i=1,numjets
+         if (jetinfo(i).eq.0) then
+            njet=njet+1
+            do mu=1,4
+               pjet(mu,njet)=pj(mu,i)
+            enddo
+         elseif (abs(jetinfo(i)).eq.1) then
+c     in principle we could distiguish b and bbar partons/hadrons. But we are not interested in this
+            nbjet=nbjet+1
+            do mu=1,4
+               pbjet(mu,nbjet)=pj(mu,i)
+            enddo
+         elseif (jetinfo(i).eq.2) then
+c     this jet contains a b and a bbar
+            nbbjet=nbbjet+1
+            do mu=1,4
+               pbbjet(mu,nbbjet)=pj(mu,i)
+            enddo
+         endif
+      enddo
+
+c     branching = 10.8d-2
+c     1/branching = 9.259259259
+      inv_branch=9.259259259d0
+
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCC           W b analysis ATLAS [JHEP06(2013)084]
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+c     lepton cuts
+      ptminlep_A2  = 25d0
+      ptminmis_A2  = 25d0
+      etamaxlep_A2 = 2.5d0
+      mtWmin_A2    = 60d0
+c     jet cuts
+      ptminjets_A2  = 25d0
+      ymaxjets_A2 = 2.1d0
+c     jet-lepton separation (eta-phi)
+      drminjlep = 0.5d0
+
+      call getyetaptmass(plep,y,etalep,ptlep,m)
+      call pwhg_getpt(pvl,ptmiss)
+      call pwhg_getdelta_azi(plep,pvl,delphilep)
+
+      mtW = sqrt(2d0*ptlep*ptmiss*(1d0-cos(delphilep)))
+
+      if  (ptlep.gt.ptminlep_A2  .and.
+     $     ptmiss.gt.ptminmis_A2 .and.
+     $     abs(etalep).lt.etamaxlep_A2 .and.
+     $     mtW.gt.mtWmin_A2) then
+         
+         call applycutsy(pjet,njet,ptminjets_A2,ymaxjets_A2,
+     $        pjout,njout)
+         call applycutsy(pbjet,nbjet,ptminjets_A2,ymaxjets_A2,
+     $        pbjout,nbjout)
+         call applycutsy(pbbjet,nbbjet,ptminjets_A2,ymaxjets_A2,
+     $        pbbjout,nbbjout)
+         
+         isolatedlep = .true.
+
+         do i=1,njout
+            call pwhg_getR_phieta(plep,pjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbjout
+            call pwhg_getR_phieta(plep,pbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbbjout
+            call pwhg_getR_phieta(plep,pbbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+
+         if (isolatedlep) then
+            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then   
+               if (nbjout.eq.1) then
+                  call pwhg_getpt(pbjout(:,1),pt)
+               else
+                  call pwhg_getpt(pbbjout(:,1),pt)
+               endif      
+               if (njout.eq.0) then
+c     we consider only one lepton here
+                  call filld('XS Wbj ATLAS 2',1d0,dsig)
+                  call filld('XS Wbj ATLAS 2',3d0,dsig)
+                  call filld('b-pt 1j ATLAS 2',pt,dsig)
+               elseif (njout.eq.1) then
+                  call filld('XS Wbj ATLAS 2',2d0,dsig)
+                  call filld('XS Wbj ATLAS 2',3d0,dsig)
+                  call filld('b-pt 2j ATLAS 2',pt,dsig)
+               endif                             
+            endif
+         endif  ! isolated lepton
+      endif ! lepton cuts
+
+
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCC           W b analysis ATLAS arXiv:1109.1470
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+c     lepton cuts
+      ptminlep_A1  = 20d0
+      ptminmis_A1  = 25d0
+      etamaxlep_A1 = 2.5d0
+      mtWmin_A1    = 40d0
+c     jet cuts
+      ptminjets_A1  = 25d0
+      ymaxjets_A1 = 2.1d0
+c     jet-lepton separation (eta-phi)
+      drminjlep = 0.5d0
+
+      call getyetaptmass(plep,y,etalep,ptlep,m)
+      call pwhg_getpt(pvl,ptmiss)
+      call pwhg_getdelta_azi(plep,pvl,delphilep)
+
+      mtW = sqrt(2d0*ptlep*ptmiss*(1d0-cos(delphilep)))
+
+      if  (ptlep.gt.ptminlep_A1  .and.
+     $     ptmiss.gt.ptminmis_A1 .and.
+     $     abs(etalep).lt.etamaxlep_A1 .and.
+     $     mtW.gt.mtWmin_A1) then
+         
+         call applycutsy(pjet,njet,ptminjets_A1,ymaxjets_A1,
+     $        pjout,njout)
+         call applycutsy(pbjet,nbjet,ptminjets_A1,ymaxjets_A1,
+     $        pbjout,nbjout)
+         call applycutsy(pbbjet,nbbjet,ptminjets_A1,ymaxjets_A1,
+     $        pbbjout,nbbjout)
+         
+         isolatedlep = .true.
+
+         do i=1,njout
+            call pwhg_getR_phieta(plep,pjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbjout
+            call pwhg_getR_phieta(plep,pbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbbjout
+            call pwhg_getR_phieta(plep,pbbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+
+         if (isolatedlep) then
+            if((nbjout.eq.1.or.nbbjout.eq.1).and.(njout.le.1)) then    ! ??????????????????? njout ???
+               if (njout.eq.0) then
+                  call filld('XS Wbj ATLAS 1',1d0,dsig)
+                  call filld('XS Wbj ATLAS 1',3d0,dsig)
+               elseif (njout.eq.1) then
+                  call filld('XS Wbj ATLAS 1',2d0,dsig)
+                  call filld('XS Wbj ATLAS 1',3d0,dsig)
+               endif                             
+            endif
+         endif  ! isolated lepton
+      endif ! lepton cuts
+
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C                                       C
+C              CMS Jets                 C
+C                                       C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+      jetvec = 0
+      numjets=0
+      if (ntracks.eq.0) then
+         numjets=0
+      else
+         palg = -1d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
+         R    = 0.5             ! Radius parameter
+         ptminfastjet = 0d0     ! Pt min
+         call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
+     $        pj,numjets,jetvec)         
+      endif
+
+c     jetinfo :  0  no b
+c             :  1  b
+c             : -1  bbar
+c             :  2  b and bbar
+c     jetinfo(0) = NULL
+c     find in which jet the b's ended up
+      jetinfo=0
+      do i=1,ntracks
+         id=idhep(ihep_of_track(i))
+         if (is_B_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the bbar
+               jetinfo(jetvec(i)) = 1               
+            else
+c     this jet does contain already the bbar
+               jetinfo(jetvec(i)) = 2
+            endif               
+         elseif (is_BBAR_hadron(id)) then
+            if (jetinfo(jetvec(i)).eq.0) then
+c     this jet does not contain the b
+               jetinfo(jetvec(i)) = -1               
+            else
+c     this jet does contain already the b
+               jetinfo(jetvec(i)) = 2
+            endif               
+         endif
+      enddo
+
+      njet=0
+      nbjet=0
+c     number of jets where the b and bbar have been assembled in the same jet
+      nbbjet=0
+      pjet=0d0
+      pbjet=0d0
+      pbbjet=0d0
+      do i=1,numjets
+         if (jetinfo(i).eq.0) then
+            njet=njet+1
+            do mu=1,4
+               pjet(mu,njet)=pj(mu,i)
+            enddo
+         elseif (abs(jetinfo(i)).eq.1) then
+c     in principle we could distiguish b and bbar partons/hadrons. But we are not interested in this
+            nbjet=nbjet+1
+            do mu=1,4
+               pbjet(mu,nbjet)=pj(mu,i)
+            enddo
+         elseif (jetinfo(i).eq.2) then
+c     this jet contains a b and a bbar
+            nbbjet=nbbjet+1
+            do mu=1,4
+               pbbjet(mu,nbbjet)=pj(mu,i)
+            enddo
+         endif
+      enddo
+
+
+      if (nbjet.eq.2) then
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+CCCCCCCCCC           W b b analysis CMS arXiv:1312.6608
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+c     lepton cuts
+      ptminlep_CMS  = 25d0
+c      ptminmis_CMS  = 25d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
+      ptminmis_CMS  = 0d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
+      etamaxlep_CMS = 2.1d0
+      mtWmin_CMS    = 45d0
+c     mtWmin_CMS    = 0d0
+c     jet cuts
+      ptminjets_CMS  = 25d0
+      etamaxjets_CMS = 2.4d0
+
+c      etamaxjets1_CMS = 4.5d0
+      etamaxjets1_CMS = 1000d0
+
+c     jet-lepton separation (eta-phi)
+c      drminjlep = 0.4d0    
+      drminjlep = 0.5d0    
+c      drminjlep = 0d0    
+
+
+      call getyetaptmass(plep,y,etalep,ptlep,m)
+      call pwhg_getpt(pvl,ptmiss)
+      call pwhg_getdelta_azi(plep,pvl,delphilep)
+
+      mtW = sqrt(2d0*ptlep*ptmiss*(1d0-cos(delphilep)))
+
+      if  (ptlep.gt.ptminlep_CMS  .and.
+     $     ptmiss.gt.ptminmis_CMS .and.
+     $     abs(etalep).lt.etamaxlep_CMS .and.
+     $     mtW.gt.mtWmin_CMS) then
+         
+         vetojet=.true.
+         do i=1,njet
+            call getyetaptmass(pjet(:,i),y,eta,pt,m)
+            if (abs(eta).gt.etamaxjets_CMS.and.pt.gt.ptminjets_CMS.and.
+     $           abs(eta).lt.etamaxjets1_CMS) then
+c               vetojet = .false.
+            endif
+         enddo
+
+         call applycutseta(pjet,njet,ptminjets_CMS,etamaxjets_CMS,
+     $        pjout,njout)
+         call applycutseta(pbjet,nbjet,ptminjets_CMS,etamaxjets_CMS,
+     $        pbjout,nbjout)
+         call applycutseta(pbbjet,nbbjet,ptminjets_CMS,etamaxjets_CMS,
+     $        pbbjout,nbbjout)
+                 
+         isolatedlep = .true.
+         do i=1,njout
+            call pwhg_getR_phieta(plep,pjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbjout
+            call pwhg_getR_phieta(plep,pbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+         do i=1,nbbjout
+            call pwhg_getR_phieta(plep,pbbjout(:,i),drjlep)
+            if(drjlep.lt.drminjlep) isolatedlep = .false.
+         enddo
+
+         if (isolatedlep.and.vetojet) then
+            if(nbjout.eq.2 .and.njout.eq.0
+     $           ) then   
+               call filld('XS Wbb CMS',1d0,dsig)
+            endif
+         endif  ! isolated lepton
+      endif ! lepton cuts
+      endif ! nbjet = 2
+      end
+
+
+
+      subroutine applycutseta(pin,nin,ptmin,etamax,pout,nout)
+      implicit none
+      integer nin 
+      real * 8 pin(4,nin)
+      real * 8 ptmin,etamax
+      integer nout
+      real *  8 pout(4,nout)
+      integer i,mu
+      real * 8 y,eta,pt,m
+      nout=0
+      pout=0
+      do i=1,nin
+         call getyetaptmass(pin(:,i),y,eta,pt,m)
+         if (pt.gt.ptmin .and. abs(eta).lt.etamax) then
+            nout=nout+1
+            do mu=1,4
+               pout(mu,nout)=pin(mu,i)
+            enddo
+         endif             
+      enddo
+      end
+
+      subroutine applycutsy(pin,nin,ptmin,ymax,pout,nout)
+      implicit none
+      integer nin 
+      real * 8 pin(4,nin)
+      real * 8 ptmin,ymax
+      integer nout
+      real *  8 pout(4,nout)
+      integer i,mu
+      real * 8 y,eta,pt,m
+      nout=0
+      pout=0
+      do i=1,nin
+         call getyetaptmass(pin(:,i),y,eta,pt,m)
+         if (pt.gt.ptmin .and. abs(y).lt.ymax) then
             nout=nout+1
             do mu=1,4
                pout(mu,nout)=pin(mu,i)
