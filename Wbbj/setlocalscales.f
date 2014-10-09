@@ -24,6 +24,10 @@ c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
 
+      real * 8 rescfacloc,renscale2
+      common/crescfac/rescfacloc,renscale2
+      save /crescfac/
+
       minlo_nlight=5
 
       do j=1,nlegborn
@@ -66,6 +70,8 @@ c If the virtual is not included, it must be omitted.
       endif
       end
 
+
+
       subroutine setlocalscales0
      1     (flav,pin,basicfac,bornfac,nlofac)
       implicit none
@@ -93,6 +99,11 @@ c If the virtual is not included, it must be omitted.
       common/cminlo_nlight/minlo_nlight
       logical Sudakovbb
       save Sudakovbb
+
+      real * 8 rescfacloc,renscale2
+      common/crescfac/rescfacloc,renscale2
+      save /crescfac/
+
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
             raisingscales = .false.
@@ -264,6 +275,9 @@ c         enddo
       bornfac=1+st_alpha*nlofac*
      1     (bornfac+st_bornorder*b0*log(mu2/st_muren2))
       st_mufact2=muf2
+
+      renscale2=mu2
+
       end
 
 C ------------------------------------------------ C
@@ -429,21 +443,21 @@ c         call sudakov_plotter
          isQuark=.true.
       endif
       if(q2l.le.q20) then
-c        call sudakov_exponent(q20,q2h,q2h,theExponentN,
-c     $                         isQuark,2,.true.)       
-        call sudakov_exponent_new(q20,q2h,theExponentN,
-     $       isquark,2)
+        call sudakov_exponent(q20,q2h,q2h,theExponentN,
+     $                         isQuark,2,.true.)       
+c        call sudakov_exponent_new(q20,q2h,theExponentN,
+c     $       isquark,2)
         sudakov=exp(theExponentN)
       else
-c         call sudakov_exponent(q20,q2h,q2h,theExponentN,
-c     $                         isQuark,2,.true.)
-         call sudakov_exponent_new(q20,q2h,theExponentN,
-     $        isquark,2)
+         call sudakov_exponent(q20,q2h,q2h,theExponentN,
+     $                         isQuark,2,.true.)
+c         call sudakov_exponent_new(q20,q2h,theExponentN,
+c     $        isquark,2)
 c         write(*,*) "ratioN2 ",theExponentN/theExponent         
-c         call sudakov_exponent(q20,q2l,q2l,theExponentD,
-c     $                         isQuark,2,.true.)
-         call sudakov_exponent_new(q20,q2l,theExponentD,
-     $        isquark,2)
+         call sudakov_exponent(q20,q2l,q2l,theExponentD,
+     $                         isQuark,2,.true.)
+c         call sudakov_exponent_new(q20,q2l,theExponentD,
+c     $        isquark,2)
 c         write(*,*) "ratioD2 ",theExponentD/theExponent
          sudakov=exp(theExponentN-theExponentD)
       endif
