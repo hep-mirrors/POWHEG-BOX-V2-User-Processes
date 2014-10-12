@@ -1,0 +1,27 @@
+--- sigremnants_ggH.f.orig	2014-10-04 17:03:54.722667480 +0200
++++ sigremnants_ggH.f	2014-10-04 17:05:31.876670320 +0200
+@@ -18,6 +18,7 @@
+       include 'pwhg_rad.h'
+       include 'pwhg_flg.h'
+       include 'pwhg_math.h'
++      include 'PhysPars.h'
+       integer sigremnant,imode
+       real * 8 retval,retval0,xx(ndiminteg),ww
+       integer ifirst
+@@ -58,6 +59,7 @@
+          call gen_real_phsp_isr(xrad,
+      #    jac_over_csi,jac_over_csi_p,jac_over_csi_m,jac_over_csi_s)
+          xjac=jac_over_csi*kn_csi*kn_csimax*kn_jacborn*ww*hc2
++     #*nnlorescfactor
+       endif
+       if(flg_withreg) then
+ c This subroutine may set the scales with values depending
+@@ -89,7 +91,7 @@
+                   call gen_real_phsp_fsr(xrad,
+      #jac_over_csi,jac_over_csi_coll,jac_over_csi_s)
+                   xjac=jac_over_csi*kn_csi*kn_csimax
+-     #                *kn_jacborn*ww*hc2
++     #                *kn_jacborn*ww*hc2*nnlorescfactor
+                   call setscalesbtlreal
+                   call sigreal_damp_rem(xjac,ttt,rad_damp_rem_arr)
+                   if(flg_nlotest) then
