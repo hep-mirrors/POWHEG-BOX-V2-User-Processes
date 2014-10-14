@@ -20,15 +20,9 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       save savbasicfac,savbornfac,savnlofac,savmuf2,valid
       save op
       data valid/maxprocborn*.false./
-c     number of flavors that MiNLO consider as light partons
-      integer minlo_nlight
-      common/cminlo_nlight/minlo_nlight
-
       real * 8 rescfacloc,renscale2
       common/crescfac/rescfacloc,renscale2
       save /crescfac/
-
-      minlo_nlight=5
 
       do j=1,nlegborn
          do mu=0,3
@@ -95,8 +89,10 @@ c If the virtual is not included, it must be omitted.
       logical raisingscales,ini
       save raisingscales,ini
       data ini/.true./
+c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
+      save /cminlo_nlight/
       logical Sudakovbb
       save Sudakovbb
 
@@ -114,6 +110,12 @@ c If the virtual is not included, it must be omitted.
             Sudakovbb = .false.
          else
             Sudakovbb = .true.
+         endif         
+         if(powheginput("#minlo_nlight").lt.0) then
+c     consider the b quark as massless
+            minlo_nlight=5
+         else
+            minlo_nlight=powheginput("#minlo_nlight")
          endif         
          ini = .false.
       endif
