@@ -1,0 +1,11042 @@
+c     calculates interference of Born with
+c     one loop non Drell-Yan SQCD diagrams for
+c     q qbar -> sl slbar g
+c     with u-type quark q of flavor qflavorin
+c     returns M_B * M_V_NDY
+c     assumes left- or right-sleptons
+c     A factor (4 Pi)^eps/Gamma[1-eps] with eps=(4-d)/2
+c     is implied but irrelevant here (no eps poles)
+c     use crossing relations to obtain other contributions
+      subroutine virtualNDYuubar(p,qflavorin,virtualNDY)
+      implicit none
+
+      include 'nlegborn.h'
+      include 'pwhg_st.h'    ! renormalization scale and strong coupling
+      include 'pwhg_math.h'  ! pi
+
+      include 'MODEL/sm_read_values.inc'
+      ! contains:
+      ! + alpha: alpha_em(M_Z)^MSbar read from MODEL/param_card.dat
+      ! + gfermi: G_F [GeV^-2] read from MODEL/param_card.dat
+      ! + ...
+
+      include 'coupl.inc'
+      ! contains:
+      ! + masses of SM particles read from MODEL/param_card.dat
+      !   wmass (from SLHA file)
+      !   zmass (Z-Boson pole mass)
+      !   bmass (bottom quark mass mb(mb)^MSbar)
+      !   tmass (top quark pole mass)
+      ! + masses of SUSY particles read from MODEL/param_card.dat in the form
+      !   m* with the particle name * specified in MODEL/particles.dat
+      !   slightly different names for slepton masses
+      !   mel/mer left-/right-handed selectron mass
+      !   mml/mmr left-/right-handed smuon mass
+      !   ml1/ml2 stau 1/2 mass
+      !   but the masses and the mixing matrix of the sleptons under consideration
+      !   can be found in PhysPars.h
+      ! + ...
+
+      include 'PhysPars.h'
+      ! contains:
+      ! + masses of the slepton pair under consideration
+      !   ph_slepton3mass, ph_slepton4mass
+      ! + and the mixing matrix of this slepton pair with entries
+      !   ph_c_U3l, ph_c_U3r, ph_c_U4l, ph_c_U4r
+
+      double precision  sw, sw2, cw, tw, s2w, c2w, e, gx, gz,
+     &                  qe, qu, qd, t3e, t3v, t3u, t3d, rt2, ppi,
+     &                  r_lc(2,2), r_bc(2,2), r_tc(2,2)
+      common /ewparam/  sw, sw2, cw, tw, s2w, c2w, e, gx, gz,
+     &                  qe, qu, qd, t3e, t3v, t3u, t3d, rt2, ppi,
+     &                  r_lc, r_bc, r_tc
+      ! contains:
+      ! + sw: sine of Weinberg angle
+      !   calculated in MODEL/couplings.f subroutine INIT_SUSY
+      ! + r_lc: stau mixing matrix read from MODEL/param_card.dat
+      ! + r_bc: sbottom mixing matrix read from MODEL/param_card.dat
+      ! + r_tc: stop mixing matrix read from MODEL/param_card.dat
+      ! + ...
+
+      ! external variables
+      real *8 p(0:3,nlegborn)
+      character qflavorin
+      complex *16 virtualNDY
+      ! internal variables
+      logical ini_NDY
+      data ini_NDY/.true./
+      save ini_NDY
+      ! SW2 part of MadGraph common block ewparam
+      real *8 Alfa2, Alfas2, CB2, CW2, finite,
+     &        mdlSq, mdrSq, mslSq, msrSq, mb1Sq, mb2Sq,
+     &        mulSq, murSq, mclSq, mcrSq, mt1Sq, mt2Sq,
+     &        mInSkUtLeSq, mInSkUtRiSq,
+     &        MB, MGl2, MM, mSlepSq, MW2, MZ2,
+     &        mixBsq1Sl, mixBsq2Sl, mixDsq1Sl, mixDsq2Sl,
+     &        mixTsq1Sl, mixTsq2Sl, mixUsq1Sl, mixUsq2Sl,
+     &        mixZSl,
+     &        p12, p13, p14, p24, p34,
+     &        tagGluino, tagSquark, tagZ, tgb,
+     &        USfSlep11, USfSlep12
+      save tgb
+      complex *16 eps1234
+      ! functions
+      real *8 sprod, levicivitacontract
+      ! variables for READ_BLOCK_HMIX (reads tan(beta))
+      integer ii
+      character line1*6, line2*100
+      integer nin2
+      real*8  unimass(20),lowmass(0:99)
+      logical done, fopened
+      ! variables for QCDLoop
+      real *8 mu2
+      integer ep
+      complex *16 qlI1, qlI2, qlI3, qlI4
+
+
+      ! initialize parameters
+      virtualNDY = dcmplx(0)
+
+      ! read tan(beta) from SLHA file
+      if (ini_NDY) then
+         tgb = -999d0
+         unimass(10) = -999d0
+         lowmass(0) = -999d0
+         nin2=23 ! Read SUSY LHA file
+         call open_file_mdl(nin2,"param_card.dat",fopened)
+         if(.not.fopened)
+     &        stop 'Error: could not open file param_card.dat'
+         do ii=1,300,1
+            line1 = ' '
+            read(nin2,'(a6,a100)') line1,line2
+            if (line1(1:1).eq.'B') then
+               if (line2(1:4).eq.'HMIX') then
+                  call READ_BLOCK_HMIX(nin2,lowmass,unimass,done)
+               endif
+            endif
+         enddo
+         tgb = unimass(10) ! tan(beta)
+         close(nin2)
+      endif
+
+      mu2 = st_muren2
+      ep  = 0
+
+      Alfa2   = alpha**2
+      Alfas2  = st_alpha**2
+      CB2     = (dcos(datan(tgb)))**2
+      ! SW2 already has value from MadGraph, in common block ewparam
+      CW2     = 1d0 - SW2
+      eps1234 = dcmplx(0,-1)*
+     &          levicivitacontract(p(0,1), p(0,2), p(0,3), p(0,4))
+      finite  = 1d0
+
+      p12 = sprod(p(0,1),p(0,2))
+      p13 = sprod(p(0,1),p(0,3))
+      p14 = sprod(p(0,1),p(0,4))
+      ! p23 eliminated with Mandelstam relation
+      p24 = sprod(p(0,2),p(0,4))
+      p34 = sprod(p(0,3),p(0,4))
+
+      MB      = 0d0
+      MGl2    = MGO**2
+      MM      = 0d0
+      mSlepSq = ph_slepton3mass**2
+      MW2     = wmass**2
+      MZ2     = zmass**2
+
+      mdlSq = mdl**2
+      mdrSq = mdr**2
+      mslSq = msl**2
+      msrSq = msr**2
+      mb1Sq = mb1**2
+      mb2Sq = mb2**2
+      mulSq = mul**2
+      murSq = mur**2
+      mclSq = mcl**2
+      mcrSq = mcr**2
+      mt1Sq = mt1**2
+      mt2Sq = mt2**2
+
+      ! choose squark masses according to incoming
+      ! quark flavor specified in qflavorin
+      select case(qflavorin)
+      case ('u')
+         mInSkUtLeSq = mulSq
+         mInSkUtRiSq = murSq
+      case ('c')
+         mInSkUtLeSq = mclSq
+         mInSkUtRiSq = mcrSq
+      case default
+         write(*,*) 'in virtualNDYuubar'
+         write(*,*) 'unhandled incoming qflavorin ', qflavorin
+         stop
+      end select
+
+      ! identify left- or right-sleptons (no slepton mixing assumed)
+      select case(int(ph_c_U3l*1d6))
+      case (1000000) ! left
+         USfSlep11 = 1d0
+         USfSlep12 = 0d0
+      case (0) !right
+         USfSlep11 = 0d0
+         USfSlep12 = 1d0
+      case default
+        write(*,*) 'unhandled slepton mixing in virtualHiggsddbar'
+        write(*,*) 'ph_c_U3l = ', ph_c_U3l
+        stop
+      end select
+
+      mixBsq1Sl =
+     &  dconjg(dcmplx(USfSlep11))*
+     -   (CB2*MW2*USfSlep11*(SW2*dble(-1) + CW2*dble(3))*
+     -      dconjg(dcmplx(r_bc(1,1)))*r_bc(1,1) + 
+     -     dble(2)*dconjg(dcmplx(r_bc(1,2)))*
+     -      (CW2*MB*MM*USfSlep12*dble(3)*r_bc(1,1) + 
+     -        CB2*MW2*SW2*USfSlep11*dble(-1)*r_bc(1,2))) + 
+     -  dble(2)*dconjg(dcmplx(USfSlep12))*
+     -   (CB2*MW2*SW2*USfSlep12*dble(2)*
+     -      dconjg(dcmplx(r_bc(1,2)))*r_bc(1,2) + 
+     -     dconjg(dcmplx(r_bc(1,1)))*
+     -      (CB2*MW2*SW2*USfSlep12*r_bc(1,1) + 
+     -        CW2*MB*MM*USfSlep11*dble(3)*r_bc(1,2)))
+      mixBsq2Sl =
+     &  dconjg(dcmplx(USfSlep11))*
+     -   (CB2*MW2*USfSlep11*(SW2*dble(-1) + CW2*dble(3))*
+     -      dconjg(dcmplx(r_bc(2,1)))*r_bc(2,1) + 
+     -     dble(2)*dconjg(dcmplx(r_bc(2,2)))*
+     -      (CW2*MB*MM*USfSlep12*dble(3)*r_bc(2,1) + 
+     -        CB2*MW2*SW2*USfSlep11*dble(-1)*r_bc(2,2))) + 
+     -  dble(2)*dconjg(dcmplx(USfSlep12))*
+     -   (CB2*MW2*SW2*USfSlep12*dble(2)*
+     -      dconjg(dcmplx(r_bc(2,2)))*r_bc(2,2) + 
+     -     dconjg(dcmplx(r_bc(2,1)))*
+     -      (CB2*MW2*SW2*USfSlep12*r_bc(2,1) + 
+     -        CW2*MB*MM*USfSlep11*dble(3)*r_bc(2,2)))
+      mixDsq1Sl =
+     &  CB2*MW2*USfSlep11*(SW2*dble(-1) + CW2*dble(3))*
+     -   dconjg(dcmplx(USfSlep11)) + 
+     -  CB2*MW2*SW2*USfSlep12*dble(2)*dconjg(dcmplx(USfSlep12))
+      mixDsq2Sl =
+     &  CB2*MW2*SW2*USfSlep11*dble(-2)*dconjg(dcmplx(USfSlep11)) + 
+     -  CB2*MW2*SW2*USfSlep12*dble(4)*dconjg(dcmplx(USfSlep12))
+      mixTsq1Sl =
+     &  SW2*USfSlep12*dble(-2)*dconjg(dcmplx(USfSlep12))*
+     -   (dconjg(dcmplx(r_tc(1,1)))*r_tc(1,1) + 
+     -     dble(-4)*dconjg(dcmplx(r_tc(1,2)))*
+     -      r_tc(1,2)) + 
+     -  USfSlep11*dconjg(dcmplx(USfSlep11))*
+     -   ((dble(1) + CW2*dble(2))*dconjg(dcmplx(r_tc(1,1)))*
+     -      r_tc(1,1) + 
+     -     SW2*dble(-4)*dconjg(dcmplx(r_tc(1,2)))*
+     -      r_tc(1,2))
+      mixTsq2Sl =
+     &  SW2*USfSlep12*dble(-2)*dconjg(dcmplx(USfSlep12))*
+     -   (dconjg(dcmplx(r_tc(2,1)))*r_tc(2,1) + 
+     -     dble(-4)*dconjg(dcmplx(r_tc(2,2)))*
+     -      r_tc(2,2)) + 
+     -  USfSlep11*dconjg(dcmplx(USfSlep11))*
+     -   ((dble(1) + CW2*dble(2))*dconjg(dcmplx(r_tc(2,1)))*
+     -      r_tc(2,1) + 
+     -     SW2*dble(-4)*dconjg(dcmplx(r_tc(2,2)))*
+     -      r_tc(2,2))
+      mixUsq1Sl =
+     &  USfSlep11*(dble(1) + CW2*dble(2))*dconjg(dcmplx(USfSlep11)) + 
+     -  SW2*USfSlep12*dble(-2)*dconjg(dcmplx(USfSlep12))
+      mixUsq2Sl =
+     &  SW2*USfSlep11*dble(-4)*dconjg(dcmplx(USfSlep11)) + 
+     -  SW2*USfSlep12*dble(8)*dconjg(dcmplx(USfSlep12))
+      mixZSl     =
+     &  USfSlep11*(dble(-1) + SW2*dble(2))*
+     -  dconjg(dcmplx(USfSlep11)) + 
+     -  SW2*USfSlep12*dble(2)*dconjg(dcmplx(USfSlep12))
+
+      ! set tags
+      ! if tagX set to 0d0: all diagrams with particle X omitted
+      ! if tagX set to 1d0: all diagrams with particle X included
+      !                     (unless omitted by other tags)
+      tagGluino = 1d0
+      tagSquark = 1d0
+      tagZ      = 1d0
+
+      ! calculate result
+      virtualNDY =
+     +(Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*mixDsq1Sl*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixDsq2Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixBsq1Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*dble(-8)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixBsq2Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*dble(-8)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixTsq1Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixTsq2Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixUsq1Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixUsq2Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13*(p14 + p24) + 
+     -             p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -          p12*(p14*(p24 + p34*dble(-4)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(2) + 
+     -             p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(3)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34)*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12*(p14*(p24 + p34*dble(-4)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(2) + 
+     -                p12*dble(-2)*(p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(3))))*
+     -           (dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixUsq1Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixUsq2Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixTsq1Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CW2**dble(-2)*finite*mixTsq2Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixBsq1Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixBsq2Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixDsq1Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*finite*
+     -     mixDsq2Sl*MW2**dble(-1)*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*dble(-8)*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        (mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -          dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1))) + 
+     -          p12*(p14*(p24 + p34*dble(-3)) + 
+     -             p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -          mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -             p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12*dble(-1)*
+     -              (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))
+     -        + (mSlepSq + p34)*tagZ*
+     -        (eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -             p14*dble(-1))*dble(3) + 
+     -          dble(-1)*(mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -             p12**dble(2)*(p34 + p14*dble(-1)) + 
+     -             dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))
+     -              + p12*(p14*(p24 + p34*dble(-3)) + 
+     -                p34*(p34 + p24*dble(-2)) + p14**dble(2)*dble(2) + 
+     -                p13*(p24 + p34*dble(-1) + p14*dble(2))) + 
+     -             mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3)))
+     -             )*(dble(-3) + SW2*dble(8)))*dconjg(dcmplx(mixZSl))))/
+     -   dble(9) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixBsq1Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mb1Sq,mb1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixBsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mb2Sq,mb2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mclSq,mclSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mcrSq,mcrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq1Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mdlSq,mdlSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mdrSq,mdrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq1Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mslSq,mslSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),msrSq,msrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mt1Sq,mt1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mt2Sq,mt2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),mulSq,mulSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2(p12*dble(2),murSq,murSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixBsq1Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mb1Sq,mb1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixBsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mb2Sq,mb2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mclSq,mclSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mcrSq,mcrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq1Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mdlSq,mdlSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mdrSq,mdrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(p13 + p14)**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**
+     -      dble(-1)*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**
+     -      dble(-1)*(p12**dble(2)*p13*p24 + p12**dble(2)*p14*p24 + 
+     -       p12**dble(3)*p34 + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12**dble(2)*p14*p34*dble(-5) + 
+     -       p12*p14*p34**dble(2)*dble(-5) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p12**dble(2)*p13*p34*dble(-2) + 
+     -       p12**dble(2)*p24*p34*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       eps1234*(mSlepSq + p12 + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -       p12**dble(3)*p14*dble(-1) + p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p13**dble(3)*p14*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p13*p14*dble(3) + 
+     -       p12**dble(2)*p14**dble(2)*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       p12*p13*p24*p34*dble(4) + p12*p14*p24*p34*dble(4) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2)*dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(5))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(8) + 
+     -       p12*p14**dble(2)*p34*dble(8) + 
+     -       mSlepSq*(p12**dble(3) + 
+     -          p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*dble(-1)*
+     -           (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(5)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-10) + p24*p34*dble(-4) + 
+     -             p34**dble(2)*dble(3) + p14*p24*dble(4) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))*dble(4) + 
+     -             p14**dble(2)*dble(8))))*dble(64)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mInSkUtLeSq,mInSkUtLeSq,mu2,ep))
+     -    /dble(27) + (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*
+     -     (p13 + p14)**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-1)*tagGluino*tagSquark*dble(-256)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**
+     -      dble(-1)*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**
+     -      dble(-1)*(p12**dble(3)*p14 + p14*p34**dble(3) + 
+     -       p12*p13*p14*p34*dble(-8) + p12*p14**dble(2)*p34*dble(-8) + 
+     -       p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       p13*p14**dble(3)*dble(-6) + 
+     -       p13**dble(2)*p14*p24*dble(-6) + 
+     -       p13*p14**dble(2)*p24*dble(-6) + p12*p13*p24*p34*dble(-4) + 
+     -       p12*p14*p24*p34*dble(-4) + p12**dble(2)*p13*p14*dble(-3) + 
+     -       p12**dble(2)*p14**dble(2)*dble(-3) + 
+     -       p13*p14*p34**dble(2)*dble(-3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       p13**dble(3)*p14*dble(-2) + p14**dble(4)*dble(-2) + 
+     -       p13**dble(3)*p24*dble(-2) + p14**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p34**dble(2)*dble(-2) + 
+     -       eps1234*(mSlepSq + p12 + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -       p12**dble(2)*p13*p24*dble(-1) + 
+     -       p12**dble(2)*p14*p24*dble(-1) + 
+     -       p12**dble(3)*p34*dble(-1) + 
+     -       p13*p24*p34**dble(2)*dble(-1) + 
+     -       p14*p24*p34**dble(2)*dble(-1) + 
+     -       p12*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*(p14 + p12*dble(-1)) + 
+     -       p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(2)*p24*dble(2) + 
+     -       p12**dble(2)*p13*p34*dble(2) + 
+     -       p12**dble(2)*p24*p34*dble(2) + 
+     -       p13**dble(2)*p24*p34*dble(2) + 
+     -       p14**dble(2)*p24*p34*dble(2) + 
+     -       p12*p13*p34**dble(2)*dble(2) + 
+     -       p12*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13**dble(2)*p14*dble(4) + p12*p14**dble(3)*dble(4) + 
+     -       p12*p13*p14*p24*dble(4) + p13**dble(2)*p14*p34*dble(4) + 
+     -       p14**dble(3)*p34*dble(4) + p13*p14*p24*p34*dble(4) + 
+     -       p12**dble(2)*p14*p34*dble(5) + 
+     -       p12*p14*p34**dble(2)*dble(5) + 
+     -       mSlepSq**dble(2)*dble(-1)*
+     -        (p12**dble(2)*dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(5))) + p12*p13*p14**dble(2)*dble(8) + 
+     -       p13*p14**dble(2)*p34*dble(8) + 
+     -       mSlepSq*(p12**dble(3)*dble(-1) + 
+     -          p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -          p14*(p14*p34*dble(-6) + p24*p34*dble(-2) + 
+     -             p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(4)) + 
+     -          p12**dble(2)*
+     -           (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(5)) + 
+     -          p13*(p14*p34*dble(-6) + p24*p34*dble(-2) + 
+     -             p14*p24*dble(4) + p14**dble(2)*dble(8)) + 
+     -          p12*dble(-1)*
+     -           (p14*p34*dble(-10) + p24*p34*dble(-4) + 
+     -             p34**dble(2)*dble(3) + p14*p24*dble(4) + 
+     -             p13*(p24 + p34*dble(-1) + p14*dble(2))*dble(4) + 
+     -             p14**dble(2)*dble(8))))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mInSkUtRiSq,mInSkUtRiSq,mu2,ep))
+     -    /dble(27) + (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*
+     -     mixDsq1Sl*MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mslSq,mslSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq2Sl*
+     -     MW2**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagSquark*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),msrSq,msrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mt1Sq,mt1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mt2Sq,mt2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),mulSq,mulSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-8)*
+     -     (mSlepSq + p34 + p12*dble(-1))**dble(-2)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34)*dble(2),murSq,murSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagGluino*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**
+     -      dble(-1)*(p12*p13*p14 + p12*p14**dble(2) + 
+     -       eps1234*(p13 + p14) + p12*p13*p34 + p13*p14*p34 + 
+     -       p14**dble(2)*p34 + p13*p14**dble(2)*dble(-2) + 
+     -       p13*p14*p24*dble(-2) + p13**dble(2)*p14*dble(-1) + 
+     -       p14**dble(3)*dble(-1) + p13**dble(2)*p24*dble(-1) + 
+     -       p14**dble(2)*p24*dble(-1) + p12*p14*p34*dble(-1) + 
+     -       mSlepSq*(p14*(p13 + p14) + p12*(p13 + p14*dble(-1))))*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(64)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(4) + 
+     -       (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((p13 + p14 + p12*dble(-1))*dble(2),MGl2,mInSkUtLeSq,mu2,
+     -      ep))/dble(27) + (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*dble(-256)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**
+     -      dble(-1)*(p13**dble(2)*p14 + p14**dble(3) + 
+     -       eps1234*(p13 + p14) + p13**dble(2)*p24 + 
+     -       p14**dble(2)*p24 + p12*p14*p34 + p12*p13*p14*dble(-1) + 
+     -       p12*p14**dble(2)*dble(-1) + p12*p13*p34*dble(-1) + 
+     -       p13*p14*p34*dble(-1) + p14**dble(2)*p34*dble(-1) + 
+     -       mSlepSq*dble(-1)*
+     -        (p14*(p13 + p14) + p12*(p13 + p14*dble(-1))) + 
+     -       p13*p14**dble(2)*dble(2) + p13*p14*p24*dble(2))*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI2((p13 + p14 + p12*dble(-1))*dble(2),MGl2,mInSkUtRiSq,mu2,
+     -      ep))/dble(27) + (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*
+     -     (p13 + p14)**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagGluino*tagSquark*dble(-64)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12*p13*p24 + p12*p14*p24 + p12**dble(2)*p34 + 
+     -       p13*p24*p34 + p14*p24*p34 + p12*p34**dble(2) + 
+     -       p12*p14*p34*dble(-3) + p13*p14**dble(2)*dble(-2) + 
+     -       p13*p14*p24*dble(-2) + p12*p24*p34*dble(-2) + 
+     -       p12**dble(2)*p14*dble(-1) + p13**dble(2)*p14*dble(-1) + 
+     -       p14**dble(3)*dble(-1) + p13**dble(2)*p24*dble(-1) + 
+     -       p14**dble(2)*p24*dble(-1) + p12*p13*p34*dble(-1) + 
+     -       p14*p34**dble(2)*dble(-1) + 
+     -       mSlepSq**dble(2)*(p12 + p14*dble(-1)) + 
+     -       eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -          p14*dble(-1)) + p12*p13*p14*dble(2) + 
+     -       p12*p14**dble(2)*dble(2) + p13*p14*p34*dble(2) + 
+     -       p14**dble(2)*p34*dble(2) + 
+     -       mSlepSq*(p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -          p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -          p12*dble(-1)*
+     -           (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      MGl2,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*(p13 + p14)**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p14 + p13**dble(2)*p14 + p14**dble(3) + 
+     -       p13**dble(2)*p24 + p14**dble(2)*p24 + p12*p13*p34 + 
+     -       p14*p34**dble(2) + p12*p13*p14*dble(-2) + 
+     -       p12*p14**dble(2)*dble(-2) + p13*p14*p34*dble(-2) + 
+     -       p14**dble(2)*p34*dble(-2) + p12*p13*p24*dble(-1) + 
+     -       p12*p14*p24*dble(-1) + p12**dble(2)*p34*dble(-1) + 
+     -       p13*p24*p34*dble(-1) + p14*p24*p34*dble(-1) + 
+     -       p12*p34**dble(2)*dble(-1) + 
+     -       mSlepSq**dble(2)*(p14 + p12*dble(-1)) + 
+     -       eps1234*(mSlepSq + p12 + p34 + p13*dble(-1) + 
+     -          p14*dble(-1)) + p13*p14**dble(2)*dble(2) + 
+     -       p13*p14*p24*dble(2) + p12*p24*p34*dble(2) + 
+     -       p12*p14*p34*dble(3) + 
+     -       mSlepSq*dble(-1)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -          p14*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -          p12*dble(-1)*
+     -           (p13 + p34*dble(-2) + p24*dble(2) + p14*dble(3))))*
+     -     dble(256)*(CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI2((mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      MGl2,mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*(MGl2 + mInSkUtLeSq*dble(-1))*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),MGl2,
+     -      MGl2,mInSkUtLeSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*dble(-16)*(MGl2 + mInSkUtRiSq*dble(-1))*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -        dble(-1) + mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),MGl2,
+     -      MGl2,mInSkUtRiSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq*mSlepSq**dble(3)*p14 + 
+     -       mInSkUtLeSq*p14*p34**dble(3) + 
+     -       mSlepSq*p12**dble(2)*p14*p34*dble(-16) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(-12) + 
+     -       p12*p13*p14**dble(2)*p34*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*dble(-8) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(-8) + 
+     -       mSlepSq*p12*p13*p14*p24*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p24*p34*dble(-8) + 
+     -       p12*p13*p14*p24*p34*dble(-8) + 
+     -       p12**dble(2)*p14*p34**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*dble(-7) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*dble(-7) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34*dble(-7) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-7) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p34*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p34*dble(-6) + 
+     -       p12*p14**dble(3)*p34*dble(-6) + 
+     -       mSlepSq*p12*p14*p34**dble(2)*dble(-6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(-4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p24*dble(-4) + 
+     -       mSlepSq*p12*p13**dble(2)*p24*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       mSlepSq*p12*p14**dble(2)*p24*dble(-4) + 
+     -       p12**dble(3)*p14*p34*dble(-4) + 
+     -       p12*p13**dble(2)*p24*p34*dble(-4) + 
+     -       p12*p14**dble(2)*p24*p34*dble(-4) + 
+     -       p12**dble(2)*p13*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p13*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p14*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(-2) + 
+     -       mSlepSq**dble(3)*p12*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(4)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34*dble(-2) + 
+     -       p12**dble(3)*p13*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p24*p34*dble(-2) + 
+     -       p12*p14*p34**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p24*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p24*dble(-1) + 
+     -       mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p13*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p14*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p12*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(2) + 
+     -       p12**dble(3)*p13*p14*dble(2) + 
+     -       p12*p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p13*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p13**dble(3)*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p14*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(2) + 
+     -       mInSkUtLeSq*p13**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p14**dble(2)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p13*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13*p24*p34**dble(2)*dble(2) + 
+     -       p12*p14*p24*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p34**dble(3)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p34*dble(4) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34*dble(4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p13*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(2)*dble(4) + 
+     -       eps1234*(p12*p13*p34*dble(-4) + p12*p14*p34*dble(-4) + 
+     -          p12**dble(2)*p13*dble(-2) + p12**dble(2)*p14*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtLeSq*p12*p34*dble(-1) + 
+     -          mInSkUtLeSq*p34**dble(2)*dble(-1) + 
+     -          mSlepSq**dble(2)*(mInSkUtLeSq + p12*dble(-2))*
+     -           dble(-1) + mSlepSq*(mInSkUtLeSq + p12*dble(-2))*
+     -           dble(-1)*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12*p13**dble(2)*dble(2) + p12*p14**dble(2)*dble(2) + 
+     -          p12**dble(2)*p34*dble(2) + 
+     -          mInSkUtLeSq*p13*p34*dble(2) + 
+     -          mInSkUtLeSq*p14*p34*dble(2) + 
+     -          p12*p34**dble(2)*dble(2) + p12*p13*p14*dble(4)) + 
+     -       mSlepSq**dble(2)*p12*p13*p14*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(2)*dble(6) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p12*p13*p14**dble(3)*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p34*dble(6) + 
+     -       p12**dble(2)*p13*p24*p34*dble(6) + 
+     -       p12**dble(2)*p14*p24*p34*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p34**dble(2)*dble(6) + 
+     -       p12*p13*p14*p34**dble(2)*dble(6) + 
+     -       p12*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34*dble(8) + 
+     -       MGl2*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(10) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(10) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(12) + 
+     -       mSlepSq*p12*p13*p14*p34*dble(12) + 
+     -       p12**dble(2)*p13*p14*p34*dble(12) + 
+     -       mSlepSq*p12*p14**dble(2)*p34*dble(12))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),MGl2,
+     -      mInSkUtLeSq,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(mInSkUtRiSq*mSlepSq**dble(3)*p12 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p24 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p24 + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(2) + 
+     -       mInSkUtRiSq*p13*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p14*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p12*p34**dble(3) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(-12) + 
+     -       mSlepSq*p12*p13*p14*p34*dble(-12) + 
+     -       p12**dble(2)*p13*p14*p34*dble(-12) + 
+     -       mSlepSq*p12*p14**dble(2)*p34*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(-10) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(-10) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34*dble(-8) + 
+     -       mSlepSq**dble(2)*p12*p13*p14*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(2)*dble(-6) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       p12*p13*p14**dble(3)*dble(-6) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*dble(-6) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(-6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p34*dble(-6) + 
+     -       p12**dble(2)*p13*p24*p34*dble(-6) + 
+     -       p12**dble(2)*p14*p24*p34*dble(-6) + 
+     -       mSlepSq*p12**dble(2)*p34**dble(2)*dble(-6) + 
+     -       p12*p13*p14*p34**dble(2)*dble(-6) + 
+     -       p12*p14**dble(2)*p34**dble(2)*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p34*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p34*dble(-4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p34*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p24*p34*dble(-4) + 
+     -       mSlepSq*p12*p13*p24*p34*dble(-4) + 
+     -       mSlepSq*p12*p14*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13*p14*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p34**dble(2)*dble(-3) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*dble(-2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(-2) + 
+     -       p12**dble(3)*p13*p14*dble(-2) + 
+     -       p12*p13**dble(3)*p14*dble(-2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(-2) + 
+     -       p12*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p24*dble(-2) + 
+     -       mSlepSq**dble(2)*p12*p13*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p13**dble(3)*p24*dble(-2) + 
+     -       mSlepSq**dble(2)*p12*p14*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(-2) + 
+     -       mInSkUtRiSq*p13**dble(2)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12**dble(3)*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p24*p34**dble(2)*dble(-2) + 
+     -       p12*p13*p24*p34**dble(2)*dble(-2) + 
+     -       p12*p14*p24*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p34**dble(3)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14*dble(-1) + 
+     -       mInSkUtRiSq*p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(2) + 
+     -       mSlepSq**dble(3)*p12*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(4)*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34*dble(2) + 
+     -       p12**dble(3)*p13*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p24*p34*dble(2) + 
+     -       p12*p14*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p13*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p14*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p13*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p24*dble(4) + 
+     -       mSlepSq*p12*p13**dble(2)*p24*dble(4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       mSlepSq*p12*p14**dble(2)*p24*dble(4) + 
+     -       p12**dble(3)*p14*p34*dble(4) + 
+     -       p12*p13**dble(2)*p24*p34*dble(4) + 
+     -       p12*p14**dble(2)*p24*p34*dble(4) + 
+     -       p12**dble(2)*p13*p34**dble(2)*dble(4) + 
+     -       p12**dble(2)*p24*p34**dble(2)*dble(4) + 
+     -       eps1234*(p12*p13*p34*dble(-4) + p12*p14*p34*dble(-4) + 
+     -          p12**dble(2)*p13*dble(-2) + p12**dble(2)*p14*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtRiSq*p12*p34*dble(-1) + 
+     -          mInSkUtRiSq*p34**dble(2)*dble(-1) + 
+     -          mSlepSq**dble(2)*(mInSkUtRiSq + p12*dble(-2))*
+     -           dble(-1) + mSlepSq*(mInSkUtRiSq + p12*dble(-2))*
+     -           dble(-1)*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12*p13**dble(2)*dble(2) + p12*p14**dble(2)*dble(2) + 
+     -          p12**dble(2)*p34*dble(2) + 
+     -          mInSkUtRiSq*p13*p34*dble(2) + 
+     -          mInSkUtRiSq*p14*p34*dble(2) + 
+     -          p12*p34**dble(2)*dble(2) + p12*p13*p14*dble(4)) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p24*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p24*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p14*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p34*dble(6) + 
+     -       p12*p13**dble(2)*p14*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p34*dble(6) + 
+     -       p12*p14**dble(3)*p34*dble(6) + 
+     -       mSlepSq*p12*p14*p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*dble(7) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*dble(7) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34*dble(7) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*dble(8) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(8) + 
+     -       mSlepSq*p12*p13*p14*p24*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p13*p34*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p24*p34*dble(8) + 
+     -       p12*p13*p14*p24*p34*dble(8) + 
+     -       p12**dble(2)*p14*p34**dble(2)*dble(8) + 
+     -       MGl2*dble(-1)*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(12) + 
+     -       p12*p13*p14**dble(2)*p34*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p14*p34*dble(16))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),MGl2,
+     -      mInSkUtRiSq,mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     dble(8)*(CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2))*dble(4) + 
+     -       (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),p12*dble(2),dble(0),MGl2,mInSkUtLeSq,
+     -      mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -        dble(-1) + mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     dble(32)*(CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + 
+     -          p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),p12*dble(2),dble(0),MGl2,mInSkUtRiSq,
+     -      mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mb1Sq*mixBsq1Sl*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mb1Sq,mb1Sq,
+     -      mb1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mb2Sq*mixBsq2Sl*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mb2Sq,mb2Sq,
+     -      mb2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mclSq*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mclSq,mclSq,
+     -      mclSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mcrSq*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mcrSq,mcrSq,
+     -      mcrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mdlSq*mixDsq1Sl*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mdlSq,mdlSq,
+     -      mdlSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mdrSq*mixDsq2Sl*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mdrSq,mdrSq,
+     -      mdrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p12*dble(-1))*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq*mSlepSq**dble(3)*p14 + 
+     -       mInSkUtLeSq*p14*p34**dble(3) + 
+     -       mSlepSq*p12**dble(2)*p14*p34*dble(-16) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(-12) + 
+     -       p12*p13*p14**dble(2)*p34*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*dble(-8) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(-8) + 
+     -       mSlepSq*p12*p13*p14*p24*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p24*p34*dble(-8) + 
+     -       p12*p13*p14*p24*p34*dble(-8) + 
+     -       p12**dble(2)*p14*p34**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*dble(-7) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*dble(-7) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34*dble(-7) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-7) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p34*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p34*dble(-6) + 
+     -       p12*p14**dble(3)*p34*dble(-6) + 
+     -       mSlepSq*p12*p14*p34**dble(2)*dble(-6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(-4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p24*dble(-4) + 
+     -       mSlepSq*p12*p13**dble(2)*p24*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       mSlepSq*p12*p14**dble(2)*p24*dble(-4) + 
+     -       p12**dble(3)*p14*p34*dble(-4) + 
+     -       p12*p13**dble(2)*p24*p34*dble(-4) + 
+     -       p12*p14**dble(2)*p24*p34*dble(-4) + 
+     -       p12**dble(2)*p13*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p13*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p14*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(-2) + 
+     -       mSlepSq**dble(3)*p12*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(4)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34*dble(-2) + 
+     -       p12**dble(3)*p13*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p24*p34*dble(-2) + 
+     -       p12*p14*p34**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p24*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p24*dble(-1) + 
+     -       mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p13*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p14*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p12*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(2) + 
+     -       p12**dble(3)*p13*p14*dble(2) + 
+     -       p12*p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p13*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p13**dble(3)*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p14*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(2) + 
+     -       mInSkUtLeSq*p13**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p14**dble(2)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p13*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13*p24*p34**dble(2)*dble(2) + 
+     -       p12*p14*p24*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p34**dble(3)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p34*dble(4) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34*dble(4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p13*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(2)*dble(4) + 
+     -       eps1234*(p12*p13*p34*dble(-4) + p12*p14*p34*dble(-4) + 
+     -          p12**dble(2)*p13*dble(-2) + p12**dble(2)*p14*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtLeSq*p12*p34*dble(-1) + 
+     -          mInSkUtLeSq*p34**dble(2)*dble(-1) + 
+     -          mSlepSq**dble(2)*(mInSkUtLeSq + p12*dble(-2))*
+     -           dble(-1) + mSlepSq*(mInSkUtLeSq + p12*dble(-2))*
+     -           dble(-1)*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12*p13**dble(2)*dble(2) + p12*p14**dble(2)*dble(2) + 
+     -          p12**dble(2)*p34*dble(2) + 
+     -          mInSkUtLeSq*p13*p34*dble(2) + 
+     -          mInSkUtLeSq*p14*p34*dble(2) + 
+     -          p12*p34**dble(2)*dble(2) + p12*p13*p14*dble(4)) + 
+     -       mSlepSq**dble(2)*p12*p13*p14*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(2)*dble(6) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p12*p13*p14**dble(3)*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p34*dble(6) + 
+     -       p12**dble(2)*p13*p24*p34*dble(6) + 
+     -       p12**dble(2)*p14*p24*p34*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p34**dble(2)*dble(6) + 
+     -       p12*p13*p14*p34**dble(2)*dble(6) + 
+     -       p12*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34*dble(8) + 
+     -       MGl2*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(10) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(10) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(12) + 
+     -       mSlepSq*p12*p13*p14*p34*dble(12) + 
+     -       p12**dble(2)*p13*p14*p34*dble(12) + 
+     -       mSlepSq*p12*p14**dble(2)*p34*dble(12))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mInSkUtLeSq,
+     -      mInSkUtLeSq,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*dble(-16)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p12*dble(-1))*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtRiSq*mSlepSq**dble(3)*p14 + 
+     -       mInSkUtRiSq*p14*p34**dble(3) + 
+     -       mSlepSq*p12**dble(2)*p14*p34*dble(-16) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(-12) + 
+     -       p12*p13*p14**dble(2)*p34*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*dble(-8) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(-8) + 
+     -       mSlepSq*p12*p13*p14*p24*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p24*p34*dble(-8) + 
+     -       p12*p13*p14*p24*p34*dble(-8) + 
+     -       p12**dble(2)*p14*p34**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*dble(-7) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*dble(-7) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34*dble(-7) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34*dble(-7) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(-6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(-6) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p14*p34*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p34*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p34*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p34*dble(-6) + 
+     -       p12*p14**dble(3)*p34*dble(-6) + 
+     -       mSlepSq*p12*p14*p34**dble(2)*dble(-6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(-4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p24*dble(-4) + 
+     -       mSlepSq*p12*p13**dble(2)*p24*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       mSlepSq*p12*p14**dble(2)*p24*dble(-4) + 
+     -       p12**dble(3)*p14*p34*dble(-4) + 
+     -       p12*p13**dble(2)*p24*p34*dble(-4) + 
+     -       p12*p14**dble(2)*p24*p34*dble(-4) + 
+     -       p12**dble(2)*p13*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p34*dble(-3) + 
+     -       mInSkUtRiSq*p12*p13*p24*p34*dble(-3) + 
+     -       mInSkUtRiSq*p12*p14*p24*p34*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq*p13*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(-2) + 
+     -       mSlepSq**dble(3)*p12*p14*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p14**dble(4)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34*dble(-2) + 
+     -       p12**dble(3)*p13*p34*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p24*p34*dble(-2) + 
+     -       p12*p14*p34**dble(3)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*dble(-1) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*dble(-1) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p24*dble(-1) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p24*dble(-1) + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtRiSq*p13*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtRiSq*p14*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtRiSq*p12*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(2) + 
+     -       p12**dble(3)*p13*p14*dble(2) + 
+     -       p12*p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p13*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p13**dble(3)*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p14*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(2)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq*p12*p13*p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq*p12*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13*p24*p34**dble(2)*dble(2) + 
+     -       p12*p14*p24*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p24*dble(4) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p34*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p34*dble(4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p34*dble(4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p34*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p13*p24*p34*dble(4) + 
+     -       mSlepSq*p12*p14*p24*p34*dble(4) + 
+     -       mInSkUtRiSq*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(2)*dble(4) + 
+     -       eps1234*dble(-1)*
+     -        (p12*p13*p34*dble(-4) + p12*p14*p34*dble(-4) + 
+     -          p12**dble(2)*p13*dble(-2) + p12**dble(2)*p14*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtRiSq*p12*p34*dble(-1) + 
+     -          mInSkUtRiSq*p34**dble(2)*dble(-1) + 
+     -          mSlepSq**dble(2)*(mInSkUtRiSq + p12*dble(-2))*
+     -           dble(-1) + mSlepSq*(mInSkUtRiSq + p12*dble(-2))*
+     -           dble(-1)*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12*p13**dble(2)*dble(2) + p12*p14**dble(2)*dble(2) + 
+     -          p12**dble(2)*p34*dble(2) + 
+     -          mInSkUtRiSq*p13*p34*dble(2) + 
+     -          mInSkUtRiSq*p14*p34*dble(2) + 
+     -          p12*p34**dble(2)*dble(2) + p12*p13*p14*dble(4)) + 
+     -       mSlepSq**dble(2)*p12*p13*p14*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(2)*dble(6) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p12*p13*p14**dble(3)*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p34*dble(6) + 
+     -       p12**dble(2)*p13*p24*p34*dble(6) + 
+     -       p12**dble(2)*p14*p24*p34*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p34**dble(2)*dble(6) + 
+     -       p12*p13*p14*p34**dble(2)*dble(6) + 
+     -       p12*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34*dble(8) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34*dble(8) + 
+     -       MGl2*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(10) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(10) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(12) + 
+     -       mSlepSq*p12*p13*p14*p34*dble(12) + 
+     -       p12**dble(2)*p13*p14*p34*dble(12) + 
+     -       mSlepSq*p12*p14**dble(2)*p34*dble(12))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mInSkUtRiSq,
+     -      mInSkUtRiSq,mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq1Sl*mslSq*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mslSq,mslSq,
+     -      mslSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CB2**dble(-1)*CW2**dble(-2)*mixDsq2Sl*msrSq*
+     -     MW2**dble(-1)*p12**dble(-1)*(mSlepSq + p34)**dble(-1)*
+     -     Pi**dble(2)*SW2**dble(-2)*tagSquark*dble(-16)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(8)*(p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),msrSq,msrSq,
+     -      msrSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq1Sl*mt1Sq*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mt1Sq,mt1Sq,
+     -      mt1Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixTsq2Sl*mt2Sq*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mt2Sq,mt2Sq,
+     -      mt2Sq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*mulSq*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),mulSq,mulSq,
+     -      mulSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*murSq*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagSquark*(p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (p12 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (p13 + p14 + mSlepSq*dble(-1) + p34*dble(-1))**dble(-1)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(8)*
+     -        (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -          (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           dble(2) + mSlepSq**dble(2)*
+     -           (p12**dble(2) + p12*p14*dble(-3) + 
+     -             p14*(p13 + p14)*dble(2)) + 
+     -          p12**dble(2)*
+     -           (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -             p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -             p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -          mSlepSq*(p12**dble(3) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -             (p13 + p14)*dble(-2)*
+     -              (p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -             p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p14*p24*dble(4) + p14**dble(2)*dble(8)))) + 
+     -       (mSlepSq + p34)*tagZ*
+     -        (eps1234*p12*dble(-3)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          (dble(-3) + SW2*dble(8))*
+     -           (p12**dble(3)*(p34 + p14*dble(-1)) + 
+     -             (p13 + p14)*(p13 + p14 + p34*dble(-1))*
+     -              (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              dble(2) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*p14*dble(-3) + 
+     -                p14*(p13 + p14)*dble(2)) + 
+     -             p12**dble(2)*
+     -              (p14*p24 + p34**dble(2) + p14*p34*dble(-4) + 
+     -                p24*p34*dble(-2) + p14**dble(2)*dble(3) + 
+     -                p13*(p24 + p34*dble(-2) + p14*dble(3))) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*dble(-2)*
+     -                 (p13 + p24 + p34*dble(-1) + p14*dble(2)) + 
+     -                (p13 + p14)*dble(-2)*
+     -                 (p13*(p24 + p14*dble(2)) + 
+     -                   p14*(p24 + p34*dble(-2) + p14*dble(2))) + 
+     -                p12*(p13*(p24*dble(3) + p14*dble(7)) + 
+     -                   p14*(p34*dble(-6) + p24*dble(3) + p14*dble(7)))
+     -                ) + p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(2) + p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8)))))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),p12*dble(2),murSq,murSq,
+     -      murSq,mu2,ep))/dble(9) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-8)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**
+     -      dble(-1)*(mSlepSq**dble(3)*p12**dble(3)*p13 + 
+     -       mSlepSq*p12**dble(5)*p13 + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14 + 
+     -       p12**dble(5)*p13*p14 + p12*p13**dble(5)*p14 + 
+     -       p12**dble(5)*p14**dble(2) + p12*p14**dble(6) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p24 + 
+     -       p12*p13**dble(5)*p24 + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p24 + 
+     -       p12*p14**dble(5)*p24 + p12**dble(5)*p13*p34 + 
+     -       p12*p13**dble(3)*p24*p34**dble(2) + 
+     -       p12*p14**dble(3)*p24*p34**dble(2) + 
+     -       p12**dble(3)*p13*p34**dble(3) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p34*dble(-348) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(-348) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(-312) + mInSkUtLeSq*mSlepSq*p13*p14**dble(3)*p34*
+     -        dble(-312) + mInSkUtLeSq*mSlepSq**dble(2)*p12*
+     -        p14**dble(2)*p34*dble(-288) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p34**dble(2)*
+     -        dble(-288) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p34*
+     -        dble(-280) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*
+     -        p14**dble(2)*dble(-228) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(3)*dble(-228) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(-228) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p34*dble(-228) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-208) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*p24*p34*
+     -        dble(-168) + mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*p24*p34*
+     -        dble(-168) + mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(-156) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(3)*dble(-156) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*p34**dble(2)*
+     -        dble(-156) + mInSkUtLeSq*p13*p14**dble(3)*p34**dble(2)*
+     -        dble(-156) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*
+     -        p13*p14*dble(-140) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(-140) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(-132) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(-132) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*p24*p34*dble(-132) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*p24*p34*dble(-132) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(-120) + mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-120) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p14*dble(-116) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34**dble(3)*dble(-116) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p24*p34*dble(-108) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*p24*p34*dble(-108) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*p34**dble(2)*dble(-108) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*p34**dble(2)*dble(-108) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(-104) + mInSkUtLeSq*mSlepSq*p13**dble(3)*p14*p34*
+     -        dble(-104) + mInSkUtLeSq*mSlepSq*p14**dble(4)*p34*
+     -        dble(-104) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-104) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p14**dble(2)*dble(-96) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34**dble(3)*dble(-96) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(-88) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(-88) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(-84) + mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        p24*dble(-84) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p24*p34**dble(2)*dble(-84) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p24*p34**dble(2)*dble(-84) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(3)*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(4)*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(2)*p24*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(3)*p24*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13*p14*p34*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14**dble(2)*p34*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p34**dble(3)*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p34**dble(3)*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p14*dble(-76) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(4)*dble(-76) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14*p34*dble(-76) + 
+     -       mInSkUtLeSq*p12*p14**dble(4)*p34*dble(-76) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(-72) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*
+     -        p34**dble(2)*dble(-72) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p34*
+     -        dble(-60) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*
+     -        p34**dble(2)*dble(-60) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p24*p34*dble(-56) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*p24*p34*dble(-56) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(3)*p14*dble(-52) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(4)*dble(-52) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*p34**dble(2)*dble(-52) + 
+     -       mInSkUtLeSq*p14**dble(4)*p34**dble(2)*dble(-52) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p34*dble(-48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34**dble(3)*dble(-48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p14*dble(-44) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(-44) + mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p24*
+     -        dble(-44) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(-44) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p24*dble(-44) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14*p34*dble(-44) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p24*p34*dble(-44) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p24*p34*dble(-44) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(-44) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(-44) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14**dble(2)*dble(-40) + 
+     -       mInSkUtLeSq*p13*p14**dble(5)*dble(-40) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14*p24*dble(-40) + 
+     -       mInSkUtLeSq*p13*p14**dble(4)*p24*dble(-40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p34**dble(2)*dble(-40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p34**dble(3)*dble(-40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(-36) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p24*
+     -        dble(-36) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p14*p24*
+     -        dble(-36) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p34*
+     -        dble(-36) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p34**dble(2)*
+     -        dble(-36) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*
+     -        p34**dble(2)*dble(-36) + 
+     -       mInSkUtLeSq*p12*p13*p24*p34**dble(3)*dble(-36) + 
+     -       mInSkUtLeSq*p12*p14*p24*p34**dble(3)*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(3)*p24*dble(-28) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(3)*p24*dble(-28) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*dble(-28) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*p34**dble(2)*dble(-28) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*p34**dble(2)*dble(-28) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(-24) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(-24) + p12**dble(2)*p13**dble(2)*p14**dble(3)*
+     -        dble(-24) + mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p34*
+     -        dble(-24) + mInSkUtLeSq*mSlepSq**dble(2)*p13*p24*
+     -        p34**dble(2)*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p24*p34**dble(2)*
+     -        dble(-24) + mSlepSq*p12**dble(3)*p13*p14**dble(2)*
+     -        dble(-21) + p12**dble(3)*p13*p14**dble(2)*p34*dble(-21) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13**dble(2)*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p13*p14*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p14**dble(2)*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12*p34*dble(-20) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p34*dble(-20) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p34**dble(3)*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p34**dble(4)*dble(-20) + 
+     -       mInSkUtLeSq*p13*p14*p34**dble(4)*dble(-20) + 
+     -       mInSkUtLeSq*p14**dble(2)*p34**dble(4)*dble(-20) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(3)*dble(-18) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(-18) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p34*dble(-18) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(-16) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13*p24*p34*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14*p24*p34*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p24*p34**dble(3)*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p24*p34**dble(3)*dble(-16) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*dble(-14) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(-14) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12**dble(2)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(3)*dble(-12) + 
+     -       mSlepSq*p12*p13**dble(3)*p14**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(-12) + 
+     -       mSlepSq*p12*p13*p14**dble(4)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p24*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p24*dble(-12) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(-12) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-12) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(-12) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p34*dble(-12) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(-12) + 
+     -       p12*p13*p14**dble(4)*p34*dble(-12) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14*p24*p34*dble(-12) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*p12**dble(3)*p34**dble(3)*dble(-12) + 
+     -       mInSkUtLeSq*p12**dble(2)*p34**dble(4)*dble(-12) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p14*dble(-8) + 
+     -       mInSkUtLeSq*p13**dble(5)*p14*dble(-8) + 
+     -       p12**dble(4)*p13*p14**dble(2)*dble(-8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(-8) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(4)*dble(-8) + 
+     -       mInSkUtLeSq*p14**dble(6)*dble(-8) + 
+     -       mInSkUtLeSq*p13**dble(5)*p24*dble(-8) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p24*dble(-8) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p24*dble(-8) + 
+     -       mInSkUtLeSq*p14**dble(5)*p24*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(-8) + 
+     -       p12*p13**dble(3)*p14*p24*p34*dble(-8) + 
+     -       p12*p13*p14**dble(3)*p24*p34*dble(-8) + 
+     -       p12**dble(2)*p14**dble(3)*p34**dble(2)*dble(-8) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(-6) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p34*dble(-6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq**dble(5)*p12*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(4)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(4)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(-4) + 
+     -       p12**dble(4)*p14**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p14**dble(5)*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p13*p24*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p14*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(4)*p14*p34*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(-4) + 
+     -       p12**dble(3)*p13*p14*p24*p34*dble(-4) + 
+     -       mInSkUtLeSq*p12**dble(4)*p34**dble(2)*dble(-4) + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*p13*p24*p34**dble(4)*dble(-4) + 
+     -       mInSkUtLeSq*p14*p24*p34**dble(4)*dble(-4) + 
+     -       mInSkUtLeSq*p12*p34**dble(5)*dble(-4) + 
+     -       mSlepSq*p12**dble(4)*p13**dble(2)*dble(-3) + 
+     -       mSlepSq*p12*p13**dble(4)*p14*dble(-3) + 
+     -       mSlepSq*p12*p14**dble(5)*dble(-3) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(-3) + 
+     -       p12**dble(2)*p14**dble(4)*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p34*dble(-3) + 
+     -       p12**dble(4)*p13**dble(2)*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(4)*p14*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p34*dble(-3) + 
+     -       p12*p14**dble(5)*p34*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(3)*p14*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12*p14**dble(3)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p14*dble(-2) + 
+     -       mSlepSq**dble(3)*p12*p13*p14**dble(2)*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p24*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(4)*p24*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(-2) + 
+     -       p12**dble(4)*p13*p14*p24*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p24*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(4)*p24*dble(-2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(-2) + 
+     -       p12**dble(3)*p13**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13**dble(4)*p24*p34*dble(-2) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12**dble(3)*p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p14**dble(4)*p24*p34*dble(-2) + 
+     -       p12**dble(4)*p14*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p13*p14*p24*p34**dble(2)*dble(-2) + 
+     -       p12*p13*p14**dble(2)*p34**dble(3)*dble(-2) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13**dble(2)*dble(-1) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(4)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p14*dble(-1) + 
+     -       mSlepSq*p12**dble(5)*p14*dble(-1) + 
+     -       mSlepSq**dble(3)*p12*p13**dble(2)*p14*dble(-1) + 
+     -       mSlepSq**dble(3)*p12*p14**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*dble(-1) + 
+     -       p12**dble(4)*p13**dble(2)*p24*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*dble(-1) + 
+     -       p12**dble(4)*p14**dble(2)*p24*dble(-1) + 
+     -       p12**dble(2)*p13**dble(4)*p34*dble(-1) + 
+     -       p12**dble(5)*p14*p34*dble(-1) + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2)*dble(-1) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2)*dble(-1) + 
+     -       p12**dble(2)*p13**dble(2)*p34**dble(3)*dble(-1) + 
+     -       p12**dble(3)*p14*p34**dble(3)*dble(-1) + 
+     -       p12*p13**dble(2)*p14*p34**dble(3)*dble(-1) + 
+     -       p12*p14**dble(3)*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p13*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(3)*dble(2) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2)*dble(2) + 
+     -       mSlepSq*p12*p13**dble(3)*p24*p34*dble(2) + 
+     -       mSlepSq*p12*p14**dble(3)*p24*p34*dble(2) + 
+     -       p12**dble(4)*p13*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p13**dble(3)*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3)*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(3)*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p14*dble(3) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p14*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(4)*dble(3) + 
+     -       p12**dble(3)*p13**dble(3)*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(3) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p34*dble(3) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(3) + 
+     -       p12**dble(4)*p13*p14*p34*dble(3) + 
+     -       mSlepSq*p12**dble(3)*p13*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(3) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(3) + 
+     -       p12*p13**dble(3)*p14*p34**dble(2)*dble(3) + 
+     -       p12*p14**dble(4)*p34**dble(2)*dble(3) + 
+     -       p12*p13**dble(2)*p14*p24*p34**dble(2)*dble(3) + 
+     -       p12*p13*p14**dble(2)*p24*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(5)*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p14*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(4) + 
+     -       mSlepSq*p12**dble(4)*p13*p34*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14*p34*dble(4) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(4) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p14*p34**dble(5)*dble(4) + 
+     -       p12*p13**dble(4)*p14**dble(2)*dble(5) + 
+     -       p12*p13*p14**dble(5)*dble(5) + 
+     -       p12*p13**dble(4)*p14*p24*dble(5) + 
+     -       p12*p13*p14**dble(4)*p24*dble(5) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(6) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(6) + 
+     -       p12**dble(3)*p14**dble(4)*dble(6) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p34*dble(6) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p34*dble(6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(6) + 
+     -       p12**dble(4)*p14**dble(2)*p34*dble(6) + 
+     -       mSlepSq*p12*p14**dble(4)*p34*dble(6) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p24*p34*dble(6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p24*p34*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(7) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(7) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(7) + 
+     -       p12**dble(3)*p14**dble(2)*p34**dble(2)*dble(7) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p13*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(3)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12*p24*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12*p13**dble(4)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12*p14**dble(4)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(4)*p13*p34*dble(8) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p34**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(3)*p24*p34**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12*p24*p34**dble(4)*dble(8) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*dble(9) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(3)*dble(9) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(9) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(9) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p34**dble(2)*dble(9) + 
+     -       p12*p13*p14**dble(3)*p34**dble(2)*dble(9) + 
+     -       p12*p13**dble(3)*p14**dble(3)*dble(10) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(10) + 
+     -       p12*p13**dble(2)*p14**dble(4)*dble(10) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p24*dble(10) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p24*dble(10) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(10) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(12) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p24*p34*dble(12) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p24*p34*dble(12) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p34*dble(14) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12*p13*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*p12*p13**dble(4)*p14*dble(16) + 
+     -       mInSkUtLeSq*p12*p14**dble(5)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p24*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13**dble(2)*p24*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14**dble(2)*p24*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p24*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p24*p34**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*p13**dble(2)*p24*p34**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*p14**dble(2)*p24*p34**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*p12*p13*p34**dble(4)*dble(16) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(18) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(18) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(18) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p34*dble(18) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p14*p34*dble(20) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p34**dble(4)*dble(20) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(4)*p24*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(4)*p24*dble(24) + 
+     -       mInSkUtLeSq*p13**dble(4)*p24*p34*dble(24) + 
+     -       mInSkUtLeSq*p14**dble(4)*p24*p34*dble(24) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(27) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(27) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(29) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(29) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p13*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12*p14*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(4)*p14*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(5)*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(32) + mInSkUtLeSq*mSlepSq**dble(3)*p13*p14*p24*
+     -        dble(32) + mInSkUtLeSq*p12*p13**dble(3)*p14*p24*
+     -        dble(32) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(32) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p24*dble(32) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14*p34*dble(32) + 
+     -       mInSkUtLeSq*p14**dble(5)*p34*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p34**dble(2)*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14*p34**dble(2)*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p34**dble(3)*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p24*p34**dble(3)*dble(32) + 
+     -       mInSkUtLeSq*p13*p14*p24*p34**dble(3)*dble(32) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(4)*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14*p34**dble(2)*dble(40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p34**dble(3)*dble(40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13**dble(2)*p14*dble(44) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14**dble(3)*dble(44) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34**dble(3)*dble(44) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34**dble(3)*dble(44) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p24*p34*
+     -        dble(48) + mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*p24*
+     -        p34*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(48) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p24*
+     -        p34**dble(2)*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p24*p34**dble(2)*
+     -        dble(48) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p24*
+     -        p34**dble(2)*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p24*p34**dble(2)*
+     -        dble(48) + eps1234*
+     -        (p12**dble(4)*p13 + p12**dble(4)*p14 + 
+     -          p12**dble(2)*p13*p34**dble(2) + 
+     -          p12**dble(2)*p14*p34**dble(2) + 
+     -          mInSkUtLeSq*p12*p13*p14*p34*dble(-72) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-48) + 
+     -          mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-40) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p34*dble(-36) + 
+     -          mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-36) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13**dble(2)*dble(-24) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-24) + 
+     -          mInSkUtLeSq*p13**dble(2)*p34**dble(2)*dble(-20) + 
+     -          mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-20) + 
+     -          mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-12) + 
+     -          mInSkUtLeSq*p12*p34**dble(3)*dble(-12) + 
+     -          p12**dble(2)*p13*p14*p34*dble(-8) + 
+     -          p12**dble(3)*p13*p14*dble(-6) + 
+     -          p12*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -          mInSkUtLeSq*mSlepSq**dble(4)*dble(-4) + 
+     -          p12*p13**dble(3)*p14*dble(-4) + 
+     -          p12*p13*p14**dble(3)*dble(-4) + 
+     -          mInSkUtLeSq*p12**dble(3)*p34*dble(-4) + 
+     -          p12**dble(2)*p13**dble(2)*p34*dble(-4) + 
+     -          p12**dble(2)*p14**dble(2)*p34*dble(-4) + 
+     -          mInSkUtLeSq*p34**dble(4)*dble(-4) + 
+     -          p12**dble(3)*p13**dble(2)*dble(-3) + 
+     -          p12**dble(3)*p14**dble(2)*dble(-3) + 
+     -          p12*p13*p14*p34**dble(2)*dble(-2) + 
+     -          p12*p13**dble(4)*dble(-1) + p12*p14**dble(4)*dble(-1) + 
+     -          p12*p13**dble(2)*p34**dble(2)*dble(-1) + 
+     -          p12*p14**dble(2)*p34**dble(2)*dble(-1) + 
+     -          p12**dble(3)*p13*p34*dble(2) + 
+     -          p12*p13**dble(3)*p34*dble(2) + 
+     -          p12**dble(3)*p14*p34*dble(2) + 
+     -          p12*p14**dble(3)*p34*dble(2) + 
+     -          p12**dble(2)*p13**dble(3)*dble(3) + 
+     -          p12**dble(2)*p14**dble(3)*dble(3) + 
+     -          mInSkUtLeSq*mSlepSq**dble(3)*dble(-4)*
+     -           (dble(-4)*(p13 + p14 + p34*dble(-1)) + p12*dble(3)) + 
+     -          p12*p13**dble(2)*p14*p34*dble(6) + 
+     -          p12*p13*p14**dble(2)*p34*dble(6) + 
+     -          mInSkUtLeSq*p12**dble(3)*p13*dble(8) + 
+     -          mInSkUtLeSq*p12**dble(3)*p14*dble(8) + 
+     -          mInSkUtLeSq*p13**dble(3)*p34*dble(8) + 
+     -          mInSkUtLeSq*p14**dble(3)*p34*dble(8) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(9) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(9) + 
+     -          mSlepSq*dble(2)*
+     -           (p12*(p13 + p14)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12 + p34 + p13*dble(-1) + p14*dble(-1)) + 
+     -             mInSkUtLeSq*dble(-2)*
+     -              (p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                dble(-2)*
+     -                 (p13**dble(3) + p14**dble(3) + 
+     -                   p14**dble(2)*p34*dble(-5) + 
+     -                   p34**dble(3)*dble(-2) + 
+     -                   p13**dble(2)*(p34*dble(-5) + p14*dble(3)) + 
+     -                   p14*p34**dble(2)*dble(6) + 
+     -                   p13*
+     -                    (p14*p34*dble(-10) + p14**dble(2)*dble(3) + 
+     -                      p34**dble(2)*dble(6))) + 
+     -                p12*(p14*p34*dble(-16) + p13**dble(2)*dble(9) + 
+     -                   p14**dble(2)*dble(9) + p34**dble(2)*dble(9) + 
+     -                   p13*dble(2)*(p34*dble(-8) + p14*dble(9))))) + 
+     -          mSlepSq**dble(2)*dble(-1)*
+     -           (p12*(p13 + p14)*dble(-1)*
+     -              (p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -             mInSkUtLeSq*dble(4)*
+     -              (p13*p34*dble(-12) + p14*p34*dble(-12) + 
+     -                p12**dble(2)*dble(3) + p13**dble(2)*dble(5) + 
+     -                p14**dble(2)*dble(5) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(9)) + 
+     -                p13*p14*dble(10))) + 
+     -          MGl2*dble(4)*
+     -           (mSlepSq**dble(4) + 
+     -             p12**dble(3)*(p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p34*dble(-1)*(p13 + p14 + p34*dble(-1))**dble(2)*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             mSlepSq**dble(3)*
+     -              (dble(-4)*(p13 + p14 + p34*dble(-1)) + p12*dble(3))
+     -              + p12*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-9) + 
+     -                p34**dble(3)*dble(-3) + p13**dble(3)*dble(4) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p13**dble(2)*dble(3)*
+     -                 (p34*dble(-3) + p14*dble(4)) + 
+     -                p13*dble(2)*
+     -                 (p14*p34*dble(-9) + p34**dble(2)*dble(4) + 
+     -                   p14**dble(2)*dble(6)) + 
+     -                p14*p34**dble(2)*dble(8)) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                dble(-2)*
+     -                 (p13**dble(3) + p14**dble(3) + 
+     -                   p14**dble(2)*p34*dble(-5) + 
+     -                   p34**dble(3)*dble(-2) + 
+     -                   p13**dble(2)*(p34*dble(-5) + p14*dble(3)) + 
+     -                   p14*p34**dble(2)*dble(6) + 
+     -                   p13*
+     -                    (p14*p34*dble(-10) + p14**dble(2)*dble(3) + 
+     -                      p34**dble(2)*dble(6))) + 
+     -                p12*(p14*p34*dble(-16) + p13**dble(2)*dble(9) + 
+     -                   p14**dble(2)*dble(9) + p34**dble(2)*dble(9) + 
+     -                   p13*dble(2)*(p34*dble(-8) + p14*dble(9)))) + 
+     -             mSlepSq**dble(2)*
+     -              (p13*p34*dble(-12) + p14*p34*dble(-12) + 
+     -                p12**dble(2)*dble(3) + p13**dble(2)*dble(5) + 
+     -                p14**dble(2)*dble(5) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(9)) + 
+     -                p13*p14*dble(10)) + 
+     -             p12**dble(2)*
+     -              (p13*p34*dble(-8) + p14*p34*dble(-8) + 
+     -                p34**dble(2)*dble(3) + p13**dble(2)*dble(6) + 
+     -                p14**dble(2)*dble(6) + p13*p14*dble(12))) + 
+     -          mInSkUtLeSq*p12*p13**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p12*p14**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p13*p34**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p14*p34**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p13**dble(2)*p14*p34*dble(24) + 
+     -          mInSkUtLeSq*p13*p14**dble(2)*p34*dble(24) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p34*dble(32) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14*p34*dble(32) + 
+     -          mInSkUtLeSq*p12*p13*p34**dble(2)*dble(32) + 
+     -          mInSkUtLeSq*p12*p14*p34**dble(2)*dble(32) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p14*dble(48) + 
+     -          mInSkUtLeSq*p12*p13*p14**dble(2)*dble(48)) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(3)*dble(60) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p34*dble(60) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(64) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(4)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(64) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p24*
+     -        dble(64) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p24*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p34*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p34*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p34*dble(64) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p24*p34*dble(64) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p34**dble(3)*dble(64) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34**dble(3)*dble(64) + 
+     -       MGl2*dble(4)*(mSlepSq**dble(5)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(4)*p34*(p34 + p13*dble(-2) + p14*dble(-1)) + 
+     -          (p13 + p14 + p34*dble(-1))**dble(2)*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(4)*
+     -           (p12**dble(2)*dble(3) + p13*(p24 + p14*dble(5)) + 
+     -             p14*(p24 + p34*dble(-5) + p14*dble(5)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-5) + p24*dble(2) + p13*dble(4) + 
+     -                p14*dble(8))) + 
+     -          p12**dble(3)*p34*
+     -           (p14*p34*dble(-8) + p24*p34*dble(-2) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(5) + p13**dble(2)*dble(6) + 
+     -             p13*(p34*dble(-8) + p24*dble(3) + p14*dble(11))) + 
+     -          p12*dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p34**dble(3)*(p34 + p24*dble(-2)) + 
+     -             p13**dble(3)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(3)*(p34*dble(-15) + p24*dble(2)) + 
+     -             p14**dble(4)*dble(4) + 
+     -             p14*p34**dble(2)*(p24 + p34*dble(-1))*dble(7) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-15) + p24*p34*dble(-9) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(6) + 
+     -                p14**dble(2)*dble(12)) + 
+     -             p14**dble(2)*p34*(p24*dble(-9) + p34*dble(17)) + 
+     -             p13*(p14**dble(2)*(p24 + p34*dble(-5))*dble(6) + 
+     -                p34**dble(2)*(p34*dble(-3) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(12) + 
+     -                p14*p34*(p24*dble(-18) + p34*dble(19)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(3) + 
+     -             p12**dble(2)*dble(-4)*
+     -              (p24 + p34*dble(-3) + p13*dble(2) + p14*dble(4)) + 
+     -             p13**dble(2)*dble(-1)*(p24*dble(4) + p14*dble(11)) + 
+     -             p13*(p14**dble(2)*dble(-22) + p14*p24*dble(-8) + 
+     -                p24*p34*dble(4) + p14*p34*dble(20)) + 
+     -             p14*(p14**dble(2)*dble(-11) + 
+     -                p34**dble(2)*dble(-10) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(4) + p14*p34*dble(20)) + 
+     -             p12*(p14*p34*dble(-32) + p24*p34*dble(-8) + 
+     -                p13**dble(2)*dble(5) + p14*p24*dble(9) + 
+     -                p34**dble(2)*dble(10) + p14**dble(2)*dble(24) + 
+     -                p13*(p34*dble(-16) + p24*dble(9) + p14*dble(29))))
+     -            + p12**dble(2)*
+     -           (p14**dble(3)*p34*dble(-15) + p14**dble(4)*dble(2) + 
+     -             p13**dble(3)*(p14 + p34*dble(-2))*dble(2) + 
+     -             p34**dble(3)*(p24*dble(-4) + p34*dble(3)) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-23) + p14**dble(2)*dble(6) + 
+     -                p34*(p24*dble(-8) + p34*dble(9))) + 
+     -             p14*p34**dble(2)*(p34*dble(-16) + p24*dble(11)) + 
+     -             p14**dble(2)*
+     -              (p24*p34*dble(-8) + p34**dble(2)*dble(26)) + 
+     -             p13*(p14**dble(2)*p34*dble(-34) + 
+     -                p14**dble(3)*dble(6) + 
+     -                p34**dble(2)*(p34*dble(-8) + p24*dble(11)) + 
+     -                p14*p34*(p24*dble(-16) + p34*dble(35)))) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(4) + 
+     -             p12**dble(3)*dble(-1)*
+     -              (p34*dble(-9) + p24*dble(2) + p13*dble(8) + 
+     -                p14*dble(8)) + 
+     -             p13**dble(3)*(p24*dble(7) + p14*dble(13)) + 
+     -             p13**dble(2)*dble(3)*
+     -              (p14*p34*dble(-11) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(7) + p14**dble(2)*dble(13)) + 
+     -             p14*(p14*p34*dble(-6)*(p34*dble(-5) + p24*dble(2)) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-5) + p24*dble(3)) + 
+     -                p14**dble(2)*(p34*dble(-33) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(13)) + 
+     -             p13*dble(3)*
+     -              (p24*p34**dble(2)*dble(2) + 
+     -                p14*p34*dble(2)*(p24*dble(-4) + p34*dble(5)) + 
+     -                p14**dble(2)*(p34*dble(-22) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(13)) + 
+     -             p12**dble(2)*
+     -              (p34*(p24*dble(-2) + p34*dble(3))*dble(6) + 
+     -                p13**dble(2)*dble(9) + 
+     -                p14*(p34*dble(-48) + p24*dble(11)) + 
+     -                p14**dble(2)*dble(26) + 
+     -                p13*(p34*dble(-24) + p24*dble(11) + p14*dble(35)))
+     -               + p12*dble(-1)*
+     -              (p13**dble(3)*dble(2) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-5) + p24*dble(6)) + 
+     -                p14**dble(2)*(p34*dble(-9) + p24*dble(2))*
+     -                 dble(8) + 
+     -                p14*p34*dble(3)*(p24*dble(-9) + p34*dble(16)) + 
+     -                p14**dble(3)*dble(32) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-15) + p24*dble(16) + p14*dble(36)) + 
+     -                p13*(p34*dble(3)*(p24*dble(-9) + p34*dble(8)) + 
+     -                   p14*(p34*dble(-87) + p24*dble(32)) + 
+     -                   p14**dble(2)*dble(66)))) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(4)*(p14 + p34*dble(-2) + p13*dble(2)) + 
+     -             p12**dble(3)*dble(-1)*
+     -              (p14*p34*dble(-16) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p14**dble(2)*dble(5) + 
+     -                p13**dble(2)*dble(6) + p34**dble(2)*dble(9) + 
+     -                p13*(p34*dble(-16) + p24*dble(3) + p14*dble(11)))
+     -              + (p13 + p14 + p34*dble(-1))*
+     -              (p13**dble(3)*(p24*dble(6) + p14*dble(8)) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p24*p34*dble(-4) + 
+     -                   p14*(p24 + p34*dble(-1))*dble(9) + 
+     -                   p14**dble(2)*dble(12)) + 
+     -                p14*(p34**dble(2)*(p34*dble(-5) + p24*dble(4)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-3))*dble(6) + 
+     -                   p14**dble(3)*dble(8) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(15))) + 
+     -                p13*(p24*p34**dble(2)*dble(4) + 
+     -                   p14*p34*(p24*dble(-16) + p34*dble(15)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-2))*dble(18) + 
+     -                   p14**dble(3)*dble(24))) + 
+     -             p12**dble(2)*
+     -              (p13**dble(3)*dble(4) + 
+     -                p14**dble(2)*(p34*dble(-52) + p24*dble(8)) + 
+     -                p34**dble(2)*(p24 + p34*dble(-1))*dble(12) + 
+     -                p14**dble(3)*dble(15) + 
+     -                p13*dble(2)*
+     -                 (p14*p34*dble(-35) + p24*p34*dble(-11) + 
+     -                   p14*p24*dble(8) + p34**dble(2)*dble(12) + 
+     -                   p14**dble(2)*dble(17)) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(8) + p14*dble(23)) + 
+     -                p14*(p24*p34*dble(-22) + p34**dble(2)*dble(48)))
+     -              + p12*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-8)*
+     -                 (p34*dble(-9) + p24*dble(4)) + 
+     -                p34**dble(3)*(p24*dble(-8) + p34*dble(5)) + 
+     -                p14**dble(3)*(p34*dble(-64) + p24*dble(11)) + 
+     -                p14**dble(4)*dble(19) + 
+     -                p13**dble(3)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14*p34**dble(2)*(p34*dble(-32) + p24*dble(27)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-72) + p24*p34*dble(-32) + 
+     -                   p34**dble(2)*dble(15) + p14*p24*dble(33) + 
+     -                   p14**dble(2)*dble(57)) + 
+     -                p13*(p34**dble(2)*
+     -                    (p34*dble(-16) + p24*dble(27)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(33) + 
+     -                   p14**dble(3)*dble(57) + 
+     -                   p14*p34*(p24*dble(-64) + p34*dble(87)))))) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13*p14**dble(2)*dble(88) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34**dble(3)*dble(88) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(92) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(92) + mInSkUtLeSq*p12*p13**dble(2)*p14**dble(3)*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p13**dble(3)*p14*p24*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p13*p14**dble(3)*p24*
+     -        dble(96) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p34*dble(96) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*p24*p34*dble(96) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*p24*p34*dble(96) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*p24*p34*dble(96) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p34**dble(2)*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*
+     -        p34**dble(2)*dble(96) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p24*p34**dble(2)*dble(96) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p14**dble(2)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(3)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(4)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p14*p34*dble(128) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(2)*p34*dble(128) + 
+     -       mInSkUtLeSq*p13*p14**dble(4)*p34*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p24*p34*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p24*p34*dble(128) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p34**dble(2)*dble(128) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*p34**dble(2)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34**dble(3)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(132) + mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(3)*p34*
+     -        dble(132) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*
+     -        p34**dble(2)*dble(132) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*p34**dble(2)*dble(132) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(136) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(136) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*
+     -        p14*dble(144) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(2)*p24*
+     -        dble(144) + mInSkUtLeSq*p13**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(144) + mInSkUtLeSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(144) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(3)*
+     -        dble(192) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p34*dble(192) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(3)*p34*dble(192) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*p34**dble(2)*
+     -        dble(192) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*
+     -        p34**dble(2)*dble(192) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p34*dble(256) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p24*p34*dble(256) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(264) + mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        p34*dble(264) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(264) + mInSkUtLeSq*p12*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(264) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p34*
+     -        dble(288) + mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p34*
+     -        dble(528))*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(4) + 
+     -       (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),MGl2,mInSkUtLeSq,
+     -      mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (mSlepSq + p12 + p34 + p13*dble(-1) + p14*dble(-1))**
+     -      dble(-1)*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**
+     -      dble(-1)*dble(32)*
+     -     (mSlepSq**dble(3)*p12**dble(2)*p13**dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(4) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p14 + 
+     -       mSlepSq*p12**dble(5)*p14 + 
+     -       mSlepSq**dble(3)*p12*p13**dble(2)*p14 + 
+     -       mSlepSq**dble(3)*p12*p14**dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24 + 
+     -       p12**dble(4)*p13**dble(2)*p24 + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24 + 
+     -       p12**dble(4)*p14**dble(2)*p24 + 
+     -       p12**dble(2)*p13**dble(4)*p34 + p12**dble(5)*p14*p34 + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34**dble(3) + 
+     -       p12**dble(3)*p14*p34**dble(3) + 
+     -       p12*p13**dble(2)*p14*p34**dble(3) + 
+     -       p12*p14**dble(3)*p34**dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(-528) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(-288) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(-264) + mInSkUtRiSq*mSlepSq**dble(2)*p13*
+     -        p14**dble(2)*p34*dble(-264) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(-264) + mInSkUtRiSq*p12*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(-264) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p34*dble(-256) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p24*p34*dble(-256) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(3)*dble(-192) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*p34*
+     -        dble(-192) + mInSkUtRiSq*p13**dble(2)*p14**dble(3)*p34*
+     -        dble(-192) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*
+     -        p34**dble(2)*dble(-192) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(-192) + mInSkUtRiSq*mSlepSq**dble(2)*p12*
+     -        p13**dble(2)*p14*dble(-144) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(2)*p24*
+     -        dble(-144) + mInSkUtRiSq*p13**dble(2)*p14**dble(2)*p24*
+     -        p34*dble(-144) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*p34**dble(2)*dble(-144) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(-136) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*
+     -        p34*dble(-136) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(-132) + mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(3)*
+     -        p34*dble(-132) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-132) + mInSkUtRiSq*mSlepSq*p14**dble(3)*
+     -        p34**dble(2)*dble(-132) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p14**dble(2)*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(3)*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(4)*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14*p34*dble(-128) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14**dble(2)*p34*dble(-128) + 
+     -       mInSkUtRiSq*p13*p14**dble(4)*p34*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p24*p34*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p24*p34*dble(-128) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p34**dble(2)*dble(-128) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*p34**dble(2)*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34**dble(3)*dble(-128) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(3)*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p14*p24*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(3)*p24*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p34*
+     -        dble(-96) + mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*p24*p34*
+     -        dble(-96) + mInSkUtRiSq*p13**dble(3)*p14*p24*p34*
+     -        dble(-96) + mInSkUtRiSq*p13*p14**dble(3)*p24*p34*
+     -        dble(-96) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*
+     -        p34**dble(2)*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(-96) + mInSkUtRiSq*mSlepSq*p13*p14*p24*p34**dble(2)*
+     -        dble(-96) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*
+     -        p14*dble(-92) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(-92) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13*p14**dble(2)*dble(-88) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34**dble(3)*dble(-88) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(-64) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14**dble(2)*dble(-64) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(4)*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p24*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p24*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p34*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p34*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p34*dble(-64) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*p24*p34*dble(-64) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(-64) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p34**dble(3)*dble(-64) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34**dble(3)*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(3)*dble(-60) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p34*dble(-60) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p24*p34*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*p24*
+     -        p34*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p24*
+     -        p34**dble(2)*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p24*p34**dble(2)*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq*p13**dble(2)*p24*
+     -        p34**dble(2)*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p24*p34**dble(2)*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq**dble(3)*p13**dble(2)*p14*
+     -        dble(-44) + mInSkUtRiSq*mSlepSq**dble(3)*p14**dble(3)*
+     -        dble(-44) + mInSkUtRiSq*p13**dble(2)*p14*p34**dble(3)*
+     -        dble(-44) + mInSkUtRiSq*p14**dble(3)*p34**dble(3)*
+     -        dble(-44) + mInSkUtRiSq*mSlepSq**dble(3)*p14*p34**dble(2)*
+     -        dble(-40) + mInSkUtRiSq*mSlepSq**dble(2)*p14*p34**dble(3)*
+     -        dble(-40) + mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p13*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p13*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq**dble(4)*p12*p14*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p14*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq*p13**dble(4)*p14*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq*p14**dble(5)*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq**dble(3)*p13*p14*p24*
+     -        dble(-32) + mInSkUtRiSq*p12*p13**dble(3)*p14*p24*
+     -        dble(-32) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(-32) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p24*dble(-32) + 
+     -       mInSkUtRiSq*p13**dble(4)*p14*p34*dble(-32) + 
+     -       mInSkUtRiSq*p14**dble(5)*p34*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p34**dble(2)*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14*p34**dble(2)*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p34**dble(3)*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p24*p34**dble(3)*dble(-32) + 
+     -       mInSkUtRiSq*p13*p14*p24*p34**dble(3)*dble(-32) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(4)*dble(-32) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(-29) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(-29) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(-27) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(-27) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(4)*p24*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(4)*p24*dble(-24) + 
+     -       mInSkUtRiSq*p13**dble(4)*p24*p34*dble(-24) + 
+     -       mInSkUtRiSq*p14**dble(4)*p24*p34*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p14*p34*dble(-20) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p34**dble(4)*dble(-20) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(-18) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(-18) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(-18) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p34*dble(-18) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p12*p13*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p14*dble(-16) + 
+     -       mInSkUtRiSq*p12*p14**dble(5)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p24*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13**dble(2)*p24*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14**dble(2)*p24*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p24*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(2)*p24*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*p13**dble(2)*p24*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*p14**dble(2)*p24*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13*p34**dble(4)*dble(-16) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p34*dble(-14) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(-12) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p24*p34*dble(-12) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p24*p34*dble(-12) + 
+     -       p12*p13**dble(3)*p14**dble(3)*dble(-10) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(-10) + 
+     -       p12*p13**dble(2)*p14**dble(4)*dble(-10) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p24*dble(-10) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p24*dble(-10) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(-10) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*dble(-9) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(3)*dble(-9) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(-9) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(-9) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p34**dble(2)*dble(-9) + 
+     -       p12*p13*p14**dble(3)*p34**dble(2)*dble(-9) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p13*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(3)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p12*p24*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(4)*p13*p34*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p34**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p24*p34**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12*p24*p34**dble(4)*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(-7) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(-7) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(-7) + 
+     -       p12**dble(3)*p14**dble(2)*p34**dble(2)*dble(-7) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(-6) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(-6) + 
+     -       p12**dble(3)*p14**dble(4)*dble(-6) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p34*dble(-6) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p34*dble(-6) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(-6) + 
+     -       p12**dble(4)*p14**dble(2)*p34*dble(-6) + 
+     -       mSlepSq*p12*p14**dble(4)*p34*dble(-6) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p24*p34*dble(-6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p24*p34*dble(-6) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(-6) + 
+     -       p12*p13**dble(4)*p14**dble(2)*dble(-5) + 
+     -       p12*p13*p14**dble(5)*dble(-5) + 
+     -       p12*p13**dble(4)*p14*p24*dble(-5) + 
+     -       p12*p13*p14**dble(4)*p24*dble(-5) + 
+     -       mInSkUtRiSq*mSlepSq**dble(5)*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p14*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(4)*p13*p34*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p34*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14*p34*dble(-4) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p14*p34**dble(5)*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(3)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p14*dble(-3) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p14*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(4)*dble(-3) + 
+     -       p12**dble(3)*p13**dble(3)*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(-3) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p34*dble(-3) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(-3) + 
+     -       p12**dble(4)*p13*p14*p34*dble(-3) + 
+     -       mSlepSq*p12**dble(3)*p13*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(-3) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(-3) + 
+     -       p12*p13**dble(3)*p14*p34**dble(2)*dble(-3) + 
+     -       p12*p14**dble(4)*p34**dble(2)*dble(-3) + 
+     -       p12*p13**dble(2)*p14*p24*p34**dble(2)*dble(-3) + 
+     -       p12*p13*p14**dble(2)*p24*p34**dble(2)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p13*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(3)*dble(-2) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(3)*p24*p34*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(3)*p24*p34*dble(-2) + 
+     -       p12**dble(4)*p13*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(3)*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3)*dble(-2) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p13*dble(-1) + 
+     -       mSlepSq*p12**dble(5)*p13*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14*dble(-1) + 
+     -       p12**dble(5)*p13*p14*dble(-1) + 
+     -       p12*p13**dble(5)*p14*dble(-1) + 
+     -       p12**dble(5)*p14**dble(2)*dble(-1) + 
+     -       p12*p14**dble(6)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p24*dble(-1) + 
+     -       p12*p13**dble(5)*p24*dble(-1) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p24*dble(-1) + 
+     -       p12*p14**dble(5)*p24*dble(-1) + 
+     -       p12**dble(5)*p13*p34*dble(-1) + 
+     -       p12*p13**dble(3)*p24*p34**dble(2)*dble(-1) + 
+     -       p12*p14**dble(3)*p24*p34**dble(2)*dble(-1) + 
+     -       p12**dble(3)*p13*p34**dble(3)*dble(-1) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p14*dble(2) + 
+     -       mSlepSq**dble(3)*p12*p13*p14**dble(2)*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p24*dble(2) + 
+     -       mSlepSq*p12*p13**dble(4)*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(2) + 
+     -       p12**dble(4)*p13*p14*p24*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p24*dble(2) + 
+     -       mSlepSq*p12*p14**dble(4)*p24*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p13**dble(2)*p24*p34*dble(2) + 
+     -       p12*p13**dble(4)*p24*p34*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*p24*p34*dble(2) + 
+     -       p12*p14**dble(4)*p24*p34*dble(2) + 
+     -       p12**dble(4)*p14*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p13*p14*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13*p14**dble(2)*p34**dble(3)*dble(2) + 
+     -       mSlepSq*p12**dble(4)*p13**dble(2)*dble(3) + 
+     -       mSlepSq*p12*p13**dble(4)*p14*dble(3) + 
+     -       mSlepSq*p12*p14**dble(5)*dble(3) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(3) + 
+     -       p12**dble(2)*p14**dble(4)*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p34*dble(3) + 
+     -       p12**dble(4)*p13**dble(2)*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p34*dble(3) + 
+     -       p12*p13**dble(4)*p14*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p34*dble(3) + 
+     -       p12*p14**dble(5)*p34*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12**dble(3)*p14*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12*p14**dble(3)*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(5)*p12*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(4)*dble(4) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2)*dble(4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(4) + 
+     -       p12**dble(4)*p13**dble(2)*p14*dble(4) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(4) + 
+     -       p12**dble(4)*p14**dble(3)*dble(4) + 
+     -       p12**dble(2)*p14**dble(5)*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p13*p24*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p14*p24*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p24*dble(4) + 
+     -       mSlepSq*p12**dble(4)*p14*p34*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(4) + 
+     -       p12**dble(3)*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtRiSq*p12**dble(4)*p34**dble(2)*dble(4) + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2)*dble(4) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq*p13*p24*p34**dble(4)*dble(4) + 
+     -       mInSkUtRiSq*p14*p24*p34**dble(4)*dble(4) + 
+     -       mInSkUtRiSq*p12*p34**dble(5)*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(6) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p34*dble(6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p14*dble(8) + 
+     -       mInSkUtRiSq*p13**dble(5)*p14*dble(8) + 
+     -       p12**dble(4)*p13*p14**dble(2)*dble(8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(4)*dble(8) + 
+     -       mInSkUtRiSq*p14**dble(6)*dble(8) + 
+     -       mInSkUtRiSq*p13**dble(5)*p24*dble(8) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p24*dble(8) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p24*dble(8) + 
+     -       mInSkUtRiSq*p14**dble(5)*p24*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p34*dble(8) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(8) + 
+     -       p12*p13**dble(3)*p14*p24*p34*dble(8) + 
+     -       p12*p13*p14**dble(3)*p24*p34*dble(8) + 
+     -       p12**dble(2)*p14**dble(3)*p34**dble(2)*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p12**dble(2)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(3)*dble(12) + 
+     -       mSlepSq*p12*p13**dble(3)*p14**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(12) + 
+     -       mSlepSq*p12*p13*p14**dble(4)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p24*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p24*dble(12) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(12) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(12) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(12) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p34*dble(12) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(12) + 
+     -       p12*p13*p14**dble(4)*p34*dble(12) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14*p24*p34*dble(12) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*p12**dble(3)*p34**dble(3)*dble(12) + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(4)*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*dble(14) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(14) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(16) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13*p24*p34*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14*p24*p34*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p24*p34**dble(3)*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p24*p34**dble(3)*dble(16) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(3)*dble(18) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(18) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p34*dble(18) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13**dble(2)*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p13*p14*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p14**dble(2)*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p12*p34*dble(20) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p34*dble(20) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p34**dble(3)*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p34**dble(4)*dble(20) + 
+     -       mInSkUtRiSq*p13*p14*p34**dble(4)*dble(20) + 
+     -       mInSkUtRiSq*p14**dble(2)*p34**dble(4)*dble(20) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(21) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(21) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(24) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(24) + p12**dble(2)*p13**dble(2)*p14**dble(3)*
+     -        dble(24) + mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p34*
+     -        dble(24) + mInSkUtRiSq*mSlepSq**dble(2)*p13*p24*
+     -        p34**dble(2)*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p24*p34**dble(2)*
+     -        dble(24) + mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(3)*p24*
+     -        dble(28) + mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(3)*p24*
+     -        dble(28) + mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(28) + mInSkUtRiSq*p13**dble(3)*p24*p34**dble(2)*
+     -        dble(28) + mInSkUtRiSq*p14**dble(3)*p24*p34**dble(2)*
+     -        dble(28) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*
+     -        p13**dble(2)*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p24*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14*p24*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p34*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(36) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(36) + mInSkUtRiSq*p12*p13*p24*p34**dble(3)*
+     -        dble(36) + mInSkUtRiSq*p12*p14*p24*p34**dble(3)*
+     -        dble(36) + mInSkUtRiSq*p13**dble(4)*p14**dble(2)*
+     -        dble(40) + mInSkUtRiSq*p13*p14**dble(5)*dble(40) + 
+     -       mInSkUtRiSq*p13**dble(4)*p14*p24*dble(40) + 
+     -       mInSkUtRiSq*p13*p14**dble(4)*p24*dble(40) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p34**dble(2)*dble(40) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p34**dble(3)*dble(40) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p14*dble(44) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(44) + mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p24*
+     -        dble(44) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(44) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p24*dble(44) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14*p34*dble(44) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p24*p34*dble(44) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p24*p34*dble(44) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(44) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(44) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p34*dble(48) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34**dble(3)*dble(48) + 
+     -       eps1234*(p12**dble(4)*p13 + p12**dble(4)*p14 + 
+     -          p12**dble(2)*p13*p34**dble(2) + 
+     -          p12**dble(2)*p14*p34**dble(2) + 
+     -          mInSkUtRiSq*p12*p13*p14*p34*dble(-72) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p14*dble(-48) + 
+     -          mInSkUtRiSq*p13*p14*p34**dble(2)*dble(-40) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p34*dble(-36) + 
+     -          mInSkUtRiSq*p12*p14**dble(2)*p34*dble(-36) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13**dble(2)*dble(-24) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(-24) + 
+     -          mInSkUtRiSq*p13**dble(2)*p34**dble(2)*dble(-20) + 
+     -          mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(-20) + 
+     -          mInSkUtRiSq*p12**dble(2)*p34**dble(2)*dble(-12) + 
+     -          mInSkUtRiSq*p12*p34**dble(3)*dble(-12) + 
+     -          p12**dble(2)*p13*p14*p34*dble(-8) + 
+     -          p12**dble(3)*p13*p14*dble(-6) + 
+     -          p12*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -          mInSkUtRiSq*mSlepSq**dble(4)*dble(-4) + 
+     -          p12*p13**dble(3)*p14*dble(-4) + 
+     -          p12*p13*p14**dble(3)*dble(-4) + 
+     -          mInSkUtRiSq*p12**dble(3)*p34*dble(-4) + 
+     -          p12**dble(2)*p13**dble(2)*p34*dble(-4) + 
+     -          p12**dble(2)*p14**dble(2)*p34*dble(-4) + 
+     -          mInSkUtRiSq*p34**dble(4)*dble(-4) + 
+     -          p12**dble(3)*p13**dble(2)*dble(-3) + 
+     -          p12**dble(3)*p14**dble(2)*dble(-3) + 
+     -          p12*p13*p14*p34**dble(2)*dble(-2) + 
+     -          p12*p13**dble(4)*dble(-1) + p12*p14**dble(4)*dble(-1) + 
+     -          p12*p13**dble(2)*p34**dble(2)*dble(-1) + 
+     -          p12*p14**dble(2)*p34**dble(2)*dble(-1) + 
+     -          p12**dble(3)*p13*p34*dble(2) + 
+     -          p12*p13**dble(3)*p34*dble(2) + 
+     -          p12**dble(3)*p14*p34*dble(2) + 
+     -          p12*p14**dble(3)*p34*dble(2) + 
+     -          p12**dble(2)*p13**dble(3)*dble(3) + 
+     -          p12**dble(2)*p14**dble(3)*dble(3) + 
+     -          mInSkUtRiSq*mSlepSq**dble(3)*dble(-4)*
+     -           (dble(-4)*(p13 + p14 + p34*dble(-1)) + p12*dble(3)) + 
+     -          p12*p13**dble(2)*p14*p34*dble(6) + 
+     -          p12*p13*p14**dble(2)*p34*dble(6) + 
+     -          mInSkUtRiSq*p12**dble(3)*p13*dble(8) + 
+     -          mInSkUtRiSq*p12**dble(3)*p14*dble(8) + 
+     -          mInSkUtRiSq*p13**dble(3)*p34*dble(8) + 
+     -          mInSkUtRiSq*p14**dble(3)*p34*dble(8) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(9) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(9) + 
+     -          mSlepSq*dble(2)*
+     -           (p12*(p13 + p14)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12 + p34 + p13*dble(-1) + p14*dble(-1)) + 
+     -             mInSkUtRiSq*dble(-2)*
+     -              (p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                dble(-2)*
+     -                 (p13**dble(3) + p14**dble(3) + 
+     -                   p14**dble(2)*p34*dble(-5) + 
+     -                   p34**dble(3)*dble(-2) + 
+     -                   p13**dble(2)*(p34*dble(-5) + p14*dble(3)) + 
+     -                   p14*p34**dble(2)*dble(6) + 
+     -                   p13*
+     -                    (p14*p34*dble(-10) + p14**dble(2)*dble(3) + 
+     -                      p34**dble(2)*dble(6))) + 
+     -                p12*(p14*p34*dble(-16) + p13**dble(2)*dble(9) + 
+     -                   p14**dble(2)*dble(9) + p34**dble(2)*dble(9) + 
+     -                   p13*dble(2)*(p34*dble(-8) + p14*dble(9))))) + 
+     -          mSlepSq**dble(2)*dble(-1)*
+     -           (p12*(p13 + p14)*dble(-1)*
+     -              (p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -             mInSkUtRiSq*dble(4)*
+     -              (p13*p34*dble(-12) + p14*p34*dble(-12) + 
+     -                p12**dble(2)*dble(3) + p13**dble(2)*dble(5) + 
+     -                p14**dble(2)*dble(5) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(9)) + 
+     -                p13*p14*dble(10))) + 
+     -          MGl2*dble(4)*
+     -           (mSlepSq**dble(4) + 
+     -             p12**dble(3)*(p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p34*dble(-1)*(p13 + p14 + p34*dble(-1))**dble(2)*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             mSlepSq**dble(3)*
+     -              (dble(-4)*(p13 + p14 + p34*dble(-1)) + p12*dble(3))
+     -              + p12*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-9) + 
+     -                p34**dble(3)*dble(-3) + p13**dble(3)*dble(4) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p13**dble(2)*dble(3)*
+     -                 (p34*dble(-3) + p14*dble(4)) + 
+     -                p13*dble(2)*
+     -                 (p14*p34*dble(-9) + p34**dble(2)*dble(4) + 
+     -                   p14**dble(2)*dble(6)) + 
+     -                p14*p34**dble(2)*dble(8)) + 
+     -             mSlepSq*(p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                dble(-2)*
+     -                 (p13**dble(3) + p14**dble(3) + 
+     -                   p14**dble(2)*p34*dble(-5) + 
+     -                   p34**dble(3)*dble(-2) + 
+     -                   p13**dble(2)*(p34*dble(-5) + p14*dble(3)) + 
+     -                   p14*p34**dble(2)*dble(6) + 
+     -                   p13*
+     -                    (p14*p34*dble(-10) + p14**dble(2)*dble(3) + 
+     -                      p34**dble(2)*dble(6))) + 
+     -                p12*(p14*p34*dble(-16) + p13**dble(2)*dble(9) + 
+     -                   p14**dble(2)*dble(9) + p34**dble(2)*dble(9) + 
+     -                   p13*dble(2)*(p34*dble(-8) + p14*dble(9)))) + 
+     -             mSlepSq**dble(2)*
+     -              (p13*p34*dble(-12) + p14*p34*dble(-12) + 
+     -                p12**dble(2)*dble(3) + p13**dble(2)*dble(5) + 
+     -                p14**dble(2)*dble(5) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(9)) + 
+     -                p13*p14*dble(10)) + 
+     -             p12**dble(2)*
+     -              (p13*p34*dble(-8) + p14*p34*dble(-8) + 
+     -                p34**dble(2)*dble(3) + p13**dble(2)*dble(6) + 
+     -                p14**dble(2)*dble(6) + p13*p14*dble(12))) + 
+     -          mInSkUtRiSq*p12*p13**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p12*p14**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p13*p34**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p14*p34**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p13**dble(2)*p14*p34*dble(24) + 
+     -          mInSkUtRiSq*p13*p14**dble(2)*p34*dble(24) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p34*dble(32) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14*p34*dble(32) + 
+     -          mInSkUtRiSq*p12*p13*p34**dble(2)*dble(32) + 
+     -          mInSkUtRiSq*p12*p14*p34**dble(2)*dble(32) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p14*dble(48) + 
+     -          mInSkUtRiSq*p12*p13*p14**dble(2)*dble(48)) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(3)*p14*dble(52) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(4)*dble(52) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*p34**dble(2)*dble(52) + 
+     -       mInSkUtRiSq*p14**dble(4)*p34**dble(2)*dble(52) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p24*p34*dble(56) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*p24*p34*dble(56) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p34*
+     -        dble(60) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*
+     -        p34**dble(2)*dble(60) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(72) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*
+     -        p34**dble(2)*dble(72) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p14*dble(76) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(4)*dble(76) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p34*dble(76) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p34*dble(76) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14**dble(3)*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(4)*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14**dble(2)*p24*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(3)*p24*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13*p14*p34*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14**dble(2)*p34*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p34**dble(3)*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p34**dble(3)*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(84) + mInSkUtRiSq*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        p24*dble(84) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p24*p34**dble(2)*dble(84) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p24*p34**dble(2)*dble(84) + 
+     -       MGl2*dble(-4)*(mSlepSq**dble(5)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(4)*p34*(p34 + p13*dble(-2) + p14*dble(-1)) + 
+     -          (p13 + p14 + p34*dble(-1))**dble(2)*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(4)*
+     -           (p12**dble(2)*dble(3) + p13*(p24 + p14*dble(5)) + 
+     -             p14*(p24 + p34*dble(-5) + p14*dble(5)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-5) + p24*dble(2) + p13*dble(4) + 
+     -                p14*dble(8))) + 
+     -          p12**dble(3)*p34*
+     -           (p14*p34*dble(-8) + p24*p34*dble(-2) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(5) + p13**dble(2)*dble(6) + 
+     -             p13*(p34*dble(-8) + p24*dble(3) + p14*dble(11))) + 
+     -          p12*dble(-1)*(p13 + p14 + p34*dble(-1))*
+     -           (p34**dble(3)*(p34 + p24*dble(-2)) + 
+     -             p13**dble(3)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(3)*(p34*dble(-15) + p24*dble(2)) + 
+     -             p14**dble(4)*dble(4) + 
+     -             p14*p34**dble(2)*(p24 + p34*dble(-1))*dble(7) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-15) + p24*p34*dble(-9) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(6) + 
+     -                p14**dble(2)*dble(12)) + 
+     -             p14**dble(2)*p34*(p24*dble(-9) + p34*dble(17)) + 
+     -             p13*(p14**dble(2)*(p24 + p34*dble(-5))*dble(6) + 
+     -                p34**dble(2)*(p34*dble(-3) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(12) + 
+     -                p14*p34*(p24*dble(-18) + p34*dble(19)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(3) + 
+     -             p12**dble(2)*dble(-4)*
+     -              (p24 + p34*dble(-3) + p13*dble(2) + p14*dble(4)) + 
+     -             p13**dble(2)*dble(-1)*(p24*dble(4) + p14*dble(11)) + 
+     -             p13*(p14**dble(2)*dble(-22) + p14*p24*dble(-8) + 
+     -                p24*p34*dble(4) + p14*p34*dble(20)) + 
+     -             p14*(p14**dble(2)*dble(-11) + 
+     -                p34**dble(2)*dble(-10) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(4) + p14*p34*dble(20)) + 
+     -             p12*(p14*p34*dble(-32) + p24*p34*dble(-8) + 
+     -                p13**dble(2)*dble(5) + p14*p24*dble(9) + 
+     -                p34**dble(2)*dble(10) + p14**dble(2)*dble(24) + 
+     -                p13*(p34*dble(-16) + p24*dble(9) + p14*dble(29))))
+     -            + p12**dble(2)*
+     -           (p14**dble(3)*p34*dble(-15) + p14**dble(4)*dble(2) + 
+     -             p13**dble(3)*(p14 + p34*dble(-2))*dble(2) + 
+     -             p34**dble(3)*(p24*dble(-4) + p34*dble(3)) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-23) + p14**dble(2)*dble(6) + 
+     -                p34*(p24*dble(-8) + p34*dble(9))) + 
+     -             p14*p34**dble(2)*(p34*dble(-16) + p24*dble(11)) + 
+     -             p14**dble(2)*
+     -              (p24*p34*dble(-8) + p34**dble(2)*dble(26)) + 
+     -             p13*(p14**dble(2)*p34*dble(-34) + 
+     -                p14**dble(3)*dble(6) + 
+     -                p34**dble(2)*(p34*dble(-8) + p24*dble(11)) + 
+     -                p14*p34*(p24*dble(-16) + p34*dble(35)))) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(4) + 
+     -             p12**dble(3)*dble(-1)*
+     -              (p34*dble(-9) + p24*dble(2) + p13*dble(8) + 
+     -                p14*dble(8)) + 
+     -             p13**dble(3)*(p24*dble(7) + p14*dble(13)) + 
+     -             p13**dble(2)*dble(3)*
+     -              (p14*p34*dble(-11) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(7) + p14**dble(2)*dble(13)) + 
+     -             p14*(p14*p34*dble(-6)*(p34*dble(-5) + p24*dble(2)) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-5) + p24*dble(3)) + 
+     -                p14**dble(2)*(p34*dble(-33) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(13)) + 
+     -             p13*dble(3)*
+     -              (p24*p34**dble(2)*dble(2) + 
+     -                p14*p34*dble(2)*(p24*dble(-4) + p34*dble(5)) + 
+     -                p14**dble(2)*(p34*dble(-22) + p24*dble(7)) + 
+     -                p14**dble(3)*dble(13)) + 
+     -             p12**dble(2)*
+     -              (p34*(p24*dble(-2) + p34*dble(3))*dble(6) + 
+     -                p13**dble(2)*dble(9) + 
+     -                p14*(p34*dble(-48) + p24*dble(11)) + 
+     -                p14**dble(2)*dble(26) + 
+     -                p13*(p34*dble(-24) + p24*dble(11) + p14*dble(35)))
+     -               + p12*dble(-1)*
+     -              (p13**dble(3)*dble(2) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-5) + p24*dble(6)) + 
+     -                p14**dble(2)*(p34*dble(-9) + p24*dble(2))*
+     -                 dble(8) + 
+     -                p14*p34*dble(3)*(p24*dble(-9) + p34*dble(16)) + 
+     -                p14**dble(3)*dble(32) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-15) + p24*dble(16) + p14*dble(36)) + 
+     -                p13*(p34*dble(3)*(p24*dble(-9) + p34*dble(8)) + 
+     -                   p14*(p34*dble(-87) + p24*dble(32)) + 
+     -                   p14**dble(2)*dble(66)))) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(4)*(p14 + p34*dble(-2) + p13*dble(2)) + 
+     -             p12**dble(3)*dble(-1)*
+     -              (p14*p34*dble(-16) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p14**dble(2)*dble(5) + 
+     -                p13**dble(2)*dble(6) + p34**dble(2)*dble(9) + 
+     -                p13*(p34*dble(-16) + p24*dble(3) + p14*dble(11)))
+     -              + (p13 + p14 + p34*dble(-1))*
+     -              (p13**dble(3)*(p24*dble(6) + p14*dble(8)) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p24*p34*dble(-4) + 
+     -                   p14*(p24 + p34*dble(-1))*dble(9) + 
+     -                   p14**dble(2)*dble(12)) + 
+     -                p14*(p34**dble(2)*(p34*dble(-5) + p24*dble(4)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-3))*dble(6) + 
+     -                   p14**dble(3)*dble(8) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(15))) + 
+     -                p13*(p24*p34**dble(2)*dble(4) + 
+     -                   p14*p34*(p24*dble(-16) + p34*dble(15)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-2))*dble(18) + 
+     -                   p14**dble(3)*dble(24))) + 
+     -             p12**dble(2)*
+     -              (p13**dble(3)*dble(4) + 
+     -                p14**dble(2)*(p34*dble(-52) + p24*dble(8)) + 
+     -                p34**dble(2)*(p24 + p34*dble(-1))*dble(12) + 
+     -                p14**dble(3)*dble(15) + 
+     -                p13*dble(2)*
+     -                 (p14*p34*dble(-35) + p24*p34*dble(-11) + 
+     -                   p14*p24*dble(8) + p34**dble(2)*dble(12) + 
+     -                   p14**dble(2)*dble(17)) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(8) + p14*dble(23)) + 
+     -                p14*(p24*p34*dble(-22) + p34**dble(2)*dble(48)))
+     -              + p12*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-8)*
+     -                 (p34*dble(-9) + p24*dble(4)) + 
+     -                p34**dble(3)*(p24*dble(-8) + p34*dble(5)) + 
+     -                p14**dble(3)*(p34*dble(-64) + p24*dble(11)) + 
+     -                p14**dble(4)*dble(19) + 
+     -                p13**dble(3)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14*p34**dble(2)*(p34*dble(-32) + p24*dble(27)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-72) + p24*p34*dble(-32) + 
+     -                   p34**dble(2)*dble(15) + p14*p24*dble(33) + 
+     -                   p14**dble(2)*dble(57)) + 
+     -                p13*(p34**dble(2)*
+     -                    (p34*dble(-16) + p24*dble(27)) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(33) + 
+     -                   p14**dble(3)*dble(57) + 
+     -                   p14*p34*(p24*dble(-64) + p34*dble(87)))))) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(88) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(88) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14**dble(2)*dble(96) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34**dble(3)*dble(96) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(104) + mInSkUtRiSq*mSlepSq*p13**dble(3)*p14*p34*
+     -        dble(104) + mInSkUtRiSq*mSlepSq*p14**dble(4)*p34*
+     -        dble(104) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(104) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p24*p34*dble(108) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*p24*p34*dble(108) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*p34**dble(2)*dble(108) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*p34**dble(2)*dble(108) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p14*dble(116) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34**dble(3)*dble(116) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(120) + mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(120) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(132) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(132) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*p24*p34*dble(132) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*p24*p34*dble(132) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p14*
+     -        dble(140) + mInSkUtRiSq*p12**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(140) + mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(156) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14**dble(3)*dble(156) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*p34**dble(2)*
+     -        dble(156) + mInSkUtRiSq*p13*p14**dble(3)*p34**dble(2)*
+     -        dble(156) + mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*p24*p34*
+     -        dble(168) + mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*p24*p34*
+     -        dble(168) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p34*dble(208) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(228) + mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(3)*
+     -        dble(228) + mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(228) + mInSkUtRiSq*p12*p13*p14**dble(3)*p34*
+     -        dble(228) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p34*
+     -        dble(280) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p34*dble(288) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p34**dble(2)*
+     -        dble(288) + mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(2)*
+     -        p34*dble(312) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(3)*p34*dble(312) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p34*dble(348) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(348))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(mSlepSq + p34)*dble(2),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),MGl2,mInSkUtRiSq,
+     -      mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*(MGl2 + mInSkUtLeSq*dble(-1))*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(p13 + p14 + p12*dble(-1))*dble(2),dble(0),MGl2,
+     -      MGl2,mInSkUtLeSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*dble(-16)*(MGl2 + mInSkUtRiSq*dble(-1))*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (p12**dble(2)*p34**dble(2) + p13*p24*p34**dble(2) + 
+     -       p14*p24*p34**dble(2) + p12*p34**dble(3) + 
+     -       p12*p13*p14**dble(2)*dble(-8) + 
+     -       p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14*dble(-4) + 
+     -       p12*p14**dble(3)*dble(-4) + p12*p13*p14*p24*dble(-4) + 
+     -       p13**dble(2)*p14*p34*dble(-4) + 
+     -       p14**dble(3)*p34*dble(-4) + p13*p14*p24*p34*dble(-4) + 
+     -       p12*p14*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(2)*p24*dble(-2) + 
+     -       p13**dble(2)*p24*p34*dble(-2) + 
+     -       p14**dble(2)*p24*p34*dble(-2) + 
+     -       p12*p13*p34**dble(2)*dble(-2) + 
+     -       p12*p24*p34**dble(2)*dble(-2) + 
+     -       p14*p34**dble(3)*dble(-1) + 
+     -       eps1234*(mSlepSq + p34)*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -        dble(-1) + mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -       p12**dble(2)*p13*p14*dble(2) + p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*dble(2) + p14**dble(4)*dble(2) + 
+     -       p13**dble(3)*p24*dble(2) + p14**dble(3)*p24*dble(2) + 
+     -       p12*p13*p24*p34*dble(3) + p12*p14*p24*p34*dble(3) + 
+     -       p13*p14*p34**dble(2)*dble(3) + 
+     -       p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       mSlepSq**dble(2)*
+     -        (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -          p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -          p12*dble(-1)*
+     -           (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -             p14*dble(4))) + p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p13*p14**dble(3)*dble(6) + p13**dble(2)*p14*p24*dble(6) + 
+     -       p13*p14**dble(2)*p24*dble(6) + p12*p13*p14*p34*dble(7) + 
+     -       p12*p14**dble(2)*p34*dble(7) + 
+     -       mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -          p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -          p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -             p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -          p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -             p14*p24*dble(-2) + p24*p34*dble(2) + p14*p34*dble(6))
+     -            + p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -             p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -             p14**dble(2)*dble(7) + 
+     -             p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7)))))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3(dble(0),(p13 + p14 + p12*dble(-1))*dble(2),dble(0),MGl2,
+     -      MGl2,mInSkUtRiSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p12*dble(-1))*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq*mSlepSq**dble(3)*p14 + 
+     -       mInSkUtLeSq*p14*p34**dble(3) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*dble(-7) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*dble(-7) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34*dble(-7) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-7) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p34*dble(-6) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       p12*p13*p14**dble(2)*p34*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p13*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p14*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(4)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(-2) + 
+     -       p12**dble(3)*p14*p34*dble(-2) + 
+     -       p12*p13**dble(2)*p14*p34*dble(-2) + 
+     -       p12*p14**dble(3)*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p24*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p24*dble(-1) + 
+     -       mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p13*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p14*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p12*p34**dble(3)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(2) + 
+     -       p12**dble(3)*p13*p14*dble(2) + 
+     -       p12*p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p13**dble(3)*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(3)*p13*p34*dble(2) + 
+     -       p12**dble(2)*p13*p14*p34*dble(2) + 
+     -       mInSkUtLeSq*p13**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p14**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p12*p13*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p24*p34**dble(2)*dble(2) + 
+     -       eps1234*(p12*p13*p14*dble(-4) + 
+     -          p12*p13**dble(2)*dble(-2) + p12*p14**dble(2)*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtLeSq*mSlepSq**dble(2)*dble(-1) + 
+     -          mInSkUtLeSq*p12*p34*dble(-1) + 
+     -          mInSkUtLeSq*p34**dble(2)*dble(-1) + 
+     -          mInSkUtLeSq*mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12**dble(2)*p13*dble(2) + p12**dble(2)*p14*dble(2) + 
+     -          mInSkUtLeSq*p13*p34*dble(2) + 
+     -          mInSkUtLeSq*p14*p34*dble(2)) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p34*dble(4) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34*dble(4) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(2)*dble(4) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p12*p13*p14**dble(3)*dble(6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34*dble(8) + 
+     -       MGl2*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3((mSlepSq + p34)*dble(2),dble(0),p12*dble(2),mInSkUtLeSq,
+     -      mInSkUtLeSq,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p12*dble(-1))*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtRiSq*mSlepSq**dble(3)*p12 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p24 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p24 + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(2) + 
+     -       mInSkUtRiSq*p13*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p14*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p12*p34**dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       p12*p13*p14**dble(3)*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(-6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p34*dble(-4) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(-4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p34*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13*p14*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(-2) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       p12**dble(3)*p13*p14*dble(-2) + 
+     -       p12*p13**dble(3)*p14*dble(-2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(-2) + 
+     -       p12*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p13**dble(3)*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(3)*p24*dble(-2) + 
+     -       p12**dble(3)*p13*p34*dble(-2) + 
+     -       p12**dble(2)*p13*p14*p34*dble(-2) + 
+     -       mInSkUtRiSq*p13**dble(2)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*p14**dble(2)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14*dble(-1) + 
+     -       mInSkUtRiSq*p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*dble(2) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(2) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(4)*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(2) + 
+     -       p12**dble(3)*p14*p34*dble(2) + 
+     -       p12*p13**dble(2)*p14*p34*dble(2) + 
+     -       p12*p14**dble(3)*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p24*p34*dble(2) + 
+     -       eps1234*(p12*p13*p14*dble(-4) + 
+     -          p12*p13**dble(2)*dble(-2) + p12*p14**dble(2)*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtRiSq*mSlepSq**dble(2)*dble(-1) + 
+     -          mInSkUtRiSq*p12*p34*dble(-1) + 
+     -          mInSkUtRiSq*p34**dble(2)*dble(-1) + 
+     -          mInSkUtRiSq*mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12**dble(2)*p13*dble(2) + p12**dble(2)*p14*dble(2) + 
+     -          mInSkUtRiSq*p13*p34*dble(2) + 
+     -          mInSkUtRiSq*p14*p34*dble(2)) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p13*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p14*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p13*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       p12*p13*p14**dble(2)*p34*dble(4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p24*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*dble(7) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*dble(7) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34*dble(7) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34*dble(7) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(8) + 
+     -       MGl2*dble(-1)*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))))*dble(16)*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3((mSlepSq + p34)*dble(2),dble(0),p12*dble(2),mInSkUtRiSq,
+     -      mInSkUtRiSq,mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq*mSlepSq**dble(3)*p14 + 
+     -       mInSkUtLeSq*p14*p34**dble(3) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*dble(-7) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*dble(-7) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34*dble(-7) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-7) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p34*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p34*dble(-6) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(-4) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       p12*p13*p14**dble(2)*p34*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p13*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*p12*p14*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(4)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(-2) + 
+     -       p12**dble(3)*p14*p34*dble(-2) + 
+     -       p12*p13**dble(2)*p14*p34*dble(-2) + 
+     -       p12*p14**dble(3)*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p24*p34*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p24*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p24*dble(-1) + 
+     -       mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p13*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p14*p24*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq*p12*p34**dble(3)*dble(-1) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(2) + 
+     -       p12**dble(3)*p13*p14*dble(2) + 
+     -       p12*p13**dble(3)*p14*dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*dble(2) + 
+     -       p12*p13**dble(3)*p24*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*dble(2) + 
+     -       p12*p14**dble(3)*p24*dble(2) + 
+     -       p12**dble(3)*p13*p34*dble(2) + 
+     -       p12**dble(2)*p13*p14*p34*dble(2) + 
+     -       mInSkUtLeSq*p13**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p14**dble(2)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq*p12*p13*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p24*p34**dble(2)*dble(2) + 
+     -       eps1234*(p12*p13*p14*dble(-4) + 
+     -          p12*p13**dble(2)*dble(-2) + p12*p14**dble(2)*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtLeSq*mSlepSq**dble(2)*dble(-1) + 
+     -          mInSkUtLeSq*p12*p34*dble(-1) + 
+     -          mInSkUtLeSq*p34**dble(2)*dble(-1) + 
+     -          mInSkUtLeSq*mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12**dble(2)*p13*dble(2) + p12**dble(2)*p14*dble(2) + 
+     -          mInSkUtLeSq*p13*p34*dble(2) + 
+     -          mInSkUtLeSq*p14*p34*dble(2)) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p34*dble(4) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34*dble(4) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p13*p14*p24*p34*dble(4) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(2)*dble(4) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       p12*p13*p14**dble(3)*dble(6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34*dble(8) + 
+     -       MGl2*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3((p13 + p14 + p12*dble(-1))*dble(2),dble(0),dble(0),MGl2,
+     -      mInSkUtLeSq,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*
+     -     (p12 + p13*dble(-1) + p14*dble(-1))**dble(-1)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtRiSq*mSlepSq**dble(3)*p12 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p24 + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p24 + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(2) + 
+     -       mInSkUtRiSq*p13*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p14*p24*p34**dble(2) + 
+     -       mInSkUtRiSq*p12*p34**dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34*dble(-8) + 
+     -       p12*p13**dble(2)*p14**dble(2)*dble(-6) + 
+     -       p12*p13*p14**dble(3)*dble(-6) + 
+     -       p12*p13**dble(2)*p14*p24*dble(-6) + 
+     -       p12*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p34*dble(-4) + 
+     -       p12**dble(2)*p14**dble(2)*p34*dble(-4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p34*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13*p14*p24*p34*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p13*dble(-2) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*dble(-2) + 
+     -       p12**dble(3)*p13*p14*dble(-2) + 
+     -       p12*p13**dble(3)*p14*dble(-2) + 
+     -       p12**dble(3)*p14**dble(2)*dble(-2) + 
+     -       p12*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*dble(-2) + 
+     -       p12*p13**dble(3)*p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*dble(-2) + 
+     -       p12*p14**dble(3)*p24*dble(-2) + 
+     -       p12**dble(3)*p13*p34*dble(-2) + 
+     -       p12**dble(2)*p13*p14*p34*dble(-2) + 
+     -       mInSkUtRiSq*p13**dble(2)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*p14**dble(2)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14*dble(-1) + 
+     -       mInSkUtRiSq*p14*p34**dble(3)*dble(-1) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*dble(2) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(2) + 
+     -       mSlepSq*p12*p14**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(4)*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p13**dble(3)*p24*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34*dble(2) + 
+     -       p12**dble(3)*p14*p34*dble(2) + 
+     -       p12*p13**dble(2)*p14*p34*dble(2) + 
+     -       p12*p14**dble(3)*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p14*p24*p34*dble(2) + 
+     -       eps1234*(p12*p13*p14*dble(-4) + 
+     -          p12*p13**dble(2)*dble(-2) + p12*p14**dble(2)*dble(-2) + 
+     -          MGl2*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -          mInSkUtRiSq*mSlepSq**dble(2)*dble(-1) + 
+     -          mInSkUtRiSq*p12*p34*dble(-1) + 
+     -          mInSkUtRiSq*p34**dble(2)*dble(-1) + 
+     -          mInSkUtRiSq*mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1))) + 
+     -          p12**dble(2)*p13*dble(2) + p12**dble(2)*p14*dble(2) + 
+     -          mInSkUtRiSq*p13*p34*dble(2) + 
+     -          mInSkUtRiSq*p14*p34*dble(2)) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p13*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*p12*p14*p24*p34*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p13*p14*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       p12**dble(2)*p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*dble(4) + 
+     -       p12**dble(2)*p14**dble(3)*dble(4) + 
+     -       p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       p12*p13*p14**dble(2)*p34*dble(4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p24*dble(6) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(2)*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*dble(7) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*dble(7) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34*dble(7) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34*dble(7) + 
+     -       p12**dble(2)*p13*p14**dble(2)*dble(8) + 
+     -       MGl2*dble(-1)*(mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))))*dble(16)*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3((p13 + p14 + p12*dble(-1))*dble(2),dble(0),dble(0),MGl2,
+     -      mInSkUtRiSq,mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (p13 + p14)**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagGluino*tagSquark*dble(-8)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mSlepSq**dble(3)*p12**dble(2)*p13**dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(4) + 
+     -       p12**dble(3)*p13**dble(3)*p14 + p12*p13**dble(5)*p14 + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14**dble(2) + 
+     -       p12**dble(3)*p14**dble(4) + p12*p14**dble(6) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p24 + 
+     -       p12*p13**dble(5)*p24 + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p24 + 
+     -       p12*p14**dble(5)*p24 + p12**dble(2)*p13**dble(4)*p34 + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2) + 
+     -       p12**dble(3)*p14**dble(2)*p34**dble(2) + 
+     -       p12*p13**dble(3)*p24*p34**dble(2) + 
+     -       p12*p14**dble(3)*p24*p34**dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p34**dble(3) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(-256) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(-228) + mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(3)*
+     -        dble(-228) + mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*
+     -        p34*dble(-228) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p34*dble(-228) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-184) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(-144) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14**dble(3)*dble(-144) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(-132) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(-132) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*p24*p34*dble(-132) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*p24*p34*dble(-132) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p14*
+     -        dble(-128) + mInSkUtLeSq*p12**dble(2)*p13*p14*
+     -        p34**dble(2)*dble(-128) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p14*dble(-96) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14*p34*dble(-96) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(-92) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-92) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(3)*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(4)*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(2)*p24*dble(-80) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(3)*p24*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(-80) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p14*dble(-76) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(4)*dble(-76) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14*p34*dble(-76) + 
+     -       mInSkUtLeSq*p12*p14**dble(4)*p34*dble(-76) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(-72) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(-72) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(-72) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(-72) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p34*
+     -        dble(-72) + mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p34*
+     -        dble(-72) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(2)*
+     -        p34*dble(-72) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(3)*p34*dble(-72) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(-72) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*p34*
+     -        dble(-60) + mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(-60) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p14*dble(-48) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(4)*dble(-48) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p24*dble(-44) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p24*dble(-44) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p24*p34*dble(-44) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p24*p34*dble(-44) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14**dble(2)*dble(-40) + 
+     -       mInSkUtLeSq*p13*p14**dble(5)*dble(-40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(-40) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(-40) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14*p24*dble(-40) + 
+     -       mInSkUtLeSq*p13*p14**dble(4)*p24*dble(-40) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(-40) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(-40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(-36) + mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(3)*dble(-36) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(-36) + mInSkUtLeSq*p13**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-36) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*p34**dble(2)*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p14*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p24*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p24*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p24*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p24*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p34*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p14*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(4)*p34*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p24*p34*dble(-24) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14*p24*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*p24*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*p24*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(-24) + 
+     -       mInSkUtLeSq*p12*p13*p14*p34**dble(3)*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p14**dble(2)*dble(-20) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*dble(-20) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p34**dble(3)*dble(-20) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(3)*dble(-18) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p34*dble(-18) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p34*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(3)*p14*dble(-12) + 
+     -       mSlepSq*p12*p13**dble(3)*p14**dble(2)*dble(-12) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(4)*dble(-12) + 
+     -       mSlepSq*p12*p13*p14**dble(4)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(-12) + mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        p24*dble(-12) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p34*
+     -        dble(-12) + p12*p13**dble(3)*p14**dble(2)*p34*dble(-12) + 
+     -       p12*p13*p14**dble(4)*p34*dble(-12) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p34**dble(2)*
+     -        dble(-12) + mInSkUtLeSq*p13**dble(3)*p14*p34**dble(2)*
+     -        dble(-12) + mInSkUtLeSq*p14**dble(4)*p34**dble(2)*
+     -        dble(-12) + mInSkUtLeSq*p13**dble(2)*p14*p24*p34**dble(2)*
+     -        dble(-12) + mInSkUtLeSq*p13*p14**dble(2)*p24*p34**dble(2)*
+     -        dble(-12) + mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p14**dble(2)*dble(-10) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(-10) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(3)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(4)*dble(-8) + 
+     -       mInSkUtLeSq*p12**dble(4)*p13*p14*dble(-8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(-8) + 
+     -       mInSkUtLeSq*p13**dble(5)*p14*dble(-8) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14**dble(2)*dble(-8) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(-8) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(-8) + 
+     -       mInSkUtLeSq*p14**dble(6)*dble(-8) + 
+     -       mInSkUtLeSq*p13**dble(5)*p24*dble(-8) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p24*dble(-8) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p24*dble(-8) + 
+     -       mInSkUtLeSq*p14**dble(5)*p24*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p24*p34*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(-8) + 
+     -       p12*p13**dble(3)*p14*p24*p34*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*p24*p34*dble(-8) + 
+     -       p12*p13*p14**dble(3)*p24*p34*dble(-8) + 
+     -       mInSkUtLeSq*p12**dble(4)*p34**dble(2)*dble(-8) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*p12**dble(3)*p34**dble(3)*dble(-8) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(-6) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p34*dble(-6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(-6) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(-5) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(-5) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13**dble(2)*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(3)*p24*dble(-4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(3)*p24*dble(-4) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p34*dble(-4) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(-4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(-4) + 
+     -       p12**dble(2)*p14**dble(3)*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*p13**dble(3)*p24*p34**dble(2)*dble(-4) + 
+     -       p12**dble(2)*p13*p14*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p34**dble(3)*dble(-4) + 
+     -       mSlepSq*p12*p13**dble(4)*p14*dble(-3) + 
+     -       mSlepSq*p12*p14**dble(5)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p34*dble(-3) + 
+     -       p12*p13**dble(4)*p14*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p34*dble(-3) + 
+     -       p12*p14**dble(5)*p34*dble(-3) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12*p14**dble(3)*p34**dble(2)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(3)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(-2) + 
+     -       mSlepSq**dble(3)*p12*p13*p14**dble(2)*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(-2) + 
+     -       p12**dble(2)*p14**dble(5)*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(4)*p24*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(4)*p24*dble(-2) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(-2) + 
+     -       p12*p13**dble(4)*p24*p34*dble(-2) + 
+     -       p12*p14**dble(4)*p24*p34*dble(-2) + 
+     -       p12**dble(2)*p13**dble(3)*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2)*dble(-2) + 
+     -       p12*p13*p14**dble(2)*p34**dble(3)*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12*p13**dble(2)*p14*dble(-1) + 
+     -       mSlepSq**dble(3)*p12*p14**dble(3)*dble(-1) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(-1) + 
+     -       p12**dble(2)*p14**dble(4)*p24*dble(-1) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(-1) + 
+     -       p12*p13**dble(2)*p14*p34**dble(3)*dble(-1) + 
+     -       p12*p14**dble(3)*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p14*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p34*dble(2) + 
+     -       mSlepSq*p12*p13**dble(3)*p24*p34*dble(2) + 
+     -       mSlepSq*p12*p14**dble(3)*p24*p34*dble(2) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3)*dble(2) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p14*dble(3) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(3) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(4)*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(3) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(3) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*dble(3) + 
+     -       p12*p13**dble(3)*p14*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(3) + 
+     -       p12*p14**dble(4)*p34**dble(2)*dble(3) + 
+     -       p12*p13**dble(2)*p14*p24*p34**dble(2)*dble(3) + 
+     -       p12*p13*p14**dble(2)*p24*p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13**dble(2)*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p14**dble(3)*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p34*dble(4) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14*p34**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p14**dble(3)*p34**dble(3)*dble(4) + 
+     -       p12*p13**dble(4)*p14**dble(2)*dble(5) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(5) + 
+     -       p12*p13*p14**dble(5)*dble(5) + 
+     -       p12*p13**dble(4)*p14*p24*dble(5) + 
+     -       p12*p13*p14**dble(4)*p24*dble(5) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(5) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(6) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p34*dble(6) + 
+     -       mSlepSq*p12*p14**dble(4)*p34*dble(6) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p24*p34*dble(6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p24*p34*dble(6) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p13*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(3)*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p13*p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p24*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(4)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p24*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(4)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(4)*p13*p34*dble(8) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*p13**dble(4)*p24*p34*dble(8) + 
+     -       mInSkUtLeSq*p14**dble(4)*p24*p34*dble(8) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p34**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*p13*p14**dble(2)*p34**dble(3)*dble(8) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*dble(9) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(3)*dble(9) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(9) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(9) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p24*p34*dble(9) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p24*p34*dble(9) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p34**dble(2)*dble(9) + 
+     -       p12*p13*p14**dble(3)*p34**dble(2)*dble(9) + 
+     -       p12*p13**dble(3)*p14**dble(3)*dble(10) + 
+     -       p12*p13**dble(2)*p14**dble(4)*dble(10) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p24*dble(10) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p24*dble(10) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(12) + mInSkUtLeSq*mSlepSq**dble(2)*p14**dble(3)*p34*
+     -        dble(12) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14*
+     -        p34**dble(2)*dble(12) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(3)*p34**dble(2)*dble(12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p14*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(4)*p14*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p14**dble(5)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14*p24*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14*p34*dble(16) + 
+     -       mInSkUtLeSq*p13**dble(4)*p14*p34*dble(16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*p14**dble(5)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(3)*p24*p34**dble(2)*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p34**dble(3)*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(18) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(18) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(18) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p34*dble(18) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(24) + mInSkUtLeSq*p12*p13**dble(4)*p24*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*p24*
+     -        dble(24) + mInSkUtLeSq*p12*p14**dble(4)*p24*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(24) + mInSkUtLeSq*mSlepSq*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(24) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(24) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(24) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34**dble(3)*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p13*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p14*dble(32) + 
+     -       mInSkUtLeSq*p12*p13**dble(4)*p14*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14**dble(3)*dble(32) + 
+     -       mInSkUtLeSq*p12*p14**dble(5)*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p14*p24*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(3)*p24*dble(32) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p13*p14**dble(3)*p24*p34*dble(32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p34**dble(2)*dble(32) + 
+     -       MGl2*dble(4)*(p12**dble(4)*(p14 + p34*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1))*dble(2) + 
+     -          mSlepSq**dble(3)*(p12 + p14*dble(-1))*
+     -           ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -             p12**dble(2)*dble(2)) + 
+     -          (p13 + p14)**dble(2)*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          p12**dble(3)*dble(-2)*(p13 + p14 + p34*dble(-1))*
+     -           (p14*(p24 + p34*dble(-5)) + p34*(p34 + p24*dble(-2)) + 
+     -             p14**dble(2)*dble(4) + 
+     -             p13*(p24 + p34*dble(-3) + p14*dble(4))) + 
+     -          mSlepSq**dble(2)*
+     -           ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -             p12**dble(2)*dble(2))*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          p12*(p13 + p14)*dble(-1)*
+     -           (p13**dble(3)*(p24*dble(6) + p14*dble(8)) + 
+     -             p14*(p14**dble(2)*(p34*dble(-19) + p24*dble(6)) + 
+     -                p34**dble(2)*(p34*dble(-5) + p24*dble(6)) + 
+     -                p14**dble(3)*dble(8) + 
+     -                p14*p34*(p24*dble(-11) + p34*dble(16))) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-19) + p24*p34*dble(-11) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(18) + 
+     -                p14**dble(2)*dble(24)) + 
+     -             p13*(p34**dble(2)*(p34*dble(-1) + p24*dble(6)) + 
+     -                p14**dble(2)*dble(2)*
+     -                 (p34*dble(-19) + p24*dble(9)) + 
+     -                p14*p34*dble(2)*(p24*dble(-11) + p34*dble(9)) + 
+     -                p14**dble(3)*dble(24))) + 
+     -          p12**dble(2)*
+     -           (p13**dble(3)*dble(2)*
+     -              (p34*dble(-2) + p24*dble(3) + p14*dble(6)) + 
+     -             p14*(p14 + p34*dble(-1))*
+     -              (p14*p34*dble(-17) + p24*p34*dble(-10) + 
+     -                p14*p24*dble(6) + p34**dble(2)*dble(6) + 
+     -                p14**dble(2)*dble(12)) + 
+     -             p13*dble(2)*
+     -              (p14*p34*dble(-16)*(p24 + p34*dble(-1)) + 
+     -                p34**dble(2)*(p34*dble(-2) + p24*dble(5)) + 
+     -                p14**dble(2)*(p34*dble(-31) + p24*dble(9)) + 
+     -                p14**dble(3)*dble(18)) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-37) + p24*p34*dble(-16) + 
+     -                p34**dble(2)*dble(9) + p14*p24*dble(18) + 
+     -                p14**dble(2)*dble(36))) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(4)*dble(2)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             (p13 + p14)**dble(2)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*(p24 + p34*dble(-3))*dble(2) + 
+     -                   p34*(p24*dble(-2) + p34*dble(3)) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-6) + p24*p34*dble(-2) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8))) + 
+     -             p12**dble(3)*dble(-2)*
+     -              (p13**dble(2)*dble(3) + 
+     -                p14*(p24 + p34*dble(-4))*dble(3) + 
+     -                p34*(p24*dble(-4) + p34*dble(3)) + 
+     -                p14**dble(2)*dble(9) + 
+     -                p13*(p34*dble(-8) + p24*dble(3) + p14*dble(12)))
+     -              + p12**dble(2)*
+     -              (p13**dble(3)*dble(4) + 
+     -                p14*(p14*p34*dble(-46) + p24*p34*dble(-20) + 
+     -                   p14*p24*dble(16) + p34**dble(2)*dble(18) + 
+     -                   p14**dble(2)*dble(29)) + 
+     -                p13*dble(2)*
+     -                 (p34*dble(2)*(p24*dble(-5) + p34*dble(3)) + 
+     -                   p14*(p24 + p34*dble(-2))*dble(16) + 
+     -                   p14**dble(2)*dble(31)) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(16) + p14*dble(37))) + 
+     -             p12*(p13 + p14)*dble(-1)*
+     -              (p13**dble(2)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14*(p34*dble(3)*(p24*dble(-4) + p34*dble(5)) + 
+     -                   p14*(p34*dble(-32) + p24*dble(11)) + 
+     -                   p14**dble(2)*dble(19)) + 
+     -                p13*(p34*(p34 + p24*dble(-4))*dble(3) + 
+     -                   p14*(p34*dble(-36) + p24*dble(22)) + 
+     -                   p14**dble(2)*dble(38))))) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(2)*p24*
+     -        dble(48) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p34*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p24*p34*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p24*p34*dble(48) + 
+     -       mInSkUtLeSq*p13**dble(2)*p14**dble(2)*p24*p34*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(48) + mInSkUtLeSq*p12**dble(3)*p14*p34**dble(2)*
+     -        dble(48) + mInSkUtLeSq*p12*p13*p14*p24*p34**dble(2)*
+     -        dble(48) + eps1234*
+     -        (p12*p13**dble(4) + p12*p14**dble(4) + 
+     -          p12**dble(2)*p13**dble(2)*p34 + 
+     -          p12**dble(2)*p14**dble(2)*p34 + 
+     -          p12*p13**dble(2)*p34**dble(2) + 
+     -          p12*p14**dble(2)*p34**dble(2) + 
+     -          mInSkUtLeSq*p12*p13*p14*p34*dble(-72) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-48) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p34*dble(-36) + 
+     -          mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-36) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13**dble(2)*dble(-24) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-24) + 
+     -          mInSkUtLeSq*p12**dble(3)*p34*dble(-8) + 
+     -          mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-8) + 
+     -          mInSkUtLeSq*p13*p14*p34**dble(2)*dble(-8) + 
+     -          p12*p13**dble(2)*p14*p34*dble(-6) + 
+     -          p12*p13*p14**dble(2)*p34*dble(-6) + 
+     -          mInSkUtLeSq*p13**dble(2)*p34**dble(2)*dble(-4) + 
+     -          mInSkUtLeSq*p14**dble(2)*p34**dble(2)*dble(-4) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-3) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-3) + 
+     -          p12*p13**dble(3)*p34*dble(-2) + 
+     -          p12*p14**dble(3)*p34*dble(-2) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-1) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-1) + 
+     -          p12**dble(2)*p13*p14*p34*dble(2) + 
+     -          p12*p13*p14*p34**dble(2)*dble(2) + 
+     -          mSlepSq**dble(2)*
+     -           (p12*(p13 + p14)**dble(2) + 
+     -             mInSkUtLeSq*dble(-4)*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2))) + 
+     -          p12*p13**dble(3)*p14*dble(4) + 
+     -          p12*p13*p14**dble(3)*dble(4) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1)))*
+     -           (p12*(p13 + p14)**dble(2)*dble(-1) + 
+     -             mInSkUtLeSq*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2))*dble(4)) + 
+     -          p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -          mInSkUtLeSq*p12**dble(3)*p13*dble(8) + 
+     -          mInSkUtLeSq*p12**dble(3)*p14*dble(8) + 
+     -          mInSkUtLeSq*p13**dble(3)*p34*dble(8) + 
+     -          mInSkUtLeSq*p14**dble(3)*p34*dble(8) + 
+     -          MGl2*dble(4)*
+     -           (p12**dble(3)*dble(-2)*(p13 + p14 + p34*dble(-1)) + 
+     -             mSlepSq**dble(2)*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2)) + 
+     -             mSlepSq*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1)))*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2)) + 
+     -             (p13 + p14)**dble(2)*p34*dble(-1)*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12**dble(2)*dble(2)*
+     -              (p34**dble(2) + p13*p34*dble(-4) + 
+     -                p14*p34*dble(-4) + p13**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(3) + p13*p14*dble(6)) + 
+     -             p12*(p13 + p14)*dble(-1)*
+     -              (p13*p34*dble(-9) + p14*p34*dble(-9) + 
+     -                p13**dble(2)*dble(4) + p14**dble(2)*dble(4) + 
+     -                p34**dble(2)*dble(4) + p13*p14*dble(8))) + 
+     -          mInSkUtLeSq*p12*p13**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p12*p14**dble(3)*dble(16) + 
+     -          mInSkUtLeSq*p12*p13*p34**dble(2)*dble(16) + 
+     -          mInSkUtLeSq*p12*p14*p34**dble(2)*dble(16) + 
+     -          mInSkUtLeSq*p13**dble(2)*p14*p34*dble(24) + 
+     -          mInSkUtLeSq*p13*p14**dble(2)*p34*dble(24) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p34*dble(32) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14*p34*dble(32) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p14*dble(48) + 
+     -          mInSkUtLeSq*p12*p13*p14**dble(2)*dble(48)) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p13**dble(3)*p14**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(3)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p13*p14**dble(4)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(64) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p34*dble(64) + 
+     -       mInSkUtLeSq*p13**dble(3)*p14**dble(2)*p34*dble(64) + 
+     -       mInSkUtLeSq*p13*p14**dble(4)*p34*dble(64) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(64) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(64) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p34**dble(2)*dble(64) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*p34*
+     -        dble(72) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*
+     -        p34**dble(2)*dble(72) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p14*
+     -        dble(80) + mInSkUtLeSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(80) + mInSkUtLeSq*mSlepSq*p13**dble(2)*p14**dble(3)*
+     -        dble(96) + mInSkUtLeSq*p12*p13**dble(3)*p14*p24*
+     -        dble(96) + mInSkUtLeSq*p12*p13*p14**dble(3)*p24*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p34*
+     -        dble(96) + mInSkUtLeSq*p13**dble(2)*p14**dble(3)*p34*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p12*p13*p14*p24*p34*
+     -        dble(96) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(3)*
+     -        dble(116) + mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p34*
+     -        dble(116) + mInSkUtLeSq*p12*p13**dble(3)*p14**dble(2)*
+     -        dble(128) + mInSkUtLeSq*p12*p13*p14**dble(4)*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p34*dble(128) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p24*p34*dble(128) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(136) + mInSkUtLeSq*p12*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(136) + mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p24*
+     -        dble(144) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*
+     -        p14*dble(148) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(148) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(160) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(3)*dble(192) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(248) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(248) + mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p34*
+     -        dble(272))*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(4) + 
+     -       (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI3((mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      (mSlepSq + p34)*dble(2),dble(0),MGl2,mInSkUtLeSq,
+     -      mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (p13 + p14)**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-1)*tagGluino*tagSquark*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(32)*(mSlepSq*p12**dble(3)*p13**dble(3) + 
+     -       mSlepSq**dble(3)*p12*p13**dble(2)*p14 + 
+     -       mSlepSq**dble(3)*p12*p14**dble(3) + 
+     -       p12**dble(2)*p13**dble(4)*p24 + 
+     -       p12**dble(2)*p14**dble(4)*p24 + 
+     -       p12**dble(3)*p13**dble(3)*p34 + 
+     -       p12*p13**dble(2)*p14*p34**dble(3) + 
+     -       p12*p14**dble(3)*p34**dble(3) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(-272) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(-248) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*
+     -        p34*dble(-248) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(3)*dble(-192) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(-160) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(-148) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*
+     -        p34*dble(-148) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-144) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(-136) + mInSkUtRiSq*p12*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(-136) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14**dble(2)*dble(-128) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(4)*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p34*dble(-128) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*p24*p34*dble(-128) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(3)*dble(-116) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p34*dble(-116) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(3)*dble(-96) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p24*dble(-96) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p24*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p34*dble(-96) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(3)*p34*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p24*p34*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p14*
+     -        dble(-80) + mInSkUtRiSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-80) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p34*dble(-72) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(-72) + mInSkUtRiSq*p12**dble(3)*p13*p14**dble(2)*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq*p13**dble(3)*p14**dble(2)*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(3)*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq*p13*p14**dble(4)*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*
+     -        p24*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(-64) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p34*
+     -        dble(-64) + mInSkUtRiSq*p13**dble(3)*p14**dble(2)*p34*
+     -        dble(-64) + mInSkUtRiSq*p13*p14**dble(4)*p34*dble(-64) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(-64) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(-64) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p34**dble(2)*dble(-64) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(2)*p24*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p34*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p24*p34*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p24*p34*dble(-48) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(2)*p24*p34*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(-48) + mInSkUtRiSq*p12**dble(3)*p14*p34**dble(2)*
+     -        dble(-48) + mInSkUtRiSq*p12*p13*p14*p24*p34**dble(2)*
+     -        dble(-48) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p13*
+     -        dble(-32) + mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p14*
+     -        dble(-32) + mInSkUtRiSq*p12*p13**dble(4)*p14*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(3)*dble(-32) + 
+     -       mInSkUtRiSq*p12*p14**dble(5)*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p14*p24*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(3)*p24*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*p24*p34*dble(-32) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p34**dble(2)*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(-24) + mInSkUtRiSq*p12*p13**dble(4)*p24*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*p24*
+     -        dble(-24) + mInSkUtRiSq*p12*p14**dble(4)*p24*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(-24) + mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(-24) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(-24) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(-24) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34**dble(3)*dble(-24) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(-18) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(-18) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(-18) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p34*dble(-18) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p14*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(4)*p14*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(5)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14*p24*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14*p34*dble(-16) + 
+     -       mInSkUtRiSq*p13**dble(4)*p14*p34*dble(-16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p14**dble(5)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(3)*p24*p34**dble(2)*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(-12) + mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(3)*p34*
+     -        dble(-12) + mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*
+     -        p34**dble(2)*dble(-12) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*p34**dble(2)*dble(-12) + 
+     -       p12*p13**dble(3)*p14**dble(3)*dble(-10) + 
+     -       p12*p13**dble(2)*p14**dble(4)*dble(-10) + 
+     -       p12*p13**dble(3)*p14**dble(2)*p24*dble(-10) + 
+     -       p12*p13**dble(2)*p14**dble(3)*p24*dble(-10) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*dble(-9) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(3)*dble(-9) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(-9) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(-9) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p24*p34*dble(-9) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p24*p34*dble(-9) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p34**dble(2)*dble(-9) + 
+     -       p12*p13*p14**dble(3)*p34**dble(2)*dble(-9) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p13*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(3)*dble(-8) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13*p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p24*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(4)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p24*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(4)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(4)*p13*p34*dble(-8) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq*p13**dble(4)*p24*p34*dble(-8) + 
+     -       mInSkUtRiSq*p14**dble(4)*p24*p34*dble(-8) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p34**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*p13*p14**dble(2)*p34**dble(3)*dble(-8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(-6) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p34*dble(-6) + 
+     -       mSlepSq*p12*p14**dble(4)*p34*dble(-6) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p24*p34*dble(-6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p24*p34*dble(-6) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(-6) + 
+     -       p12*p13**dble(4)*p14**dble(2)*dble(-5) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(-5) + 
+     -       p12*p13*p14**dble(5)*dble(-5) + 
+     -       p12*p13**dble(4)*p14*p24*dble(-5) + 
+     -       p12*p13*p14**dble(4)*p24*dble(-5) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(-5) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p13**dble(2)*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p14**dble(3)*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p34*dble(-4) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14*p34**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p34**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p14*dble(-3) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(-3) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(4)*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p34*dble(-3) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(-3) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(-3) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*dble(-3) + 
+     -       p12*p13**dble(3)*p14*p34**dble(2)*dble(-3) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(-3) + 
+     -       p12*p14**dble(4)*p34**dble(2)*dble(-3) + 
+     -       p12*p13**dble(2)*p14*p24*p34**dble(2)*dble(-3) + 
+     -       p12*p13*p14**dble(2)*p24*p34**dble(2)*dble(-3) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14*dble(-2) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p14*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(-2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p34*dble(-2) + 
+     -       mSlepSq*p12*p13**dble(3)*p24*p34*dble(-2) + 
+     -       mSlepSq*p12*p14**dble(3)*p24*p34*dble(-2) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(-2) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3)*dble(-2) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13**dble(2)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2)*dble(-1) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(4)*dble(-1) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(-1) + 
+     -       p12*p13**dble(5)*p14*dble(-1) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(-1) + 
+     -       p12**dble(3)*p14**dble(4)*dble(-1) + 
+     -       p12*p14**dble(6)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(3)*p24*dble(-1) + 
+     -       p12*p13**dble(5)*p24*dble(-1) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p24*dble(-1) + 
+     -       p12*p14**dble(5)*p24*dble(-1) + 
+     -       p12**dble(2)*p13**dble(4)*p34*dble(-1) + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2)*dble(-1) + 
+     -       p12**dble(3)*p14**dble(2)*p34**dble(2)*dble(-1) + 
+     -       p12*p13**dble(3)*p24*p34**dble(2)*dble(-1) + 
+     -       p12*p14**dble(3)*p24*p34**dble(2)*dble(-1) + 
+     -       p12**dble(2)*p13**dble(2)*p34**dble(3)*dble(-1) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3)*dble(-1) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(3)*dble(2) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(2) + 
+     -       mSlepSq**dble(3)*p12*p13*p14**dble(2)*dble(2) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(2) + 
+     -       p12**dble(2)*p14**dble(5)*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*dble(2) + 
+     -       mSlepSq*p12*p13**dble(4)*p24*dble(2) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*dble(2) + 
+     -       mSlepSq*p12*p14**dble(4)*p24*dble(2) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(2) + 
+     -       p12*p13**dble(4)*p24*p34*dble(2) + 
+     -       p12*p14**dble(4)*p24*p34*dble(2) + 
+     -       p12**dble(2)*p13**dble(3)*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2)*dble(2) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2)*dble(2) + 
+     -       p12*p13*p14**dble(2)*p34**dble(3)*dble(2) + 
+     -       mSlepSq*p12*p13**dble(4)*p14*dble(3) + 
+     -       mSlepSq*p12*p14**dble(5)*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p13**dble(2)*p14*p34*dble(3) + 
+     -       p12*p13**dble(4)*p14*p34*dble(3) + 
+     -       mSlepSq**dble(2)*p12*p14**dble(3)*p34*dble(3) + 
+     -       p12*p14**dble(5)*p34*dble(3) + 
+     -       mSlepSq*p12*p13**dble(2)*p14*p34**dble(2)*dble(3) + 
+     -       mSlepSq*p12*p14**dble(3)*p34**dble(2)*dble(3) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13**dble(2)*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(3)*p24*dble(4) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(3)*p24*dble(4) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p34*dble(4) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(4) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(4) + 
+     -       p12**dble(2)*p14**dble(3)*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq*p13**dble(3)*p24*p34**dble(2)*dble(4) + 
+     -       p12**dble(2)*p13*p14*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq*p14**dble(3)*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p34**dble(3)*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(5) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(5) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(6) + 
+     -       mSlepSq**dble(2)*p12*p13*p14**dble(2)*p34*dble(6) + 
+     -       mSlepSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(3)*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(4)*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(4)*p13*p14*dble(8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(8) + 
+     -       mInSkUtRiSq*p13**dble(5)*p14*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14**dble(2)*dble(8) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(8) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(8) + 
+     -       mInSkUtRiSq*p14**dble(6)*dble(8) + 
+     -       mInSkUtRiSq*p13**dble(5)*p24*dble(8) + 
+     -       mSlepSq*p12*p13**dble(3)*p14*p24*dble(8) + 
+     -       mSlepSq*p12*p13*p14**dble(3)*p24*dble(8) + 
+     -       mInSkUtRiSq*p14**dble(5)*p24*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p24*p34*dble(8) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(8) + 
+     -       p12*p13**dble(3)*p14*p24*p34*dble(8) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(3)*p24*p34*dble(8) + 
+     -       p12*p13*p14**dble(3)*p24*p34*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(4)*p34**dble(2)*dble(8) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p34**dble(3)*dble(8) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*dble(10) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(10) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(3)*p14*dble(12) + 
+     -       mSlepSq*p12*p13**dble(3)*p14**dble(2)*dble(12) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p14**dble(4)*dble(12) + 
+     -       mSlepSq*p12*p13*p14**dble(4)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(12) + mInSkUtRiSq*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        p24*dble(12) + 
+     -       mSlepSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p34*
+     -        dble(12) + p12*p13**dble(3)*p14**dble(2)*p34*dble(12) + 
+     -       p12*p13*p14**dble(4)*p34*dble(12) + 
+     -       p12*p13**dble(2)*p14**dble(2)*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p34**dble(2)*
+     -        dble(12) + mInSkUtRiSq*p13**dble(3)*p14*p34**dble(2)*
+     -        dble(12) + mInSkUtRiSq*p14**dble(4)*p34**dble(2)*
+     -        dble(12) + mInSkUtRiSq*p13**dble(2)*p14*p24*p34**dble(2)*
+     -        dble(12) + mInSkUtRiSq*p13*p14**dble(2)*p24*p34**dble(2)*
+     -        dble(12) + mInSkUtRiSq*mSlepSq*p12**dble(4)*p34*
+     -        dble(16) + mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(16) + mSlepSq*p12*p13**dble(2)*p14**dble(3)*
+     -        dble(18) + p12*p13**dble(2)*p14**dble(3)*p34*dble(18) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14**dble(2)*dble(20) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*dble(20) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34**dble(3)*dble(20) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p14*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p24*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p24*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p24*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p24*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p34*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(3)*p14*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p14**dble(4)*p34*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p24*p34*dble(24) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14*p24*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p13**dble(2)*p14*p24*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(2)*p24*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(24) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34**dble(3)*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(36) + mInSkUtRiSq*mSlepSq**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p13*p14**dble(3)*dble(36) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(36) + mInSkUtRiSq*p13**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(36) + 
+     -       mInSkUtRiSq*p13*p14**dble(3)*p34**dble(2)*dble(36) + 
+     -       MGl2*dble(-4)*(p12**dble(4)*(p14 + p34*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1))*dble(2) + 
+     -          mSlepSq**dble(3)*(p12 + p14*dble(-1))*
+     -           ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -             p12**dble(2)*dble(2)) + 
+     -          (p13 + p14)**dble(2)*
+     -           (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          p12**dble(3)*dble(-2)*(p13 + p14 + p34*dble(-1))*
+     -           (p14*(p24 + p34*dble(-5)) + p34*(p34 + p24*dble(-2)) + 
+     -             p14**dble(2)*dble(4) + 
+     -             p13*(p24 + p34*dble(-3) + p14*dble(4))) + 
+     -          mSlepSq**dble(2)*
+     -           ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -             p12**dble(2)*dble(2))*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          p12*(p13 + p14)*dble(-1)*
+     -           (p13**dble(3)*(p24*dble(6) + p14*dble(8)) + 
+     -             p14*(p14**dble(2)*(p34*dble(-19) + p24*dble(6)) + 
+     -                p34**dble(2)*(p34*dble(-5) + p24*dble(6)) + 
+     -                p14**dble(3)*dble(8) + 
+     -                p14*p34*(p24*dble(-11) + p34*dble(16))) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-19) + p24*p34*dble(-11) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(18) + 
+     -                p14**dble(2)*dble(24)) + 
+     -             p13*(p34**dble(2)*(p34*dble(-1) + p24*dble(6)) + 
+     -                p14**dble(2)*dble(2)*
+     -                 (p34*dble(-19) + p24*dble(9)) + 
+     -                p14*p34*dble(2)*(p24*dble(-11) + p34*dble(9)) + 
+     -                p14**dble(3)*dble(24))) + 
+     -          p12**dble(2)*
+     -           (p13**dble(3)*dble(2)*
+     -              (p34*dble(-2) + p24*dble(3) + p14*dble(6)) + 
+     -             p14*(p14 + p34*dble(-1))*
+     -              (p14*p34*dble(-17) + p24*p34*dble(-10) + 
+     -                p14*p24*dble(6) + p34**dble(2)*dble(6) + 
+     -                p14**dble(2)*dble(12)) + 
+     -             p13*dble(2)*
+     -              (p14*p34*dble(-16)*(p24 + p34*dble(-1)) + 
+     -                p34**dble(2)*(p34*dble(-2) + p24*dble(5)) + 
+     -                p14**dble(2)*(p34*dble(-31) + p24*dble(9)) + 
+     -                p14**dble(3)*dble(18)) + 
+     -             p13**dble(2)*
+     -              (p14*p34*dble(-37) + p24*p34*dble(-16) + 
+     -                p34**dble(2)*dble(9) + p14*p24*dble(18) + 
+     -                p14**dble(2)*dble(36))) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(4)*dble(2)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             (p13 + p14)**dble(2)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14*(p14*(p24 + p34*dble(-3))*dble(2) + 
+     -                   p34*(p24*dble(-2) + p34*dble(3)) + 
+     -                   p14**dble(2)*dble(4)) + 
+     -                p13*(p14*p34*dble(-6) + p24*p34*dble(-2) + 
+     -                   p14*p24*dble(4) + p14**dble(2)*dble(8))) + 
+     -             p12**dble(3)*dble(-2)*
+     -              (p13**dble(2)*dble(3) + 
+     -                p14*(p24 + p34*dble(-4))*dble(3) + 
+     -                p34*(p24*dble(-4) + p34*dble(3)) + 
+     -                p14**dble(2)*dble(9) + 
+     -                p13*(p34*dble(-8) + p24*dble(3) + p14*dble(12)))
+     -              + p12**dble(2)*
+     -              (p13**dble(3)*dble(4) + 
+     -                p14*(p14*p34*dble(-46) + p24*p34*dble(-20) + 
+     -                   p14*p24*dble(16) + p34**dble(2)*dble(18) + 
+     -                   p14**dble(2)*dble(29)) + 
+     -                p13*dble(2)*
+     -                 (p34*dble(2)*(p24*dble(-5) + p34*dble(3)) + 
+     -                   p14*(p24 + p34*dble(-2))*dble(16) + 
+     -                   p14**dble(2)*dble(31)) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(16) + p14*dble(37))) + 
+     -             p12*(p13 + p14)*dble(-1)*
+     -              (p13**dble(2)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14*(p34*dble(3)*(p24*dble(-4) + p34*dble(5)) + 
+     -                   p14*(p34*dble(-32) + p24*dble(11)) + 
+     -                   p14**dble(2)*dble(19)) + 
+     -                p13*(p34*(p34 + p24*dble(-4))*dble(3) + 
+     -                   p14*(p34*dble(-36) + p24*dble(22)) + 
+     -                   p14**dble(2)*dble(38))))) + 
+     -       mInSkUtRiSq*p13**dble(4)*p14**dble(2)*dble(40) + 
+     -       mInSkUtRiSq*p13*p14**dble(5)*dble(40) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(40) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(40) + 
+     -       mInSkUtRiSq*p13**dble(4)*p14*p24*dble(40) + 
+     -       mInSkUtRiSq*p13*p14**dble(4)*p24*dble(40) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(40) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(40) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p24*dble(44) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p24*dble(44) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p24*p34*dble(44) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p24*p34*dble(44) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p14*dble(48) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(4)*dble(48) + 
+     -       eps1234*(p12*p13**dble(4) + p12*p14**dble(4) + 
+     -          p12**dble(2)*p13**dble(2)*p34 + 
+     -          p12**dble(2)*p14**dble(2)*p34 + 
+     -          p12*p13**dble(2)*p34**dble(2) + 
+     -          p12*p14**dble(2)*p34**dble(2) + 
+     -          mInSkUtRiSq*p12*p13*p14*p34*dble(-72) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p14*dble(-48) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p34*dble(-36) + 
+     -          mInSkUtRiSq*p12*p14**dble(2)*p34*dble(-36) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13**dble(2)*dble(-24) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(-24) + 
+     -          mInSkUtRiSq*p12**dble(3)*p34*dble(-8) + 
+     -          mInSkUtRiSq*p12**dble(2)*p34**dble(2)*dble(-8) + 
+     -          mInSkUtRiSq*p13*p14*p34**dble(2)*dble(-8) + 
+     -          p12*p13**dble(2)*p14*p34*dble(-6) + 
+     -          p12*p13*p14**dble(2)*p34*dble(-6) + 
+     -          mInSkUtRiSq*p13**dble(2)*p34**dble(2)*dble(-4) + 
+     -          mInSkUtRiSq*p14**dble(2)*p34**dble(2)*dble(-4) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-3) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-3) + 
+     -          p12*p13**dble(3)*p34*dble(-2) + 
+     -          p12*p14**dble(3)*p34*dble(-2) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-1) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-1) + 
+     -          p12**dble(2)*p13*p14*p34*dble(2) + 
+     -          p12*p13*p14*p34**dble(2)*dble(2) + 
+     -          mSlepSq**dble(2)*
+     -           (p12*(p13 + p14)**dble(2) + 
+     -             mInSkUtRiSq*dble(-4)*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2))) + 
+     -          p12*p13**dble(3)*p14*dble(4) + 
+     -          p12*p13*p14**dble(3)*dble(4) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12 + dble(-2)*(p13 + p14 + p34*dble(-1)))*
+     -           (p12*(p13 + p14)**dble(2)*dble(-1) + 
+     -             mInSkUtRiSq*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2))*dble(4)) + 
+     -          p12*p13**dble(2)*p14**dble(2)*dble(6) + 
+     -          mInSkUtRiSq*p12**dble(3)*p13*dble(8) + 
+     -          mInSkUtRiSq*p12**dble(3)*p14*dble(8) + 
+     -          mInSkUtRiSq*p13**dble(3)*p34*dble(8) + 
+     -          mInSkUtRiSq*p14**dble(3)*p34*dble(8) + 
+     -          MGl2*dble(4)*
+     -           (p12**dble(3)*dble(-2)*(p13 + p14 + p34*dble(-1)) + 
+     -             mSlepSq**dble(2)*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2)) + 
+     -             mSlepSq*(p12 + dble(-2)*(p13 + p14 + p34*dble(-1)))*
+     -              ((p13 + p14)**dble(2) + p12*(p13 + p14)*dble(-4) + 
+     -                p12**dble(2)*dble(2)) + 
+     -             (p13 + p14)**dble(2)*p34*dble(-1)*
+     -              (p34*dble(-1) + p13*dble(2) + p14*dble(2)) + 
+     -             p12**dble(2)*dble(2)*
+     -              (p34**dble(2) + p13*p34*dble(-4) + 
+     -                p14*p34*dble(-4) + p13**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(3) + p13*p14*dble(6)) + 
+     -             p12*(p13 + p14)*dble(-1)*
+     -              (p13*p34*dble(-9) + p14*p34*dble(-9) + 
+     -                p13**dble(2)*dble(4) + p14**dble(2)*dble(4) + 
+     -                p34**dble(2)*dble(4) + p13*p14*dble(8))) + 
+     -          mInSkUtRiSq*p12*p13**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p12*p14**dble(3)*dble(16) + 
+     -          mInSkUtRiSq*p12*p13*p34**dble(2)*dble(16) + 
+     -          mInSkUtRiSq*p12*p14*p34**dble(2)*dble(16) + 
+     -          mInSkUtRiSq*p13**dble(2)*p14*p34*dble(24) + 
+     -          mInSkUtRiSq*p13*p14**dble(2)*p34*dble(24) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p34*dble(32) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14*p34*dble(32) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p14*dble(48) + 
+     -          mInSkUtRiSq*p12*p13*p14**dble(2)*dble(48)) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*p34*
+     -        dble(60) + mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(60) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(72) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(72) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(72) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(72) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p34*
+     -        dble(72) + mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p34*
+     -        dble(72) + mInSkUtRiSq*mSlepSq*p13**dble(2)*p14**dble(2)*
+     -        p34*dble(72) + 
+     -       mInSkUtRiSq*mSlepSq*p13*p14**dble(3)*p34*dble(72) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(72) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p14*dble(76) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(4)*dble(76) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p34*dble(76) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p34*dble(76) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14**dble(3)*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(4)*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(3)*p14**dble(2)*p24*dble(80) + 
+     -       mInSkUtRiSq*p13**dble(2)*p14**dble(3)*p24*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(80) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(92) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(92) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p14*dble(96) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14*p34*dble(96) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p14*
+     -        dble(128) + mInSkUtRiSq*p12**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(128) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p24*
+     -        dble(132) + mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p24*
+     -        dble(132) + mInSkUtRiSq*p12*p13**dble(2)*p14*p24*p34*
+     -        dble(132) + mInSkUtRiSq*p12*p13*p14**dble(2)*p24*p34*
+     -        dble(132) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(144) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14**dble(3)*dble(144) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(184) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*
+     -        p14**dble(2)*dble(228) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(3)*dble(228) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(228) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p34*dble(228) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(256))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI3((mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      (mSlepSq + p34)*dble(2),dble(0),MGl2,mInSkUtRiSq,
+     -      mInSkUtRiSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq**dble(2)*mSlepSq**dble(4)*p12 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p14 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p13*p24 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14*p24 + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14*p34**dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p13*p24*p34**dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p14*p24*p34**dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p12*p34**dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(-128) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*dble(-96) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-92) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p14*dble(-64) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(-64) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(-60) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14*p34*dble(-60) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(-60) + 
+     -       mSlepSq*p12**dble(3)*p14*p34**dble(2)*dble(-60) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(-54) + mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(3)*
+     -        dble(-54) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p34*
+     -        dble(-54) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p34*dble(-54) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(-54) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p34*dble(-54) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(-54) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p34**dble(2)*
+     -        dble(-54) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p24*p34*
+     -        dble(-52) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*p24*p34*
+     -        dble(-52) + mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p14**dble(2)*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(-48) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(-48) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(-46) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-46) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(-42) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(-42) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14*p24*p34*dble(-42) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*p24*p34*dble(-42) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(-36) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p34*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(-36) + p12**dble(3)*p13**dble(2)*p14*p34*dble(-36) + 
+     -       mSlepSq*p12**dble(3)*p13*p34**dble(2)*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p14*dble(-32) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p24*dble(-32) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14*p34*dble(-32) + 
+     -       p12**dble(3)*p13*p14*p24*p34*dble(-32) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(-30) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(-30) + mSlepSq*p12**dble(3)*p14**dble(3)*dble(-28) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(-28) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(-26) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(-26) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(-26) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(-26) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(-24) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(-24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(-24) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(-24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(-24) + 
+     -       mSlepSq*p12**dble(4)*p14*p34*dble(-24) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p24*p34*dble(-24) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(-24) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p34**dble(2)*
+     -        dble(-24) + mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p34**dble(2)*dble(-24) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*dble(-24) + 
+     -       p12**dble(2)*p14**dble(3)*p34**dble(2)*dble(-24) + 
+     -       mSlepSq*p12**dble(3)*p24*p34**dble(2)*dble(-24) + 
+     -       p12**dble(2)*p13*p14*p24*p34**dble(2)*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(-22) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p34*dble(-22) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p14*dble(-20) + 
+     -       p12**dble(3)*p14*p34**dble(3)*dble(-20) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(-18) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p14*
+     -        dble(-18) + mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p14*
+     -        dble(-18) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p14**dble(2)*
+     -        dble(-18) + mInSkUtLeSq*mSlepSq*p12*p14**dble(4)*
+     -        dble(-18) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(-18) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p24*
+     -        dble(-18) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p34*
+     -        dble(-18) + mInSkUtLeSq*p12*p13**dble(3)*p14*p34*
+     -        dble(-18) + mInSkUtLeSq*p12*p14**dble(4)*p34*dble(-18) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(-18) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(-18) + mInSkUtLeSq*p12*p13*p14*p34**dble(3)*
+     -        dble(-18) + mInSkUtLeSq*p12*p14**dble(2)*p34**dble(3)*
+     -        dble(-18) + p12**dble(2)*p13**dble(3)*p14**dble(2)*
+     -        dble(-16) + p12**dble(2)*p13*p14**dble(4)*dble(-16) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p24*dble(-16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(-16) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p24*dble(-16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p34*dble(-16) + 
+     -       mSlepSq*p12**dble(4)*p13*p34*dble(-16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14*p34*dble(-16) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p14**dble(2)*p34*
+     -        dble(-16) + p12**dble(3)*p13**dble(2)*p24*p34*dble(-16) + 
+     -       p12**dble(3)*p14**dble(2)*p24*p34*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p34**dble(3)*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p14*p34**dble(3)*dble(-16) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p24*dble(-14) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p24*dble(-14) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p24*p34*dble(-14) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p24*p34*dble(-14) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p13*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p14*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*p24*p34*dble(-12) + 
+     -       p12**dble(4)*p14*p34**dble(2)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p24*p34**dble(2)*dble(-12) + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p24*p34**dble(2)*dble(-12) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2)*dble(-12) + 
+     -       p12**dble(3)*p13*p34**dble(3)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(-10) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p14*dble(-10) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(4)*dble(-10) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p34*dble(-10) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14*p34*
+     -        dble(-9) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p14*
+     -        p34**dble(2)*dble(-9) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p13*dble(-8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        dble(-8) + p12**dble(4)*p13*p14**dble(2)*dble(-8) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p24*dble(-8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14*p34*
+     -        dble(-8) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(3)*p34*
+     -        dble(-8) + mInSkUtLeSq**dble(2)*mSlepSq*p13*p14*p24*p34*
+     -        dble(-8) + p12**dble(4)*p13*p34**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq**dble(2)*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(-8) + p12**dble(3)*p24*p34**dble(3)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*p12*p13*p14**dble(3)*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p24*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p24*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p24*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*p12*p13**dble(2)*p14*p24*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*p12*p13*p14**dble(2)*p24*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p24*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p34*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(3)*p13*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(3)*p14*p24*p34*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14*p34**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p24*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p12**dble(3)*p34**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*p14*
+     -        dble(-5) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*
+     -        p14**dble(2)*dble(-5) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(-5) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-5) + mInSkUtLeSq*mSlepSq**dble(4)*p12**dble(2)*
+     -        dble(-4) + mSlepSq*p12**dble(3)*p13**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(4)*p12**dble(2)*p14*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p14*
+     -        dble(-4) + p12**dble(4)*p13**dble(2)*p14*dble(-4) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14**dble(3)*
+     -        dble(-4) + p12**dble(4)*p14**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p14**dble(5)*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p24*dble(-4) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p14*p24*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14*p24*
+     -        dble(-4) + p12**dble(2)*p14**dble(4)*p24*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p34*dble(-4) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14*p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(2)*p24*
+     -        p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*p14**dble(3)*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*p13*p14*p24*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*mSlepSq*p14*p34**dble(3)*
+     -        dble(-4) + mInSkUtLeSq*p12*p13*p24*p34**dble(3)*
+     -        dble(-4) + mInSkUtLeSq*p12*p14*p24*p34**dble(3)*
+     -        dble(-4) + mInSkUtLeSq*p12**dble(2)*p34**dble(4)*
+     -        dble(-4) + p12**dble(2)*p14*p34**dble(4)*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p14*dble(-3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*p24*
+     -        dble(-3) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p14*
+     -        p24*dble(-3) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14*p24*p34*dble(-3) + 
+     -       mInSkUtLeSq**dble(2)*p12*p14*p34**dble(3)*dble(-3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(4)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p13*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(3)*p13*p14*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(4)*p13*p14*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p14**dble(4)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p24*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p24*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p13**dble(3)*p24*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p14**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(3)*p34*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(4)*p34**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p24*p34**dble(2)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p14**dble(2)*p24*
+     -        p34**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13*p34**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p24*p34**dble(3)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(3)*
+     -        dble(-1) + mInSkUtLeSq**dble(2)*mSlepSq**dble(4)*p14*
+     -        dble(-1) + mInSkUtLeSq**dble(2)*p12**dble(3)*p34**dble(2)*
+     -        dble(-1) + mInSkUtLeSq**dble(2)*p14*p34**dble(4)*
+     -        dble(-1) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(2)*p13*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p13*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p24*dble(2) + mInSkUtLeSq**dble(2)*p12**dble(2)*
+     -        p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(3)*p24*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(2) + mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(3)*p24*
+     -        dble(2) + mInSkUtLeSq*p12**dble(4)*p13*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p14*p34*
+     -        dble(2) + mInSkUtLeSq**dble(2)*p13**dble(3)*p14*p34*
+     -        dble(2) + mInSkUtLeSq**dble(2)*p14**dble(4)*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(2) + mInSkUtLeSq**dble(2)*p12**dble(2)*p24*
+     -        p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p14*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(3)*p14*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p13*p14*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14**dble(2)*
+     -        dble(3) + mInSkUtLeSq**dble(2)*p12**dble(3)*p14*p34*
+     -        dble(3) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p24*
+     -        p34*dble(3) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14*
+     -        p24*p34*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p24*p34**dble(2)*
+     -        dble(3) + mInSkUtLeSq**dble(2)*mSlepSq*p14*p24*
+     -        p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p13*p14*p34**dble(3)*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(2)*p34**dble(3)*dble(3) + 
+     -       mSlepSq**dble(4)*p12**dble(3)*dble(4) + 
+     -       mSlepSq**dble(3)*p12**dble(4)*dble(4) + 
+     -       mSlepSq*p12**dble(4)*p13**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(4)*p12*p14*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p14*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*p14*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        p14*dble(4) + mInSkUtLeSq*p12*p13**dble(4)*p14*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(3)*
+     -        dble(4) + mInSkUtLeSq*p12*p14**dble(5)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(4) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p24*dble(4) + 
+     -       p12**dble(3)*p13**dble(3)*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p13**dble(4)*p24*dble(4) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14*p24*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14*p24*dble(4) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(4)*p24*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p34*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*p34*
+     -        dble(4) + p12**dble(4)*p13**dble(2)*p34*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14*p34*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p14*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12*p13*p14*p34**dble(2)*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(3)*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p34**dble(3)*dble(4) + 
+     -       p12**dble(4)*p34**dble(3)*dble(4) + 
+     -       p12**dble(2)*p13*p24*p34**dble(3)*dble(4) + 
+     -       p12**dble(2)*p14*p24*p34**dble(3)*dble(4) + 
+     -       p12**dble(3)*p34**dble(4)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14*p34**dble(4)*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14**dble(2)*
+     -        dble(6) + mInSkUtLeSq**dble(2)*mSlepSq*p13*p14**dble(3)*
+     -        dble(6) + mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14*
+     -        p24*dble(6) + mInSkUtLeSq**dble(2)*mSlepSq*p13*
+     -        p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(6) + mInSkUtLeSq**dble(2)*p13*p14**dble(3)*p34*
+     -        dble(6) + mInSkUtLeSq**dble(2)*p13**dble(2)*p14*p24*p34*
+     -        dble(6) + mInSkUtLeSq**dble(2)*p13*p14**dble(2)*p24*p34*
+     -        dble(6) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*
+     -        p34**dble(2)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p14*dble(8) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(8) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(8) + mInSkUtLeSq*p12**dble(3)*p14**dble(3)*dble(8) + 
+     -       p12**dble(3)*p14**dble(4)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p24*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p34*dble(8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*p14*p34*dble(8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p14**dble(2)*p34*
+     -        dble(8) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p24*p34*
+     -        dble(8) + mInSkUtLeSq*p12**dble(2)*p24*p34**dble(3)*
+     -        dble(8) + MGl2**dble(2)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14*p34*
+     -        dble(9) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p34*dble(9) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p14*p34**dble(2)*
+     -        dble(9) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(2)*
+     -        p34**dble(2)*dble(9) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(12) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(12) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p34*dble(12) + 
+     -       p12**dble(4)*p14**dble(2)*p34*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p24*p34*dble(12) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*p24*p34*dble(12) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(12) + 
+     -       mSlepSq*p12**dble(4)*p34**dble(2)*dble(12) + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(14) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(14) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p24*dble(14) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(14) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(14) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p34**dble(3)*dble(14) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p13*dble(16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14*dble(16) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2)*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14**dble(2)*dble(16) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14**dble(2)*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(16) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(4)*dble(16) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14*p24*dble(16) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p24*dble(16) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p34*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12*p14*p34*dble(16) + 
+     -       p12**dble(4)*p13*p14*p34*dble(16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(16) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p34**dble(2)*dble(16) + 
+     -       mSlepSq*p12**dble(3)*p34**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14*p34**dble(3)*dble(16) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3)*dble(16) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(20) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p24*dble(20) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14*p24*dble(20) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14*p34**dble(2)*dble(20) + 
+     -       p12**dble(3)*p13*p24*p34**dble(2)*dble(20) + 
+     -       p12**dble(3)*p14*p24*p34**dble(2)*dble(20) + 
+     -       MGl2*dble(-2)*(mSlepSq**dble(4)*
+     -           (mInSkUtLeSq + p12*dble(-2))*(p12 + p14*dble(-1)) + 
+     -          p12*(p13 + p14 + p34*dble(-1))*
+     -           (p12**dble(3)*(p14 + p34*dble(-1)) + 
+     -             p12**dble(2)*
+     -              (p14*(p24 + p34)*dble(-1) + 
+     -                p13*(p34 + p24*dble(-1)) + p34*(p34 + p24*dble(2))
+     -                ) + (p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p13*p34*dble(-3) + p14*p34*dble(-3) + 
+     -                p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -                p34**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p14**dble(2)*(p24 + p34*dble(-7)) + 
+     -                p14*p34*dble(-3)*(p24 + p34*dble(-2)) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(3) + 
+     -                p13**dble(2)*(p24 + p14*dble(3)) + 
+     -                p13*(p14*(p34*dble(-7) + p24*dble(2)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14**dble(2)*dble(6)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(-1) + 
+     -             mInSkUtLeSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             p12*dble(-1)*
+     -              (p14*p34*dble(-8) + p13*p24*dble(2) + 
+     -                p14*p24*dble(2) + 
+     -                mInSkUtLeSq*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)) + p13*p14*dble(7) + 
+     -                p14**dble(2)*dble(7)) + 
+     -             p12**dble(2)*
+     -              (p34*dble(-8) + p24*dble(4) + p13*dble(5) + 
+     -                p14*dble(8))) + 
+     -          mInSkUtLeSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(2)*
+     -           (mInSkUtLeSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9))) + 
+     -             p12*(p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p34*dble(-3) + p24*dble(-2) + p14*dble(2)) + 
+     -                p13**dble(2)*(p24 + p14*dble(2))*dble(5) + 
+     -                p14*(p14*p34*dble(-21) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(5) + p14**dble(2)*dble(10) + 
+     -                   p34**dble(2)*dble(12)) + 
+     -                p12*dble(-1)*
+     -                 (p13**dble(2)*dble(3) + 
+     -                   p14*(p34*dble(-24) + p24*dble(7)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(12) + 
+     -                   p14**dble(2)*dble(13) + 
+     -                   p13*
+     -                    (p34*dble(-15) + p24*dble(7) + p14*dble(16)))
+     -                 + p13*
+     -                 (p14*p34*dble(-21) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(10) + p14**dble(2)*dble(20)))) + 
+     -          mSlepSq*(p12**dble(4)*dble(-1)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12**dble(3)*
+     -              (p13**dble(2) + p24*p34*dble(-4) + 
+     -                p34**dble(2)*dble(-3) + 
+     -                mInSkUtLeSq*p34*dble(-2) + 
+     -                p14**dble(2)*dble(-1) + mInSkUtLeSq*p14*dble(3) + 
+     -                p13*p24*dble(3) + p14*p24*dble(3) + 
+     -                p14*p34*dble(4)) + 
+     -             mInSkUtLeSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(2)*
+     -              (mInSkUtLeSq*
+     -                 (p14**dble(2)*dble(-5) + p14*p24*dble(-3) + 
+     -                   p14*p34*dble(2) + p24*p34*dble(4) + 
+     -                   p13*(p14*dble(-5) + p24*dble(-3) + p34*dble(4))
+     -                   ) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p34*dble(-3) + p24*dble(2) + p14*dble(5)) + 
+     -                dble(2)*
+     -                 (p14**dble(2)*(p34*dble(-13) + p24*dble(2)) + 
+     -                   p34**dble(2)*dble(2)*
+     -                    (p34*dble(-2) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(5) + 
+     -                   p14*p34*(p24*dble(-7) + p34*dble(12))) + 
+     -                p13*(p14*(p24 + p34*dble(-4))*dble(8) + 
+     -                   p34*(p24*dble(-14) + p34*dble(15)) + 
+     -                   p14**dble(2)*dble(20))) + 
+     -             p12*dble(-1)*
+     -              (mInSkUtLeSq*p34**dble(2)*dble(2)*
+     -                 (p34*dble(-2) + p24*dble(3)) + 
+     -                p14**dble(3)*(p24 + p34*dble(-4))*dble(5) + 
+     -                p14**dble(4)*dble(7) + 
+     -                p13**dble(3)*(p24*dble(5) + p14*dble(7)) + 
+     -                p14*p34*
+     -                 (p34**dble(2)*dble(-8) + 
+     -                   mInSkUtLeSq*p24*dble(-4) + p24*p34*dble(6) + 
+     -                   mInSkUtLeSq*p34*dble(9)) + 
+     -                p13**dble(2)*
+     -                 (p24*p34*dble(-10) + 
+     -                   p14*(p34*dble(-4) + p24*dble(3))*dble(5) + 
+     -                   p14**dble(2)*dble(21)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-10) + mInSkUtLeSq*dble(-8) + 
+     -                   p34*dble(21)) + 
+     -                p13*(p34*dble(2)*
+     -                    (mInSkUtLeSq*p24*dble(-2) + 
+     -                      mInSkUtLeSq*p34*dble(3) + p24*p34*dble(3))
+     -                    + p14**dble(2)*(p34*dble(-8) + p24*dble(3))*
+     -                    dble(5) + p14**dble(3)*dble(21) + 
+     -                   p14*p34*
+     -                    (p24*dble(-20) + mInSkUtLeSq*dble(-8) + 
+     -                      p34*dble(21)))))) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(24) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(24) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(24) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(3)*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(24) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(24) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(24) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p24*p34*
+     -        dble(24) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p24*p34*
+     -        dble(24) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(24) + mSlepSq**dble(2)*p12**dble(3)*p34**dble(2)*
+     -        dble(24) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14*
+     -        p34**dble(2)*dble(24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p24*p34**dble(2)*
+     -        dble(24) + mInSkUtLeSq*p12**dble(2)*p14*p34**dble(3)*
+     -        dble(24) + eps1234*
+     -        (mInSkUtLeSq**dble(2)*p34**dble(3) + 
+     -          mInSkUtLeSq*p12*p13*p14*p34*dble(-36) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-20) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p34*dble(-18) + 
+     -          mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-18) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-12) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-12) + 
+     -          p12**dble(2)*p13*p34**dble(2)*dble(-12) + 
+     -          p12**dble(2)*p14*p34**dble(2)*dble(-12) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13**dble(2)*dble(-10) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-10) + 
+     -          p12**dble(3)*p13*p34*dble(-8) + 
+     -          p12**dble(3)*p14*p34*dble(-8) + 
+     -          mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-6) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-4) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -          mInSkUtLeSq*p12*p34**dble(3)*dble(-4) + 
+     -          mInSkUtLeSq*p12**dble(3)*p34*dble(-2) + 
+     -          mInSkUtLeSq**dble(2)*p13*p34**dble(2)*dble(-2) + 
+     -          mInSkUtLeSq**dble(2)*p14*p34**dble(2)*dble(-2) + 
+     -          mSlepSq**dble(3)*
+     -           (mInSkUtLeSq + p12*dble(-2))**dble(2) + 
+     -          mInSkUtLeSq**dble(2)*p12**dble(2)*p34*dble(-1) + 
+     -          MGl2**dble(2)*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtLeSq*p12**dble(3)*p13*dble(2) + 
+     -          mInSkUtLeSq*p12**dble(3)*p14*dble(2) + 
+     -          mInSkUtLeSq**dble(2)*p12*p13*p34*dble(2) + 
+     -          mInSkUtLeSq**dble(2)*p12*p14*p34*dble(2) + 
+     -          p12**dble(3)*p13**dble(2)*dble(4) + 
+     -          p12**dble(3)*p14**dble(2)*dble(4) + 
+     -          p12**dble(3)*p34**dble(2)*dble(4) + 
+     -          p12**dble(2)*p34**dble(3)*dble(4) + 
+     -          mSlepSq**dble(2)*
+     -           (mInSkUtLeSq**dble(2)*
+     -              (p13*dble(-2) + p14*dble(-2) + p34*dble(3)) + 
+     -             p12**dble(2)*
+     -              (p12 + dble(-3)*(p13 + p14 + p34*dble(-1)))*dble(4)
+     -              + mInSkUtLeSq*p12*dble(-2)*
+     -              (p13*dble(-7) + p14*dble(-7) + p12*dble(3) + 
+     -                p34*dble(6))) + 
+     -          mInSkUtLeSq*p12*p13**dble(3)*dble(8) + 
+     -          p12**dble(3)*p13*p14*dble(8) + 
+     -          mInSkUtLeSq*p12*p14**dble(3)*dble(8) + 
+     -          MGl2*dble(-2)*
+     -           (mSlepSq**dble(3)*(mInSkUtLeSq + p12*dble(-2)) + 
+     -             mInSkUtLeSq*p34**dble(2)*
+     -              (p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p12**dble(3)*dble(-1)*(p13 + p14 + p34*dble(-1)) + 
+     -             p12**dble(2)*
+     -              (p13**dble(2) + p14**dble(2) + 
+     -                p34*(mInSkUtLeSq + p34)*dble(-1) + p13*p14*dble(2)
+     -                ) + p12*p34*
+     -              (p13*p14*dble(-6) + p13**dble(2)*dble(-3) + 
+     -                p14**dble(2)*dble(-3) + p34**dble(2)*dble(-2) + 
+     -                mInSkUtLeSq*(p13 + p14)*dble(2) + 
+     -                p13*p34*dble(5) + p14*p34*dble(5)) + 
+     -             mSlepSq**dble(2)*dble(-1)*
+     -              (p12**dble(2) + 
+     -                mInSkUtLeSq*
+     -                 (p34*dble(-3) + p13*dble(2) + p14*dble(2)) + 
+     -                p12*(p13*dble(-5) + p14*dble(-5) + p34*dble(6)))
+     -              + mSlepSq*
+     -              (mInSkUtLeSq*dble(-1)*
+     -                 (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                   p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4)))
+     -                  + p12*
+     -                 (p12**dble(2) + p13*p14*dble(-6) + 
+     -                   p34**dble(2)*dble(-6) + 
+     -                   p13**dble(2)*dble(-3) + 
+     -                   p14**dble(2)*dble(-3) + p12*p34*dble(-2) + 
+     -                   p13*p34*dble(10) + p14*p34*dble(10)))) + 
+     -          p12**dble(2)*p13**dble(2)*p34*dble(12) + 
+     -          p12**dble(2)*p14**dble(2)*p34*dble(12) + 
+     -          mInSkUtLeSq*p12*p13*p34**dble(2)*dble(14) + 
+     -          mInSkUtLeSq*p12*p14*p34**dble(2)*dble(14) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p34*dble(16) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14*p34*dble(16) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(2)*(p13 + p14 + p34*dble(-1))*
+     -              (dble(-3)*(p13 + p14 + p34*dble(-1)) + p12*dble(2))*
+     -              dble(4) + 
+     -             mInSkUtLeSq**dble(2)*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4))) + 
+     -             mInSkUtLeSq*p12*dble(2)*
+     -              (p12**dble(2) + p13*p34*dble(-14) + 
+     -                p14*p34*dble(-14) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                p13**dble(2)*dble(9) + p14**dble(2)*dble(9) + 
+     -                p13*p14*dble(18))) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p14*dble(24) + 
+     -          mInSkUtLeSq*p12*p13*p14**dble(2)*dble(24) + 
+     -          p12**dble(2)*p13*p14*p34*dble(24)) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*p14*
+     -        dble(28) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(3)*
+     -        dble(28) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p24*
+     -        dble(28) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p24*p34*
+     -        dble(28) + mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p24*p34*
+     -        dble(28) + mInSkUtLeSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(28) + mInSkUtLeSq*p12*p14**dble(3)*p34**dble(2)*
+     -        dble(28) + mInSkUtLeSq*p12*p13*p14*p24*p34**dble(2)*
+     -        dble(28) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p34*
+     -        dble(32) + mSlepSq**dble(2)*p12**dble(3)*p14**dble(2)*
+     -        dble(36) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(3)*
+     -        dble(36) + mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(36) + mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*
+     -        dble(36) + mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p34*
+     -        dble(36) + p12**dble(2)*p13**dble(2)*p14*p24*p34*
+     -        dble(36) + p12**dble(2)*p13*p14**dble(2)*p24*p34*
+     -        dble(36) + p12**dble(3)*p14**dble(2)*p34**dble(2)*
+     -        dble(36) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p34*
+     -        dble(40) + mSlepSq*p12**dble(3)*p13*p24*p34*dble(40) + 
+     -       mSlepSq*p12**dble(3)*p14*p24*p34*dble(40) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p34*
+     -        dble(42) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*
+     -        p34**dble(2)*dble(42) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p14*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(48) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(48) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(48) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(48) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(48) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p24*p34*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(48) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(48) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(52) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(52) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*
+     -        p14**dble(2)*dble(56) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(56) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p34*dble(56) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p24*p34*dble(56) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(56) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*p34*
+     -        dble(72) + mSlepSq*p12**dble(3)*p14**dble(2)*p34*
+     -        dble(72) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*
+     -        p34**dble(2)*dble(72) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(80) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(80) + mSlepSq*p12**dble(3)*p13*p14*p34*dble(96) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(112))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),dble(0),(mSlepSq + p34)*dble(2),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      p12*dble(2),MGl2,mInSkUtLeSq,mInSkUtLeSq,mInSkUtLeSq,mu2,ep)
+     -     )/dble(27) + (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-1)*tagGluino*tagSquark*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(4)*p14 + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(3)*p34**dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p14*p34**dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(-112) + 
+     -       mSlepSq*p12**dble(3)*p13*p14*p34*dble(-96) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(-80) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*p34*
+     -        dble(-80) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p34*dble(-72) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p34*dble(-72) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(-72) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*
+     -        p14**dble(2)*dble(-56) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(-56) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p34*dble(-56) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p24*p34*dble(-56) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*p34**dble(2)*dble(-56) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(-52) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(-52) + mSlepSq**dble(2)*p12**dble(3)*p13*p14*
+     -        dble(-48) + mSlepSq*p12**dble(2)*p13**dble(2)*
+     -        p14**dble(2)*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(-48) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(-48) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*dble(-48) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(-48) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(-48) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*p24*p34*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p34**dble(2)*dble(-48) + 
+     -       p12**dble(3)*p13*p14*p34**dble(2)*dble(-48) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p34**dble(2)*dble(-48) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p34*
+     -        dble(-42) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*
+     -        p34**dble(2)*dble(-42) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p34*dble(-40) + 
+     -       mSlepSq*p12**dble(3)*p13*p24*p34*dble(-40) + 
+     -       mSlepSq*p12**dble(3)*p14*p24*p34*dble(-40) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(-36) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(3)*dble(-36) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(-36) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(-36) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p34*dble(-36) + 
+     -       p12**dble(2)*p13**dble(2)*p14*p24*p34*dble(-36) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p24*p34*dble(-36) + 
+     -       p12**dble(3)*p14**dble(2)*p34**dble(2)*dble(-36) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p34*dble(-32) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p14*
+     -        dble(-28) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(3)*
+     -        dble(-28) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p24*
+     -        dble(-28) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p24*p34*
+     -        dble(-28) + mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p24*p34*
+     -        dble(-28) + mInSkUtRiSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-28) + mInSkUtRiSq*p12*p14**dble(3)*p34**dble(2)*
+     -        dble(-28) + mInSkUtRiSq*p12*p13*p14*p24*p34**dble(2)*
+     -        dble(-28) + mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p14*
+     -        dble(-24) + p12**dble(3)*p13**dble(2)*p14**dble(2)*
+     -        dble(-24) + p12**dble(3)*p13*p14**dble(3)*dble(-24) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(3)*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(-24) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p24*dble(-24) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-24) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p34*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p24*p34*
+     -        dble(-24) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p24*p34*
+     -        dble(-24) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(-24) + mSlepSq**dble(2)*p12**dble(3)*p34**dble(2)*
+     -        dble(-24) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*
+     -        p34**dble(2)*dble(-24) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p24*p34**dble(2)*
+     -        dble(-24) + mInSkUtRiSq*p12**dble(2)*p14*p34**dble(3)*
+     -        dble(-24) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p14*
+     -        dble(-20) + mSlepSq**dble(2)*p12**dble(3)*p13*p24*
+     -        dble(-20) + mSlepSq**dble(2)*p12**dble(3)*p14*p24*
+     -        dble(-20) + mInSkUtRiSq*p12**dble(3)*p14*p34**dble(2)*
+     -        dble(-20) + p12**dble(3)*p13*p24*p34**dble(2)*dble(-20) + 
+     -       p12**dble(3)*p14*p24*p34**dble(2)*dble(-20) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p13*dble(-16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p14*dble(-16) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(-16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14**dble(2)*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14**dble(2)*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14**dble(2)*dble(-16) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(4)*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(4)*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p24*dble(-16) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p24*dble(-16) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p34*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14*p34*dble(-16) + 
+     -       p12**dble(4)*p13*p14*p34*dble(-16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(-16) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p34**dble(2)*dble(-16) + 
+     -       mSlepSq*p12**dble(3)*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p34**dble(3)*dble(-16) + 
+     -       p12**dble(2)*p13*p14*p34**dble(3)*dble(-16) + 
+     -       p12**dble(2)*p14**dble(2)*p34**dble(3)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(-14) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(-14) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p24*dble(-14) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(-14) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(-14) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p34**dble(3)*dble(-14) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(3)*p24*dble(-12) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(-12) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p24*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p34*dble(-12) + 
+     -       p12**dble(4)*p14**dble(2)*p34*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p24*p34*dble(-12) + 
+     -       p12**dble(2)*p13**dble(3)*p24*p34*dble(-12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14*p24*p34*dble(-12) + 
+     -       p12**dble(2)*p14**dble(3)*p24*p34*dble(-12) + 
+     -       mSlepSq*p12**dble(4)*p34**dble(2)*dble(-12) + 
+     -       p12**dble(3)*p13**dble(2)*p34**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(-12) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p14*p34*
+     -        dble(-9) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p34*dble(-9) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13*p14*p34**dble(2)*
+     -        dble(-9) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(2)*
+     -        p34**dble(2)*dble(-9) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p14*dble(-8) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(-8) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(3)*p14**dble(3)*
+     -        dble(-8) + p12**dble(3)*p14**dble(4)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p24*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p34*dble(-8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p14**dble(2)*p34*
+     -        dble(-8) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p24*p34*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(2)*p24*p34**dble(3)*
+     -        dble(-8) + mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*
+     -        p14**dble(2)*dble(-6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p14*p24*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(2)*
+     -        p24*dble(-6) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13*p14**dble(3)*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13**dble(2)*p14*p24*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13*p14**dble(2)*p24*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*
+     -        p34**dble(2)*dble(-6) + 
+     -       mSlepSq**dble(4)*p12**dble(3)*dble(-4) + 
+     -       mSlepSq**dble(3)*p12**dble(4)*dble(-4) + 
+     -       mSlepSq*p12**dble(4)*p13**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(4)*p12*p14*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p14*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*p14*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        p14*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p14*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(3)*
+     -        dble(-4) + mInSkUtRiSq*p12*p14**dble(5)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(-4) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p13*p24*dble(-4) + 
+     -       p12**dble(3)*p13**dble(3)*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p24*dble(-4) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14*p24*dble(-4) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p24*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p34*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p34*
+     -        dble(-4) + p12**dble(4)*p13**dble(2)*p34*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14*p34*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p14*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12*p13*p14*p34**dble(2)*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(3)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p34**dble(3)*dble(-4) + 
+     -       p12**dble(4)*p34**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p13*p24*p34**dble(3)*dble(-4) + 
+     -       p12**dble(2)*p14*p24*p34**dble(3)*dble(-4) + 
+     -       p12**dble(3)*p34**dble(4)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14*p34**dble(4)*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(3)*p14*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p13*p14*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14**dble(2)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p12**dble(3)*p14*p34*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p24*
+     -        p34*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14*p24*p34*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p24*
+     -        p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14*p24*p34**dble(2)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p13*p14*p34**dble(3)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p14**dble(2)*p34**dble(3)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(2)*p13*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p13*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p24*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(3)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14*
+     -        p24*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(3)*p24*
+     -        dble(-2) + mInSkUtRiSq*p12**dble(4)*p13*p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p14*p34*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p13**dble(3)*p14*p34*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p14**dble(4)*p34*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p13**dble(3)*p24*p34*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p14**dble(3)*p24*p34*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13*
+     -        p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p24*p34**dble(2)*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p12*p13*p24*p34**dble(2)*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p12*p14*p24*p34**dble(2)*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(4)*p12*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(2)*p14*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p13*p24*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14*p24*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*p13*p24*p34**dble(3)*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*p14*p24*p34**dble(3)*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*p12*p34**dble(4)*
+     -        dble(-1) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(4)*
+     -        dble(2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p13*
+     -        dble(2) + mInSkUtRiSq**dble(2)*p12**dble(3)*p13*p14*
+     -        dble(2) + mInSkUtRiSq*p12**dble(4)*p13*p14*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p24*
+     -        dble(2) + mInSkUtRiSq**dble(2)*p12*p13**dble(3)*p24*
+     -        dble(2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(3)*p34*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(4)*p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(2)*p24*p34**dble(2)*
+     -        dble(2) + mInSkUtRiSq**dble(2)*p14**dble(2)*p24*
+     -        p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p24*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p14*dble(3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p24*
+     -        dble(3) + mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p14*
+     -        p24*dble(3) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p24*
+     -        p34*dble(3) + mInSkUtRiSq**dble(2)*p12**dble(2)*p14*p24*
+     -        p34*dble(3) + mInSkUtRiSq**dble(2)*p12*p14*p34**dble(3)*
+     -        dble(3) + mInSkUtRiSq*mSlepSq**dble(4)*p12**dble(2)*
+     -        dble(4) + mSlepSq*p12**dble(3)*p13**dble(3)*dble(4) + 
+     -       mSlepSq**dble(4)*p12**dble(2)*p14*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p14*
+     -        dble(4) + p12**dble(4)*p13**dble(2)*p14*dble(4) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14**dble(3)*
+     -        dble(4) + p12**dble(4)*p14**dble(3)*dble(4) + 
+     -       p12**dble(2)*p14**dble(5)*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p24*dble(4) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14*p24*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p14*p24*
+     -        dble(4) + p12**dble(2)*p14**dble(4)*p24*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p34*dble(4) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14*p34*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(2)*p24*
+     -        p34*dble(4) + mInSkUtRiSq**dble(2)*p13**dble(2)*p14*
+     -        p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*p14**dble(3)*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*p13*p14*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14*p34**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*p12*p13*p24*p34**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*p12*p14*p24*p34**dble(3)*dble(4) + 
+     -       mInSkUtRiSq*p12**dble(2)*p34**dble(4)*dble(4) + 
+     -       p12**dble(2)*p14*p34**dble(4)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p14*
+     -        dble(5) + mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*
+     -        p14**dble(2)*dble(5) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(5) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(5) + mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(3)*
+     -        dble(6) + mInSkUtRiSq**dble(2)*p12*p13**dble(2)*
+     -        p14**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p24*dble(6) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p24*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p24*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(6) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p24*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*p34*
+     -        dble(6) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p24*
+     -        p34*dble(6) + mInSkUtRiSq*p12**dble(3)*p13*p24*p34*
+     -        dble(6) + mInSkUtRiSq*p12**dble(3)*p14*p24*p34*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14*
+     -        p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p24*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*p12**dble(3)*p34**dble(3)*dble(6) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p13*dble(8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        dble(8) + p12**dble(4)*p13*p14**dble(2)*dble(8) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p24*dble(8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p14*p34*
+     -        dble(8) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(3)*p34*
+     -        dble(8) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p14*p24*p34*
+     -        dble(8) + p12**dble(4)*p13*p34**dble(2)*dble(8) + 
+     -       mInSkUtRiSq**dble(2)*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(8) + p12**dble(3)*p24*p34**dble(3)*dble(8) + 
+     -       MGl2**dble(2)*dble(-1)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14*p34*
+     -        dble(9) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p14*
+     -        p34**dble(2)*dble(9) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(10) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p14*dble(10) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(4)*dble(10) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p34*dble(10) + 
+     -       mSlepSq**dble(3)*p12**dble(3)*p13*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(4)*p14*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*dble(12) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p14*p24*p34*dble(12) + 
+     -       p12**dble(4)*p14*p34**dble(2)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p24*p34**dble(2)*dble(12) + 
+     -       p12**dble(2)*p13**dble(2)*p24*p34**dble(2)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14*p24*p34**dble(2)*dble(12) + 
+     -       p12**dble(2)*p14**dble(2)*p24*p34**dble(2)*dble(12) + 
+     -       p12**dble(3)*p13*p34**dble(3)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p24*dble(14) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p24*dble(14) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p24*p34*dble(14) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p24*p34*dble(14) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(16) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(16) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p24*dble(16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(16) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(2)*p24*dble(16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p34*dble(16) + 
+     -       mSlepSq*p12**dble(4)*p13*p34*dble(16) + 
+     -       mSlepSq**dble(3)*p12**dble(2)*p14*p34*dble(16) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(2)*p34*
+     -        dble(16) + p12**dble(3)*p13**dble(2)*p24*p34*dble(16) + 
+     -       p12**dble(3)*p14**dble(2)*p24*p34*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p34**dble(3)*dble(16) + 
+     -       mSlepSq*p12**dble(2)*p14*p34**dble(3)*dble(16) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(18) + mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p14*
+     -        dble(18) + mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p14*
+     -        dble(18) + mInSkUtRiSq*mSlepSq**dble(3)*p12*p14**dble(2)*
+     -        dble(18) + mInSkUtRiSq*mSlepSq*p12*p14**dble(4)*
+     -        dble(18) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p24*
+     -        dble(18) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*p24*
+     -        dble(18) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p34*
+     -        dble(18) + mInSkUtRiSq*p12*p13**dble(3)*p14*p34*
+     -        dble(18) + mInSkUtRiSq*p12*p14**dble(4)*p34*dble(18) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(18) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(18) + mInSkUtRiSq*p12*p13*p14*p34**dble(3)*
+     -        dble(18) + mInSkUtRiSq*p12*p14**dble(2)*p34**dble(3)*
+     -        dble(18) + mSlepSq**dble(3)*p12**dble(3)*p14*dble(20) + 
+     -       p12**dble(3)*p14*p34**dble(3)*dble(20) + 
+     -       MGl2*dble(2)*(mSlepSq**dble(4)*
+     -           (mInSkUtRiSq + p12*dble(-2))*(p12 + p14*dble(-1)) + 
+     -          p12*(p13 + p14 + p34*dble(-1))*
+     -           (p12**dble(3)*(p14 + p34*dble(-1)) + 
+     -             p12**dble(2)*
+     -              (p14*(p24 + p34)*dble(-1) + 
+     -                p13*(p34 + p24*dble(-1)) + p34*(p34 + p24*dble(2))
+     -                ) + (p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p13*p34*dble(-3) + p14*p34*dble(-3) + 
+     -                p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -                p34**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p14**dble(2)*(p24 + p34*dble(-7)) + 
+     -                p14*p34*dble(-3)*(p24 + p34*dble(-2)) + 
+     -                p34**dble(2)*dble(2)*
+     -                 (p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(3) + 
+     -                p13**dble(2)*(p24 + p14*dble(3)) + 
+     -                p13*(p14*(p34*dble(-7) + p24*dble(2)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14**dble(2)*dble(6)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(-1) + 
+     -             mInSkUtRiSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             p12*dble(-1)*
+     -              (p14*p34*dble(-8) + p13*p24*dble(2) + 
+     -                p14*p24*dble(2) + 
+     -                mInSkUtRiSq*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)) + p13*p14*dble(7) + 
+     -                p14**dble(2)*dble(7)) + 
+     -             p12**dble(2)*
+     -              (p34*dble(-8) + p24*dble(4) + p13*dble(5) + 
+     -                p14*dble(8))) + 
+     -          mInSkUtRiSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(2)*
+     -           (mInSkUtRiSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9))) + 
+     -             p12*(p12**dble(3) + 
+     -                p12**dble(2)*
+     -                 (p34*dble(-3) + p24*dble(-2) + p14*dble(2)) + 
+     -                p13**dble(2)*(p24 + p14*dble(2))*dble(5) + 
+     -                p14*(p14*p34*dble(-21) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(5) + p14**dble(2)*dble(10) + 
+     -                   p34**dble(2)*dble(12)) + 
+     -                p12*dble(-1)*
+     -                 (p13**dble(2)*dble(3) + 
+     -                   p14*(p34*dble(-24) + p24*dble(7)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(12) + 
+     -                   p14**dble(2)*dble(13) + 
+     -                   p13*
+     -                    (p34*dble(-15) + p24*dble(7) + p14*dble(16)))
+     -                 + p13*
+     -                 (p14*p34*dble(-21) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(10) + p14**dble(2)*dble(20)))) + 
+     -          mSlepSq*(p12**dble(4)*dble(-1)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             p12**dble(3)*
+     -              (p13**dble(2) + p24*p34*dble(-4) + 
+     -                p34**dble(2)*dble(-3) + 
+     -                mInSkUtRiSq*p34*dble(-2) + 
+     -                p14**dble(2)*dble(-1) + mInSkUtRiSq*p14*dble(3) + 
+     -                p13*p24*dble(3) + p14*p24*dble(3) + 
+     -                p14*p34*dble(4)) + 
+     -             mInSkUtRiSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(2)*
+     -              (mInSkUtRiSq*
+     -                 (p14**dble(2)*dble(-5) + p14*p24*dble(-3) + 
+     -                   p14*p34*dble(2) + p24*p34*dble(4) + 
+     -                   p13*(p14*dble(-5) + p24*dble(-3) + p34*dble(4))
+     -                   ) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p34*dble(-3) + p24*dble(2) + p14*dble(5)) + 
+     -                dble(2)*
+     -                 (p14**dble(2)*(p34*dble(-13) + p24*dble(2)) + 
+     -                   p34**dble(2)*dble(2)*
+     -                    (p34*dble(-2) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(5) + 
+     -                   p14*p34*(p24*dble(-7) + p34*dble(12))) + 
+     -                p13*(p14*(p24 + p34*dble(-4))*dble(8) + 
+     -                   p34*(p24*dble(-14) + p34*dble(15)) + 
+     -                   p14**dble(2)*dble(20))) + 
+     -             p12*dble(-1)*
+     -              (mInSkUtRiSq*p34**dble(2)*dble(2)*
+     -                 (p34*dble(-2) + p24*dble(3)) + 
+     -                p14**dble(3)*(p24 + p34*dble(-4))*dble(5) + 
+     -                p14**dble(4)*dble(7) + 
+     -                p13**dble(3)*(p24*dble(5) + p14*dble(7)) + 
+     -                p14*p34*
+     -                 (p34**dble(2)*dble(-8) + 
+     -                   mInSkUtRiSq*p24*dble(-4) + p24*p34*dble(6) + 
+     -                   mInSkUtRiSq*p34*dble(9)) + 
+     -                p13**dble(2)*
+     -                 (p24*p34*dble(-10) + 
+     -                   p14*(p34*dble(-4) + p24*dble(3))*dble(5) + 
+     -                   p14**dble(2)*dble(21)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-10) + mInSkUtRiSq*dble(-8) + 
+     -                   p34*dble(21)) + 
+     -                p13*(p34*dble(2)*
+     -                    (mInSkUtRiSq*p24*dble(-2) + 
+     -                      mInSkUtRiSq*p34*dble(3) + p24*p34*dble(3))
+     -                    + p14**dble(2)*(p34*dble(-8) + p24*dble(3))*
+     -                    dble(5) + p14**dble(3)*dble(21) + 
+     -                   p14*p34*
+     -                    (p24*dble(-20) + mInSkUtRiSq*dble(-8) + 
+     -                      p34*dble(21)))))) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(22) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p34*dble(22) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*dble(24) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p14**dble(3)*dble(24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(24) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(24) + 
+     -       mSlepSq*p12**dble(4)*p14*p34*dble(24) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p24*p34*dble(24) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p24*p34*dble(24) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(2)*p24*p34*dble(24) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p34**dble(2)*
+     -        dble(24) + mSlepSq**dble(2)*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(24) + p12**dble(2)*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(24) + p12**dble(2)*p14**dble(3)*p34**dble(2)*
+     -        dble(24) + mSlepSq*p12**dble(3)*p24*p34**dble(2)*
+     -        dble(24) + p12**dble(2)*p13*p14*p24*p34**dble(2)*
+     -        dble(24) + eps1234*
+     -        (mInSkUtRiSq**dble(2)*p34**dble(3) + 
+     -          mInSkUtRiSq*p12*p13*p14*p34*dble(-36) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p14*dble(-20) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p34*dble(-18) + 
+     -          mInSkUtRiSq*p12*p14**dble(2)*p34*dble(-18) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-12) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-12) + 
+     -          p12**dble(2)*p13*p34**dble(2)*dble(-12) + 
+     -          p12**dble(2)*p14*p34**dble(2)*dble(-12) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13**dble(2)*dble(-10) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(-10) + 
+     -          p12**dble(3)*p13*p34*dble(-8) + 
+     -          p12**dble(3)*p14*p34*dble(-8) + 
+     -          mInSkUtRiSq*p12**dble(2)*p34**dble(2)*dble(-6) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-4) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -          mInSkUtRiSq*p12*p34**dble(3)*dble(-4) + 
+     -          mInSkUtRiSq*p12**dble(3)*p34*dble(-2) + 
+     -          mInSkUtRiSq**dble(2)*p13*p34**dble(2)*dble(-2) + 
+     -          mInSkUtRiSq**dble(2)*p14*p34**dble(2)*dble(-2) + 
+     -          mSlepSq**dble(3)*
+     -           (mInSkUtRiSq + p12*dble(-2))**dble(2) + 
+     -          mInSkUtRiSq**dble(2)*p12**dble(2)*p34*dble(-1) + 
+     -          MGl2**dble(2)*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtRiSq*p12**dble(3)*p13*dble(2) + 
+     -          mInSkUtRiSq*p12**dble(3)*p14*dble(2) + 
+     -          mInSkUtRiSq**dble(2)*p12*p13*p34*dble(2) + 
+     -          mInSkUtRiSq**dble(2)*p12*p14*p34*dble(2) + 
+     -          p12**dble(3)*p13**dble(2)*dble(4) + 
+     -          p12**dble(3)*p14**dble(2)*dble(4) + 
+     -          p12**dble(3)*p34**dble(2)*dble(4) + 
+     -          p12**dble(2)*p34**dble(3)*dble(4) + 
+     -          mSlepSq**dble(2)*
+     -           (mInSkUtRiSq**dble(2)*
+     -              (p13*dble(-2) + p14*dble(-2) + p34*dble(3)) + 
+     -             p12**dble(2)*
+     -              (p12 + dble(-3)*(p13 + p14 + p34*dble(-1)))*dble(4)
+     -              + mInSkUtRiSq*p12*dble(-2)*
+     -              (p13*dble(-7) + p14*dble(-7) + p12*dble(3) + 
+     -                p34*dble(6))) + 
+     -          mInSkUtRiSq*p12*p13**dble(3)*dble(8) + 
+     -          p12**dble(3)*p13*p14*dble(8) + 
+     -          mInSkUtRiSq*p12*p14**dble(3)*dble(8) + 
+     -          MGl2*dble(-2)*
+     -           (mSlepSq**dble(3)*(mInSkUtRiSq + p12*dble(-2)) + 
+     -             mInSkUtRiSq*p34**dble(2)*
+     -              (p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p12**dble(3)*dble(-1)*(p13 + p14 + p34*dble(-1)) + 
+     -             p12**dble(2)*
+     -              (p13**dble(2) + p14**dble(2) + 
+     -                p34*(mInSkUtRiSq + p34)*dble(-1) + p13*p14*dble(2)
+     -                ) + p12*p34*
+     -              (p13*p14*dble(-6) + p13**dble(2)*dble(-3) + 
+     -                p14**dble(2)*dble(-3) + p34**dble(2)*dble(-2) + 
+     -                mInSkUtRiSq*(p13 + p14)*dble(2) + 
+     -                p13*p34*dble(5) + p14*p34*dble(5)) + 
+     -             mSlepSq**dble(2)*dble(-1)*
+     -              (p12**dble(2) + 
+     -                mInSkUtRiSq*
+     -                 (p34*dble(-3) + p13*dble(2) + p14*dble(2)) + 
+     -                p12*(p13*dble(-5) + p14*dble(-5) + p34*dble(6)))
+     -              + mSlepSq*
+     -              (mInSkUtRiSq*dble(-1)*
+     -                 (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                   p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4)))
+     -                  + p12*
+     -                 (p12**dble(2) + p13*p14*dble(-6) + 
+     -                   p34**dble(2)*dble(-6) + 
+     -                   p13**dble(2)*dble(-3) + 
+     -                   p14**dble(2)*dble(-3) + p12*p34*dble(-2) + 
+     -                   p13*p34*dble(10) + p14*p34*dble(10)))) + 
+     -          p12**dble(2)*p13**dble(2)*p34*dble(12) + 
+     -          p12**dble(2)*p14**dble(2)*p34*dble(12) + 
+     -          mInSkUtRiSq*p12*p13*p34**dble(2)*dble(14) + 
+     -          mInSkUtRiSq*p12*p14*p34**dble(2)*dble(14) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p34*dble(16) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14*p34*dble(16) + 
+     -          mSlepSq*dble(-1)*
+     -           (p12**dble(2)*(p13 + p14 + p34*dble(-1))*
+     -              (dble(-3)*(p13 + p14 + p34*dble(-1)) + p12*dble(2))*
+     -              dble(4) + 
+     -             mInSkUtRiSq**dble(2)*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4))) + 
+     -             mInSkUtRiSq*p12*dble(2)*
+     -              (p12**dble(2) + p13*p34*dble(-14) + 
+     -                p14*p34*dble(-14) + p34**dble(2)*dble(6) + 
+     -                p12*(p13*dble(-8) + p14*dble(-8) + p34*dble(6)) + 
+     -                p13**dble(2)*dble(9) + p14**dble(2)*dble(9) + 
+     -                p13*p14*dble(18))) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p14*dble(24) + 
+     -          mInSkUtRiSq*p12*p13*p14**dble(2)*dble(24) + 
+     -          p12**dble(2)*p13*p14*p34*dble(24)) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(26) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(26) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(26) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(26) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(28) + 
+     -       p12**dble(3)*p14**dble(3)*p34*dble(28) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(30) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(30) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p14*
+     -        dble(32) + mSlepSq*p12**dble(3)*p13*p14*p24*dble(32) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13*p14*p34*dble(32) + 
+     -       p12**dble(3)*p13*p14*p24*p34*dble(32) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(36) + 
+     -       mSlepSq**dble(2)*p12**dble(3)*p13*p34*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(36) + p12**dble(3)*p13**dble(2)*p14*p34*dble(36) + 
+     -       mSlepSq*p12**dble(3)*p13*p34**dble(2)*dble(36) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(42) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(42) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*p24*p34*dble(42) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*p24*p34*dble(42) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(46) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(46) + 
+     -       mSlepSq**dble(2)*p12**dble(2)*p13*p14**dble(2)*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14*p34*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p14**dble(3)*p34*dble(48) + 
+     -       mSlepSq*p12**dble(2)*p13*p14*p24*p34*dble(48) + 
+     -       p12**dble(2)*p13*p14**dble(2)*p34**dble(2)*dble(48) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(52) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(52) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(54) + mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(3)*
+     -        dble(54) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p34*
+     -        dble(54) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p34*dble(54) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p34*dble(54) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p34*dble(54) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(54) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p34**dble(2)*
+     -        dble(54) + mSlepSq*p12**dble(3)*p13*p14**dble(2)*
+     -        dble(60) + mSlepSq**dble(2)*p12**dble(3)*p14*p34*
+     -        dble(60) + p12**dble(3)*p13*p14**dble(2)*p34*dble(60) + 
+     -       mSlepSq*p12**dble(3)*p14*p34**dble(2)*dble(60) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p14*
+     -        dble(64) + mInSkUtRiSq*p12**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(64) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p34*dble(92) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(2)*p34*dble(96) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(128))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),dble(0),(mSlepSq + p34)*dble(2),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      p12*dble(2),MGl2,mInSkUtRiSq,mInSkUtRiSq,mInSkUtRiSq,mu2,ep)
+     -     )/dble(27) + (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*
+     -     p12**dble(-1)*(mSlepSq + p34)**dble(-1)*Pi**dble(2)*
+     -     SW2**dble(-2)*tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (eps1234*(mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -        dble(-1)*(MGl2**dble(2)*(mSlepSq + p34)*dble(-1)*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtLeSq*(mSlepSq + p34)*dble(-1)*
+     -           (mInSkUtLeSq*(p34 + p12*dble(-1)) + 
+     -             dble(-2)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p13 + p14 + p34*dble(-1)) + 
+     -             mSlepSq*(mInSkUtLeSq + p13*dble(-2) + p14*dble(-2) + 
+     -                p12*dble(2))) + 
+     -          MGl2*dble(2)*
+     -           (mSlepSq**dble(2)*
+     -              (mInSkUtLeSq + p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -             p12**dble(2)*dble(-2)*(p13 + p14 + p34*dble(-1)) + 
+     -             p34*(p13**dble(2) + p14**dble(2) + mInSkUtLeSq*p34 + 
+     -                p13*p34*dble(-1) + p14*p34*dble(-1) + 
+     -                p13*p14*dble(2)) + 
+     -             mSlepSq*(mInSkUtLeSq*(p12 + p34*dble(-2))*dble(-1) + 
+     -                (p12 + p13*dble(-1) + p14*dble(-1))*
+     -                 (p13*dble(-1) + p14*dble(-1) + p12*dble(2) + 
+     -                   p34*dble(2))) + 
+     -             p12*(p34**dble(2) + p13*p34*dble(-3) + 
+     -                p14*p34*dble(-3) + mInSkUtLeSq*p34*dble(-1) + 
+     -                p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -                p13*p14*dble(4)))) + 
+     -       MGl2**dble(2)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtLeSq*(mInSkUtLeSq*(p34 + p12*dble(-1)) + 
+     -          dble(-2)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1)) + 
+     -          mSlepSq*(mInSkUtLeSq + p13*dble(-2) + p14*dble(-2) + 
+     -             p12*dble(2)))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       MGl2*dble(-2)*(mSlepSq**dble(4)*(p12 + p14*dble(-1))*
+     -           (mInSkUtLeSq + p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -          (p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1))*
+     -           (p12**dble(3)*(p14 + p34*dble(-1))*dble(2) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p14*p34*dble(-7) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(2) + 
+     -                p13*dble(2)*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p34**dble(2)*dble(3) + p14**dble(2)*dble(4)) + 
+     -             p12*(p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-9) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-5) + p34*dble(6)) + 
+     -                p13*(p14*p34*dble(-9) + p24*p34*dble(-5) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mInSkUtLeSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(3) + 
+     -             mInSkUtLeSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             (p13 + p14)*dble(-1)*
+     -              (p13*(p24 + p14*dble(4)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(4))) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p24 + p34*dble(-2) + p13*dble(3) + p14*dble(5)) + 
+     -             p12*(p13**dble(2)*dble(3) + 
+     -                mInSkUtLeSq*dble(-1)*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)) + 
+     -                p14*(p34*dble(-8) + p24*dble(3) + p14*dble(11)) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(14))))
+     -           + mSlepSq**dble(2)*
+     -           (mInSkUtLeSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9))) + 
+     -             (p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12**dble(3)*dble(2) + 
+     -                p13*(p14**dble(2)*dble(-14) + 
+     -                   p14*dble(-6)*(p24 + p34*dble(-2)) + 
+     -                   p24*p34*dble(3)) + 
+     -                p14*(p14**dble(2)*dble(-7) + 
+     -                   p14*(p24 + p34*dble(-4))*dble(-3) + 
+     -                   p34*(p24 + p34*dble(-2))*dble(3)) + 
+     -                p13**dble(2)*dble(-1)*
+     -                 (p24*dble(3) + p14*dble(7)) + 
+     -                p12**dble(2)*dble(-1)*
+     -                 (p34*dble(-9) + p24*dble(4) + p13*dble(7) + 
+     -                   p14*dble(10)) + 
+     -                p12*(p13**dble(2)*dble(2) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(6) + 
+     -                   p14*(p24 + p34*dble(-3))*dble(7) + 
+     -                   p14**dble(2)*dble(15) + 
+     -                   p13*(p34*dble(-9) + p24*dble(7) + p14*dble(17))
+     -                   ))) + 
+     -          mSlepSq*(p12**dble(4)*dble(-2)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             mInSkUtLeSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(3)*
+     -              (p14*p34*dble(-24) + p24*p34*dble(-8) + 
+     -                mInSkUtLeSq*p34*dble(-2) + 
+     -                mInSkUtLeSq*p14*dble(3) + p13**dble(2)*dble(6) + 
+     -                p14*p24*dble(6) + 
+     -                p13*dble(3)*
+     -                 (p34*dble(-6) + p24*dble(2) + p14*dble(7)) + 
+     -                p34**dble(2)*dble(9) + p14**dble(2)*dble(15)) + 
+     -             (p13 + p14)*dble(-1)*
+     -              (p13**dble(3)*(p24*dble(4) + p14*dble(6)) + 
+     -                p14*(p14*p34*dble(-6)*(p24 + p34*dble(-2)) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-7) + p24*dble(2)) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6)) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(6) + p14**dble(2)*dble(9)) + 
+     -                p13*(p14*p34*dble(-12)*(p24 + p34*dble(-1)) + 
+     -                   p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*(p34*dble(-7) + p24*dble(3))*
+     -                    dble(4) + p14**dble(3)*dble(18))) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-50) + 
+     -                p14*p24*p34*dble(-22) + p34**dble(3)*dble(-4) + 
+     -                p13**dble(3)*dble(4) + 
+     -                mInSkUtLeSq*
+     -                 (p24*p34*dble(-4) + p14*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(5)) + 
+     -                p24*p34**dble(2)*dble(6) + 
+     -                p14**dble(2)*p24*dble(13) + 
+     -                p14**dble(3)*dble(24) + 
+     -                p14*p34**dble(2)*dble(30) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(13) + p14*dble(32)) + 
+     -                p13*(p14*p34*dble(-68) + p24*p34*dble(-22) + 
+     -                   mInSkUtLeSq*
+     -                    (p34*dble(-4) + p24*dble(3) + p14*dble(5)) + 
+     -                   p34**dble(2)*dble(18) + p14*p24*dble(26) + 
+     -                   p14**dble(2)*dble(52))) + 
+     -             p12*(mInSkUtLeSq*p34**dble(2)*dble(2)*
+     -                 (p24*dble(-3) + p34*dble(2)) + 
+     -                p14*p34*
+     -                 (mInSkUtLeSq*p34*dble(-9) + 
+     -                   p34**dble(2)*dble(-8) + 
+     -                   mInSkUtLeSq*p24*dble(4) + p24*p34*dble(9)) + 
+     -                p14**dble(3)*(p24 + p34*dble(-4))*dble(11) + 
+     -                p14**dble(4)*dble(19) + 
+     -                p13**dble(3)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-20) + mInSkUtLeSq*dble(8) + 
+     -                   p34*dble(33)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-52) + p24*p34*dble(-20) + 
+     -                   p34**dble(2)*dble(9) + p14*p24*dble(33) + 
+     -                   p14**dble(2)*dble(57)) + 
+     -                p13*(p34*
+     -                    (mInSkUtLeSq*p34*dble(-6) + 
+     -                      p34**dble(2)*dble(-4) + 
+     -                      mInSkUtLeSq*p24*dble(4) + p24*p34*dble(9))
+     -                    + p14*p34*dble(2)*
+     -                    (p24*dble(-20) + mInSkUtLeSq*dble(4) + 
+     -                      p34*dble(21)) + 
+     -                   p14**dble(2)*(p34*dble(-92) + p24*dble(33)) + 
+     -                   p14**dble(3)*dble(57))))))*
+     -     (CW2*SW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*
+     -        dble(4) + (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),dble(0),(mSlepSq + p34)*dble(2),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),MGl2,MGl2,mInSkUtLeSq,
+     -      mInSkUtLeSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(eps1234*
+     -        (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -        dble(-1)*(MGl2**dble(2)*(mSlepSq + p34)*dble(-1)*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtRiSq*(mSlepSq + p34)*dble(-1)*
+     -           (mInSkUtRiSq*(p34 + p12*dble(-1)) + 
+     -             dble(-2)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p13 + p14 + p34*dble(-1)) + 
+     -             mSlepSq*(mInSkUtRiSq + p13*dble(-2) + p14*dble(-2) + 
+     -                p12*dble(2))) + 
+     -          MGl2*dble(2)*
+     -           (mSlepSq**dble(2)*
+     -              (mInSkUtRiSq + p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -             p12**dble(2)*dble(-2)*(p13 + p14 + p34*dble(-1)) + 
+     -             p34*(p13**dble(2) + p14**dble(2) + mInSkUtRiSq*p34 + 
+     -                p13*p34*dble(-1) + p14*p34*dble(-1) + 
+     -                p13*p14*dble(2)) + 
+     -             mSlepSq*(mInSkUtRiSq*(p12 + p34*dble(-2))*dble(-1) + 
+     -                (p12 + p13*dble(-1) + p14*dble(-1))*
+     -                 (p13*dble(-1) + p14*dble(-1) + p12*dble(2) + 
+     -                   p34*dble(2))) + 
+     -             p12*(p34**dble(2) + p13*p34*dble(-3) + 
+     -                p14*p34*dble(-3) + mInSkUtRiSq*p34*dble(-1) + 
+     -                p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -                p13*p14*dble(4)))) + 
+     -       MGl2**dble(2)*dble(-1)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtRiSq*dble(-1)*
+     -        (mInSkUtRiSq*(p34 + p12*dble(-1)) + 
+     -          dble(-2)*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1)) + 
+     -          mSlepSq*(mInSkUtRiSq + p13*dble(-2) + p14*dble(-2) + 
+     -             p12*dble(2)))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       MGl2*dble(2)*(mSlepSq**dble(4)*(p12 + p14*dble(-1))*
+     -           (mInSkUtRiSq + p12 + p13*dble(-1) + p14*dble(-1)) + 
+     -          (p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p13 + p14 + p34*dble(-1))*
+     -           (p12**dble(3)*(p14 + p34*dble(-1))*dble(2) + 
+     -             dble(-1)*(p13*(p14 + p24) + 
+     -                p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p14*p34*dble(-7) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(2) + 
+     -                p13*dble(2)*(p24 + p34*dble(-2) + p14*dble(2)) + 
+     -                p34**dble(2)*dble(3) + p14**dble(2)*dble(4)) + 
+     -             p12*(p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-9) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-5) + p34*dble(6)) + 
+     -                p13*(p14*p34*dble(-9) + p24*p34*dble(-5) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mInSkUtRiSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3)*dble(3) + 
+     -             mInSkUtRiSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             (p13 + p14)*dble(-1)*
+     -              (p13*(p24 + p14*dble(4)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(4))) + 
+     -             p12**dble(2)*dble(-2)*
+     -              (p24 + p34*dble(-2) + p13*dble(3) + p14*dble(5)) + 
+     -             p12*(p13**dble(2)*dble(3) + 
+     -                mInSkUtRiSq*dble(-1)*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)) + 
+     -                p14*(p34*dble(-8) + p24*dble(3) + p14*dble(11)) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(14))))
+     -           + mSlepSq**dble(2)*
+     -           (mInSkUtRiSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9))) + 
+     -             (p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12**dble(3)*dble(2) + 
+     -                p13*(p14**dble(2)*dble(-14) + 
+     -                   p14*dble(-6)*(p24 + p34*dble(-2)) + 
+     -                   p24*p34*dble(3)) + 
+     -                p14*(p14**dble(2)*dble(-7) + 
+     -                   p14*(p24 + p34*dble(-4))*dble(-3) + 
+     -                   p34*(p24 + p34*dble(-2))*dble(3)) + 
+     -                p13**dble(2)*dble(-1)*
+     -                 (p24*dble(3) + p14*dble(7)) + 
+     -                p12**dble(2)*dble(-1)*
+     -                 (p34*dble(-9) + p24*dble(4) + p13*dble(7) + 
+     -                   p14*dble(10)) + 
+     -                p12*(p13**dble(2)*dble(2) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(6) + 
+     -                   p14*(p24 + p34*dble(-3))*dble(7) + 
+     -                   p14**dble(2)*dble(15) + 
+     -                   p13*(p34*dble(-9) + p24*dble(7) + p14*dble(17))
+     -                   ))) + 
+     -          mSlepSq*(p12**dble(4)*dble(-2)*
+     -              (p13 + p34*dble(-2) + p14*dble(2)) + 
+     -             mInSkUtRiSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(3)*
+     -              (p14*p34*dble(-24) + p24*p34*dble(-8) + 
+     -                mInSkUtRiSq*p34*dble(-2) + 
+     -                mInSkUtRiSq*p14*dble(3) + p13**dble(2)*dble(6) + 
+     -                p14*p24*dble(6) + 
+     -                p13*dble(3)*
+     -                 (p34*dble(-6) + p24*dble(2) + p14*dble(7)) + 
+     -                p34**dble(2)*dble(9) + p14**dble(2)*dble(15)) + 
+     -             (p13 + p14)*dble(-1)*
+     -              (p13**dble(3)*(p24*dble(4) + p14*dble(6)) + 
+     -                p14*(p14*p34*dble(-6)*(p24 + p34*dble(-2)) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-7) + p24*dble(2)) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6)) + 
+     -                p13**dble(2)*dble(2)*
+     -                 (p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p14*p24*dble(6) + p14**dble(2)*dble(9)) + 
+     -                p13*(p14*p34*dble(-12)*(p24 + p34*dble(-1)) + 
+     -                   p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*(p34*dble(-7) + p24*dble(3))*
+     -                    dble(4) + p14**dble(3)*dble(18))) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p14**dble(2)*p34*dble(-50) + 
+     -                p14*p24*p34*dble(-22) + p34**dble(3)*dble(-4) + 
+     -                p13**dble(3)*dble(4) + 
+     -                mInSkUtRiSq*
+     -                 (p24*p34*dble(-4) + p14*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(5)) + 
+     -                p24*p34**dble(2)*dble(6) + 
+     -                p14**dble(2)*p24*dble(13) + 
+     -                p14**dble(3)*dble(24) + 
+     -                p14*p34**dble(2)*dble(30) + 
+     -                p13**dble(2)*
+     -                 (p34*dble(-18) + p24*dble(13) + p14*dble(32)) + 
+     -                p13*(p14*p34*dble(-68) + p24*p34*dble(-22) + 
+     -                   mInSkUtRiSq*
+     -                    (p34*dble(-4) + p24*dble(3) + p14*dble(5)) + 
+     -                   p34**dble(2)*dble(18) + p14*p24*dble(26) + 
+     -                   p14**dble(2)*dble(52))) + 
+     -             p12*(mInSkUtRiSq*p34**dble(2)*dble(2)*
+     -                 (p24*dble(-3) + p34*dble(2)) + 
+     -                p14*p34*
+     -                 (mInSkUtRiSq*p34*dble(-9) + 
+     -                   p34**dble(2)*dble(-8) + 
+     -                   mInSkUtRiSq*p24*dble(4) + p24*p34*dble(9)) + 
+     -                p14**dble(3)*(p24 + p34*dble(-4))*dble(11) + 
+     -                p14**dble(4)*dble(19) + 
+     -                p13**dble(3)*
+     -                 (p34*dble(-4) + p24*dble(11) + p14*dble(19)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-20) + mInSkUtRiSq*dble(8) + 
+     -                   p34*dble(33)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-52) + p24*p34*dble(-20) + 
+     -                   p34**dble(2)*dble(9) + p14*p24*dble(33) + 
+     -                   p14**dble(2)*dble(57)) + 
+     -                p13*(p34*
+     -                    (mInSkUtRiSq*p34*dble(-6) + 
+     -                      p34**dble(2)*dble(-4) + 
+     -                      mInSkUtRiSq*p24*dble(4) + p24*p34*dble(9))
+     -                    + p14*p34*dble(2)*
+     -                    (p24*dble(-20) + mInSkUtRiSq*dble(4) + 
+     -                      p34*dble(21)) + 
+     -                   p14**dble(2)*(p34*dble(-92) + p24*dble(33)) + 
+     -                   p14**dble(3)*dble(57))))))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),dble(0),(mSlepSq + p34)*dble(2),dble(0),
+     -      (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))*dble(2),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),MGl2,MGl2,mInSkUtRiSq,
+     -      mInSkUtRiSq,mu2,ep))/dble(3) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq1Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-2)*
+     -     tagGluino*tagSquark*dble(-4)*
+     -     (p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     (mInSkUtLeSq**dble(2)*mSlepSq**dble(4)*p12 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p14 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p13*p24 + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14*p24 + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14*p34**dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p13*p24*p34**dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p14*p24*p34**dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p12*p34**dble(4) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(-36) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(-36) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(-32) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(3)*dble(-24) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(-24) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(-24) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(-24) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-20) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p14*dble(-16) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13*p14**dble(2)*dble(-16) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14**dble(2)*dble(-16) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(4)*dble(-16) + 
+     -       mInSkUtLeSq*p12*p13**dble(3)*p14*p24*dble(-16) + 
+     -       mInSkUtLeSq*p12*p13*p14**dble(3)*p24*dble(-16) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p14**dble(2)*p34*
+     -        dble(-16) + mInSkUtLeSq*p12**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(-16) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p13**dble(2)*
+     -        dble(-14) + mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p34*
+     -        dble(-14) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p14*
+     -        dble(-12) + p12**dble(3)*p13**dble(3)*p14*dble(-12) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(-12) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(-12) + 
+     -       p12**dble(3)*p14**dble(4)*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(-12) + mInSkUtLeSq*p12**dble(3)*p13*p14*p34*
+     -        dble(-12) + p12**dble(4)*p14**dble(2)*p34*dble(-12) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(-12) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(-12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(-10) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(-10) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14*p34*
+     -        dble(-9) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p14*
+     -        p34**dble(2)*dble(-9) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p14*dble(-8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14**dble(2)*
+     -        dble(-8) + mInSkUtLeSq*p12**dble(3)*p14**dble(3)*
+     -        dble(-8) + p12**dble(3)*p13**dble(3)*p24*dble(-8) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(-8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14*p34*
+     -        dble(-8) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(3)*p34*
+     -        dble(-8) + mInSkUtLeSq**dble(2)*mSlepSq*p13*p14*p24*p34*
+     -        dble(-8) + mInSkUtLeSq**dble(2)*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(-8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*p12*p13**dble(2)*
+     -        p14**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13*p14**dble(3)*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*p24*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p24*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p24*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p24*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p34*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*p34*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p34*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p34*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(3)*p13*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12**dble(3)*p14*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12*p13**dble(2)*p14*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*p12*p13*p14**dble(2)*p24*p34*
+     -        dble(-6) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p34**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p34**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14*p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p34**dble(2)*
+     -        dble(-6) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p24*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p24*p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p24*p34**dble(2)*dble(-6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*p14*
+     -        dble(-5) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*
+     -        p14**dble(2)*dble(-5) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(-5) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(-5) + mSlepSq*p12**dble(5)*p13*dble(-4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(3)*dble(-4) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(-4) + 
+     -       p12**dble(5)*p13*p14*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p14*
+     -        dble(-4) + mSlepSq*p12**dble(2)*p13**dble(3)*p14*
+     -        dble(-4) + mInSkUtLeSq*p12*p13**dble(4)*p14*dble(-4) + 
+     -       p12**dble(5)*p14**dble(2)*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14**dble(3)*
+     -        dble(-4) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(3)*
+     -        dble(-4) + mSlepSq*p12**dble(2)*p14**dble(4)*dble(-4) + 
+     -       mInSkUtLeSq*p12*p14**dble(5)*dble(-4) + 
+     -       mInSkUtLeSq*p12*p13**dble(4)*p24*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14*p24*
+     -        dble(-4) + mInSkUtLeSq*p12**dble(3)*p13*p14*p24*
+     -        dble(-4) + mInSkUtLeSq*p12*p14**dble(4)*p24*dble(-4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p34*dble(-4) + 
+     -       p12**dble(5)*p13*p34*dble(-4) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14*p34*dble(-4) + 
+     -       p12**dble(4)*p13*p14*p34*dble(-4) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(-4) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p34*dble(-4) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(2)*p24*
+     -        p34*dble(-4) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*p14**dble(3)*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*p13*p14*p24*p34**dble(2)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*mSlepSq*p14*p34**dble(3)*
+     -        dble(-4) + mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p14*
+     -        dble(-3) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*
+     -        p24*dble(-3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p14*p24*
+     -        dble(-3) + mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p24*p34*
+     -        dble(-3) + mInSkUtLeSq**dble(2)*p12**dble(2)*p14*p24*p34*
+     -        dble(-3) + mInSkUtLeSq**dble(2)*p12*p14*p34**dble(3)*
+     -        dble(-3) + mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(3)*
+     -        dble(-2) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(4)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p13*
+     -        dble(-2) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p13*p14*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12**dble(3)*p13*p14*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p13**dble(3)*p14*
+     -        dble(-2) + mInSkUtLeSq*mSlepSq**dble(3)*p12*p14**dble(2)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12**dble(3)*p14**dble(2)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p14**dble(4)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p24*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq*p12**dble(3)*p13**dble(2)*p24*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p24*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14**dble(2)*p24*
+     -        dble(-2) + mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p24*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p14**dble(3)*p24*
+     -        dble(-2) + mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p24*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(3)*p34*
+     -        dble(-2) + mInSkUtLeSq*p12*p13**dble(3)*p24*p34*
+     -        dble(-2) + mInSkUtLeSq*p12*p14**dble(3)*p24*p34*
+     -        dble(-2) + mInSkUtLeSq*p12**dble(4)*p34**dble(2)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p13**dble(2)*p24*
+     -        p34**dble(2)*dble(-2) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(2)*p24*p34**dble(2)*
+     -        dble(-2) + mInSkUtLeSq*p12**dble(3)*p34**dble(3)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p13*p34**dble(3)*
+     -        dble(-2) + mInSkUtLeSq*p12*p13*p14*p34**dble(3)*
+     -        dble(-2) + mInSkUtLeSq*p12*p14**dble(2)*p34**dble(3)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*p12*p24*p34**dble(3)*
+     -        dble(-2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(3)*dble(-1) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(4)*p14*dble(-1) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(3)*p34**dble(2)*dble(-1) + 
+     -       mInSkUtLeSq**dble(2)*p14*p34**dble(4)*dble(-1) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        dble(2) + mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p13*
+     -        dble(2) + mInSkUtLeSq*p12**dble(4)*p13*p14*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12**dble(4)*p14**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p24*dble(2) + mInSkUtLeSq*mSlepSq**dble(2)*p12*
+     -        p13**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(3)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14*
+     -        p24*dble(2) + mInSkUtLeSq*mSlepSq**dble(2)*p12*
+     -        p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(3)*p24*
+     -        dble(2) + mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p14*
+     -        p34*dble(2) + mInSkUtLeSq**dble(2)*p13**dble(3)*p14*p34*
+     -        dble(2) + mInSkUtLeSq*p12*p13**dble(3)*p14*p34*dble(2) + 
+     -       mInSkUtLeSq*p12**dble(3)*p14**dble(2)*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(4)*p34*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(4)*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(2) + mInSkUtLeSq**dble(2)*p12**dble(2)*p24*
+     -        p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p13*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*p12*p14*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(2) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p34**dble(3)*dble(2) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(3)*p14*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p13*p14*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p14**dble(2)*
+     -        dble(3) + mInSkUtLeSq**dble(2)*p12**dble(3)*p14*p34*
+     -        dble(3) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p24*
+     -        p34*dble(3) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p14*
+     -        p24*p34*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p24*p34**dble(2)*
+     -        dble(3) + mInSkUtLeSq**dble(2)*mSlepSq*p14*p24*
+     -        p34**dble(2)*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p13*p14*p34**dble(3)*dble(3) + 
+     -       mInSkUtLeSq**dble(2)*p14**dble(2)*p34**dble(3)*dble(3) + 
+     -       mInSkUtLeSq*mSlepSq**dble(3)*p12**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12**dble(5)*p14*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p13*p14*
+     -        dble(4) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p13**dble(2)*
+     -        p14*dble(4) + mInSkUtLeSq**dble(2)*p12**dble(2)*
+     -        p13**dble(2)*p14*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(2)*p14*dble(4) + 
+     -       p12**dble(2)*p13**dble(4)*p14*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        dble(4) + mInSkUtLeSq*mSlepSq**dble(2)*p12*p14**dble(3)*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12**dble(2)*p14**dble(3)*
+     -        dble(4) + p12**dble(2)*p14**dble(5)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(4) + 
+     -       p12**dble(4)*p13**dble(2)*p24*dble(4) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(4) + 
+     -       p12**dble(4)*p14**dble(2)*p24*dble(4) + 
+     -       p12**dble(2)*p14**dble(4)*p24*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(3)*p12*p34*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p13*p34*
+     -        dble(4) + p12**dble(5)*p14*p34*dble(4) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*p24*p34*
+     -        dble(4) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*mSlepSq*p12*p14*p24*p34*
+     -        dble(4) + mInSkUtLeSq*mSlepSq*p12*p14**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12*p13*p14*p34**dble(2)*
+     -        dble(4) + mInSkUtLeSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(4) + mInSkUtLeSq**dble(2)*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*p12*p14**dble(3)*p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(3)*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq*p12*p13*p14*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p34**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14*p34**dble(3)*dble(4) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(4)*p13*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14**dble(2)*
+     -        dble(6) + mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*
+     -        p14**dble(2)*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(3)*dble(6) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p24*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13**dble(2)*p14*p24*
+     -        dble(6) + mInSkUtLeSq**dble(2)*mSlepSq*p13*p14**dble(2)*
+     -        p24*dble(6) + mInSkUtLeSq*p12**dble(2)*p14**dble(3)*p24*
+     -        dble(6) + mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p34*dble(6) + mInSkUtLeSq*p12**dble(4)*p13*p34*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(6) + mInSkUtLeSq*p12*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(6) + mInSkUtLeSq**dble(2)*p13*p14**dble(3)*p34*
+     -        dble(6) + mInSkUtLeSq*p12*p13*p14**dble(3)*p34*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*p13**dble(2)*p14*p24*p34*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*p13*p14**dble(2)*p24*p34*dble(6) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p12*p34**dble(2)*
+     -        dble(6) + mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*
+     -        p34**dble(2)*dble(6) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p13*dble(8) + 
+     -       mSlepSq*p12**dble(4)*p13**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(8) + mInSkUtLeSq**dble(2)*p12**dble(2)*p13*
+     -        p14**dble(2)*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(8) + p12**dble(4)*p13*p14*p24*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(8) + p12**dble(4)*p13**dble(2)*p34*dble(8) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p34*dble(8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p13*p14*p34*dble(8) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(8) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p12*p14**dble(2)*p34*
+     -        dble(8) + mInSkUtLeSq*mSlepSq*p12*p14**dble(3)*p34*
+     -        dble(8) + mInSkUtLeSq*mSlepSq*p12**dble(3)*p24*p34*
+     -        dble(8) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p24*p34*
+     -        dble(8) + mInSkUtLeSq*mSlepSq*p12*p13*p14*p24*p34*
+     -        dble(8) + mInSkUtLeSq*p12**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(8) + mInSkUtLeSq*p12**dble(3)*p13*p34**dble(2)*
+     -        dble(8) + mInSkUtLeSq*p12**dble(3)*p14*p34**dble(2)*
+     -        dble(8) + mInSkUtLeSq*p12*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(8) + MGl2**dble(2)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*p13*p14*p34*
+     -        dble(9) + mInSkUtLeSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p34*dble(9) + 
+     -       mInSkUtLeSq**dble(2)*mSlepSq*p13*p14*p34**dble(2)*
+     -        dble(9) + mInSkUtLeSq**dble(2)*mSlepSq*p14**dble(2)*
+     -        p34**dble(2)*dble(9) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(3)*p14*dble(10) + 
+     -       mInSkUtLeSq*p12**dble(2)*p14**dble(4)*dble(10) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(12) + p12**dble(4)*p13**dble(2)*p14*dble(12) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(12) + 
+     -       p12**dble(4)*p14**dble(3)*dble(12) + 
+     -       mInSkUtLeSq*mSlepSq**dble(2)*p12**dble(2)*p14*p34*
+     -        dble(12) + mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(12) + p12**dble(3)*p14**dble(3)*p34*dble(12) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(12) + p12**dble(2)*p13**dble(3)*p14**dble(2)*
+     -        dble(16) + p12**dble(2)*p13*p14**dble(4)*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p13*p34*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12**dble(3)*p14*p34*dble(16) + 
+     -       mInSkUtLeSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14*p24*p34*dble(16) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(18) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(18) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(20) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(20) + 
+     -       MGl2*dble(-2)*(mInSkUtLeSq*mSlepSq**dble(4)*
+     -           (p12 + p14*dble(-1)) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3) + 
+     -             p12**dble(2)*dble(-1)*(p13 + p14*dble(2)) + 
+     -             mInSkUtLeSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             p12*(p14*(p13 + p14) + 
+     -                mInSkUtLeSq*dble(-1)*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)))) + 
+     -          mInSkUtLeSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(2)*
+     -           (p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p34*dble(-3) + p24*dble(2) + p13*dble(3) + 
+     -                   p14*dble(3))) + 
+     -             mInSkUtLeSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)))) + 
+     -          p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-4) + 
+     -                p14**dble(2)*dble(3) + p13*(p34 + p14*dble(3))) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-1) + 
+     -                p14*p34*dble(-1) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14*p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(3)) + 
+     -                p14**dble(3)*dble(5) + 
+     -                p13**dble(2)*(p24*dble(3) + p14*dble(5)) + 
+     -                p13*(p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14*(p34*dble(-7) + p24*dble(6)) + 
+     -                   p14**dble(2)*dble(10)))) + 
+     -          mSlepSq*(p12**dble(4)*
+     -              (p13 + p14*dble(-4) + p34*dble(2)) + 
+     -             p12*(p14**dble(3)*(p24 + p34*dble(-4)) + 
+     -                mInSkUtLeSq*p34**dble(2)*dble(2)*
+     -                 (p24*dble(-3) + p34*dble(2)) + 
+     -                p14**dble(4)*dble(3) + 
+     -                p13**dble(3)*(p24 + p14*dble(3)) + 
+     -                mInSkUtLeSq*p14*p34*
+     -                 (p34*dble(-9) + p24*dble(4)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-2) + p34*dble(3) + 
+     -                   mInSkUtLeSq*dble(8)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-4) + p24*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(9)) + 
+     -                p13*(mInSkUtLeSq*p34*dble(2)*
+     -                    (p34*dble(-3) + p24*dble(2)) + 
+     -                   p14**dble(2)*(p34*dble(-8) + p24*dble(3)) + 
+     -                   p14*p34*
+     -                    (p24*dble(-4) + p34*dble(3) + 
+     -                      mInSkUtLeSq*dble(8)) + p14**dble(3)*dble(9))
+     -                ) + mInSkUtLeSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(3)*
+     -              (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                mInSkUtLeSq*p34*dble(-2) + 
+     -                p13**dble(2)*dble(-1) + mInSkUtLeSq*p14*dble(3) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p13*(p34*dble(-8) + p24*dble(3) + p14*dble(10)) + 
+     -                p14**dble(2)*dble(11)) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p13**dble(2)*dble(2)*
+     -                 (p34*dble(-3) + p24*dble(2) + p14*dble(5)) + 
+     -                p14*dble(2)*
+     -                 (p14*(p34*dble(-5) + p24*dble(2)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14**dble(2)*dble(5)) + 
+     -                mInSkUtLeSq*
+     -                 (p24*p34*dble(-4) + p14*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(5) + 
+     -                   p13*(p34*dble(-4) + p24*dble(3) + p14*dble(5)))
+     -                  + p13*
+     -                 (p34*(p34 + p24*dble(-2))*dble(3) + 
+     -                   p14*(p24 + p34*dble(-2))*dble(8) + 
+     -                   p14**dble(2)*dble(20))))) + 
+     -       p12**dble(4)*p13*p14**dble(2)*dble(24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(24) + 
+     -       eps1234*(mInSkUtLeSq**dble(2)*mSlepSq**dble(3) + 
+     -          mInSkUtLeSq**dble(2)*p34**dble(3) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p14*dble(-28) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13**dble(2)*dble(-14) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14**dble(2)*dble(-14) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-12) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-12) + 
+     -          mInSkUtLeSq*p12*p13*p14*p34*dble(-12) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p34*dble(-6) + 
+     -          mInSkUtLeSq*p12*p14**dble(2)*p34*dble(-6) + 
+     -          p12**dble(4)*p13*dble(-4) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-4) + 
+     -          p12**dble(4)*p14*dble(-4) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -          mInSkUtLeSq*p12**dble(3)*p34*dble(-2) + 
+     -          mInSkUtLeSq*p12**dble(2)*p34**dble(2)*dble(-2) + 
+     -          mInSkUtLeSq**dble(2)*p13*p34**dble(2)*dble(-2) + 
+     -          mInSkUtLeSq**dble(2)*p14*p34**dble(2)*dble(-2) + 
+     -          mInSkUtLeSq**dble(2)*p12**dble(2)*p34*dble(-1) + 
+     -          MGl2**dble(2)*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtLeSq**dble(2)*p12*p13*p34*dble(2) + 
+     -          mInSkUtLeSq**dble(2)*p12*p14*p34*dble(2) + 
+     -          mInSkUtLeSq*p12*p13*p34**dble(2)*dble(2) + 
+     -          mInSkUtLeSq*p12*p14*p34**dble(2)*dble(2) + 
+     -          mInSkUtLeSq*mSlepSq**dble(2)*
+     -           (p12**dble(2)*dble(-2) + p12*(p13 + p14)*dble(2) + 
+     -             mInSkUtLeSq*
+     -              (p13*dble(-2) + p14*dble(-2) + p34*dble(3))) + 
+     -          mInSkUtLeSq*mSlepSq*dble(-1)*
+     -           (p12*(p12 + p13*dble(-1) + p14*dble(-1))*dble(2)*
+     -              (p12 + p13*dble(-3) + p14*dble(-3) + p34*dble(2)) + 
+     -             mInSkUtLeSq*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4))))
+     -           + MGl2*dble(-2)*
+     -           (mInSkUtLeSq*mSlepSq**dble(3) + 
+     -             p12**dble(3)*(p13 + p14 + p34) + 
+     -             mInSkUtLeSq*p34**dble(2)*
+     -              (p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p12*(p13 + p14)*p34*
+     -              (p34*dble(-1) + mInSkUtLeSq*dble(2) + p13*dble(3) + 
+     -                p14*dble(3)) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-1) + 
+     -                mInSkUtLeSq*
+     -                 (p13*dble(-2) + p14*dble(-2) + p34*dble(3))) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p13**dble(2) + p14**dble(2) + 
+     -                p34*(mInSkUtLeSq + p34*dble(-1)) + 
+     -                p13*dble(2)*(p14 + p34*dble(2)) + p14*p34*dble(4))
+     -               + mSlepSq*
+     -              (p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -                 (p12 + p13*dble(-3) + p14*dble(-3) + p34*dble(2))
+     -                  + mInSkUtLeSq*dble(-1)*
+     -                 (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                   p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4)))
+     -                )) + mInSkUtLeSq*p12**dble(3)*p13*dble(6) + 
+     -          mInSkUtLeSq*p12**dble(3)*p14*dble(6) + 
+     -          p12**dble(3)*p13**dble(2)*dble(8) + 
+     -          mInSkUtLeSq*p12*p13**dble(3)*dble(8) + 
+     -          p12**dble(3)*p14**dble(2)*dble(8) + 
+     -          mInSkUtLeSq*p12*p14**dble(3)*dble(8) + 
+     -          mInSkUtLeSq*p12**dble(2)*p13*p34*dble(8) + 
+     -          mInSkUtLeSq*p12**dble(2)*p14*p34*dble(8) + 
+     -          p12**dble(3)*p13*p14*dble(16) + 
+     -          mInSkUtLeSq*p12*p13**dble(2)*p14*dble(24) + 
+     -          mInSkUtLeSq*p12*p13*p14**dble(2)*dble(24)) + 
+     -       mInSkUtLeSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(30) + mInSkUtLeSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(30))*(CW2*SW2*
+     -        (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))*dble(4) + 
+     -       (mSlepSq + p34)*tagZ*(dble(-3) + SW2*dble(4))*
+     -        dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),(mSlepSq + p34)*dble(2),dble(0),dble(0),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),p12*dble(2),MGl2,
+     -      mInSkUtLeSq,mInSkUtLeSq,mInSkUtLeSq,mu2,ep))/dble(27) + 
+     -  (Alfa2*Alfas2*CW2**dble(-2)*mixUsq2Sl*p12**dble(-1)*
+     -     (mSlepSq + p34)**dble(-1)*Pi**dble(2)*SW2**dble(-1)*
+     -     tagGluino*tagSquark*(p13 + p14 + p12*dble(-1))**dble(-2)*
+     -     (mSlepSq + p34 + p13*dble(-1) + p14*dble(-1))**dble(-2)*
+     -     (MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2))**dble(-1)*
+     -     dble(16)*(mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(4)*p14 + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(3)*p34**dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p14*p34**dble(4) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*
+     -        dble(-30) + mInSkUtRiSq*p12**dble(2)*p13*p14**dble(3)*
+     -        dble(-30) + p12**dble(4)*p13*p14**dble(2)*dble(-24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(3)*dble(-24) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p24*dble(-24) + 
+     -       mSlepSq*p12**dble(3)*p13*p14**dble(2)*dble(-20) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p34*dble(-20) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p24*dble(-18) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14**dble(2)*p24*dble(-18) + 
+     -       p12**dble(2)*p13**dble(3)*p14**dble(2)*dble(-16) + 
+     -       p12**dble(2)*p13*p14**dble(4)*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p24*dble(-16) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p24*dble(-16) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p24*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p34*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p34*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p34*dble(-16) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p14*p24*p34*dble(-16) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(-12) + p12**dble(4)*p13**dble(2)*p14*dble(-12) + 
+     -       mSlepSq*p12**dble(3)*p14**dble(3)*dble(-12) + 
+     -       p12**dble(4)*p14**dble(3)*dble(-12) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*p34*
+     -        dble(-12) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p14*p34*
+     -        dble(-12) + p12**dble(3)*p14**dble(3)*p34*dble(-12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p34**dble(2)*
+     -        dble(-12) + mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p14*
+     -        dble(-10) + mInSkUtRiSq*p12**dble(2)*p14**dble(4)*
+     -        dble(-10) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p14*
+     -        p34*dble(-9) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14**dble(2)*p34*
+     -        dble(-9) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p14*
+     -        p34**dble(2)*dble(-9) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(2)*p34**dble(2)*
+     -        dble(-9) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p13*
+     -        dble(-8) + mSlepSq*p12**dble(4)*p13**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(3)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p14*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14**dble(2)*
+     -        dble(-8) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13*
+     -        p14**dble(2)*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p24*
+     -        dble(-8) + p12**dble(4)*p13*p14*p24*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(-8) + p12**dble(4)*p13**dble(2)*p34*dble(-8) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p34*dble(-8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p34*dble(-8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p14**dble(2)*p34*
+     -        dble(-8) + mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p34*
+     -        dble(-8) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p24*p34*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*p24*p34*
+     -        dble(-8) + mInSkUtRiSq*mSlepSq*p12*p13*p14*p24*p34*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*p24*p34*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(3)*p13*p34**dble(2)*
+     -        dble(-8) + mInSkUtRiSq*p12**dble(3)*p14*p34**dble(2)*
+     -        dble(-8) + mInSkUtRiSq*p12*p13*p14**dble(2)*p34**dble(2)*
+     -        dble(-8) + mInSkUtRiSq*mSlepSq*p12**dble(4)*p13*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*
+     -        p14**dble(2)*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(3)*
+     -        dble(-6) + mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(3)*
+     -        dble(-6) + mInSkUtRiSq*p12**dble(2)*p13**dble(3)*p24*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p14*
+     -        p24*dble(-6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(2)*p24*
+     -        dble(-6) + mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p24*
+     -        dble(-6) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p34*dble(-6) + 
+     -       mInSkUtRiSq*p12**dble(4)*p13*p34*dble(-6) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(-6) + mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13*p14**dble(3)*p34*
+     -        dble(-6) + mInSkUtRiSq*p12*p13*p14**dble(3)*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13**dble(2)*p14*p24*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*p13*p14**dble(2)*p24*p34*
+     -        dble(-6) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*
+     -        p34**dble(2)*dble(-6) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(-6) + mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p14*
+     -        dble(-4) + mSlepSq*p12**dble(5)*p14*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*p14*
+     -        dble(-4) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*
+     -        p14*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13**dble(2)*p14*
+     -        dble(-4) + mSlepSq*p12**dble(3)*p13**dble(2)*p14*
+     -        dble(-4) + p12**dble(2)*p13**dble(4)*p14*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        dble(-4) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(3)*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(3)*
+     -        dble(-4) + p12**dble(2)*p14**dble(5)*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p24*dble(-4) + 
+     -       p12**dble(4)*p13**dble(2)*p24*dble(-4) + 
+     -       p12**dble(2)*p13**dble(4)*p24*dble(-4) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*p24*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p14*p24*dble(-4) + 
+     -       p12**dble(4)*p14**dble(2)*p24*dble(-4) + 
+     -       p12**dble(2)*p14**dble(4)*p24*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p34*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p34*
+     -        dble(-4) + p12**dble(5)*p14*p34*dble(-4) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p34*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p24*p34*
+     -        dble(-4) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p14*p24*p34*
+     -        dble(-4) + mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*p24*p34*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12*p13*p14*p34**dble(2)*
+     -        dble(-4) + mInSkUtRiSq*p12*p13**dble(2)*p14*p34**dble(2)*
+     -        dble(-4) + mInSkUtRiSq**dble(2)*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(3)*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq*p12*p13*p14*p24*p34**dble(2)*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p34**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14*p34**dble(3)*dble(-4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(3)*p14*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p13*p14*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14**dble(2)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p12**dble(3)*p14*p34*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p24*
+     -        p34*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14*p24*p34*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p24*
+     -        p34**dble(2)*dble(-3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14*p24*p34**dble(2)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p13*p14*p34**dble(3)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*p14**dble(2)*p34**dble(3)*
+     -        dble(-3) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p12**dble(2)*p13*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(2)*p13*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(4)*p13*p14*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p14*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(4)*p14**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(4)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p24*dble(-2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12*p13**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13**dble(2)*
+     -        p24*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(3)*p24*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14*p24*
+     -        dble(-2) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p14**dble(2)*
+     -        p24*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(2)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(3)*p24*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p14*
+     -        p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(3)*p14*p34*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p34*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p14**dble(4)*p34*dble(-2) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(3)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p14**dble(3)*p24*p34*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p34**dble(2)*
+     -        dble(-2) + mInSkUtRiSq**dble(2)*p12**dble(2)*p24*
+     -        p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p14*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p24*p34**dble(2)*dble(-2) + 
+     -       mInSkUtRiSq*p12**dble(2)*p13*p34**dble(3)*dble(-2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(4)*p12*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p13*p24*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14*p24*
+     -        dble(-1) + mInSkUtRiSq**dble(2)*p12**dble(2)*p14*
+     -        p34**dble(2)*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*p13*p24*p34**dble(3)*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*p14*p24*p34**dble(3)*dble(-1) + 
+     -       mInSkUtRiSq**dble(2)*p12*p34**dble(4)*dble(-1) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(4)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p13*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p13*p14*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(3)*p13*p14*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13**dble(3)*p14*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq**dble(3)*p12*p14**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(3)*p14**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p14**dble(4)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p24*
+     -        dble(2) + mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p24*
+     -        dble(2) + mInSkUtRiSq**dble(2)*p12*p13**dble(3)*p24*
+     -        dble(2) + mInSkUtRiSq*mSlepSq*p12*p13**dble(3)*p24*
+     -        dble(2) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*
+     -        p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(2)*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq*mSlepSq*p12*p14**dble(3)*p24*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(3)*p34*dble(2) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*p12*p14**dble(3)*p24*p34*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(4)*p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p13**dble(2)*p24*p34**dble(2)*
+     -        dble(2) + mInSkUtRiSq**dble(2)*p14**dble(2)*p24*
+     -        p34**dble(2)*dble(2) + 
+     -       mInSkUtRiSq*p12**dble(3)*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*p12*p13*p14*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq*p12*p14**dble(2)*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*p12*p24*p34**dble(3)*dble(2) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p12*p14*dble(3) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p24*
+     -        dble(3) + mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p14*
+     -        p24*dble(3) + mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p24*
+     -        p34*dble(3) + mInSkUtRiSq**dble(2)*p12**dble(2)*p14*p24*
+     -        p34*dble(3) + mInSkUtRiSq**dble(2)*p12*p14*p34**dble(3)*
+     -        dble(3) + mSlepSq*p12**dble(5)*p13*dble(4) + 
+     -       mSlepSq*p12**dble(3)*p13**dble(3)*dble(4) + 
+     -       mSlepSq*p12**dble(4)*p13*p14*dble(4) + 
+     -       p12**dble(5)*p13*p14*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13**dble(2)*p14*
+     -        dble(4) + mSlepSq*p12**dble(2)*p13**dble(3)*p14*dble(4) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p14*dble(4) + 
+     -       p12**dble(5)*p14**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14**dble(3)*
+     -        dble(4) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(3)*
+     -        dble(4) + mSlepSq*p12**dble(2)*p14**dble(4)*dble(4) + 
+     -       mInSkUtRiSq*p12*p14**dble(5)*dble(4) + 
+     -       mInSkUtRiSq*p12*p13**dble(4)*p24*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*p14*p24*
+     -        dble(4) + mInSkUtRiSq*p12**dble(3)*p13*p14*p24*dble(4) + 
+     -       mInSkUtRiSq*p12*p14**dble(4)*p24*dble(4) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(4)*p34*dble(4) + 
+     -       p12**dble(5)*p13*p34*dble(4) + 
+     -       p12**dble(3)*p13**dble(3)*p34*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(3)*p14*p34*dble(4) + 
+     -       p12**dble(4)*p13*p14*p34*dble(4) + 
+     -       p12**dble(2)*p13**dble(3)*p14*p34*dble(4) + 
+     -       mInSkUtRiSq*p12**dble(2)*p14**dble(3)*p34*dble(4) + 
+     -       p12**dble(2)*p14**dble(4)*p34*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p24*p34*
+     -        dble(4) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(2)*p24*
+     -        p34*dble(4) + mInSkUtRiSq**dble(2)*p13**dble(2)*p14*
+     -        p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*p14**dble(3)*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*p13*p14*p24*p34**dble(2)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p14*p34**dble(3)*dble(4) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*p13*p14*
+     -        dble(5) + mInSkUtRiSq**dble(2)*mSlepSq*p12**dble(2)*
+     -        p14**dble(2)*dble(5) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p13*p14*p34*dble(5) + 
+     -       mInSkUtRiSq**dble(2)*p12**dble(2)*p14**dble(2)*p34*
+     -        dble(5) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*
+     -        p13**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*p12*p13**dble(2)*p14**dble(2)*
+     -        dble(6) + mInSkUtRiSq**dble(2)*p12*p13*p14**dble(3)*
+     -        dble(6) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*
+     -        p24*dble(6) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p24*
+     -        dble(6) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14*
+     -        p24*dble(6) + mInSkUtRiSq*mSlepSq*p12**dble(3)*p14*p24*
+     -        dble(6) + mInSkUtRiSq**dble(2)*p12*p13**dble(2)*p14*p24*
+     -        dble(6) + mInSkUtRiSq*mSlepSq*p12*p13**dble(2)*p14*p24*
+     -        dble(6) + mInSkUtRiSq**dble(2)*p12*p13*p14**dble(2)*p24*
+     -        dble(6) + mInSkUtRiSq*mSlepSq*p12*p13*p14**dble(2)*p24*
+     -        dble(6) + mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(3)*p34*
+     -        dble(6) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p13*
+     -        p34*dble(6) + mInSkUtRiSq*mSlepSq**dble(2)*p12*p13*p14*
+     -        p34*dble(6) + mInSkUtRiSq*mSlepSq**dble(2)*p12*
+     -        p14**dble(2)*p34*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p24*p34*
+     -        dble(6) + mInSkUtRiSq*p12**dble(3)*p13*p24*p34*dble(6) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14*p24*p34*dble(6) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14*p24*p34*dble(6) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(2)*p24*p34*dble(6) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p13*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*p12**dble(2)*p13**dble(2)*
+     -        p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p14*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*mSlepSq*p12*p13*p14*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*mSlepSq*p12*p14**dble(2)*
+     -        p34**dble(2)*dble(6) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p12*p24*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*p12**dble(2)*p13*p24*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*p12**dble(2)*p14*p24*p34**dble(2)*
+     -        dble(6) + mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p14*
+     -        dble(8) + mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p13*
+     -        p14**dble(2)*dble(8) + 
+     -       mInSkUtRiSq*p12**dble(3)*p14**dble(3)*dble(8) + 
+     -       p12**dble(3)*p13**dble(3)*p24*dble(8) + 
+     -       p12**dble(3)*p14**dble(3)*p24*dble(8) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13**dble(2)*p14*p34*
+     -        dble(8) + mInSkUtRiSq**dble(2)*mSlepSq*p14**dble(3)*p34*
+     -        dble(8) + mInSkUtRiSq**dble(2)*mSlepSq*p13*p14*p24*p34*
+     -        dble(8) + mInSkUtRiSq**dble(2)*p13*p14**dble(2)*
+     -        p34**dble(2)*dble(8) + 
+     -       MGl2**dble(2)*dble(-1)*(mSlepSq + p34 + p12*dble(-1))*
+     -        (mSlepSq**dble(3)*(p12 + p14*dble(-1)) + 
+     -          p12**dble(2)*
+     -           (p34**dble(2) + p14*p34*dble(-3) + p13*p14*dble(2) + 
+     -             p14**dble(2)*dble(2)) + 
+     -          (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -           (p34**dble(2) + p13*p34*dble(-2) + p14*p34*dble(-2) + 
+     -             p13**dble(2)*dble(2) + p14**dble(2)*dble(2) + 
+     -             p13*p14*dble(4)) + 
+     -          mSlepSq**dble(2)*
+     -           (p12**dble(2) + p13*(p24 + p14*dble(3)) + 
+     -             p14*(p24 + p34*dble(-3) + p14*dble(3)) + 
+     -             p12*dble(-1)*
+     -              (p34*dble(-3) + p13*dble(2) + p24*dble(2) + 
+     -                p14*dble(4))) + 
+     -          mSlepSq*(p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -             p12**dble(2)*(p14*dble(-3) + p34*dble(2)) + 
+     -             p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                p24*p34*dble(2) + p14*p34*dble(6)) + 
+     -             p14*(p14**dble(2)*dble(-4) + p34**dble(2)*dble(-3) + 
+     -                p14*p24*dble(-2) + p24*p34*dble(2) + 
+     -                p14*p34*dble(6)) + 
+     -             p12*(p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p14**dble(2)*dble(7) + 
+     -                p13*(p34*dble(-4) + p24*dble(3) + p14*dble(7))))
+     -           + p12*dble(-1)*
+     -           (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -             p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -             p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -             p14**dble(3)*dble(4) + 
+     -             p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -             p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                p14**dble(2)*dble(8)))) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq**dble(2)*p12*p14*p34*
+     -        dble(9) + mInSkUtRiSq**dble(2)*mSlepSq*p12*p14*
+     -        p34**dble(2)*dble(9) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p14**dble(2)*
+     -        dble(10) + mInSkUtRiSq*p12**dble(2)*p14**dble(2)*
+     -        p34**dble(2)*dble(10) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13*p14*dble(12) + 
+     -       p12**dble(3)*p13**dble(3)*p14*dble(12) + 
+     -       mSlepSq*p12**dble(4)*p14**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p13**dble(2)*p14**dble(2)*dble(12) + 
+     -       mSlepSq*p12**dble(2)*p13*p14**dble(3)*dble(12) + 
+     -       p12**dble(3)*p14**dble(4)*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13**dble(2)*p34*
+     -        dble(12) + mInSkUtRiSq*p12**dble(3)*p13*p14*p34*
+     -        dble(12) + p12**dble(4)*p14**dble(2)*p34*dble(12) + 
+     -       p12**dble(2)*p13**dble(2)*p14**dble(2)*p34*dble(12) + 
+     -       p12**dble(2)*p13*p14**dble(3)*p34*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p14*p24*p34*dble(12) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(3)*p13**dble(2)*dble(14) + 
+     -       mInSkUtRiSq*p12**dble(3)*p13**dble(2)*p34*dble(14) + 
+     -       mInSkUtRiSq*mSlepSq**dble(2)*p12**dble(2)*p13*p14*
+     -        dble(16) + mInSkUtRiSq*p12**dble(3)*p13*p14**dble(2)*
+     -        dble(16) + mInSkUtRiSq*p12*p13**dble(3)*p14**dble(2)*
+     -        dble(16) + mInSkUtRiSq*p12*p13*p14**dble(4)*dble(16) + 
+     -       mInSkUtRiSq*p12*p13**dble(3)*p14*p24*dble(16) + 
+     -       mInSkUtRiSq*p12*p13*p14**dble(3)*p24*dble(16) + 
+     -       mInSkUtRiSq**dble(2)*mSlepSq*p13*p14**dble(2)*p34*
+     -        dble(16) + mInSkUtRiSq*p12**dble(2)*p13*p14*p34**dble(2)*
+     -        dble(16) + mInSkUtRiSq*mSlepSq*p12**dble(2)*p14**dble(2)*
+     -        p34*dble(20) + 
+     -       MGl2*dble(2)*(mInSkUtRiSq*mSlepSq**dble(4)*
+     -           (p12 + p14*dble(-1)) + 
+     -          mSlepSq**dble(3)*
+     -           (p12**dble(3) + 
+     -             p12**dble(2)*dble(-1)*(p13 + p14*dble(2)) + 
+     -             mInSkUtRiSq*
+     -              (p13*(p24 + p14*dble(3)) + 
+     -                p14*(p24 + p34*dble(-4) + p14*dble(3))) + 
+     -             p12*(p14*(p13 + p14) + 
+     -                mInSkUtRiSq*dble(-1)*
+     -                 (p34*dble(-4) + p13*dble(2) + p24*dble(2) + 
+     -                   p14*dble(3)))) + 
+     -          mInSkUtRiSq*dble(-1)*(p12 + p34*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-3) + 
+     -                p13*p14*dble(2) + p14**dble(2)*dble(2)) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-2) + 
+     -                p14*p34*dble(-2) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p13**dble(2)*dble(2)*(p24 + p14*dble(2)) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(2)) + 
+     -                p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14**dble(3)*dble(4) + 
+     -                p14*p34*(p24*dble(-3) + p34*dble(4)) + 
+     -                p13*(p14*p34*dble(-7) + p24*p34*dble(-3) + 
+     -                   p34**dble(2)*dble(2) + p14*p24*dble(4) + 
+     -                   p14**dble(2)*dble(8)))) + 
+     -          mSlepSq**dble(2)*
+     -           (p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -              (p12**dble(2) + p13*(p24 + p14*dble(2)) + 
+     -                p14*(p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                p12*dble(-1)*
+     -                 (p34*dble(-3) + p24*dble(2) + p13*dble(3) + 
+     -                   p14*dble(3))) + 
+     -             mInSkUtRiSq*
+     -              (p12**dble(3)*dble(-1) + 
+     -                p13**dble(2)*dble(-2)*(p24 + p14*dble(2)) + 
+     -                p12**dble(2)*(p14 + p13*dble(2) + p24*dble(2)) + 
+     -                p12*(p14*p34*dble(-9) + p24*p34*dble(-6) + 
+     -                   p14*p24*dble(2) + 
+     -                   p13*dble(2)*
+     -                    (p24 + p34*dble(-3) + p14*dble(2)) + 
+     -                   p14**dble(2)*dble(4) + p34**dble(2)*dble(6)) + 
+     -                p13*(p14**dble(2)*dble(-8) + p14*p24*dble(-4) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)) + 
+     -                p14*(p34**dble(2)*dble(-6) + 
+     -                   p14**dble(2)*dble(-4) + p14*p24*dble(-2) + 
+     -                   p24*p34*dble(3) + p14*p34*dble(9)))) + 
+     -          p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -           (p12**dble(2)*
+     -              (p34**dble(2) + p14*p34*dble(-4) + 
+     -                p14**dble(2)*dble(3) + p13*(p34 + p14*dble(3))) + 
+     -             (p13*(p14 + p24) + p14*(p14 + p24 + p34*dble(-1)))*
+     -              (p34**dble(2) + p13*p34*dble(-1) + 
+     -                p14*p34*dble(-1) + p13**dble(2)*dble(2) + 
+     -                p14**dble(2)*dble(2) + p13*p14*dble(4)) + 
+     -             p12*dble(-1)*
+     -              (p34**dble(2)*(p34*dble(-1) + p24*dble(2)) + 
+     -                p14*p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                p14**dble(2)*(p34*dble(-7) + p24*dble(3)) + 
+     -                p14**dble(3)*dble(5) + 
+     -                p13**dble(2)*(p24*dble(3) + p14*dble(5)) + 
+     -                p13*(p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14*(p34*dble(-7) + p24*dble(6)) + 
+     -                   p14**dble(2)*dble(10)))) + 
+     -          mSlepSq*(p12**dble(4)*
+     -              (p13 + p14*dble(-4) + p34*dble(2)) + 
+     -             p12*(p14**dble(3)*(p24 + p34*dble(-4)) + 
+     -                mInSkUtRiSq*p34**dble(2)*dble(2)*
+     -                 (p24*dble(-3) + p34*dble(2)) + 
+     -                p14**dble(4)*dble(3) + 
+     -                p13**dble(3)*(p24 + p14*dble(3)) + 
+     -                mInSkUtRiSq*p14*p34*
+     -                 (p34*dble(-9) + p24*dble(4)) + 
+     -                p14**dble(2)*p34*
+     -                 (p24*dble(-2) + p34*dble(3) + 
+     -                   mInSkUtRiSq*dble(8)) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-4) + p24*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(9)) + 
+     -                p13*(mInSkUtRiSq*p34*dble(2)*
+     -                    (p34*dble(-3) + p24*dble(2)) + 
+     -                   p14**dble(2)*(p34*dble(-8) + p24*dble(3)) + 
+     -                   p14*p34*
+     -                    (p24*dble(-4) + p34*dble(3) + 
+     -                      mInSkUtRiSq*dble(8)) + p14**dble(3)*dble(9))
+     -                ) + mInSkUtRiSq*
+     -              (p13**dble(3)*(p14 + p24)*dble(2) + 
+     -                p13**dble(2)*
+     -                 (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                   p14**dble(2)*dble(6) + p14*p24*dble(6)) + 
+     -                p13*(p24*p34**dble(2)*dble(3) + 
+     -                   p14**dble(2)*dble(2)*
+     -                    (p34*dble(-8) + p24*dble(3)) + 
+     -                   p14**dble(3)*dble(6) + 
+     -                   p14*p34*(p24*dble(-8) + p34*dble(9))) + 
+     -                p14*(p14**dble(3)*dble(2) + 
+     -                   p14**dble(2)*(p24 + p34*dble(-4))*dble(2) + 
+     -                   p34**dble(2)*(p34*dble(-4) + p24*dble(3)) + 
+     -                   p14*p34*(p24*dble(-4) + p34*dble(9)))) + 
+     -             p12**dble(3)*
+     -              (p14*p34*dble(-8) + p24*p34*dble(-4) + 
+     -                mInSkUtRiSq*p34*dble(-2) + 
+     -                p13**dble(2)*dble(-1) + mInSkUtRiSq*p14*dble(3) + 
+     -                p14*p24*dble(3) + p34**dble(2)*dble(3) + 
+     -                p13*(p34*dble(-8) + p24*dble(3) + p14*dble(10)) + 
+     -                p14**dble(2)*dble(11)) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p13**dble(2)*dble(2)*
+     -                 (p34*dble(-3) + p24*dble(2) + p14*dble(5)) + 
+     -                p14*dble(2)*
+     -                 (p14*(p34*dble(-5) + p24*dble(2)) + 
+     -                   p34*(p34 + p24*dble(-1))*dble(3) + 
+     -                   p14**dble(2)*dble(5)) + 
+     -                mInSkUtRiSq*
+     -                 (p24*p34*dble(-4) + p14*p34*dble(-2) + 
+     -                   p14*p24*dble(3) + p14**dble(2)*dble(5) + 
+     -                   p13*(p34*dble(-4) + p24*dble(3) + p14*dble(5)))
+     -                  + p13*
+     -                 (p34*(p34 + p24*dble(-2))*dble(3) + 
+     -                   p14*(p24 + p34*dble(-2))*dble(8) + 
+     -                   p14**dble(2)*dble(20))))) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(3)*dble(24) + 
+     -       p12**dble(3)*p13**dble(2)*p14*p24*dble(24) + 
+     -       p12**dble(3)*p13*p14**dble(2)*p24*dble(24) + 
+     -       mInSkUtRiSq*p12*p13**dble(2)*p14**dble(2)*p24*dble(24) + 
+     -       eps1234*(mInSkUtRiSq**dble(2)*mSlepSq**dble(3) + 
+     -          mInSkUtRiSq**dble(2)*p34**dble(3) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p14*dble(-28) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13**dble(2)*dble(-14) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14**dble(2)*dble(-14) + 
+     -          p12**dble(2)*p13**dble(2)*p14*dble(-12) + 
+     -          p12**dble(2)*p13*p14**dble(2)*dble(-12) + 
+     -          mInSkUtRiSq*p12*p13*p14*p34*dble(-12) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p34*dble(-6) + 
+     -          mInSkUtRiSq*p12*p14**dble(2)*p34*dble(-6) + 
+     -          p12**dble(4)*p13*dble(-4) + 
+     -          p12**dble(2)*p13**dble(3)*dble(-4) + 
+     -          p12**dble(4)*p14*dble(-4) + 
+     -          p12**dble(2)*p14**dble(3)*dble(-4) + 
+     -          mInSkUtRiSq*p12**dble(3)*p34*dble(-2) + 
+     -          mInSkUtRiSq*p12**dble(2)*p34**dble(2)*dble(-2) + 
+     -          mInSkUtRiSq**dble(2)*p13*p34**dble(2)*dble(-2) + 
+     -          mInSkUtRiSq**dble(2)*p14*p34**dble(2)*dble(-2) + 
+     -          mInSkUtRiSq**dble(2)*p12**dble(2)*p34*dble(-1) + 
+     -          MGl2**dble(2)*(mSlepSq + p34)*
+     -           (mSlepSq + p12 + p34 + p13*dble(-2) + p14*dble(-2))*
+     -           (mSlepSq + p34 + p12*dble(-1)) + 
+     -          mInSkUtRiSq**dble(2)*p12*p13*p34*dble(2) + 
+     -          mInSkUtRiSq**dble(2)*p12*p14*p34*dble(2) + 
+     -          mInSkUtRiSq*p12*p13*p34**dble(2)*dble(2) + 
+     -          mInSkUtRiSq*p12*p14*p34**dble(2)*dble(2) + 
+     -          mInSkUtRiSq*mSlepSq**dble(2)*
+     -           (p12**dble(2)*dble(-2) + p12*(p13 + p14)*dble(2) + 
+     -             mInSkUtRiSq*
+     -              (p13*dble(-2) + p14*dble(-2) + p34*dble(3))) + 
+     -          mInSkUtRiSq*mSlepSq*dble(-1)*
+     -           (p12*(p12 + p13*dble(-1) + p14*dble(-1))*dble(2)*
+     -              (p12 + p13*dble(-3) + p14*dble(-3) + p34*dble(2)) + 
+     -             mInSkUtRiSq*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4))))
+     -           + MGl2*dble(-2)*
+     -           (mInSkUtRiSq*mSlepSq**dble(3) + 
+     -             p12**dble(3)*(p13 + p14 + p34) + 
+     -             mInSkUtRiSq*p34**dble(2)*
+     -              (p34 + p13*dble(-2) + p14*dble(-2)) + 
+     -             p12*(p13 + p14)*p34*
+     -              (p34*dble(-1) + mInSkUtRiSq*dble(2) + p13*dble(3) + 
+     -                p14*dble(3)) + 
+     -             mSlepSq**dble(2)*
+     -              (p12**dble(2) + p12*(p13 + p14)*dble(-1) + 
+     -                mInSkUtRiSq*
+     -                 (p13*dble(-2) + p14*dble(-2) + p34*dble(3))) + 
+     -             p12**dble(2)*dble(-1)*
+     -              (p13**dble(2) + p14**dble(2) + 
+     -                p34*(mInSkUtRiSq + p34*dble(-1)) + 
+     -                p13*dble(2)*(p14 + p34*dble(2)) + p14*p34*dble(4))
+     -               + mSlepSq*
+     -              (p12*(p12 + p13*dble(-1) + p14*dble(-1))*
+     -                 (p12 + p13*dble(-3) + p14*dble(-3) + p34*dble(2))
+     -                  + mInSkUtRiSq*dble(-1)*
+     -                 (p12**dble(2) + p12*(p13 + p14)*dble(-2) + 
+     -                   p34*(p34*dble(-3) + p13*dble(4) + p14*dble(4)))
+     -                )) + mInSkUtRiSq*p12**dble(3)*p13*dble(6) + 
+     -          mInSkUtRiSq*p12**dble(3)*p14*dble(6) + 
+     -          p12**dble(3)*p13**dble(2)*dble(8) + 
+     -          mInSkUtRiSq*p12*p13**dble(3)*dble(8) + 
+     -          p12**dble(3)*p14**dble(2)*dble(8) + 
+     -          mInSkUtRiSq*p12*p14**dble(3)*dble(8) + 
+     -          mInSkUtRiSq*p12**dble(2)*p13*p34*dble(8) + 
+     -          mInSkUtRiSq*p12**dble(2)*p14*p34*dble(8) + 
+     -          p12**dble(3)*p13*p14*dble(16) + 
+     -          mInSkUtRiSq*p12*p13**dble(2)*p14*dble(24) + 
+     -          mInSkUtRiSq*p12*p13*p14**dble(2)*dble(24)) + 
+     -       mInSkUtRiSq*mSlepSq*p12**dble(2)*p13*p14*p34*dble(32) + 
+     -       p12**dble(3)*p13**dble(2)*p14**dble(2)*dble(36) + 
+     -       p12**dble(3)*p13*p14**dble(3)*dble(36))*
+     -     (CW2*(MZ2*dble(-1) + mSlepSq*dble(2) + p34*dble(2)) + 
+     -       (mSlepSq + p34)*tagZ*dconjg(dcmplx(mixZSl)))*
+     -     qlI4(dble(0),(mSlepSq + p34)*dble(2),dble(0),dble(0),
+     -      (p13 + p14 + p12*dble(-1))*dble(2),p12*dble(2),MGl2,
+     -      mInSkUtRiSq,mInSkUtRiSq,mInSkUtRiSq,mu2,ep))/dble(27)
+
+      ini_NDY = .false.
+
+      end

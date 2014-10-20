@@ -1,0 +1,61 @@
+c     computes the scalar loop integrals
+c     for QCD Drell-Yan contributions
+      subroutine computemi(mi)
+
+      implicit none
+#include "vars.h"
+#include "mi.h"
+      complex *16 qlI1, qlI2, qlI3, qlI4
+
+      mi(1) = qlI2(s12, 0d0, 0d0, musq, 0)
+      mi(2) = qlI2(s125, 0d0, 0d0, musq, 0)
+      mi(3) = qlI2(s15, 0d0, 0d0, musq, 0)
+      mi(4) = qlI2(s25, 0d0, 0d0, musq, 0)
+      mi(5) = qlI4(0d0, 0d0, 0d0, s125, s12, s15, 0d0, 0d0, 0d0, 0d0, musq, 0)
+      mi(6) = qlI4(0d0, 0d0, 0d0, s125, s12, s15, 0d0, 0d0, 0d0, 0d0, musq, -1)
+      mi(7) = qlI4(0d0, 0d0, 0d0, s125, s12, s25, 0d0, 0d0, 0d0, 0d0, musq, 0)
+      mi(8) = qlI4(0d0, 0d0, 0d0, s125, s12, s25, 0d0, 0d0, 0d0, 0d0, musq, -1)
+      mi(9) = qlI4(0d0, 0d0, 0d0, s125, s15, s25, 0d0, 0d0, 0d0, 0d0, musq, 0)
+      mi(10) = qlI4(0d0, 0d0, 0d0, s125, s15, s25, 0d0, 0d0, 0d0, 0d0, musq, -1)
+      mi(11) = qlI4(0d0, 0d0, 0d0, s125, s25, s15, 0d0, 0d0, 0d0, 0d0, musq, 0)
+      mi(12) = qlI4(0d0, 0d0, 0d0, s125, s25, s15, 0d0, 0d0, 0d0, 0d0, musq, -1)
+      mi(13) = qlI1(m2t, musq, 0)
+      mi(14) = qlI2(s125, m2t, m2t, musq, 0)
+      mi(15) = qlI2(s12, m2t, m2t, musq, 0)
+      mi(16) = qlI3(0d0, s125, s12, m2t, m2t, m2t, musq, 0)
+      mi(17) = dcmplx(0d0)
+      mi(18) = dcmplx(0d0)
+      mi(19) = dcmplx(0d0)
+      mi(20) = dcmplx(0d0)
+      mi(21) = dcmplx(0d0)
+      mi(22) = dcmplx(0d0)
+      mi(23) = dcmplx(0d0)
+      mi(24) = dcmplx(0d0)
+      mi(25) = dcmplx(0d0)
+      mi(26) = dcmplx(0d0)
+      mi(27) = dcmplx(0d0)
+      mi(28) = dcmplx(0d0)
+      mi(29) = dcmplx(0d0)
+      mi(30) = dcmplx(0d0)
+      mi(31) = dcmplx(0d0)
+      mi(32) = dcmplx(0d0)
+      mi(33) = dcmplx(0d0)
+      mi(34) = dcmplx(0d0)
+      mi(35) = dcmplx(0d0)
+      mi(36) = dcmplx(0d0)
+      mi(37) = dcmplx(0d0)
+      mi(38) = dcmplx(0d0)
+      mi(39) = dcmplx(0d0)
+      mi(40) = dcmplx(0d0)
+      mi(41) = dcmplx(0d0)
+      mi(42) = dcmplx(0d0)
+      mi(43) = dcmplx(0d0)
+      mi(44) = dcmplx(0d0)
+      mi(45) = dcmplx(0d0)
+      mi(46) = dcmplx(0d0)
+      mi(47) = dcmplx(0d0)
+      mi(48) = dcmplx(0d0)
+      mi(49) = dcmplx(0d0)
+
+      end
+

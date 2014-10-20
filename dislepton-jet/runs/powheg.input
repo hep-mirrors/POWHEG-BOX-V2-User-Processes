@@ -1,0 +1,60 @@
+! settings for a test with low statistics
+! execution time for Core i7-4558U
+! grid generation:  45 min
+! integration:      85 min
+
+! PDG particle ids for final state sleptons a and b
+! possible ids so far only:
+! 1000011 selectron left
+! (plus anti-particles)
+sleptona  1000011
+sleptonb -1000011
+
+ebeam1 7000d0     ! energy of beam 1
+ebeam2 7000d0     ! energy of beam 2
+ih1         1     ! hadron 1 (1 for protons, -1 for antiprotons)
+ih2         1     ! hadron 2 (1 for protons, -1 for antiprotons)
+
+! LHA pdfs
+! MSTW 2008 NLO:
+lhans1      21150 ! pdf set for hadron 1 (LHA numbering)
+lhans2      21150 ! pdf set for hadron 2 (LHA numbering)
+incomingflavors 4 ! (default 4) number of flavors to consider for incoming partons
+
+bornktmin     1d0 ! generation cut; minimmum kt in underlying born
+bornsuppfact 10d0 ! mass param for Born suppression factor. If < 0 suppfact = 1
+renscfact     1d0 ! (default 1d0) ren scale factor: muren  = muref * renscfact
+facscfact     1d0 ! (default 1d0) fac scale factor: mufact = muref * facscfact
+
+ncall1 50000      ! number of calls for initializing the integration grid
+itmx1      2      ! number of iterations for initializing the integration grid
+ncall2 50000      ! number of calls for computing the integral and finding upper bound
+itmx2      3      ! number of iterations for computing the integral and finding upper bound
+foldcsi    2      ! number of folds on csi integration
+foldy      2      ! number of folds on  y  integration
+foldphi    2      ! number of folds on phi integration
+nubound    0      ! number of bbarra calls to setup norm of upper bounding function
+icsimax    1      ! <= 100, number of csi subdivision when computing the upper bounds
+iymax      1      ! <= 100, number of y subdivision when computing the upper bounds
+xupbound 2d0      ! increase upper bound for radiation generation
+numevts    0      ! number of events to be generated
+
+use-old-grid   1  ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound 1  ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
+bornonly       0  ! (default 0) if 1 do Born only
+fakevirtual    0  ! (default 0) if 1 use simple approximation for virtual contribution
+qcdonly        1  ! if 1 include only QCD part of virtual corrections
+testplots      1  ! write data for gnuplot histograms to *.top
+#storeinfo_rwgt 1  ! store info for reweighting events 
+
+iseed          2
+! flags for parallel runs:
+#manyseeds      1  ! Used to perform multiple runs with different random
+                  ! seeds in the same directory.
+                  ! If set to 1, the program asks for an integer j;
+                  ! The file pwgseeds.dat at line j is read, and the
+                  ! integer at line j is used to initialize the random
+                  ! sequence for the generation of the event.
+                  ! The event file is called pwgevents-'j'.lhe
+#xgriditeration 1  ! identifier for grid generation
+#parallelstage  1  ! identifier for parallel running stages
