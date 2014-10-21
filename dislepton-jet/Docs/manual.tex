@@ -70,6 +70,7 @@ Refs.~\cite{JMT,Alioli:2010xd,Ellis:2007qk,vanOldenborgh:1990yc}.
 %
 Note that the current  implementation has been tailored to 
 left-handed slepton pair production in association with a jet. Right-handed sleptons are not yet supported. The masses of squarks that appear as virtual particles in the loop corrections are implicitly assumed to be degenerate. Mixing effects between squarks of different generations are entirely disregarded. 
+Please contact the authors if you want to apply the code to scenarios that do not meet these limitations.
 %
 Model parameters are read from the file {\tt param\_card.dat}
 in the subdirectory {\tt MODEL} which is formated 
@@ -114,9 +115,10 @@ and compile the code with
 \\[2ex]
 {\tt \$ make}
 \\[2ex]
-to obtain the programs {\tt pwhg\_main},
+which may take some time.
+All three generated programs {\tt pwhg\_main},
 {\tt lhef\_analysis} and {\tt main-PYTHIA-lhef}
-that are to be executed in a separate working directory. This directory has to 
+are to be executed in a separate working directory. This directory has to 
 contain a file {\tt powheg.input} that specifies several technical parameters
 and, for parallel running, a file {\tt pwgseeds.dat}
 with different seeds for each parallel computation.

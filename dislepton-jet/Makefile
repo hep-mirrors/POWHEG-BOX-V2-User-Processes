@@ -88,16 +88,14 @@ PWHGANAL+= fastjetfortran.o fastjetsisconewrap.o fastjetktwrap.o
 endif
 
 
-VPATH=./:../Version-pre2-1/progress/:../Version-pre2-1/include/:../Version-pre2-1/:../:./Madlib/:./MODEL/:./DHELAS/:obj/:virtualDY/:
+VPATH=./:../:./Madlib/:./MODEL/:./DHELAS/:obj/:virtualDY/:
 
-HEADERS =$(wildcard ../Version-pre2-1/include/*.h ../include/*.h *.h include/*.h)
+HEADERS =$(wildcard ../include/*.h *.h include/*.h)
 
 INCLUDE0=./
-INCLUDE0.1=../Version-pre2-1/progress/include
-INCLUDE0.2=../Version-pre2-1/include
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=./MODEL
-INCLUDES+=-I$(PWD) -I$(INCLUDE0.1)  -I$(INCLUDE0.2) -I$(INCLUDE2) -I$(INCLUDE3)
+INCLUDES+=-I$(PWD) -I$(INCLUDE2) -I$(INCLUDE3)
 
 FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) $(INCLUDES)
 
