@@ -1,12 +1,7 @@
 c     qqZg amplitude: tensor coefficients
+c     generated on  Mon May 19 11:40:52 2014 by avm
 c
 c     heavy Nf contributions (top mass)
-c
-c     generated on  Mon May 19 11:40:52 2014 by avm
-c     (result generated with git revision
-c      1444288e8b24048b308eecfa29fe4068f5519021 from 13.12.2013,
-c      fermion loop: Larin, external fermions: naive, eps2sign = -1,
-c      exported with most recent git version)
 
 c     subroutine convention:
 c     input: mi
