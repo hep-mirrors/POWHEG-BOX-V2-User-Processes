@@ -1,5 +1,7 @@
-c     qqZg renormalized amplitude: tensor coefficients
+c     qqZg amplitude: tensor coefficients
 c     generated on  Wed Apr  9 15:22:24 2014 by avm
+c
+c     bare SM corrections without Nf contributions
 
 c     subroutine convention:
 c     input: mi

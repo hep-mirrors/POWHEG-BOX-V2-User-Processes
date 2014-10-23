@@ -1,4 +1,4 @@
-c     qqZg renormalized amplitude: tensor coefficients
+c     qqZg amplitude: tensor coefficients
 c     generated on  Fri Sep 12 14:37:03 2014 by avm
 c
 c     This file contains alphas/(2 pi) * 1/eps * Born

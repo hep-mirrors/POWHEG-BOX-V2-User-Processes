@@ -1,4 +1,4 @@
-c     qqZg renormalized amplitude: tensor coefficients
+c     qqZg amplitude: tensor coefficients
 c
 c     light Nf contributions
 c

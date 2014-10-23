@@ -1,4 +1,4 @@
-c     qqZg renormalized amplitude: tensor coefficients
+c     qqZg amplitude: tensor coefficients
 c     generated on  Wed Sep 24 23:17:04 2014 by avm
 
 c     bare SUSY corrections without closed squark loop

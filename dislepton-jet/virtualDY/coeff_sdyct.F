@@ -1,4 +1,4 @@
-c     qqZg renormalized amplitude: tensor coefficients
+c     qqZg amplitude: tensor coefficients
 c     generated on  Thu Sep 25 20:01:26 2014 by avm
 
 c     UV counter terms for SUSY corrections

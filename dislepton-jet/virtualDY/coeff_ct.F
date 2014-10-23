@@ -1,6 +1,5 @@
-c     qqZg renormalized amplitude: tensor coefficients
-c     generated on  Mon Aug 18 13:56:09 2014 by avm
-c     fixed factor 2 on 2014-09-10
+c     qqZg amplitude: tensor coefficients
+c     generated on  Wed Sep 10 2014 by avm
 c
 c     counter terms for SM corrections
 c     alphas in MS-bar, wave functions in ONS
