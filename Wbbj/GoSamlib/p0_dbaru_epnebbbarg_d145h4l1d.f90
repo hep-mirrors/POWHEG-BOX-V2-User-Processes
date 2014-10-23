@@ -1,0 +1,847 @@
+module     p0_dbaru_epnebbbarg_d145h4l1d
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/Wbbj_tmp/ &
+   ! &GoSam_POWHEG/Virtual/p0_dbaru_epnebbbarg/helicity4d145h4l1d.f90
+   ! generator: buildfortran_d.py
+   use p0_dbaru_epnebbbarg_config, only: ki
+   use p0_dbaru_epnebbbarg_util, only: cond, d => metric_tensor
+   implicit none
+   private
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+   integer, private :: iv0
+   integer, private :: iv1
+   integer, private :: iv2
+   integer, private :: iv3
+   real(ki), dimension(4), private :: qshift
+   public :: derivative , reconstruct_d145
+contains
+!---#[ function brack_1:
+   pure function brack_1(Q, mu2) result(brack)
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_color
+      use p0_dbaru_epnebbbarg_abbrevd145h4
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q
+      complex(ki), intent(in) :: mu2
+      complex(ki), dimension(79) :: acd145
+      complex(ki) :: brack
+      acd145(1)=dotproduct(k2,qshift)
+      acd145(2)=dotproduct(qshift,spval5k2)
+      acd145(3)=dotproduct(qshift,spvak7k2)
+      acd145(4)=abb145(33)
+      acd145(5)=abb145(39)
+      acd145(6)=dotproduct(qshift,spval6k2)
+      acd145(7)=abb145(117)
+      acd145(8)=abb145(20)
+      acd145(9)=abb145(106)
+      acd145(10)=abb145(19)
+      acd145(11)=dotproduct(k3,qshift)
+      acd145(12)=abb145(77)
+      acd145(13)=dotproduct(k4,qshift)
+      acd145(14)=dotproduct(l5,qshift)
+      acd145(15)=abb145(37)
+      acd145(16)=abb145(129)
+      acd145(17)=abb145(102)
+      acd145(18)=abb145(58)
+      acd145(19)=dotproduct(l6,qshift)
+      acd145(20)=dotproduct(k7,qshift)
+      acd145(21)=abb145(34)
+      acd145(22)=abb145(124)
+      acd145(23)=abb145(101)
+      acd145(24)=abb145(59)
+      acd145(25)=dotproduct(qshift,qshift)
+      acd145(26)=abb145(35)
+      acd145(27)=abb145(57)
+      acd145(28)=abb145(53)
+      acd145(29)=abb145(22)
+      acd145(30)=dotproduct(qshift,spvak1k2)
+      acd145(31)=abb145(28)
+      acd145(32)=dotproduct(qshift,spvak1k3)
+      acd145(33)=abb145(30)
+      acd145(34)=dotproduct(qshift,spvak4k2)
+      acd145(35)=abb145(31)
+      acd145(36)=dotproduct(qshift,spvak4k3)
+      acd145(37)=abb145(45)
+      acd145(38)=abb145(29)
+      acd145(39)=dotproduct(qshift,spvak7k3)
+      acd145(40)=abb145(36)
+      acd145(41)=abb145(27)
+      acd145(42)=abb145(40)
+      acd145(43)=abb145(56)
+      acd145(44)=abb145(46)
+      acd145(45)=abb145(54)
+      acd145(46)=abb145(47)
+      acd145(47)=abb145(25)
+      acd145(48)=dotproduct(qshift,spvak1l5)
+      acd145(49)=abb145(52)
+      acd145(50)=dotproduct(qshift,spvak1l6)
+      acd145(51)=abb145(55)
+      acd145(52)=dotproduct(qshift,spval5k3)
+      acd145(53)=abb145(81)
+      acd145(54)=dotproduct(qshift,spval6k3)
+      acd145(55)=abb145(96)
+      acd145(56)=abb145(21)
+      acd145(57)=abb145(66)
+      acd145(58)=abb145(26)
+      acd145(59)=abb145(49)
+      acd145(60)=abb145(51)
+      acd145(61)=abb145(38)
+      acd145(62)=abb145(23)
+      acd145(63)=abb145(41)
+      acd145(64)=abb145(67)
+      acd145(65)=abb145(60)
+      acd145(66)=acd145(11)+acd145(13)
+      acd145(67)=acd145(66)-acd145(1)
+      acd145(68)=acd145(7)*acd145(67)
+      acd145(69)=-acd145(32)*acd145(43)
+      acd145(70)=-acd145(36)*acd145(45)
+      acd145(71)=-acd145(34)*acd145(44)
+      acd145(72)=-acd145(30)*acd145(42)
+      acd145(68)=acd145(72)+acd145(71)+acd145(70)+acd145(46)+acd145(69)+acd145(&
+      &68)
+      acd145(68)=acd145(6)*acd145(68)
+      acd145(67)=acd145(4)*acd145(67)
+      acd145(69)=-acd145(32)*acd145(33)
+      acd145(70)=-acd145(36)*acd145(37)
+      acd145(71)=-acd145(34)*acd145(35)
+      acd145(72)=-acd145(30)*acd145(31)
+      acd145(67)=acd145(72)+acd145(71)+acd145(70)+acd145(38)+acd145(69)+acd145(&
+      &67)
+      acd145(67)=acd145(2)*acd145(67)
+      acd145(69)=acd145(14)+acd145(19)
+      acd145(70)=-acd145(16)*acd145(69)
+      acd145(71)=acd145(50)*acd145(51)
+      acd145(72)=acd145(48)*acd145(49)
+      acd145(73)=acd145(54)*acd145(55)
+      acd145(74)=acd145(52)*acd145(53)
+      acd145(75)=acd145(30)*acd145(47)
+      acd145(76)=-acd145(25)*acd145(27)
+      acd145(77)=acd145(20)*acd145(22)
+      acd145(78)=acd145(1)*acd145(8)
+      acd145(67)=acd145(67)+acd145(68)+acd145(78)+acd145(77)+acd145(76)+acd145(&
+      &75)+acd145(74)+acd145(73)+acd145(72)-acd145(56)+acd145(71)+acd145(70)
+      acd145(67)=acd145(3)*acd145(67)
+      acd145(68)=-acd145(17)*acd145(69)
+      acd145(70)=acd145(39)*acd145(57)
+      acd145(71)=-acd145(25)*acd145(28)
+      acd145(72)=acd145(20)*acd145(23)
+      acd145(73)=acd145(1)*acd145(9)
+      acd145(68)=acd145(73)+acd145(72)+acd145(71)-acd145(58)+acd145(70)+acd145(&
+      &68)
+      acd145(68)=acd145(6)*acd145(68)
+      acd145(70)=-acd145(15)*acd145(69)
+      acd145(71)=acd145(39)*acd145(40)
+      acd145(72)=-acd145(25)*acd145(26)
+      acd145(73)=acd145(20)*acd145(21)
+      acd145(74)=acd145(1)*acd145(5)
+      acd145(70)=acd145(74)+acd145(73)+acd145(72)-acd145(41)+acd145(71)+acd145(&
+      &70)
+      acd145(70)=acd145(2)*acd145(70)
+      acd145(69)=-acd145(18)*acd145(69)
+      acd145(66)=acd145(12)*acd145(66)
+      acd145(71)=-acd145(54)*acd145(64)
+      acd145(72)=-acd145(52)*acd145(63)
+      acd145(73)=-acd145(39)*acd145(62)
+      acd145(74)=-acd145(36)*acd145(61)
+      acd145(75)=-acd145(34)*acd145(60)
+      acd145(76)=-acd145(30)*acd145(59)
+      acd145(77)=acd145(25)*acd145(29)
+      acd145(78)=-acd145(20)*acd145(24)
+      acd145(79)=-acd145(1)*acd145(10)
+      brack=acd145(65)+acd145(66)+acd145(67)+acd145(68)+acd145(69)+acd145(70)+a&
+      &cd145(71)+acd145(72)+acd145(73)+acd145(74)+acd145(75)+acd145(76)+acd145(&
+      &77)+acd145(78)+acd145(79)
+   end function brack_1
+!---#] function brack_1:
+!---#[ function brack_2:
+   pure function brack_2(Q, mu2) result(brack)
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_color
+      use p0_dbaru_epnebbbarg_abbrevd145h4
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q
+      complex(ki), intent(in) :: mu2
+      complex(ki), dimension(101) :: acd145
+      complex(ki) :: brack
+      acd145(1)=k2(iv1)
+      acd145(2)=dotproduct(qshift,spval5k2)
+      acd145(3)=dotproduct(qshift,spvak7k2)
+      acd145(4)=abb145(33)
+      acd145(5)=abb145(39)
+      acd145(6)=dotproduct(qshift,spval6k2)
+      acd145(7)=abb145(117)
+      acd145(8)=abb145(20)
+      acd145(9)=abb145(106)
+      acd145(10)=abb145(19)
+      acd145(11)=k3(iv1)
+      acd145(12)=abb145(77)
+      acd145(13)=k4(iv1)
+      acd145(14)=l5(iv1)
+      acd145(15)=abb145(37)
+      acd145(16)=abb145(129)
+      acd145(17)=abb145(102)
+      acd145(18)=abb145(58)
+      acd145(19)=l6(iv1)
+      acd145(20)=k7(iv1)
+      acd145(21)=abb145(34)
+      acd145(22)=abb145(124)
+      acd145(23)=abb145(101)
+      acd145(24)=abb145(59)
+      acd145(25)=qshift(iv1)
+      acd145(26)=abb145(35)
+      acd145(27)=abb145(57)
+      acd145(28)=abb145(53)
+      acd145(29)=abb145(22)
+      acd145(30)=spval5k2(iv1)
+      acd145(31)=dotproduct(k2,qshift)
+      acd145(32)=dotproduct(k3,qshift)
+      acd145(33)=dotproduct(k4,qshift)
+      acd145(34)=dotproduct(l5,qshift)
+      acd145(35)=dotproduct(l6,qshift)
+      acd145(36)=dotproduct(k7,qshift)
+      acd145(37)=dotproduct(qshift,qshift)
+      acd145(38)=dotproduct(qshift,spvak1k2)
+      acd145(39)=abb145(28)
+      acd145(40)=dotproduct(qshift,spvak1k3)
+      acd145(41)=abb145(30)
+      acd145(42)=dotproduct(qshift,spvak4k2)
+      acd145(43)=abb145(31)
+      acd145(44)=dotproduct(qshift,spvak4k3)
+      acd145(45)=abb145(45)
+      acd145(46)=abb145(29)
+      acd145(47)=dotproduct(qshift,spvak7k3)
+      acd145(48)=abb145(36)
+      acd145(49)=abb145(27)
+      acd145(50)=spvak7k2(iv1)
+      acd145(51)=abb145(40)
+      acd145(52)=abb145(56)
+      acd145(53)=abb145(46)
+      acd145(54)=abb145(54)
+      acd145(55)=abb145(47)
+      acd145(56)=abb145(25)
+      acd145(57)=dotproduct(qshift,spvak1l5)
+      acd145(58)=abb145(52)
+      acd145(59)=dotproduct(qshift,spvak1l6)
+      acd145(60)=abb145(55)
+      acd145(61)=dotproduct(qshift,spval5k3)
+      acd145(62)=abb145(81)
+      acd145(63)=dotproduct(qshift,spval6k3)
+      acd145(64)=abb145(96)
+      acd145(65)=abb145(21)
+      acd145(66)=spval6k2(iv1)
+      acd145(67)=abb145(66)
+      acd145(68)=abb145(26)
+      acd145(69)=spvak1k2(iv1)
+      acd145(70)=abb145(49)
+      acd145(71)=spvak1k3(iv1)
+      acd145(72)=spvak1l5(iv1)
+      acd145(73)=spvak1l6(iv1)
+      acd145(74)=spvak4k2(iv1)
+      acd145(75)=abb145(51)
+      acd145(76)=spvak4k3(iv1)
+      acd145(77)=abb145(38)
+      acd145(78)=spvak7k3(iv1)
+      acd145(79)=abb145(23)
+      acd145(80)=spval5k3(iv1)
+      acd145(81)=abb145(41)
+      acd145(82)=spval6k3(iv1)
+      acd145(83)=abb145(67)
+      acd145(84)=-acd145(33)+acd145(31)-acd145(32)
+      acd145(85)=acd145(84)*acd145(7)
+      acd145(86)=acd145(44)*acd145(54)
+      acd145(87)=acd145(42)*acd145(53)
+      acd145(88)=acd145(40)*acd145(52)
+      acd145(89)=acd145(38)*acd145(51)
+      acd145(85)=acd145(85)+acd145(86)+acd145(88)+acd145(89)+acd145(87)-acd145(&
+      &55)
+      acd145(86)=-acd145(66)*acd145(85)
+      acd145(84)=acd145(84)*acd145(4)
+      acd145(87)=acd145(44)*acd145(45)
+      acd145(88)=acd145(42)*acd145(43)
+      acd145(89)=acd145(40)*acd145(41)
+      acd145(90)=acd145(38)*acd145(39)
+      acd145(84)=acd145(84)+acd145(87)+acd145(88)+acd145(89)+acd145(90)-acd145(&
+      &46)
+      acd145(87)=-acd145(30)*acd145(84)
+      acd145(88)=-acd145(54)*acd145(76)
+      acd145(89)=-acd145(53)*acd145(74)
+      acd145(90)=-acd145(52)*acd145(71)
+      acd145(91)=-acd145(69)*acd145(51)
+      acd145(92)=acd145(11)+acd145(13)
+      acd145(93)=acd145(92)-acd145(1)
+      acd145(94)=acd145(7)*acd145(93)
+      acd145(88)=acd145(94)+acd145(91)+acd145(90)+acd145(88)+acd145(89)
+      acd145(88)=acd145(6)*acd145(88)
+      acd145(89)=-acd145(45)*acd145(76)
+      acd145(90)=-acd145(43)*acd145(74)
+      acd145(91)=-acd145(41)*acd145(71)
+      acd145(94)=-acd145(69)*acd145(39)
+      acd145(93)=acd145(4)*acd145(93)
+      acd145(89)=acd145(93)+acd145(94)+acd145(91)+acd145(89)+acd145(90)
+      acd145(89)=acd145(2)*acd145(89)
+      acd145(90)=acd145(14)+acd145(19)
+      acd145(91)=-acd145(16)*acd145(90)
+      acd145(93)=acd145(64)*acd145(82)
+      acd145(94)=acd145(62)*acd145(80)
+      acd145(95)=acd145(60)*acd145(73)
+      acd145(96)=acd145(58)*acd145(72)
+      acd145(97)=acd145(69)*acd145(56)
+      acd145(98)=2.0_ki*acd145(25)
+      acd145(99)=-acd145(27)*acd145(98)
+      acd145(100)=acd145(20)*acd145(22)
+      acd145(101)=acd145(1)*acd145(8)
+      acd145(86)=acd145(89)+acd145(88)+acd145(87)+acd145(86)+acd145(101)+acd145&
+      &(100)+acd145(99)+acd145(97)+acd145(96)+acd145(95)+acd145(93)+acd145(94)+&
+      &acd145(91)
+      acd145(86)=acd145(3)*acd145(86)
+      acd145(85)=-acd145(6)*acd145(85)
+      acd145(84)=-acd145(2)*acd145(84)
+      acd145(87)=acd145(64)*acd145(63)
+      acd145(88)=acd145(62)*acd145(61)
+      acd145(89)=acd145(60)*acd145(59)
+      acd145(91)=acd145(58)*acd145(57)
+      acd145(93)=-acd145(37)*acd145(27)
+      acd145(94)=acd145(36)*acd145(22)
+      acd145(95)=acd145(34)+acd145(35)
+      acd145(96)=-acd145(16)*acd145(95)
+      acd145(97)=acd145(38)*acd145(56)
+      acd145(99)=acd145(31)*acd145(8)
+      acd145(84)=acd145(84)+acd145(85)+acd145(99)+acd145(97)+acd145(96)+acd145(&
+      &94)+acd145(93)+acd145(91)+acd145(89)+acd145(88)-acd145(65)+acd145(87)
+      acd145(84)=acd145(50)*acd145(84)
+      acd145(85)=acd145(47)*acd145(67)
+      acd145(87)=-acd145(37)*acd145(28)
+      acd145(88)=acd145(36)*acd145(23)
+      acd145(89)=-acd145(17)*acd145(95)
+      acd145(91)=acd145(31)*acd145(9)
+      acd145(85)=acd145(91)+acd145(89)+acd145(88)+acd145(87)-acd145(68)+acd145(&
+      &85)
+      acd145(85)=acd145(66)*acd145(85)
+      acd145(87)=acd145(47)*acd145(48)
+      acd145(88)=-acd145(37)*acd145(26)
+      acd145(89)=acd145(36)*acd145(21)
+      acd145(91)=-acd145(15)*acd145(95)
+      acd145(93)=acd145(31)*acd145(5)
+      acd145(87)=acd145(93)+acd145(91)+acd145(89)+acd145(88)-acd145(49)+acd145(&
+      &87)
+      acd145(87)=acd145(30)*acd145(87)
+      acd145(88)=-acd145(17)*acd145(90)
+      acd145(89)=acd145(78)*acd145(67)
+      acd145(91)=-acd145(28)*acd145(98)
+      acd145(93)=acd145(20)*acd145(23)
+      acd145(94)=acd145(1)*acd145(9)
+      acd145(88)=acd145(94)+acd145(93)+acd145(89)+acd145(91)+acd145(88)
+      acd145(88)=acd145(6)*acd145(88)
+      acd145(89)=-acd145(15)*acd145(90)
+      acd145(91)=acd145(78)*acd145(48)
+      acd145(93)=-acd145(26)*acd145(98)
+      acd145(94)=acd145(20)*acd145(21)
+      acd145(95)=acd145(1)*acd145(5)
+      acd145(89)=acd145(95)+acd145(94)+acd145(91)+acd145(93)+acd145(89)
+      acd145(89)=acd145(2)*acd145(89)
+      acd145(90)=-acd145(18)*acd145(90)
+      acd145(91)=acd145(12)*acd145(92)
+      acd145(92)=-acd145(82)*acd145(83)
+      acd145(93)=-acd145(80)*acd145(81)
+      acd145(94)=-acd145(78)*acd145(79)
+      acd145(95)=-acd145(76)*acd145(77)
+      acd145(96)=-acd145(74)*acd145(75)
+      acd145(97)=-acd145(69)*acd145(70)
+      acd145(98)=acd145(29)*acd145(98)
+      acd145(99)=-acd145(20)*acd145(24)
+      acd145(100)=-acd145(1)*acd145(10)
+      brack=acd145(84)+acd145(85)+acd145(86)+acd145(87)+acd145(88)+acd145(89)+a&
+      &cd145(90)+acd145(91)+acd145(92)+acd145(93)+acd145(94)+acd145(95)+acd145(&
+      &96)+acd145(97)+acd145(98)+acd145(99)+acd145(100)
+   end function brack_2
+!---#] function brack_2:
+!---#[ function brack_3:
+   pure function brack_3(Q, mu2) result(brack)
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_color
+      use p0_dbaru_epnebbbarg_abbrevd145h4
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q
+      complex(ki), intent(in) :: mu2
+      complex(ki), dimension(105) :: acd145
+      complex(ki) :: brack
+      acd145(1)=d(iv1,iv2)
+      acd145(2)=dotproduct(qshift,spval5k2)
+      acd145(3)=abb145(35)
+      acd145(4)=dotproduct(qshift,spval6k2)
+      acd145(5)=abb145(53)
+      acd145(6)=dotproduct(qshift,spvak7k2)
+      acd145(7)=abb145(57)
+      acd145(8)=abb145(22)
+      acd145(9)=k2(iv1)
+      acd145(10)=spval5k2(iv2)
+      acd145(11)=abb145(33)
+      acd145(12)=abb145(39)
+      acd145(13)=spval6k2(iv2)
+      acd145(14)=abb145(117)
+      acd145(15)=abb145(106)
+      acd145(16)=spvak7k2(iv2)
+      acd145(17)=abb145(20)
+      acd145(18)=k2(iv2)
+      acd145(19)=spval5k2(iv1)
+      acd145(20)=spval6k2(iv1)
+      acd145(21)=spvak7k2(iv1)
+      acd145(22)=k3(iv1)
+      acd145(23)=k3(iv2)
+      acd145(24)=k4(iv1)
+      acd145(25)=k4(iv2)
+      acd145(26)=l5(iv1)
+      acd145(27)=abb145(37)
+      acd145(28)=abb145(102)
+      acd145(29)=abb145(129)
+      acd145(30)=l5(iv2)
+      acd145(31)=l6(iv1)
+      acd145(32)=l6(iv2)
+      acd145(33)=k7(iv1)
+      acd145(34)=abb145(34)
+      acd145(35)=abb145(101)
+      acd145(36)=abb145(124)
+      acd145(37)=k7(iv2)
+      acd145(38)=qshift(iv1)
+      acd145(39)=qshift(iv2)
+      acd145(40)=dotproduct(k2,qshift)
+      acd145(41)=dotproduct(k3,qshift)
+      acd145(42)=dotproduct(k4,qshift)
+      acd145(43)=dotproduct(qshift,spvak1k2)
+      acd145(44)=abb145(28)
+      acd145(45)=dotproduct(qshift,spvak1k3)
+      acd145(46)=abb145(30)
+      acd145(47)=dotproduct(qshift,spvak4k2)
+      acd145(48)=abb145(31)
+      acd145(49)=dotproduct(qshift,spvak4k3)
+      acd145(50)=abb145(45)
+      acd145(51)=abb145(29)
+      acd145(52)=spvak1k2(iv2)
+      acd145(53)=spvak1k3(iv2)
+      acd145(54)=spvak4k2(iv2)
+      acd145(55)=spvak4k3(iv2)
+      acd145(56)=spvak7k3(iv2)
+      acd145(57)=abb145(36)
+      acd145(58)=spvak1k2(iv1)
+      acd145(59)=spvak1k3(iv1)
+      acd145(60)=spvak4k2(iv1)
+      acd145(61)=spvak4k3(iv1)
+      acd145(62)=spvak7k3(iv1)
+      acd145(63)=abb145(40)
+      acd145(64)=abb145(56)
+      acd145(65)=abb145(46)
+      acd145(66)=abb145(54)
+      acd145(67)=abb145(47)
+      acd145(68)=abb145(66)
+      acd145(69)=abb145(25)
+      acd145(70)=spvak1l5(iv2)
+      acd145(71)=abb145(52)
+      acd145(72)=spvak1l6(iv2)
+      acd145(73)=abb145(55)
+      acd145(74)=spval5k3(iv2)
+      acd145(75)=abb145(81)
+      acd145(76)=spval6k3(iv2)
+      acd145(77)=abb145(96)
+      acd145(78)=spvak1l5(iv1)
+      acd145(79)=spvak1l6(iv1)
+      acd145(80)=spval5k3(iv1)
+      acd145(81)=spval6k3(iv1)
+      acd145(82)=acd145(66)*acd145(49)
+      acd145(83)=acd145(65)*acd145(47)
+      acd145(84)=acd145(64)*acd145(45)
+      acd145(85)=acd145(63)*acd145(43)
+      acd145(86)=-acd145(42)+acd145(40)-acd145(41)
+      acd145(87)=acd145(86)*acd145(14)
+      acd145(82)=acd145(82)+acd145(83)+acd145(84)+acd145(85)+acd145(87)-acd145(&
+      &67)
+      acd145(83)=-acd145(13)*acd145(82)
+      acd145(84)=acd145(50)*acd145(49)
+      acd145(85)=acd145(48)*acd145(47)
+      acd145(87)=acd145(46)*acd145(45)
+      acd145(86)=acd145(86)*acd145(11)
+      acd145(88)=acd145(44)*acd145(43)
+      acd145(84)=acd145(86)+acd145(84)+acd145(88)-acd145(51)+acd145(85)+acd145(&
+      &87)
+      acd145(85)=-acd145(10)*acd145(84)
+      acd145(86)=acd145(66)*acd145(55)
+      acd145(87)=acd145(65)*acd145(54)
+      acd145(88)=acd145(64)*acd145(53)
+      acd145(89)=acd145(63)*acd145(52)
+      acd145(86)=acd145(86)+acd145(87)+acd145(88)+acd145(89)
+      acd145(87)=-acd145(4)*acd145(86)
+      acd145(88)=acd145(50)*acd145(55)
+      acd145(89)=acd145(48)*acd145(54)
+      acd145(90)=acd145(46)*acd145(53)
+      acd145(91)=acd145(44)*acd145(52)
+      acd145(88)=acd145(88)+acd145(89)+acd145(90)+acd145(91)
+      acd145(89)=-acd145(2)*acd145(88)
+      acd145(90)=acd145(14)*acd145(4)
+      acd145(91)=acd145(11)*acd145(2)
+      acd145(90)=acd145(90)+acd145(91)
+      acd145(91)=-acd145(25)+acd145(18)-acd145(23)
+      acd145(92)=-acd145(91)*acd145(90)
+      acd145(93)=acd145(77)*acd145(76)
+      acd145(94)=acd145(75)*acd145(74)
+      acd145(95)=acd145(73)*acd145(72)
+      acd145(96)=acd145(71)*acd145(70)
+      acd145(97)=acd145(37)*acd145(36)
+      acd145(98)=2.0_ki*acd145(7)
+      acd145(99)=-acd145(39)*acd145(98)
+      acd145(100)=acd145(30)+acd145(32)
+      acd145(101)=-acd145(29)*acd145(100)
+      acd145(102)=acd145(52)*acd145(69)
+      acd145(103)=acd145(18)*acd145(17)
+      acd145(83)=acd145(85)+acd145(83)+acd145(89)+acd145(87)+acd145(103)+acd145&
+      &(102)+acd145(101)+acd145(99)+acd145(97)+acd145(96)+acd145(95)+acd145(93)&
+      &+acd145(94)+acd145(92)
+      acd145(83)=acd145(21)*acd145(83)
+      acd145(82)=-acd145(20)*acd145(82)
+      acd145(84)=-acd145(19)*acd145(84)
+      acd145(85)=acd145(66)*acd145(61)
+      acd145(87)=acd145(65)*acd145(60)
+      acd145(89)=acd145(64)*acd145(59)
+      acd145(92)=acd145(63)*acd145(58)
+      acd145(85)=acd145(85)+acd145(87)+acd145(89)+acd145(92)
+      acd145(87)=-acd145(4)*acd145(85)
+      acd145(89)=acd145(50)*acd145(61)
+      acd145(92)=acd145(48)*acd145(60)
+      acd145(93)=acd145(46)*acd145(59)
+      acd145(94)=acd145(44)*acd145(58)
+      acd145(89)=acd145(89)+acd145(92)+acd145(93)+acd145(94)
+      acd145(92)=-acd145(2)*acd145(89)
+      acd145(93)=-acd145(24)+acd145(9)-acd145(22)
+      acd145(90)=-acd145(93)*acd145(90)
+      acd145(94)=acd145(77)*acd145(81)
+      acd145(95)=acd145(75)*acd145(80)
+      acd145(96)=acd145(73)*acd145(79)
+      acd145(97)=acd145(71)*acd145(78)
+      acd145(99)=acd145(33)*acd145(36)
+      acd145(101)=-acd145(38)*acd145(98)
+      acd145(102)=acd145(26)+acd145(31)
+      acd145(103)=-acd145(29)*acd145(102)
+      acd145(104)=acd145(58)*acd145(69)
+      acd145(105)=acd145(9)*acd145(17)
+      acd145(82)=acd145(84)+acd145(82)+acd145(92)+acd145(87)+acd145(105)+acd145&
+      &(104)+acd145(103)+acd145(101)+acd145(99)+acd145(97)+acd145(96)+acd145(94&
+      &)+acd145(95)+acd145(90)
+      acd145(82)=acd145(16)*acd145(82)
+      acd145(84)=-acd145(14)*acd145(91)
+      acd145(84)=acd145(84)-acd145(86)
+      acd145(84)=acd145(20)*acd145(84)
+      acd145(86)=-acd145(11)*acd145(91)
+      acd145(86)=acd145(86)-acd145(88)
+      acd145(86)=acd145(19)*acd145(86)
+      acd145(87)=-acd145(14)*acd145(93)
+      acd145(85)=acd145(87)-acd145(85)
+      acd145(85)=acd145(13)*acd145(85)
+      acd145(87)=-acd145(11)*acd145(93)
+      acd145(87)=acd145(87)-acd145(89)
+      acd145(87)=acd145(10)*acd145(87)
+      acd145(88)=-acd145(1)*acd145(98)
+      acd145(84)=acd145(87)+acd145(85)+acd145(86)+acd145(88)+acd145(84)
+      acd145(84)=acd145(6)*acd145(84)
+      acd145(85)=acd145(56)*acd145(68)
+      acd145(86)=acd145(37)*acd145(35)
+      acd145(87)=2.0_ki*acd145(5)
+      acd145(88)=-acd145(39)*acd145(87)
+      acd145(89)=-acd145(28)*acd145(100)
+      acd145(90)=acd145(18)*acd145(15)
+      acd145(85)=acd145(90)+acd145(89)+acd145(88)+acd145(85)+acd145(86)
+      acd145(85)=acd145(20)*acd145(85)
+      acd145(86)=acd145(56)*acd145(57)
+      acd145(88)=acd145(37)*acd145(34)
+      acd145(89)=2.0_ki*acd145(3)
+      acd145(90)=-acd145(39)*acd145(89)
+      acd145(91)=-acd145(27)*acd145(100)
+      acd145(92)=acd145(18)*acd145(12)
+      acd145(86)=acd145(92)+acd145(91)+acd145(90)+acd145(86)+acd145(88)
+      acd145(86)=acd145(19)*acd145(86)
+      acd145(88)=acd145(62)*acd145(68)
+      acd145(90)=acd145(33)*acd145(35)
+      acd145(87)=-acd145(38)*acd145(87)
+      acd145(91)=-acd145(28)*acd145(102)
+      acd145(92)=acd145(9)*acd145(15)
+      acd145(87)=acd145(92)+acd145(91)+acd145(87)+acd145(88)+acd145(90)
+      acd145(87)=acd145(13)*acd145(87)
+      acd145(88)=acd145(57)*acd145(62)
+      acd145(90)=acd145(33)*acd145(34)
+      acd145(89)=-acd145(38)*acd145(89)
+      acd145(91)=-acd145(27)*acd145(102)
+      acd145(92)=acd145(9)*acd145(12)
+      acd145(88)=acd145(92)+acd145(91)+acd145(89)+acd145(88)+acd145(90)
+      acd145(88)=acd145(10)*acd145(88)
+      acd145(89)=-acd145(4)*acd145(5)
+      acd145(90)=-acd145(2)*acd145(3)
+      acd145(89)=acd145(90)+acd145(8)+acd145(89)
+      acd145(89)=acd145(1)*acd145(89)
+      brack=acd145(82)+acd145(83)+acd145(84)+acd145(85)+acd145(86)+acd145(87)+a&
+      &cd145(88)+2.0_ki*acd145(89)
+   end function brack_3
+!---#] function brack_3:
+!---#[ function brack_4:
+   pure function brack_4(Q, mu2) result(brack)
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_color
+      use p0_dbaru_epnebbbarg_abbrevd145h4
+      implicit none
+      complex(ki), dimension(4), intent(in) :: Q
+      complex(ki), intent(in) :: mu2
+      complex(ki), dimension(65) :: acd145
+      complex(ki) :: brack
+      acd145(1)=d(iv1,iv2)
+      acd145(2)=spval5k2(iv3)
+      acd145(3)=abb145(35)
+      acd145(4)=spval6k2(iv3)
+      acd145(5)=abb145(53)
+      acd145(6)=spvak7k2(iv3)
+      acd145(7)=abb145(57)
+      acd145(8)=d(iv1,iv3)
+      acd145(9)=spval5k2(iv2)
+      acd145(10)=spval6k2(iv2)
+      acd145(11)=spvak7k2(iv2)
+      acd145(12)=d(iv2,iv3)
+      acd145(13)=spval5k2(iv1)
+      acd145(14)=spval6k2(iv1)
+      acd145(15)=spvak7k2(iv1)
+      acd145(16)=k2(iv1)
+      acd145(17)=abb145(33)
+      acd145(18)=abb145(117)
+      acd145(19)=k2(iv2)
+      acd145(20)=k2(iv3)
+      acd145(21)=k3(iv1)
+      acd145(22)=k3(iv2)
+      acd145(23)=k3(iv3)
+      acd145(24)=k4(iv1)
+      acd145(25)=k4(iv2)
+      acd145(26)=k4(iv3)
+      acd145(27)=spvak1k2(iv3)
+      acd145(28)=abb145(28)
+      acd145(29)=spvak1k3(iv3)
+      acd145(30)=abb145(30)
+      acd145(31)=spvak4k2(iv3)
+      acd145(32)=abb145(31)
+      acd145(33)=spvak4k3(iv3)
+      acd145(34)=abb145(45)
+      acd145(35)=spvak1k2(iv2)
+      acd145(36)=spvak1k3(iv2)
+      acd145(37)=spvak4k2(iv2)
+      acd145(38)=spvak4k3(iv2)
+      acd145(39)=spvak1k2(iv1)
+      acd145(40)=spvak1k3(iv1)
+      acd145(41)=spvak4k2(iv1)
+      acd145(42)=spvak4k3(iv1)
+      acd145(43)=abb145(40)
+      acd145(44)=abb145(56)
+      acd145(45)=abb145(46)
+      acd145(46)=abb145(54)
+      acd145(47)=-acd145(3)*acd145(9)
+      acd145(48)=-acd145(5)*acd145(10)
+      acd145(49)=-acd145(7)*acd145(11)
+      acd145(47)=acd145(49)+acd145(47)+acd145(48)
+      acd145(47)=acd145(8)*acd145(47)
+      acd145(48)=-acd145(3)*acd145(13)
+      acd145(49)=-acd145(5)*acd145(14)
+      acd145(50)=-acd145(7)*acd145(15)
+      acd145(48)=acd145(50)+acd145(48)+acd145(49)
+      acd145(48)=acd145(12)*acd145(48)
+      acd145(47)=acd145(47)+acd145(48)
+      acd145(48)=acd145(2)*acd145(15)
+      acd145(49)=acd145(13)*acd145(6)
+      acd145(48)=acd145(48)+acd145(49)
+      acd145(49)=acd145(17)*acd145(48)
+      acd145(50)=acd145(4)*acd145(15)
+      acd145(51)=acd145(14)*acd145(6)
+      acd145(50)=acd145(50)+acd145(51)
+      acd145(51)=acd145(18)*acd145(50)
+      acd145(49)=acd145(51)+acd145(49)
+      acd145(51)=acd145(25)+acd145(22)-acd145(19)
+      acd145(49)=acd145(49)*acd145(51)
+      acd145(51)=acd145(9)*acd145(15)
+      acd145(52)=acd145(13)*acd145(11)
+      acd145(51)=acd145(51)+acd145(52)
+      acd145(52)=acd145(17)*acd145(51)
+      acd145(53)=acd145(10)*acd145(15)
+      acd145(54)=acd145(14)*acd145(11)
+      acd145(53)=acd145(53)+acd145(54)
+      acd145(54)=acd145(18)*acd145(53)
+      acd145(52)=acd145(54)+acd145(52)
+      acd145(54)=acd145(26)+acd145(23)-acd145(20)
+      acd145(52)=acd145(52)*acd145(54)
+      acd145(54)=acd145(2)*acd145(11)
+      acd145(55)=acd145(9)*acd145(6)
+      acd145(54)=acd145(54)+acd145(55)
+      acd145(55)=acd145(17)*acd145(54)
+      acd145(56)=acd145(4)*acd145(11)
+      acd145(57)=acd145(10)*acd145(6)
+      acd145(56)=acd145(56)+acd145(57)
+      acd145(57)=acd145(18)*acd145(56)
+      acd145(55)=acd145(57)+acd145(55)
+      acd145(57)=acd145(24)+acd145(21)-acd145(16)
+      acd145(55)=acd145(55)*acd145(57)
+      acd145(57)=acd145(3)*acd145(2)
+      acd145(58)=acd145(5)*acd145(4)
+      acd145(59)=acd145(7)*acd145(6)
+      acd145(57)=acd145(59)+acd145(57)+acd145(58)
+      acd145(57)=-2.0_ki*acd145(57)
+      acd145(57)=acd145(1)*acd145(57)
+      acd145(58)=-acd145(28)*acd145(51)
+      acd145(59)=-acd145(43)*acd145(53)
+      acd145(58)=acd145(58)+acd145(59)
+      acd145(58)=acd145(27)*acd145(58)
+      acd145(59)=-acd145(30)*acd145(51)
+      acd145(60)=-acd145(44)*acd145(53)
+      acd145(59)=acd145(59)+acd145(60)
+      acd145(59)=acd145(29)*acd145(59)
+      acd145(60)=-acd145(32)*acd145(51)
+      acd145(61)=-acd145(45)*acd145(53)
+      acd145(60)=acd145(60)+acd145(61)
+      acd145(60)=acd145(31)*acd145(60)
+      acd145(51)=-acd145(34)*acd145(51)
+      acd145(53)=-acd145(46)*acd145(53)
+      acd145(51)=acd145(51)+acd145(53)
+      acd145(51)=acd145(33)*acd145(51)
+      acd145(53)=-acd145(28)*acd145(48)
+      acd145(61)=-acd145(43)*acd145(50)
+      acd145(53)=acd145(53)+acd145(61)
+      acd145(53)=acd145(35)*acd145(53)
+      acd145(61)=-acd145(30)*acd145(48)
+      acd145(62)=-acd145(44)*acd145(50)
+      acd145(61)=acd145(61)+acd145(62)
+      acd145(61)=acd145(36)*acd145(61)
+      acd145(62)=-acd145(32)*acd145(48)
+      acd145(63)=-acd145(45)*acd145(50)
+      acd145(62)=acd145(62)+acd145(63)
+      acd145(62)=acd145(37)*acd145(62)
+      acd145(48)=-acd145(34)*acd145(48)
+      acd145(50)=-acd145(46)*acd145(50)
+      acd145(48)=acd145(48)+acd145(50)
+      acd145(48)=acd145(38)*acd145(48)
+      acd145(50)=-acd145(28)*acd145(54)
+      acd145(63)=-acd145(43)*acd145(56)
+      acd145(50)=acd145(50)+acd145(63)
+      acd145(50)=acd145(39)*acd145(50)
+      acd145(63)=-acd145(30)*acd145(54)
+      acd145(64)=-acd145(44)*acd145(56)
+      acd145(63)=acd145(63)+acd145(64)
+      acd145(63)=acd145(40)*acd145(63)
+      acd145(64)=-acd145(32)*acd145(54)
+      acd145(65)=-acd145(45)*acd145(56)
+      acd145(64)=acd145(64)+acd145(65)
+      acd145(64)=acd145(41)*acd145(64)
+      acd145(54)=-acd145(34)*acd145(54)
+      acd145(56)=-acd145(46)*acd145(56)
+      acd145(54)=acd145(54)+acd145(56)
+      acd145(54)=acd145(42)*acd145(54)
+      brack=2.0_ki*acd145(47)+acd145(48)+acd145(49)+acd145(50)+acd145(51)+acd14&
+      &5(52)+acd145(53)+acd145(54)+acd145(55)+acd145(57)+acd145(58)+acd145(59)+&
+      &acd145(60)+acd145(61)+acd145(62)+acd145(63)+acd145(64)
+   end function brack_4
+!---#] function brack_4:
+!---#[ function derivative:
+   function derivative(mu2,i1,i2,i3) result(numerator)
+      use p0_dbaru_epnebbbarg_globalsl1, only: epspow
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_abbrevd145h4
+      implicit none
+      complex(ki), intent(in) :: mu2
+      integer, intent(in), optional :: i1
+      integer, intent(in), optional :: i2
+      integer, intent(in), optional :: i3
+      complex(ki) :: numerator
+      complex(ki) :: loc
+      integer :: t1
+      integer :: deg
+      complex(ki), dimension(4), parameter :: Q = (/ (0.0_ki,0.0_ki),(0.0_ki,0.&
+      &0_ki),(0.0_ki,0.0_ki),(0.0_ki,0.0_ki)/)
+      qshift = -k6-k5
+      numerator = 0.0_ki
+      deg = 0
+      if(present(i1)) then
+          iv1=i1
+          deg=1
+      else
+          iv1=1
+      end if
+      if(present(i2)) then
+          iv2=i2
+          deg=2
+      else
+          iv2=1
+      end if
+      if(present(i3)) then
+          iv3=i3
+          deg=3
+      else
+          iv3=1
+      end if
+      t1 = 0
+      if(deg.eq.0) then
+         numerator = cond(epspow.eq.t1,brack_1,Q,mu2)
+         return
+      end if
+      if(deg.eq.1) then
+         numerator = cond(epspow.eq.t1,brack_2,Q,mu2)
+         return
+      end if
+      if(deg.eq.2) then
+         numerator = cond(epspow.eq.t1,brack_3,Q,mu2)
+         return
+      end if
+      if(deg.eq.3) then
+         numerator = cond(epspow.eq.t1,brack_4,Q,mu2)
+         return
+      end if
+   end function derivative
+!---#] function derivative:
+!---#[ subroutine reconstruct_d145:
+   subroutine     reconstruct_d145(coeffs)
+      use p0_dbaru_epnebbbarg_groups, only: tensrec_info_group16
+      implicit none
+      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
+      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
+      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
+      type(tensrec_info_group16), intent(out) :: coeffs
+      ! rank 3 case :
+      !---[# reconstruct coeffs%coeffs_145:
+      coeffs%coeffs_145%c0 = derivative(czip)
+      coeffs%coeffs_145%c1(1,1) = derivative(czip,1)
+      coeffs%coeffs_145%c1(1,2) = derivative(czip,1,1)/2.0_ki
+      coeffs%coeffs_145%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
+      coeffs%coeffs_145%c1(2,1) = -derivative(czip,2)
+      coeffs%coeffs_145%c1(2,2) = derivative(czip,2,2)/2.0_ki
+      coeffs%coeffs_145%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
+      coeffs%coeffs_145%c1(3,1) = -derivative(czip,3)
+      coeffs%coeffs_145%c1(3,2) = derivative(czip,3,3)/2.0_ki
+      coeffs%coeffs_145%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
+      coeffs%coeffs_145%c1(4,1) = -derivative(czip,4)
+      coeffs%coeffs_145%c1(4,2) = derivative(czip,4,4)/2.0_ki
+      coeffs%coeffs_145%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
+      coeffs%coeffs_145%c2(1,1) = -derivative(czip,1,2)
+      coeffs%coeffs_145%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
+      coeffs%coeffs_145%c2(1,3) = -derivative(czip,1,1,2)/2.0_ki
+      coeffs%coeffs_145%c2(2,1) = -derivative(czip,1,3)
+      coeffs%coeffs_145%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
+      coeffs%coeffs_145%c2(2,3) = -derivative(czip,1,1,3)/2.0_ki
+      coeffs%coeffs_145%c2(3,1) = -derivative(czip,1,4)
+      coeffs%coeffs_145%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
+      coeffs%coeffs_145%c2(3,3) = -derivative(czip,1,1,4)/2.0_ki
+      coeffs%coeffs_145%c2(4,1) = derivative(czip,2,3)
+      coeffs%coeffs_145%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
+      coeffs%coeffs_145%c2(4,3) = -derivative(czip,2,2,3)/2.0_ki
+      coeffs%coeffs_145%c2(5,1) = derivative(czip,2,4)
+      coeffs%coeffs_145%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
+      coeffs%coeffs_145%c2(5,3) = -derivative(czip,2,2,4)/2.0_ki
+      coeffs%coeffs_145%c2(6,1) = derivative(czip,3,4)
+      coeffs%coeffs_145%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
+      coeffs%coeffs_145%c2(6,3) = -derivative(czip,3,3,4)/2.0_ki
+      coeffs%coeffs_145%c3(1,1) = derivative(czip,1,2,3)
+      coeffs%coeffs_145%c3(2,1) = derivative(czip,1,2,4)
+      coeffs%coeffs_145%c3(3,1) = derivative(czip,1,3,4)
+      coeffs%coeffs_145%c3(4,1) = -derivative(czip,2,3,4)
+      !---#] reconstruct coeffs%coeffs_145:
+   end subroutine reconstruct_d145
+!---#] subroutine reconstruct_d145:
+end module     p0_dbaru_epnebbbarg_d145h4l1d

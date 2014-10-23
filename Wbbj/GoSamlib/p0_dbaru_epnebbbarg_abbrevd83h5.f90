@@ -1,0 +1,239 @@
+module     p0_dbaru_epnebbbarg_abbrevd83h5
+   use p0_dbaru_epnebbbarg_config, only: ki
+   use p0_dbaru_epnebbbarg_globalsh5
+   implicit none
+   private
+   complex(ki), dimension(66), public :: abb83
+   complex(ki), public :: R2d83
+   public :: init_abbrev
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+contains
+   subroutine     init_abbrev()
+      use p0_dbaru_epnebbbarg_config, only: deltaOS, &
+     &    logfile, debug_nlo_diagrams
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_color, only: TR
+      use p0_dbaru_epnebbbarg_globalsl1, only: epspow
+      implicit none
+      abb83(1)=1.0_ki/(-mW**2+es34+i_*mW*wW)
+      abb83(2)=NC**(-1)
+      abb83(3)=sqrt2**(-1)
+      abb83(4)=es56**(-1)
+      abb83(5)=spbk7k2**(-1)
+      abb83(6)=spak2l5**(-1)
+      abb83(7)=spbl6k2**(-1)
+      abb83(8)=spbk4k3*spak4l6
+      abb83(9)=spal6k7*spbk7k3
+      abb83(8)=abb83(8)-abb83(9)
+      abb83(9)=c4*abb83(2)**2
+      abb83(10)=c1*abb83(2)
+      abb83(9)=c2+abb83(9)-abb83(10)
+      abb83(10)=TR*gW
+      abb83(10)=abb83(10)**2*abb83(4)*i_*CVDU*abb83(3)*abb83(1)
+      abb83(11)=abb83(9)*abb83(10)
+      abb83(12)=abb83(11)*spak4k7
+      abb83(13)=abb83(8)*abb83(12)
+      abb83(14)=spbl5k2*spak1k7
+      abb83(15)=abb83(14)*abb83(13)
+      abb83(16)=spak1k7*abb83(12)
+      abb83(17)=abb83(5)*abb83(10)
+      abb83(18)=abb83(17)*spbk3k2
+      abb83(19)=-abb83(9)*abb83(18)
+      abb83(20)=-abb83(19)*spak1k7
+      abb83(21)=spak3k4*abb83(20)
+      abb83(16)=abb83(21)+abb83(16)
+      abb83(21)=spak1l6*spbl5k3
+      abb83(16)=abb83(21)*abb83(16)
+      abb83(22)=-abb83(19)*spbk7l5
+      abb83(23)=abb83(22)*spak4k7
+      abb83(24)=abb83(23)*spak1l6
+      abb83(25)=spak1k7*abb83(24)
+      abb83(16)=abb83(25)+abb83(16)
+      abb83(16)=spbk2k1*abb83(16)
+      abb83(25)=-abb83(9)*abb83(6)*abb83(7)*mB**2
+      abb83(26)=-abb83(17)*abb83(25)
+      abb83(27)=spbk3k2**2
+      abb83(28)=abb83(26)*abb83(27)
+      abb83(29)=spak3k4*spak1k7
+      abb83(30)=abb83(28)*abb83(29)
+      abb83(31)=es12*abb83(30)
+      abb83(15)=abb83(16)+abb83(31)+abb83(15)
+      abb83(15)=8.0_ki*abb83(15)
+      abb83(16)=-abb83(19)*spak4l6
+      abb83(31)=16.0_ki*abb83(16)
+      abb83(32)=abb83(31)*abb83(14)
+      abb83(30)=-16.0_ki*abb83(30)
+      abb83(16)=8.0_ki*abb83(16)
+      abb83(33)=-abb83(14)*abb83(16)
+      abb83(9)=-abb83(17)*abb83(9)
+      abb83(17)=abb83(9)*spak1k4
+      abb83(34)=abb83(8)*abb83(17)
+      abb83(35)=-spbl5k2*abb83(34)
+      abb83(18)=-abb83(18)*abb83(25)
+      abb83(36)=abb83(18)*spak1k4
+      abb83(37)=abb83(36)*es12
+      abb83(38)=abb83(17)*abb83(21)
+      abb83(39)=abb83(38)*spbk2k1
+      abb83(35)=abb83(35)+abb83(37)-abb83(39)
+      abb83(37)=16.0_ki*abb83(35)
+      abb83(39)=-64.0_ki*abb83(36)
+      abb83(36)=32.0_ki*abb83(36)
+      abb83(40)=abb83(19)*abb83(21)
+      abb83(28)=-spak1k2*abb83(28)
+      abb83(28)=abb83(40)+abb83(28)
+      abb83(28)=spak3k4*abb83(28)
+      abb83(40)=-abb83(21)*abb83(12)
+      abb83(24)=abb83(28)+abb83(40)-abb83(24)
+      abb83(24)=16.0_ki*abb83(24)
+      abb83(28)=-8.0_ki*abb83(35)
+      abb83(35)=abb83(11)*spbl5k3
+      abb83(22)=abb83(35)+abb83(22)
+      abb83(22)=abb83(22)*spak2l6
+      abb83(10)=-abb83(10)*abb83(25)
+      abb83(25)=spbk4k3*abb83(10)*spak2k4
+      abb83(22)=abb83(22)-abb83(25)
+      abb83(35)=-spak1k4*abb83(22)
+      abb83(34)=-spbk7l5*abb83(34)
+      abb83(40)=abb83(10)*spak1k2
+      abb83(41)=spak1k4*abb83(40)
+      abb83(42)=spbk7l5*spak1l6
+      abb83(43)=abb83(17)*abb83(42)
+      abb83(41)=abb83(41)+abb83(43)
+      abb83(41)=spbk3k1*abb83(41)
+      abb83(43)=abb83(18)*spak1k2
+      abb83(44)=abb83(43)*spak1k4
+      abb83(38)=abb83(44)-abb83(38)
+      abb83(44)=-spbk7k1*abb83(38)
+      abb83(45)=abb83(26)*spbk7k3
+      abb83(46)=abb83(45)*spak1k4
+      abb83(47)=es712-es71
+      abb83(48)=abb83(47)-es12
+      abb83(49)=-abb83(46)*abb83(48)
+      abb83(34)=abb83(44)+abb83(41)+abb83(49)+abb83(34)+abb83(35)
+      abb83(34)=8.0_ki*abb83(34)
+      abb83(35)=-32.0_ki*abb83(46)
+      abb83(41)=8.0_ki*abb83(9)
+      abb83(27)=-abb83(29)*abb83(27)*abb83(41)
+      abb83(29)=-abb83(19)*spak1k4
+      abb83(44)=16.0_ki*abb83(29)
+      abb83(29)=-8.0_ki*abb83(29)
+      abb83(46)=16.0_ki*abb83(17)
+      abb83(46)=-spbk7k3*abb83(46)
+      abb83(49)=abb83(17)*spbl5k3
+      abb83(50)=16.0_ki*abb83(49)
+      abb83(49)=-8.0_ki*abb83(49)
+      abb83(51)=-abb83(19)*spak3l6
+      abb83(11)=abb83(11)*spal6k7
+      abb83(11)=abb83(51)-abb83(11)
+      abb83(14)=-abb83(14)*abb83(11)
+      abb83(51)=spbk4k2*spak4l6
+      abb83(52)=spbk2k1*spak1l6
+      abb83(52)=abb83(51)+abb83(52)
+      abb83(53)=abb83(9)*spbl5k2
+      abb83(54)=abb83(53)*spak1k7
+      abb83(52)=abb83(54)*abb83(52)
+      abb83(14)=abb83(52)+abb83(14)
+      abb83(14)=8.0_ki*abb83(14)
+      abb83(52)=abb83(53)*spak1l6
+      abb83(55)=spak1k7*abb83(10)
+      abb83(56)=abb83(26)*spbk4k2
+      abb83(57)=spak1k4*abb83(56)
+      abb83(58)=spak1k3*abb83(18)
+      abb83(55)=abb83(58)+abb83(57)+abb83(55)+abb83(52)
+      abb83(55)=16.0_ki*abb83(55)
+      abb83(52)=-16.0_ki*abb83(52)
+      abb83(57)=-abb83(9)*abb83(42)
+      abb83(57)=-abb83(40)+abb83(57)
+      abb83(57)=8.0_ki*abb83(57)
+      abb83(58)=abb83(9)*spak1k7
+      abb83(59)=abb83(58)*spbk7l5
+      abb83(60)=-spak1k2*abb83(53)
+      abb83(61)=-spak1k3*spbl5k3*abb83(9)
+      abb83(17)=-spbl5k4*abb83(17)
+      abb83(17)=abb83(17)+abb83(61)+abb83(60)+abb83(59)
+      abb83(17)=8.0_ki*abb83(17)
+      abb83(54)=abb83(8)*abb83(54)
+      abb83(21)=abb83(21)*abb83(9)
+      abb83(60)=spak1k7*abb83(21)*spbk2k1
+      abb83(61)=abb83(18)*spak1k7
+      abb83(62)=abb83(61)*es12
+      abb83(54)=abb83(60)+abb83(54)-abb83(62)
+      abb83(60)=16.0_ki*abb83(54)
+      abb83(61)=32.0_ki*abb83(61)
+      abb83(54)=-8.0_ki*abb83(54)
+      abb83(62)=16.0_ki*abb83(18)
+      abb83(63)=-spak1k7*abb83(62)
+      abb83(22)=spak1k7*abb83(22)
+      abb83(21)=abb83(43)-abb83(21)
+      abb83(43)=abb83(45)*spak1k7
+      abb83(64)=abb83(43)+abb83(21)
+      abb83(65)=-es71-es12
+      abb83(64)=abb83(64)*abb83(65)
+      abb83(65)=-es23+es123
+      abb83(65)=abb83(21)*abb83(65)
+      abb83(8)=abb83(59)*abb83(8)
+      abb83(40)=-spak1k7*abb83(40)
+      abb83(42)=-abb83(58)*abb83(42)
+      abb83(40)=abb83(40)+abb83(42)
+      abb83(40)=spbk3k1*abb83(40)
+      abb83(42)=es712*abb83(43)
+      abb83(59)=-spbl5k3*abb83(19)*spak2l6
+      abb83(66)=-spak1k3*abb83(59)
+      abb83(8)=abb83(66)+abb83(42)+abb83(40)+abb83(8)+abb83(65)+abb83(64)+abb83&
+      &(22)
+      abb83(8)=8.0_ki*abb83(8)
+      abb83(22)=16.0_ki*abb83(21)
+      abb83(40)=32.0_ki*abb83(43)
+      abb83(21)=8.0_ki*abb83(21)
+      abb83(42)=-16.0_ki*abb83(20)
+      abb83(20)=8.0_ki*abb83(20)
+      abb83(43)=16.0_ki*spbk7k3*abb83(58)
+      abb83(56)=-spak1k2*abb83(56)
+      abb83(58)=abb83(9)*spak1l6
+      abb83(64)=spbl5k4*abb83(58)
+      abb83(56)=abb83(56)+abb83(64)
+      abb83(56)=8.0_ki*abb83(56)
+      abb83(38)=spbk3k1*abb83(38)
+      abb83(64)=spak1k4*abb83(59)
+      abb83(38)=abb83(64)+abb83(38)
+      abb83(38)=8.0_ki*abb83(38)
+      abb83(64)=spak4k7*abb83(62)
+      abb83(65)=8.0_ki*spak4k7*abb83(19)
+      abb83(13)=8.0_ki*abb83(13)
+      abb83(9)=abb83(9)*abb83(51)
+      abb83(9)=abb83(9)-abb83(11)
+      abb83(9)=8.0_ki*abb83(9)
+      abb83(10)=-spak4k7*abb83(10)
+      abb83(11)=-spak3k4*abb83(18)
+      abb83(10)=abb83(10)+abb83(11)
+      abb83(10)=16.0_ki*abb83(10)
+      abb83(11)=-spak3k4*abb83(19)
+      abb83(11)=abb83(12)+abb83(11)
+      abb83(11)=8.0_ki*abb83(11)
+      abb83(19)=-abb83(45)*abb83(48)
+      abb83(19)=abb83(25)+abb83(19)
+      abb83(19)=spak4k7*abb83(19)
+      abb83(12)=-spbl5k3*abb83(12)
+      abb83(12)=abb83(12)-abb83(23)
+      abb83(12)=spak2l6*abb83(12)
+      abb83(23)=-spak3k4*abb83(59)
+      abb83(12)=abb83(23)+abb83(12)+abb83(19)
+      abb83(12)=8.0_ki*abb83(12)
+      abb83(19)=abb83(62)*spak2k4
+      abb83(18)=-8.0_ki*spak2k4*abb83(18)
+      abb83(23)=es234-es34+abb83(47)
+      abb83(23)=abb83(26)*abb83(23)
+      abb83(25)=-spak2l6*abb83(53)
+      abb83(45)=spbl5k1*abb83(58)
+      abb83(23)=abb83(45)+abb83(25)+abb83(23)
+      abb83(23)=8.0_ki*abb83(23)
+      abb83(25)=-16.0_ki*abb83(26)
+      R2d83=0.0_ki
+      rat2 = rat2 + R2d83
+      if (debug_nlo_diagrams) then
+          write (logfile,*) "<result name='r2' index='83' value='", &
+          & R2d83, "'/>"
+      end if
+   end subroutine
+end module p0_dbaru_epnebbbarg_abbrevd83h5

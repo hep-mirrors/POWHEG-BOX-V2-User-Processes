@@ -20,9 +20,6 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       save savbasicfac,savbornfac,savnlofac,savmuf2,valid
       save op
       data valid/maxprocborn*.false./
-      real * 8 rescfacloc,renscale2
-      common/crescfac/rescfacloc,renscale2
-      save /crescfac/
 
       do j=1,nlegborn
          do mu=0,3
@@ -71,6 +68,7 @@ c If the virtual is not included, it must be omitted.
       implicit none
       include 'nlegborn.h'
       include 'pwhg_st.h'
+      include 'pwhg_flg.h'
       include 'pwhg_math.h'
       integer flav(nlegborn)
       real * 8 pin(0:3,nlegborn),basicfac,bornfac,nlofac
@@ -78,7 +76,7 @@ c If the virtual is not included, it must be omitted.
       parameter (onem=1000000)
       real * 8 scales(nlegborn),p(0:3,nlegborn),ptot(0:3),
      1     lscalej,lscalek
-      integer j,k,l,lflav(nlegborn),jmerge,kmerge,inlofac
+      integer j,k,l,lflav(nlegborn),fl(nlegborn),jmerge,kmerge,inlofac
       integer mergedfl
       real * 8 q2merge,q2merge0,renfac2,facfact2,alphas,mu2,muf2
       real * 8 sudakov,expsudakov,pwhg_alphas,b0,powheginput
@@ -95,10 +93,9 @@ c     number of flavors that MiNLO consider as light partons
       save /cminlo_nlight/
       logical Sudakovbb
       save Sudakovbb
-
-      real * 8 rescfacloc,renscale2
-      common/crescfac/rescfacloc,renscale2
-      save /crescfac/
+      integer cluster
+      common/ccluster/cluster
+      save /ccluster/
 
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
@@ -274,11 +271,37 @@ c         enddo
       nlofac=nlofac/inlofac
       mu2=mu2**(1d0/inlofac)
       b0=(33-2*st_nlight)/(12*pi)
-      bornfac=1+st_alpha*nlofac*
-     1     (bornfac+st_bornorder*b0*log(mu2/st_muren2))
+      if(.not.flg_bornonly) then
+         bornfac=1+st_alpha*nlofac*
+     1        (bornfac+st_bornorder*b0*log(mu2/st_muren2))
+      else
+         bornfac=1d0
+      endif
       st_mufact2=muf2
-
-      renscale2=mu2
+      
+      cluster=0
+      fl = lflav
+      if (fl(5).ne.onem.and.fl(6).ne.onem.and.fl(7).ne.onem)then
+c     no clustering: wbbj final state
+         cluster=1
+      elseif(fl(5).ne.onem.and.fl(6).ne.onem.and.fl(7).eq.onem)then
+c     clustered final-state jet: wbb final state 
+         cluster=2
+      elseif(fl(5).eq.0.and.fl(6).eq.onem.and.fl(7).ne.onem)then
+c     clustered b bbar -> g: wgj final state 
+         cluster=3
+      elseif(fl(5).eq.onem.and.fl(6).eq.onem.and.fl(7).eq.onem)then
+c     everything clustered: w final state
+         cluster=4
+      elseif( (fl(5).ne.onem.and.fl(6).eq.onem.and.fl(7).eq.onem).or.
+     $        (fl(5).eq.onem.and.fl(6).eq.onem.and.fl(7).ne.onem)) then
+c     Wj final state
+         cluster=5
+      else   
+         write(*,*) '* PROBLEM in variable cluster in setlocalscales *'
+         write(*,*) 'Unclassified flavor sequence', fl
+         cluster=6
+      endif
 
       end
 
@@ -353,9 +376,12 @@ c is the dijet case, return with no merging.
 c
 
       do j=3,nlegborn
-         if(abs(lflav(j)).gt.minlo_nlight) goto 11
+         if(abs(lflav(j)).gt.minlo_nlight) goto 11         
+c     do NOT allow to merge initial state parton with a final-state b and have a b in the initial state
+         if (abs(lflav(j)).eq.5) goto 364
          yj=0.5d0*log((p(0,j)+p(3,j))/(p(0,j)-p(3,j)))
          if(yj.gt.ycm) then
+            
             call validmergeisr(lflav,1,j,fl1)
             if(fl1.ne.onem) then
                q2j = p(1,j)**2+p(2,j)**2
@@ -378,6 +404,7 @@ c
                endif
             endif
          endif
+ 364     continue
          do k=j+1,nlegborn
             if(abs(lflav(k)).gt.minlo_nlight) goto 12
             call validmergefsr(lflav,j,k,fl)

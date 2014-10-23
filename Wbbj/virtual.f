@@ -289,6 +289,9 @@ c     transfer the flavor list into a list with only up and down quark or antiqu
       muren=sqrt(st_muren2)
       params(1)=1d0
       
+c     from old to new version of GoSam!  
+      proc = proc-12
+
       call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
       virtual=res(3)
      

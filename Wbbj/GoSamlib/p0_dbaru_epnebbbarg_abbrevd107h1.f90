@@ -1,0 +1,240 @@
+module     p0_dbaru_epnebbbarg_abbrevd107h1
+   use p0_dbaru_epnebbbarg_config, only: ki
+   use p0_dbaru_epnebbbarg_globalsh1
+   implicit none
+   private
+   complex(ki), dimension(55), public :: abb107
+   complex(ki), public :: R2d107
+   public :: init_abbrev
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+contains
+   subroutine     init_abbrev()
+      use p0_dbaru_epnebbbarg_config, only: deltaOS, &
+     &    logfile, debug_nlo_diagrams
+      use p0_dbaru_epnebbbarg_kinematics
+      use p0_dbaru_epnebbbarg_model
+      use p0_dbaru_epnebbbarg_color, only: TR
+      use p0_dbaru_epnebbbarg_globalsl1, only: epspow
+      implicit none
+      abb107(1)=1.0_ki/(-mW**2+es34+i_*mW*wW)
+      abb107(2)=sqrt(mB**2)
+      abb107(3)=NC**(-1)
+      abb107(4)=sqrt2**(-1)
+      abb107(5)=es234**(-1)
+      abb107(6)=es71**(-1)
+      abb107(7)=spak2l5**(-1)
+      abb107(8)=spak2k7**(-1)
+      abb107(9)=spbl5k2**(-1)
+      abb107(10)=spbl6k2**(-1)
+      abb107(11)=spbk3k2*spak1k2
+      abb107(12)=abb107(11)**2
+      abb107(13)=TR*gW
+      abb107(13)=abb107(8)*i_*CVDU*abb107(5)*abb107(4)*abb107(1)*abb107(13)**2
+      abb107(14)=abb107(13)*spbk7k1*abb107(6)
+      abb107(15)=abb107(14)*abb107(3)
+      abb107(16)=abb107(12)*abb107(15)
+      abb107(17)=2.0_ki*c3
+      abb107(18)=abb107(17)*abb107(7)
+      abb107(19)=abb107(16)*abb107(18)
+      abb107(20)=abb107(3)**2
+      abb107(20)=abb107(20)+1.0_ki
+      abb107(21)=abb107(20)*abb107(14)
+      abb107(12)=abb107(12)*abb107(21)
+      abb107(22)=abb107(7)*c4
+      abb107(23)=abb107(12)*abb107(22)
+      abb107(23)=abb107(23)-abb107(19)
+      abb107(24)=spak3k4*abb107(10)
+      abb107(23)=abb107(24)*abb107(23)
+      abb107(16)=abb107(16)*abb107(17)
+      abb107(25)=abb107(12)*c4
+      abb107(16)=abb107(16)-abb107(25)
+      abb107(16)=abb107(9)*abb107(16)*abb107(7)**2
+      abb107(25)=spak2l6*spak3k4*abb107(16)
+      abb107(23)=abb107(25)+abb107(23)
+      abb107(23)=abb107(23)*abb107(2)*mB**3
+      abb107(25)=abb107(3)*spak1k2
+      abb107(26)=abb107(25)**2
+      abb107(27)=abb107(14)*spbk3k2
+      abb107(28)=abb107(26)*abb107(27)
+      abb107(29)=spak1k2**2
+      abb107(27)=abb107(27)*abb107(29)
+      abb107(28)=abb107(28)+abb107(27)
+      abb107(30)=abb107(2)*mB
+      abb107(31)=abb107(22)*abb107(30)
+      abb107(32)=abb107(28)*abb107(31)
+      abb107(33)=abb107(17)*abb107(3)
+      abb107(34)=abb107(33)*abb107(27)
+      abb107(35)=abb107(30)*abb107(7)
+      abb107(36)=abb107(34)*abb107(35)
+      abb107(36)=abb107(32)-abb107(36)
+      abb107(37)=-spak3k4*abb107(36)
+      abb107(38)=spbk7k3*abb107(37)
+      abb107(39)=abb107(36)*spak2k4
+      abb107(40)=spbk7k2*abb107(39)
+      abb107(38)=abb107(40)+abb107(38)
+      abb107(38)=spal6k7*abb107(38)
+      abb107(39)=-spbl5k2*abb107(39)
+      abb107(40)=-spbl5k3*abb107(37)
+      abb107(39)=abb107(39)+abb107(40)
+      abb107(39)=spal5l6*abb107(39)
+      abb107(30)=abb107(30)*abb107(10)
+      abb107(40)=abb107(30)*c4
+      abb107(41)=abb107(40)*abb107(20)
+      abb107(42)=-abb107(33)*abb107(30)
+      abb107(41)=abb107(41)+abb107(42)
+      abb107(41)=spbk7l5*spak3k4*abb107(41)*abb107(13)*spak1k2*spbk3k2**2
+      abb107(37)=-spbk3k1*spak1l6*abb107(37)
+      abb107(11)=abb107(11)*abb107(14)
+      abb107(42)=abb107(11)*abb107(20)
+      abb107(43)=-abb107(42)*abb107(31)
+      abb107(11)=abb107(33)*abb107(11)
+      abb107(33)=abb107(35)*abb107(11)
+      abb107(33)=abb107(43)+abb107(33)
+      abb107(43)=spak2k4*spak1l6
+      abb107(33)=es12*abb107(33)*abb107(43)
+      abb107(23)=abb107(33)+abb107(37)+abb107(39)+abb107(41)+abb107(38)+abb107(&
+      &23)
+      abb107(23)=8.0_ki*abb107(23)
+      abb107(33)=2.0_ki*spak4l6
+      abb107(37)=abb107(33)*abb107(36)
+      abb107(38)=abb107(30)*abb107(11)
+      abb107(39)=abb107(40)*abb107(42)
+      abb107(38)=abb107(38)-abb107(39)
+      abb107(39)=spak1k4*spbl5k2
+      abb107(41)=abb107(38)*abb107(39)
+      abb107(37)=abb107(37)+abb107(41)
+      abb107(41)=16.0_ki*abb107(37)
+      abb107(44)=mB**2
+      abb107(22)=abb107(22)*abb107(44)
+      abb107(45)=abb107(42)*abb107(22)
+      abb107(46)=abb107(44)*abb107(7)
+      abb107(47)=abb107(11)*abb107(46)
+      abb107(47)=-abb107(45)+abb107(47)
+      abb107(47)=abb107(47)*abb107(43)
+      abb107(16)=-abb107(24)*mB**4*abb107(16)
+      abb107(16)=abb107(16)+abb107(47)-abb107(37)
+      abb107(16)=16.0_ki*abb107(16)
+      abb107(37)=abb107(24)*abb107(22)
+      abb107(12)=abb107(12)*abb107(37)
+      abb107(47)=abb107(42)*c4
+      abb107(47)=abb107(47)-abb107(11)
+      abb107(43)=abb107(43)*abb107(47)
+      abb107(48)=-spbl5k2*abb107(43)
+      abb107(49)=-spak1l6*spak3k4*abb107(47)
+      abb107(50)=-spbl5k3*abb107(49)
+      abb107(51)=abb107(44)*spak3k4
+      abb107(19)=-abb107(10)*abb107(51)*abb107(19)
+      abb107(12)=abb107(50)+abb107(48)+abb107(12)+abb107(19)
+      abb107(12)=8.0_ki*abb107(12)
+      abb107(19)=spbk7l5*abb107(49)
+      abb107(48)=abb107(28)*abb107(22)
+      abb107(24)=abb107(48)*abb107(24)
+      abb107(50)=abb107(10)*abb107(7)
+      abb107(52)=abb107(34)*abb107(50)
+      abb107(53)=abb107(52)*abb107(51)
+      abb107(24)=abb107(24)-abb107(53)
+      abb107(53)=spbk7k2*abb107(24)
+      abb107(19)=abb107(19)+abb107(53)
+      abb107(19)=8.0_ki*abb107(19)
+      abb107(53)=spbk7l5*abb107(43)
+      abb107(54)=-spbk7k3*abb107(24)
+      abb107(53)=abb107(53)+abb107(54)
+      abb107(53)=8.0_ki*abb107(53)
+      abb107(54)=16.0_ki*abb107(47)
+      abb107(55)=abb107(54)*spak1k4
+      abb107(46)=abb107(35)-abb107(46)
+      abb107(27)=abb107(17)*abb107(27)*abb107(3)*abb107(46)
+      abb107(25)=abb107(17)*abb107(25)
+      abb107(20)=c4*abb107(20)*spak1k2
+      abb107(20)=abb107(20)-abb107(25)
+      abb107(13)=spbk7l5*abb107(20)*abb107(13)*spbk3k2
+      abb107(13)=abb107(13)+abb107(27)+abb107(48)-abb107(32)
+      abb107(20)=-8.0_ki*spak3k4*abb107(13)
+      abb107(13)=8.0_ki*spak2k4*abb107(13)
+      abb107(27)=8.0_ki*abb107(24)
+      abb107(32)=spbl5k2*abb107(27)
+      abb107(27)=-spbl5k3*abb107(27)
+      abb107(46)=abb107(54)*spak1l6
+      abb107(15)=abb107(15)*abb107(29)
+      abb107(17)=abb107(35)*abb107(17)*abb107(15)
+      abb107(26)=abb107(26)+abb107(29)
+      abb107(26)=abb107(14)*abb107(26)
+      abb107(29)=abb107(26)*abb107(31)
+      abb107(17)=abb107(17)-abb107(29)
+      abb107(17)=abb107(17)*abb107(33)
+      abb107(14)=abb107(25)*abb107(14)
+      abb107(25)=abb107(14)*abb107(30)
+      abb107(21)=spak1k2*abb107(21)
+      abb107(29)=abb107(21)*abb107(40)
+      abb107(25)=abb107(25)-abb107(29)
+      abb107(25)=abb107(25)*abb107(39)
+      abb107(17)=abb107(25)-abb107(17)
+      abb107(25)=-spbk4k2*abb107(17)
+      abb107(29)=abb107(38)*spbl5k2
+      abb107(31)=-spak1k3*abb107(29)
+      abb107(33)=2.0_ki*abb107(36)
+      abb107(35)=-spak3l6*abb107(33)
+      abb107(25)=abb107(35)+abb107(25)+abb107(31)
+      abb107(25)=8.0_ki*abb107(25)
+      abb107(21)=abb107(21)*c4
+      abb107(14)=abb107(21)-abb107(14)
+      abb107(21)=abb107(14)*spak1k4
+      abb107(31)=-spbk4k2*abb107(21)
+      abb107(35)=-spak1k3*abb107(47)
+      abb107(31)=abb107(31)+abb107(35)
+      abb107(31)=8.0_ki*abb107(31)
+      abb107(35)=8.0_ki*spak1l6
+      abb107(14)=abb107(14)*abb107(35)
+      abb107(36)=spbk4k2*abb107(14)
+      abb107(17)=spbk4k3*abb107(17)
+      abb107(39)=-abb107(28)*abb107(40)
+      abb107(30)=abb107(34)*abb107(30)
+      abb107(30)=abb107(39)+abb107(30)
+      abb107(30)=spbl5k2*abb107(30)
+      abb107(33)=spak2l6*abb107(33)
+      abb107(17)=abb107(33)+abb107(30)+abb107(17)
+      abb107(17)=8.0_ki*abb107(17)
+      abb107(30)=abb107(48)*abb107(10)
+      abb107(33)=abb107(52)*abb107(44)
+      abb107(30)=abb107(33)-abb107(30)
+      abb107(33)=16.0_ki*abb107(30)
+      abb107(28)=c4*abb107(28)
+      abb107(21)=spbk4k3*abb107(21)
+      abb107(21)=abb107(21)+abb107(28)-abb107(34)
+      abb107(21)=8.0_ki*abb107(21)
+      abb107(14)=-spbk4k3*abb107(14)
+      abb107(15)=abb107(44)*abb107(18)*abb107(15)
+      abb107(18)=abb107(26)*abb107(22)
+      abb107(15)=abb107(15)-abb107(18)
+      abb107(15)=abb107(10)*abb107(15)
+      abb107(15)=8.0_ki*abb107(15)
+      abb107(18)=-spbk4k2*abb107(15)
+      abb107(15)=spbk4k3*abb107(15)
+      abb107(22)=abb107(35)*abb107(47)
+      abb107(26)=-8.0_ki*abb107(30)
+      abb107(28)=spak3k4*abb107(45)
+      abb107(11)=abb107(51)*abb107(11)
+      abb107(30)=-abb107(7)*abb107(11)
+      abb107(28)=abb107(28)+abb107(30)
+      abb107(28)=abb107(28)*abb107(35)
+      abb107(30)=spbl5k1*abb107(49)
+      abb107(34)=abb107(42)*abb107(37)
+      abb107(11)=-abb107(50)*abb107(11)
+      abb107(11)=abb107(34)+abb107(11)
+      abb107(11)=es12*abb107(11)
+      abb107(11)=abb107(30)+abb107(11)
+      abb107(11)=8.0_ki*abb107(11)
+      abb107(29)=spak2k4*abb107(29)
+      abb107(30)=-spbl5k3*spak3k4*abb107(38)
+      abb107(34)=spbl5k1*abb107(43)
+      abb107(24)=-spbk3k1*abb107(24)
+      abb107(24)=abb107(24)+abb107(34)+abb107(29)+abb107(30)
+      abb107(24)=8.0_ki*abb107(24)
+      R2d107=0.0_ki
+      rat2 = rat2 + R2d107
+      if (debug_nlo_diagrams) then
+          write (logfile,*) "<result name='r2' index='107' value='", &
+          & R2d107, "'/>"
+      end if
+   end subroutine
+end module p0_dbaru_epnebbbarg_abbrevd107h1
