@@ -6,15 +6,12 @@
       include 'pwhg_rad.h'    
       real * 8 pt2max_regular
       integer i
+      real * 8 ptsq1,ptsq2
 
-C$$$      write(*,*) ' dummy pt2max_regular function; replace with'
-C$$$      write(*,*) ' your own process-dependent one, to be put in the'
-C$$$      write(*,*) ' process-specific directory (e.g. /W, /Z, /VBF_H...)'
-C$$$      write(*,*) ' The Makefile will automatically compile the version'
-C$$$      write(*,*) ' in the process-specific directory'
-C$$$      call exit(1)
+      ptsq1=(kn_cmpreal(1,7)**2+kn_cmpreal(2,7)**2)
+      ptsq2=(kn_cmpreal(1,8)**2+kn_cmpreal(2,8)**2)
 
-      pt2max_regular=(kn_sreal/4)*(1-kn_y**2)*kn_csi**2
+      pt2max_regular=max(ptsq1,ptsq2)
 
       if (pt2max_regular.lt.rad_ptsqmin) then
          write(*,*) '****************************************'

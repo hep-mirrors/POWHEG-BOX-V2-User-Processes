@@ -43,9 +43,6 @@ c it is an event with radiation
 c     set color connections for all particles      
 
       call realcolour_lh
-      write(*,*) 'idup ',idup
-      write(*,*) 'icolup ',icolup
-      
 
 c add resonances, perform decays, put particles on shell, etc.(or nothing!)
       call finalize_lh 
