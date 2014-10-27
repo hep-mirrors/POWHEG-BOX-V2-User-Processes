@@ -17,8 +17,8 @@ c  pwhgfill  :  fills the histograms with data
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
       real * 8 ptminarr(nptmin)
-      data cptmin/  '-000',  '-015',  '-025'/
-      data ptminarr/ 0d0,  15d0,    25d0/
+      data cptmin/  '-001',  '-015',  '-025'/
+      data ptminarr/ 1d0,  15d0,    25d0/
 
       integer nptbmin
       parameter (nptbmin=2)
