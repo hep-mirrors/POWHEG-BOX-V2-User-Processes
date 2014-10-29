@@ -54,9 +54,8 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:obj/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
@@ -112,7 +111,10 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
 	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	sigcollsoft.o sigvirtual.o reshufflemoms.o $(PDFPACK) $(USER) $(FPEOBJ)
+	sigcollsoft.o sigvirtual.o reshufflemoms.o  setlocalscales.o \
+        validflav.o mint_upb.o  \
+	pwhgreweight.o opencount.o ubprojections.o utils.o \
+	$(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
