@@ -6,7 +6,8 @@ COMPILER=gfortran
 PDF = native 
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
-ANALYSIS=default
+#ANALYSIS=default
+ANALYSIS=SC
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -78,17 +79,26 @@ else
 PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
+PWHGANAL=pwhg_analysis-dummy.o
 
 ifeq ("$(ANALYSIS)","default")
 ##To include Fastjet configuration uncomment the following lines. 
 #FASTJET_CONFIG=$(shell which fastjet-config)
 #LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 #FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o 
+PWHGANAL=pwhg_analysis.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-else
-PWHGANAL=pwhg_analysis-dummy.o
+endif
+
+ifeq ("$(ANALYSIS)","SC")
+##To include Fastjet configuration uncomment the following lines. 
+#FASTJET_CONFIG=$(shell which fastjet-config)
+#LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+#FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_analysis-SC.o pwhg_bookhist-multi.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)
+#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
 
 %.o: %.f $(INCLUDE)
@@ -109,7 +119,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o reshufflemoms.o  setlocalscales.o \
         validflav.o mint_upb.o  \
@@ -121,7 +131,7 @@ pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o pwhg_bookhist.o $(PWHGANAL)	\
+     opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
@@ -132,7 +142,7 @@ lhef_analysis:$(LHEF)
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o	\
+	powheginput.o $(PWHGANAL) lhefread.o	\
 	pdfdummies.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
@@ -140,7 +150,7 @@ main-HERWIG-lhef: $(HERWIG)
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
-	pwhg_bookhist.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
+	$(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
 
