@@ -14,7 +14,7 @@ module ninjago_module
   ! subroutines
   public :: ninja_diagram, ninja_diagram_rm, ninja_diagram_cm, ninja_diagram_nm
   public :: ninja_clear_integral_cache, ninja_free_integral_cache
-  public :: ninja_set_test, ninja_set_test_tolerance
+  public :: ninja_set_test, ninja_set_test_tolerance, ninja_set_ir_threshold
   public :: ninja_set_verbosity, ninja_set_output_precision
   public :: ninja_set_integral_library
 
@@ -341,6 +341,14 @@ module ninjago_module
        use, intrinsic :: iso_c_binding
        real(KI_NIN), intent(in) :: val
      end subroutine ninja_set_test_tolerance
+  end interface
+
+  interface
+     subroutine ninja_set_ir_threshold(val) &
+          bind (c,name='ninjago_set_ir_threshold')
+       use, intrinsic :: iso_c_binding
+       real(KI_NIN), intent(in) :: val
+     end subroutine ninja_set_ir_threshold
   end interface
 
   interface

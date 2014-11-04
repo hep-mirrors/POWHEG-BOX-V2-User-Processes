@@ -358,6 +358,11 @@ extern "C" {
     ninja::setTestTolerance(val);
   }
 
+  void ninjago_set_ir_threshold(const Real & val)
+  {
+    ninja::setDefaultInfraredThreshold(val);
+  }
+
   void ninjago_set_output_precision(int val)
   {
     ninjago_out.precision(val);
