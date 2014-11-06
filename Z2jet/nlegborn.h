@@ -6,5 +6,9 @@
       parameter (ndiminteg=(nlegreal-2)*3-4+2-1)
       
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=999,maxprocreal=999)
+      parameter (maxprocborn=175,maxprocreal=275)
       
+
+      integer maxalr
+c      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)
+      parameter (maxalr=1945)

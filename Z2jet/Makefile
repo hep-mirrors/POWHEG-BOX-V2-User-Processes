@@ -55,17 +55,14 @@ DEPDIRS=./MCFMinterface/ ./MCFM/src/pwgplots/ ./MCFM/src/Need/ \
 ./MCFM/src/Lib/ ./MCFM/src/Phase/ ./MCFM/src/Z2jet/ \
 ./MCFM/src/Zbb/  ./MCFM/src/W2jet/ ./MCFM/src/W2jetvirt/ ./MCFM/src/Wbb/ 
 
-VPATH= ./:../Version-pre2-1/progress:../Version-pre2-1:../:$(OBJ)/:./MCFMinterface:./MCFM/src/pwgplots/:./MCFM/src/Need/:./MCFM/src/Lib/:./MCFM/src/Phase/:./MCFM/src/Z2jet/:./MCFM/src/Zbb/:./MCFM/src/W2jet/:./MCFM/src/W2jetvirt/:./MCFM/src/Wbb/
+VPATH= ./:../:$(OBJ)/:./MCFMinterface:./MCFM/src/pwgplots/:./MCFM/src/Need/:./MCFM/src/Lib/:./MCFM/src/Phase/:./MCFM/src/Z2jet/:./MCFM/src/Zbb/:./MCFM/src/W2jet/:./MCFM/src/W2jetvirt/:./MCFM/src/Wbb/
 
 
-INCLUDEA=../Version-pre2-1/progress/include
-INCLUDEC=../Version-pre2-1/include
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=$(PWD)/MCFM/src/Inc/
 INCLUDE4=./MCFMinterface/Inc
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDEA) -I$(INCLUDEC) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3) -I$(INCLUDE4)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2) -I$(INCLUDE3) -I$(INCLUDE4)
 
 
 
