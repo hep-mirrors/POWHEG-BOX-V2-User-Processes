@@ -156,20 +156,16 @@ c
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
-c     lepton masses
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
 
       call add_resonance(idvecbos,4,5)
-c     The following routine also performs the reshuffling of momenta if
-c     a massive decay is chosen
-      call momenta_reshuffle(4,5,6,decmass,decmass)
 
 c     fix here the W decay mode
       id5=vdecaymode
       id6=-vdecaymode
       call change_id_particles(5,6,id5,id6)
-
+      
+c     The general reshuffling procedure.
+      call lhefinitemasses
       end
 
 
@@ -184,63 +180,3 @@ c     fix here the W decay mode
       end
 
 
-
-c     i1<i2
-      subroutine momenta_reshuffle(ires,i1,i2,m1,m2)
-      implicit none
-      include 'LesHouches.h'
-      integer ires,i1,i2
-      real * 8 m1,m2
-      real * 8 ptemp(0:3),pfin(0:3),beta(3),betainv(3),modbeta,m
-      real * 8 mod_pfin,m0
-      integer j,id,dec
-      if (i1.ge.i2) then
-         write(*,*) 'wrong sequence in momenta_reshuffle'
-         stop
-      endif
-cccccccccccccccccccccccccccccc
-c construct boosts from/to vector boson rest frame 
-      do j=1,3
-         beta(j)=-pup(j,ires)/pup(4,ires)
-      enddo
-      modbeta=sqrt(beta(1)**2+beta(2)**2+beta(3)**2)
-      do j=1,3
-         beta(j)=beta(j)/modbeta
-         betainv(j)=-beta(j)
-      enddo
-
-      m0 = pup(5,ires)
-      mod_pfin=
-     $     1/(2*m0)*sqrt(abs((m0**2-m1**2-m2**2)**2 - 4*m1**2*m2**2))
-               
-cccccccccccccccccccccccccccccccccccccccc
-c     loop of the two decay products
-      
-      do dec=1,2
-         if(dec.eq.1) then
-            id=i1
-            m=m1
-         else
-            id=i2
-            m=m2
-         endif
-         ptemp(0)=pup(4,id)
-         do j=1,3
-            ptemp(j)=pup(j,id)
-         enddo
-         call mboost(1,beta,modbeta,ptemp,ptemp)
-         pfin(0)=sqrt(mod_pfin**2 + m**2)
-         do j=1,3
-            pfin(j)=ptemp(j)*mod_pfin/ptemp(0)
-         enddo
-         call mboost(1,betainv,modbeta,pfin,ptemp)
-         do j=1,3
-            pup(j,id)=ptemp(j)
-         enddo
-         pup(4,id)=ptemp(0)
-         pup(5,id)=sqrt(abs(pup(4,id)**2-pup(1,id)**2
-     $        -pup(2,id)**2-pup(3,id)**2))
-         
-      enddo
-
-      end

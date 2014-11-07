@@ -208,8 +208,7 @@ c     now boost everything BACK along z-axis
      $        (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2
          fact=fact*(pt2V+1d0)/(pt2V+1d0+ptminV**2)
          if (ptVlow.gt.0.and.ptVhigh.gt.0.and.Vstep.gt.0) then
-            ptV=sqrt((kn_cmpborn(1,4)+kn_cmpborn(1,5))**2+
-     $           (kn_cmpborn(2,4)+kn_cmpborn(2,5))**2)
+            ptV=sqrt(pt2V)
             if (ptV.lt.ptVlow) then
                stepfun=1d0
             elseif (ptV.gt.ptVlow.and.ptV.lt.ptVhigh) then

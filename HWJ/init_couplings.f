@@ -2,6 +2,7 @@
       implicit none
       include "coupl.inc"
       include 'PhysPars.h'
+      include "pwhg_physpar.h"
 c      include 'pwhg_par.h'
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
@@ -12,9 +13,7 @@ c but never closed ...
       save called
       integer idvecbos,vdecaymode,Vdecmod
       common/cvecbos/idvecbos,vdecaymode
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
-      data lepmass/0.51099891d-3,0.1056583668d0,1.77684d0/
+      real *8 decmass
 
       if(called) then
          return
@@ -85,8 +84,21 @@ c   decay products of the vector boson
          call pwhg_exit(1)
       endif
 
-c     set lepton mass
-      decmass=lepmass(Vdecmod)   
+
+c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
+      physpar_ml(1) = 0.51099891d-3
+      physpar_ml(2) = 0.1056583668d0
+      physpar_ml(3) = 1.77684d0
+      physpar_mq(1) = 0.33d0     ! down
+      physpar_mq(2) = 0.33d0     ! up
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = 4.5d0      ! bottom
+
+      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)
+      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)
+      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)
+ 
 
       if (ph_Wmass2low.lt.decmass**2) then
          write(*,*) 'min_w_mass less than the minimun invariant mass of'

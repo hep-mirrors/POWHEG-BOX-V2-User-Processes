@@ -84,7 +84,7 @@ manyseeds 1         ! Used to perform multiple runs with different random
 parallelstage 1
 xgriditeration 1
 fastbtlbound 1
-#storemintupb 1
+storemintupb 1
 
 storeinfo_rwgt 1   ! store info to allow for reweighting
 #pdfreweight 1

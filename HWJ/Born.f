@@ -181,19 +181,15 @@ c
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
-c     lepton masses
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
 
       call add_resonance(idvecbos,4,5)
-c     The following routine also performs the reshuffling of momenta if
-c     a massive decay is chosen
-      call momenta_reshuffle(4,5,6,decmass,0d0)
 
 c     fix here the W decay mode
       id5=vdecaymode
       id6=-vdecaymode + sign(1,idvecbos) 
       call change_id_particles(5,6,id5,id6)
+c     The general reshuffling procedure.
+      call lhefinitemasses
 
       end
 
