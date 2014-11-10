@@ -47,7 +47,7 @@ c the real contribution to implement Born zero suppression
  9       continue
          ini=.false.
       endif
-      if(otherdamp.gt.0) then
+      if(otherdamp.eq.1) then
          call bornzerodamplocal(otherdamp,alr,r0,rc,rs,dampfac)
          return
       endif
@@ -92,25 +92,8 @@ c the real contribution to implement Born zero suppression
       real * 8 dotp
       external dotp
       em = flst_emitter(alr)
-c In case of photon emission, we need to damp the region where the
+
       if(otherdamp.eq.1) then
-
-         if(em.lt.3) then
-            ptsq = kn_preal(1,5)**2+kn_preal(2,5)**2
-         else
-            ptsq = 2*dotp(kn_preal(0,em),kn_preal(0,5))+kn_masses(em)**2
-         endif
-
-         if(flst_uborn(1,alr)*flst_uborn(3,alr).gt.0) then
-c The incoming parton has the same sign as the outgoing lepton
-            omcth = dotp(kn_cmpborn(:,1),kn_cmpborn(:,4))
-         else
-            omcth = dotp(kn_cmpborn(:,1),kn_cmpborn(:,3))
-         endif
-
-         dampfac=omcth/(ptsq+omcth)
-
-      elseif(otherdamp.eq.2) then
          rflav = flst_alr(:,alr)
          ppp = kn_cmpreal
          call ampZj(ppp,rflav,amp)
@@ -121,6 +104,10 @@ c         write(*,*) ' Bornzerodamp: problem,  amp/r0: ',
 c     1        amp/r0,' flav:',rflav
 c      endif
          dampfac=amp/r0
+         if(dampfac.gt.1) then
+c            write(*,*) ' Warning: dampfac > 1', dampfac, ' reset to 1'
+            dampfac = 1
+         endif
       else
          write(*,*) ' Bornzerodamplocal: invalid otherdamp=',otherdamp
          call exit(-1)
