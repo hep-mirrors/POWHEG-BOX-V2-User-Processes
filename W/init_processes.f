@@ -26,6 +26,10 @@ c     lepton masses
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
       real * 8 cmass, bmass
+ 
+      flg_withdamp=.true.
+      flg_bornzerodamp=.true.
+
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
@@ -33,7 +37,7 @@ c    ID of vector boson produced
       idvecbos=powheginput('idvecbos')
 c   decay products of the vector boson
       tmp=powheginput('vdecaymode')
- 
+
       if (lepmass(1).ne.0.51099891d-3) then
          write(*,*) 'block data lepmass not loaded. stop running' 
          stop

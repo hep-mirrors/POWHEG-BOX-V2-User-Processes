@@ -83,7 +83,9 @@ c the real contribution to implement Born zero suppression
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
-      integer otherdamp,alr
+      include 'pwhg_st.h'
+      include 'pwhg_math.h'
+      integer otherdamp,alr,rflav(5)
       real * 8 r0,rc,rs,dampfac,amp,ppp(0:3,5)
       real * 8 ptsq,omcth
       integer em
@@ -112,7 +114,13 @@ c The incoming parton has the same sign as the outgoing lepton
          rflav = flst_alr(:,alr)
          ppp = kn_cmpreal
          call ampWj(ppp,rflav,amp)
+         amp = amp * st_alpha/(2*pi)/(8*ppp(0,1)*ppp(0,2))
+     1        *(1-kn_y**2)*kn_csi**2
          dampfac=amp/r0
+         if(dampfac.gt.1) then
+c            write(*,*) ' Warning: dampfac > 1', dampfac, ' reset to 1'
+            dampfac = 1
+         endif
       endif
       end
 
