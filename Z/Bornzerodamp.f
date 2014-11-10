@@ -16,14 +16,13 @@ c the real contribution to implement Born zero suppression
       integer otherdamp
       save ini,h,otherdamp
       external pwhg_pt2,powheginput
+      dampfac = 1
       if(ini) then
          otherdamp = powheginput("#otherdamp")
          if(otherdamp.eq.1) then
-            write(*,*) ' using damp function from local file'
-            goto 9
+            write(*,*) ' using spin dependent damp function'
          elseif(otherdamp.eq.2) then
             write(*,*) ' using damp function involving rcs'
-            goto 9
          endif
          h=powheginput("#hdamp")
          if(h.lt.0) then
@@ -44,23 +43,13 @@ c the real contribution to implement Born zero suppression
             write(*,*)' Sudakov and remnants    h=',h,' GeV   ' 
             write(*,*)'***************************************'
          endif
- 9       continue
-         ini=.false.
+          ini=.false.
       endif
-      if(otherdamp.eq.1) then
-         call bornzerodamplocal(otherdamp,alr,r0,rc,rs,dampfac)
-         return
-      endif
-c local variables
-      if(h.gt.0) then
-         pt2=pwhg_pt2()
-         dampfac=h**2/(pt2+h**2)
-      else
-         dampfac=1
-      endif
-
+      dampfac = 1
       if(flg_bornzerodamp) then
-         if(otherdamp.eq.2) then
+         if(otherdamp.eq.1) then
+            call bornzerodamplocal(otherdamp,alr,r0,rc,rs,dampfac)
+         elseif(otherdamp.eq.2) then
             rapp = rc+rs-rcs
             dampfac= min(1d0,rapp/r0)
             dampfac = max(dampfac,0d0)
@@ -68,8 +57,17 @@ c local variables
             dampfac=0
          endif
       endif
-c      write(*,*) ' bornzerodamp: r0=',r0,'  rc=',rc,'  rs=',rs,
-c     # ' dampfac=',dampfac
+
+c local variables
+      if(h.gt.0) then
+         pt2=pwhg_pt2()
+         if(dampfac.gt.1) then
+            h = min(h, sqrt(pt2/(dampfac-1)))
+            write(*,*) ' h '
+         endif
+         dampfac=dampfac*h**2/(pt2+h**2)
+      endif
+
       end
 
 
