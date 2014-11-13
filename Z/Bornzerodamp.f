@@ -61,17 +61,9 @@ c the real contribution to implement Born zero suppression
 
 c local variables
       if(h.gt.0) then
-         pt2=pwhg_pt2()
+         pt2 = pwhg_pt2()
          mz2 = 2*dotp(kn_cmpreal(:,3),kn_cmpreal(:,4))
-c         if(dampfac.gt.1) then
-c            oh = h
-c            h = min(h, sqrt(pt2/mz2/(dampfac-1)))
-c            if(h.lt.oh) then
-c               call ampZj(kn_cmpreal,flst_alr(:,alr),amp,ratio)
-c               write(*,*) ' h = ', h
-c            endif
-c         endif
-         dampfac=dampfac*h**2*mz2/(pt2+mz2*h**2)
+         dampfac = dampfac*h**2*mz2/(pt2+mz2*h**2)
       endif
 
       if(dampfac.gt.1) dampfac = 1
@@ -118,391 +110,6 @@ c         endif
 
 
 
-      subroutine ampZjold(p,flav,amp)
-      implicit none
-      real*8 dotp
-      external dotp
-      include 'pwhg_math.h'
-      include 'PhysPars.h'
-      include 'pwhg_st.h'
-      include 'nlegborn.h'
-      include 'pwhg_kn.h'
-      integer i,flav(5)
-      real *8 p(0:3,5),pp(0:3,5),pCS(0:3,5),q(0:3),qCS(0:3),amp
-      real *8 p12,p14,p15,p24,p25,p45,q2,qz,qt,q0,E,t0,colfac,couplz
-      real *8 phi,sth,cth,sph,cph,c2ph,opcth2,a0th,SGN,prop_int
-      real *8 s1,s2,s3,s4,s5,s6,s7,s8,s9,s10
-      real *8 T3L,T3Q,chargeL,chargeQ,VL,AL,VH,AH,chhad,chlep,propZ
-      real *8 sphi,cphi
-
-      ph_cthw = sqrt(1-ph_sthw2)
-      couplz = 1/(2*ph_sthw*ph_cthw)
-
-c     the gluon must have transverse momentum aligned along the -x axis
-      pp=p
-      phi = pi - atan2(p(2,5),p(1,5))
-      cphi = cos(phi)
-      sphi = sin(phi)
-      do i=3,5
-         pp(1,i) = cphi*p(1,i)-sphi*p(2,i)
-         pp(2,i) = sphi*p(1,i)+cphi*p(2,i)
-      enddo
-
-      q = pp(:,3) + pp(:,4)
-      qz = q(3)
-      SGN = sign(1d0,qz)
-      qt = sqrt(q(1)**2+q(2)**2)
-      q0 = q(0)
-
-      call CollinsSoper_frame_old(pp,pCS)
-
-      qCS = pCS(:,3) + pCS(:,4)
-      p12=dotp(pCS(:,1),pCS(:,2))
-c      p14=dotp(pCS(:,1),pCS(:,3))
-c      p15=dotp(pCS(:,1),pCS(:,4))
-c      p24=dotp(pCS(:,2),pCS(:,3))
-c      p25=dotp(pCS(:,2),pCS(:,4))
-c      p45=dotp(pCS(:,3),pCS(:,4))
-      q2=dotp(qCS,qCS)
-      E = sqrt(2*p12)
-
-      cth = pCS(3,3)/pCS(0,3)
-
-c check that it is the same as UB angle
-c      write(*,*) ' check CS:',kn_cmpborn(3,3)/kn_cmpborn(0,3)/cth
-
-
-      sth = sqrt(1-cth**2)
-      phi = atan2(pCS(2,3),pCS(1,3))
-      sph = sin(phi)
-      cph = cos(phi)
-
-      c2ph   = cph**2-sph**2
-      opcth2 = 1+cth**2
-      a0th   = (1-3*cth**2)/2d0
-
-c bypass Carlo
-      
-      sth = 0
-      sph = 0
-      cph = 0
-      c2ph = 0
-      a0th   = 0
-
-c
-
-
-      if (mod(abs(flav(3)),2).eq.1) then
-         chargeL = -1
-         T3L = -1d0/2d0
-      elseif (mod(abs(flav(3)),2).eq.0) then
-         chargeL = 0
-         T3L = 1d0/2d0
-      endif
-
-      if (flav(5).eq.0) then
-         if (mod(abs(flav(1)),2).eq.0) then
-            chargeQ = 2d0/3d0
-            T3Q = 1d0/2d0
-         elseif (mod(abs(flav(1)),2).eq.1) then
-            chargeQ = -1d0/3d0
-            T3Q = -1d0/2d0
-         endif
-      else
-         if (mod(abs(flav(5)),2).eq.0) then
-            chargeQ = 2d0/3d0
-            T3Q = 1d0/2d0
-         elseif (mod(abs(flav(5)),2).eq.1) then
-            chargeQ = -1d0/3d0
-            T3Q = -1d0/2d0
-         endif
-      endif
-      VL = T3L - 2*chargeL*ph_sthw2
-      AL = -T3L
-      VH = T3Q - 2*chargeQ*ph_sthw2
-      AH = -T3Q
-      chhad = -chargeQ
-      chlep = -chargeL
-
-      propZ = 1/((q2-ph_Zmass**2)**2 + ph_ZmZw**2)*couplz**4
-      prop_int = 1/q2 * (q2-ph_Zmass2)/((q2-ph_Zmass2)**2+ph_ZmZw**2)*
-     $     couplz**2
-
-
-      if(flav(1).gt.0.and.flav(2).lt.0) then
-
-      s3 = -16*qt*(E**2+q2)*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2)
-     #)*sqrt(q2)/(q2+qt**2)/(-E**4+2*E**2*qt**2-q2**2)*sth*cph*cth-32*qt
-     #*q2**2*AL*AH*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*(E**2+q
-     #2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt**2)/(-E**4+2*E*
-     #*2*qt**2-q2**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2
-     #*chhad*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*pr
-     #opZ*AH**2*AL**2+chlep**2*chhad**2)*sth*cph+8*qt**2/(q2+qt**2)*a0th
-      s2 = s3+4*qt**2/(q2+qt**2)*c2ph*sth**2+32*sqrt(q2)**5*AL*AH*(2*VH*
-     #VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt**2)/(propZ*q2**2*VL**2*V
-     #H**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep*prop_int*q2**2*VL*VH+q2
-     #**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL**2+chlep**2*chhad**2)*C
-     #TH+8*opcth2
-      s3 = (-E**4+2*E**2*qt**2-q2**2)*(propZ*q2**2*VL**2*VH**2+propZ*q2*
-     #*2*VH**2*AL**2+2*chhad*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**
-     #2*VL**2+q2**2*propZ*AH**2*AL**2+chlep**2*chhad**2)
-      s1 = s2*s3
-      s2 = 1/q2/(-q2+E*q0+E*qz)/E/(q0+qz-E)
-      t0 = s1*s2
-
-      elseif(flav(1).lt.0.and.flav(2).gt.0) then
-
-      s3 = -16*qt*(E**2+q2)*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2)
-     #)*sqrt(q2)/(q2+qt**2)/(-E**4+2*E**2*qt**2-q2**2)*sth*cph*cth+32*qt
-     #*q2**2*AL*AH*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*(E**2+q
-     #2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt**2)/(-E**4+2*E*
-     #*2*qt**2-q2**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2
-     #*chhad*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*pr
-     #opZ*AH**2*AL**2+chlep**2*chhad**2)*sth*cph+8*qt**2/(q2+qt**2)*a0th
-      s2 = s3+4*qt**2/(q2+qt**2)*c2ph*sth**2-32*sqrt(q2)**5*AL*AH*(2*VH*
-     #VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt**2)/(propZ*q2**2*VL**2*V
-     #H**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep*prop_int*q2**2*VL*VH+q2
-     #**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL**2+chlep**2*chhad**2)*C
-     #TH+8*opcth2
-      s3 = (-E**4+2*E**2*qt**2-q2**2)*(propZ*q2**2*VL**2*VH**2+propZ*q2*
-     #*2*VH**2*AL**2+2*chhad*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**
-     #2*VL**2+q2**2*propZ*AH**2*AL**2+chlep**2*chhad**2)
-      s1 = s2*s3
-      s2 = 1/q2/(-q2+E*q0+E*qz)/E/(q0+qz-E)
-      t0 = s1*s2
-
-      elseif(flav(1).eq.0.and.flav(2).lt.0) then
-
-      s2 = 4
-      s6 = 2*qt*(-3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3
-     #*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2-E**4-q2**2+2*E**
-     #2*qt**2)*sqrt(q2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*s
-     #qrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q
-     #2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*sth*cph*cth
-      s8 = 4*qt*q2**2*AL*AH*(2*E**2*qt**2+E**4-SGN*sqrt(-(-q2+2*qt*E+E**
-     #2)*(q2+2*qt*E-E**2))*E**2-3*q2**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+
-     #2*qt*E-E**2))*q2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt*
-     #*2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*sqrt(-(
-     #-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q2+2*qt
-     #*E+E**2)*(q2+2*qt*E-E**2))*q2)*sth*cph
-      s9 = qt**2*(-4*q2*E**2-3*E**4+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*E+E
-     #**2)*(q2+2*qt*E-E**2))*E**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E
-     #-E**2))*q2-3*q2**2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN
-     #*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(
-     #-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*a0th
-      s7 = s8+s9
-      s5 = s6+s7
-      s6 = s5+qt**2*(-4*q2*E**2-3*E**4+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*
-     #E+E**2)*(q2+2*qt*E-E**2))*E**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*q
-     #t*E-E**2))*q2-3*q2**2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-
-     #SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt
-     #(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*c2ph*sth**2/2
-      s4 = s6+4*sqrt(q2)**5*AL*AH*(2*E**2*qt**2-E**4+SGN*sqrt(-(-q2+2*qt
-     #*E+E**2)*(q2+2*qt*E-E**2))*E**2-q2**2-3*SGN*sqrt(-(-q2+2*qt*E+E**2
-     #)*(q2+2*qt*E-E**2))*q2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(
-     #q2+qt**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad
-     #*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH
-     #**2*AL**2+chlep**2*chhad**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*s
-     #qrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q
-     #2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*CTH+opcth2
-      s5 = propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2
-      s3 = s4*s5
-      s1 = s2*s3
-      s2 = (2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(
-     #q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*
-     #E-E**2))*q2)/q2/E**2/(-q2+E*q0+E*qz)
-      t0 = s1*s2
-
-      elseif(flav(1).gt.0.and.flav(2).eq.0) then
-
-      s2 = -4
-      s6 = -2*qt*(-E**4-q2**2+3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E
-     #**2))*E**2+3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+2*E*
-     #*2*qt**2)/(q2+qt**2)*sqrt(q2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+
-     #2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+
-     #2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*sth*cph*cth
-      s8 = -4*qt*q2**2*AL*AH*(E**4-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(
-     #q2+2*qt*E-E**2))*q2+2*E**2*qt**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2
-     #*qt*E-E**2))*E**2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt
-     #**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chle
-     #p*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*A
-     #L**2+chlep**2*chhad**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+2*qt*E
-     #+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E
-     #-E**2))*E**2-3*q2**2+4*q2*E**2)*sth*cph
-      s9 = qt**2*(-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*
-     #q2-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-4*q2
-     #*E**2+2*E**2*qt**2)/(q2+qt**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2
-     #+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2
-     #+2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*a0th
-      s7 = s8+s9
-      s5 = s6+s7
-      s6 = s5+qt**2*(-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2
-     #))*q2-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-4
-     #*q2*E**2+2*E**2*qt**2)/(q2+qt**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(
-     #-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*
-     #(q2+2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*c2ph*sth**2/2
-      s4 = s6+4*sqrt(q2)**5*AL*AH*(-E**4-q2**2+3*SGN*sqrt(-(-q2+2*qt*E+E
-     #**2)*(q2+2*qt*E-E**2))*q2+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*E+E**2)
-     #*(q2+2*qt*E-E**2))*E**2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt
-     #(q2+qt**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chha
-     #d*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*A
-     #H**2*AL**2+chlep**2*chhad**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+
-     #2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+
-     #2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*CTH+opcth2
-      s5 = propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2
-      s3 = s4*s5
-      s1 = s2*s3
-      s2 = (2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E
-     #**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*q2**
-     #2+4*q2*E**2)/q2/E**3/(q0+qz-E)
-      t0 = s1*s2
-
-      elseif(flav(1).eq.0.and.flav(2).gt.0) then
-
-      s2 = 4
-      s6 = 2*qt*(-3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3
-     #*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2-E**4-q2**2+2*E**
-     #2*qt**2)*sqrt(q2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*s
-     #qrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q
-     #2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*sth*cph*cth
-      s8 = -4*qt*q2**2*AL*AH*(2*E**2*qt**2+E**4-SGN*sqrt(-(-q2+2*qt*E+E*
-     #*2)*(q2+2*qt*E-E**2))*E**2-3*q2**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2
-     #+2*qt*E-E**2))*q2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt
-     #**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chle
-     #p*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*A
-     #L**2+chlep**2*chhad**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*sqrt(-
-     #(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q2+2*q
-     #t*E+E**2)*(q2+2*qt*E-E**2))*q2)*sth*cph
-      s9 = qt**2*(-4*q2*E**2-3*E**4+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*E+E
-     #**2)*(q2+2*qt*E-E**2))*E**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E
-     #-E**2))*q2-3*q2**2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN
-     #*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(
-     #-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*a0th
-      s7 = s8+s9
-      s5 = s6+s7
-      s6 = s5+qt**2*(-4*q2*E**2-3*E**4+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*
-     #E+E**2)*(q2+2*qt*E-E**2))*E**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*q
-     #t*E-E**2))*q2-3*q2**2)/(q2+qt**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-
-     #SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt
-     #(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*c2ph*sth**2/2
-      s4 = s6-4*sqrt(q2)**5*AL*AH*(2*E**2*qt**2-E**4+SGN*sqrt(-(-q2+2*qt
-     #*E+E**2)*(q2+2*qt*E-E**2))*E**2-q2**2-3*SGN*sqrt(-(-q2+2*qt*E+E**2
-     #)*(q2+2*qt*E-E**2))*q2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(
-     #q2+qt**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad
-     #*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH
-     #**2*AL**2+chlep**2*chhad**2)/(2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*s
-     #qrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q
-     #2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2)*CTH+opcth2
-      s5 = propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2
-      s3 = s4*s5
-      s1 = s2*s3
-      s2 = (2*E**2*qt**2+4*q2*E**2-3*q2**2-SGN*sqrt(-(-q2+2*qt*E+E**2)*(
-     #q2+2*qt*E-E**2))*E**2-3*E**4-SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*
-     #E-E**2))*q2)/q2/E**2/(-q2+E*q0+E*qz)
-      t0 = s1*s2
-
-      elseif(flav(1).lt.0.and.flav(2).eq.0) then
-
-      s2 = -4
-      s6 = -2*qt*(-E**4-q2**2+3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E
-     #**2))*E**2+3*SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+2*E*
-     #*2*qt**2)/(q2+qt**2)*sqrt(q2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+
-     #2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+
-     #2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*sth*cph*cth
-      s8 = 4*qt*q2**2*AL*AH*(E**4-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q
-     #2+2*qt*E-E**2))*q2+2*E**2*qt**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*
-     #qt*E-E**2))*E**2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt(q2+qt*
-     #*2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+2*qt*E+
-     #E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-
-     #E**2))*E**2-3*q2**2+4*q2*E**2)*sth*cph
-      s9 = qt**2*(-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*
-     #q2-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-4*q2
-     #*E**2+2*E**2*qt**2)/(q2+qt**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2
-     #+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2
-     #+2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*a0th
-      s7 = s8+s9
-      s5 = s6+s7
-      s6 = s5+qt**2*(-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2
-     #))*q2-3*q2**2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-4
-     #*q2*E**2+2*E**2*qt**2)/(q2+qt**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(
-     #-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*
-     #(q2+2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*c2ph*sth**2/2
-      s4 = s6-4*sqrt(q2)**5*AL*AH*(-E**4-q2**2+3*SGN*sqrt(-(-q2+2*qt*E+E
-     #**2)*(q2+2*qt*E-E**2))*q2+2*E**2*qt**2-SGN*sqrt(-(-q2+2*qt*E+E**2)
-     #*(q2+2*qt*E-E**2))*E**2)*(2*VH*VL*propZ+chhad*chlep*prop_int)/sqrt
-     #(q2+qt**2)/(propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chha
-     #d*chlep*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*A
-     #H**2*AL**2+chlep**2*chhad**2)/(2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+
-     #2*qt*E+E**2)*(q2+2*qt*E-E**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+
-     #2*qt*E-E**2))*E**2-3*q2**2+4*q2*E**2)*CTH+opcth2
-      s5 = propZ*q2**2*VL**2*VH**2+propZ*q2**2*VH**2*AL**2+2*chhad*chlep
-     #*prop_int*q2**2*VL*VH+q2**2*propZ*AH**2*VL**2+q2**2*propZ*AH**2*AL
-     #**2+chlep**2*chhad**2
-      s3 = s4*s5
-      s1 = s2*s3
-      s2 = (2*E**2*qt**2-3*E**4+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E
-     #**2))*q2+SGN*sqrt(-(-q2+2*qt*E+E**2)*(q2+2*qt*E-E**2))*E**2-3*q2**
-     #2+4*q2*E**2)/q2/E**3/(q0+qz-E)
-      t0 = s1*s2
-      endif
-
-c     COLOUR FACTORS, QUARK-GLUON SWITCH AND CKM MATRIX
-c     colour factors: CF*n from sum over initial colours, 1/4 from
-c     average over initial spins, 1/n from average over quark colours
-c     and 1/(n^2-1) from average over gluon colours
-      if(flav(5).ne.0) then
-         amp=-1d0   !quark-gluon switch
-         colfac=CF*nc/4d0/nc/(nc**2-1d0)
-      else
-         amp=1d0    !no quark-gluon switch
-         colfac=CF*nc/4d0/nc**2
-      endif
-
-      amp=amp*colfac*(4*pi*st_alpha)*ph_unit_e**4*t0
-      amp=amp/(st_alpha/(2*pi))
-      end
-
-
-
-
-      subroutine CollinsSoper_frame_old(pin,pout)
-      implicit none
-      real* 8 dotp
-      external dotp
-      real * 8 pin(0:3,5),ptemp(0:3,5),pout(0:3,5),q(0:3),vec(3),beta,
-     $     qt
-      q = pin(:,3) + pin(:,4)
-c     first transverse boost to obtain qz=0
-      beta = -q(3)/q(0)
-      vec(1) = 0
-      vec(2) = 0
-      vec(3) = 1
-      call mboost(5,vec,beta,pin(0,1),ptemp(0,1))
-      q = ptemp(:,3) + ptemp(:,4)
-c     second longitudinal boost to obtain qt=0
-      qt = sqrt(q(1)**2+q(2)**2)
-      beta = -qt/q(0)
-      if (qt.ne.0d0) then
-         vec(1) = q(1)/qt
-         vec(2) = q(2)/qt
-         vec(3) = q(3)/qt
-         call mboost(5,vec,beta,ptemp(0,1),pout(0,1))
-      else
-         pout=ptemp
-      endif
-      end
-
-
       subroutine ampZj(p,flav,amp,ratio)
       implicit none
       include 'pwhg_math.h'
@@ -517,7 +124,7 @@ c      real * 8 p14,p15,p24,p25,p45
       real *8 s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15
       real *8 T3L,T3Q,chargeL,chargeQ,VL,AL,VH,AH,chhad,chlep,propZ
       real * 8 sphi,cphi,norm,globfac,num,den,ampij
-      real * 8 a00,a0,a1,a2,a3,a4
+      real * 8 a00,a0,a1,a2,a3,a4,a4born
       real * 8 b00,b0,b1,b2,b3,b4
       integer i
       real*8 dotp
@@ -601,6 +208,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      $     couplz**2
 
       if(flav(1).gt.0.and.flav(2).lt.0) then
+      a4born = 1
       a0 = qt**2/(q2+qt**2)
       a1 = -0.2D1*qt*E*(E**2+q2)*qz*sqrt(q2)/(q2+qt**2)/(-q2**2+E**2*(-E
      #**2+2*qt**2))
@@ -619,6 +227,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      #p**2*chhad**2)*q2-2*E**2*(-E**2+2*qt**2)*chlep**2*chhad**2/q2
       globfac = -4/(E*q0+E*qz-q2)/E/(-E+q0+qz)
       elseif(flav(1).lt.0.and.flav(2).gt.0) then
+      a4born = -1
       a0 = qt**2/(q2+qt**2)
       a1 = -0.2D1*qt*E*(E**2+q2)*qz*sqrt(q2)/(q2+qt**2)/(-q2**2+E**2*(-E
      #**2+2*qt**2))
@@ -637,6 +246,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      #p**2*chhad**2)*q2-2*E**2*(-E**2+2*qt**2)*chlep**2*chhad**2/q2
       globfac = -4/(E*q0+E*qz-q2)/E/(-E+q0+qz)
       elseif(flav(1).eq.0.and.flav(2).lt.0) then
+      a4born = 1
       a0 = qt**2*(3*q2**2+2*E*(2*E+qz)*q2+E**2*(3*E**2+2*E*qz-2*qt**2))/
      #(q2+qt**2)/(3*q2**2+2*E*(-2*E+qz)*q2+E**2*(3*E**2+2*E*qz-2*qt**2))
       a1 = 0.1D1*qt*(q2**2+6*q2*E*qz+E**2*(E**2+6*E*qz-2*qt**2))*sqrt(q2
@@ -664,6 +274,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      #p**2*chhad**2/q2
       globfac = 2/(E*q0+E*qz-q2)
       elseif(flav(1).gt.0.and.flav(2).eq.0) then
+      a4born = 1
       a0 = qt**2*(-3*q2**2+2*E*(-2*E+qz)*q2+E**2*(-3*E**2+2*E*qz+2*qt**2
      #))/(q2+qt**2)/(-3*q2**2+2*E*(2*E+qz)*q2+E**2*(-3*E**2+2*E*qz+2*qt*
      #*2))
@@ -693,6 +304,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      #**2*chhad**2/q2
       globfac = -2/E/(-E+q0+qz)
       elseif(flav(1).eq.0.and.flav(2).gt.0) then
+      a4born = -1
       a0 = qt**2*(3*q2**2+2*E*(2*E+qz)*q2+E**2*(3*E**2+2*E*qz-2*qt**2))/
      #(q2+qt**2)/(3*q2**2+2*E*(-2*E+qz)*q2+E**2*(3*E**2+2*E*qz-2*qt**2))
       a1 = 0.1D1*qt*(q2**2+6*q2*E*qz+E**2*(E**2+6*E*qz-2*qt**2))*sqrt(q2
@@ -720,6 +332,7 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
      #p**2*chhad**2/q2
       globfac = 2/(E*q0+E*qz-q2)
       elseif(flav(1).lt.0.and.flav(2).eq.0) then
+      a4born = -1
       a0 = qt**2*(-3*q2**2+2*E*(-2*E+qz)*q2+E**2*(-3*E**2+2*E*qz+2*qt**2
      #))/(q2+qt**2)/(-3*q2**2+2*E*(2*E+qz)*q2+E**2*(-3*E**2+2*E*qz+2*qt*
      #*2))
@@ -750,13 +363,19 @@ c      p45=dotp(pCS(:,3),pCS(:,4))
       globfac = -2/E/(-E+q0+qz)
       endif
 
+c Born value of a4 equal to qqb case at qt=0
+      a4born = a4born*
+     1 4*q2**2*AL*AH*(2*propZ*VL*VH+prop_int*chlep*chhad)
+     2 /((VL**2+AL**2)*(VH**2+AH**2)*q2**2*propZ+chlep**2*chhad
+     3 **2+2*q2**2*chhad*chlep*prop_int*VL*VH)
+
       b00 = opcth2      
       b0 = a0th
       b1 = 2*sth*cph*cth
       b2 = 0.5D0*c2ph*sth**2
       b3 = sth*cph
       b4 = cth     
-      num = a00*b00 + a4*b4 + a1*b1 + a3*b3 + a2*b2
+      num = a00*b00 + a4born*b4 + a1*b1 + a3*b3 + a2*b2
       den = a00*b00 + a4*b4 + a0*b0 + a1*b1 + a2*b2 + a3*b3
 c      ampij = den*norm*globfac
       ampij = den*norm*globfac

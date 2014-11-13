@@ -113,9 +113,10 @@ c     we need to tell to this analysis file which program is running it
 c spin correlation observables
       real * 8 aspincor(0:7),lcos,genphi
       external cstar,phistar_report
-      logical ini
+      logical ini,noheavy
       data ini/.true./
       save ini
+
 
       if(dsig.eq.0) return
 
@@ -123,7 +124,15 @@ c spin correlation observables
       if (ini) then
           vdecaytemp = lprup(1)-10000
           vdecay2temp = - vdecaytemp
+          noheavy = powheginput("#noheavy").eq.1
           ini=.false.
+      endif
+
+      if(noheavy.and.
+     1       abs(idup(1)).eq.5.or.abs(idup(2)).eq.5
+     2  .or. abs(idup(5)).eq.5.or.abs(idup(5)).eq.4
+     3  .or. abs(idup(1)).eq.4.or.abs(idup(2)).eq.4) then
+         return
       endif
 
       pw = (/0,0,0,0/)
