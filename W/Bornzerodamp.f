@@ -62,6 +62,9 @@ c the real contribution to implement Born zero suppression
       if(flg_bornzerodamp) then
          if(angcorr_damp) then
             call ampwj(kn_cmpreal,flst_alr(:,alr),amp,dampfac)
+            if(dampfac.lt.0) then
+               dampfac = 0
+            endif
          elseif(new_damp) then
             rapp = rc+rs-rcs
             dampfac= min(1d0,rapp/r0)
