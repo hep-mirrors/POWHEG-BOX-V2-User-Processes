@@ -14,16 +14,24 @@ c the real contribution to implement Born zero suppression
      1     powheginput,dotp,amp,ratio
       logical ini
       data ini/.true./
-      integer otherdamp
-      save ini,h,otherdamp
+      logical angcorr_damp,new_damp
+      save ini,h,angcorr_damp,new_damp
       external pwhg_pt2,powheginput,dotp
-      dampfac = 1
       if(ini) then
-         otherdamp = powheginput("#otherdamp")
-         if(otherdamp.eq.1) then
-            write(*,*) ' using spin dependent damp function'
-         elseif(otherdamp.eq.2) then
-            write(*,*) ' using damp function involving rcs'
+         angcorr_damp = powheginput("#angcorr_damp") .eq. 1
+         new_damp = powheginput("#new_damp") .eq. 1
+         theta_damp = powheginput("#theta_damp") .eq. 1
+         if( (angcorr_damp.and.new_damp) ) then
+            write(*,*) ' bornzerodamp:'
+            write(*,*) ' you should specify only one of'//
+     1           'angcorr_damp, new_damp'
+            write(*,*) ' exiting ...'
+            call exit(-1)
+         endif
+         if(angcorr_damp) then
+            write(*,*) ' using angular correlations aware damp function'
+         elseif(new_damp) then
+            write(*,*) ' using new, better default damp function'            
          endif
          h=powheginput("#hdamp")
          if(h.lt.0) then
@@ -46,16 +54,19 @@ c the real contribution to implement Born zero suppression
          endif
           ini=.false.
       endif
-      dampfac = 1
+
       if(flg_bornzerodamp) then
-         if(otherdamp.eq.1) then
-            call bornzerodamplocal(otherdamp,alr,r0,rc,rs,dampfac)
-         elseif(otherdamp.eq.2) then
+         if(angcorr_damp) then
+            call ampwz(kn_cmpreal,flst_alr(:,alr),amp,dampfac)
+         elseif(new_damp) then
             rapp = rc+rs-rcs
             dampfac= min(1d0,rapp/r0)
             dampfac = max(dampfac,0d0)
          elseif(r0.gt.5*rc.and.r0.gt.5*rs) then
             dampfac=0
+            return
+         else
+            dampfac = 1
          endif
       endif
 
@@ -70,43 +81,6 @@ c local variables
 
       end
 
-
-      subroutine bornzerodamplocal(otherdamp,alr,r0,rc,rs,dampfac)
-c given the R_alpha region (i.e. the alr) and the associated
-c real contribution r (without pdf factor),
-c returns in dampfac the damping factor to be applied to
-c the real contribution to implement Born zero suppression
-      implicit none
-      include 'pwhg_flg.h'
-      include 'nlegborn.h'
-      include 'pwhg_flst.h'
-      include 'pwhg_kn.h'
-      include 'pwhg_st.h'
-      include 'pwhg_math.h'
-      integer otherdamp,alr,rflav(5)
-      real * 8 r0,rc,rs,dampfac,amp,ampold,ratio,ppp(0:3,5)
-      real * 8 ptsq,omcth
-      integer em
-      real * 8 dotp
-      external dotp
-      em = flst_emitter(alr)
-
-      if(otherdamp.eq.1) then
-         rflav = flst_alr(:,alr)
-         ppp = kn_cmpreal
-         call ampZj(ppp,rflav,amp,ratio)
-c         amp = amp * st_alpha/(2*pi)/(8*ppp(0,1)*ppp(0,2))
-c     1        *(1-kn_y**2)*kn_csi**2
-c         if(abs(amp/r0-1).gt.1d-5) then
-c            write(*,*) ' Bornzerodamp: problem,  amp/r0: ', 
-c     1           amp/r0,' flav:',rflav
-c         endif
-         dampfac=ratio
-      else
-         write(*,*) ' Bornzerodamplocal: invalid otherdamp=',otherdamp
-         call exit(-1)
-      endif
-      end
 
 
 
