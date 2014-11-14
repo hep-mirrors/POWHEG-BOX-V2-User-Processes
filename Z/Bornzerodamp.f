@@ -20,7 +20,6 @@ c the real contribution to implement Born zero suppression
       if(ini) then
          angcorr_damp = powheginput("#angcorr_damp") .eq. 1
          new_damp = powheginput("#new_damp") .eq. 1
-         theta_damp = powheginput("#theta_damp") .eq. 1
          if( (angcorr_damp.and.new_damp) ) then
             write(*,*) ' bornzerodamp:'
             write(*,*) ' you should specify only one of'//
@@ -57,7 +56,10 @@ c the real contribution to implement Born zero suppression
 
       if(flg_bornzerodamp) then
          if(angcorr_damp) then
-            call ampwz(kn_cmpreal,flst_alr(:,alr),amp,dampfac)
+            call ampzj(kn_cmpreal,flst_alr(:,alr),amp,dampfac)
+            if(dampfac.lt.0) then
+               dampfac = 0
+            endif
          elseif(new_damp) then
             rapp = rc+rs-rcs
             dampfac= min(1d0,rapp/r0)
