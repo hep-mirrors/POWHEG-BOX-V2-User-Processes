@@ -34,7 +34,8 @@ OPT=-O2
 #DEBUG= -ggdb 
 ifdef DEBUG
 OPT=-O0
-FPE=-ffpe-trap=invalid,zero,overflow,underflow
+FPE=-ffpe-trap=invalid,zero,overflow
+#,underflow
 endif
 endif
 
@@ -63,9 +64,11 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJDIR):./GoSamlib/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
+#INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+#FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
@@ -154,7 +157,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	reshufflemoms.o pwhg_gosam.o                                    \
 	sigcollsoft.o sigvirtual.o  ubprojections.o                     \
-	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o          \
+	pwhgreweight.o setlocalscales.o setlocalscales_test.o mint_upb.o opencount.o          \
 	validflav.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 LIBDIRMG=$(OBJ)

@@ -20,6 +20,13 @@ c coupling rescaling, for born (imode=1) and NLO corrections (imode=2)
       save savbasicfac,savbornfac,savnlofac,savmuf2,valid
       save op
       data valid/maxprocborn*.false./
+      real * 8 rescfac_test
+      real * 8  oldrescfac
+      data oldrescfac/0d0/
+      save oldrescfac
+c      if(imode.eq.2) then 
+c         write(*,*) "imode", imode
+c      endif
 
       do j=1,nlegborn
          do mu=0,3
@@ -59,6 +66,13 @@ c If the virtual is not included, it must be omitted.
       elseif(imode.eq.2) then
          rescfac=basicfac*nlofac
       endif
+
+C$$$      if (rescfac.ne.oldrescfac) then
+C$$$         call setlocalscales_test(iuborn,imode,rescfac_test)
+C$$$         write(*,*) rescfac, rescfac_test
+C$$$      endif
+C$$$      oldrescfac=rescfac
+      
       end
 
 
@@ -70,6 +84,7 @@ c If the virtual is not included, it must be omitted.
       include 'pwhg_st.h'
       include 'pwhg_flg.h'
       include 'pwhg_math.h'
+      include 'PhysPars.h'
       integer flav(nlegborn)
       real * 8 pin(0:3,nlegborn),basicfac,bornfac,nlofac
       integer onem
@@ -96,6 +111,8 @@ c     number of flavors that MiNLO consider as light partons
       integer cluster
       common/ccluster/cluster
       save /ccluster/
+      real * 8 pg(0:3),pw(0:3),pj(0:3),mt2,ptj2,mtw2
+
 
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
@@ -186,11 +203,20 @@ c provide alpha_S reweighting
 
 c     No more merging is possible.
 
-
-c      write(*,*) 'lflav ', lflav
-
-
-      if(.not.dijetflag) then
+      if (minlo_nlight.eq.4) then
+c         write(*,*) 'lflav ', lflav
+c     transverse momentum of the gluon that does the bbar splitting
+         pg = p(:,5)+ p(:,6)
+         mt2 = 4*ph_bmass**2 + pg(1)**2+pg(2)**2
+         pw =  p(:,3)+ p(:,4)
+         mtw2 = ph_wmass**2 + pw(1)**2+pw(2)**2
+         q2merge = (   (sqrt(mt2) + sqrt(mtw2))/4   )**2
+         if (lflav(nlegborn).ne.onem) then
+            pj=p(:,nlegborn)
+            ptj2=pj(1)**2+pj(2)**2
+            q2merge = (  (sqrt(mt2) + sqrt(ptj2) + sqrt(mtw2))/4  )**2
+         endif                     
+      else
 c     Define the initial scale as
 c     the invariant mass of the remaining system
          ptot=0
@@ -205,35 +231,7 @@ c     the invariant mass of the remaining system
          else
             q2merge=ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2
          endif
-
-
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-c         q2merge=max(q2mergeMAX,80.419d0**2)
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-
-
-
-
-      else
-c Dijet case: use the scalar sum of the pt of the two partons
-         q2merge = 0
-         do j=3,nlegborn
-            if(lflav(j).ne.onem) then
-               q2merge=sqrt(p(1,j)**2+p(2,j)**2)+q2merge
-            endif
-         enddo
-         q2merge=q2merge**2
-         if(raisingscales) then
-            q2merge=max(q2mergeMAX,q2merge)
-         endif
       endif
-
 
       if(scales(1).gt.0) then
          do j=1,nlegborn
@@ -255,21 +253,42 @@ c If scales(1)=0 no merge has taken place: no sudakovs.
          basicfac=1
          nlofac=0
       endif
+
       if(st_bornorder.gt.inlofac) then
-         alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
+c     no merging
+         if (minlo_nlight.eq.4) then
+            if (inlofac.eq.0) then
+               alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
+     1              st_lambda5MSB,st_nlight)               
+               mu2 = max((q2merge*renfac2)**3,1d0)
+               nlofac=nlofac + 3*alphas/st_alpha 
+               basicfac=basicfac * (alphas/st_alpha)**3
+            elseif (inlofac.eq.1) then
+c     one merging
+               alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
+     1              st_lambda5MSB,st_nlight)                              
+               mu2 = mu2 * max((q2merge*renfac2)**2,1d0)
+               nlofac = nlofac + 2*alphas/st_alpha
+               basicfac=basicfac*(alphas/st_alpha)**2
+            else
+               write(*,*) 'ERROR in setlocalscale0!!'
+               call pwhg_exit(-1)
+            endif
+            inlofac=st_bornorder
+         else
+c     If minlo_nlight not equal 4: do the usual stuff
+            alphas=pwhg_alphas(max(q2merge*renfac2,1d0),
      1           st_lambda5MSB,st_nlight)
-c         do j=inlofac+1,st_bornorder
-c            mu2=mu2*max(q2merge*renfac2,1d0)
-c            nlofac=nlofac+alphas/st_alpha
-c            basicfac=basicfac*alphas/st_alpha
-c         enddo
-         mu2=mu2*max(q2merge*renfac2,1d0)**(st_bornorder-inlofac)
-         nlofac=nlofac+alphas/st_alpha*(st_bornorder-inlofac)
-         basicfac=basicfac*(alphas/st_alpha)**(st_bornorder-inlofac)
-         inlofac=st_bornorder
+            mu2=mu2*max(q2merge*renfac2,1d0)**(st_bornorder-inlofac)
+            nlofac=nlofac+alphas/st_alpha*(st_bornorder-inlofac)
+            basicfac=basicfac*(alphas/st_alpha)**(st_bornorder-inlofac)
+            inlofac=st_bornorder
+         endif
       endif
+c     Divide by the power of the Born to get arithmetic and geometric average        
       nlofac=nlofac/inlofac
       mu2=mu2**(1d0/inlofac)
+
       b0=(33-2*st_nlight)/(12*pi)
       if(.not.flg_bornonly) then
          bornfac=1+st_alpha*nlofac*
