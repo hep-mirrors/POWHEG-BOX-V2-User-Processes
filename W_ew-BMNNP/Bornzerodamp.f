@@ -1,4 +1,4 @@
-      subroutine bornzerodamp(alr,r0,rc,rs,dampfac)
+      subroutine bornzerodamp(alr,r0,rc,rs,rcs,dampfac)
 c given the R_alpha region (i.e. the alr) and the associated
 c real contribution r (without pdf factor),
 c returns in dampfac the damping factor to be applied to
@@ -9,7 +9,7 @@ c the real contribution to implement Born zero suppression
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       integer alr
-      real * 8 r0,rc,rs,dampfac
+      real * 8 r0,rc,rs,rcs,dampfac
       real * 8 m2eg,k2ga
       real * 8 dotp
       external dotp
