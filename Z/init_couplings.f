@@ -5,7 +5,6 @@
       include 'pwhg_math.h'
       include 'nlegborn.h'
       include 'pwhg_kn.h'
-      real * 8 masswindow_low,masswindow_high
       real * 8 mass_low,mass_high
       real * 8 powheginput
       external powheginput
