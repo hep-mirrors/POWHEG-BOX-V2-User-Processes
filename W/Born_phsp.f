@@ -162,14 +162,8 @@ c minimal final state mass
          if (ini) then
             write(*,*) '*************************************'
             write(*,*) '    Factorization and renormalization '
-            if (powheginput('#runningscale').eq.1) then
-               write(*,*) '    scales set to the W virtuality '            
-            else 
-               write(*,*) "runningscale value not allowed"
-               call exit(1)
-            endif
+            write(*,*) '    scales set to the W virtuality '            
             write(*,*) '*************************************'
-            ini=.false.
          endif
          muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4)))
        else
@@ -178,10 +172,10 @@ c minimal final state mass
             write(*,*) '    Factorization and renormalization '
             write(*,*) '    scales set to the W mass '
             write(*,*) '*************************************'
-            ini=.false.
          endif
          muref=ph_Wmass
       endif
+      ini=.false.
       muf=muref
       mur=muref
       end
