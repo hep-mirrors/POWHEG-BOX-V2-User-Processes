@@ -80,8 +80,8 @@ c the real contribution to implement Born zero suppression
             rapp = rc+rs-rcs
             if(h.gt.0) then
                pt2 = kn_cmpreal(1,5)**2+kn_cmpreal(2,5)**2
-               mz2 = 2*dotp(kn_cmpreal(:,3),kn_cmpreal(:,4))
-               rapp = rapp*h**2*mz2/(pt2+mz2*h**2)
+               mw2 = 2*dotp(kn_cmpreal(:,3),kn_cmpreal(:,4))
+               rapp = rapp*h**2*mw2/(pt2+mw2*h**2)
             endif
             dampfac= min(1d0,rapp/r0)
             dampfac = max(dampfac,0d0)
