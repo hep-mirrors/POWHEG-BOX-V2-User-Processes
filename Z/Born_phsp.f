@@ -163,6 +163,7 @@ c default is true
          if (ini) then
             write(*,*) '*************************************'
             write(*,*) '    Factorization and renormalization '
+            write(*,*) '    scales set to the Z virtuality '
             write(*,*) '*************************************'
             ini=.false.
          endif
