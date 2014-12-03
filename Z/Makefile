@@ -22,8 +22,12 @@ F77= gfortran -fno-automatic
 ## Use -O2 to be on the safe side
 OPT=-O2
 ## For debugging uncomment the following
-#DEBUG= -ggdb -pg
 endif
+
+ifdef DEBUG
+OPT=-O0
+endif
+
 
 ifeq ("$(COMPILER)","g77")
 F77= g77 -fno-automatic 
@@ -131,7 +135,7 @@ pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o $(PWHGANAL)	\
+     bra_ket_subroutines.o opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
