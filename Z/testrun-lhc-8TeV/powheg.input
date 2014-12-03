@@ -34,7 +34,7 @@ xupbound 2d0   ! increase upper bound for radiation generation
 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
-#bornonly   0      ! (default 0) if 1 do Born only
+#bornonly   1      ! (default 0) if 1 do Born only
 #smartsig   1      ! (default 1) remember equal amplitudes (0 do not remember)
 #ptsqmin    0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
 #charmthr   1.5    ! (default 1.5 GeV) charm treshold for gluon splitting 

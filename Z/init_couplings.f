@@ -35,13 +35,9 @@ c     number of light flavors
 
 c     mass window
       mass_low = powheginput("#mass_low")
-      if (mass_low.lt.0d0) mass_low=-1d0
+      if (mass_low.lt.0d0) mass_low=0
       mass_high = powheginput("#mass_high")
-      if (mass_high.lt.0d0) mass_high=-1d0   
-      masswindow_low = powheginput("#masswindow_low")
-      if (masswindow_low.le.0d0) masswindow_low=30d0
-      masswindow_high = powheginput("#masswindow_high")
-      if (masswindow_high.le.0d0) masswindow_high=30d0
+      if (mass_high.lt.0d0) mass_high=sqrt(kn_sbeams)   
 
 c     running width
       ph_runwidth = powheginput("#running_width").eq.1d0
@@ -53,11 +49,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_cthw = sqrt(1-ph_sthw2)
       ph_Zmass2 = ph_Zmass**2
 
-      if(mass_low.ge.0d0) then
-         ph_Zmass2low=mass_low**2
-      else
-         ph_Zmass2low=(max(0d0,ph_Zmass-masswindow_low*ph_Zwidth))**2
-      endif
+      ph_Zmass2low=mass_low**2
       if (sqrt(ph_Zmass2low).lt.1d0) then
          write(*,*) '*************************************'
          write(*,*) 'WARNING: Z virtuality cutoff at 1 GeV'
@@ -66,12 +58,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
          ph_Zmass2low=1d0
       endif
      
-      if(mass_high.ge.0d0) then
-         ph_Zmass2high=mass_high
-      else
-         ph_Zmass2high=ph_Zmass+masswindow_high*ph_Zwidth
-      endif
-      ph_Zmass2high=min(kn_sbeams,ph_Zmass2high**2)
+      ph_Zmass2high=min(kn_sbeams,mass_high**2)
+
       ph_ZmZw = ph_Zmass * ph_Zwidth
       ph_unit_e = sqrt(4*pi*ph_alphaem)
 
