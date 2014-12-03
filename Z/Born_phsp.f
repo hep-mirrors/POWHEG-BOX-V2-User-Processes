@@ -152,10 +152,11 @@ c minimal final state mass
       real * 8 powheginput
       external powheginput
       if(ini) then
-         if(powheginput('#runningscale').eq.1) then
-            runningscales=.true.
-         else
+c default is true
+         if(powheginput('#runningscale').eq.0) then
             runningscales=.false.
+         else
+            runningscales=.true.
          endif
       endif
       if (runningscales) then
