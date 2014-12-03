@@ -24,10 +24,10 @@ c the real contribution to implement Born zero suppression
          new_damp_v = powheginput("#new_damp_v") .eq. 1
          theta_damp = powheginput("#theta_damp") .eq. 1
          numopt = 0         
-         if( (angcorr_damp) numopt = numopt + 1
-         if( (new_damp) numopt = numopt + 1
-         if( (new_damp_v) numopt = numopt + 1
-         if( (theta_damp) numopt = numopt + 1
+         if(angcorr_damp) numopt = numopt + 1
+         if(new_damp) numopt = numopt + 1
+         if(new_damp_v) numopt = numopt + 1
+         if(theta_damp) numopt = numopt + 1
          if(numopt.gt.1) then
             write(*,*) ' bornzerodamp:'
             write(*,*) ' you should specify only one of'//
