@@ -163,12 +163,6 @@ c default is true
          if (ini) then
             write(*,*) '*************************************'
             write(*,*) '    Factorization and renormalization '
-            if (powheginput('#runningscale').eq.1) then
-               write(*,*) '    scales set to the Z virtuality '            
-            else 
-               write(*,*) "runningscale value not allowed"
-               call exit(1)
-            endif
             write(*,*) '*************************************'
             ini=.false.
          endif
