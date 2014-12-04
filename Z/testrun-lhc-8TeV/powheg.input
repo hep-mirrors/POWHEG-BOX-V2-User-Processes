@@ -35,7 +35,7 @@ xupbound 2d0   ! increase upper bound for radiation generation
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
 #bornonly   1      ! (default 0) if 1 do Born only
-#smartsig   1      ! (default 1) remember equal amplitudes (0 do not remember)
+#smartsig   0      ! (default 1) remember equal amplitudes (0 do not remember)
 #ptsqmin    0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
 #charmthr   1.5    ! (default 1.5 GeV) charm treshold for gluon splitting 
 #bottomthr  5.0    ! (default 5.0 GeV) bottom treshold for gluon splitting
@@ -60,11 +60,22 @@ mass_high 1d20      ! upper limit for dilepton mass
 
 # runningscale 0    ! default is 1, true, central scale equal to Z/gamma virtuality, 0 equal to M_Z
 
-# uncomment the following for modified damp factor
-# bornzerodamp 1
-# new_damp_v 1
-# hdamp 0.25
 
+
+
+# Option for alternative splitting R-> R_s + R_f
+# These were study to see the effect on the unphysical negative value of the a0
+# angular correlation coefficients
+# bornzerodamp 1    ! Turn this on (without this the program behaves as usual)
+# new_damp 1        ! R_s = max(0,min(1, R_app/R)), where R_app is the soft collinear approximation to R, R_app = R_soft + R_coll - R_soft_coll
+# hnew_damp 0.5     ! if this flag appears together with new_damp 1, then R_app -> R_app * h^2 * m^2 / ( h^2 * m^2 + pt2 ), where
+                    ! h is the value of hnew_damp, m is the mass of the vector boson, and pt2 is the square of its transverse momentum
+# hdamp 1.0         ! if this flag appears, R_s -> R_s *  h^2 * m^2 / ( h^2 * m^2 + pt2 ), where h is the value of hdamp.
+                    ! The following combination seem to yield a0 consistent with non-negative values:
+                    ! new_damp 1 + hdamp 0.25; new_damp 1 + hnew_damp 0.5 ;
+                    ! Looking at the Bornzerodamp.f routine should clarify all doubts on these options.
+                    ! You can experiment with other values. Remember: too small  hnew_damp and/or hdamp factors can cause troubles,
+                    ! check that you get a nice sudakov shape of the vector boson pt.
 
 
 
