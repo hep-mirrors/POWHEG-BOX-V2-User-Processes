@@ -39,9 +39,6 @@ c if less than 0 will not be used
             hnew_damp =  powheginput("#hnew_damp")
             if(hnew_damp.gt.0) then
                write(*,*) ' Using hnew_damp=',hnew_damp
-               if(hnew_damp.gt.1) then
-                  write(*,*) ' Warning: hnew_damp>1 not recommended'
-               endif
             endif
          endif
          h=powheginput("#hdamp")
