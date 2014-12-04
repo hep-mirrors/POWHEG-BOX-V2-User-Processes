@@ -25,6 +25,12 @@ OPT=-O2
 #DEBUG= -ggdb -pg
 endif
 
+ifdef DEBUG
+OPT=-O0
+endif
+
+
+
 ifeq ("$(COMPILER)","g77")
 F77= g77 -fno-automatic 
 #FFLAGS= -Wall -ffortran-bounds-check
