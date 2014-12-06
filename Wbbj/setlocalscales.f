@@ -112,7 +112,8 @@ c     number of flavors that MiNLO consider as light partons
       common/ccluster/cluster
       save /ccluster/
       real * 8 pg(0:3),pw(0:3),pj(0:3),mt2,ptj2,mtw2
-
+      real * 8 q2mergefac
+      save q2mergefac
 
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
@@ -130,7 +131,12 @@ c     consider the b quark as massless
             minlo_nlight=5
          else
             minlo_nlight=powheginput("#minlo_nlight")
-         endif         
+         endif   
+         
+         q2mergefac=powheginput("#q2mergefac")
+         if(q2mergefac.lt.0) then
+            q2mergefac=1d0
+         endif
          ini = .false.
       endif
       renfac2=st_renfact**2
@@ -211,6 +217,7 @@ c     transverse momentum of the gluon that does the bbar splitting
          pw =  p(:,3)+ p(:,4)
          mtw2 = ph_wmass**2 + pw(1)**2+pw(2)**2
          q2merge = (   (sqrt(mt2) + sqrt(mtw2))/4   )**2
+        
          if (lflav(nlegborn).ne.onem) then
             pj=p(:,nlegborn)
             ptj2=pj(1)**2+pj(2)**2
@@ -232,6 +239,26 @@ c     the invariant mass of the remaining system
             q2merge=ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2
          endif
       endif
+
+
+c     the invariant mass of the remaining system
+      ptot=0
+      do j=3,nlegborn
+         if(lflav(j).ne.onem) then
+            ptot=ptot+p(:,j)
+         endif
+      enddo
+      if(raisingscales) then
+         q2merge=max(q2mergeMAX,
+     $        ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2)
+      else
+         q2merge=ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2
+      endif
+         
+
+      q2merge=q2merge/q2mergefac
+
+
 
       if(scales(1).gt.0) then
          do j=1,nlegborn

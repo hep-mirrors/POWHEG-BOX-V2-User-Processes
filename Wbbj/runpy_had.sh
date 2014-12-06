@@ -5,7 +5,7 @@ prg=../main-PYTHIA-lhef
 
 cp powheg.input-save powheg.input
 
-echo 'nohad 1' >> powheg.input
+echo 'nohad 0' >> powheg.input
 #echo 'changescalup 1' >> powheg.input
 
 \rm pwg-*-POWHEG+PYTHIA-output.top
@@ -20,6 +20,6 @@ wait
 
 (echo 1 ; ls -c1 pwg-0*POWHEG+PYTHIA-output.top ; echo "") | mergedata
 
-mv fort.12 pwgPOWHEG+PYTHIA-output_nohad.top
+mv fort.12 pwgPOWHEG+PYTHIA-output_had.top
 
 
