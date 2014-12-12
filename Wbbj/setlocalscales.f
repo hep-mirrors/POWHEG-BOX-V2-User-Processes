@@ -106,8 +106,8 @@ c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
       save /cminlo_nlight/
-      logical Sudakovbb
-      save Sudakovbb
+      logical Sudakovbb,sudmw2mb
+      save Sudakovbb,sudmw2mb
       integer cluster
       common/ccluster/cluster
       save /ccluster/
@@ -132,7 +132,14 @@ c     consider the b quark as massless
          else
             minlo_nlight=powheginput("#minlo_nlight")
          endif   
-         
+      
+         if(powheginput("#sudmw2mb").le.0) then
+            sudmw2mb = .false.
+         else
+            sudmw2mb = .true.
+         endif          
+
+   
          q2mergefac=powheginput("#q2mergefac")
          if(q2mergefac.lt.0) then
             q2mergefac=1d0
@@ -176,7 +183,7 @@ c provide Sudakov
                if (Sudakovbb.or..not.(abs(lflav(jmerge)).eq.5 
      $              .and.abs(lflav(kmerge)).eq.5)) then
                basicfac=basicfac*
-     1              sudakov(q2merge0,q2merge,lscalej,lflav(jmerge))
+     1              sudakov(q2merge0,q2merge,lscalej,lflav(jmerge))               
                basicfac=basicfac*
      1              sudakov(q2merge0,q2merge,lscalek,lflav(kmerge))
                bornfac=bornfac+
@@ -255,6 +262,9 @@ c     the invariant mass of the remaining system
          q2merge=ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2
       endif
          
+      if (sudmw2mb) then
+         q2merge=(ph_wmass+2*ph_bmass)**2
+      endif
 
       q2merge=q2merge/q2mergefac
 
@@ -496,6 +506,7 @@ C ------------------------------------------------ C
       real * 8 lam2
       logical isQuark
       real * 8 theExponentN,theExponentD,theExponent
+      real * 8 theExponentN_new,theExponentD_new
       logical ini
       data ini/.true./
       save ini
@@ -518,22 +529,35 @@ c         call sudakov_plotter
          isQuark=.true.
       endif
       if(q2l.le.q20) then
-        call sudakov_exponent(q20,q2h,q2h,theExponentN,
-     $                         isQuark,2,.true.)       
-c        call sudakov_exponent_new(q20,q2h,theExponentN,
-c     $       isquark,2)
+c        call sudakov_exponent(q20,q2h,q2h,theExponentN,
+c     $                         isQuark,2,.true.)       
+        call sudakov_exponent_new(q20,q2h,theExponentN,
+     $       isquark,2)
+
+c        if (abs(theExponentN/theExponentN_new-1).gt.1d-2) then
+c           write(*,*) "N", theExponentN/theExponentN_new,
+c     $          theExponentN,theExponentN_new
+c        endif
+
         sudakov=exp(theExponentN)
       else
-         call sudakov_exponent(q20,q2h,q2h,theExponentN,
-     $                         isQuark,2,.true.)
-c         call sudakov_exponent_new(q20,q2h,theExponentN,
-c     $        isquark,2)
-c         write(*,*) "ratioN2 ",theExponentN/theExponent         
-         call sudakov_exponent(q20,q2l,q2l,theExponentD,
-     $                         isQuark,2,.true.)
-c         call sudakov_exponent_new(q20,q2l,theExponentD,
-c     $        isquark,2)
-c         write(*,*) "ratioD2 ",theExponentD/theExponent
+c         call sudakov_exponent(q20,q2h,q2h,theExponentN,
+c     $                         isQuark,2,.true.)
+         call sudakov_exponent_new(q20,q2h,theExponentN,
+     $        isquark,2)
+c         if (abs(theExponentN/theExponentN_new-1).gt.1d-2) then
+c            write(*,*) "N2 ",theExponentN/theExponentN_new,
+c     $           theExponentN,theExponentN_new
+c         endif
+         
+c         call sudakov_exponent(q20,q2l,q2l,theExponentD,
+c     $                         isQuark,2,.true.)
+         call sudakov_exponent_new(q20,q2l,theExponentD,
+     $        isquark,2)
+c         if (abs(theExponentD/theExponentD_new-1).gt.1d-2) then
+c            write(*,*) "D2 ",theExponentD/theExponentD_new,
+c     $           theExponentD,theExponentD_new
+c         endif
          sudakov=exp(theExponentN-theExponentD)
       endif
  999  continue
@@ -624,7 +648,7 @@ C ------------------------------------------------ C
       include 'pwhg_st.h'
       include 'pwhg_math.h'
       include 'pwhg_flg.h'
-      real * 8 b0,c,b,lam2
+      real * 8 b0,c,b,lam2,logh,logl
       lam2=st_lambda5MSB**2
       if(q20.le.lam2.or.q2l.lt.lam2.or.q2h.lt.lam2) then
 c in this case everything is zero, irrelevant
@@ -644,12 +668,15 @@ c in this case everything is zero, irrelevant
          b=3d0/4
       endif
       if(q2l.le.q20) then
+         logh=log(q2h/q20)
          expsudakov=
-     1        c/pi*(0.25d0*log(q2h/q20)**2 - b*log(q2h/q20))
+     1        c/pi*(0.25d0*logh**2 - b*logh)
       else
+         logh=log(q2h/q20)
+         logl=log(q2l/q20)
          expsudakov=
-     1        c/pi*(0.25d0*log(q2h/q20)**2 - b*log(q2h/q20))
-     2      - c/pi*(0.25d0*log(q2l/q20)**2 - b*log(q2l/q20))
+     1        c/pi*(0.25d0*logh**2 - b*logh)
+     2      - c/pi*(0.25d0*logl**2 - b*logl)
       endif
       end
 
@@ -915,6 +942,8 @@ C - flavour alphaS*(1+alphaS*K/2*pi) actually meet at about 9 GeV - C
 C - instead.                                                      - C
 C -                                                               - C
 C ***************************************************************** C
+c     it is always called with m2=q2h in this code
+
       subroutine sudakov_exponent(q2l,q2h,m2,theExponent,isQuark,
      $                            theAccuracy,fixed_nf)
       implicit none
