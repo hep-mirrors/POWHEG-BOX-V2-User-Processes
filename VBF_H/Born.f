@@ -194,6 +194,8 @@ c     on the Les Houches interface.
 c     
 c     Resonance Z -> e-(3) e+(4)
 c      call add_resonance(23,3,4)
+      
+      call lhefinitemasses
       end
 
 

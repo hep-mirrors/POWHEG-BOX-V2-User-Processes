@@ -1,9 +1,8 @@
-numevts 500000    ! number of events to be generated
+numevts 100000    ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
-ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
-ih2  -1           ! hadron 2 (1 for protons, -1 for antiprotons)
-ebeam1 980d0      ! energy of beam 1
-ebeam2 980d0      ! energy of beam 2
+ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
+ebeam1 7000d0     ! energy of beam 1
+ebeam2 7000d0     ! energy of beam 2
 
 ! To be set only if using internal (mlm) pdfs
 ! 131 cteq4m
@@ -21,17 +20,16 @@ lhans2  10050         ! pdf set for hadron 2 (LHA numbering)
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
 
-ncall1 50000   ! number of calls for initializing the integration grid
-itmx1    5     ! number of iterations for initializing the integration grid
-ncall2 50000   ! number of calls for computing the integral and finding upper bounding envelope
-itmx2    5     ! number of iterations for computing the integral and finding upper bouding envelope
-foldcsi   2    ! number of folds on csi integration
-foldy     5    ! number of folds on  y  integration
+ncall1 20000   ! number of calls for initializing the integration grid
+itmx1    2     ! number of iterations for initializing the integration grid
+ncall2 20000   ! number of calls for computing the integral and finding upper bounding envelope
+itmx2    3     ! number of iterations for computing the integral and finding upper bouding envelope
+foldcsi   1    ! number of folds on csi integration
+foldy     1    ! number of folds on  y  integration
 foldphi   1    ! number of folds on phi integration
-nubound 100000 ! number of calls to set up the upper bounding norms for radiation
+nubound 20000 ! number of calls to set up the upper bounding norms for radiation
 
 
-! OPTIONAL PARAMETERS
 withnegweights 1  ! (default 0) if 1, use negative weights
 xupbound 2d0   ! increase upper bound for radiation generation
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
@@ -39,13 +37,13 @@ xupbound 2d0   ! increase upper bound for radiation generation
 #ptsupp     0d0   ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 suppfact = 1
 #bornonly   1      ! (default 0) if 1 do Born only
 withdamp    1      ! (default 0, do not use) use Born-zero damping factor
-#testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 
 #iseed    5437     !  Start the random number generator with seed iseed
 #rand1     0       !  skipping  rand2*100000000+rand1 numbers.         
 #rand2     0       !  (see RM48 short writeup in CERNLIB)              
 
-#manyseeds 1       ! Used to perform multiple runs with different random
+manyseeds 1       ! Used to perform multiple runs with different random
                    ! seeds in the same directory.
                    ! If set to 1, the program asks for an integer j.
                    ! The file pwgseeds.dat at line j is read, and the
@@ -53,8 +51,8 @@ withdamp    1      ! (default 0, do not use) use Born-zero damping factor
                    ! sequence for the generation of the events.
                    ! The event file is called pwgevents-'j'.lhe
 
-hmass    120d0       ! Higgs boson mass
-hwidth   0.00437d0   ! Higgs boson width   
+hmass    125d0       ! Higgs boson mass
+hwidth   4.14d-03    ! Higgs boson width   
 
 #higgsfixedwidth  1  ! if 1, use old behaviour with fixed width Breit-Wigner
                      ! default is running width
@@ -65,8 +63,18 @@ hdecaymode -1   ! -1 no decay
                 ! 7-9 e+ e-, mu+ mu-, tau+ tau-
                 ! 10  W+W-
                 ! 11  ZZ
-                ! 12  gamma gamma    
+                ! 12  gamma gamma      
+
+parallelstage 1
+xgriditeration 1
+fastbtlbound 1
+storemintupb 1
 
 
-#higgsfixedwidth  1  ! use old behaviour with fixed width Breit-Wigner
-                     ! default is running width
+storeinfo_rwgt 1   ! store info to allow for reweighting
+
+#pdfreweight 1
+#flg_debug 1
+
+#doublefsr 1 
+#nohad   1

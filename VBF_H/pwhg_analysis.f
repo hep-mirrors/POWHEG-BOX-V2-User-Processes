@@ -7,165 +7,151 @@ c  pwhgfill  :  fills the histograms with data
 
       subroutine init_hist
       implicit none
-      include '../pwhg_book.h'
-      include 'PhysPars.h'
-      real * 8 pi,pi2
-      parameter(pi = 3.141592653589793D0, pi2 = 9.869604401089358D0)
+c      include 'PhysPars.h'
+c      real * 8 pi,pi2
+c      parameter(pi = 3.141592653589793D0, pi2 = 9.869604401089358D0)
       real * 8 ptvbcut
       common/cptvbcut/ptvbcut
-      character * 10 cut
+      character * 10 cut,cut1
       integer nsigma,diag
-      real * 8 step,invmasslow,invmasshigh,ymax
+      real * 8 ymax
       real * 8 binsize(100)
       common/pwhghistcommon/binsize
       logical ini
       data ini/.true./
       save ini
 
-      if (ini) then
-         write(*,*) '********************************************'
-         write(*,*) '********************************************'
-         write(*,*) 'inv Higgs boson mass plot done assuming the '
-         write(*,*) 'following values'
-         write(*,*) 'ph_Hmass = ',ph_Hmass
-         write(*,*) 'ph_Hwidth = ',ph_Hwidth
-         write(*,*) '********************************************'
-         write(*,*) '********************************************'
-         ini=.false.
-      endif
-
-      nsigma = 3
-      invmasslow =ph_Hmass-nsigma*ph_Hwidth
-      invmasshigh=ph_Hmass+nsigma*ph_Hwidth
-      step = 2*nsigma*ph_Hwidth/50
       cut = ' WBF cuts '
+      cut1 = ' WBF new cuts '
       ymax = 7.2d0
 
-      call pwhginihist
+      call inihists
+
       diag=1
       binsize(diag) = 10d0
-      call pwhgbookup(diag,'pt H ','LIN',binsize(diag),0d0,400d0)
+      call bookupeqbins('pt H ',binsize(diag),0d0,400d0)
 
       diag=diag+1
       binsize(diag) = 0.2d0
-      call pwhgbookup(diag,'y H ','LIN',binsize(diag),-ymax,ymax)
+      call bookupeqbins('y H ',binsize(diag),-ymax,ymax)
 
       diag=diag+1
-      binsize(diag) = step
-      call pwhgbookup(diag,'inv mass ','LOG',binsize(diag),invmasslow,
-     #     invmasshigh)
+      binsize(diag) = 0.1d0
+      call bookupeqbins('inv mass ',binsize(diag),120d0,
+     #     130d0)
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(1) - yj(2) ','LIN',binsize(diag),
+      call bookupeqbins('yj(1) - yj(2) ',binsize(diag),
      #     -ymax,ymax)
 
       diag=diag+1
       binsize(diag) = 40d0
-      call pwhgbookup(diag,'mjj ','LIN',binsize(diag),0d0,3600d0)
+      call bookupeqbins('mjj ',binsize(diag),0d0,3600d0)
 
       diag=diag+1
       binsize(diag) = 40d0
-      call pwhgbookup(diag,'mjj'//cut,'LIN',binsize(diag),0d0,3600d0)
+      call bookupeqbins('mjj'//cut,binsize(diag),0d0,3600d0)
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'abs(yj(1) - yj(2))'//cut,'LIN',
+      call bookupeqbins('abs(yj(1) - yj(2))'//cut,
      #     binsize(diag),0d0,2*ymax)
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(1) - yj(2)'//cut,'LIN',
+      call bookupeqbins('yj(1) - yj(2)'//cut,
      #     binsize(diag),-ymax,ymax)
 
       diag=diag+1
       binsize(diag) = 40d0
-      call pwhgbookup(diag,'mjj'//cut,'LIN',binsize(diag),0d0,3600d0)
+      call bookupeqbins('mjj'//cut1,binsize(diag),0d0,3600d0)
 
       diag=diag+1
       binsize(diag) = 10d0
-      call pwhgbookup(diag,'ptj(3)'//cut,'LOG',binsize(diag),0d0,150d0)
+      call bookupeqbins('ptj(3)'//cut,binsize(diag),0d0,150d0)
 
       diag=diag+1
       binsize(diag) = 10d0
-      call pwhgbookup(diag,'ptj(2)'//cut,'LOG',binsize(diag),0d0,250d0)
+      call bookupeqbins('ptj(2)'//cut,binsize(diag),0d0,250d0)
 
       diag=diag+1
       binsize(diag) = 10d0
-      call pwhgbookup(diag,'ptj(1)'//cut,'LOG',binsize(diag),0d0,400d0)
+      call bookupeqbins('ptj(1)'//cut,binsize(diag),0d0,400d0)
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(3)'//cut,'LIN',binsize(diag),-ymax,ymax)
+      call bookupeqbins('yj(3)'//cut,binsize(diag),-ymax,ymax)
  
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(2)'//cut,'LIN',binsize(diag),-ymax,ymax)
+      call bookupeqbins('yj(2)'//cut,binsize(diag),-ymax,ymax)
 
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(1)'//cut,'LIN',binsize(diag),-ymax,ymax)
+      call bookupeqbins('yj(1)'//cut,binsize(diag),-ymax,ymax)
 
       diag=diag+1
       binsize(diag) = 0.4d0
-      call pwhgbookup(diag,'yj(3)-0.5*(yj(1)+yj(2))'//cut,'LIN',
+      call bookupeqbins('yj(3)-0.5*(yj(1)+yj(2))'//cut,
      #     binsize(diag),-ymax,ymax) 
 
       diag=diag+1
       binsize(diag) = 0.2d0
-      call pwhgbookup(diag,'min(abs(yj(1)),abs(yj(2)))'//cut,'LIN',
+      call bookupeqbins('min(abs(yj(1)),abs(yj(2)))'//cut,
      #     binsize(diag),0d0,ymax)
 
 
       diag=diag+1
       binsize(diag) = 0.2d0
-      call pwhgbookup(diag,'max(abs(yj(1)),abs(yj(2)))'//cut,'LIN',
+      call bookupeqbins('max(abs(yj(1)),abs(yj(2)))'//cut,
      #     binsize(diag),0d0,ymax)
 
       diag=diag+1
       binsize(diag) = 0.2d0
-      call pwhgbookup(diag,'delphi_jj'//cut,'LIN',
+      call bookupeqbins('delphi_jj'//cut,
      1  binsize(diag),0d0,3.2d0)
 
 
       diag=diag+1
       binsize(diag) = 40d0
-      call pwhgbookup(diag,'mHjj ','LIN',binsize(diag),0d0,3600d0)
+      call bookupeqbins('mHjj ',binsize(diag),0d0,3600d0)
 
       diag=diag+1
       binsize(diag) = 1d0
-      call pwhgbookup(diag,'ptrel j1'//cut,'LOG',binsize(diag),0d0,30d0)
+      call bookupeqbins('ptrel j1'//cut,binsize(diag),0d0,30d0)
 
       diag=diag+1
       binsize(diag) = 1d0
-      call pwhgbookup(diag,'ptrel j2'//cut,'LOG',binsize(diag),0d0,30d0)
+      call bookupeqbins('ptrel j2'//cut,binsize(diag),0d0,30d0)
 
       diag=diag+1
       binsize(diag) = 1d0
-      call pwhgbookup(diag,'jet multip'//cut,'LOG',
+      call bookupeqbins('jet multip'//cut,
      #     binsize(diag),1.5d0,8.5d0)
 
       diag=diag+1
       binsize(diag) = 1d0
-      call pwhgbookup(diag,'jet mult. btw tag jets'//cut,'LOG',
+      call bookupeqbins('jet mult. btw tag jets'//cut,
      #     binsize(diag),0.5d0,8.5d0)
 
       diag=diag+1
       binsize(diag) = 1d0
-      call pwhgbookup(diag,'Pveto'//cut,'LIN',binsize(diag),10d0,60d0)
+      call bookupeqbins('Pveto'//cut,binsize(diag),10d0,60d0)
 
 
       end
 
       
      
-      subroutine analysis(dsig)
+      subroutine analysis(dsig0)
       implicit none
-      real * 8 dsig
+      real * 8 dsig0
       include 'hepevt.h'
       include 'pwhg_math.h'      
+      include 'pwhg_weights.h'
 c arrays to reconstruct jets
       integer maxtrack,maxjet
       parameter (maxtrack=2048,maxjet=2048)
@@ -209,7 +195,33 @@ c     we need to tell to the this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
-      
+      real * 8 dsig(7)
+      integer nweights
+      logical inimulti
+      data inimulti/.true./
+      save inimulti
+      character * 10 cut,cut1
+      cut = ' WBF cuts '
+      cut1 = ' WBF new cuts '
+      if(inimulti) then
+         if(weights_num.eq.0) then
+            call setupmulti(1)
+         else
+            call setupmulti(weights_num)
+         endif
+         inimulti=.false.
+      endif
+
+      dsig=0
+      if(weights_num.eq.0) then
+         dsig(1)=dsig0
+         nweights=1
+      else
+         dsig(1:weights_num)=weights_val(1:weights_num)
+          nweights=weights_num
+      endif
+
+      if(sum(abs(dsig)).eq.0) return
       
 c     DISABLE ALL CUTS
       ptalljetmin = 0d0            
@@ -340,11 +352,11 @@ c     program used
       call getinvmass(phep(1,idH),inv_mH)
       
       diag=1
-      call pwhgfill(diag,ptH,dsig/binsize(diag))
+      call filld('pt H ',ptH,dsig)
       diag=diag+1
-      call pwhgfill(diag,yH,dsig/binsize(diag))
+      call filld('y H ',yH,dsig)
       diag=diag+1
-      call pwhgfill(diag,inv_mH,dsig/binsize(diag))
+      call filld('inv mass ',inv_mH,dsig)
 
       
 c     set up arrays for jet finding
@@ -495,9 +507,9 @@ c     compute invariant mass of the Hjj system
          mHjj = sqrt(abs(phjj(0)**2-phjj(1)**2-phjj(2)**2-phjj(3)**2))
 
          diag=diag+1
-         call pwhgfill(diag,yj(1) - yj(2),dsig/binsize(diag))
+         call filld('yj(1) - yj(2) ',yj(1) - yj(2),dsig)
          diag=diag+1
-         call pwhgfill(diag,mjj(pj(0,1),pj(0,2)),dsig/binsize(diag))
+         call filld('mjj ',mjj(pj(0,1),pj(0,2)),dsig)
 
 
        
@@ -543,33 +555,34 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          
          diag=diag+1
          if (pass_cuts_no_mjjmin) then
-            call pwhgfill(diag,mjj(pj(0,1),pj(0,2)),dsig/binsize(diag))
+            call filld('mjj'//cut,mjj(pj(0,1),pj(0,2)),dsig)
          endif
 
          diag=diag+1
          if (pass_cuts_no_deltayjjmin) then 
-            call pwhgfill(diag,abs(yj(1) - yj(2)),dsig/binsize(diag))
+            call filld('abs(yj(1) - yj(2))'//cut,abs(yj(1) - yj(2)),
+     $           dsig)
          endif
             
 
          if (pass_cuts) then    
 c            call increasecnt('pass WBF cuts')
             diag=diag+1
-            call pwhgfill(diag,yj(1) - yj(2),dsig/binsize(diag))
+            call filld('yj(1) - yj(2)'//cut,yj(1) - yj(2),dsig)
 
             diag=diag+1
-            call pwhgfill(diag,mjj(pj(0,1),pj(0,2)),dsig/binsize(diag))
+            call filld('mjj'//cut1,mjj(pj(0,1),pj(0,2)),dsig)
 
             diag=diag+1            
             if (exist3rdjet) then
-               call pwhgfill(diag,ptj(3),dsig/binsize(diag))
+               call filld('ptj(3)'//cut,ptj(3),dsig)
             endif
 
             diag=diag+1
-            call pwhgfill(diag,ptj(2),dsig/binsize(diag))
+            call filld('ptj(2)'//cut,ptj(2),dsig)
 
             diag=diag+1
-            call pwhgfill(diag,ptj(1),dsig/binsize(diag))
+            call filld('ptj(1)'//cut,ptj(1),dsig)
 
 c            if (iniptcut) then
 c               iniptcut = .false.
@@ -582,35 +595,36 @@ c            endif
 
             diag=diag+1
             if (exist3rdjet)  then
-               call pwhgfill(diag,yj(3),dsig/binsize(diag))
+               call filld('yj(3)'//cut,yj(3),dsig)
             endif
 
             diag=diag+1
-            call pwhgfill(diag,yj(2),dsig/binsize(diag))
+            call filld('yj(2)'//cut,yj(2),dsig)
 
             diag=diag+1
-            call pwhgfill(diag,yj(1),dsig/binsize(diag))
+            call filld('yj(1)'//cut,yj(1),dsig)
 
             diag=diag+1
             if (exist3rdjet) then 
-               call pwhgfill(diag,yj(3)-0.5*(yj(1)+yj(2)),
-     $              dsig/binsize(diag))
+               call filld('yj(3)-0.5*(yj(1)+yj(2))'//cut,
+     $              yj(3)-0.5*(yj(1)+yj(2)),dsig)
             endif
 
             diag=diag+1
-            call pwhgfill(diag,min(abs(yj(1)),abs(yj(2))),
-     $           dsig/binsize(diag))
+            call filld('min(abs(yj(1)),abs(yj(2)))'//cut,
+     $           min(abs(yj(1)),abs(yj(2))),
+     $           dsig)
 
             diag=diag+1
-            call pwhgfill(diag,max(abs(yj(1)),abs(yj(2))),
-     $           dsig/binsize(diag))
+           call filld('max(abs(yj(1)),abs(yj(2)))'//cut,
+     $           max(abs(yj(1)),abs(yj(2))),
+     $           dsig)
 
             diag=diag+1
-            call pwhgfill(diag,delphi_jj,dsig/binsize(diag))
+            call filld('delphi_jj'//cut,delphi_jj,dsig)
 
             diag=diag+1
-            call pwhgfill(diag,mHjj,dsig/binsize(diag))
-
+            call filld('mHjj ',Mhjj,dsig)
 c     loop on the hardest and next-to-hardest jet
             do ijet=1,2
                vec(1)=0d0
@@ -633,11 +647,11 @@ c                     write(*,*) ijet,ptrel
                enddo
                diag=diag+1
                if (ijet.eq.1) then 
-                  call pwhgfill(diag,ptrel,dsig/binsize(diag))
+                  call filld('ptrel j1'//cut,ptrel,dsig)
                endif
 c               diag=diag+1
                if (ijet.eq.2) then 
-                  call pwhgfill(diag,ptrel,dsig/binsize(diag))
+                  call filld('ptrel j2'//cut,ptrel,dsig)
                endif
             enddo         
 
@@ -659,7 +673,7 @@ c     two jets surely already exists at this step
             enddo
 c            write(*,*) 'njets_passcut ',njets_passcut
             diag=diag+1
-            call pwhgfill(diag,njets_passcut*1d0,dsig/binsize(diag))
+            call filld('jet multip'//cut,njets_passcut*1d0,dsig)
 
 c     jet multeplicity between the two tagging jets
             njets_passcut = 0
@@ -671,7 +685,8 @@ c     jet multeplicity between the two tagging jets
                endif
             enddo            
             diag=diag+1
-            call pwhgfill(diag,njets_passcut*1d0,dsig/binsize(diag))
+            call filld('jet mult. btw tag jets'//cut,
+     $           njets_passcut*1d0,dsig)
 
 c     Pveto as in eq. (3.14) of arXiv:0710.5621v2
             found_hardest_vetojet = .false.
@@ -687,7 +702,8 @@ c     Pveto as in eq. (3.14) of arXiv:0710.5621v2
             sig2NLO = 0.72331d0
  111        continue
 c     NB: NO division by binsize(diag) since we want the integral
-            call pwhgfill(diag,ptvetojet,dsig/sig2NLO)
+            call filld('Pveto'//cut,ptvetojet,
+     $           dsig*binsize(diag)/sig2NLO)
             ptvetojet = ptvetojet - binsize(diag)
             if (ptvetojet.gt.10d0) goto 111
          endif
@@ -714,18 +730,6 @@ c     NB: NO division by binsize(diag) since we want the integral
       real * 8 p(4),m
       m=sqrt(abs(p(4)**2-p(1)**2-p(2)**2-p(3)**2))
       end
-
-
-
-c      subroutine pwhgfillup(n,x,y)
-c      implicit none
-c      real * 8 x,y
-c      integer n
-c      call pwhgfill(n,x,y)
-c      call pwhgfill(n+100,x,y*y)
-c      end
-
-
 
 
 
@@ -870,6 +874,8 @@ c     build an identifier for Higgs production in WW and ZZ fusion
       end
 
 
+      subroutine pwhgfinalopshist
+      end
 
 
 c      subroutine topout

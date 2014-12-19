@@ -1,6 +1,7 @@
 #-*- Makefile -*-
-## COMPILER: gfortran, g77, ifort
+## COMPILER: gfortran, ifort
 COMPILER=gfortran
+FC=$(COMPILER)
 ## PDF: native, lhapdf
 ## For "lhapdf", the LAHPDF package has to be installed separately
 PDF=lhapdf
@@ -11,8 +12,9 @@ ANALYSIS=default
 ## For static linking uncomment the following
 #STATIC=-static
 #
+
 ifeq ("$(COMPILER)","gfortran")	
-F77= gfortran -fno-automatic 	
+F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -22,41 +24,41 @@ F77= gfortran -fno-automatic
 ## Use -O2 to be on the safe side
 OPT=-O2
 ## For debugging uncomment the following
-#DEBUG= -ggdb -pg
+#DEBUG= -ggdb
+ifdef DEBUG
+OPT=-O0
+FPE=-ffpe-trap=invalid,zero,overflow
 endif
-
-ifeq ("$(COMPILER)","g77")
-F77= g77 -fno-automatic 
-#FFLAGS= -Wall -ffortran-bounds-check
-## For floating point exception trapping  uncomment the following 
-#FPEOBJ=trapfpe.o
-OPT=-O3
-## For debugging uncomment the following
-#DEBUG= -ggdb -pg
 endif
 
 
 ifeq ("$(COMPILER)","ifort")
-F77 = ifort -save  -extend_source
-CXX = icpc
-LIBS = -limf
-#FFLAGS =  -check
+F77 = ifort -save  -extend_source  -I$(OBJ)
+#CXX = g++
+#LIBS = -limf
+#FFLAGS =  -checkm
 ## For floating point exception trapping  uncomment the following 
 #FPE = -fpe0
-OPT = -O3 #-fast
+OPT = -O1 #-fast
 ## For debugging uncomment the following
 #DEBUG= -debug -g
+ifdef DEBUG
+OPT=-O0
 endif
+endif
+
+OBJ=obj-$(COMPILER)
+OBJDIR:=$(OBJ)
 
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../:obj/
+VPATH= ./:../:$(OBJDIR)
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
@@ -65,7 +67,7 @@ ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
 PDFPACK=lhapdfif.o
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
-ifeq  ("$(STATIC)","-static")
+ifeq  ("$(STATIC)","-static") 
 ## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
 ## libgfortran as well. The same holds for libstdc++. 
 ## One possible solution is to use fastjet, since $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
@@ -74,7 +76,7 @@ ifeq  ("$(STATIC)","-static")
 # LIBSTDCPP=/usr/lib/gcc/i386-redhat-linux/4.3.0/
 # LIBSLHAPDF +=  -L$(LIBGFORTRANPATH)  -lgfortranbegin -lgfortran -L$(LIBSTDCPP) -lstdc++
 endif
-LIBS +=  $(LIBSLHAPDF) 
+LIBS+=$(LIBSLHAPDF)
 else
 PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
@@ -85,21 +87,25 @@ ifeq ("$(ANALYSIS)","default")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o 
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis.o 
+#PWHGANAL=pwhg_analysis.o 
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
-PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o
+PWHGANAL+= fastjetantiktwrap.o fastjetktwrap.o
+#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o
 else
 PWHGANAL=pwhg_analysis-dummy.o
 endif
 
-%.o: %.f $(INCLUDE)
-	$(FF) -c -o obj/$@ $<
+%.o: %.f $(INCLUDE) | $(OBJDIR)
+	$(FF) -c -o $(OBJ)/$@ $<
+%.o: %.f90 $(INCLUDE) | $(OBJDIR)
+	$(FF) -c -o $(OBJ)/$@ $<
 
-%.o: %.c
-	$(CC) $(DEBUG) -c -o obj/$@ $^ 
+%.o: %.c | $(OBJDIR)
+	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
-%.o: %.cc
-	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
+%.o: %.cc | $(OBJDIR)
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o \
 		      real.o pwhg_cpHTO_reweight.o $(PWHGANAL)
@@ -110,45 +116,51 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	reshufflemoms.o                                                 \
-	sigcollsoft.o sigvirtual.o  $(PDFPACK) $(USER) $(FPEOBJ)
+	reshufflemoms.o \
+	pwhgreweight.o setlocalscales.o mint_upb.o opencount.o      \
+	validflav.o  ubprojections.o \
+	sigcollsoft.o sigvirtual.o $(PDFPACK) $(USER) $(FPEOBJ)
+
 
 # target to generate LHEF output
-pwhg_main:$(PWHG)
-	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
+pwhg_main: $(PWHG) 
+	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LINKMGLIBS) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@
+
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o pwhg_bookhist.o $(PWHGANAL)	\
+     opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
-	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
-
+	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o	\
-	pdfdummies.o opencount.o  random.o cernroutines.o $(FPEOBJ) 
+	powheginput.o $(PWHGANAL) lhefread.o	\
+	pdfdummies.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,obj/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
-PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
-	pwhg_bookhist.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
+PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
+	$(PWHGANAL) lhefread.o newunit.o 	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA))  $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean
 clean:
-	rm -f obj/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef
+	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main \
+	lhef_analysis main-HERWIG-lhefmain-PYTHIA-lhef
 
+# target to generate object directory if it does not exist
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
