@@ -56,9 +56,10 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJDIR):./GoSamlib/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
+#INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+#FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0)   -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
@@ -86,7 +87,7 @@ ifeq ("$(ANALYSIS)","HWnJ")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ.o observables.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ.o observables.o 
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
@@ -110,8 +111,8 @@ endif
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
      real.o  phi1_2.o phi1_2m_nobw_ktmin.o phi3m0.o phi3m.o \
-     boost.o breit.o $(PWHGANAL)
-
+     boost.o breit.o virtual_amp.o  scalar_integrals.o \
+     $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
@@ -161,7 +162,7 @@ main-HERWIG-lhef: $(HERWIG)
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
 	$(PWHGANAL) lhefread.o newunit.o 	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
-	$(FPEOBJ)
+	$(FPEOBJ) 
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA))  $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@

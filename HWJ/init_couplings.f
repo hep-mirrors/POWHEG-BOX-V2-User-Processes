@@ -2,7 +2,9 @@
       implicit none
       include "coupl.inc"
       include 'PhysPars.h'
-      include "pwhg_physpar.h"
+      include 'pwhg_physpar.h'
+      include 'pwhg_st.h'
+      include 'pwhg_math.h'
 c      include 'pwhg_par.h'
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
@@ -13,7 +15,19 @@ c but never closed ...
       save called
       integer idvecbos,vdecaymode,Vdecmod
       common/cvecbos/idvecbos,vdecaymode
-      real *8 decmass
+      save/cvecbos/
+      real * 8 pwhg_alphas
+      external pwhg_alphas
+      real * 8 opasopi,sumCKM,nleptfam
+      common/decay_corr/opasopi,sumCKM,nleptfam
+      save/decay_corr/
+      real * 8 decmass
+      real * 8 kappa_ghb,kappa_ght,kappa_ghw
+      common/Hcoupls/kappa_ghb,kappa_ght,kappa_ghw
+      save/Hcoupls/
+      logical massivetop,massivebottom
+      common/massiveflags/massivetop,massivebottom
+      save/massiveflags/
 
       if(called) then
          return
@@ -21,13 +35,39 @@ c but never closed ...
          called=.true.
       endif
 
+      massivetop = .false.
+      if (powheginput("#massivetop").eq.1) massivetop=.true.
+      massivebottom = .false.
+      if (powheginput("#massivebottom").eq.1) massivebottom=.true.
+
 *********************************************************
 ***********         MADGRAPH                 ************
 *********************************************************
 c Parameters are read from the MadGraph param_card.dat,
 c except the strong coupling constant, which is defined
 c somewhere else
+      
+      ph_bmass=powheginput("#bmass")
+      if (ph_bmass.lt.0d0) then
+         ph_bmass=4.75d0        ! b-quark mass used in the massive 
+                                ! VIRTUAL diagrams and in the final-state 
+                                ! momenta reshuffling
+      endif
+      ph_tmass=powheginput("#tmass")
+      if (ph_tmass.lt.0d0) then
+         ph_tmass=172.5d0
+      endif
+
       call setpara("param_card.dat",.true.)
+
+      physpar_ml(1) = 0.511d-3   ! electron
+      physpar_ml(2) = 0.1057d0   ! muon
+      physpar_ml(3) = 1.777d0    ! tau
+      physpar_mq(1) = 0.33d0     ! down
+      physpar_mq(2) = 0.33d0     ! up
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = ph_bmass   ! bottom
 
       call madtophys
 
@@ -37,9 +77,9 @@ c somewhere else
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
-c    ID of vector boson produced
+c     ID of the vector boson produced
       idvecbos=powheginput('idvecbos')
-c   decay products of the vector boson
+c     decay products of the vector boson
       Vdecmod=powheginput('vdecaymode')
       
       if(idvecbos.eq.24) then
@@ -49,16 +89,24 @@ c   decay products of the vector boson
             vdecaymode=-13
          elseif (Vdecmod.eq.3) then
             vdecaymode=-15
+         elseif (Vdecmod.eq.0) then
+c     hadronic decay
+            vdecaymode=0
+         elseif (Vdecmod.eq.10) then
+c     inclusive decay
+            vdecaymode=10
          else
             write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $           ' is not allowed '
             call pwhg_exit(1)
          endif
          write(*,*) 
-         write(*,*) ' POWHEG: H W+ J production and decay ' 
+         write(*,*) ' POWHEG: H W+ J production with W+ decay ' 
          if (vdecaymode.eq.-11) write(*,*) '         to e+ ve '
          if (vdecaymode.eq.-13) write(*,*) '         to mu+ vmu'
          if (vdecaymode.eq.-15) write(*,*) '         to tau+ vtau'
+         if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
+         if (vdecaymode.eq. 10) write(*,*) '         inclusive decay'
          write(*,*) 
       elseif(idvecbos.eq.-24) then
          if (Vdecmod.eq.1) then
@@ -67,16 +115,22 @@ c   decay products of the vector boson
             vdecaymode=13
          elseif (Vdecmod.eq.3) then
             vdecaymode=15
+         elseif (Vdecmod.eq.0) then
+            vdecaymode=0
+         elseif (Vdecmod.eq.10) then
+            vdecaymode=10
          else
             write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $           ' is not allowed '
             call pwhg_exit(1)
          endif
          write(*,*) 
-         write(*,*) ' POWHEG: H W- J production and decay '
+         write(*,*) ' POWHEG: H W- J production with W- decay '
          if (vdecaymode.eq.11) write(*,*) '         to e- ve~ '
          if (vdecaymode.eq.13) write(*,*) '         to mu- vmu~'
          if (vdecaymode.eq.15) write(*,*) '         to tau- vtau~'
+         if (vdecaymode.eq. 0) write(*,*) '         to hadrons'
+         if (vdecaymode.eq.10) write(*,*) '         inclusive decay'
          write(*,*)    
       else
          write(*,*) 'ERROR: The ID of vector boson you selected ',
@@ -84,29 +138,47 @@ c   decay products of the vector boson
          call pwhg_exit(1)
       endif
 
-
-c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
-      physpar_ml(1) = 0.51099891d-3
-      physpar_ml(2) = 0.1056583668d0
-      physpar_ml(3) = 1.77684d0
-      physpar_mq(1) = 0.33d0     ! down
-      physpar_mq(2) = 0.33d0     ! up
-      physpar_mq(3) = 0.50d0     ! strange
-      physpar_mq(4) = 1.50d0     ! charm
-      physpar_mq(5) = 4.5d0      ! bottom
-
-      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)
-      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)
-      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)
- 
+c     set lepton mass
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
+         decmass = physpar_mq(5)+ physpar_mq(4) ! worst case: W -> b c 
+      else
+         decmass=physpar_ml(Vdecmod)
+      endif
 
       if (ph_Wmass2low.lt.decmass**2) then
          write(*,*) 'min_w_mass less than the minimun invariant mass of'
-         write(*,*) 'the final-state leptonic system ',decmass
-         write(*,*) 'POWHEG aborts'
+         write(*,*) 'W decay products ',decmass
+         write(*,*) 'POWHEG exits'
          call pwhg_exit(-1)
       endif
 
+*********************************************************      
+***  MODIFICATION OF Higgs-top and Higgs-W couplings:
+***  (we assume multiplicative kappa factors)
+      kappa_ghb=powheginput("#kappa_ghb")
+      if (kappa_ghb.eq.-1000000d0) then
+         kappa_ghb=1d0
+      endif
+      kappa_ght=powheginput("#kappa_ght")
+      if (kappa_ght.eq.-1000000d0) then
+         kappa_ght=1d0
+      endif
+      kappa_ghw=powheginput("#kappa_ghw")
+      if (kappa_ghw.eq.-1000000d0) then
+         kappa_ghw=1d0
+      endif
+
+c     hadronic and inclusive W decay:
+c     factor 1+as(mw)/pi to take into account corrections to the decay products
+      opasopi = 1+pwhg_alphas(ph_Wmass**2,st_lambda5MSB,st_nlight)/pi
+c     sum over the allowed hadronic W decay products (all apart from the 
+c     top quark ones) ==> should be 2
+      sumCKM = ph_CKM(1,1)**2+ph_CKM(1,2)**2+ph_CKM(1,3)**2+
+     $     ph_CKM(2,1)**2+ph_CKM(2,2)**2+ph_CKM(2,3)**2
+c     number of leptonic families considered in inclusive decay:
+c     nleptfam = 2: the W boson can decay into e/ve, mu/vmu
+c     nleptfam = 3: the W boson can decay into e/ve, mu/vmu, tau/vtau
+      nleptfam = 3
       end
 
 
@@ -130,7 +202,6 @@ c     Common to lh_readin and printout
       common/values/    alpha,gfermi,alfas,   
      &                  mtMS,mbMS,mcMS,mtaMS,
      &                  Vud,Vus,Vub,Vcd,Vcs,Vcb,Vtd,Vts,Vtb
-c
       real * 8 powheginput
       external powheginput
 c the only parameters relevant for this process are set
@@ -141,14 +212,16 @@ c madgraph routines not to blow.
       gfermi = 0.1166390d-4
       alfas = 0.119d0
       zmass = 91.188d0
-      tmass = 172.5d0
+c      tmass = 172.5d0
+      tmass = ph_tmass
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
       mtMS = 172.5d0
       mtaMS = 1.777d0
       cmass = 0d0
-      bmass = 0d0
+      bmass = 0d0 ! must be zero in MadGraph, otherwise the amplitudes are 
+                  ! evaluated with massive bottom
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
@@ -224,6 +297,7 @@ c HEFT coupling
       include 'coupl.inc'
       include 'PhysPars.h'
       include 'pwhg_math.h'
+      include 'pwhg_physpar.h'
       real * 8 e_em,g_weak
 c
 c     Common to lh_readin and printout
@@ -234,7 +308,7 @@ c
       common/values/    alpha,gfermi,alfas,   
      &                  mtMS,mbMS,mcMS,mtaMS,
      &                  Vud,Vus,Vub,Vcd,Vcs,Vcb,Vtd,Vts,Vtb
-
+      
       e_em=gal(1)
       ph_unit_e=e_em
       ph_alphaem=e_em**2/(4*pi)
@@ -249,10 +323,11 @@ c
       ph_Zwidth = zwidth
       ph_Wwidth = wwidth
       ph_Hwidth = hwidth
-      ph_tmass = tmass
-
+c      ph_tmass = tmass
+c      ph_bmass = physpar_mq(5)  ! b-quark mass used in the massive VIRTUAL diagrams 
       ph_WmWw = ph_Wmass * ph_Wwidth
       ph_Wmass2 = ph_Wmass**2
+      ph_Zmass2 = ph_Zmass**2
 
 c     CKM from PDG 2010 (eq. 11.27)
       ph_CKM(1,1)=Vud
@@ -287,13 +362,11 @@ C     ones defined in the POWHEG BOX.
       external powheginput
       integer parallelstage,rndiwhichseed
       common/cpwhg_info/parallelstage,rndiwhichseed
-      logical massivetop
+      logical massivetop,massivebottom
+      common/massiveflags/massivetop,massivebottom
 
       rndiwhichseed=rnd_iwhichseed
       parallelstage=powheginput("#parallelstage")
-C     Read from card of top loops should be included
-      massivetop = .false.
-      if (powheginput("#massivetop").eq.1) massivetop=.true.
 
 C     Parameter definition
       
@@ -524,7 +597,7 @@ C     Parameter definition
       call check_gosam_err(param,ierr)
       
 C     Initialize virtual code
-      path = '../GoSam_POWHEG/orderfile.olc'
+      path = '../GoSamlib/orderfile.olc'
       
       call OLP_Start(path,ioerr,parallelstage,rndiwhichseed)
       call check_gosam_err('olp_start routine',ierr)

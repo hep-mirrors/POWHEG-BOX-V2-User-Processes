@@ -161,6 +161,16 @@ c$$$      enddo
 c$$$
 
       enddo
+c     1 elect, 2 muon, 3 tau
+c     4, 5, 6 respective neutrinos
+c     7 hadr
+      call bookupeqbins('Br.frac.',1d0,0.5d0,7.5d0)
+
+
+c     1 ud, 2 us, 3 ub, 4 cd, 5 cs, 6 cb
+      call bookupeqbins('flav.str.',1d0,0.5d0,6.5d0)
+
+
       end
      
       subroutine analysis(dsig0)
@@ -172,6 +182,7 @@ c$$$
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
+      include 'pwhg_bookhist-multi.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer isthep_loc(NMXHEP)  ! local copy of isthep
@@ -206,8 +217,10 @@ c     we need to tell to this analysis file which program is running it
       real * 8 powheginput,dotp
       external powheginput,dotp
       real * 8 ptmin
-      integer idvecbos,Vdecmod,idl,idnu
-      save idvecbos,Vdecmod,idl,idnu
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+      integer Vdecmod,idl,idnu
+      save Vdecmod,idl,idnu
       integer maxnumlep
       parameter (maxnumlep=10)
       real * 8 pvl(4,maxnumlep),plep(4,maxnumlep)
@@ -222,17 +235,14 @@ c     we need to tell to this analysis file which program is running it
       save minlo
       data minlo/0/
       character * 20 processid
-      save processid
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2
-      real * 8 dsig(7)
       integer nweights
       logical inimulti
       data inimulti/.true./
       save inimulti
-
-
-c      call reweightifneeded(dsig0,dsig)
+      real * 8 Vud,Vus,Vub,Vcd,Vcs,Vcb
+      real * 8 dsig(maxmulti)
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -256,10 +266,9 @@ c      call reweightifneeded(dsig0,dsig)
 
 c      if(dsig.eq.0) return
 
-
       if (ini) then
-         idvecbos=powheginput('idvecbos')
          Vdecmod=powheginput('vdecaymode')
+         idvecbos=powheginput('idvecbos')
 
          if (WHCPRG.ne.'NLO   ') then
             if (Vdecmod.eq.1) then
@@ -291,7 +300,6 @@ c     if idvecbos=24 idl and idnu are ok
          ini=.false.
       endif
 
-
       ilep=0
       ih=0
       ivl=0
@@ -301,24 +309,32 @@ c     if idvecbos=24 idl and idnu are ok
       enddo
       
       if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
-         do ihep=1,nhep            
-            if(idhep(ihep).eq.idl) then
-               ilep=ihep
-               do mu=1,4
-                  plep(mu,1)=phep(mu,ihep)
-               enddo
-            elseif(idhep(ihep).eq.idnu) then
-               ivl=ihep
-               do mu=1,4
-                  pvl(mu,1)=phep(mu,ihep)
-               enddo              
-            elseif(idhep(ihep).eq.25) then
-               ih=ihep
-               do mu=1,4
-                  ph(mu)=phep(mu,ihep)
-               enddo              
+         if (Vdecmod.ne.0.and.Vdecmod.ne.10) then
+            do ihep=1,nhep            
+               if(idhep(ihep).eq.idl) then
+                  ilep=ihep
+               elseif(idhep(ihep).eq.idnu) then
+                  ivl=ihep
+               elseif(idhep(ihep).eq.25) then
+                  ih=ihep
+               endif
+            enddo
+         else
+            if (WHCPRG.eq.'NLO   ') then
+               ih=3
+               ilep=4
+               ivl=5
+            else
+               ih=3
+               ilep=5
+               ivl=6
             endif
-         enddo
+         endif
+         do mu=1,4
+            ph(mu)=phep(mu,ih)
+            plep(mu,1)=phep(mu,ilep)
+            pvl(mu,1)=phep(mu,ivl)
+         enddo              
       endif
 
 
@@ -384,6 +400,61 @@ c     change status of l vu and Higgs
       isthep_loc(ilep)=10000
       isthep_loc(ivl)=10000
       isthep_loc(ih)=10000
+
+
+      if (abs(idhep(ilep)).eq.11) then
+c      Z -> e+ e-  or W -> e nu_e
+         call filld('Br.frac.',1d0,dsig)
+      elseif (abs(idhep(ilep)).eq.13) then
+c      Z -> mu+ mu-  or W -> mu nu_mu
+         call filld('Br.frac.',2d0,dsig)
+      elseif (abs(idhep(ilep)).eq.15) then
+c      Z -> tau+ tau-  or W -> tau nu_tau
+         call filld('Br.frac.',3d0,dsig)
+      elseif (abs(idhep(ilep)).eq.12) then
+c     Z -> nu_e nu_e (no plot for W)
+         call filld('Br.frac.',4d0,dsig)
+      elseif (abs(idhep(ilep)).eq.14) then
+c     Z -> nu_mu nu_mu (no plot for W)
+         call filld('Br.frac.',5d0,dsig)
+      elseif (abs(idhep(ilep)).eq.16) then
+c     Z -> nu_tau nu_tau (no plot for W)
+         call filld('Br.frac.',6d0,dsig)
+      else
+c     Z or W hadronic decay         
+         call filld('Br.frac.',7d0,dsig)
+      endif
+ 
+
+
+      Vud=0.97428d0 
+      Vus=0.2253d0  
+      Vub=0.00347d0 
+      Vcd=0.2252d0  
+      Vcs=0.97345d0 
+      Vcb=0.0410d0  
+
+c     1 ud, 2 us, 3 ub, 4 cd, 5 cs, 6 cb
+      if (abs(idhep(ivl)).eq.2) then
+         if (abs(idhep(ilep)).eq.1) then
+            call filld('flav.str.',1d0,dsig/Vud**2)
+         elseif (abs(idhep(ilep)).eq.3) then
+            call filld('flav.str.',2d0,dsig/Vus**2)
+         elseif (abs(idhep(ilep)).eq.5) then
+            call filld('flav.str.',3d0,dsig/Vub**2)
+c            write(*,*) '=========================> ', idhep(ilep), 
+c     $           dsig0/Vub**2
+         endif
+      elseif (abs(idhep(ivl)).eq.4) then
+         if (abs(idhep(ilep)).eq.1) then
+            call filld('flav.str.',4d0,dsig/Vcd**2)
+         elseif (abs(idhep(ilep)).eq.3) then
+            call filld('flav.str.',5d0,dsig/Vcs**2)
+         elseif (abs(idhep(ilep)).eq.5) then
+            call filld('flav.str.',6d0,dsig/Vcb**2)
+         endif
+      endif
+
 
 c     W momentum
       do mu=1,4

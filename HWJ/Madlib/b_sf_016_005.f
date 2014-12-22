@@ -19,7 +19,7 @@ C
       INTEGER    THEL
       PARAMETER (THEL=NCOMB*NCROSS)
       INTEGER NGRAPHS
-      PARAMETER (NGRAPHS=   5)
+      PARAMETER (NGRAPHS=   2)
 C  
 C ARGUMENTS 
 C  
@@ -160,10 +160,10 @@ C
 C CONSTANTS
 C  
       INTEGER    NGRAPHS,    NEIGEN 
-      PARAMETER (NGRAPHS=   5,NEIGEN=  1) 
+      PARAMETER (NGRAPHS=   2,NEIGEN=  1) 
       include "nexternal.inc"
       INTEGER    NWAVEFUNCS     , NCOLOR
-      PARAMETER (NWAVEFUNCS=  14, NCOLOR=   1) 
+      PARAMETER (NWAVEFUNCS=  10, NCOLOR=   1) 
       REAL*8     ZERO
       PARAMETER (ZERO=0D0)
 C  
@@ -211,23 +211,13 @@ C ----------
       CALL OXXXXX(P(0,5   ),ZERO ,NHEL(5   ),+1*IC(5   ),W(1,5   ))        
       CALL OXXXXX(P(0,6   ),BMASS ,NHEL(6   ),+1*IC(6   ),W(1,6   ))       
       CALL JIOXXX(W(1,4   ),W(1,5   ),GWF ,WMASS   ,WWIDTH  ,W(1,7   ))    
-      CALL FVIXXX(W(1,1   ),W(1,7   ),GWFCB ,BMASS   ,ZERO    ,W(1,        
+      CALL JVSXXX(W(1,7   ),W(1,3   ),GWWH ,WMASS   ,WWIDTH  ,W(1,         
      &     8   ))                                                          
-      CALL FSIXXX(W(1,8   ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
+      CALL FVIXXX(W(1,1   ),W(1,8   ),GWFCB ,BMASS   ,ZERO    ,W(1,        
      &     9   ))                                                          
       CALL IOVXXX(W(1,9   ),W(1,6   ),W(1,2   ),GG ,AMP(1   ))             
-      CALL FVIXXX(W(1,8   ),W(1,2   ),GG ,BMASS   ,ZERO    ,W(1,10  ))     
-      CALL IOSXXX(W(1,10  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(2   ))          
-      CALL JVSXXX(W(1,7   ),W(1,3   ),GWWH ,WMASS   ,WWIDTH  ,W(1,         
-     &     11  ))                                                          
-      CALL FVIXXX(W(1,1   ),W(1,11  ),GWFCB ,BMASS   ,ZERO    ,W(1,        
-     &     12  ))                                                          
-      CALL IOVXXX(W(1,12  ),W(1,6   ),W(1,2   ),GG ,AMP(3   ))             
-      CALL FVIXXX(W(1,1   ),W(1,2   ),GG ,ZERO    ,ZERO    ,W(1,13  ))     
-      CALL FVIXXX(W(1,13  ),W(1,7   ),GWFCB ,BMASS   ,ZERO    ,W(1,        
-     &     14  ))                                                          
-      CALL IOSXXX(W(1,14  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(4   ))          
-      CALL IOVXXX(W(1,13  ),W(1,6   ),W(1,11  ),GWFCB ,AMP(5   ))          
+      CALL FVIXXX(W(1,1   ),W(1,2   ),GG ,ZERO    ,ZERO    ,W(1,10  ))     
+      CALL IOVXXX(W(1,10  ),W(1,6   ),W(1,8   ),GWFCB ,AMP(2   ))          
       do i=1,ngraphs
          saveamp(i,hell)=amp(i)
       enddo
@@ -236,7 +226,7 @@ C ----------
          amp(i)=saveamp(i,hell)
       enddo
       endif
-      JAMP(   1) = +AMP(   1)+AMP(   2)+AMP(   3)+AMP(   4)+AMP(   5)
+      JAMP(   1) = +AMP(   1)+AMP(   2)
       B_SF_016_005 = 0.D0 
       DO I = 1, NCOLOR
           ZTEMP = (0.D0,0.D0)

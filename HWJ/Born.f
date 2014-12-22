@@ -3,12 +3,20 @@ c Wrapper subroutine to call the MadGraph Borns
 c and set the event-by-event couplings constant
       implicit none
       include 'nlegborn.h'
-      real * 8 p(0:3,nlegborn),bornjk(nlegborn,nlegborn)
+      include 'pwhg_math.h'
+      real * 8 p(0:3,nlegborn),bornjk(nlegborn,nlegborn),bornFG
       integer bflav(nlegborn)
       real * 8 bmunu(0:3,0:3,nlegborn),born
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
       integer j,mu
+      real * 8 opasopi,sumCKM,nleptfam
+      common/decay_corr/opasopi,sumCKM,nleptfam
+      real * 8 kappa_ghb,kappa_ght,kappa_ghw
+      common/Hcoupls/kappa_ghb,kappa_ght,kappa_ghw
+      real *8 multiplicity
+
+      multiplicity = 1d0
       call set_ebe_couplings
 
       if(idvecbos.eq.-24) then
@@ -29,8 +37,27 @@ c and set the event-by-event couplings constant
          enddo
       endif
 
+      if(vdecaymode.eq.0) then
+c     sum over the hadronic W decay products: multiply by the sum of the 
+c     squared CKM matrix elements -> all the elements apart from the 
+c     top-quark ones
+c     Factor (1 + alphas(mw)/pi) to take into account the corrections to
+c     the decay products
+         multiplicity = sumCKM*opasopi*nc
+      elseif(vdecaymode.eq.10) then
+c     sumCKM*(1 + alphas(mw)/pi) from sum over hadronic W decay products 
+c     and to take into account the corrections to the decay products, 
+c     nleptfam for leptonic W decay products
+         multiplicity = nleptfam+sumCKM*opasopi*nc
+      endif
+*********************************************************      
+***   MODIFICATION OF Higgs-W couplings:
+***   (we assume multiplicative kappa factors)
+      born   = multiplicity * kappa_ghw**2 * born
+      bornjk = multiplicity * kappa_ghw**2 * bornjk
+      bmunu  = multiplicity * kappa_ghw**2 * bmunu 
       end
-
+      
       subroutine pconj(p,n)
       implicit none
       real * 8 p(0:3,n)
@@ -52,6 +79,7 @@ c kinematics defined in the Les Houches interface
       include 'LesHouches.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      include 'pwhg_math.h'
 c colours of incoming quarks, antiquarks
       integer icolqi(2),icolai(2),icolgi(2),
      #        icolqf(2),icolaf(2),icolgf(2)
@@ -62,6 +90,13 @@ c colours of incoming quarks, antiquarks
       data icolaf/ 0  , 501 /
       data icolgf/ 501, 502 /
       save icolqi,icolai,icolgi,icolqf,icolaf,icolgf
+      real * 8 random,rand_num
+      external random
+      integer idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode
+      real * 8 opasopi,sumCKM,nleptfam
+      common/decay_corr/opasopi,sumCKM,nleptfam
+
       do j=1,nlegborn
 c     Higgs and W decay products
          if(j.eq.3.or.j.eq.4.or.j.eq.5) then
@@ -98,6 +133,44 @@ c     Higgs and W decay products
             endif
          endif
       enddo
+
+c     W decay into quarks
+      if(vdecaymode.eq.0) then
+         if(idvecbos.lt.0) then
+            icolup(1,4) = 503
+            icolup(2,4) = 0
+            icolup(1,5) = 0
+            icolup(2,5) = 503
+         elseif(idvecbos.gt.0) then
+            icolup(1,4) = 0
+            icolup(2,4) = 503
+            icolup(1,5) = 503
+            icolup(2,5) = 0
+         endif
+      endif
+c     inclusive W decay: the type of decay (hadronic or leptonic) must
+c     be decided here rather than in finalize_lh, because otherwise the
+c     colour connections could not be assigned properly:  
+c     sumCKM*(1+as/pi)/(nleptfam+sumCKM*(1+as/pi)) probability that
+c     the decay is hadronic, 1 minus the above that it is leptonic
+c     ==>  in the latter case, no colour connections
+      if(vdecaymode.eq.10) then
+         rand_num=random() 
+         if(rand_num.le.sumCKM*opasopi*nc/(nleptfam+sumCKM*opasopi*nc))
+     $        then
+            if(idvecbos.lt.0) then
+               icolup(1,4) = 503
+               icolup(2,4) = 0
+               icolup(1,5) = 0
+               icolup(2,5) = 503
+            elseif(idvecbos.gt.0) then
+               icolup(1,4) = 0
+               icolup(2,4) = 503
+               icolup(1,5) = 503
+               icolup(2,5) = 0
+            endif
+         endif
+      endif
       end
 
 
@@ -174,93 +247,114 @@ C$$$      end
 
 
 
+
+
       subroutine finalize_lh
-c     Set up the resonances whose mass must be preserved
-c     on the Les Houches interface.
-c     
+      implicit none
+      include "nlegborn.h"
+      include "pwhg_flst.h"
+      include "LesHouches.h"
+      include "PhysPars.h"
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
-
+      integer id5,id6
+      real * 8 random,rand_num
+      external random
+      logical init
+      data init/.true./
+      save init
+      real * 8 opasopi,sumCKM,nleptfam
+      common/decay_corr/opasopi,sumCKM,nleptfam
+      real * 8 int_ud,int_us,int_ub,int_cd,int_cs,Wsign,norm
+      save int_ud,int_us,int_ub,int_cd,int_cs,Wsign
+c     Set up the resonances whose mass must be preserved
+c     on the Les Houches interface.
       call add_resonance(idvecbos,4,5)
 
-c     fix here the W decay mode
-      id5=vdecaymode
-      id6=-vdecaymode + sign(1,idvecbos) 
-      call change_id_particles(5,6,id5,id6)
-c     The general reshuffling procedure.
-      call lhefinitemasses
-
-      end
-
-
-
-      subroutine change_id_particles(i1,i2,id1,id2)
-      implicit none
-      include 'LesHouches.h'
-      integer i1,i2,id1,id2
-      idup(i1)=id1
-      idup(i2)=id2
-      end
-
-
-
-c     i1<i2
-      subroutine momenta_reshuffle(ires,i1,i2,m1,m2)
-      implicit none
-      include 'LesHouches.h'
-      integer ires,i1,i2
-      real * 8 m1,m2
-      real * 8 ptemp(0:3),pfin(0:3),beta(3),betainv(3),modbeta,m
-      real * 8 mod_pfin,m0
-      integer j,id,dec
-      if (i1.ge.i2) then
-         write(*,*) 'wrong sequence in momenta_reshuffle'
-         stop
-      endif
-cccccccccccccccccccccccccccccc
-c construct boosts from/to vector boson rest frame 
-      do j=1,3
-         beta(j)=-pup(j,ires)/pup(4,ires)
-      enddo
-      modbeta=sqrt(beta(1)**2+beta(2)**2+beta(3)**2)
-      do j=1,3
-         beta(j)=beta(j)/modbeta
-         betainv(j)=-beta(j)
-      enddo
-
-      m0 = pup(5,ires)
-      mod_pfin=
-     $     1/(2*m0)*sqrt(abs((m0**2-m1**2-m2**2)**2 - 4*m1**2*m2**2))
-               
-cccccccccccccccccccccccccccccccccccccccc
-c     loop of the two decay products
-      
-      do dec=1,2
-         if(dec.eq.1) then
-            id=i1
-            m=m1
-         else
-            id=i2
-            m=m2
+c     fix here the flavours of the quarks coming from W decay, 
+c     in case of hadronic W decay
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
+         if(init) then
+            int_ud =          ph_CKM(1,1)**2/sumCKM
+            int_us = int_ud + ph_CKM(1,2)**2/sumCKM
+            int_ub = int_us + ph_CKM(1,3)**2/sumCKM
+            int_cd = int_ub + ph_CKM(2,1)**2/sumCKM
+            int_cs = int_cd + ph_CKM(2,2)**2/sumCKM
+            Wsign = idvecbos/abs(idvecbos)
+            init = .false.
          endif
-         ptemp(0)=pup(4,id)
-         do j=1,3
-            ptemp(j)=pup(j,id)
-         enddo
-         call mboost(1,beta,modbeta,ptemp,ptemp)
-         pfin(0)=sqrt(mod_pfin**2 + m**2)
-         do j=1,3
-            pfin(j)=ptemp(j)*mod_pfin/ptemp(0)
-         enddo
-         call mboost(1,betainv,modbeta,pfin,ptemp)
-         do j=1,3
-            pup(j,id)=ptemp(j)
-         enddo
-         pup(4,id)=ptemp(0)
-         pup(5,id)=sqrt(abs(pup(4,id)**2-pup(1,id)**2
-     $        -pup(2,id)**2-pup(3,id)**2))
-         
-      enddo
-
+         rand_num=random() 
+         if(vdecaymode.eq.0) then
+            if(rand_num.lt.int_ud) then
+               idup(5) = Wsign*(-1)
+               idup(6) = Wsign*2
+            elseif(rand_num.lt.int_us) then
+               idup(5) = Wsign*(-3)
+               idup(6) = Wsign*2
+            elseif(rand_num.lt.int_ub) then
+               idup(5) = Wsign*(-5)
+               idup(6) = Wsign*2
+            elseif(rand_num.lt.int_cd) then
+               idup(5) = Wsign*(-1)
+               idup(6) = Wsign*4
+            elseif(rand_num.lt.int_cs) then
+               idup(5) = Wsign*(-3)
+               idup(6) = Wsign*4
+            elseif(rand_num.ge.int_cs) then
+               idup(5) = Wsign*(-5)
+               idup(6) = Wsign*4
+            endif
+         elseif(vdecaymode.eq.10) then
+            if(icolup(1,5).eq.0.and.icolup(2,5).eq.0) then
+c           leptonic decay
+               if(rand_num.le.1d0/nleptfam) then
+                  idup(5) = Wsign*(-11)
+                  idup(6) = Wsign*12
+               elseif(rand_num.le.2d0/nleptfam) then
+                  idup(5) = Wsign*(-13)
+                  idup(6) = Wsign*14
+               else
+                  idup(5) = Wsign*(-15)
+                  idup(6) = Wsign*16
+               endif
+            else
+c           hadronic decay
+               if(rand_num.lt.int_ud) then
+                  idup(5) = Wsign*(-1)
+                  idup(6) = Wsign*2
+               elseif(rand_num.lt.int_us) then
+                  idup(5) = Wsign*(-3)
+                  idup(6) = Wsign*2
+               elseif(rand_num.lt.int_ub) then
+                  idup(5) = Wsign*(-5)
+                  idup(6) = Wsign*2
+               elseif(rand_num.lt.int_cd) then
+                  idup(5) = Wsign*(-1)
+                  idup(6) = Wsign*4
+               elseif(rand_num.lt.int_cs) then
+                  idup(5) = Wsign*(-3)
+                  idup(6) = Wsign*4
+               elseif(rand_num.ge.int_cs) then
+                  idup(5) = Wsign*(-5)
+                  idup(6) = Wsign*4
+               endif
+            endif
+         endif
+      else
+         idup(5)=vdecaymode
+         idup(6)=-vdecaymode + sign(1,idvecbos) 
+      endif   
+c      call change_id_particles(5,6,id5,id6)
+      call lhefinitemasses
       end
+
+
+c$$$      subroutine change_id_particles(i1,i2,id1,id2)
+c$$$      implicit none
+c$$$      include 'LesHouches.h'
+c$$$      integer i1,i2,id1,id2
+c$$$      idup(i1)=id1
+c$$$      idup(i2)=id2
+c$$$      end
+

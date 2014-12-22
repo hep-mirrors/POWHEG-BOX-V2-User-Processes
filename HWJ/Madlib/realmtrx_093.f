@@ -18,7 +18,7 @@ C
       INTEGER    THEL
       PARAMETER (THEL=NCOMB*NCROSS)
       INTEGER NGRAPHS
-      PARAMETER (NGRAPHS=   5)
+      PARAMETER (NGRAPHS=   2)
 C  
 C ARGUMENTS 
 C  
@@ -163,10 +163,10 @@ C
 C CONSTANTS
 C  
       INTEGER    NGRAPHS,    NEIGEN 
-      PARAMETER (NGRAPHS=   5,NEIGEN=  1) 
+      PARAMETER (NGRAPHS=   2,NEIGEN=  1) 
       include "nexternal.inc"
       INTEGER    NWAVEFUNCS     , NCOLOR
-      PARAMETER (NWAVEFUNCS=  16, NCOLOR=   1) 
+      PARAMETER (NWAVEFUNCS=  12, NCOLOR=   1) 
       REAL*8     ZERO
       PARAMETER (ZERO=0D0)
 C  
@@ -210,24 +210,14 @@ C ----------
       CALL OXXXXX(P(0,7   ),BMASS ,NHEL(7   ),+1*IC(7   ),W(1,7   ))       
       CALL JIOXXX(W(1,1   ),W(1,2   ),GG ,ZERO    ,ZERO    ,W(1,8   ))     
       CALL JIOXXX(W(1,4   ),W(1,5   ),GWF ,WMASS   ,WWIDTH  ,W(1,9   ))    
-      CALL FSOXXX(W(1,7   ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     10  ))                                                          
-      CALL FVOXXX(W(1,10  ),W(1,9   ),GWFCB ,ZERO    ,ZERO    ,W(1,        
-     &     11  ))                                                          
-      CALL IOVXXX(W(1,6   ),W(1,11  ),W(1,8   ),GG ,AMP(1   ))             
-      CALL FVOXXX(W(1,7   ),W(1,8   ),GG ,BMASS   ,ZERO    ,W(1,12  ))     
+      CALL FVOXXX(W(1,7   ),W(1,8   ),GG ,BMASS   ,ZERO    ,W(1,10  ))     
       CALL JVSXXX(W(1,9   ),W(1,3   ),GWWH ,WMASS   ,WWIDTH  ,W(1,         
-     &     13  ))                                                          
-      CALL IOVXXX(W(1,6   ),W(1,12  ),W(1,13  ),GWFCB ,AMP(2   ))          
-      CALL FVOXXX(W(1,7   ),W(1,13  ),GWFCB ,ZERO    ,ZERO    ,W(1,        
-     &     14  ))                                                          
-      CALL IOVXXX(W(1,6   ),W(1,14  ),W(1,8   ),GG ,AMP(3   ))             
-      CALL FVOXXX(W(1,10  ),W(1,8   ),GG ,BMASS   ,ZERO    ,W(1,15  ))     
-      CALL IOVXXX(W(1,6   ),W(1,15  ),W(1,9   ),GWFCB ,AMP(4   ))          
-      CALL FSOXXX(W(1,12  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     16  ))                                                          
-      CALL IOVXXX(W(1,6   ),W(1,16  ),W(1,9   ),GWFCB ,AMP(5   ))          
-      JAMP(   1) = +AMP(   1)+AMP(   2)+AMP(   3)+AMP(   4)+AMP(   5)
+     &     11  ))                                                          
+      CALL IOVXXX(W(1,6   ),W(1,10  ),W(1,11  ),GWFCB ,AMP(1   ))          
+      CALL FVOXXX(W(1,7   ),W(1,11  ),GWFCB ,ZERO    ,ZERO    ,W(1,        
+     &     12  ))                                                          
+      CALL IOVXXX(W(1,6   ),W(1,12  ),W(1,8   ),GG ,AMP(2   ))             
+      JAMP(   1) = +AMP(   1)+AMP(   2)
       REALMTRX_093 = 0.D0 
       DO I = 1, NCOLOR
           ZTEMP = (0.D0,0.D0)
