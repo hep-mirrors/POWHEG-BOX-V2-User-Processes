@@ -18,7 +18,7 @@ C
       INTEGER    THEL
       PARAMETER (THEL=NCOMB*NCROSS)
       INTEGER NGRAPHS
-      PARAMETER (NGRAPHS=  24)
+      PARAMETER (NGRAPHS=   4)
 C  
 C ARGUMENTS 
 C  
@@ -163,10 +163,10 @@ C
 C CONSTANTS
 C  
       INTEGER    NGRAPHS,    NEIGEN 
-      PARAMETER (NGRAPHS=  24,NEIGEN=  1) 
+      PARAMETER (NGRAPHS=   4,NEIGEN=  1) 
       include "nexternal.inc"
       INTEGER    NWAVEFUNCS     , NCOLOR
-      PARAMETER (NWAVEFUNCS=  49, NCOLOR=   1) 
+      PARAMETER (NWAVEFUNCS=  16, NCOLOR=   1) 
       REAL*8     ZERO
       PARAMETER (ZERO=0D0)
 C  
@@ -208,84 +208,21 @@ C ----------
       CALL OXXXXX(P(0,5   ),ZERO ,NHEL(5   ),+1*IC(5   ),W(1,5   ))        
       CALL OXXXXX(P(0,6   ),ZERO ,NHEL(6   ),+1*IC(6   ),W(1,6   ))        
       CALL IXXXXX(P(0,7   ),ZERO ,NHEL(7   ),-1*IC(7   ),W(1,7   ))        
-      CALL FSIXXX(W(1,2   ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     8   ))                                                          
-      CALL JIOXXX(W(1,4   ),W(1,5   ),GAL ,ZERO    ,AWIDTH  ,W(1,9   ))    
-      CALL FVIXXX(W(1,8   ),W(1,9   ),GAD ,BMASS   ,ZERO    ,W(1,10  ))    
+      CALL JIOXXX(W(1,4   ),W(1,5   ),GZL ,ZMASS   ,ZWIDTH  ,W(1,8   ))    
+      CALL JVSXXX(W(1,8   ),W(1,3   ),GZZH ,ZMASS   ,ZWIDTH  ,W(1,         
+     &     9   ))                                                          
+      CALL FVIXXX(W(1,2   ),W(1,9   ),GZD ,BMASS   ,ZERO    ,W(1,10  ))    
       CALL JIOXXX(W(1,10  ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,11  ))     
       CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,11  ),GG ,AMP(1   ))             
-      CALL JIOXXX(W(1,4   ),W(1,5   ),GZL ,ZMASS   ,ZWIDTH  ,W(1,12  ))    
-      CALL FVIXXX(W(1,8   ),W(1,12  ),GZD ,BMASS   ,ZERO    ,W(1,13  ))    
-      CALL JIOXXX(W(1,13  ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,14  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,14  ),GG ,AMP(2   ))             
-      CALL FVOXXX(W(1,1   ),W(1,9   ),GAD ,BMASS   ,ZERO    ,W(1,15  ))    
-      CALL FSOXXX(W(1,15  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     16  ))                                                          
-      CALL JIOXXX(W(1,2   ),W(1,16  ),GG ,ZERO    ,ZERO    ,W(1,17  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,17  ),GG ,AMP(3   ))             
-      CALL FVOXXX(W(1,1   ),W(1,12  ),GZD ,BMASS   ,ZERO    ,W(1,18  ))    
-      CALL FSOXXX(W(1,18  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     19  ))                                                          
-      CALL JIOXXX(W(1,2   ),W(1,19  ),GG ,ZERO    ,ZERO    ,W(1,20  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,20  ),GG ,AMP(4   ))             
-      CALL JIOXXX(W(1,8   ),W(1,15  ),GG ,ZERO    ,ZERO    ,W(1,21  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,21  ),GG ,AMP(5   ))             
-      CALL JIOXXX(W(1,8   ),W(1,18  ),GG ,ZERO    ,ZERO    ,W(1,22  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,22  ),GG ,AMP(6   ))             
-      CALL JIOXXX(W(1,8   ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,23  ))     
-      CALL FVIXXX(W(1,7   ),W(1,23  ),GG ,ZERO    ,ZERO    ,W(1,24  ))     
-      CALL IOVXXX(W(1,24  ),W(1,6   ),W(1,9   ),GAU ,AMP(7   ))            
-      CALL IOVXXX(W(1,24  ),W(1,6   ),W(1,12  ),GZU ,AMP(8   ))            
-      CALL FVIXXX(W(1,7   ),W(1,9   ),GAU ,ZERO    ,ZERO    ,W(1,25  ))    
-      CALL IOVXXX(W(1,25  ),W(1,6   ),W(1,23  ),GG ,AMP(9   ))             
-      CALL FVIXXX(W(1,7   ),W(1,12  ),GZU ,ZERO    ,ZERO    ,W(1,26  ))    
-      CALL IOVXXX(W(1,26  ),W(1,6   ),W(1,23  ),GG ,AMP(10  ))             
-      CALL FVIXXX(W(1,2   ),W(1,9   ),GAD ,BMASS   ,ZERO    ,W(1,27  ))    
-      CALL FSIXXX(W(1,27  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     28  ))                                                          
-      CALL JIOXXX(W(1,28  ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,29  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,29  ),GG ,AMP(11  ))             
-      CALL FVIXXX(W(1,2   ),W(1,12  ),GZD ,BMASS   ,ZERO    ,W(1,30  ))    
-      CALL FSIXXX(W(1,30  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     31  ))                                                          
-      CALL JIOXXX(W(1,31  ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,32  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,32  ),GG ,AMP(12  ))             
-      CALL FSOXXX(W(1,1   ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     33  ))                                                          
-      CALL FVOXXX(W(1,33  ),W(1,9   ),GAD ,BMASS   ,ZERO    ,W(1,34  ))    
-      CALL JIOXXX(W(1,2   ),W(1,34  ),GG ,ZERO    ,ZERO    ,W(1,35  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,35  ),GG ,AMP(13  ))             
-      CALL FVOXXX(W(1,33  ),W(1,12  ),GZD ,BMASS   ,ZERO    ,W(1,36  ))    
-      CALL JIOXXX(W(1,2   ),W(1,36  ),GG ,ZERO    ,ZERO    ,W(1,37  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,37  ),GG ,AMP(14  ))             
-      CALL JIOXXX(W(1,27  ),W(1,33  ),GG ,ZERO    ,ZERO    ,W(1,38  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,38  ),GG ,AMP(15  ))             
-      CALL JIOXXX(W(1,30  ),W(1,33  ),GG ,ZERO    ,ZERO    ,W(1,39  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,39  ),GG ,AMP(16  ))             
-      CALL JIOXXX(W(1,2   ),W(1,33  ),GG ,ZERO    ,ZERO    ,W(1,40  ))     
-      CALL FVIXXX(W(1,7   ),W(1,40  ),GG ,ZERO    ,ZERO    ,W(1,41  ))     
-      CALL IOVXXX(W(1,41  ),W(1,6   ),W(1,9   ),GAU ,AMP(17  ))            
-      CALL IOVXXX(W(1,41  ),W(1,6   ),W(1,12  ),GZU ,AMP(18  ))            
-      CALL IOVXXX(W(1,25  ),W(1,6   ),W(1,40  ),GG ,AMP(19  ))             
-      CALL IOVXXX(W(1,26  ),W(1,6   ),W(1,40  ),GG ,AMP(20  ))             
-      CALL JVSXXX(W(1,12  ),W(1,3   ),GZZH ,ZMASS   ,ZWIDTH  ,W(1,         
-     &     42  ))                                                          
-      CALL FVIXXX(W(1,2   ),W(1,42  ),GZD ,BMASS   ,ZERO    ,W(1,43  ))    
-      CALL JIOXXX(W(1,43  ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,44  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,44  ),GG ,AMP(21  ))             
-      CALL FVOXXX(W(1,1   ),W(1,42  ),GZD ,BMASS   ,ZERO    ,W(1,45  ))    
-      CALL JIOXXX(W(1,2   ),W(1,45  ),GG ,ZERO    ,ZERO    ,W(1,46  ))     
-      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,46  ),GG ,AMP(22  ))             
-      CALL JIOXXX(W(1,2   ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,47  ))     
-      CALL FVIXXX(W(1,7   ),W(1,47  ),GG ,ZERO    ,ZERO    ,W(1,48  ))     
-      CALL IOVXXX(W(1,48  ),W(1,6   ),W(1,42  ),GZU ,AMP(23  ))            
-      CALL FVIXXX(W(1,7   ),W(1,42  ),GZU ,ZERO    ,ZERO    ,W(1,49  ))    
-      CALL IOVXXX(W(1,49  ),W(1,6   ),W(1,47  ),GG ,AMP(24  ))             
-      JAMP(   1) = +AMP(   1)+AMP(   2)+AMP(   3)+AMP(   4)+AMP(   5)
-     &             +AMP(   6)+AMP(   7)+AMP(   8)+AMP(   9)+AMP(  10)
-     &             +AMP(  11)+AMP(  12)+AMP(  13)+AMP(  14)+AMP(  15)
-     &             +AMP(  16)+AMP(  17)+AMP(  18)+AMP(  19)+AMP(  20)
-     &             +AMP(  21)+AMP(  22)+AMP(  23)+AMP(  24)
+      CALL FVOXXX(W(1,1   ),W(1,9   ),GZD ,BMASS   ,ZERO    ,W(1,12  ))    
+      CALL JIOXXX(W(1,2   ),W(1,12  ),GG ,ZERO    ,ZERO    ,W(1,13  ))     
+      CALL IOVXXX(W(1,7   ),W(1,6   ),W(1,13  ),GG ,AMP(2   ))             
+      CALL JIOXXX(W(1,2   ),W(1,1   ),GG ,ZERO    ,ZERO    ,W(1,14  ))     
+      CALL FVIXXX(W(1,7   ),W(1,14  ),GG ,ZERO    ,ZERO    ,W(1,15  ))     
+      CALL IOVXXX(W(1,15  ),W(1,6   ),W(1,9   ),GZU ,AMP(3   ))            
+      CALL FVIXXX(W(1,7   ),W(1,9   ),GZU ,ZERO    ,ZERO    ,W(1,16  ))    
+      CALL IOVXXX(W(1,16  ),W(1,6   ),W(1,14  ),GG ,AMP(4   ))             
+      JAMP(   1) = +AMP(   1)+AMP(   2)+AMP(   3)+AMP(   4)
       REALMTRX_140 = 0.D0 
       DO I = 1, NCOLOR
           ZTEMP = (0.D0,0.D0)

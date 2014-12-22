@@ -1,8 +1,12 @@
       subroutine init_couplings
       implicit none
+      include "nlegborn.h"
+      include "pwhg_flst.h"
       include "coupl.inc"
       include 'PhysPars.h'
-      include "pwhg_physpar.h"
+      include 'pwhg_physpar.h'
+      include 'pwhg_math.h'
+      include 'pwhg_st.h'
       real * 8 powheginput
       external powheginput
 c Avoid multiple calls to this subroutine. The parameter file is opened
@@ -11,11 +15,26 @@ c but never closed ...
       data called/.false./
       save called
       integer idvecbos,vdecaymode,Vdecmod
-      common/cvecbos/idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode,Vdecmod
+      save/cvecbos/
       real *8 decmass
+      real * 8 kappa_ghb,kappa_ght,kappa_ghz
+      common/Hcoupls/kappa_ghb,kappa_ght,kappa_ghz
+      save/Hcoupls/
       real * 8 ger,gel
       common/Zlepcoupl/ger,gel
       real * 8 t3lep,qlep,gev,gea
+      real * 8 pwhg_alphas
+      external pwhg_alphas
+      real *8 opasopi,nleptfam
+      common/decay_corr/opasopi,nleptfam
+      logical massivetop,massivebottom
+      common/massiveflags/massivetop,massivebottom
+      save/massiveflags/
+      real * 8 gzl1,gzl2
+      common/cgzl/gzl1,gzl2
+      save/cgzl/
+      integer i
 
       if(called) then
          return
@@ -23,10 +42,14 @@ c but never closed ...
          called=.true.
       endif
 
+      massivetop = .false.
+      if (powheginput("#massivetop").eq.1) massivetop=.true.
+      massivebottom = .false.
+      if (powheginput("#massivebottom").eq.1) massivebottom=.true.
+
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
-
       idvecbos = 23
 c     decay products of the vector boson
       Vdecmod=powheginput('vdecaymode')
@@ -43,19 +66,25 @@ c     decay products of the vector boson
          vdecaymode=-14
       elseif (Vdecmod.eq.6) then
          vdecaymode=-16
+      elseif (Vdecmod.eq.0) then
+         vdecaymode=0
+      elseif (Vdecmod.eq.10) then
+         vdecaymode=10
       else
          write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $        ' is not allowed '
          call pwhg_exit(1)
       endif
       write(*,*) 
-      write(*,*) ' POWHEG: H Z J production and decay ' 
+      write(*,*) ' POWHEG: H Z J production with Z decay ' 
       if (vdecaymode.eq.-11) write(*,*) '         to e+ e- '
       if (vdecaymode.eq.-13) write(*,*) '         to mu+ mu-'
       if (vdecaymode.eq.-15) write(*,*) '         to tau+ tau-'
       if (vdecaymode.eq.-12) write(*,*) '         to antinue nue'
       if (vdecaymode.eq.-14) write(*,*) '         to antinumu numu'
       if (vdecaymode.eq.-16) write(*,*) '         to antinutau nutau'
+      if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
+      if (vdecaymode.eq. 10) write(*,*) '         inclusive'
 
 
 *********************************************************
@@ -64,60 +93,111 @@ c     decay products of the vector boson
 c Parameters are read from the MadGraph param_card.dat,
 c except the strong coupling constant, which is defined
 c somewhere else
-      call setpara("param_card.dat",.true.)
-      call madtophys
+      
+      ph_bmass=powheginput("#bmass")
+      if (ph_bmass.lt.0d0) then
+         ph_bmass=4.75d0        ! b-quark mass used in the massive 
+                                ! VIRTUAL diagrams and in the final-state 
+                                ! momenta reshuffling
+      endif
+      ph_tmass=powheginput("#tmass")
+      if (ph_tmass.lt.0d0) then
+         ph_tmass=172.5d0
+      endif
+
+      physpar_ml(1) = 0.511d-3   ! electron
+      physpar_ml(2) = 0.1057d0   ! muon
+      physpar_ml(3) = 1.777d0    ! tau
+      physpar_mq(1) = 0.33d0     ! down
+      physpar_mq(2) = 0.33d0     ! up
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = ph_bmass   ! bottom
       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     set parameter for MadGraph
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc      
-c     Here we assign the coupling of the Zll vertex to the neutrino ones, if 
-c     the code has to generate Z -> nu nu
-      if (Vdecmod.gt.3) then
-         gzl(1)=gzn(1)
-         gzl(2)=gzn(2)
-      endif
+      call setpara("param_card.dat",.true.)
+      call madtophys
+c     Save the leptonic Z coupling to be used in the subroutine setZcouplings
+      gzl1=gzl(1)
+      gzl2=gzl(2)
 
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     set parameter for GoSam: Z couplings to final-state leptons
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc      
-      if (Vdecmod.le.3) then
+      if (Vdecmod.ge.1.and.Vdecmod.le.3) then
 c     electron         
-         t3lep =-1d0/2   
-         qlep = -1d0
-      else
+         t3lep = -1d0/2   
+         qlep  = -1d0
+      elseif (Vdecmod.ge.4.and.Vdecmod.le.6) then
 c     neutrino
-         t3lep =+1d0/2   
-         qlep = 0d0
+         do i=1,flst_nborn
+            flst_born(   4,   i)=         -12
+            flst_born(   5,   i)=          12      
+         enddo         
+         do i=1,flst_nreal
+            flst_real(   4,   i)=         -12
+            flst_real(   5,   i)=          12      
+         enddo
+         t3lep = +1d0/2   
+         qlep  = 0d0
+      else
+         write(*,*) '***********************************************'
+         write(*,*) 'Decay mode of the Z boson NOT contemplated if'
+         write(*,*) 'GoSam is used for the evaluation of the virtual'
+         write(*,*) 'corrections'
+         write(*,*) '***********************************************'
       endif
       gev = (t3lep - 2*qlep*ph_sthw**2)/(2*ph_sthw*sqrt(1-ph_sthw**2))
       gea = t3lep/(2*ph_sthw*sqrt(1-ph_sthw**2))
+
       gel=gev+gea
       ger=gev-gea
 
       call golem_initialize
  
-c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
-      physpar_ml(1) = 0.51099891d-3
-      physpar_ml(2) = 0.1056583668d0
-      physpar_ml(3) = 1.77684d0
-      physpar_mq(1) = 0.33d0     ! down
-      physpar_mq(2) = 0.33d0     ! up
-      physpar_mq(3) = 0.50d0     ! strange
-      physpar_mq(4) = 1.50d0     ! charm
-      physpar_mq(5) = 4.5d0      ! bottom
+c     set lepton mass
+      if (Vdecmod.eq.0.or.Vdecmod.eq.10) then
+         decmass=physpar_mq(5)   ! worst case: Z -> b ~b 
+      elseif (Vdecmod.gt.3) then
+         decmass=0d0
+      else
+         decmass=physpar_ml(Vdecmod)   
+      endif
 
-      decmass=0d0
-      if (abs(vdecaymode).eq.11) decmass = physpar_ml(1)
-      if (abs(vdecaymode).eq.13) decmass = physpar_ml(2)
-      if (abs(vdecaymode).eq.15) decmass = physpar_ml(3)
-         
       if (ph_Zmass2low.lt.4*decmass**2) then
          write(*,*) 'min_z_mass less than the minimun invariant mass of'
-         write(*,*) 'the final-state leptonic system ',2*decmass
-         write(*,*) 'POWHEG aborts'
+         write(*,*) 'Z decay products',2*decmass
+         write(*,*) 'POWHEG exits'
          call pwhg_exit(-1)
       endif
+
+*********************************************************      
+***  MODIFICATION OF Higgs-top, Higgs-bottom and Higgs-Z couplings
+***  (we assume multiplicative kappa factors)
+      kappa_ghb=powheginput("#kappa_ghb")
+      if (kappa_ghb.eq.-1000000d0) then
+         kappa_ghb=1d0
+      endif
+      kappa_ght=powheginput("#kappa_ght")
+      if (kappa_ght.eq.-1000000d0) then
+         kappa_ght=1d0
+      endif
+      kappa_ghz=powheginput("#kappa_ghz")
+      if (kappa_ghz.eq.-1000000d0) then
+         kappa_ghz=1d0
+      endif
+
+c     hadronic and inclusive Z decay:
+c     factor 1+alpha_s(mz)/pi to take into account the corrections
+c     to the Z decay products
+      opasopi = 1+pwhg_alphas(ph_Zmass**2,st_lambda5MSB,st_nlight)/pi
+c     number of leptonic families considered in inclusive decay:
+c     nleptfam = 2: the Z boson can decay into e+/e-, mu+/mu-
+c     nleptfam = 3: the Z boson can decay into e+/e-, mu+/mu-, tau+/tau-
+      nleptfam = 3
 
 
       end
@@ -154,14 +234,16 @@ c madgraph routines not to blow.
       gfermi = 0.1166390d-4
       alfas = 0.119d0
       zmass = 91.188d0
-      tmass = 172.5d0
+c      tmass = 172.5d0
+      tmass = ph_tmass
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
       mtMS = 172.5d0
       mtaMS = 1.777d0
       cmass = 0d0
-      bmass = 0d0
+      bmass = 0d0 ! must be zero in MadGraph, otherwise the amplitudes are 
+                  ! evaluated with massive bottom
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
@@ -176,7 +258,6 @@ c madgraph routines not to blow.
 
       ph_Zmass2low=powheginput("min_z_mass")**2
       ph_Zmass2high=powheginput("max_z_mass")**2
-
 
       zwidth=2.441d0
       wwidth=2.0476d0
@@ -239,6 +320,7 @@ c HEFT coupling
       include 'coupl.inc'
       include 'PhysPars.h'
       include 'pwhg_math.h'
+      include 'pwhg_physpar.h'
       real * 8 e_em,g_weak
 c
 c     Common to lh_readin and printout
@@ -255,6 +337,7 @@ c
       ph_alphaem=e_em**2/(4*pi)
       ph_sthw2=1-(wmass/zmass)**2
       ph_sthw=sqrt(ph_sthw2)
+      ph_cthw=sqrt(1-ph_sthw2)
       g_weak=e_em/ph_sthw
       ph_gfermi=sqrt(2d0)*g_weak**2/(8*wmass**2)
 
@@ -264,8 +347,9 @@ c
       ph_Zwidth = zwidth
       ph_Wwidth = wwidth
       ph_Hwidth = hwidth
-      ph_tmass = tmass
-
+c      ph_tmass = tmass
+c      ph_bmass = physpar_mq(5)  ! b-quark mass used in the massive 
+c                                ! VIRTUAL diagrams 
       ph_WmWw = ph_Wmass * ph_Wwidth
       ph_ZmZw = ph_Zmass * ph_Zwidth
 
@@ -305,13 +389,11 @@ C     ones defined in the POWHEG BOX.
       external powheginput
       integer parallelstage,rndiwhichseed
       common/cpwhg_info/parallelstage,rndiwhichseed
-      logical massivetop
+      logical massivetop,massivebottom
+      common/massiveflags/massivetop,massivebottom
 
       rndiwhichseed=rnd_iwhichseed
       parallelstage=powheginput("#parallelstage")
-C     Read from card of top loops should be included
-      massivetop = .false.
-      if (powheginput("#massivetop").eq.1) massivetop=.true.
 
 C     Parameter definition
       param = 'Nf='
@@ -541,7 +623,7 @@ C     Parameter definition
       call check_gosam_err(param,ierr)
       
 C     Initialize virtual code
-      path = '../GoSam_POWHEG/orderfile.olc'
+      path = '../GoSamlib/orderfile.olc'
       
       call OLP_Start(path,ioerr,parallelstage,rndiwhichseed)
       call check_gosam_err('olp_start routine',ierr)

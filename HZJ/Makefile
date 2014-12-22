@@ -29,7 +29,8 @@ OPT=-O2
 #DEBUG= -ggdb 
 ifdef DEBUG
 OPT=-O0
-FPE=-ffpe-trap=invalid,zero,overflow,underflow
+FPE=-ffpe-trap=invalid,zero
+#,overflow,underflow
 endif
 endif
 
@@ -56,9 +57,10 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJDIR):./GoSamlib/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
+#INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+#FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0)   -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
@@ -110,7 +112,8 @@ endif
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
      real.o  phi1_2.o phi1_2m_nobw_ktmin.o phi3m0.o \
-     phi3m.o boost.o breit.o $(PWHGANAL)
+     phi3m.o boost.o breit.o scalar_integrals.o \
+     virtual_amp.o $(PWHGANAL)
 
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
@@ -171,10 +174,10 @@ main-PYTHIA-lhef: $(PYTHIA)
 
 XFFLAGS=$(DEBUG) $(OPT)
 libdhelas3.a:
-	cd DHELAS ; make FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd DHELAS ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 libmadgraph.a:
-	cd Madlib ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd Madlib ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 ifeq ("$(COMPILER)","gfortran")
 XFFLAGS +=-ffixed-line-length-132
@@ -183,7 +186,7 @@ XFFLAGS +=-extend-source
 endif
 
 libmodel.a:
-	cd MODEL ; make FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd MODEL ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 clean:

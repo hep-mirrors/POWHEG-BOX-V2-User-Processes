@@ -161,6 +161,11 @@ c$$$      enddo
 c$$$
 
       enddo
+c     1 elect, 2 muon, 3 tau
+c     4, 5, 6 respective neutrinos
+c     7 hadr
+      call bookupeqbins('Br.frac.',1d0,0.5d0,7.5d0)
+
       end
      
       subroutine analysis(dsig0)
@@ -172,6 +177,7 @@ c$$$
       include 'pwhg_math.h' 
       include 'pwhg_rad.h' 
       include 'pwhg_weights.h'
+      include 'pwhg_bookhist-multi.h'
 c      include 'pwhg_flg.h'
 c      include 'LesHouches.h'
       integer isthep_loc(NMXHEP)  ! local copy of isthep
@@ -206,8 +212,10 @@ c     we need to tell to this analysis file which program is running it
       real * 8 powheginput,dotp
       external powheginput,dotp
       real * 8 ptmin
-      integer idvecbos,Vdecmod,idl,idnu
-      save idvecbos,Vdecmod,idl,idnu
+      integer idvecbos,vdecaymode,Vdecmod
+      common/cvecbos/idvecbos,vdecaymode,Vdecmod
+      integer idl,idnu
+      save idl,idnu
       integer maxnumlep
       parameter (maxnumlep=10)
       real * 8 pvl(4,maxnumlep),plep(4,maxnumlep)
@@ -223,13 +231,11 @@ c     we need to tell to this analysis file which program is running it
       data minlo/0/
       character * 20 processid
       save processid
-      real * 8 dsig(7)
+      real * 8 dsig(maxmulti)
       integer nweights
       logical inimulti
       data inimulti/.true./
       save inimulti
-
-c      call reweightifneeded(dsig0,dsig)
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -256,8 +262,7 @@ c      if(dsig.eq.0) return
 c     from now on, nu is the positron!
 
       if (ini) then
-         Vdecmod=powheginput('vdecaymode')
-         if (WHCPRG.ne.'NLO   ') then
+c         if (WHCPRG.ne.'NLO   ') then
             if (Vdecmod.eq.1) then
                idl=11
             elseif (Vdecmod.eq.2) then
@@ -271,9 +276,11 @@ c     from now on, nu is the positron!
             elseif (Vdecmod.eq.6) then
                idl=16
             endif
-         else
-            idl=11
-         endif
+c         endif
+c         else
+c            idl=11
+c         endif
+
          idnu=-idl
          
          minlo=powheginput('#minlo')
@@ -293,28 +300,35 @@ c     from now on, nu is the positron!
       do ihep=1,nhep  
          isthep_loc(ihep) = isthep(ihep)
       enddo
-      
-      if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
-         do ihep=1,nhep            
-            if(idhep(ihep).eq.idl) then
-               ilep=ihep
-               do mu=1,4
-                  plep(mu,1)=phep(mu,ihep)
-               enddo
-            elseif(idhep(ihep).eq.idnu) then
-               ivl=ihep
-               do mu=1,4
-                  pvl(mu,1)=phep(mu,ihep)
-               enddo              
-            elseif(idhep(ihep).eq.25) then
-               ih=ihep
-               do mu=1,4
-                  ph(mu)=phep(mu,ihep)
-               enddo              
-            endif
-         enddo
-      endif
 
+      if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
+         if (Vdecmod.ne.0.and.Vdecmod.ne.10) then
+            do ihep=1,nhep            
+               if(idhep(ihep).eq.idl) then
+                  ilep=ihep
+               elseif(idhep(ihep).eq.idnu) then
+                  ivl=ihep
+               elseif(idhep(ihep).eq.25) then
+                  ih=ihep
+               endif
+            enddo
+         else
+            if (WHCPRG.eq.'NLO   ') then
+               ih=3
+               ilep=4
+               ivl=5
+            else
+               ih=3
+               ilep=5
+               ivl=6
+            endif
+         endif
+         do mu=1,4
+            ph(mu)=phep(mu,ih)
+            plep(mu,1)=phep(mu,ilep)
+            pvl(mu,1)=phep(mu,ivl)
+         enddo              
+      endif
 
 c     Analysis after MC shower
       if((WHCPRG.eq.'HERWIG').or.(WHCPRG.eq.'PYTHIA')) then
@@ -378,6 +392,31 @@ c     change status of l vu and Higgs
       isthep_loc(ilep)=10000
       isthep_loc(ivl)=10000
       isthep_loc(ih)=10000
+
+
+      if (abs(idhep(ilep)).eq.11) then
+c      Z -> e+ e-  or W -> e nu_e
+         call filld('Br.frac.',1d0,dsig)
+      elseif (abs(idhep(ilep)).eq.13) then
+c      Z -> mu+ mu-  or W -> mu nu_mu
+         call filld('Br.frac.',2d0,dsig)
+      elseif (abs(idhep(ilep)).eq.15) then
+c      Z -> tau+ tau-  or W -> tau nu_tau
+         call filld('Br.frac.',3d0,dsig)
+      elseif (abs(idhep(ilep)).eq.12) then
+c     Z -> nu_e nu_e (no plot for W)
+         call filld('Br.frac.',4d0,dsig)
+      elseif (abs(idhep(ilep)).eq.14) then
+c     Z -> nu_mu nu_mu (no plot for W)
+         call filld('Br.frac.',5d0,dsig)
+      elseif (abs(idhep(ilep)).eq.16) then
+c     Z -> nu_tau nu_tau (no plot for W)
+         call filld('Br.frac.',6d0,dsig)
+      else
+c     Z or W hadronic decay         
+         call filld('Br.frac.',7d0,dsig)
+      endif
+         
 
 c     Z momentum
       do mu=1,4

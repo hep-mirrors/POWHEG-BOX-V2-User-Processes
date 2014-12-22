@@ -1,5 +1,5 @@
-vdecaymode   1  ! 1,2,3 => electron,muon,tau; 4,5,6 => respective neutrinos
-hdecaymode  -1  ! undecayed Higgs boson (for PYTHIA and HERWIG)
+vdecaymode   1   ! 1: e, 2: mu, 3: tau, 4:nu_e, 5: nu_mu, 6: nu_tau, 0: hadrons, 10: inclusive
+hdecaymode  -1   ! for PYTHIA or HERWIG: do not decay the Higgs boson
 
 hmass  125d0        ! Higgs boson mass 
 hwidth 0.403d-2     ! Higgs boson width 
@@ -7,12 +7,11 @@ hwidth 0.403d-2     ! Higgs boson width
 min_h_mass    10d0      
 max_h_mass  1000d0 
 
-min_z_mass     10d0
+min_z_mass      10d0
 max_z_mass    1000d0
 
 
-
-numevts 125000    ! number of events to be generated
+numevts 100000    ! number of events to be generated
 ih1 1             ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2 1             ! hadron 2 (1 for protons, -1 for antiprotons)
 ebeam1 4000d0     ! energy of beam 1
@@ -22,7 +21,6 @@ bornktmin 0.26d0      ! (default 0d0) generation cut. Minimum kt in underlying B
 bornsuppfact 0d0 ! (default 0d0)  mass param for Born suppression factor. If < 0 suppfact = 1
 
 #bornzerodamp  1
-
 
 ! To be set only if using internal (mlm) pdfs
 ! 131 cteq4m
@@ -46,18 +44,17 @@ facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
 
-! the typical call uses 1/1400 seconds (1400 calls per second)
-ncall1 100000      ! Number of calls for the construction of the importance sampling grid
-itmx1 1           ! Number of iterations for grid
-ncall2 100000      ! Number of calls for the computation of the upper bounding envelope
+ncall1 100000     ! Number of calls for the construction of the importance sampling grid
+itmx1 1           ! Number of iterations for grid. NOT READ if run in parallel
+ncall2 100000     ! Number of calls for the computation of the upper bounding envelope
                   ! for the generation of radiation
 itmx2 1           ! Number of iterations for the above
-! Notice: the total number of calls is ncall2*itmx2*foldcsi*foldy*foldphi
+                  ! Notice: the total number of calls is ncall2*itmx2*foldcsi*foldy*foldphi
 foldcsi 1         ! number of folds on csi integration
 foldy   1         ! number of folds on  y  integration
 foldphi 1         ! number of folds on phi integration
 
-nubound 100000 ! number of calls to set up the upper bounding norms for radiation
+nubound 200000 ! number of calls to set up the upper bounding norms for radiation
                ! This is performed using only the Born cross section (fast)
 
 
@@ -73,7 +70,7 @@ testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 #iseed    547         !  Start the random number generator with seed iseed
 #rand1     0          !  skipping  rand2*100000000+rand1 numbers.  
 #rand2     0          !  (see RM48 short writeup in CERNLIB)              
-manyseeds 1         ! Used to perform multiple runs with different random
+manyseeds 1          ! Used to perform multiple runs with different random
                      ! seeds in the same directory.
                      ! If set to 1, the program asks for an integer j;
                      ! The file pwgseeds.dat at line j is read, and the
@@ -85,21 +82,29 @@ parallelstage 1
 xgriditeration 1
 fastbtlbound 1
 storemintupb 1
+#flg_debug 1
 
 storeinfo_rwgt 1   ! store info to allow for reweighting
 #pdfreweight 1
 
-
-
 minlo 1    
-minlo_nnll 1  
+minlo_nnll 1
 
-# if running with minlo, set the following to 0
-massivetop   0 
+
+
+massivetop   1     !  1: include top quark loops; 0 otherwise
+#tmass    172.5d0
+
+massivebottom 1    ! 1: include bottom quark loops; 0 otherwise
+#bmass 4.75d0
 
 sudscalevar   1
 
 doublefsr 1 
 
-nohad   1
+! modification of Higgs-top, Higgs-bottom and Higgs-Z couplings 
+kappa_ghb      1d0      !  multiplicative kappa-factor of the Higgs-bottom coupling
+kappa_ght      1d0      !  multiplicative kappa-factor of the Higgs-top coupling
+kappa_ghz      1d0      !  multiplicative kappa-factor of the Higgs-Z coupling
 
+nohad   1      ! for PYTHIA or HERWIG: no hadronization

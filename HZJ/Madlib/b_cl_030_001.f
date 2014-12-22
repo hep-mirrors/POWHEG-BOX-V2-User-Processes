@@ -19,7 +19,7 @@ C
       INTEGER    THEL
       PARAMETER (THEL=NCOMB*NCROSS)
       INTEGER NGRAPHS
-      PARAMETER (NGRAPHS=  14)
+      PARAMETER (NGRAPHS=   2)
 C  
 C ARGUMENTS 
 C  
@@ -171,10 +171,10 @@ C
 C CONSTANTS
 C  
       INTEGER    NGRAPHS,    NEIGEN 
-      PARAMETER (NGRAPHS=  14,NEIGEN=  1) 
+      PARAMETER (NGRAPHS=   2,NEIGEN=  1) 
       include "nexternal.inc"
       INTEGER    NWAVEFUNCS     , NCOLOR
-      PARAMETER (NWAVEFUNCS=  24, NCOLOR=   1) 
+      PARAMETER (NWAVEFUNCS=  10, NCOLOR=   1) 
       REAL*8     ZERO
       PARAMETER (ZERO=0D0)
 C  
@@ -228,43 +228,13 @@ C ----------
       CALL IXXXXX(P(0,4   ),ZERO ,NHEL(4   ),-1*IC(4   ),W(1,4   ))        
       CALL OXXXXX(P(0,5   ),ZERO ,NHEL(5   ),+1*IC(5   ),W(1,5   ))        
       CALL OXXXXX(P(0,6   ),BMASS ,NHEL(6   ),+1*IC(6   ),W(1,6   ))       
-      CALL FSIXXX(W(1,2   ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     7   ))                                                          
-      CALL JIOXXX(W(1,4   ),W(1,5   ),GAL ,ZERO    ,AWIDTH  ,W(1,8   ))    
-      CALL FVIXXX(W(1,7   ),W(1,8   ),GAD ,BMASS   ,ZERO    ,W(1,9   ))    
+      CALL JIOXXX(W(1,4   ),W(1,5   ),GZL ,ZMASS   ,ZWIDTH  ,W(1,7   ))    
+      CALL JVSXXX(W(1,7   ),W(1,3   ),GZZH ,ZMASS   ,ZWIDTH  ,W(1,         
+     &     8   ))                                                          
+      CALL FVIXXX(W(1,2   ),W(1,8   ),GZD ,BMASS   ,ZERO    ,W(1,9   ))    
       CALL IOVXXX(W(1,9   ),W(1,6   ),W(1,1   ),GG ,AMP(1   ))             
-      CALL JIOXXX(W(1,4   ),W(1,5   ),GZL ,ZMASS   ,ZWIDTH  ,W(1,10  ))    
-      CALL FVIXXX(W(1,7   ),W(1,10  ),GZD ,BMASS   ,ZERO    ,W(1,11  ))    
-      CALL IOVXXX(W(1,11  ),W(1,6   ),W(1,1   ),GG ,AMP(2   ))             
-      CALL FVIXXX(W(1,7   ),W(1,1   ),GG ,BMASS   ,ZERO    ,W(1,12  ))     
-      CALL IOVXXX(W(1,12  ),W(1,6   ),W(1,8   ),GAD ,AMP(3   ))            
-      CALL IOVXXX(W(1,12  ),W(1,6   ),W(1,10  ),GZD ,AMP(4   ))            
-      CALL FVIXXX(W(1,2   ),W(1,8   ),GAD ,BMASS   ,ZERO    ,W(1,13  ))    
-      CALL FSIXXX(W(1,13  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     14  ))                                                          
-      CALL IOVXXX(W(1,14  ),W(1,6   ),W(1,1   ),GG ,AMP(5   ))             
-      CALL FVIXXX(W(1,2   ),W(1,10  ),GZD ,BMASS   ,ZERO    ,W(1,15  ))    
-      CALL FSIXXX(W(1,15  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     16  ))                                                          
-      CALL IOVXXX(W(1,16  ),W(1,6   ),W(1,1   ),GG ,AMP(6   ))             
-      CALL FVIXXX(W(1,13  ),W(1,1   ),GG ,BMASS   ,ZERO    ,W(1,17  ))     
-      CALL IOSXXX(W(1,17  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(7   ))          
-      CALL FVIXXX(W(1,15  ),W(1,1   ),GG ,BMASS   ,ZERO    ,W(1,18  ))     
-      CALL IOSXXX(W(1,18  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(8   ))          
-      CALL JVSXXX(W(1,10  ),W(1,3   ),GZZH ,ZMASS   ,ZWIDTH  ,W(1,         
-     &     19  ))                                                          
-      CALL FVIXXX(W(1,2   ),W(1,19  ),GZD ,BMASS   ,ZERO    ,W(1,20  ))    
-      CALL IOVXXX(W(1,20  ),W(1,6   ),W(1,1   ),GG ,AMP(9   ))             
-      CALL FVIXXX(W(1,2   ),W(1,1   ),GG ,BMASS   ,ZERO    ,W(1,21  ))     
-      CALL FVIXXX(W(1,21  ),W(1,8   ),GAD ,BMASS   ,ZERO    ,W(1,22  ))    
-      CALL IOSXXX(W(1,22  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(10  ))          
-      CALL FVIXXX(W(1,21  ),W(1,10  ),GZD ,BMASS   ,ZERO    ,W(1,23  ))    
-      CALL IOSXXX(W(1,23  ),W(1,6   ),W(1,3   ),GHBOT ,AMP(11  ))          
-      CALL IOVXXX(W(1,21  ),W(1,6   ),W(1,19  ),GZD ,AMP(12  ))            
-      CALL FSIXXX(W(1,21  ),W(1,3   ),GHBOT ,BMASS   ,ZERO    ,W(1,        
-     &     24  ))                                                          
-      CALL IOVXXX(W(1,24  ),W(1,6   ),W(1,8   ),GAD ,AMP(13  ))            
-      CALL IOVXXX(W(1,24  ),W(1,6   ),W(1,10  ),GZD ,AMP(14  ))            
+      CALL FVIXXX(W(1,2   ),W(1,1   ),GG ,BMASS   ,ZERO    ,W(1,10  ))     
+      CALL IOVXXX(W(1,10  ),W(1,6   ),W(1,8   ),GZD ,AMP(2   ))            
       do i=1,ngraphs
          if(ihel.eq.-1)then
             saveamp(i,hell)=amp(i)
@@ -287,9 +257,7 @@ C ----------
          endif
       enddo
       endif
-      JAMP(   1) = +AMP(   1)+AMP(   2)+AMP(   3)+AMP(   4)+AMP(   5)
-     &             +AMP(   6)+AMP(   7)+AMP(   8)+AMP(   9)+AMP(  10)
-     &             +AMP(  11)+AMP(  12)+AMP(  13)+AMP(  14)
+      JAMP(   1) = +AMP(   1)+AMP(   2)
       DO I = 1, NCOLOR
           ZTEMP = (0.D0,0.D0)
           DO J = 1, NCOLOR
