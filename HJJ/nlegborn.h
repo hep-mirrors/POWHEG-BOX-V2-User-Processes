@@ -9,5 +9,7 @@ c     one extra variable to separate ISR and FSR for second jet
      1 +1 )
       
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=999,maxprocreal=999)
+      parameter (maxprocborn=176,maxprocreal=276)
  
+      integer maxalr
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)

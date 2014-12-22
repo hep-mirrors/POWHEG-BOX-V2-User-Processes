@@ -1,4 +1,4 @@
-numevts 20000     ! number of events to be generated
+numevts 40000     ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
 ebeam1 3500d0     ! energy of beam 1
@@ -38,20 +38,20 @@ bwcutoff 15       ! Mass window is hmass +- bwcutoff*hwidth
 
 
 ncall1   40000   ! number of calls for initializing the integration grid
-itmx1    1      ! number of iterations for initializing the integration grid
+itmx1    2      ! number of iterations for initializing the integration grid
 ncall2   40000     ! number of calls for computing the integral and finding upper bound
-itmx2    1  ! number of iterations for computing the integral and finding upper bound
+itmx2    2  ! number of iterations for computing the integral and finding upper bound
 foldcsi   1    ! number of folds on csi integration
 foldy     1     ! number of folds on  y  integration
 foldphi   1      ! number of folds on phi integration
-nubound  40000    ! number of bbarra calls to setup norm of upper bounding function
+nubound  50000    ! number of bbarra calls to setup norm of upper bounding function
 
 ! OPTIONAL PARAMETERS
 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
 #bornonly   0      ! (default 0) if 1 do Born only
-#testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 
 #iseed    12345    ! initialize random number sequence 
 #rand1     -1      ! initialize random number sequence 
@@ -80,7 +80,7 @@ storeinfo_rwgt 1
 # 2: upper bounding envelope for generation of underlying Born configurations
 # 3: upper bounds for radiation
 # 4: events
-# xgriditeration: only used with parallelstage 3
+# xgriditeration: only used with parallelstage 1
 # Set it to 1 for the first grid iteration, 2 for the second, etc.
 
 parallelstage 1

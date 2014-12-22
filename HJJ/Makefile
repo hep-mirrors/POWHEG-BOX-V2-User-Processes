@@ -8,12 +8,17 @@ PDF=lhapdf
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=dummy
-ANALYSIS=alt
-#ANALYSIS=HnJ
+#ANALYSIS=alt
+ANALYSIS=HnJ
 #ANALYSIS=none 
 ## For static linking uncomment the following
 #STATIC= -static
 #
+
+
+OBJ=obj-$(COMPILER)
+OBJDIR:=$(OBJ)
+
 ifeq ("$(COMPILER)","gfortran")	
 F77=gfortran -fno-automatic 	
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
@@ -34,19 +39,35 @@ OPT=-O0
 endif
 endif
 
+
+ifeq ("$(COMPILER)","ifort")
+F77 = ifort -save  -extend_source  -module $(OBJ)
+#CXX = g++
+#LIBS = -limf
+#FFLAGS =  -checkm
+## For floating point exception trapping  uncomment the following 
+#FPE = -fpe0
+OPT = -O1 #-fast
+## For debugging uncomment the following
+#DEBUG= -debug -g
+ifdef DEBUG
+OPT=-O0 
+FPE = -fpe0
+endif
+endif
+
 PWD=$(shell pwd)
-OBJ=$(PWD)/obj-$(COMPILER)
 WDNAME=$(shell basename $(PWD))
+VPATH= ./:../:$(OBJDIR):./HJJvirt:./Madlib/:./MODEL/:./DHELAS/
 
-VPATH= ./:../Version-pre2-1/progress/:../Version-pre2-1/:../:./Madlib/:./MODEL/:./DHELAS/:./HJJvirt/:$(OBJ)/
-
-
-INCLUDE0=./
-INCLUDE0.1=../Version-pre2-1/progress/include
-INCLUDE0.2=../Version-pre2-1/include
+INCLUDE0=$(PWD)
+INCLUDE1=$(PWD)/include
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=./MCFM_Include 
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0)  -I$(INCLUDE0.1)  -I$(INCLUDE0.2) -I$(INCLUDE2) -I$(INCLUDE3)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)  -I$(INCLUDE2) -I$(INCLUDE3)
+
+INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
+
 
 LIBFILES=$(shell  for dir in ./Madlib ./MODEL ./DHELAS ; do cd $$dir ; echo *.[fF] ' ' | sed 's/[fF] /o /g' ; cd .. ; done  )
 
