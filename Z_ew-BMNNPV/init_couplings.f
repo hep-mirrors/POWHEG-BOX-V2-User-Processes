@@ -9,8 +9,7 @@
       include 'pwhg_physpar.h'
       include 'LesHouches.h'
       include 'pwhg_em.h'
-      real * 8 masswindow_low,masswindow_high
-      real * 8 mass_low,mass_high
+      include 'pwhg_flg.h'
 
       real * 8 powheginput
       external powheginput
@@ -18,7 +17,7 @@
       parameter(verbose=.true.)
       real *8 decmass
       common/clepmass/decmass
-      real*8 mlep2
+      real*8 mlep2,resc_em_alpha
       common/leptmass/mlep2
 c     renormalization scheme
 c     0 -> alpha(0)
@@ -28,12 +27,16 @@ c     2 -> gmu
       integer iftoptmp
       real * 8 cmass, bmass
       integer j
+      save 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_alphaem = powheginput("#alphaem")
       if (ph_alphaem.le.0d0) ph_alphaem = 1d0/137.03599911d0
       em_alpha = ph_alphaem
+      if(.not.flg_with_em) then
+         em_alpha = 0
+      endif
       physpar_aem = ph_alphaem
 
 c EW renormalization scale
@@ -124,17 +127,6 @@ c     read eventual c and b masses from the input file
 c     number of light flavors
       st_nlight = 5
 
-c     mass window
-      mass_low = powheginput("#mass_low")
-      if (mass_low.lt.0d0) mass_low=-1d0
-      mass_high = powheginput("#mass_high")
-      if (mass_high.lt.0d0) mass_high=-1d0    
-
-      masswindow_low = powheginput("#masswindow_low")
-      if (masswindow_low.le.0d0) masswindow_low=30d0
-      masswindow_high = powheginput("#masswindow_high")
-      if (masswindow_high.le.0d0) masswindow_high=30d0
-
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   DEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -217,38 +209,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_WmWw = ph_Wmass * ph_Wwidth
       ph_ZmZw = ph_Zmass * ph_Zwidth
 
-
-c     set mass windows around Z-mass peak in unit of ph_Zwidth
-c     It is used in the generation of the Born phase space
-
-      if(mass_low.ge.0d0) then
-         ph_Zmass2low=mass_low
-      else
-         ph_Zmass2low=max(0d0,ph_Zmass-masswindow_low*ph_Zwidth)
-      endif
-      if(mass_high.gt.0d0) then
-         ph_Zmass2high=mass_high
-      else
-         ph_Zmass2high=ph_Zmass+masswindow_high*ph_Zwidth
-      endif
-
-      if (ph_Zmass2low.lt.1d0) then
-         write(*,*) '*************************************'
-         write(*,*) 'WARNING: Z virtuality cutoff at 1 GeV'
-         write(*,*) '         to avoid the photon pole    '
-         write(*,*) '*************************************'
-         ph_Zmass2low=1d0
-      endif
-      ph_Zmass2low=ph_Zmass2low**2
-      ph_Zmass2high=min(kn_sbeams,ph_Zmass2high**2)
-
-      if( ph_Zmass2low.ge.ph_Zmass2high ) then
-         write(*,*) "Error in init_couplings: mass_low >= mass_high"
-         call exit(1)
-      endif
-
-*
-      el2 = ph_alphaem*4.d0*pi
+c Alpha Thomson for radiation
+      el2 = em_alpha*4.d0*pi
       alsu4pi = ph_alphaem/4d0/pi
       ph_unit_e = sqrt(4d0*pi*ph_alphaem)
 

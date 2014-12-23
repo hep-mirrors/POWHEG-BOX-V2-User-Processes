@@ -7,6 +7,7 @@
       include 'pwhg_par.h'
       include 'LesHouches.h'
       include 'pwhg_flg.h'
+      include 'strongcorr.h'
       integer i1,i2,i3,i4,i5,k,ii(nlegreal)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
      #  (i4,ii(4)),(i5,ii(5))
@@ -27,7 +28,19 @@ c     lepton masses
 
 c Must include photon!
       pdf_nparton = 22
-      flg_with_em = .true.
+
+      if(powheginput("#no_ew").eq.1) then
+         flg_with_em = .false.
+      else
+         flg_with_em = .true.
+      endif
+
+      if(powheginput("#no_strong").eq.1) then
+         strongcorr = .false.
+      else
+         strongcorr = .true.
+      endif
+
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
@@ -46,7 +59,13 @@ c          ifdis=.false.
           ifphotoninduced=.false.
           ifdis=.false.
       endif
- 
+
+      if(powheginput("#lepaslight").ne.0) then
+         flst_lightpart=3
+      else
+         flst_lightpart=5
+      endif
+
       par_isrtinycsi = 1d-11
       par_isrtinyy = 1d-11
 
@@ -89,7 +108,6 @@ c     index of the first light particle in the final state
 c     that can give rise to collinear singularities;
 c     The charged leptons are considered MASSIVE particles in this code,
 c     and thus do not give rise to collinear singularities
-      flst_lightpart=5
 c     Z decay products
       i3=vdecaymode
       i4=-i3
@@ -110,7 +128,7 @@ c     q qbar
             endif
          enddo
       enddo
-      if (ifphotoninduced) then
+      if (flg_with_em.and.ifphotoninduced) then
           i1=22
           i2=22
           flst_nborn=flst_nborn+1
@@ -134,45 +152,48 @@ c     q qbar
       flst_nreal=0
       do i1=-5,5
          do i2=-5,5
-            do i5=-5,5
-               condition=.false.
-               if(.not.(i1.eq.0.and.i2.eq.0)) then
+            if(strongcorr) then
+               do i5=-5,5
+                  condition=.false.
+                  if(.not.(i1.eq.0.and.i2.eq.0)) then
 c     exclude gg
-                  if((i1.ne.0).and.(i1+i2.eq.0).and.(i5.eq.0)) then
+                     if((i1.ne.0).and.(i1+i2.eq.0).and.(i5.eq.0)) then
 c     q qbar -> g
-                     condition=.true.
-                  elseif((i1.eq.0).and.(i2.eq.i5)) then
+                        condition=.true.
+                     elseif((i1.eq.0).and.(i2.eq.i5)) then
 c     g q
-                     condition=.true.
-                  elseif((i2.eq.0).and.(i1.eq.i5)) then
+                        condition=.true.
+                     elseif((i2.eq.0).and.(i1.eq.i5)) then
 c     q g
-                     condition=.true.
+                        condition=.true.
+                     endif
                   endif
-               endif
+                  if (condition) then
+                     flst_nreal=flst_nreal+1
+                     if(flst_nreal.gt.maxprocreal) goto 998
+                     do k=1,nlegreal
+                        flst_real(k,flst_nreal)=ii(k)
+                     enddo
+                  endif
+               enddo
+            endif
+            if(flg_with_em) then
+               condition=(i1+i2.eq.0.and.i1.ne.0)
                if (condition) then
                   flst_nreal=flst_nreal+1
                   if(flst_nreal.gt.maxprocreal) goto 998
-                  do k=1,nlegreal
+                  do k=1,nlegborn
                      flst_real(k,flst_nreal)=ii(k)
                   enddo
+c     Photon in final state
+                  flst_real(nlegreal,flst_nreal)=22
                endif
-            enddo
-            condition=(i1+i2.eq.0.and.i1.ne.0)
-            if (condition) then
-               flst_nreal=flst_nreal+1
-               if(flst_nreal.gt.maxprocreal) goto 998
-               do k=1,nlegborn
-                  flst_real(k,flst_nreal)=ii(k)
-               enddo
-c Photon in final state
-               flst_real(nlegreal,flst_nreal)=22
             endif
- 11         continue
          enddo
       enddo
 
 c Photon in initial state
-      if (ifphotoninduced) then
+      if (flg_with_em.and.ifphotoninduced) then
           i1=22
           do i2=-5,5
              do i5=-5,5

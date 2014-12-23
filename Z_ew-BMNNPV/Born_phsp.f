@@ -22,7 +22,7 @@
 
       real*8 anorm,anbw,anlog,pbw,csi
 
-      real * 8 masswindow_low,masswindow_high,
+      real * 8 mass_low,
      1     phsp_Zmass2low,phsp_Zmass2high
       real * 8 phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw
       save phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw,
@@ -46,21 +46,12 @@ c     set initial- and final-state masses for Born and real
          phsp_ZmZw=phsp_Zm*phsp_Zw
 
 c     mass window
-         masswindow_low = powheginput("#masswindow_low")
-         if (masswindow_low.le.0d0) masswindow_low=30d0
-         masswindow_high = powheginput("#masswindow_high")
-         if (masswindow_high.le.0d0) masswindow_high=30d0
+         mass_low = powheginput("#mass_low")
+         if (mass_low.le.0d0) mass_low=30d0
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccc   DEPENDENT QUANTITIES       
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-c     set mass window around W-mass peak in unit of ph_Wwidth
-c     It is used in the generation of the Born phase space
-         phsp_Zmass2low=max(decmass*10d0,phsp_Zm-masswindow_low*phsp_Zw)
-         phsp_Zmass2low=phsp_Zmass2low**2
-         phsp_Zmass2high=phsp_Zm+masswindow_high*phsp_Zw
-         phsp_Zmass2high=min(kn_sbeams,phsp_Zmass2high**2)
+         mass_low = max(mass_low,decmass)
+         phsp_Zmass2low = mass_low**2
+         phsp_Zmass2high = kn_sbeams
 
       endif
 c Phase space:
@@ -193,6 +184,7 @@ c minimal final state mass
       include 'PhysPars.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      include 'pwhg_flg.h'
       include 'pwhg_kn.h'
       include 'pwhg_em.h'
       include 'mathx.h'
@@ -227,7 +219,13 @@ c minimal final state mass
             write(*,*) '*************************************'
             ini=.false.
          endif
-         muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4)))
+         if(flg_btildepart.eq.'r') then
+            muref=sqrt(2d0*dotp(kn_preal(0,3),kn_preal(0,4))
+     1           +kn_masses(3)**2+kn_masses(4)**2)
+         else
+            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
+     1           +kn_masses(3)**2+kn_masses(4)**2)
+         endif
       else
          if (ini) then
             write(*,*) '*************************************'

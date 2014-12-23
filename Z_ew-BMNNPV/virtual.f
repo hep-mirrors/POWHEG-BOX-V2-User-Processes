@@ -7,6 +7,8 @@ c     The as/(2pi) factor is attached at a later point
       include 'nlegborn.h'
       include 'pwhg_st.h'
       include 'pwhg_math.h'
+      include 'pwhg_flg.h'
+      include 'strongcorr.h'
       real * 8 p(0:3,nlegborn)
       integer vflav(nlegborn)
       real * 8 virtual
@@ -21,12 +23,20 @@ c     The as/(2pi) factor is attached at a later point
           return
       endif
 *
-      s = 2d0*dotp(p(0,1),p(0,2))
-      call compborn(p,vflav,born,dummy)
-      virt_st = pi2 - 8 - 3*log(st_muren2/s) - log(st_muren2/s)**2
-      virt_st = virt_st * cf * born
+      if(strongcorr) then
+         s = 2d0*dotp(p(0,1),p(0,2))
+         call compborn(p,vflav,born,dummy)
+         virt_st = pi2 - 8 - 3*log(st_muren2/s) - log(st_muren2/s)**2
+         virt_st = virt_st * cf * born
+      else
+         virt_st = 0
+      endif
 *
-      call virtual_ew(p,vflav,virt_ew)
+      if(flg_with_em) then
+         call virtual_ew(p,vflav,virt_ew)
+      else
+         virt_ew = 0
+      endif
 *
       virtual = virt_st + 2d0*dble(virt_ew) / 4d0 / nc
      +                                      /(st_alpha/(2d0*pi))
@@ -103,6 +113,12 @@ c$$$      end
       real*8 mqbig2
       integer nu
 
+      logical ini
+      data ini/.true./
+      real * 8 powheginput
+      real * 8 resc_em_alpha
+      save ini,resc_em_alpha
+
       qq = chargeofparticle(flav(1))
 
       if (qq.gt.0d0) then
@@ -176,6 +192,14 @@ c$$$      end
 * eq. (2.10) of Dittmaier-Kraemer PRD65 073007
 *
       virtual = self + vert + box
+
+      if(ini) then
+         ini = .false.
+         resc_em_alpha = powheginput("#resc_em_alpha")
+      endif
+      if(resc_em_alpha.gt.0) then
+         virtual = virtual * resc_em_alpha
+      endif
 
       end subroutine virtual_ew
 *
