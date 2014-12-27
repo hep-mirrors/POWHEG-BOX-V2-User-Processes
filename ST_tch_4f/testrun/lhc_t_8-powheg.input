@@ -75,3 +75,4 @@ CKM_Vtd    0.000001
 CKM_Vts    0.000001
 CKM_Vtb    1.0
 
+olddij 1 ! keep this flag for backward compatibility

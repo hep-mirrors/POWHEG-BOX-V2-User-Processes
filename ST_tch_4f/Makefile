@@ -1,5 +1,5 @@
 #-*- Makefile -*-
-## Choose compiler: gfortran,g77,ifort
+## Choose compiler: gfortran,ifort
 COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
@@ -7,6 +7,7 @@ PDF=lhapdf
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=default5f
+#Bjet-realistic
 ## For static linking uncomment the following
 #STATIC=-static
 #
@@ -23,20 +24,8 @@ FPE= #-ffpe-trap=invalid,zero #,overflow,underflow
 ## Use -O2 to be on the safe side
 OPT= -O2
 ## For debugging uncomment the following
-DEBUG= #-ggdb #-pg
+DEBUG=-ggdb #-pg
 endif
-
-ifeq ("$(COMPILER)","g77")
-F77= g77 -fno-automatic 
-FFLAGS= -Wall -ffortran-bounds-check \
-	-ffixed-line-length-132
-## For floating point exception trapping  uncomment the following 
-#FPEOBJ=trapfpe.o
-OPT=-O2
-## For debugging uncomment the following
-#DEBUG= -ggdb -pg
-endif
-
 
 ifeq ("$(COMPILER)","ifort")
 F77 = /usr/local/intel/fc/11.0.74/bin/ia32/ifort -save  -extend_source
@@ -50,10 +39,9 @@ OPT = #-O3 #-fast
 #DEBUG= -debug -g
 endif
 
-
-
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
+OBJ=obj-$(COMPILER)
 VPATH= ./:../:obj/
 
 INCLUDE0=$(PWD)
@@ -100,7 +88,7 @@ ifeq ("$(ANALYSIS)","default5f")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis5f.o 
+PWHGANAL=pwhg_analysis5f.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -109,7 +97,7 @@ ifeq ("$(ANALYSIS)","NLOvalidation")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_NLOvalidation.o 
+PWHGANAL=pwhg_analysis_NLOvalidation.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -118,7 +106,7 @@ ifeq ("$(ANALYSIS)","Bjet")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_Bjet.o 
+PWHGANAL=pwhg_analysis_Bjet.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -127,7 +115,7 @@ ifeq ("$(ANALYSIS)","Bjetbugfix")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_Bjet_bugfix.o 
+PWHGANAL=pwhg_analysis_Bjet_bugfix.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -136,7 +124,7 @@ ifeq ("$(ANALYSIS)","BjetbugfixalsoNLO")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_Bjet_bugfix_alsoNLO.o 
+PWHGANAL=pwhg_analysis_Bjet_bugfix_alsoNLO.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -145,7 +133,7 @@ ifeq ("$(ANALYSIS)","Bjet-new")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_Bjet-new.o 
+PWHGANAL=pwhg_analysis_Bjet-new.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -155,7 +143,7 @@ ifeq ("$(ANALYSIS)","Bjet-realistic")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis_Bjet-realistic.o 
+PWHGANAL=pwhg_analysis_Bjet-realistic.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -165,7 +153,7 @@ ifeq ("$(ANALYSIS)","hwanst4f_v3")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=powheg_hwanst4f_v3.o 
+PWHGANAL=powheg_hwanst4f_v3.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -175,7 +163,7 @@ ifeq ("$(ANALYSIS)","hwanst4f_v7")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=powheg_hwanst4f_v7.o 
+PWHGANAL=powheg_hwanst4f_v7.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -185,7 +173,7 @@ ifeq ("$(ANALYSIS)","hwanst4f_v8")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=powheg_hwanst4f_v8.o 
+PWHGANAL=powheg_hwanst4f_v8.o pwhg_bookhist.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetktwrap.o # fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
@@ -217,8 +205,6 @@ MCFM=$(shell echo MCFM_src/*.f | sed -e 's/\.f/\.o/g;s/MCFM_src\///g')
 ##########
 
 
-
-
 %.o: %.f $(INCLUDE)
 	$(FF) -c -o obj/$@ $<
 
@@ -237,9 +223,12 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o				\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	sigcollsoft.o sigvirtual.o  $(PDFPACK) $(USER) $(FPEOBJ)
+	sigcollsoft.o sigvirtual.o setlocalscales.o validflav.o mint_upb.o  \
+	pwhgreweight.o opencount.o ubprojections.o  			\
+	reshufflemoms.o                                                 \
+	$(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main: $(PWHG)
@@ -247,7 +236,7 @@ pwhg_main: $(PWHG)
 
 # target to analyze LHEF output
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	      \
-	opencount.o powheginput.o pwhg_bookhist.o lhefread.o  \
+	opencount.o powheginput.o lhefread.o  \
 	newunit.o pwhg_analysis_driver.o $(FPEOBJ)            \
 	$(PWHGANAL) #boost.o
 
@@ -256,7 +245,7 @@ lhef_analysis: $(LHEF)
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o powheginput.o \
-	pwhg_bookhist.o lhefread.o opencount.o $(FPEOBJ)      \
+	newunit.o lhefread.o opencount.o $(FPEOBJ)      \
 	$(PWHGANAL) #boost.o #pdfdummies.o #running herwig with external pdf!
 
 main-HERWIG-lhef: $(HERWIG)
@@ -264,7 +253,7 @@ main-HERWIG-lhef: $(HERWIG)
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
-	pwhg_bookhist.o lhefread.o opencount.o pdfdummies.o $(FPEOBJ)      \
+	newunit.o lhefread.o opencount.o pdfdummies.o $(FPEOBJ)      \
 	$(PWHGANAL) #boost.o
 
 main-PYTHIA-lhef: $(PYTHIA)
@@ -273,7 +262,7 @@ main-PYTHIA-lhef: $(PYTHIA)
 #############################################
 # target to read event file, shower events with HERWIG6520 + analysis
 HERWIG6520=main-HERWIG.o setup-HERWIG-lhef.o herwig6520.o boostrot.o powheginput.o \
-	pwhg_bookhist.o lhefread.o opencount.o $(FPEOBJ)      \
+	newunit.o lhefread.o opencount.o $(FPEOBJ)      \
 	$(PWHGANAL) pdfdummies.o #boost.o #running herwig with external pdf!
 
 main-HERWIG6520-lhef: $(HERWIG6520)
@@ -281,7 +270,7 @@ main-HERWIG6520-lhef: $(HERWIG6520)
 
 # target to read event file, shower events with PYTHIA-TUNED+MPI + analysis
 PYTHIA_tune=main-PYTHIA.o setup-PYTHIA_tune-lhef.o pythia.o boostrot.o powheginput.o \
-	pwhg_bookhist.o lhefread.o opencount.o pdfdummies.o $(FPEOBJ)      \
+	newunit.o lhefread.o opencount.o pdfdummies.o $(FPEOBJ)      \
 	$(PWHGANAL) #boost.o
 
 main-PYTHIA_tune-lhef: $(PYTHIA_tune)

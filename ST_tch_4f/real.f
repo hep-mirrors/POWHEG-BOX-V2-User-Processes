@@ -78,8 +78,7 @@ c     to avoid bugs in HELAS, restore exact masslessness of  incoming partons
       kr_mad(0,1)=dabs(kr_mad(3,1))
       kr_mad(0,2)=dabs(kr_mad(3,2))
 
-
-      call checkmomzero(nlegreal,kr_mad)
+      call checkmomzero_st(nlegreal,kr_mad)
 
 
 c$$$c     boost momenta in cm, it may improve madgraph
@@ -91,7 +90,7 @@ c$$$      call mboost(nlegreal,vec,beta,kr_mad,kr_mad_cm)
 c$$$c     to avoid bugs in HELAS, restore exact masslessness of  incoming partons 
 c$$$      kr_mad_cm(0,1)=dabs(kr_mad_cm(3,1))
 c$$$      kr_mad_cm(0,2)=dabs(kr_mad_cm(3,2))
-c$$$c      call checkmomzero(nlegreal,kr_mad_cm)
+c$$$c      call checkmomzero_st(nlegreal,kr_mad_cm)
 c$$$c      do mu=0,3
 c$$$c         write(*,*) kr_mad_cm(mu,1) , kr_mad_cm(mu,2)
 c$$$c      enddo

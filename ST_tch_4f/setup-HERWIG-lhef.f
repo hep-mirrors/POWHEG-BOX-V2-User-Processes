@@ -237,13 +237,20 @@ c      stop
       end
 
       subroutine hwaend
+      character * 100 filename
       character * 20 pwgprefix
       integer lprefix
       common/cpwgprefix/pwgprefix,lprefix
-      open(unit=99,file=pwgprefix(1:lprefix)//'POWHEG+HERWIG-output.top'
-     #     ,status='unknown')
+      include 'pwhg_rnd.h'
+      if(rnd_cwhichseed.ne.'none') then
+         filename=pwgprefix(1:lprefix)//'POWHEG+HERWIG-output-'
+     1        //rnd_cwhichseed
+      else
+         filename=pwgprefix(1:lprefix)//'POWHEG+HERWIG-output'
+      endif
+      open(unit=99,file=trim(filename)//'.top',status='unknown')
       call pwhgsetout
-      call pwhgtopout
+      call pwhgtopout(trim(filename))
       close(99)
       end
       
