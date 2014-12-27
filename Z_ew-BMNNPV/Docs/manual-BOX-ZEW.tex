@@ -1,0 +1,272 @@
+\documentclass[paper]{JHEP3}
+\usepackage{amsmath,amssymb,enumerate,url}
+\bibliographystyle{JHEP}
+
+%%%%%%%%%% Start TeXmacs macros
+\newcommand{\tmtextit}[1]{{\itshape{#1}}}
+\newcommand{\tmtexttt}[1]{{\ttfamily{#1}}}
+\newenvironment{enumeratenumeric}{\begin{enumerate}[1.] }{\end{enumerate}}
+\newcommand\sss{\mathchoice%
+{\displaystyle}%
+{\scriptstyle}%
+{\scriptscriptstyle}%
+{\scriptscriptstyle}%
+}
+
+\newcommand\as{\alpha_{\sss\rm S}}
+\newcommand\POWHEG{{\tt POWHEG}}
+\newcommand\POWHEGBOX{{\tt POWHEG BOX}}
+\newcommand\HERWIG{{\tt HERWIG}}
+\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\PHOTOS{{\tt PHOTOS}}
+\newcommand\MCatNLO{{\tt MC@NLO}}
+
+\newcommand\kt{k_{\sss\rm T}}
+
+\newcommand\pt{p_{\sss\rm T}}
+\newcommand\LambdaQCD{\Lambda_{\scriptscriptstyle QCD}}
+%%%%%%%%%% End TeXmacs macros
+
+
+\title{The $\boldsymbol{Z/\gamma^*}$ EW NLO \& QCD production \\
+in the POWHEG-BOX-V2 user manual} \vfill
+\author{Luca Barz\`e\\
+  PH-TH Department, CERN, CH-1211 Geneva 23, Switzerland\\
+  E-mail: \email{Luca.Barze@cern.ch}}
+\author{Guido Montagna\\
+  Dipartimento di Fisica, Universit\`a di Pavia and INFN, 
+  Sezione di Pavia, \\
+  Via A. Bassi 6, 27100 Pavia, Italy\\
+  E-mail: \email{Guido.Montagna@pv.infn.it}}
+\author{Paolo Nason\\
+  INFN, Sezione di Milano-Bicocca,
+  Piazza della Scienza 3, 20126 Milan, Italy\\
+  E-mail: \email{Paolo.Nason@mib.infn.it}}
+\author{Oreste Nicrosini\\
+  INFN, Sezione di Pavia, Via A. Bassi 6, 27100 Pavia, Italy\\
+  E-mail: \email{Oreste.Nicrosini@pv.infn.it}}
+\author{Fulvio Piccinini\\
+  INFN, Sezione di Pavia, Via A. Bassi 6, 27100 Pavia, Italy\\
+  E-mail: \email{Fulvio.Piccinini@pv.infn.it}}
+\author{Alessandro Vicini\\
+  Dipartimento di Fisica, Universit\`a di Milano and INFN, 
+  Sezione di Milano, \\
+  Via Celoria 16, I-20133 Milano, Italy\\
+  E-mail: \email{Alessandro.Vicini@mi.infn.it}}
+\vskip -0.5truecm
+
+\keywords{POWHEG, Shower Monte Carlo, NLO, Electroweak}
+
+\abstract{This note documents the use of the package
+  \tmtexttt{POWHEG-BOX-V2} for $Z/\gamma^*$ production processes including
+  QCD and ElectroWeak NLO corrections.
+  Results can be easily interfaced to shower Monte Carlo programs, in
+  such a way that both NLO and shower accuracy are maintained.}
+\preprint{\today\\ \tmtexttt{POWHEG-BOX-V2}}
+
+\begin{document}
+
+
+\section{Introduction}
+
+The \tmtexttt{POWHEG BOX} program is a framework for implementing NLO
+calculations in Shower Monte Carlo programs according to the
+\POWHEG{} method. An explanation of the method and a discussion of
+how the code is organized can be found in
+Refs.~\cite{Nason:2004rx,Frixione:2007vw,Alioli:2010xd}. The code is
+distributed according to the ``MCNET GUIDELINES for Event Generator
+Authors and Users'' and can be found at the web page \\
+%
+\begin{center}
+ \url{http://powhegbox.mib.infn.it}.
+\end{center}
+%
+~\\
+%
+This program is an implementation of the Drell-Yan NLO cross sections
+$pp\to Z/\gamma^* \to \ell^+ \ell^-$ including QCD and ElectroWeak (EW) 
+radiative corrections. 
+A detailed description of the implementation can be found in 
+Ref.~\cite{Barze:2013}. 
+%Please cite the paper when you use the program. \\
+In order to run the \tmtexttt{POWHEG BOX} program, we recommend the
+reader to start from the \tmtexttt{POWHEG BOX} user manual, which
+contains all the information and settings that are common between
+all subprocesses. In this note we focus on  the settings and
+parameters specific to the $Z/\gamma^*$ implementation.
+
+\section{Generation of events}
+
+Build the executable\\
+\tmtexttt{\$ cd POWHEG-BOX/ZEW \\
+\$ make pwhg\_main }\\
+Then do (for example) \\
+\tmtexttt{\$
+cd test-el\\
+\$ ../pwhg\_main}\\
+At
+the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
+100000 events for $Z/\gamma^* \to e^+ e^-$  in the Les Houches format. In
+order to shower them with \PYTHIA{} do\\~\\
+\tmtexttt{\$
+cd POWHEG-BOX/ZEW \\ \$ make
+main-PYTHIA-lhef \\ \$ cd
+test-el \\
+\$ ../main-PYTHIA-lhef}
+
+\section{Process specific input parameters}
+
+For the EW NLO $Z/\gamma^*$ production, it is required to activate the
+\tmtexttt{easlight} option, to enable the new final state radiation mapping
+necessary to describe the final state collinear radiation.\\
+Other mandatory parameters are those needed to select the final state
+leptonic species coming from the vector-boson:
+~\\
+\tmtexttt{
+  vdecaymode 11 !  code for selected Z decay\\
+  \phantom{aaaaaaaaaaaaa} ! (11(-11): electronic; 13(-13): muonic; 15(-15): tauonic)}
+\\
+\\
+The decay $Z \to \nu \bar \nu$ is not handled in the present version. 
+\\
+\\
+Together with the mandatory parameters, the \POWHEGBOX{} input facility 
+allows for an easy 
+setting of EW and run parameters, by explicitly adding the relevant 
+lines to the input card. 
+If one of the following entries is not present in the input card  
+the reported default 
+value is assumed. In any case, these parameters are printed 
+in the output of the program, 
+so their values can be easily tracked down. 
+~\\~\\
+ \tmtexttt{
+   Wmass\phantom{aa}  80.398 \phantom{aaaaaaa} ! W mass in GeV\\
+   Wwidth\phantom{a} 2.141 \phantom{aaaaaaaa} ! W width in GeV\\
+   Zmass\phantom{aa}  91.1876 \phantom{aaaaaa}   ! Z mass in GeV\\
+   Zwidth\phantom{a} 2.4952 \phantom{aaaaaaa} ! Z width in GeV\\
+   alphaem 0.00729735254 \phantom{a}! em coupling alpha(0)\\
+   Hmass\phantom{aa} 120. \phantom{aaaaaaaa} ! Higgs mass in GeV\\
+   Tmass\phantom{aa} 172.9 \phantom{aaaaaaaa} ! Top mass in GeV\\
+   Bmass\phantom{aaaa} 4.6 \phantom{aaaaaaaa} ! B quark mass in GeV\\
+   Cmass\phantom{aaaa} 1.2 \phantom{aaaaaaaa} ! C quark mass in GeV\\
+   Smass\phantom{aaa} 0.15 \phantom{aaaaaaaa} ! S quark mass in GeV\\
+   Umass\phantom{aaa} 0.06983 \phantom{aaaaa} ! U quark mass in GeV\\
+   Dmass\phantom{aaa} 0.06984 \phantom{aaaaa} ! D quark mass in GeV\\
+   Elmass\phantom{aa} 0.005109989 \phantom{a} ! Electron mass in GeV\\
+   Mumass\phantom{aa} 0.105658369 \phantom{a} ! Mu mass in GeV\\
+   Taumass\phantom{a} 1.77699 \phantom{aaaaa} ! Tau mass in GeV\\
+}
+\\
+The following parameter limits from below the virtuality of the $Z$ boson:
+\\
+\tmtexttt{mass\_low 20 \phantom{aaaaaaaa}! Z virtuality > mass\_low in GeV}\\
+\\
+If absent, it is set to 30~GeV.
+In order to avoid edge effects, the lower limit \tmtexttt{masslow} 
+should be more inclusive w.r.t. cuts applied at the analysis level.
+Notice that, if photons are generated, the $Z$ virtuality is not
+necessarily the mass of the dilepton.
+\\
+\\
+\tmtexttt{runningscale 0 \phantom{aaaa}! choice for ren and fac scales in Bbar integration}\\
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: fixed scale M\_Z}\\
+\phantom{pppppppppppppppppppppppppppppp} 
+\tmtexttt{ 1: running scale $\ell^+ \ell^-$ inv mass }\\ 
+With running scale, a minimum cutoff of 5 GeV is imposed on $m(\ell^+ \ell^-)$.
+\\
+\\
+\tmtexttt{scheme 1! choice for EW NLO scheme calculation}\\
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: Alpha(0)}\\
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 1: Alpha(M\_Z)}\\
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 2: G\_$\mu$}\\
+\\ 
+The CKM mixing matrix is assumed diagonal in the EW NLO corrections.\\
+\\
+The EW radiative corrections can be calculated according to three 
+different schemes: the $\alpha(0)$ scheme, where the input parameters 
+are $\alpha(0)$, $M_W$ and $M_Z$; the $\alpha(M_Z^2)$ scheme, where the 
+input parameters are $\alpha(M_Z^2)$, $M_W$ and $M_Z$ (with this 
+scheme the value of the parameter \tmtexttt{alphaem\_z} should be specified); 
+the $G_\mu$ scheme, where the 
+input parameters are $G_\mu$, $M_W$ and $M_Z$. 
+\\
+The Electro-Weak corrections can be switched off by setting
+\\
+\tmtexttt{no\_ew 1       ! default 0}
+\\
+and the strong corrections can be switched off by setting
+\\
+\tmtexttt{no\_strong 1       ! default 0}
+\\
+This last option is just to check EW corrections at the NLO level (i.e.,
+the Les Houches events do not have much meaning).
+
+The program can be interfaced to both \tmtexttt{PYTHIA6} and  \tmtexttt{PYTHIA8},
+by doing
+\\
+\tmtexttt{make main-PYTHIA-lhef}
+\\
+for \tmtexttt{PYTHIA6} and
+\\
+\tmtexttt{make main-PYTHIA8-lhef}.
+\\
+In the case of \tmtexttt{PYTHIA6} one can also optionally switch off photon radiation
+from  \tmtexttt{PYTHIA6}, and use \tmtexttt{PHOTOS}~\cite{Golonka:2005pn}
+instead. This is done by setting:
+\\
+\tmtexttt{use\_photos 1   ! default 0}
+\\
+in the \tmtexttt{powheg.input} file.
+
+The \PHOTOS \, source code is included in the \POWHEGBOX. 
+
+
+
+\begin{thebibliography}{10}
+
+\bibitem{Nason:2004rx}
+  P.~Nason,
+  ``A new method for combining NLO QCD with shower Monte Carlo algorithms,''
+  JHEP {\bf 0411} (2004) 040
+  [arXiv:hep-ph/0409146].
+  %%CITATION = JHEPA,0411,040;%%
+
+%\cite{Frixione:2007vw}
+\bibitem{Frixione:2007vw}
+  S.~Frixione, P.~Nason and C.~Oleari,
+``Matching NLO QCD computations with Parton Shower simulations: the POWHEG
+method,''
+  JHEP {\bf 0711} (2007) 070
+  [arXiv:0709.2092 [hep-ph]].
+  %%CITATION = JHEPA,0711,070;%%
+
+%\cite{Alioli:2010xd}
+\bibitem{Alioli:2010xd}
+  S.~Alioli, P.~Nason, C.~Oleari and E.~Re,
+``A general framework for implementing NLO calculations in shower Monte Carlo
+  programs: the POWHEG BOX,''
+  [arXiv:1002.2581 [hep-ph]].
+  %%CITATION = ARXIV:1002.2581;%%
+
+\bibitem{Barze:2013}
+  L.~Barz\`e, G.~Montagna, P.~Nason, O.~Nicrosini, F.~Piccinini and 
+  A.~Vicini, 
+  ``paper in preparation''.
+
+%\cite{Golonka:2005pn}
+\bibitem{Golonka:2005pn}
+  P.~Golonka and Z.~Was,
+  %``PHOTOS Monte Carlo: A Precision tool for QED corrections in $Z$ and $W$ decays,''
+  Eur.\ Phys.\ J.\ C {\bf 45} (2006) 97
+  [hep-ph/0506026].
+  %%CITATION = HEP-PH/0506026;%%
+
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
