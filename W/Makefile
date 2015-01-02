@@ -137,7 +137,7 @@ pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o $(PWHGANAL)	\
+     opencount.o powheginput.o bra_ket_subroutines.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
