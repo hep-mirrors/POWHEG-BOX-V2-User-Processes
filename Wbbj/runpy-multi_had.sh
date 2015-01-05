@@ -18,7 +18,7 @@ prg=../main-PYTHIA-lhef
 # cat powheg.input-save | sed "s/renscfact.*/renscfact $rfac/ ; s/facscfact.*/facscfact $ffac/ " > powheg.input
 
 cp powheg.input-save powheg.input
-echo 'nohad 1' >>  powheg.input
+echo 'nohad 0' >>  powheg.input
 
 for file in pwgevents-*.lhe
 do
@@ -32,6 +32,6 @@ for i in {1..3}
 do
 (echo 1 ; ls -c1 pwg-0*POWHEG+PYTHIA-output-W$i.top ; echo "") | mergedata
 
-mv fort.12 pwgPOWHEG+PYTHIA-output_nohad-W$i.top
+mv fort.12 pwgPOWHEG+PYTHIA-output_had-W$i.top
 
 done

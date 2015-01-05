@@ -8,7 +8,7 @@ cp powheg.input-save powheg.input
 echo 'nohad 0' >> powheg.input
 #echo 'changescalup 1' >> powheg.input
 
-\rm pwg-*-POWHEG+PYTHIA-output.top
+\rm pwg-*-POWHEG+PYTHIA-output.top  > /dev/null  2>&1
 
 for file in pwgevents-*.lhe
 do
