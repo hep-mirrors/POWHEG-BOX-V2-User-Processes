@@ -1,0 +1,7 @@
+In order to obtain the source code needed to have NNLOPS accuracy, the
+user has to download the DYNNLOPS directory from this folder using the
+following command
+
+svn co [--revision n] --username anonymous --password anonymous svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/DYNNLOPS
+
+and follow the instructions in the manual therein.
