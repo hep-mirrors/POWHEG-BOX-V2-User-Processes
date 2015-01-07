@@ -1,0 +1,14 @@
+14d3                ! sroot
+1 1                ! ih1, ih2
+3                  ! nproc
+91.1876d0 91.1876d0  ! mur, muf
+2                  ! order
+'tota'             ! part 
+.false.            ! zerowidth
+66d0 116d0           ! mwmin, mwmax
+30 10000000         ! itmx1, ncall1
+30 10000000         ! itmx2, ncall2
+113                ! rseed
+92 0               ! set, member (native PDFs)
+'MSTW2008nnlo68cl.LHgrid' 0  ! set, member (LHAPDFs)
+'nnlo'             ! runstring

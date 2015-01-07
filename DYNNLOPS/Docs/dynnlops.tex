@@ -1,0 +1,616 @@
+\documentclass[11pt,a4paper]{article}
+\pdfoutput=1 % if your are submitting a pdflatex (i.e. if you have
+             % images in pdf, png or jpg format)
+
+\usepackage{jheppub}
+
+\usepackage[T1]{fontenc}
+
+\usepackage[latin9]{inputenc}
+\usepackage{esint}
+
+
+\newcommand{\noun}[1]{{\tt #1}}
+\newcommand{\POWHEG}{\noun{POWHEG}}
+\newcommand{\POWHEGBOX}{\noun{POWHEG BOX}}
+\newcommand{\MINLO}{\noun{MiNLO}}
+\newcommand{\ZJMINLO}{\noun{ZJ-MiNLO}}
+\newcommand{\WJMINLO}{\noun{WJ-MiNLO}}
+\newcommand{\VJMINLO}{\noun{VJ-MiNLO}}
+\newcommand{\DYNNLO}{\noun{DYNNLO}}
+\newcommand{\NNLOPS}{\noun{NNLOPS}}
+\newcommand{\NLOPS}{\noun{NLOPS}}
+\newcommand{\PYTHIA}{\noun{Pythia}}
+\newcommand{\HERWIG}{\noun{Herwig}}
+\newcommand{\MCatNLO}{\noun{MC@NLO}}
+\newcommand{\MEPS}{\noun{MEPS}}
+\newcommand{\JETVHETO}{\noun{JetVHeto}}
+\newcommand{\FASTJET}{\noun{FastJet}}
+\newcommand{\as}{\alpha_{\scriptscriptstyle \mathrm{S}}}
+\newcommand{\Kr}{K_{\scriptscriptstyle \mathrm{R}}}
+\newcommand{\Kf}{K_{\scriptscriptstyle \mathrm{F}}}
+\newcommand{\mur}{\mu_{\scriptscriptstyle \mathrm{R}}}
+\newcommand{\muf}{\mu_{\scriptscriptstyle \mathrm{F}}}
+\newcommand{\pt}{p_{\scriptscriptstyle \mathrm{T}}}
+\newcommand{\pth}{p_{\scriptscriptstyle \mathrm{T}}^{\scriptscriptstyle \mathrm{H}}}
+\newcommand{\ptjone}{p_{\scriptscriptstyle \mathrm{T}}^{\scriptscriptstyle \mathrm{j_{1}}}}
+\newcommand{\kt}{k_{\scriptscriptstyle \mathrm{T}}}
+\newcommand{\mh}{m_{\scriptscriptstyle \mathrm{H}}}
+\newcommand{\mH}{mh}
+
+\newcommand{\ptjo}{\pt^{{\scriptscriptstyle \mathrm{j}_{1}}}}
+\newcommand{\hc}{\beta}
+\newcommand{\hgam}{\gamma}
+\newcommand{\smallk}{\kappa}
+\newcommand{\comment}[1]{{\bf [#1] }}
+
+\usepackage[mathscr]{euscript}
+
+% continuation line arrows
+\newcommand{\continueend}[0]{\raisebox{2.5mm}%
+{\rotatebox{-90}{$\curvearrowright$}}}
+\newcommand{\continuebeg}[0]{\raisebox{-0mm}%
+{\rotatebox{90}{$\curvearrowleft$}}}
+
+
+
+\title{{NNLOPS accurate Drell Yan production}}
+
+% more complex case: 4 authors, 3 institutions, 2 footnotes
+\author[a]{Alexander Karlberg,}
+\author[a]{Emanuele Re,}
+\author[a,b]{Giulia Zanderighi}
+
+% The "\note" macro will give a warning: "Ignoring empty anchor..."
+% you can safely ignore it.
+
+\affiliation[a]{Rudolf Peierls Centre for Theoretical Physics, University of Oxford\\1 Keble Road, UK}
+\affiliation[b]{Theory
+Division, CERN,\\CH--1211, Geneva 23, Switzerland}
+% e-mail addresses: one for each author, in the same order as the authors
+\emailAdd{a.karlber1g@physics.ox.ac.uk}
+\emailAdd{e.re1@physics.ox.ac.uk}
+\emailAdd{g.zanderighi1@physics.ox.ac.uk}
+
+\abstract{This document contains instructions for the promotion of \VJMINLO{} Les Houches event
+  files from NLO to NNLO accuracy in the description of inclusive Drell-Yan 
+  production observables, by a reweighting procedure making use of the
+  \DYNNLO{} program~\cite{Catani:2009sm}.}
+
+
+%\makeatother
+
+\begin{document}
+\maketitle
+\flushbottom
+
+\section{Introduction}
+
+These instructions explain how to use the code in the {\tt{ZJ/DYNNLOPS}} and {\tt{WJ/DYNNLOPS}}
+directories, upgraded with the {\tt MiNLO} procedure, in conjunction with the \DYNNLO{} program to get NNLO accuracy for inclusive Drell Yan production. As there is no fundamental difference between obtaining \NNLOPS accurate results for Z and W production from this code, we will here give instructions for the case of V production, where V denotes either Z or W. 
+
+In order to obtain the needed source code, the user has to download the {\tt DYNNLOPS} directory from the ZJ or WJ main directory, using the following command
+
+{\tt svn co [--revision n] --username anonymous --password anonymous \textbackslash
+
+\hspace{1cm} svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/DYNNLOPS} . 
+
+
+The {\tt DYNNLOPS} directory contains five folders
+\begin{itemize}
+\item {\tt aux}: a directory containing auxiliary files (e.g. to combine histograms, make plots, etc.); 
+\item {\tt Docs}: a directory containing the manual; 
+\item {\tt COMMON}: a directory containing all files common to W and Z production; 
+\item {\tt WNNLOPS} and {\tt ZNNLOPS}: directories containing files specific of W or Z production. 
+\end{itemize}
+
+
+\section{NNLO input\label{sec:NNLO-ingredients}}
+A fundamental  ingredient required to obtain NNLO accurate
+event samples is a triple differential distribution for the Z boson Born kinematics.\footnote{
+In this case the Born kinematics is fully specified in terms of the
+rapidity of the boson, an (arbitrary) angle describing the final state leptons and the invariant mass of the lepton pair.} We here give instructions on how to obtain
+such distributions, in a format suitable for upgrading the \VJMINLO{}
+events via the {\tt{VJ/DYNNLOPS}} reweighting code.
+
+\begin{enumerate}
+
+\item Make sure the {\noun{LHAPDF}} package is installed:\\
+\hspace*{5mm}
+{\url{https://lhapdf.hepforge.org}}\\
+In particular, for the installation of \DYNNLO{},
+the command {\tt{lhapdf-config ---libdir}} should return the 
+location of the installed {\noun{Lhapdf}} libraries.
+
+\item Download \DYNNLO{} from the following URL:\\
+\hspace*{5mm}
+{\url{http://theory.fi.infn.it/grazzini/codes/dynnlo-v1.4.tgz}}
+
+\item Unpack the tarball in a convenient location\\
+\hspace*{5mm}
+{\tt{\$ cp ~/Downloads/dynnlo-v1.4.tgz ./}}\\
+\hspace*{5mm}
+{\tt{\$ tar -xzvf dynnlo-v1.4.tgz}}\\
+\hspace*{5mm}
+{\tt{\$ ls dynnlo-v1.4}}\\
+Under the parent directory {\tt{dynnlo-v1.4}} one should find subdirectories
+{\tt{bin}}, {\tt{doc}}, {\tt{obj}}, {\tt{src}}, and a {\tt{makefile}}.
+
+\item Enter the \DYNNLO{} parent directory\\
+\hspace*{5mm}
+{\tt{\$ cd dynnlo-v1.4}}
+
+\item  Replace (or link) the \DYNNLO{} default {\tt{makefile}} with the one
+from the \\ {\tt{Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches}} directory\\
+\hspace*{5mm}
+{\tt{\$ cp /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches/dynnlo.makefile ./makefile}}
+
+\item  Copy (or link) the \DYNNLO{} patches directory into the parent directory\\
+\hspace*{5mm}
+{\tt{\$ cp -r /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches ./}}
+
+\item  Build the code\\
+\hspace*{5mm}{\tt{\$ make}}\\
+A message {\tt{----> DYNNLO compiled with LHAPDF routines <----}}
+indicates success. You might need to set the enviromental variable {\ttfamily LD\_LIBRARY\_PATH} to the output of
+{\ttfamily lhapdf-config ---libdir}, although the patched {\ttfamily dynnlo.makefile} contains commands that should take care
+of this automatically.
+
+\item  Copy over the template input file\\
+\hspace*{5mm}{\tt{\$ cd bin}}\\
+\hspace*{5mm}{\tt{\$ cp /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches/dynnlo.infile ./}}\\
+%\hspace*{5mm}{\tt{work\$ cp /path/to/HJ/NNLOPS/HNNLO-mur-muf-scan.sh ./}}\\
+
+\item  Edit the input file as desired.
+The input file is nothing but a standard \DYNNLO{} input file and may be
+run simply by typing\\
+\hspace*{5mm}{\tt{\$ ./dynnlo < dynnlo.infile  >\,> my.log}}\\ 
+yielding a {\tt{nnlo.top}}  and {\tt{nnlo3D.top}} histogram file.
+\vspace{3mm}\\
+The first file contains one-dimensional distributions which can be used for phenomenological studies. The second file is the one of interest here, as it contains a set of three-dimensional distributions which can be used for reweighting \ZJMINLO{} events. As each histogram consists of $25³=15625$ bins, very high statistics are required to properly populate the tails of the distributions. For the analysis presented in \cite{Karlberg:2014qua} we ran 100 instances of \DYNNLO{} with the following parameters:\\
+\hspace*{5mm}{\tt 15 10000000         ! itmx1, ncall1}\\
+\hspace*{5mm}{\tt 30 10000000         ! itmx2, ncall2}
+\vspace{3mm}\\
+%Alternatively the {\tt{HNNLO-mur-muf-scan.sh}} script loops over rescaling
+%factors ${\frac{1}{4}}$, ${\frac{1}{2}}$, 1, 2, independently, for $\mur$ and
+%$\muf$, and, moreover, a number of sequentially ordered random seeds,
+%{\tt{njobs}}, for each $\mur$, $\muf$ value; the intention being that runs
+%different only by the value of the random seed may be combined to increase
+%the statistical precision. Statistically equivalent histogram files may be
+%combined with the mergedata program:\\
+Changing the random seed {\tt rseed} for each run. To combine the runs we provide a fortran program, merge3ddata.f, in the {\tt aux} folder.  
+As it can use big amounts of memory, we recommend compiling with the following flags
+
+\hspace*{5mm}{\tt{\$ gfortran -mcmodel=medium -o merge3ddata merge3ddata.f }}
+
+To then merge the nnlo3D.top files into a file called dynnlo.top do the following
+
+\hspace*{5mm}{\tt{\$ ./merge3ddata 1 file\_1.top ... file\_N.top}}\\
+\hspace*{5mm}{\tt{\$ mv fort.12 dynnlo.top}}\vspace{3mm}\\
+%
+We would like to note here, that due to the way \DYNNLO{} computes the real contribution of the cross-section, the errors of the nnlo3D.top files (and nnlo.top) are not reliable. In order to asses the precision on the three dimensional distributions, we provide a script, 3dto1d.f, which will integrate the three-dimensional distribution into three one-dimensional distributions. After compilation it is run by
+
+\hspace*{5mm}{\tt{\$ ./3dto1d dynnlo.top}}
+
+which will produce a file fort.12 with one-dimensional distributions. 
+
+In the case where a user might not be interested in high rapidity events, it is presumably reasonable to run with fewer points  than suggested here. 
+
+\item Finally, make sure that all input parameters (width, mass, couplings, pdfs) should be the same in \DYNNLO{}  and \ZJMINLO{}. (The patched \DYNNLO{} program outputs all relevant physical parameters). 
+
+\end{enumerate}
+
+
+\section{{\noun{Zj-MiNLO}} events\label{sub:HJ-MINLO-ingredients}}
+
+The other fundamental ingredient needed for the NNLO reweighting procedure are  \ZJMINLO{} Les Houches events. A few modifications of the standard code are needed to obtain three-dimensional distributions and  to maintain
+consistency of the physical parameters in \DYNNLO{} and \ZJMINLO{}.  In order to include them, it is sufficient to replace the default {\ttfamily POWHEG} file with the patched one:\vspace{3mm}\\
+\hspace*{5mm} {\tt{\$ cp DYNNLOPS/ZNNLOPS/powheg-patches/powheg.makefile ./makefile}}\vspace{3mm}\\
+In {\tt{DYNNLOPS/ZNNLOPS/powheg-patches/powheg.input}} a template input file can also be found. If the code is run with the patches out of the box and the above input file, consistency between \DYNNLO{} and \ZJMINLO{} should be achieved. 
+However, we stress again that it is up to the user to make sure this is the case.
+
+
+Few comments are helpful:
+\begin{enumerate}
+
+\item  A large number of physical parameters used by the \ZJMINLO{} code,
+  such as the Fermi constant, are assigned by the subroutine
+  {\tt{init\_couplings}}
+  defined in file\linebreak {\tt{Zj/init\_couplings.f}}. As in the case of
+  the \DYNNLO{} {\tt{mdata.f}} file, some of the parameters in this file are
+  irrelevant. Nevertheless, in {\tt{Zj/DYNNLOPS/ZNNLOPS/powheg.input}} all these parameters can be changed. The version we provide is consistent with our version of mdata.f
+
+ \item For detailed instructions
+  on setting up the \ZJMINLO{} program to perform numerous runs in parallel
+  see section 4.1 in
+  {\tt{/path/to/W2jet/Docs/manual-BOX-WZ2jet.pdf}}
+  
+  \item We add that although
+  it is not strictly necessary to generate the \ZJMINLO{} events using a
+  NNLO PDF, in the limited studies that we have carried out to date we used the same (NNLO) PDF set in \ZJMINLO{} and \DYNNLO{}.
+  
+\item As was the case when obtaining NNLO distributions, a large number of events is needed to populate the tails of the three-dimensional distributions. For the study carried out in \cite{Karlberg:2014qua} we used 20 million events to compute denominators.  
+
+
+\end{enumerate}
+
+
+\section{Reweighting\label{sub:Reweighting}}
+
+The NLO-to-NNLO weight factor assigned to the \VJMINLO{} events is
+differential in the vector boson phase space  ($\Phi_B$) and the transverse
+momentum of the leading jet ($\pt$), at the NNLO level in the \DYNNLO{}
+case, and at the level of the hardest emission cross section (Les Houches
+events) in \VJMINLO{}. It is given by 
+\begin{eqnarray} \mathcal{W}\left(\Phi_B,\, p_{{\scriptscriptstyle
+\mathrm{T}}}\right)&=&h\left(\pt\right)\,\frac{\smallint
+d\sigma^{{\scriptscriptstyle
+\mathrm{NNLO\phantom{i}}}}\,\delta\left(\Phi_B-\Phi_B\left(\Phi\right)\right)-\smallint
+d\sigma_{B}^{{\scriptscriptstyle
+\mathrm{MINLO}}}\,\delta\left(\Phi_B-\Phi_B\left(\Phi\right)\right)}{\smallint
+d\sigma_{A}^{{\scriptscriptstyle
+\mathrm{MINLO}}}\,\delta\left(\Phi_B-\Phi_B\left(\Phi\right)\right)}\nonumber\\
+&+&\left(1-h\left(\pt\right)\right)\,,\label{eq:NNLOPS-overall-rwgt-factor-1}
+\label{eq:Wdef}
+\end{eqnarray} 
+where
+\begin{eqnarray}
+d\sigma_{A} & = & d\sigma\, h\left(\pt\right)\,,\label{eq:NNLOPS-dsig0}\\
+d\sigma_{B} & = & d\sigma\,\left(1-h\left(\pt\right)\right)\,,\label{eq:NNLOPS-dsig1}
+\end{eqnarray}
+with $h$ a monotonic profile function 
+\begin{equation}
+h(\pt)=\frac{(\hc\, m_{{\scriptscriptstyle \mathrm{V}}})^{2}}{(\hc\, m_{{\scriptscriptstyle \mathrm{V}}})^{2}+\pt^{2}},\label{eq:NNLOPS-hpT-fn-defn}
+\end{equation}
+and $\hc$ a constant parameter. 
+On convoluting $\mathcal{W}\left(\Phi_B,\, \pt\right)$ with the \ZJMINLO{} differential cross section
+and integrating over $\pt$ one finds, exactly,
+\begin{eqnarray}
+\left(\frac{d\sigma}{d\Phi_B}\right)^{{\scriptscriptstyle \mathrm{NNLOPS}}} & = & \left(\frac{d\sigma}{d\Phi_B}\right)^{{\scriptscriptstyle \mathrm{NNLO}}}\,.\label{eq:NNLOPS-NNLOPS-eq-NNLO_0+MINLO_1-1}
+\end{eqnarray}
+For a proof of why such a reweighting procedure leads to NNLO accuracy in
+general, we refer the
+reader to \cite{Hamilton:2013fea,Karlberg:2014qua}. 
+
+The role of the profile function $h$ and, in particular, the $\hc$
+parameter within it, is, roughly speaking, to determine how to spread out
+the NLO-to-NNLO corrections along the $\pt$ axis. For
+$\hc=\infty$ the corrections are spread uniformly in $\pt$ (see e.g.
+fig.~3 of ref.~\cite{Hamilton:2013fea}), while for $\hc=1$
+they are concentrated in the region $\pt<\hc\,m_Z$. In the latter
+respect the $\hc$ parameter plays a similar role to the resummation
+scale in dedicated resummation calculations, and as such we favour 
+that $\hc$ be set consistently with the preferred values in those.
+Thus we recommend $\hc=1$ in carrying out the reweighting.
+Indeed for $\hc=1$ we find good agreement with dedicated
+NNLL+NNLO calculations of the Z boson transverse momentum and the
+0-jet veto efficiency where the resummation scale was set to
+$m_Z$.
+
+We should emphasise that, while our NNLOPS simulation is formally NNLO
+accurate for inclusive quantities, the accuracy of its resummation of
+all-orders large logarithms is, formally, categorically not at the
+NNLL+NNLO level. We recommend that the predictions of such calculations
+be used to `tune' the \NNLOPS{} simulation (in particular the $\hc$
+parameter) to approximate the yet higher order, large logarithmic, terms
+which it does not take into account. Setting $\hc=1$ appears
+to do a very good job in this respect, thus it is the default, recommended,
+value in the following. If the reweighting is performed using eq.~\eqref{eq:Wdef}, the value of $\beta$ can be changed by just modifying in a straightforward way the file {\tt get\_zdamp.f}. 
+
+
+\subsection{A simple run\label{sec:simple-reweighting}} 
+
+The code to be used in order to produce an NNLO-reweighted event file
+can be found in the {\tt{DYNNLOPS/ZNNLOPS/Reweighter}} directory. After
+compiling it (\FASTJET{} needs to be linked), the program has to
+be run with the following command line:
+\vspace{3mm}\\
+\hspace*{5mm}{\tt \$ ./minnlo <ZjMiNLO-eventfile> <nr-DYNNLOfiles> <DYNNLO-file1>} \\ 
+\hspace*{10mm}{\tt [ <DYNNLO-file2>...]  [<ZjMiNLO-file1>  <ZjMiNLO-file2>  .... ] }
+\vspace{3mm}\\
+%
+
+%\vspace{3mm}\\
+%\hspace*{5mm}{\tt{\$ ./minnlo <ZjMiNLO-eventfile> <DYNNLO-identifier> <DYNNLO-outputfile> \{<ZjMiNLO-denominators>\}}}\vspace{3mm}\\
+%
+
+
+where {\tt ZjMiNLO-eventfile} is a LH file (suffix {\tt .lhe})
+containing events produced with \ZJMINLO{}, obtained as described in
+sec.~\ref{sub:HJ-MINLO-ingredients}, 
+{\tt nr-DYNNLOfiles} denotes the number of DYNNLO files containing the 3D distributions (more then one is needed for instance when commuting uncertainty bands using scale variation), {\tt DYNNLO-file*} are output files of {\tt DYNNLO},  computed as described in sec~\ref{sec:NNLO-ingredients}. The number of files given in the input line must correspond to {\tt nr-DYNNLOfiles}. Finally, {\tt ZjMiNLO-file*} contain three-dimensional histograms  computed using {\tt ZJ-MiNLO} events. These last arguments are optional. If these files are not present in the command line, the reweighing program computes them and stops. We call this stage one. When the {\tt ZjMiNLO-file*} are computed by the reweighing program using the {\tt ZjMiNLO-eventfile}, the first weight present in the LHE file will produce a file called {\tt MINLO-W1-denom.top}, the second weight a file called {\tt MINLO-W2-denom.top} and so on. 
+
+Rather then producing just one huge event file, it is also possible to compute the {\tt MINLO-W*-denom.top} files on each event sample and then combine the resulting distributions using the program merge3ddata (in {\tt aux}).\footnote{In this case, care has to be take to produce files in different directories.} 
+With the generated {\tt MINLO-W*-denom.top} files one can then go on and perform the actual NNLO reweighing including in the command line these files. We call this stage two. The files \emph{have} to be given in the same order as the corresponding weights in the LH file. Otherwise the reweighting will be incorrect. 
+
+Here follows an example on how to go through both stages, assuming that the user has a \ZJMINLO{} event file called {\tt pwgevents.lhe} containing 7 weights and 3 \DYNNLO{} files called {\tt dynnlo-mur0.5-muf0.5.top}, {\tt dynnlo-mur1.0-muf1.0.top} and {\tt dynnlo-mur2.0-muf2.0.top}, the program should be called as\vspace{3mm}\\
+\hspace*{5mm}{\tt \$./minnlo pwgevents.lhe 3 dynnlo-mur0.5-muf0.5.top  \textbackslash }
+
+\hspace*{5mm} {\tt  dynnlo-mur1.0-muf1.0.top dynnlo-mur2.0-muf2.0.top}\vspace{3mm}\\
+This will result in an output of {\tt MINLO-W1-denom.top}, {\tt MINLO-W2-denom.top}, {\tt MINLO-W3-denom.top}, {\tt MINLO-W4-denom.top}, {\tt MINLO-W5-denom.top}, {\tt MINLO-W6-denom.top}, {\tt MINLO-W7-denom.top}.\\
+
+To perform stage two the user would run \vspace{3mm}\\
+\hspace*{5mm}{\tt \$./minnlo pwgevents2.lhe 3  dynnlo-mur0.5-muf0.5.top  \textbackslash }
+
+\hspace*{5mm} {\tt dynnlo-mur1.0-muf1.0.top dynnlo-mur2.0-muf2.0.top MINLO-W*-denom.top}\vspace{3mm}\\
+which will produce a file called {\tt pwgevents.lhe-nnlo}. This LH file is the final output of the {\tt MiNNLO} NLO-to-NNLO reweighter program, and can now be read and
+showered by \PYTHIA{} or \HERWIG{}, as it is usually done with LH
+event files generated by the \POWHEGBOX{}.  {It is important to notice that
+the new NNLO weight attached to each event is written \emph{after} the
+event record, in the line comprised between the partonic momenta and
+the end-of-event tag ({\tt </event>})}. Similarly to the format of a
+\POWHEGBOX{} output when the reweighting machinery is used, this line
+starts with the text
+\vspace{3mm}\\
+\hspace*{5mm}{\tt \#new
+  weight,renfact,facfact,pdf1,pdf2}\vspace{3mm}\\
+%
+followed by a weight and other information. In a LH file obtained
+with the {\tt MiNNLO} reweighter, the names of the {\tt DYNNLO-output} files are
+appended at the end of this line, and the NNLO weight to be used is
+the first number appearing, which will obviously be different from the
+original weight contained in {\tt ZJMiNLO-eventfile}. This different
+weight, together with the appended identifier at the end of each line
+starting with {\tt \#new weight}, should be the only differences
+between the input and output LH files. Notice that the NNLO-reweighted
+output file will always contain the {\tt \#new weight} line(s), even
+if the original LH file {\tt ZJMiNLO-eventfile} didn't.
+
+The program takes few hours to reweight a LH file produced by
+\ZJMINLO{} containing 20 million events. The output printed on the
+terminal at run time is self explanatory. We have also included a
+template script ({\tt runminnlo\_template.sh}) to help the user.
+
+\subsection{Estimating uncertainties\label{sec:Estimating-uncertainties}}
+
+The conservative ansatz we recommend in estimating errors (the one
+employed in ref.~\cite{Hamilton:2013fea,Karlberg:2014qua}) is that the  $\mur$ and
+$\muf$ scales in the NNLO and NLO inputs should be varied in a fully
+independent way. In doing so we regard the uncertainties in the
+normalisations of distributions, as being independent of the respective
+uncertainties in the shapes --- at least in the region covered by the
+profile function, $h(\pt)$, i.e. that which includes the low $\pt$
+domain.  The former are determined
+by the \DYNNLO{} program, while the latter are due to
+\ZJMINLO{}. Outside of the low $\pt$ region, the uncertainty is given by the
+standard \ZJMINLO{} computation (which uses in that region $\mur=\muf=\pt$ for the central scale choice).
+
+In order to compute an uncertainty band, one first needs to have
+obtained multiple outputs from \DYNNLO{} and \ZJMINLO{} with different $\mur$
+and $\muf$. For the sake of simplicity, we will now describe a case
+where $\mur$ and $\muf$ are kept equal both when running \DYNNLO{} and
+\ZJMINLO{}. We call this situation a ``3x3 pts'' scale variation
+study: for each event we will obtain 9 NNLOPS weights, associated to
+each of the 9 possible combinations among 3 results from \DYNNLO{} and
+3 from \ZJMINLO{}.  This procedure is general enough to be
+straightforwardly adapted to the more general case of a ``7x7 pts''
+scale variation, or variation thereof.
+
+In the ``3x3 pts'' case, the needed inputs are 3 histogram files from
+\DYNNLO{}, which we will call {\tt DYNNLO-outputfile-11.top}, {\tt
+  DYNNLO-outputfile-HH.top} and {\tt DYNNLO-outputfile-22.top}, for
+values of $\mur=\muf=\{m_Z/2,m_Z,2m_Z\}$ respectively.  Similarly,
+the user needs to have obtained a LH file from \ZJMINLO{} where 3
+weights are associated to each event. This file has to be obtained
+with the \POWHEGBOX{} reweighting machinery: the 3 lines in between
+the last line of each event record and the {\tt </event>} tag should
+have the format
+\vspace{3mm}\\
+\hspace*{5mm}{\tt \#new weight,renfact,facfact,pdf1,pdf2 <weight>
+  <ren.scale factor> \continueend}\\
+\hspace*{5mm} {\tt \continuebeg \ <fact.scale fact> 
+  <pdf number for hadron 1> \continueend}\\
+\hspace*{5mm} {\tt \continuebeg \ <pdf number for hadron 2> <'mlm' or 'lha'>}\vspace{3mm}\\
+%
+The NLO-to-NNLO reweighter program should now be invoked in a first steep as:
+\vspace{3mm}\\
+\hspace*{5mm}{\tt{\$ ./minnlo ZJMiNLO-events.lhe 3
+    DYNNLO-outputfile-HH.top \textbackslash }}\\
+%
+ \hspace*{5mm}{\tt {   DYNNLO-outputfile-11.top \
+%
+    DYNNLO-outputfile-22.top}}\vspace{3mm}\\
+%
+This will produce the three {\tt MiNLO} files with three-dimensional distributions. 
+
+In a second step, one calls 
+\vspace{3mm}\\
+\hspace*{5mm}{\tt{\$ ./minnlo ZJMiNLO-events.lhe 3
+    DYNNLO-outputfile-HH.top \textbackslash }}\\
+%
+ \hspace*{5mm}{\tt {   DYNNLO-outputfile-11.top \
+%
+    DYNNLO-outputfile-22.top \textbackslash}}\\
+ \hspace*{5mm}{\tt { MINLO-W1-denom.top MINLO-W2-denom.top  MINLO-W3-denom.top }}\vspace{3mm}\\
+At the end
+of the run, 9 lines will be present after each event record, each one
+containing the NNLO weight associated to the \ZJMINLO{} result
+labelled by the values of the pair ({\tt <ren.scale factor>}, {\tt
+  <fact.scale fact>}) and the \DYNNLO{} result identified by the name of the file appended to each line.
+
+\section{Example analysis\label{sec:Analysis}}
+
+The analysis used for the phenomenological study in
+ref.~\cite{Karlberg:2014qua} can be found in
+{\tt{pwhg\_analysis-minlo.f}}. The analysis is compiled in the {\tt Zj} directory in the usual way by \\
+\hspace*{5mm}{\tt make lhef\_analysis}\\
+
+It can also be used to analyse events after the
+showering stage. We provide drivers for both Pythia6 (version 6.4.28) and Pythia8 (version 8.185) which can be compiled by\\
+\hspace*{5mm}{\tt make main-PYTHIA-lhef}\\
+\hspace*{5mm}{\tt make main-PYTHIA8-lhef}\\
+
+Note that \POWHEGBOX{} ships with Pythia6.4.25 as standard. It is straightforward to use any other version, by downloading it, and putting it in the main \POWHEGBOX{} directory. 
+%
+For Pythia8 the user has to compile it himself and then set the {\tt PYTHIA8LOCATION} appropriately. 
+
+\section{Suggested citations}
+If you use this code please cite the inclusive Drell Yan production
+\NNLOPS{} paper \cite{Karlberg:2014qua} and the \ZJMINLO{} paper which
+precedes and lays much of the foundations for it \cite{Hamilton:2012rf}.
+The \NNLOPS{} simulation fundamentally relies on the NNLO Drell Yan boson
+production calculation of refs.~\cite{Catani:2009sm},
+and so these works should also be cited.
+
+
+\appendix
+
+
+\section{Code description}
+In this section we briefly record the various additions and modifications
+to existing \DYNNLO{} and \POWHEGBOX{} code used to produce \NNLOPS{} events.
+
+\subsection{DYNNLO\label{sec:DYNNLOcode}}
+\begin{itemize}
+
+\item {\tt{makefile}} ({\tt{HNNLO-makefile}})
+  \begin{itemize}
+  \item The \DYNNLO{} {\tt{makefile}} is modified by
+    prepending {\tt{\$(DYNNLOHOME)/dynnlo-patches}} to
+    the {\tt{\$DIRS}} variable, introducing a variable {\tt{\$PATCHES}}
+    equal to the concatenation of the following object files in this list,
+    plus the removal of those elements from the other {\tt{Makefile}}
+    variables (avoiding duplication). In this way the modified \DYNNLO{}
+    files below are compiled and linked from {\tt{dynnlo-patches}} instead
+    of the default versions in the default locations.
+  \end{itemize}
+
+\item {\tt{mbook.f}}
+  \begin{itemize}
+  \item The {\tt{mtop}} subroutine, which outputs the \DYNNLO{} histograms
+    to a text file, has undergone a minor modification so as to have the
+    same format as the \ZJMINLO{} histogram output, to ease comparisons
+    and for use in the reweighting program.
+  \end{itemize}
+
+\item {\tt{mdata.f}}
+  \begin{itemize}
+  \item This file contains the values of numerous physical constants in
+    \DYNNLO{} e.g. Fermi's constant $G_{F}$, etc.  We have edited all
+    parameters in this file to have agreement with the corresponding
+    \ZJMINLO{} default settings.
+  \end{itemize}
+
+\item {\tt{plotter.f}}
+  \begin{itemize}
+  \item This file contains an example analysis for \DYNNLO{} by
+    default.  We have modified this analysis  to produce
+    three-dimensional histograms. Also a number of distributions relevant for phenomenology is being filled.
+    The three-dimension histogram range has been set to
+    $-5<y<5$, $-\pi/2<a_{mll}<\pi/2$ and $0<\theta_l<\pi$. The distributions have 25 bins in each direction. These values may be altered by
+    the user as desired, by editing the relevant booking
+    subroutine call. However, in this case one must take care to
+    modify the relevant \POWHEGBOX{} analysis file ({\tt{pwhg\_analysis-release.f}}) used by the
+    reweighting code, under the {\tt{Zj/DYNNLOPS/ZNNLOPS/Reweighter}} directory.
+  \end{itemize}
+
+\item {\tt{setup.f}}
+  \begin{itemize}
+  \item This file was modified to use the $k_T$-algorithm instead of the anti-$k_T$.
+  \end{itemize}
+
+\item {\tt{writeinfo.f}}
+  \begin{itemize}
+  \item Originally the {\tt{writeinfo}} subroutine in this file copied
+    the contents of the input file used in running the program, plus the
+    cross section, as a series of comments to the top of the histogram
+    output file. In order to have a simple uniform format for the \ZJMINLO{}
+    and \DYNNLO{} we removed these comments (the bulk of which was simply
+    a copy of the input file used to run the program).
+  \end{itemize}
+
+\item {\tt{histofinLH.f}}
+  \begin{itemize}
+  \item This file takes care of finalising the histograms. As we are using the \POWHEGBOX{} routines to fill our histograms (and a modified version to fill three-dimensional histograms) this file had to be modified to fill the correct histograms and finalise them.
+  \end{itemize}
+
+\item {\tt{coupling.f}}
+  \begin{itemize}
+  \item We added a printout to the screen of various parameters, to make it easier to compare with the output of \ZJMINLO{}.  
+  \end{itemize}
+
+\item {\tt{boost.f}}
+  \begin{itemize}
+  \item Added a routine to go from the lab frame to the CM frame.
+  \end{itemize}
+
+\item {\tt{auxiliary.f,pwhg\_bookhist-multi.f,pwhg\_bookhist-new.f,pwhg\_book-multi.h}, {\tt pwhg\_bookhist-new.h},pwhg\_math.h}
+  \begin{itemize}
+  \item These files contains the routines to fill histograms, to have a consistent output between \DYNNLO{} and \ZJMINLO{}. 
+  \end{itemize}
+
+
+\end{itemize}
+
+\subsection{\ZJMINLO{}\label{sec:ZJMINLOcode}}
+
+\begin{itemize}
+
+\item {\tt{lhapdfif.f}}
+  \begin{itemize}
+  \item When using NNLO PDFs $\Lambda_5$ is now computed at NLL and not NNLL. 
+  \end{itemize}
+
+\item {\tt{setlocalscales2.f}}
+  \begin{itemize}
+  \item This file is used by the Makefile instead of the default {\tt setlocalscales.f}. We have changed the routine which computes $\alpha_S$ to be the default \POWHEGBOX{} one, instead of a locally defined prescription. The two prescriptions agree far away from $\Lambda_5$ but significant differences show up close to the Landau pole. 
+  \end{itemize}
+
+\item {\tt{powheg.input}} / {\tt{powheg.input-save}}
+  \begin{itemize}
+  \item Here all values should be set consistently with the values used by \DYNNLO{}.
+  \end{itemize}
+
+\end{itemize}
+
+The rest of the files found in this folder are either a driver for Pythia (as used in \cite{Karlberg:2014qua} or files already described in the section above)
+\subsection{NNLO reweighting\label{sec:HNNLO code}}
+
+\begin{itemize}
+  
+\item {\tt{Makefile}}
+  \begin{itemize}
+  \item The default value for the {\tt ANALYSIS} variable should be
+    {\tt release}. \FASTJET{}
+    must be linked properly too, and as usual it is recommended to let
+    the {\tt Makefile} call the {\tt fastjet-config} command.
+  \end{itemize}
+  
+\item {\tt{minnlo.f}}
+  \begin{itemize}
+  \item This file contains the main program to perform the NLO-to-NNLO
+    reweighting. Some parameters useful for debugging purposes can be
+    found here, as described in the commented section at the beginning
+    of the file. However, the user is recommended not to change them.
+  \end{itemize}
+  
+\item {{\tt opencount.f}, {\tt auxilliary.f}, {\tt lhef\_readwrite.f},
+    {\tt get\_zdamp.f}, {\tt genclust\_kt.f}, \\ {\tt swapjet.f},
+    {\tt miscclust.f}, {\tt ptyrap.f}, {\tt r.f}}
+  \begin{itemize}
+  \item These files contain several functions and routines needed by
+    {\tt minnlo.f} and/or by the analysis subroutine used to process
+    the \ZJMINLO{} LH file and compute
+    $d\sigma_{A/B}^{{\scriptscriptstyle
+        \mathrm{MINLO}}}\,\delta\left(\Phi_B-\Phi_B\left(\Phi\right)\right)$.
+  
+  [{\tt jetlabel.f}, {\tt jetcuts.f}, {\tt mxpart.f} and {\tt npart.f}
+  contain common blocks used in the source files.]
+\end{itemize}
+
+\item {{\tt pwhg\_analysis-release.f}, {\tt jet\_finder-release.f}}
+  \begin{itemize}
+  \item These files contain the minimal analysis needed to extract
+    $d\sigma_{A/B}^{{\scriptscriptstyle
+        \mathrm{MINLO}}}\,\delta\left(\Phi_B-\Phi_B\left(\Phi\right)\right)$
+  from the LH input file. They are compiled if {\tt ANALYSIS=release}
+  is set, which is the default option.
+\end{itemize}
+  
+\end{itemize}
+
+\bibliographystyle{JHEP}
+\bibliography{dynnlops}
+
+
+\end{document}

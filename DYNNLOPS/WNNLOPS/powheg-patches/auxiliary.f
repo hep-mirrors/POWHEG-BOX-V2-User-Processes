@@ -1,0 +1,1 @@
+../../COMMON/powheg-patches/auxiliary.f
