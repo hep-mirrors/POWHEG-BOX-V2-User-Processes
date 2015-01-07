@@ -145,9 +145,9 @@ from the \\ {\tt{Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches}} directory\\
 \hspace*{5mm}
 {\tt{\$ cp /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches/dynnlo.makefile ./makefile}}
 
-\item  Copy (or link) the \DYNNLO{} patches directory into the parent directory\\
+\item  Link (or copy using the {\tt -L} option) the \DYNNLO{} patches directory into the parent directory\\
 \hspace*{5mm}
-{\tt{\$ cp -r /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches ./}}
+{\tt{\$ cp -r -L /path/to/Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches ./}}
 
 \item  Build the code\\
 \hspace*{5mm}{\tt{\$ make}}\\
