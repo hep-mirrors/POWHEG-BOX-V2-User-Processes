@@ -11,24 +11,7 @@ c  pwhgfill  :  fills the histograms with data
       include 'pwhg_math.h'
       integer i,j
       real * 8 dy,dylep,dpt,dr
-      character * 1 cnum(9)
-      data cnum/'1','2','3','4','5','6','7','8','9'/
-      integer nptmin
-      parameter (nptmin=3)
-      character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin)
-      data cptmin/  '-001',  '-015',  '-025'/
-      data ptminarr/ 1d0,  15d0,    25d0/
-
-      integer nptbmin
-      parameter (nptbmin=2)
-      character * 4 cptbmin(nptbmin)
-      real * 8 ptbminarr(nptbmin)
-      data cptbmin/  '-000',  '-015'/
-      data ptbminarr/    0d0,    15d0/
-
-      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
-      save /infohist/
+      
       real * 8 powheginput
       external powheginput
       integer nptmaxbins
@@ -36,8 +19,31 @@ c  pwhgfill  :  fills the histograms with data
       real * 8 ptmaxbins(nptmaxbins + 1)
       data ptmaxbins/25d0,30d0,40d0,60d0,140d0/
 
-      call inihists
+      character * 1 cnum(9)
+      data cnum/'1','2','3','4','5','6','7','8','9'/
 
+      integer nptmin
+      parameter (nptmin=3)
+      character * 4 cptmin(nptmin)
+      real * 8    ptminarr(nptmin)
+      integer nptbmin
+      parameter (nptbmin=2)
+      character * 4 cptbmin(nptbmin)
+      real * 8    ptbminarr(nptbmin)
+      character * 3 cptjmin(12)
+      common/cinfohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin,cptjmin
+      save /cinfohist/
+
+      data cptmin/  '-001',  '-015',  '-025'/
+      data ptminarr/ 1d0,  15d0,    25d0/
+      data cptjmin/  '-01','-02','-03','-04','-05','-06','-07',
+     $     '-08','-09','-10','-11','-12'/
+      data cptbmin/  '-000',  '-015'/
+      data ptbminarr/    0d0,    15d0/
+
+
+
+      call inihists
 
       call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
       call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
@@ -117,6 +123,8 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),
      $     0.5d0,0d0,20d0)
 
+      call bookupeqbins('Wbb-ptzoom3'//cptmin(i)//cptbmin(j),
+     $     0.002d0,0d0,0.04d0)
       enddo
       enddo
 
@@ -131,7 +139,13 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('XS WbbX',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS W(bb)jX',1d0,0.5d0,1.5d0)
       call bookupeqbins('XS WbbjX',1d0,0.5d0,1.5d0)
+ 
+
+      call bookupeqbins('1wbbj, 2wbb, 3wgj, 4w, 5wj',1d0,0.5d0,7.5d0)
       
+      do i=1,12
+         call bookupeqbins('Njet exc 2b'//cptjmin(i),1d0,-0.5d0,5.5d0)      
+      enddo
       end
      
       subroutine analysis(dsig0)
@@ -157,17 +171,20 @@ c      include 'LesHouches.h'
       parameter (maxtrack=2048)
       real * 8  ptrack(4,maxtrack)
       integer   jetvec(maxtrack),ihep_of_track(maxtrack)
+
       character * 1 cnum(9)
       integer nptmin
       parameter (nptmin=3)
       character * 4 cptmin(nptmin)
-      real * 8 ptminarr(nptmin) 
+      real * 8    ptminarr(nptmin)
       integer nptbmin
       parameter (nptbmin=2)
       character * 4 cptbmin(nptbmin)
-      real * 8 ptbminarr(nptbmin)     
-      common/infohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin
-      save /infohist/
+      real * 8    ptbminarr(nptbmin)
+      character * 3 cptjmin(12)
+      common/cinfohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin,cptjmin
+      save /cinfohist/
+
       real * 8 ptb1min,ptb2min,ybmax,yjmax
       integer j,i,k
 c     we need to tell to this analysis file which program is running it
@@ -179,10 +196,14 @@ c     we need to tell to this analysis file which program is running it
       integer ihep
       real * 8 powheginput,dotp
       external powheginput,dotp
-      integer idvecbos,Vdecmod,idl,idnu
+      integer idvecbos,Vdecmod
+      integer idl,idnu,nlep,nvl,nph
       save idvecbos,Vdecmod,idl,idnu
+      integer nmaxlep
+      parameter (nmaxlep=10)
+      integer idlarr(nmaxlep),idnuarr(nmaxlep),idpharr(nmaxlep)
       real * 8 pvl(4),plep(4),pWbb(4)
-      integer mu,ilep,ivl,nlep,nvl
+      integer mu,ilep,ivl
       real * 8 ptminfastjet,R,palg
       integer  minlo
       save minlo
@@ -212,15 +233,15 @@ c      common /crescfac/rescfac1,rescfac2
       save etamax, ptjmin
       logical pwhg_isfinite
       external pwhg_isfinite
+      integer cluster
+      common/ccluster/cluster
+      save /ccluster/
+      real * 8 ppp(0:3,9),pppcm(0:3,9),beta,vec(3)
       
       if (.not.pwhg_isfinite(dsig0)) then
          write(*,*) "*** NaN in analysis ***"
          return
       endif
-
-
-      call analysis_ATLAS_CMS(dsig0)
-
 
       if(inimulti) then
          if(weights_num.eq.0) then
@@ -241,6 +262,8 @@ c      common /crescfac/rescfac1,rescfac2
       endif
 
       if(sum(abs(dsig)).eq.0) return
+
+      call analysis_ATLAS_CMS(dsig0)
       
       if (ini) then
          idvecbos=powheginput('idvecbos')
@@ -282,38 +305,70 @@ c     make a local copy of status of particles
          isthep_loc(ihep) = isthep(ihep)
       enddo
 
-      ilep = 0
-      ivl  = 0
-      nlep=0
-      nvl=0
-      do ihep=1,nhep
-         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
-c     lepton found
-            ilep=ihep
-            nlep=nlep+1
-         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
-c     neutrino found
-            ivl=ihep
-            nvl=nvl+1
-         endif
-      enddo
+
+C$$$      ilep = 0
+C$$$      ivl  = 0
+C$$$      nlep=0
+C$$$      nvl=0
+C$$$      do ihep=1,nhep
+C$$$         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
+C$$$c     lepton found
+C$$$            nlep=nlep+1
+C$$$            ilep=ihep
+            
+C$$$         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
+C$$$c     neutrino found
+C$$$            ivl=ihep
+C$$$            nvl=nvl+1
+C$$$         endif
+C$$$      enddo
+C$$$      if(nvl.ne.1.and.nlep.ne.1) then
+C$$$         write(*,*) 'Problems with leptons from W decay'
+C$$$         write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
+C$$$         write(*,*) 'PROGRAM ABORT'
+C$$$         call pwhg_exit(-1)
+C$$$      endif
+
+
+C$$$      do mu=1,4
+C$$$         plep(mu) = phep(mu,ilep)
+C$$$         pvl(mu)  = phep(mu,ivl)
+C$$$      enddo 
+
+C$$$c     change status of l and vu 
+C$$$      isthep_loc(ilep) = 10000
+C$$$      isthep_loc(ivl)  = 10000
+
       
-      if(nvl.ne.1.and.nlep.ne.1) then
+
+c     find leptons and neutrinos
+      nlep=nmaxlep
+      nvl=nmaxlep
+      nph=nmaxlep
+      call find_particles(idl,nlep,idlarr)
+      call find_particles(idnu,nvl,idnuarr)      
+
+c      call find_particles(23,nph,idpharr)
+c      if (nph.gt.0) then
+c         write(*,*) '************** PHOTONS *********'
+c      endif
+
+      
+      if (nlep.eq.0.or.nvl.eq.0.) then
          write(*,*) 'Problems with leptons from W decay'
          write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
          write(*,*) 'PROGRAM ABORT'
-         call pwhg_exit(-1)
+         call pwhg_exit(-1)        
       endif
-
       do mu=1,4
-         plep(mu) = phep(mu,ilep)
-         pvl(mu)  = phep(mu,ivl)
+         plep(mu) = phep(mu,idlarr(1))
+         pvl(mu)  = phep(mu,idnuarr(1))
       enddo 
 
 c     change status of l and vu 
-      isthep_loc(ilep) = 10000
-      isthep_loc(ivl)  = 10000
-
+      isthep_loc(idlarr(1)) = 10000
+      isthep_loc(idnuarr(1))  = 10000
+           
 
 C     W momentum
       pw = plep + pvl
@@ -341,7 +396,7 @@ c     copy momenta to be passed to jet algorithm
       if (ntracks.eq.0) then
          numjets=0
       else
-         palg = 0d0             ! Alg: 1 = kt, -1 = antikt, 0 C/A
+         palg = -1d0             ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.7d0           ! Radius parameter
          ptminfastjet = 0d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
@@ -408,7 +463,8 @@ c      if (nbjet.eq.1) then
 c         write(*,*) njet,nbjet,nbbjet
 c      endif
 
-
+      call filld('1wbbj, 2wbb, 3wgj, 4w, 5wj',cluster*1d0,dsig)
+      call filld('1wbbj, 2wbb, 3wgj, 4w, 5wj',7d0,dsig)
 
       if (njet.ge.1) then
          call getyetaptmass(pjet(:,1),y,eta,pt,m)
@@ -428,6 +484,41 @@ c     1/branching = 9.259259259
       inv_branch=9.259259259d0
 
       if (nbjet.eq.2) then
+         
+C$$$            if (dsig0.lt.-10000d0) then
+C$$$               write(*,*) 'xxxxxxxxxxxxxxxx',dsig0
+C$$$               do  ihep=1,nhep
+C$$$                  do mu=1,3
+C$$$                     ppp(mu,ihep)=phep(mu,ihep)
+C$$$                  enddo
+C$$$                  ppp(0,ihep)=phep(4,ihep)
+C$$$               enddo
+C$$$               vec(1)=0
+C$$$               vec(2)=0
+C$$$               vec(3)=-1
+C$$$               beta=(ppp(0,1)-ppp(0,2))/(ppp(0,1)+ppp(0,2))
+C$$$               call mboost(9,vec,beta,ppp,pppcm)
+C$$$               do  ihep=1,nhep
+C$$$                  write(*,*) idhep(ihep), pppcm(0,ihep),pppcm(1,ihep),
+C$$$     $                 pppcm(2,ihep),pppcm(3,ihep)
+C$$$               enddo
+C$$$            endif
+
+
+      if (nbjet.eq.2) then
+         do i=1,12
+            call applycuts(pjet,njet,1d0*i,100d0,pjout,njout)
+            if (njout.eq.0) then
+               call filld('Njet exc 2b'//cptjmin(i),0d0,dsig)
+            elseif (njout.eq.1) then
+               call filld('Njet exc 2b'//cptjmin(i),1d0,dsig)
+            elseif (njout.eq.2) then
+               call filld('Njet exc 2b'//cptjmin(i),2d0,dsig)
+            endif            
+         enddo
+      endif
+     
+
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 CCCCCCCCCC                   W b b analysis
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC            
@@ -446,8 +537,33 @@ c        call applycuts(pbbjet,nbbjet,ptminarr(i),etamaxWbb,pbbjout,nbbjout)
          endif
          
 
-         call filld('sigtot Wbb'//cptmin(i)//cptbmin(j),1d0,dsig)                  
+         do mu=1,4
+            pwbb(mu) = pw(mu) + pbjout(mu,1)+ pbjout(mu,2)
+         enddo
+c         if (njout.ge.1) then
+            call getyetaptmass(pwbb,y,eta,pt,m)
+            
+*************************************************************************************
+*************************************************************************************
+c     try to avoid unstable point with pt_Wbb less than 2 MeV
+            
+            if (WHCPRG.ne.'NLO   '.and. minlo.eq.1 .and. pt.lt.0.002d0) 
+     $           return
+*************************************************************************************            
+*************************************************************************************
 
+
+            call filld('Wbb-y'//cptmin(i)//cptbmin(j),y,dsig)
+            call filld('Wbb-eta'//cptmin(i)//cptbmin(j),eta,dsig)
+            call filld('Wbb-pt'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('Wbb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
+            call filld('Wbb-ptzoom3'//cptmin(i)//cptbmin(j),pt,dsig)
+c         endif
+
+
+         call filld('sigtot Wbb'//cptmin(i)//cptbmin(j),1d0,dsig)                  
+         
          if (njout.eq.0) then
             call filld('Njet excl'//cptmin(i)//cptbmin(j),0d0,dsig)
          elseif (njout.eq.1) then
@@ -511,22 +627,11 @@ c     next-to-hardest jet
             call filld('j2-m'//cptmin(i)//cptbmin(j),m,dsig)
          endif
 
-         do mu=1,4
-            pwbb(mu) = pw(mu) + pbjout(mu,1)+ pbjout(mu,2)
-         enddo
-         call getyetaptmass(pwbb,y,eta,pt,m)
-         call filld('Wbb-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('Wbb-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('Wbb-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('Wbb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
       enddo
       enddo
       endif   ! nbjet=2
       
 
-
- 111  continue
 
       if (nbjet.ge.1.or.nbbjet.gt.0) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
@@ -799,8 +904,11 @@ c     we need to tell to this analysis file which program is running it
       external powheginput,dotp
       integer idvecbos,Vdecmod,idl,idnu
       save idvecbos,Vdecmod,idl,idnu
+      integer nmaxlep
+      parameter (nmaxlep=10)
+      integer idlarr(nmaxlep),idnuarr(nmaxlep),idpharr(nmaxlep)
       real * 8 pvl(4),plep(4),pWbb(4)
-      integer mu,ilep,ivl,nlep,nvl
+      integer mu,ilep,ivl,nlep,nvl,nph
       real * 8 ptminfastjet,R,palg
       integer  minlo
       save minlo
@@ -837,14 +945,14 @@ c      common /crescfac/rescfac1,rescfac2
      $     ptminjets_CMS,etamaxjets_CMS,etamaxjets1_CMS
       logical isolatedlep,vetojet
 
-      if(inimulti) then
-         if(weights_num.eq.0) then
-            call setupmulti(1)
-         else
-            call setupmulti(weights_num)
-         endif
-         inimulti=.false.
-      endif
+C$$$      if(inimulti) then
+C$$$         if(weights_num.eq.0) then
+C$$$            call setupmulti(1)
+C$$$         else
+C$$$            call setupmulti(weights_num)
+C$$$         endif
+C$$$         inimulti=.false.
+C$$$      endif
 
       dsig=0
       if(weights_num.eq.0) then
@@ -897,37 +1005,70 @@ c     make a local copy of status of particles
          isthep_loc(ihep) = isthep(ihep)
       enddo
 
-      ilep = 0
-      ivl  = 0
-      nlep=0
-      nvl=0
-      do ihep=1,nhep
-         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
-c     lepton found
-            ilep=ihep
-            nlep=nlep+1
-         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
-c     neutrino found
-            ivl=ihep
-            nvl=nvl+1
-         endif
-      enddo
+C$$$      ilep = 0
+C$$$      ivl  = 0
+C$$$      nlep=0
+C$$$      nvl=0
+C$$$      do ihep=1,nhep
+C$$$         if (idhep(ihep).eq.idl .and. isthep_loc(ihep).eq.1) then
+C$$$c     lepton found
+C$$$            ilep=ihep
+C$$$            nlep=nlep+1
+C$$$         elseif (idhep(ihep).eq.idnu .and. isthep_loc(ihep).eq.1) then
+C$$$c     neutrino found
+C$$$            ivl=ihep
+C$$$            nvl=nvl+1
+C$$$         endif
+C$$$      enddo
       
-      if(nvl.ne.1.and.nlep.ne.1) then
-         write(*,*) 'Problems with leptons from W decay'
+C$$$      if(nvl.ne.1.and.nlep.ne.1) then
+C$$$         write(*,*) 'Problems with leptons from W decay'
+C$$$         write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
+C$$$         write(*,*) 'PROGRAM ABORT'
+C$$$         call pwhg_exit(-1)
+C$$$      endif
+
+C$$$      do mu=1,4
+C$$$         plep(mu) = phep(mu,ilep)
+C$$$         pvl(mu)  = phep(mu,ivl)
+C$$$      enddo 
+
+C$$$c     change status of l and vu 
+C$$$      isthep_loc(ilep) = 10000
+C$$$      isthep_loc(ivl)  = 10000
+
+
+
+c     find leptons and neutrinos
+      nlep=nmaxlep
+      nvl=nmaxlep
+      nph=nmaxlep
+      call find_particles(idl,nlep,idlarr)
+      call find_particles(idnu,nvl,idnuarr)      
+
+c      call find_particles(23,nph,idpharr)
+c      if (nph.gt.0) then
+c         write(*,*) '************** PHOTONS *********'
+c      endif
+
+      
+      if (nlep.eq.0.or.nvl.eq.0.) then
+         write(*,*) 'Problems with leptons from W decay in CMS/ATLAS'
          write(*,*) 'nvl= ',nvl, 'nlep= ',nlep
          write(*,*) 'PROGRAM ABORT'
-         call pwhg_exit(-1)
+         call pwhg_exit(-1)        
       endif
-
       do mu=1,4
-         plep(mu) = phep(mu,ilep)
-         pvl(mu)  = phep(mu,ivl)
+         plep(mu) = phep(mu,idlarr(1))
+         pvl(mu)  = phep(mu,idnuarr(1))
       enddo 
 
 c     change status of l and vu 
-      isthep_loc(ilep) = 10000
-      isthep_loc(ivl)  = 10000
+      isthep_loc(idlarr(1)) = 10000
+      isthep_loc(idnuarr(1))  = 10000
+
+
+
 
 
 C     W momentum
@@ -1176,7 +1317,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       else
          palg = -1d0            ! Alg: 1 = kt, -1 = antikt, 0 C/A
          R    = 0.5             ! Radius parameter
-         ptminfastjet = 0d0     ! Pt min
+         ptminfastjet = 1d0     ! Pt min
          call fastjetppgenkt(ptrack,ntracks,R,palg,ptminfastjet,
      $        pj,numjets,jetvec)         
       endif
@@ -1238,6 +1379,19 @@ c     this jet contains a b and a bbar
       enddo
 
 
+
+
+c**************************************************************************************
+      if (njet.eq.0) then
+c         write(*,*) 'CMS return condition ',dsig0
+c         return
+      endif
+c**************************************************************************************
+
+
+
+
+
       if (nbjet.eq.2) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCC           W b b analysis CMS arXiv:1312.6608
@@ -1247,8 +1401,8 @@ c     lepton cuts
 c      ptminmis_CMS  = 25d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
       ptminmis_CMS  = 0d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
       etamaxlep_CMS = 2.1d0
-      mtWmin_CMS    = 45d0
-c     mtWmin_CMS    = 0d0
+c      mtWmin_CMS    = 45d0
+      mtWmin_CMS    = 0d0
 c     jet cuts
       ptminjets_CMS  = 25d0
       etamaxjets_CMS = 2.4d0
@@ -1357,4 +1511,32 @@ c               vetojet = .false.
             enddo
          endif             
       enddo
+      end
+
+
+
+
+c     Scan the hep common block to find "nmax" final-state particles with idhep = id
+c     Return the pt-ordered position of the found particles in idarr(1:nidarr)
+c     If the found particles are less than nidarr, nidarr is set to the actual number of
+c     found particles
+      subroutine find_particles(id,nmax,idarr)
+      implicit none
+      include 'hepevt.h'
+      integer id,nmax
+      integer idarr(nmax)
+      integer ihep,imax      
+      imax = 0
+      do ihep=1,nhep
+         if (idhep(ihep).eq.id .and. isthep(ihep).eq.1) then
+c     found
+            imax = imax+1
+            idarr(imax)=ihep
+         endif
+         if (imax.eq.nmax) goto 111
+      enddo
+      
+ 111  continue
+      call sortbypt(imax,idarr(1:imax))
+      nmax = imax
       end
