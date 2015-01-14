@@ -45,17 +45,21 @@ c  pwhgfill  :  fills the histograms with data
 
       call inihists
 
-      call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
-      call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
-      call bookupeqbins('XS Wbb CMS',1d0,0.5d0,1.5d0)
-      call bookup('b-pt 1j ATLAS 2', nptmaxbins,ptmaxbins)
-      call bookup('b-pt 2j ATLAS 2', nptmaxbins,ptmaxbins)
-
-
       dy=0.5d0
       dylep=0.4d0
       dpt=10d0
       dr=0.2d0
+
+      call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
+      call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
+      call bookupeqbins('XS Wbb CMS',1d0,0.5d0,1.5d0)
+      call bookupeqbins('XS Wbb CMS pTwbb>5',1d0,0.5d0,1.5d0)
+      call bookupeqbins('CMS Wbb-pt',dpt,0d0,400d0)
+      call bookupeqbins('CMS Wbb-ptzoom2',0.5d0,0d0,20d0)
+
+      call bookup('b-pt 1j ATLAS 2', nptmaxbins,ptmaxbins)
+      call bookup('b-pt 2j ATLAS 2', nptmaxbins,ptmaxbins)
+
 
       call bookupeqbins('j1-pt no cuts',0.5d0,0d0,20d0)
       call bookupeqbins('j2-pt no cuts',0.5d0,0d0,20d0)
@@ -907,7 +911,7 @@ c     we need to tell to this analysis file which program is running it
       integer nmaxlep
       parameter (nmaxlep=10)
       integer idlarr(nmaxlep),idnuarr(nmaxlep),idpharr(nmaxlep)
-      real * 8 pvl(4),plep(4),pWbb(4)
+      real * 8 pvl(4),plep(4),pWbb(4),ptWbb
       integer mu,ilep,ivl,nlep,nvl,nph
       real * 8 ptminfastjet,R,palg
       integer  minlo
@@ -1461,6 +1465,15 @@ c               vetojet = .false.
             if(nbjout.eq.2 .and.njout.eq.0
      $           ) then   
                call filld('XS Wbb CMS',1d0,dsig)
+               do mu=1,4
+                  pWbb(mu)=plep(mu)+pvl(mu)+pbjet(mu,1)+pbjet(mu,2)
+               enddo
+               ptwbb = sqrt(pWbb(1)**2+pWbb(2)**2)
+               call filld('CMS Wbb-ptzoom2',ptwbb,dsig)
+               call filld('CMS Wbb-pt',ptwbb,dsig)
+               if (ptwbb.gt.5d0) then
+                  call filld('XS Wbb CMS pTwbb>5',1d0,dsig)
+               endif
             endif
          endif  ! isolated lepton
       endif ! lepton cuts
