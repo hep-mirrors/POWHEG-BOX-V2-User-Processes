@@ -3,8 +3,8 @@
 dir=/home/oleari/fortran/POWHEG-BOX-V2/Wbbj
 
 
-# this file works ONLY in the Wbbj7_minlo_nf4_sh-W directory, due to the fact the 
-# the final files are copyed in Wbbj7_minlo_nf4_sh4-W* and  Wbbj7_minlo_nf4_sh16-W*
+# this file works ONLY in the Wbbj7_minlo_nf4_sh-W(p/m)-rwgt directory, due to the fact the 
+# the final files are copied in Wbbj7_minlo_nf4_sh4-W* and  Wbbj7_minlo_nf4_sh16-W*
 for work in  Wbbj7_minlo_nf4_sh-W
 
 do
@@ -22,11 +22,11 @@ do
 	../runLHEF-multi.sh
 
 	echo '  ***  doing PY6 shower  ***'
-	\rm pwg-*-POWHEG+PYTHIA-output.top  > /dev/null  2>&1
+	\rm pwg-*POWHEG+PYTHIA-output*.top  > /dev/null  2>&1
 	../runpy-multi.sh 
 
 	echo '  ***  doing PY6 shower + hadronization  ***'
-	\rm pwg-*-POWHEG+PYTHIA-output.top  > /dev/null  2>&1
+	\rm pwg-*POWHEG+PYTHIA-output*.top  > /dev/null  2>&1
 	../runpy-multi_had.sh 
 
 	cd ../
@@ -54,16 +54,16 @@ done
 work=Wbbj7_minlo_nf4_sh-W
 
 \cp pwgNLO_Wpm.top                           $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/
-\cp pwgLHEF_analysis-W1_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_nohad-W1_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_had-W1_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/
+\cp pwgLHEF_analysis-W1_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/pwgLHEF_analysis_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_nohad-W1_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/pwgPOWHEG+PYTHIA-output_nohad_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_had-W1_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh-Wpm/pwgPOWHEG+PYTHIA-output_had_Wpm.top
 
-\cp pwgLHEF_analysis-W2_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_nohad-W2_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_had-W2_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/
+\cp pwgLHEF_analysis-W2_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/pwgLHEF_analysis_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_nohad-W2_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/pwgPOWHEG+PYTHIA-output_nohad_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_had-W2_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh4-Wpm/pwgPOWHEG+PYTHIA-output_had_Wpm.top
 
-\cp pwgLHEF_analysis-W3_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_nohad-W3_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/
-\cp pwgPOWHEG+PYTHIA-output_had-W3_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/
+\cp pwgLHEF_analysis-W3_Wpm.top              $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/pwgLHEF_analysis_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_nohad-W3_Wpm.top $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/pwgPOWHEG+PYTHIA-output_nohad_Wpm.top
+\cp pwgPOWHEG+PYTHIA-output_had-W3_Wpm.top   $dir/Wbb_Wbbj_results/Wbbj/Wbbj7_minlo_nf4_sh16-Wpm/pwgPOWHEG+PYTHIA-output_had_Wpm.top
 
 
