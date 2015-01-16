@@ -23,18 +23,8 @@ c Parameters are read from the MadGraph param_card.dat,
 c except the strong coupling constant, which is defined
 c somewhere else
       call setpara("param_card.dat",.true.)
-
       call madtophys
- 
-c Are these needed?
-c$$$      physpar_ml(1)=0.511d-3
-c$$$      physpar_ml(2)=0.1057d0
-c$$$      physpar_ml(3)=1.777d0
-c$$$      physpar_mq(1)=0.33d0     ! up
-c$$$      physpar_mq(2)=0.33d0     ! down
-c$$$      physpar_mq(3)=0.50d0     ! strange
-c$$$      physpar_mq(4)=1.50d0     ! charm
-c$$$      physpar_mq(5)=4.80d0     ! bottom
+
       end
 
 
@@ -67,7 +57,6 @@ c
 c the only parameters relevant for this process are set
 c via powheginput. All others are needed for the
 c madgraph routines not to blow.
-
       alfas = 0.119d0
       tmass = 172.5d0
       lmass = 0d0
@@ -82,8 +71,6 @@ c madgraph routines not to blow.
       zwidth=2.441d0
       wwidth=2.0476d0
 
-c test only:
-c value for comp. with MV:
       zmass = 91.187d0
       wmass = 80.385d0
       gfermi = 0.1166390d-4
@@ -96,18 +83,13 @@ c value for comp. with MV:
       cthw = SQRT(1.d0 -ph_sthw2 )
       G2 = SQRT(8.d0*GFERMI/SQRT(2.d0))*ph_Zmass*cthw
       alpha = g2**2*ph_sthw2/(4.d0*PI)
-
-c      print*,'init: al,s2w=',alpha,sthw**2
-      
 c
 c default: set top width to zero 
 c (this value is used in matrix elements)
       twidth = 0d0
 
-c alternative: 
       hmass = powheginput('hmass')
       hwidth = powheginput('hwidth')
-           
 
 c in current code version CKM elements have no effect
 c
@@ -140,13 +122,7 @@ c QCD coupling constant
       GG(1)=-G
       GG(2)=-G
 
-c test only:
       twidth = 0d0
-c
-c      print*,'als,g in set_ebe=',st_alpha,g
-      
-c      print*,'alpha_s in init=',st_alpha,g
-c      print*,'top yuk=',ghtop(1)
 
 c HEFT coupling
       gh(1) = cmplx( g**2/4d0/PI/(3d0*PI*V), 0d0)
@@ -172,13 +148,7 @@ c QCD coupling constant
       GG(1)=-G
       GG(2)=-G
 
-c test only:
       twidth = ph_twidth
-c
-c      print*,'als,g in set_ebe=',st_alpha,g
-      
-c      print*,'alpha_s in init=',st_alpha,g
-c      print*,'top yuk=',ghtop(1)
 
 c HEFT coupling
       gh(1) = cmplx( g**2/4d0/PI/(3d0*PI*V), 0d0)
@@ -217,19 +187,12 @@ c
       g_weak=e_em/ph_sthw
       ph_gfermi=gfermi
 
-c      ph_Zmass = zmass
-c      ph_Wmass = wmass
       ph_Hmass = hmass
       ph_Zwidth = zwidth
       ph_Wwidth = wwidth
       ph_Hwidth = hwidth
 
-c      print*,'param:',e_em,ph_alphaem,ph_sthw2,g_weak,ph_gfermi
-c      print*,'mass:',zmass,wmass,hmass
-c      stop
-
       ph_tmass  = tmass
-c      ph_twidth = twidth
       ph_twidth = 1.5083d0 ! this value is used for decays
 
       ph_WmWw = ph_Wmass * ph_Wwidth
