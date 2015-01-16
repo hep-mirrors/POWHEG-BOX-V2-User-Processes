@@ -24,7 +24,8 @@ F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow 
 ## gfortran 4.4.1 optimized with -O3 yields erroneous results
 ## Use -O2 to be on the safe side
-OPT=-O2
+OPT=-O0
+#OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb 
 ifdef DEBUG
