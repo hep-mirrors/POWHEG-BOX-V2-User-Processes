@@ -31,11 +31,12 @@ c gen_real_phsp_isr: mapping for the initial state radiation
       include 'pwhg_rad.h'
       include 'pwhg_par.h'
       include 'pwhg_flg.h'
-      real * 8 betaem
+      real * 8 betaem,ombetaem
 c     local common block
       real * 8 q0,q2,e0em
       common/gen_real_phspc/q0,q2,e0em
       real * 8 xjac
+*
 c find rad_kinreg as function of kn_emitter
       rad_kinreg=kn_emitter+2-flst_lightpart
       if(flg_jacsing) then
@@ -50,12 +51,12 @@ c Importance sampling in case of massive emitter
 c we need to sample at angles of order m/e (dead cone size)
       if(kn_masses(kn_emitter).gt.0) then
 c compute (underlying born) beta of massive emitter
-         call compbetaem(betaem)
+         call compbetaem(betaem,ombetaem)
          kn_y= 1.d0/betaem*
      +        ( 1d0 - (1d0+betaem) * 
-     +        exp(-xrad(2)*log((1d0+betaem)/(1d0-betaem))) )
+     +        exp(-xrad(2)*log((1d0+betaem)/(ombetaem))) )
          xjac= xjac*( 1d0-betaem*kn_y )
-     +        *(log((1.d0+betaem)/(1.d0-betaem)))/betaem
+     +        *(log((1.d0+betaem)/ombetaem))/betaem
       else
          kn_y=1-2*xrad(2)
          xjac=xjac*2
@@ -115,6 +116,7 @@ c     local common block
       integer i,j,ires,resemitter,lres
       data vec/0d0,0d0,1d0/
       save vec
+*
       kn_emitter=flst_lightpart+rad_kinreg-2
       if(flst_bornres(kn_emitter,1).ne.0) then
 c Find four momentum of resonance
@@ -352,8 +354,9 @@ c parameters
 C Local variables
       real * 16 m2,q0,q2,mrec2,k0np1,uknp1,ukj,k0j,uk,cpsi,cpsi1,
      1     norm,k0rec,ukrec,ukj0,alpha,
-     2     ubkj,bk0j,bk0rec,ubkrec,k0jmax,k0recmax,z,z1,z2
-      real * 8 vec(3),beta,cpsi8,spsi8,cpsi18,spsi18
+     2     ubkj,bk0j,bk0rec,ubkrec,k0jmax,k0recmax,z,z1,z2,
+     3     qa,qb,qc,qq
+      real * 8 vec(3),beta,cpsi8,spsi8,cpsi18,spsi18,dk0recmax
       integer i
       real * 8 cosjnp1soft,sinjnp1soft
       common/ccosjnp1soft/cosjnp1soft,sinjnp1soft
@@ -370,12 +373,23 @@ c our reference is the Dalitz phase space d k0jp1 dk0j
       jac=jac*q0/2
       uknp1=k0np1
 c compute Mrec^2 (5.45)
-      mrec2=(q0-barredk(0,j))**2
-     #     -barredk(1,j)**2-barredk(2,j)**2-barredk(3,j)**2
+      mrec2=(q0*1.q0-barredk(0,j)*1.q0)**2*1.q0
+     #     -barredk(1,j)**2*1.q0
+     #     -barredk(2,j)**2*1.q0
+     #     -barredk(3,j)**2*1.q0
       k0recmax = (q2-m2+mrec2)/(2*q0)
       k0jmax   = (q2+m2-mrec2)/(2*q0)
-      z1=(k0recmax+sqrt(k0recmax**2-mrec2))/q0
-      z2=(k0recmax-sqrt(k0recmax**2-mrec2))/q0
+
+      dk0recmax= k0recmax*1.d0
+c solutions of the quadratic equation
+c      z1=(k0recmax+sqrt(k0recmax**2-mrec2))/q0
+c      z2=(k0recmax-sqrt(k0recmax**2-mrec2))/q0
+      qa= q0/2.q0
+      qb= -k0recmax
+      qc= mrec2/2.q0/q0
+      qq= -0.5q0*(qb-dsign(1.d0,dk0recmax)*sqrt(k0recmax**2-mrec2))
+      z1= qq/qa
+      z2= qc/qq
       z=z2-(z2-z1)*(1+y)/2
       jac=jac*(z1-z2)/2
       k0j=k0jmax-k0np1*z
@@ -510,6 +524,8 @@ c      call checkmomzero(nlegreal,kn_preal)
       integer j,kres
       real * 8 dotp
       external dotp
+      real*16 qa,qb,qc,qq
+      real*16 qk0recmax,qmrec2,qz1,qz2,qz,qknp1max,qkn_csimax
       j=kn_emitter
       kres=flst_bornres(j,1)
       if(kres.gt.0) then
@@ -522,17 +538,40 @@ c      call checkmomzero(nlegreal,kn_preal)
       endif
       kn_q0=q0
       mrec2=(q0-pj(0))**2-pj(1)**2-pj(2)**2-pj(3)**2
+c calculation of mrec2 in quadruple precision 
+      qmrec2= (q0*1.q0-pj(0)*1.q0)**2
+     +       -        (pj(1)*1.q0)**2
+     +       -        (pj(2)*1.q0)**2
+     +       -        (pj(3)*1.q0)**2
       m2=kn_masses(j)**2
       if(m2.eq.0) then
          kn_csimax=1-mrec2/q0**2
       else
-         k0recmax = (q0**2-m2+mrec2)/(2*q0)
-         z1=(k0recmax+sqrt(k0recmax**2-mrec2))/q0
-         z2=(k0recmax-sqrt(k0recmax**2-mrec2))/q0
-         z=z2-(z2-z1)*(1+kn_y)/2
-         knp1max=-(q0**2*z**2-2*q0*k0recmax*z+mrec2)/(2*q0*z*(1-z))
-         kn_csimax=2*knp1max/q0
+c calculation of kn_csimax in double precision
+c         k0recmax = (q0**2-m2+mrec2)/(2*q0)
+c         z1=(k0recmax+sqrt(k0recmax**2-mrec2))/q0
+c         z2=(k0recmax-sqrt(k0recmax**2-mrec2))/q0
+c         z=z2-(z2-z1)*(1+kn_y)/2
+c         knp1max=-(q0**2*z**2-2*q0*k0recmax*z+mrec2)/(2*q0*z*(1-z))
+c         kn_csimax=2*knp1max/q0
+c calculation of kn_csimax in quadruple precision
+         qk0recmax = (q0**2*1.q0-m2*1.q0+qmrec2)/(2*q0)
+         qa= q0/2.q0
+         qb= -qk0recmax
+         qc= qmrec2/2.q0/q0
+         qq= -0.5q0*(qb-dsign(1.d0,k0recmax)*sqrt(qk0recmax**2-qmrec2))
+c         qz1=(qk0recmax+sqrt(qk0recmax**2-qmrec2))/q0
+c         qz2=(qk0recmax-sqrt(qk0recmax**2-qmrec2))/q0
+         qz1= qq/qa
+         qz2= qc/qq
+         qz=qz2-(qz2-qz1)*(1+kn_y)/2
+         qknp1max=-(q0**2*qz**2-2*q0*qk0recmax*qz+qmrec2)/(2*q0*qz*(1-qz))
+         qkn_csimax=2*qknp1max/q0
       endif
+c use always kn_csimax obtained with real*16 precision
+c      if(kn_csimax.lt.0.d0) then
+      kn_csimax= qkn_csimax
+c      endif
       end
 
       subroutine comppt2fsrmv(y,csi,pt2)
@@ -676,10 +715,23 @@ c don't forget q0/pvec d phi integration!
       real * 8 t,rv,csi,y
       include 'pwhg_mvem.h'
       real * 8 csimin,csi1,csim,csimaxz,z
+      real*8 tmp
       call setupmvemitter
       csimin=(sqrt(t*(t*z2**2+8*p0max*q*(1-z2)))-t*z2)/(2*q**2*(1-z2))
       csi1=(sqrt(t*(t*z1**2+8*p0max*q*(1-z1)))-t*z1)/(2*q**2*(1-z1))
       csim=min(csimax,csi1)
+      tmp= csim*q**2-t
+      if(tmp.lt.0.d0) then
+c this signals if we are out of the relevant Dalitz region
+         csi=2
+         return
+      endif
+      tmp= csimin*q**2-t
+      if(tmp.lt.0.d0) then
+c this signals if we are out of the relevant Dalitz region
+         csi=2
+         return
+      endif
       csi=(exp(log(csimin*q**2-t)
      1     +rv*log((csim*q**2-t)/(csimin*q**2-t)))+t)/q**2
       z=(csi**2*q**3-2*t*p0max)/(csi*q*(csi*q**2-t))
@@ -1083,15 +1135,15 @@ c Rotate kn_softvec around dir of an amount azi
       kn_softvec(3)=y
       end
 
-      subroutine compbetaem(betaem)
+      subroutine compbetaem(betaem,ombetaem)
       implicit none
-      real * 8 betaem
+      real * 8 betaem,ombetaem
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_flg.h'
       include 'pwhg_kn.h'
-      real * 8 q0,m2,mrec2,pj(0:3)
-      real * 8 k0emmax
+      real * 8 q0,m,m2,pj(0:3)
+      real * 16 k0emmax,mrec2,x,qbetaem,qombetaem
       integer j,kres
       real * 8 dotp
       external dotp
@@ -1110,9 +1162,20 @@ c Rotate kn_softvec around dir of an amount azi
          q0=2*kn_cmpborn(0,1)
       endif
       kn_q0=q0
-      mrec2=(q0-pj(0))**2-pj(1)**2-pj(2)**2-pj(3)**2
+      mrec2=(q0*1.q0-pj(0)*1.q0)**2
+     +     -pj(1)**2*1.q0-pj(2)**2*1.q0-pj(3)**2*1.q0
+      m=kn_masses(j)
       m2=kn_masses(j)**2
-      k0emmax = (q0**2-mrec2+m2)/(2*q0)
-      betaem=sqrt(1-m2/k0emmax**2)
+      k0emmax=(q0**2*1.q0-mrec2+m2*1.q0)/(2*q0)
+      x=m*1.q0/k0emmax
+      if(x.lt.1.q-7) then
+         qbetaem=(1.q0 - x/2.q0 - x**2/8.q0 - x**3/16.q0)
+     +          *(1.q0 + x/2.q0 - x**2/8.q0 + x**3/16.q0)
+         qombetaem=x**2/2.d0 - 3.d0/16.d0*x**3
+      else
+         qbetaem=sqrt(1.q0-m*1.q0/k0emmax)*sqrt(1.q0+m*1.q0/k0emmax)
+         qombetaem=1.q0-qbetaem
+      endif
+      betaem=qbetaem
+      ombetaem=qombetaem
       end
-

@@ -75,6 +75,8 @@ c Insist to shower this event;
             call pythia_to_hepevt(nmxhep,nhep,isthep,idhep,jmohep,
      1           jdahep,phep,vhep)
 c            if(nevhep.lt.20) then
+c               call printhepblock
+c            endif
 c            if(lh_gamma) then
 c               write(*,*)'  j,    is     id    m1   m2    d1  d2 '
 c               do j=1,nhep

@@ -17,7 +17,8 @@
 \newcommand\POWHEG{{\tt POWHEG}}
 \newcommand\POWHEGBOX{{\tt POWHEG BOX}}
 \newcommand\HERWIG{{\tt HERWIG}}
-\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\PYTHIASIX{{\tt PYTHIA6}}
+\newcommand\PYTHIAEIGHT{{\tt PYTHIA8}}
 \newcommand\PHOTOS{{\tt PHOTOS}}
 \newcommand\MCatNLO{{\tt MC@NLO}}
 
@@ -98,28 +99,34 @@ parameters specific to the $Z/\gamma^*$ implementation.
 \section{Generation of events}
 
 Build the executable\\
-\tmtexttt{\$ cd POWHEG-BOX/ZEW \\
+\tmtexttt{\$ cd POWHEG-BOX-V2/Z\_ew-BMNNPV \\
 \$ make pwhg\_main }\\
 Then do (for example) \\
 \tmtexttt{\$
-cd test-el\\
+cd runtest-lhc-8TeV\\
 \$ ../pwhg\_main}\\
 At
 the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
-100000 events for $Z/\gamma^* \to e^+ e^-$  in the Les Houches format. In
-order to shower them with \PYTHIA{} do\\~\\
+100000 events for $Z/\gamma^* \to e^+ e^-$  in the Les Houches format. 
+In order to shower them with \PYTHIASIX{} do\\~\\
 \tmtexttt{\$
-cd POWHEG-BOX/ZEW \\ \$ make
+cd POWHEG-BOX-V2/Z\_ew-BMNNPV \\ \$ make
 main-PYTHIA-lhef \\ \$ cd
-test-el \\
+runtest-lhc-8TeV \\
 \$ ../main-PYTHIA-lhef}
+\\
+\\
+If you prefer to shower the event with \PYTHIAEIGHT{} do\\~\\
+\tmtexttt{\$
+cd POWHEG-BOX-V2/Z\_ew-BMNNPV \\ \$ make
+main-PYTHIA8-lhef \\ \$ cd
+runtest-lhc-8TeV \\
+\$ ../main-PYTHIA-lhef}
+
 
 \section{Process specific input parameters}
 
-For the EW NLO $Z/\gamma^*$ production, it is required to activate the
-\tmtexttt{easlight} option, to enable the new final state radiation mapping
-necessary to describe the final state collinear radiation.\\
-Other mandatory parameters are those needed to select the final state
+Mandatory parameters are those needed to select the final state
 leptonic species coming from the vector-boson:
 ~\\
 \tmtexttt{
@@ -146,6 +153,7 @@ so their values can be easily tracked down.
    Zmass\phantom{aa}  91.1876 \phantom{aaaaaa}   ! Z mass in GeV\\
    Zwidth\phantom{a} 2.4952 \phantom{aaaaaaa} ! Z width in GeV\\
    alphaem 0.00729735254 \phantom{a}! em coupling alpha(0)\\
+   gmu\phantom{aaaa} 1.16637d-5 \phantom{aaa} ! Fermi constant in GeV\^{}-2\\
    Hmass\phantom{aa} 120. \phantom{aaaaaaaa} ! Higgs mass in GeV\\
    Tmass\phantom{aa} 172.9 \phantom{aaaaaaaa} ! Top mass in GeV\\
    Bmass\phantom{aaaa} 4.6 \phantom{aaaaaaaa} ! B quark mass in GeV\\
@@ -163,7 +171,7 @@ The following parameter limits from below the virtuality of the $Z$ boson:
 \tmtexttt{mass\_low 20 \phantom{aaaaaaaa}! Z virtuality > mass\_low in GeV}\\
 \\
 If absent, it is set to 30~GeV.
-In order to avoid edge effects, the lower limit \tmtexttt{masslow} 
+In order to avoid edge effects, the lower limit \tmtexttt{mass\_low} 
 should be more inclusive w.r.t. cuts applied at the analysis level.
 Notice that, if photons are generated, the $Z$ virtuality is not
 necessarily the mass of the dilepton.
@@ -191,7 +199,7 @@ scheme the value of the parameter \tmtexttt{alphaem\_z} should be specified);
 the $G_\mu$ scheme, where the 
 input parameters are $G_\mu$, $M_W$ and $M_Z$. 
 \\
-The Electro-Weak corrections can be switched off by setting
+The EW corrections can be switched off by setting
 \\
 \tmtexttt{no\_ew 1       ! default 0}
 \\
@@ -201,25 +209,51 @@ and the strong corrections can be switched off by setting
 \\
 This last option is just to check EW corrections at the NLO level (i.e.,
 the Les Houches events do not have much meaning).
-
-The program can be interfaced to both \tmtexttt{PYTHIA6} and  \tmtexttt{PYTHIA8},
+\\
+\\
+The program can be interfaced to both \PYTHIASIX{} and  \PYTHIAEIGHT{},
 by doing
 \\
 \tmtexttt{make main-PYTHIA-lhef}
 \\
-for \tmtexttt{PYTHIA6} and
+for \PYTHIASIX{} and
 \\
 \tmtexttt{make main-PYTHIA8-lhef}.
 \\
-In the case of \tmtexttt{PYTHIA6} one can also optionally switch off photon radiation
-from  \tmtexttt{PYTHIA6}, and use \tmtexttt{PHOTOS}~\cite{Golonka:2005pn}
+for \PYTHIAEIGHT{}.
+\\
+In the case of \PYTHIASIX{} one can also optionally switch off photon radiation
+from  \PYTHIASIX{} and use \PHOTOS{}~\cite{Golonka:2005pn}
 instead. This is done by setting:
 \\
 \tmtexttt{use\_photos 1   ! default 0}
 \\
 in the \tmtexttt{powheg.input} file.
-
+\\
 The \PHOTOS \, source code is included in the \POWHEGBOX. 
+\\
+\\
+For photon final state radiation a comment is in order. According to 
+the \POWHEG{} method, the radiation by the shower has to be generated 
+from a starting scale given by the hardest $\pt$ tried at the matrix element 
+level (the variable {\tt scalup} written in the event file 
+\tmtexttt{pwgevents.lhe}). This is true also in the case that both 
+QCD and QED radiation are present, as detailed in 
+Ref.~\cite{Barze:2013} . Both \PYTHIASIX{} and \PYTHIAEIGHT{} 
+do not use this starting scale for the generation of QED final state radiation 
+from the $Z$. Hence, in order to avoid double counting of QED radiation, 
+a veto algorithm is necessary. The same problem is present also using 
+\PHOTOS{}. 
+This algorithm 
+is provided automatically in the files \tmtexttt{main-PYTHIA-lhef.f} and 
+\tmtexttt{scalupveto.f}. The same algorithm is implemented for 
+\PYTHIAEIGHT{}. In this case, however, the user can optionally 
+adopt the internal algorithm of \PYTHIAEIGHT, which is switched 
+on by setting:
+\\
+\tmtexttt{py8veto 1   ! default 0}
+\\
+in the \tmtexttt{powheg.input} file.
 
 
 

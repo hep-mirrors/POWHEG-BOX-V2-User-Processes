@@ -15,7 +15,7 @@ c the real contribution to implement Born zero suppression
       logical ini
       data ini/.true./
       logical new_damp
-      integer numopt
+      integer numopt,em
       save ini,h,new_damp,hnew_damp
       external powheginput,dotp
       if(ini) then
@@ -56,7 +56,14 @@ c if less than 0 will not be used
          if(new_damp) then
             rapp = rc+rs-rcs
             if(hnew_damp.gt.0) then
-               pt2 = kn_cmpreal(1,5)**2+kn_cmpreal(2,5)**2
+               em = flst_emitter(alr)
+               if(em.le.2) then
+                  pt2 = kn_cmpreal(1,5)**2+kn_cmpreal(2,5)**2
+               else
+                  pt2 = (2*dotp(kn_cmpreal(:,em),kn_cmpreal(:,5))
+     1              +kn_masses(em)**2)*kn_cmpreal(0,em)*kn_cmpreal(0,5)
+     2                 / (kn_cmpreal(0,em) + kn_cmpreal(0,5))**2
+               endif
                m2 = 2*dotp(kn_cmpreal(:,3),kn_cmpreal(:,4))
                rapp = rapp*hnew_damp**2*m2/(pt2+m2*hnew_damp**2)
             endif

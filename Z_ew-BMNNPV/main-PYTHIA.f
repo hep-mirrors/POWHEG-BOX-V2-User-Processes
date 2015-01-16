@@ -14,7 +14,7 @@ c END DEBUG **********
 c     mcmaxev
       integer maxev
       common/mcmaxev/maxev
-      integer id_z
+      integer id_v
 
       logical ok
 
@@ -80,7 +80,7 @@ c$$$c DEBUG ENDS ********************************************
             photostrial=0
             call seteps
 c position of the Z resonance in the LH common block
-            id_z=3
+            id_v=3
 c Run PHOTOS until event ok.
 c Photos overwrites the phhepevt common block
 c (fills it with photons).
@@ -93,7 +93,7 @@ c$$$            call  printphhepblock
 c$$$            write(*,*) ' End incoming hep block for photos **************'
 c$$$            call checkresmomphhep
 c Photos adds photons to  PHHEPEVT common
-            call photos_make(id_z)
+            call photos_make(id_v)
 c$$$            write(*,*) ' outgoing hep block for photos **************'
 c$$$            call  printphhepblock
 c$$$            call checkresmomphhep
@@ -143,6 +143,7 @@ c
 c examine_res_photons checks if the photons from the resonance violate scalup.
             call examine_res_photons(lepveto,ptrel)
 c START CHECK *********************************************************
+c Only for Z!
 c Check that examine_ptotons yields the same result as old veto routine
 c scalupveto1 (commented in the rest of the code
 c               call scalupveto1(lepveto1,ptrel1)
@@ -293,8 +294,8 @@ c less than scalup
 
       integer jlep,iph,first_photos
 
-      integer vdecaytemp,iz
-      real*8 pt,cos_emrad
+      integer vdecaytemp,iv
+      real*8 ptmin,pt,cos_emrad
       real*8 vec(3)
       data vec/0d0,0d0,1d0/
       save vec
@@ -312,21 +313,26 @@ c less than scalup
       endif
 
 c Z is at 3
-      iz = 3
+      iv = 3
 c Photos puts its photon right after the last particle belonging to
 c the resonance in the hep common block. In case of photon radiation,
 c this is the 7th particle (2 incoming, Z, l+, l-,gamma, 7th particle)
 c otherwise it is the 6th particle.
 c If nup=6, and the 6th particle is from the Z, it is a LH photon.
-      if(nup.eq.6.and.mothup(1,6).eq.iz) then
+      if(nup.eq.6.and.mothup(1,6).eq.iv) then
          first_photos = 7
       else
          first_photos = 6
       endif
-c The last photos photon is jdahep(2,iz)
-      do iph=first_photos,jdahep(2,iz)
+c The last photos photon is jdahep(2,iv)
+      do iph=first_photos,jdahep(2,iv)
 c the leptons are 4 and 5
+         ptmin = -1
          do jlep=4,5
+            if((idhep(jlep)/2)*2.eq.idhep(jlep)) then
+c It is a neutrino, skip
+               cycle
+            endif
 ******************************************************************
             beta=(phep(4,1)-phep(4,2))/(phep(4,1)+phep(4,2))
 c
@@ -350,11 +356,18 @@ c
      1           (ppho(1)*plep(1) + ppho(2)*plep(2) + ppho(3)*plep(3))/
      2           ( ppho(4) * sqrt(plep(1)**2+plep(2)**2+plep(3)**2) )
 
+c$$$            pt= 2.d0*(1.d0 - cos_emrad) * ppho(4)*ppho(4)
+c$$$            pt = sqrt(pt)
             pt = sqrt(1 - cos_emrad**2) * ppho(4)
-            
-            if (pt.gt.scalup) return
-            
+            if(ptmin.lt.0) then
+               ptmin = pt
+            else
+               ptmin = min(pt,ptmin)
+            endif
          enddo
+            
+         if (ptmin.gt.scalup) return
+
       enddo
 
       ok = .true.
@@ -386,6 +399,7 @@ c     beta.  Lorents convention: (t,x,y,z).
       end
 
       subroutine scalupveto1(lepveto,ptrel)
+c     Obsolete! works only for Z, not for W!
 c     veto QED radiation from Z-decay leptons
 c     above the SCALUP value
       implicit none
@@ -404,6 +418,7 @@ c     above the SCALUP value
       data vec/0d0,0d0,1d0/
 
 c     find last Z
+      iz = 0
       do ihep=1,nhep
 c W case:
 c         if(abs(idhep(ihep)).eq.24) then
@@ -412,7 +427,10 @@ c end W case
             iz = ihep
          endif
       enddo
-
+      if(iz.eq.0) then
+         write(*,*) ' scalupveto1: No Z found! exiting ...'
+         call exit(-1)
+      endif
 c PYTHIA seems to give a different hep record in case of transverse
 c momentum ordering or Q2 ordering
 c pt ordering:

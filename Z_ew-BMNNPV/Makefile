@@ -42,7 +42,8 @@ endif
 
 OBJ = obj-$(COMPILER)
 
-PYTHIA8LOCATION=/home/nason/Pheno/pythia8185-inst
+PYTHIA8_CONFIG=pythia8-config
+PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
@@ -113,11 +114,11 @@ $(shell ../svnversion/svnversion.sh>/dev/null)
 
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
-     real.o real16.o btilde.o $(PWHGANAL)
+     real.o real16.o $(PWHGANAL)
 
-PWHG=pwhg_main.o pwhg_init.o bbinit.o lhefwrite.o		\
+PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
-	test_Sudakov.o pt2maxreg.o sigborn.o  gen_real_phsp.o  maxrat.o	\
+	test_Sudakov.o pt2maxreg.o sigborn.o gen_real_phsp.o maxrat.o	\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
@@ -125,11 +126,11 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o lhefwrite.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o reshufflemoms.o \
         setlocalscales.o validflav.o mint_upb.o  \
-	pwhgreweight.o opencount.o ubprojections.o  $(PDFPACK) $(USER) $(FPEOBJ)
+	pwhgreweight.o opencount.o ubprojections.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
      opencount.o powheginput.o $(PWHGANAL)	\
@@ -150,7 +151,7 @@ main-HERWIG-lhef: $(HERWIG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
-PYTHIA=main-PYTHIA.o scalupveto.o setup-PYTHIA-lhef.o pythia.o boostrot.o \
+PYTHIA=main-PYTHIA.o scalupveto.o scalupvetoqpy6.o setup-PYTHIA-lhef.o pythia.o boostrot.o \
 	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	photos.o \
 	$(FPEOBJ)
@@ -158,7 +159,7 @@ PYTHIA=main-PYTHIA.o scalupveto.o setup-PYTHIA-lhef.o pythia.o boostrot.o \
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
 
-PYTHIA8=main-PYTHIA8.o scalupveto.o pythia8F77.o boostrot.o powheginput.o \
+PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o powheginput.o \
         $(PWHGANAL) lhefread.o newunit.o pdfdummies.o bra_ket_subroutines.o \
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o      \
         $(FPEOBJ)
@@ -184,8 +185,6 @@ MERGE_wp_wm=merge_wp_wm.o newunit.o random.o cernroutines.o
 #  target to merge wp and wm samples
 merge_wp_wm: $(MERGE_wp_wm)
 	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(MERGE_wp_wm)) -o $@
-
-
 
 pwhg_main.o: svn.version
 lhefwrite.o: svn.version

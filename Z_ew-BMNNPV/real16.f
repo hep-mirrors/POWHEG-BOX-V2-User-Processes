@@ -179,7 +179,8 @@ ccc modified fulvio
      -      2*k2k*(4*k1k2*s + t*(-2*p2k2 + 2*p1k*(p2k - s) + s*t) - 
      -         2*(p1k2 - p1k*p2k + p2k*s)*u + s*u2 + 
      -      2*k1k*(-(p1k*s) - p2k*s + 2*p2k*t + s*t + 2*p1k*u + s*u))))/
-     -  (k1k*k2k2) +
+     -  (k1k*k2k2)
+      amp216 = amp216 + 
      -  (-2*dens2*(glp2*(gqp2*(4*k2k2*p2k*(2*p1k - s - t) - 
      -            4*k2k*(k1k - p2k)*(k1k*s + p2k*t) - 
      -         4*k2k*(p1k*(k1k + p2k) + (k1k - p2k)*s)*u - 2*k2k*s*u2 + 
@@ -196,7 +197,8 @@ ccc modified fulvio
      -         k1k*t*(2*p2k*t + (s + u)*(2*k1k - 2*p1k + s + t + u)) - 
      -            2*k2k*(2*k1k2*s + t*(2*p1k*(p2k - s) + s*t) - 
      -             2*p1k2*u + 2*k1k*((p2k + s)*t + p1k*(-s + u)))))))/
-     -  (k1k*k2k2) +
+     -  (k1k*k2k2)
+      amp216 = amp216 + 
      -         (2*densd*densg*qq*(glpd*
      -       (gqpd*(4*k2k2*p2k*(2*p1k - s - t) - 
      -            4*k2k*(k1k - p2k)*(k1k*s + p2k*t) - 
@@ -214,7 +216,8 @@ ccc modified fulvio
      -          k1k*t*(2*p2k*t + (s + u)*(2*k1k - 2*p1k + s + t + u)) - 
      -            2*k2k*(2*k1k2*s + t*(2*p1k*(p2k - s) + s*t) - 
      -               2*p1k2*u + 2*k1k*((p2k + s)*t + p1k*(-s + u)))))))/
-     -  (k1k*k2k2) +
+     -  (k1k*k2k2)
+      amp216 = amp216 + 
      -         (2*dens*densg*qq*(glp*(gqp*
      -          (4*k2k2*p2k*(2*p1k - s - t) - 
      -            4*k2k*(k1k - p2k)*(k1k*s + p2k*t) - 
@@ -232,7 +235,8 @@ ccc modified fulvio
      -          k1k*t*(2*p2k*t + (s + u)*(2*k1k - 2*p1k + s + t + u)) - 
      -            2*k2k*(2*k1k2*s + t*(2*p1k*(p2k - s) + s*t) - 
      -             2*p1k2*u + 2*k1k*((p2k + s)*t + p1k*(-s + u)))))))/
-     -  (k1k*k2k2) +
+     -  (k1k*k2k2)
+      amp216 = amp216 + 
      -       (-8*densg*denspg*qq**3*
      -    (2*k1k**3*(p1k - p2k)*s + 
      -      2*k1k2*(((p1k - p2k)*p2k - p1k*s)*t + 
@@ -245,7 +249,8 @@ ccc modified fulvio
      -            p2k*(s2 + 2*s*t + 2*t2 - 2*p2k*(s + t)))*u - 
      -         2*p1k*t*u2 - k2k*(p1k - p2k)*
      -       (8*p1k*p2k - s2 - 4*p2k*t + s*t + (-4*p1k + s + 4*t)*u))))/
-     -  (k1k*k2k*p1k*p2k) +
+     -  (k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (2*densd*denspg*qq2*(glpd*
      -       (gqpd*(2*k1k**3*p1k*s + 
      -            2*k1k2*(p1k*p2k*(-s + t) + 
@@ -284,7 +289,8 @@ ccc modified fulvio
      -               p1k*t*(2*p2k2 + (s + u)**2 - 2*p2k*(2*s + u)) + 
      -               k2k*(2*p2k*t*(-2*p2k + s + u) + 
      -                  p1k*(8*p2k2 - 6*p2k*s + s2 - s*t - 4*p2k*u + 
-     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k) +
+     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (2*dens*denspg*qq2*(glp*
      -       (gqp*(2*k1k**3*p1k*s + 
      -            2*k1k2*(p1k*p2k*(-s + t) + 
@@ -323,7 +329,8 @@ ccc modified fulvio
      -               p1k*t*(2*p2k2 + (s + u)**2 - 2*p2k*(2*s + u)) + 
      -               k2k*(2*p2k*t*(-2*p2k + s + u) + 
      -                  p1k*(8*p2k2 - 6*p2k*s + s2 - s*t - 4*p2k*u + 
-     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k) +
+     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -        (-8*denspg**2*qq**4*(t*(2*p2k2 + s2 + 2*p2k*(-s + t)) + 
      -      (2*p2k2 - 2*p2k*(s + t) + s*(s + 2*t))*u + 2*p1k2*(t + u) - 
      -      2*p1k*((t - u)*u + s*(t + u)) + 
@@ -346,7 +353,8 @@ ccc modified fulvio
      -             (-2*s*t + 2*p2k*(t - u) + s*u - t*u + u2) + 
      -            t*(2*p2k2 + p2k*(-3*s + t - u) + s*(s + u)) + 
      -         k1k*(4*p2k2 - 2*p1k*t - 2*p2k*(2*s + u) + s*(s + t + u)))
-     -         )))/(p1k*p2k)+
+     -         )))/(p1k*p2k)
+      amp216 = amp216 + 
      -         (2*densg*denspd*qq2*(glmd*
      -       (-(gqpd*(2*k1k**3*p2k*s + 
      -              2*k1k2*(p1k*s*(t + p2k*(-1 + mz2dm1*t)) + 
@@ -401,7 +409,8 @@ ccc modified fulvio
      -               k2k*(4*p1k2 - 2*p1k*(s + t) + p2k*(s + 2*t))*u + 
      -               p1k*(t*u2 + 2*p2k2*(t - mz2dm1*(s + t)*u) + 
      -              p2k*u*(mz2dm1*s2 + s*(4 + 2*mz2dm1*t + mz2dm1*u) + 
-     -                 t*(2 + mz2dm1*(t + u)))))))))/(k1k*k2k*p1k*p2k) +
+     -                 t*(2 + mz2dm1*(t + u)))))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -     (-2*dens*denspd*qq*(glp2*
      -       (gqp2*(2*k1k**3*p1k*s + 
      -            2*k1k2*(p1k*p2k*(-s + t) + 
@@ -440,7 +449,8 @@ ccc modified fulvio
      -               p1k*t*(2*p2k2 + (s + u)**2 - 2*p2k*(2*s + u)) + 
      -               k2k*(2*p2k*t*(-2*p2k + s + u) + 
      -                  p1k*(8*p2k2 - 6*p2k*s + s2 - s*t - 4*p2k*u + 
-     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)+
+     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (4*denspd*denspg*qq**3*
      -    (glpd*(gqpd*((2*p1k - s - t)*(2*k1k*p1k - k1k*s - p2k*t) + 
      -            (2*p1k2 - 2*k1k*p2k + 2*p1k*p2k + 2*p2k2 + k1k*s - 
@@ -458,7 +468,8 @@ ccc modified fulvio
      -             (-2*s*t + 2*p2k*(t - u) + s*u - t*u + u2) + 
      -            t*(2*p2k2 + p2k*(-3*s + t - u) + s*(s + u)) + 
      -         k1k*(4*p2k2 - 2*p1k*t - 2*p2k*(2*s + u) + s*(s + t + u)))
-     -         )))/(p1k*p2k)+
+     -         )))/(p1k*p2k)
+      amp216 = amp216 + 
      -        (2*densg*densp*qq2*(glp*
      -       (gqp*(2*k1k**3*p1k*s + 
      -            2*k1k2*(p1k*p2k*(-s + t) + 
@@ -497,7 +508,8 @@ ccc modified fulvio
      -               p1k*t*(2*p2k2 + (s + u)**2 - 2*p2k*(2*s + u)) + 
      -               k2k*(2*p2k*t*(-2*p2k + s + u) + 
      -                  p1k*(8*p2k2 - 6*p2k*s + s2 - s*t - 4*p2k*u + 
-     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k) +
+     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (-2*densd*densp*qq*(glp2*
      -       (gqp2*(2*k1k**3*p1k*s + 
      -            2*k1k2*(p1k*p2k*(-s + t) + 
@@ -536,7 +548,8 @@ ccc modified fulvio
      -               p1k*t*(2*p2k2 + (s + u)**2 - 2*p2k*(2*s + u)) + 
      -               k2k*(2*p2k*t*(-2*p2k + s + u) + 
      -                  p1k*(8*p2k2 - 6*p2k*s + s2 - s*t - 4*p2k*u + 
-     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)+
+     -                     s*u - 2*t*u)))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (4*densp*denspg*qq**3*(glp*
      -       (gqp*((2*p1k - s - t)*(2*k1k*p1k - k1k*s - p2k*t) + 
      -            (2*p1k2 - 2*k1k*p2k + 2*p1k*p2k + 2*p2k2 + k1k*s - 
@@ -850,7 +863,8 @@ ccc modified fulvio
      -                          p1k*
      -                          (s + t + 2*u + 
      -                     p2k*(2 + mz2dm1*(-2*p2k + 5*s + 3*(t + u)))))
-     -                        ))))))))/(k1k2*k2k2*p1k*p2k) +
+     -                        ))))))))/(k1k2*k2k2*p1k*p2k)
+      amp216 = amp216 + 
      -     (8*densg**2*ml2*qq2*(2*k1k**3*(2*s + t + u) - 
      -      2*k1k*k2k*(-p1k2 + 2*p1k*p2k - p2k2 - p1k*s - p2k*s + 
      -      k2k*(p1k + p2k + s) + 2*p2k*t + s*t + (2*p1k + s - 2*t)*u) + 
@@ -886,7 +900,8 @@ ccc modified fulvio
      -               (-p1k + t)*u) + 
      -          k1k2*(-4*k2k*(p1k + p2k + s) + (s + t)**2 + 4*p1k*u + 
      -               6*(s + t)*u + u2 - 2*p2k*(s + t + u))))))/
-     -  (k1k2*k2k2) +
+     -  (k1k2*k2k2)
+      amp216 = amp216 + 
      -         (-2*densd*densg*ml2*qq*
      -    (glmd*(gqpd*(2*k2k2*(2*p1k - t)*(2*p2k - s - u) + 
      -            2*k1k**3*(2*s + t + u) - 
@@ -956,7 +971,8 @@ ccc modified fulvio
      -            2*t*(t + 2*u)) - 
      -         p1k*(3*s2 + 2*
      -         (2*p2k2 + s*t + 2*(s + t)*u + u2 + p2k*(-t + u))))))/
-     -  (k1k*k2k*p1k*p2k) + 
+     -  (k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -        (2*densd*denspg*ml2*qq2*
      -    (-(glpd*(gqpd*(2*k1k2 + 5*k2k*s + k1k*(4*k2k - t - 3*u)) + 
      -           gqmd*(-2*k1k2 - 5*k2k*s + k1k*(-4*k2k + 3*t + u)))) - 
@@ -1002,7 +1018,8 @@ ccc modified fulvio
      -            gqpd*(k1k2*(3*s + 2*(t + u)) + 
      -               k2k*(s*(2*t + u) + t*(t + 2*u)) + 
      -          k1k*((s + t)*(2*s + t + 2*u) + k2k*(s + 2*(t + u))))))/
-     -       p1k))/(k1k*k2k) +
+     -       p1k))/(k1k*k2k)
+      amp216 = amp216 + 
      -        (2*dens*denspg*ml2*qq2*
      -   ((p2k*(glm*(2*gqp*k1k*(k1k + 2*k2k + s) + gqp*(k1k + 5*k2k)*t + 
      -              gqm*(k2k*(s + 4*t + u) + k1k*(4*s + 3*t + 2*u))) + 
@@ -1049,7 +1066,8 @@ ccc modified fulvio
      -            gqp*(k1k2*(3*s + 2*(t + u)) + 
      -               k2k*(s*(2*t + u) + t*(t + 2*u)) + 
      -           k1k*((s + t)*(2*s + t + 2*u) + k2k*(s + 2*(t + u))))))/
-     -       p1k))/(k1k*k2k)+
+     -       p1k))/(k1k*k2k)
+      amp216 = amp216 + 
      -        (16*denspg**2*ml2*qq**4*
      -    (4*p1k2 + 4*p2k2 - 2*k1k*(p1k + p2k - s) - 4*p1k*s - 4*p2k*s + 
      -      2*s2 - p1k*t + p2k*t + s*t + (p1k - p2k + s)*u))/(p1k*p2k)+
@@ -1125,9 +1143,8 @@ ccc modified fulvio
      -            gqpd*(k1k2*(3*s + 2*(t + u)) + 
      -               k2k*(s*(2*t + u) + t*(t + 2*u)) + 
      -           k1k*((s + t)*(2*s + t + 2*u) + k2k*(s + 2*(t + u))))))/
-     -       p1k))/(k1k*k2k)+
-     -
-     -
+     -       p1k))/(k1k*k2k)
+      amp216 = amp216 + 
      -        (2*dens*denspd*ml2*qq*(-2*
      -       (((glm2 - 2*glmd*glp - glp2)*gqm2 + 
      -            (-glm2 + glp2 - 2*glm*glpd)*gqp2)*k1k + 
@@ -1196,9 +1213,8 @@ ccc modified fulvio
      -         glm2*(gqm2*(2*k1k + s + t)*(k2k*t + k1k*(s + t)) + 
      -         gqm2*(2*k1k2 + 2*k1k*(k2k + s + t) + k2k*(s + 2*t))*u + 
      -            gqp2*(2*k1k2*(t + u) + k2k*t*(2*s + t + 2*u) + 
-     -         k1k*(2*k2k*(s + t + u) + t*(t + 2*u)))))/p1k))/(k1k*k2k)+
-     -
-     -
+     -         k1k*(2*k2k*(s + t + u) + t*(t + 2*u)))))/p1k))/(k1k*k2k)
+      amp216 = amp216 + 
      -         (-4*denspd*denspg*ml2*qq**3*
      -    (glmd*(gqpd*(4*p1k2 + 4*p2k2 - 2*k1k*(p1k + p2k - s) - 
      -            3*p1k*s - 5*p2k*s + 2*s2 - p1k*t + p2k*t + s*t + 
@@ -1255,10 +1271,8 @@ ccc modified fulvio
      -               p1k*(2*p2k2 - p2k*(4*s + 3*t + u) + 
      -                  (s + u)*(2*(s + t) + u)) - 
      -               k2k*(p2k*(4*p2k - 3*s - 2*(t + u)) + 
-     -              p1k*(4*p2k + s + 2*(t + u))))))))/(k1k*k2k*p1k*p2k)+
-     -
-     -
-     -
+     -              p1k*(4*p2k + s + 2*(t + u))))))))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -         (2*densd*densp*ml2*qq*(4*glm*glpd*gqm2*k1k*p1k2*p2k + 
      -      4*glmd*glp*gqp2*k1k*p1k2*p2k - 
      -      4*glmd*glp*gqm2*k2k*p1k2*p2k - 
@@ -1339,10 +1353,8 @@ ccc modified fulvio
      -               ) + k2k*(p1k2*(-6*p2k + 4*u) + 
      -               p2k*(t*(s + t) + (s + 2*t)*u - p2k*(s + 3*t + u)) + 
      -          p1k*(2*p2k2 + p2k*(3*s + t - u) - u*(2*(s + t) + u))))
-     -         )))/(k1k*k2k*p1k*p2k)+
-     -
-     -
-     -
+     -         )))/(k1k*k2k*p1k*p2k)
+      amp216 = amp216 + 
      -   (-4*densp*denspg*ml2*qq**3*
      -  (glm*(gqp*(4*p1k2 + 4*p2k2 - 2*k1k*(p1k + p2k - s) - 3*p1k*s - 
      -       5*p2k*s + 2*s2 - p1k*t + p2k*t + s*t + (p1k - p2k + s)*u)

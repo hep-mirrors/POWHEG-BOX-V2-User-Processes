@@ -1,16 +1,22 @@
-
+c veto photons harder than scalup in decaying resonance.
+c Works for both W+- and Z.
       subroutine examine_res_photons(lepveto,ptrel)
       implicit none
       include 'LesHouches.h'
       include 'hepevt.h'
       logical lepveto
-      real * 8 ptrel
+c ptrel is for leptons, ptrelq for quarks
+      real * 8 ptrel,ptrelq
       real * 8 ptrel1,ptrel2
-      integer iup,ihep,iz,il(2),j,k
+      integer iup,ihep,iv,il(2),j,k
       integer maxpart
       parameter (maxpart=100)
       integer idvector(maxpart,2),nvec(2)
+      integer qidvector(2)
       logical lh_gamma,ok
+      integer nphq
+      integer idphfromq(maxpart)
+
 c First find out if there is a photon in the LH interfacs
       lh_gamma = .false.
       do iup=1,nup
@@ -20,27 +26,69 @@ c First find out if there is a photon in the LH interfacs
          endif
       enddo
       do ihep=1,nhep
-         if(idhep(ihep).eq.23) then
-            iz=ihep
+         if(idhep(ihep).eq.idup(3)) then
+            iv=ihep
          endif
       enddo
 c    look for the sons of the z
-      if(jdahep(2,iz)-jdahep(1,iz).ne.1) then
+      if(jdahep(2,iv)-jdahep(1,iv).ne.1) then
 c         write(*,*) " more than 2 Zed's sons"
-         if(idhep(jdahep(2,iz)).ne.22) then
+         if(idhep(jdahep(2,iv)).ne.22) then
             write(*,*) ' examine_photons: error? third son is not a photon!'
          endif
          if(.not.lh_gamma) then
             write(*,*) ' examine_photons: error? third son, but no lh photon!'
          endif
       endif
-      il(1) = jdahep(1,iz)
-      il(2) = il(1)+1
+c      il(1) = jdahep(1,iv)
+c      il(2) = il(1)+1
+      il(1) = 0
+      il(2) = 0
+c cycle over daughters of resonance to assign lepton 1
+      do ihep=jdahep(1,iv),jdahep(2,iv)
+c check if the running particle is a charged lepton or neutrino
+         if(abs(idhep(ihep)).ge.11.and.abs(idhep(ihep)).le.16) then
+            if(il(1).eq.0) then
+               il(1)= ihep
+            elseif(il(2).eq.0) then
+               il(2)=ihep
+            else
+               write(*,*) ' examine_res_photons:'
+               write(*,*) ' more than 2 leptons in direct product of V decay, exiting ...'
+               call exit(-1)
+            endif
+         endif
+      enddo
+
 c Check that these two are opposite leptons
-      if(idhep(il(1)).ne.-idhep(il(2))) then
+      if(idup(3).eq.23) then
+         if(idhep(il(1)).ne.-idhep(il(2))) then
+c     this happens rarely when using the old virtuality ordered shower.
+c     Should not happen with pt ordered one.
+            write(*,*)
+     1           ' examine_pqhotons: error: first and second son of Z'
+            write(*,*) 'are not opposite leptons !'
+            lepveto= .true.     !avoid this event
+            ptrel= 1.d6
+            return
+         endif
+      elseif(abs(idup(3)).eq.24) then
+         if( (idhep(il(1))+idhep(il(2)))*idup(3).ne.24) then
+c     this happens rarely when using the old virtuality ordered shower.
+c     Should not happen with pt ordered one.
+            write(*,*)
+     1           ' examine_pqhotons: error: first and second son of W'
+            write(*,*) 'do not match ! ',idup(3),' -> ',idhep(il(1)),idhep(il(2))
+            lepveto= .true.     !avoid this event
+            ptrel= 1.d6
+            return
+         endif
+      else
+c     this happens rarely when using the old virtuality ordered shower.
+c     Should not happen with pt ordered one.
          write(*,*)
-     1   ' examine_photons: error: first and second son of Z'
-         write(*,*) 'are not opposite leptons !'
+     1        ' examine_photons: neither W nor Z! exiting ...'
+         call exit(-1)
       endif
       nvec = 0
       do k=1,2
@@ -74,23 +122,15 @@ c check for consistency
       if((ptrel-scalup)/scalup.gt.0) then
          lepveto=.true.
 c         write(*,*) 'vetoed event',(ptrel-scalup)/scalup
+         return
       else
          lepveto = .false.
       endif
-
-c      if(lepveto) then
-c         write(*,*) ' must veto? ...'
-c      endif
-      return
-
-      write(*,*) ' *** '
-      do k=1,2
-         write(*,*) ' lepton ',il(k),idhep(il(k)),isthep(il(k))
-         do j=1,nvec(k)
-            write(*,*) ' sons   ',
-     1           idvector(j,k),idhep(idvector(j,k)),isthep(idvector(j,k))
-         enddo
-      enddo
+c The call below can be activated to check that both
+c PYTHIA6 and PYTHIA8 do honor the scalup requirements
+c on shower originated photons. In order to activate the
+c check, uncomment the call below.
+c      call examine_other_photons(nvec,idvector,lepveto,ptrelq)
 
       end
          

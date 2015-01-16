@@ -49,7 +49,7 @@ c     mass window
          mass_low = powheginput("#mass_low")
          if (mass_low.le.0d0) mass_low=30d0
 
-         mass_low = max(mass_low,decmass)
+         mass_low = max(mass_low,2.d0*decmass)
          phsp_Zmass2low = mass_low**2
          phsp_Zmass2high = kn_sbeams
 
