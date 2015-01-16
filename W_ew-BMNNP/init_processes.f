@@ -10,6 +10,7 @@
       include 'pwhg_flg.h'
       include 'pwhg_physpar.h'
       include 'pwhg_st.h'
+      include 'strongcorr.h'
       integer i1,i2,i3,i4,i5,k,ii(nlegreal)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
      #  (i4,ii(4)),(i5,ii(5))
@@ -30,9 +31,27 @@ c     lepton masses
       real *8 kt2minqed
       common/showerqed/kt2minqed
       real * 8 cmass, bmass
+      if(powheginput("#bornzerodamp").ne.0) then
+         flg_bornzerodamp = .true.
+         flg_withdamp = .true.
+      else
+         flg_bornzerodamp = .false.
+         flg_withdamp = .false.
+      endif
 c Must include photon!
       pdf_nparton = 22
-      flg_with_em = .true.
+      if(powheginput("#no_ew").eq.1) then
+         flg_with_em = .false.
+      else
+         flg_with_em = .true.
+      endif
+
+      if(powheginput("#no_strong").eq.1) then
+         strongcorr = .false.
+      else
+         strongcorr = .true.
+      endif
+
 c EW renormalization scale
       em_muren2 = 1d0
 c******************************************************
@@ -142,10 +161,10 @@ c     index of the first light particle in the final state
 c     that can give rise to collinear singularities;
 c     The charged leptons are considered MASSIVE particles in this code,
 c     and thus do not give rise to collinear singularities
-      if(powheginput('#easlight').eq.1d0) then
-         flst_lightpart=3
-      else
+      if(powheginput('#lepaslight').eq.0d0) then
          flst_lightpart=5
+      else
+         flst_lightpart=3
       endif
       i3=vdecaymode
       if ((idvecbos.eq.24).and.(vdecaymode.lt.0)) then
@@ -181,41 +200,43 @@ c     Real graphs
       condition=.false.
       do i1=-5,5
          do i2=-5,5
-            if (abs(i1).eq.abs(i2)) goto 11
-            do i5=-5,5
-               condition=.false.
-               if ((i1.eq.0).and.(i2.ne.0)) then
-                  condition=(charge3(i2)-charge3(i5))
-     $                 .eq.(sign(3,idvecbos))    
-               endif
-               if ((i2.eq.0).and.(i1.ne.0)) then
-                  condition=(charge3(i1)-charge3(i5))
-     $                 .eq.(sign(3,idvecbos))
-               endif
-               if (i5.eq.0) then
-                condition=(charge3(i1)+charge3(i2))
-     $                 .eq.(sign(3,idvecbos))
-               endif   
+            if(strongcorr) then
+               do i5=-5,5
+                  condition=.false.
+                  if ((i1.eq.0).and.(i2.ne.0)) then
+                     condition=(charge3(i2)-charge3(i5))
+     $                    .eq.(sign(3,idvecbos))    
+                  endif
+                  if ((i2.eq.0).and.(i1.ne.0)) then
+                     condition=(charge3(i1)-charge3(i5))
+     $                    .eq.(sign(3,idvecbos))
+                  endif
+                  if (i5.eq.0) then
+                     condition=(charge3(i1)+charge3(i2))
+     $                    .eq.(sign(3,idvecbos))
+                  endif   
+                  if(condition) then
+                     flst_nreal=flst_nreal+1
+                     if(flst_nreal.gt.maxprocreal) goto 998
+                     do k=1,nlegreal
+                        flst_real(k,flst_nreal)=ii(k)
+                     enddo
+                  endif
+               enddo
+            endif
+            if(flg_with_em) then
+               condition=(charge3(i1)+charge3(i2))
+     $              .eq.(sign(3,idvecbos))
                if(condition) then
                   flst_nreal=flst_nreal+1
                   if(flst_nreal.gt.maxprocreal) goto 998
-                  do k=1,nlegreal
+                  do k=1,nlegborn
                      flst_real(k,flst_nreal)=ii(k)
                   enddo
-               endif
-            enddo
-            condition=(charge3(i1)+charge3(i2))
-     $           .eq.(sign(3,idvecbos))
-            if(condition) then
-               flst_nreal=flst_nreal+1
-               if(flst_nreal.gt.maxprocreal) goto 998
-               do k=1,nlegborn
-                  flst_real(k,flst_nreal)=ii(k)
-               enddo
 c Photon in final state
-               flst_real(nlegreal,flst_nreal)=22
+                  flst_real(nlegreal,flst_nreal)=22
+               endif
             endif
- 11         continue
          enddo
       enddo
       if (debug) then

@@ -7,6 +7,7 @@
       include 'pwhg_math.h'
       include 'nlegborn.h'
       include 'pwhg_kn.h'
+      include 'pwhg_flg.h'
       include 'pwhg_physpar.h'
       real * 8 masswindow_low,masswindow_high
       real * 8 powheginput
@@ -17,6 +18,7 @@
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
       real*8 mlep2
+      complex*16 el2_scheme
       common/leptmass/mlep2
       real*8 complextmp
 c     renormalization scheme
@@ -34,10 +36,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       ph_alphaem = powheginput("#alphaem")
       if (ph_alphaem.le.0d0) ph_alphaem = 1d0/137.03599911d0
-
+      em_alpha = ph_alphaem
+      if(.not.flg_with_em) then
+         em_alpha = 0
+      endif
       physpar_aem = ph_alphaem
-
-      em_alpha = physpar_aem
 
       ph_Zmass = powheginput("#Zmass")
       if (ph_Zmass.le.0d0) ph_Zmass  = 91.1876d0     
@@ -91,7 +94,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c     set mass window around W-mass peak in unit of ph_Wwidth
 c     It is used in the generation of the Born phase space
-      ph_Wmass2low=max(decmass*10d0,ph_Wmass-masswindow_low*ph_Wwidth)
+      ph_Wmass2low=max(decmass*1d0,ph_Wmass-masswindow_low*ph_Wwidth)
       ph_Wmass2low=ph_Wmass2low**2
       ph_Wmass2high=ph_Wmass+masswindow_high*ph_Wwidth
       ph_Wmass2high=min(kn_sbeams,ph_Wmass2high**2)
@@ -132,7 +135,8 @@ c     It is used in the generation of the Born phase space
 *
       alpha   = dcmplx(ph_alphaem)
       ph_unit_e = sqrt(4d0*pi*ph_alphaem)
-      el2     = alpha*4.d0*pi
+      el2     = dcmplx(em_alpha)*4.d0*pi
+      el2_scheme = alpha*4.d0*pi
       alsu4pi = alpha/4d0/pi
 *
       mw2= ph_Wmass**2 
@@ -159,7 +163,8 @@ c     It is used in the generation of the Born phase space
       ph_WmWw = ph_Wmass * ph_Wwidth
 
       if (scheme.eq.0) then
-          g2 = el2/sw2
+c          g2 = el2/sw2
+          g2 = el2_scheme/sw2
       else
           g2 =  ph_gmu * 8d0/sqrt(2d0)  * mw2 
       endif

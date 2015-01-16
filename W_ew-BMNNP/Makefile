@@ -3,15 +3,16 @@
 COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
-PDF = native 
+PDF = lhapdf
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=default
 ## For static linking uncomment the following
-STATIC= -static
+#STATIC= -static
 #
 ifeq ("$(COMPILER)","gfortran")	
-F77= gfortran -fno-automatic -fno-whole-file
+F77= gfortran -fno-automatic  -finit-real=nan -ffixed-line-length-none
+# -fno-whole-file
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -21,25 +22,13 @@ F77= gfortran -fno-automatic -fno-whole-file
 ## Use -O2 to be on the safe side
 OPT=-O2
 ## For debugging uncomment the following
-#DEBUG= -ggdb -pg
 ifdef DEBUG
+DEBUG= -ggdb -pg -finit-real=nan
+# FPE=-ffpe-trap=invalid,zero,overflow,underflow
 OPT=
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow
 endif
 endif
-
-ifeq ("$(COMPILER)","g77")
-F77= g77 -fno-automatic 
-#FFLAGS= -Wall -ffortran-bounds-check
-## For floating point exception trapping  uncomment the following 
-#FPEOBJ=trapfpe.o
-OPT=-O3
-## For debugging uncomment the following
-#DEBUG= -ggdb -pg
-endif
-
-OBJ = obj-$(COMPILER)
-
 
 ifeq ("$(COMPILER)","ifort")
 F77 = ifort -save  -extend_source
@@ -53,16 +42,20 @@ OPT = -O3 #-fast
 #DEBUG= -debug -g
 endif
 
+OBJ = obj-$(COMPILER)
 
+PYTHIA8_CONFIG=pythia8-config
+PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJ)/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
-INCLUDE2=$(shell dirname $(PWD))/include
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2)
+INCLUDE1=$(shell dirname $(PWD))/include
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
@@ -86,17 +79,17 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
+PWHGANAL=pwhg_analysis-dummy.o
+
 ifeq ("$(ANALYSIS)","default")
 ##To include Fastjet configuration uncomment the following lines. 
 #FASTJET_CONFIG=$(shell which fastjet-config)
 #LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 #FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o 
+PWHGANAL=pwhg_analysis.o pwhg_bookhist-multi.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetfortran.o
-else
-PWHGANAL=pwhg_analysis-dummy.o
 endif
 
 %.o: %.f $(INCLUDE)
@@ -108,8 +101,12 @@ endif
 %.o: %.cc
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
+
+$(shell ../svnversion/svnversion.sh>/dev/null)
+
+
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
-     real.o $(PWHGANAL)
+     real.o real16.o $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
@@ -117,7 +114,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
-	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
+	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o reshufflemoms.o \
         setlocalscales.o validflav.o mint_upb.o  \
@@ -128,7 +125,7 @@ pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o pwhg_bookhist.o $(PWHGANAL)	\
+     opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
@@ -139,33 +136,36 @@ lhef_analysis:$(LHEF)
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o	\
+	powheginput.o $(PWHGANAL) lhefread.o	\
 	pdfdummies.o opencount.o $(FPEOBJ) 
 
 main-HERWIG-lhef: $(HERWIG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
-PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
-	pwhg_bookhist.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
-	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	photos.o  \
+PYTHIA=main-PYTHIA.o scalupveto.o scalupvetoqpy6.o setup-PYTHIA-lhef.o pythia.o boostrot.o \
+	powheginput.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	photos.o \
 	$(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
 
-PHOTOS=main-PHOTOS.o photos.o boostrot.o lhefwrite_photos.o newunit.o \
-	powheginput.o pwhg_bookhist.o $(PWHGANAL) lhefread.o cernroutines.o \
-	pdfdummies.o opencount.o random.o readhorace.o $(FPEOBJ) 
+PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o powheginput.o \
+        $(PWHGANAL) lhefread.o newunit.o pdfdummies.o bra_ket_subroutines.o \
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o      \
+        $(FPEOBJ)
 
-main-PHOTOS-lhef: $(PHOTOS)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PHOTOS)) $(STATIC) -o $@
+main-PYTHIA8-lhef: $(PYTHIA8)
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) -L/usr/local/lib $(STATIC)\
+$(LIBSLHAPDF) -o $@
+
 
 # target to cleanup
 .PHONY: clean
 clean:
 	rm -f $(OBJ)/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef main-PHOTOS-lhef
+	main-PYTHIA-lhef main-PYTHIA8-lhef main-PHOTOS-lhef
 
 ###################################################################
 # From here on there are targets specific to the W implementation
@@ -177,3 +177,6 @@ MERGE_wp_wm=merge_wp_wm.o newunit.o random.o cernroutines.o
 #  target to merge wp and wm samples
 merge_wp_wm: $(MERGE_wp_wm)
 	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(MERGE_wp_wm)) -o $@
+
+pwhg_main.o: svn.version
+lhefwrite.o: svn.version

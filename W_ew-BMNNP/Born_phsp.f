@@ -17,8 +17,7 @@
       real*8 rkallen
       external rkallen
       real*8 pmod,sqla,betal
-      real * 8 masswindow_low,masswindow_high
-      real * 8 phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw
+      real * 8 mass_low,phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw
       save phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw
       real * 8 powheginput
       if(ini) then
@@ -35,23 +34,14 @@ c     set initial- and final-state masses for Born and real
          phsp_Wmass2=phsp_Wm**2
          phsp_WmWw=phsp_Wm*phsp_Ww
 
-c     mass window
-         masswindow_low = powheginput("#masswindow_low")
-         if (masswindow_low.le.0d0) masswindow_low=30d0
-         masswindow_high = powheginput("#masswindow_high")
-         if (masswindow_high.le.0d0) masswindow_high=30d0
-
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccc   DEPENDENT QUANTITIES       
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-c     set mass window around W-mass peak in unit of ph_Wwidth
-c     It is used in the generation of the Born phase space
-         ph_Wmass2low=max(decmass*10d0,phsp_Wm-masswindow_low*phsp_Ww)
-         ph_Wmass2low=ph_Wmass2low**2
-         ph_Wmass2high=phsp_Wm+masswindow_high*phsp_Ww
-         ph_Wmass2high=min(kn_sbeams,ph_Wmass2high**2)
       endif
+c mass window
+      mass_low = powheginput("#mass_low")
+      if (mass_low.le.0d0) mass_low=1d0
+      mass_low = max(mass_low,decmass)
+
+      ph_Wmass2low= mass_low**2
+      ph_Wmass2high= kn_sbeams
 
 c 1 /(16 pi S) d m^2 d cth d y
       xjac=1d0/kn_sbeams/(16*pi)
@@ -158,6 +148,7 @@ c minimal final state mass
       include 'PhysPars.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      include 'pwhg_flg.h'
       include 'pwhg_kn.h'
       include 'pwhg_em.h'
       include 'mathx.h'
@@ -194,13 +185,20 @@ c minimal final state mass
             write(*,*) '*************************************'
             ini=.false.
          endif
-         if(powheginput('#runningscale').eq.2) then
-            pt2=(kn_pborn(1,3)+kn_pborn(1,4))**2+(kn_pborn(2,3)
-     $           +kn_pborn(2,4))**2
-            muref=sqrt(pt2+ph_Wmass*ph_Wmass)
+         if(flg_btildepart.eq.'r') then
+            muref=sqrt(2d0*dotp(kn_preal(0,3),kn_preal(0,4))
+     1           +kn_masses(3)**2+kn_masses(4)**2)
          else
-            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4)))
+            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
+     1           +kn_masses(3)**2+kn_masses(4)**2)
          endif
+c         if(powheginput('#runningscale').eq.2) then
+c            pt2=(kn_pborn(1,3)+kn_pborn(1,4))**2+(kn_pborn(2,3)
+c     $           +kn_pborn(2,4))**2
+c            muref=sqrt(pt2+ph_Wmass*ph_Wmass)
+c         else
+c            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4)))
+c         endif
       else
          if (ini) then
             write(*,*) '*************************************'
@@ -211,6 +209,7 @@ c minimal final state mass
          endif
          muref=ph_Wmass
       endif
+      if(muref.lt.1) muref = 1
       muf=muref
       mur=muref
       mudim2=em_muren2

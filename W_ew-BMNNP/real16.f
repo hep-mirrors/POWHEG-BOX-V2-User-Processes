@@ -1,512 +1,4 @@
-      subroutine setreal(p,fermion_flav,amp2)
-      implicit none
-      include 'nlegborn.h'
-*
-      real * 8 p(0:3,nlegreal)
-      integer fermion_flav(nlegreal)
-      logical pwhg_isfinite
-      external pwhg_isfinite
-      real * 8 amp2
-
-      if(fermion_flav(nlegreal).eq.22) then
-          call setreal_ew(p,fermion_flav,amp2)
-      else
-          call setreal_st(p,fermion_flav,amp2)
-      endif
-
-      if(.not.pwhg_isfinite(amp2)) amp2=0.d0
-
-      end
-
-
-      subroutine setreal_st(p,fermion_flav,amp2)
-      implicit none
-      include 'nlegborn.h'
-      include 'pwhg_flst.h'
-      include 'mathx.h'
-      include 'pwhg_math.h'
-      include 'pwhg_st.h'
-c -*- Fortran -*-
-c      character *2 flav(-5:5)
-      real * 8 charge(-5:5)
-c      data (charge(ijkh),ijkh=-5,5) 
-c      data (flav(ijkh),ijkh=-5,5) 
-c      data flav
-c     #     /'b~','c~','s~','u~','d~','g','d','u','s','c','b'/
-      data charge
-     #     / 0.33333333333333333333d0, !   1d0/3
-     #      -0.66666666666666666667d0, !  -2d0/3
-     #       0.33333333333333333333d0, !   1d0/3 
-     #      -0.66666666666666666667d0, !   -2d0/3
-     #       0.33333333333333333333d0, !   1d0/3 
-     #       0d0,                      !   0d0   
-     #      -0.33333333333333333333d0, !   -1d0/3
-     #       0.66666666666666666667d0, !   2d0/3   
-     #      -0.33333333333333333333d0, !   -1d0/3
-     #       0.66666666666666666667d0, !   2d0/3 
-     #      -0.33333333333333333333d0/ !   -1d0/3
-c      include 'QuarkFlavs.h'
-      include 'PhysPars.h'
-      integer nleg
-      parameter (nleg=nlegreal)
-      real * 8 p(0:3,nleg)
-      integer fermion_flav(nleg)
-      real * 8 amp2
-      integer ferm_type(nleg)
-      real * 8 ferm_charge(nleg)
-      integer i,j,k,l,count,tmp_type
-      real *8 tmp_charge
-c     vector boson id and decay
-      integer idvecbos,vdecaymode
-      common/cvecbos/idvecbos,vdecaymode  
-
-c     i is the flavour index of first incoming parton
-c     j is the flavour index of second incoming parton
-c     k is the flavour of outgoing parton in the order particle,antiparticle,gluon
-c     with the convention:
-c     
-c      -6  -5  -4  -3  -2  -1  0  1  2  3  4  5  6                    
-c      t~  b~  c~  s~  u~  d~  g  d  u  s  c  b  t                    
-      
-      i = fermion_flav(1)
-      j = fermion_flav(2)
-      k = fermion_flav(5)
-      ferm_charge(1) = charge(i)
-      ferm_charge(2) = charge(j)
-      ferm_charge(5) = charge(k)
-      
-
-      if (i.eq.0) then
-         ferm_type(1) = 0
-      else 
-         ferm_type(1) = i/abs(i)
-      endif 
-      if (j.eq.0) then
-         ferm_type(2) = 0
-      else 
-         ferm_type(2) = j/abs(j)
-      endif   
-      if (k.eq.0) then
-         ferm_type(5) = 0
-      else 
-         ferm_type(5) = k/abs(k)
-      endif   
-
-c     antilepton-neutrino from W decay
-      ferm_type(3) = fermion_flav(3)/abs(fermion_flav(3))
-      ferm_charge(3) = ferm_type(3)*(-1d0)
-      ferm_type(4) = -ferm_type(3)
-      ferm_charge(4) = 0d0
-
-      if(idvecbos.eq.24) then
-         if (i.eq.0) then
-c     g q -> W+ qp
-            call g_aqp_to_al_vl_aq(p,ferm_type,ferm_charge,amp2) 
-         elseif ((i.ne.0).and.(j.ne.0)) then
-c     q aqp -> W+ g
-            call q_aqp_to_al_vl_g(p,ferm_type,ferm_charge,amp2)
-         elseif (j.eq.0) then
-c     q g -> W+ qp
-            call q_g_to_al_vl_qp(p,ferm_type,ferm_charge,amp2)
-         else
-            amp2 = 0d0
-         endif
-      elseif(idvecbos.eq.-24) then
-         if (i.eq.0) then
-c     g q -> W- qp
-            call g_aqp_to_l_avl_aq(p,ferm_type,ferm_charge,amp2) 
-         elseif ((i.ne.0).and.(j.ne.0)) then
-c     q aqp -> W- g
-            call q_aqp_to_l_avl_g(p,ferm_type,ferm_charge,amp2)
-         elseif (j.eq.0) then
-c     q g -> W- qp
-            call q_g_to_l_avl_qp(p,ferm_type,ferm_charge,amp2)
-         else
-            amp2 = 0d0
-         endif
-
-      else
-         write(*,*) 'ERROR: this subroutine deals only with W+ or W- '
-         call exit(1)
-      endif
-
-      if (i.eq.0) i=abs(k)
-      if (j.eq.0) j=abs(k)
-      if(mod(abs(i),2).eq.0) then
-         amp2=amp2*ph_CKM(abs(i)/2,(abs(j)+1)/2)**2
-      elseif(mod(abs(i),2).eq.1) then   
-         amp2=amp2*ph_CKM(abs(j)/2,(abs(i)+1)/2)**2
-      endif
-c     cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
-      amp2 = amp2/(st_alpha/(2*pi))
-      
-      end
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C AMPLITUDES RELATES BY CROSSING:
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-      subroutine g_aqp_to_al_vl_aq(pphy,fermion_type,fermion_charge,
-     #     amp2)
-      implicit none
-      include 'nlegborn.h'
-      integer nleg
-      parameter (nleg=nlegreal)
-      integer fermion_type(nleg)
-      real * 8 fermion_charge(nleg)
-      real * 8 pphy(0:3,nleg)
-      real * 8 pp(0:3,nleg), ferm_charge(nleg)
-      integer ferm_type(nleg)
-      real * 8 amp2
-      integer mu,i
-
-      do i = 1,nleg
-         do mu=0,3
-            pp(mu,i) = pphy(mu,i)
-         enddo
-         ferm_charge(i) = fermion_charge(i)
-         ferm_type(i) = fermion_type(i)
-      enddo
-
-      do mu=0,3
-c     exchange initial gluon <-> final quark
-         pp(mu,5) = -pphy(mu,1)
-         pp(mu,1) = -pphy(mu,5)
-      enddo
-
-c no useful information is in ferm_type(1) or ferm_charge(1), 
-c since it's the gluon, BEFORE the following exchange
-      ferm_type(1) = -ferm_type(5)
-c NOTE the MINUS sign     !!!
-      ferm_charge(1) = -ferm_charge(5)
-
-c     if the following two lines are missing 
-      ferm_type(5)=0
-      ferm_charge(5)=0d0 
-c     ferm_type(5) and ferm_charge(5) don't contain
-c     their correct values, but this does not affect 
-c     the correct call of
-
-       call q_aqp_to_al_vl_g(pp,ferm_type,ferm_charge,
-     #     amp2)
-
-c     correct for color average
-      amp2 = amp2 * 3d0/8d0
-      
-      end
-
-ccccccccccccccccccccccccccccccccccccccccccccc
-
-      subroutine q_g_to_al_vl_qp(pphy,fermion_type,fermion_charge,
-     #     amp2)
-   
-      implicit none
-      integer nleg
-      parameter (nleg=5)
-      integer fermion_type(nleg)
-      real * 8 fermion_charge(nleg)
-      real * 8 pphy(0:3,nleg)
-      real * 8 pp(0:3,nleg), ferm_charge(nleg)
-      integer ferm_type(nleg)
-      real * 8 amp2
-      integer mu,i
-
-      do i = 1,nleg
-         do mu=0,3
-            pp(mu,i) = pphy(mu,i)
-         enddo
-         ferm_charge(i) = fermion_charge(i)
-         ferm_type(i) = fermion_type(i)
-      enddo
-
-      do mu=0,3
-c     exchange initial gluon <-> final quark
-         pp(mu,5) = -pphy(mu,2)
-         pp(mu,2) = -pphy(mu,5)
-      enddo
-
-c no useful information is in ferm_type(2) or ferm_charge(2), 
-c since it's the gluon, BEFORE the following exchange
-      ferm_type(2) = -ferm_type(5)
-c NOTE the MINUS sign     !!!
-      ferm_charge(2) = -ferm_charge(5)
-
-c     if the following two lines are missing 
-      ferm_type(5)=0
-      ferm_charge(5)=0d0 
-c     ferm_type(5) and ferm_charge(5) don't contain
-c     their correct values, but this does not affect 
-c     the correct call of
-
-       call q_aqp_to_al_vl_g(pp,ferm_type,ferm_charge,
-     #     amp2)
-
-c     correct for color average
-      amp2 = amp2 * 3d0/8d0
-      
-      end
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-
-      subroutine q_aqp_to_l_avl_g(pphy,fermion_type,fermion_charge,
-     #     amp2)
-   
-      implicit none
-      include 'nlegborn.h'
-c the 5 4-momentum vectors
-c p(i,1) is the i-th component of vector p1...   
-      integer nleg
-      parameter (nleg=nlegreal)
-      integer fermion_type(nleg),i
-      real * 8 fermion_charge(nleg)
-      real * 8 pphy(0:3,nleg)
-      real * 8 amp2
-      real * 8 ferm_charge(nleg)
-      integer ferm_type(nleg)
-
-       if ((fermion_type(3).ne.1).and.(fermion_type(4).ne.-1)) then
-         write(*,*) 'ERROR: this subroutine deals only with W- decay'
-         stop
-      endif
-
-      do i=1,nleg
-         ferm_charge(i) = -fermion_charge(i)
-         ferm_type(i) = -fermion_type(i)
-      enddo
-            
-      
-      call q_aqp_to_al_vl_g(pphy,ferm_type,ferm_charge,
-     #     amp2)
-
-      end
-
-ccccccccccccccccccccccccccccccccccccccccccccc
-
-       subroutine g_aqp_to_l_avl_aq(pphy,fermion_type,fermion_charge,
-     #     amp2)
-   
-      implicit none
-      include 'nlegborn.h'
-c the 5 4-momentum vectors
-c p(i,1) is the i-th component of vector p1...   
-      integer nleg
-      parameter (nleg=nlegreal)
-      integer fermion_type(nleg),i
-      real * 8 fermion_charge(nleg)
-      real * 8 pphy(0:3,nleg)
-      real * 8 amp2
-      real * 8 ferm_charge(nleg)
-      integer ferm_type(nleg)
-
-       if ((fermion_type(3).ne.1).and.(fermion_type(4).ne.-1)) then
-         write(*,*) 'ERROR: this subroutine deals only with W- decay'
-         stop
-      endif
-
-      do i=1,nleg
-         ferm_charge(i) = -fermion_charge(i)
-         ferm_type(i) = -fermion_type(i)
-      enddo
-      
-      call g_aqp_to_al_vl_aq(pphy,ferm_type,ferm_charge,
-     #     amp2)
-
-      end
-
-ccccccccccccccccccccccccccccccccccccccccccccc
-
-       subroutine q_g_to_l_avl_qp(pphy,fermion_type,fermion_charge,
-     #     amp2)
-   
-      implicit none
-c the 5 4-momentum vectors
-c p(i,1) is the i-th component of vector p1...   
-      integer nleg
-      parameter (nleg=5)
-      integer fermion_type(nleg),i
-      real * 8 fermion_charge(nleg)
-      real * 8 pphy(0:3,nleg)
-      real * 8 amp2
-      real * 8 ferm_charge(nleg)
-      integer ferm_type(nleg)
-
-      if ((fermion_type(3).ne.1).and.(fermion_type(4).ne.-1)) then
-         write(*,*) 'ERROR: this subroutine deals only with W- decay'
-         stop
-      endif
-
-      do i=1,nleg
-      
-         ferm_charge(i) = -fermion_charge(i)
-         ferm_type(i) = -fermion_type(i)
-      enddo
-      
-      call q_g_to_al_vl_qp(pphy,ferm_type,ferm_charge,
-     #     amp2)
-
-      end
-*
-** Subroutine for strong real part
-** mu = md = 0
-**
-**(pu) u \            / l+ (pl)
-**        \---gl     /
-**         \________/
-**         /   W+   \       (gl can be emitted by both initial leg)
-**        /          \
-**(pd) d~/            \ nu_l (pn)
-*
-      subroutine q_aqp_to_al_vl_g(pphy,fermion_type,fermion_charge,amp2)
-      implicit none
-      include 'nlegborn.h'
-      include 'PhysPars.h'
-      include 'pwhg_st.h'
-      include 'pwhg_kn.h'
-      include 'mathx.h'
-      include 'pwhg_math.h'
-      include 'pwhg_physpar.h'
-*
-      integer nleg
-      parameter (nleg=nlegreal)
-      real * 8 pphy(0:3,nleg)
-      integer fermion_type(nleg)
-      real * 8 fermion_charge(nleg)
-      real * 8 amp2
-*
-      real*8 dotp
-      external dotp
-*
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
-*
-      real*8 p(0:3,nleg)
-      integer ferm_type(nleg)
-      real*8 ferm_charge(nleg)
-      real*8 pu(0:3),pd(0:3),pn(0:3),pl(0:3),k(0:3)
-      real*8 sp
-
-      integer i,j,nu
-
-      real*8 pupd,pupe,pupn,puk
-      real*8 pdpe,pdpn,pdk
-      real*8 pnpe,pnk
-      real*8 pek
-      complex*16 mw2m1,mw2m2,mw2dm1
-      real*8 tmp
-      real*8 ml2,ml4
-      complex*16 gs2
-      real*8 densp2
-
-      integer ifirst
-      data ifirst/0/
-      save ifirst,ml2,ml4,mw2m1,mw2dm1,mw2m2
-
-      if (ifirst.eq.0) then
-          ifirst = 0
-
-          ml2 = kn_masses(3)*kn_masses(3)
-          ml4 = ml2*ml2
-    
-          mw2m1 = 1d0/mw2
-          mw2dm1= conjg(mw2m1)
-          mw2m2 = mw2m1*mw2dm1
-      endif
-
-      gs2 = 4d0*pi*st_alpha
-*
-c  copy of local variables
-      do i=1,nlegreal
-         do nu=0,3
-            p(nu,i) = pphy(nu,i)
-         enddo
-         ferm_charge(i) = fermion_charge(i)
-         ferm_type(i) = fermion_type(i)
-      enddo
-
-c     exchance particle 1 and 2
-      if (ferm_type(1).eq.-1) then
-         if (ferm_type(2).eq.1) then
-            call exchange_momenta(p(0,1),p(0,2))
-            tmp = ferm_charge(1)
-            ferm_charge(1)=ferm_charge(2)
-            ferm_charge(2)=tmp
-            tmp = ferm_type(1)
-            ferm_type(1)=ferm_type(2)
-            ferm_type(2)=tmp
-         else
-            write(*,*) 'Error in the type of the quark 1-2'
-            stop
-         endif
-      endif
-
-      if (ferm_charge(1)*ferm_type(1).lt.0d0) then
-          do nu=0,3
-              pu(nu) = p(nu,2)
-              pd(nu) = p(nu,1)
-          enddo
-      else
-          do nu=0,3
-              pu(nu) = p(nu,1)
-              pd(nu) = p(nu,2)
-          enddo
-      endif
-
-      do nu=0,3
-          pl(nu) = p(nu,3)
-          pn(nu) = p(nu,4)
-          k (nu) = p(nu,5)
-      enddo
-
-*
-      pupd = dotp(pu,pd)
-      pupe = dotp(pu,pl)
-      pupn = dotp(pu,pn)
-      puk  = dotp(pu,k)
-*
-      pdpe = dotp(pd,pl)
-      pdpn = dotp(pd,pn)
-      pdk  = dotp(pd,k)
-*
-      pnpe = dotp(pl,pn)
-      pnk  = dotp(pn,k)
-*
-      pek  = dotp(pl,k)
-*
-      sp = 2.d0*pnpe + ml2
-*
-      densp2 = 1d0/(sp*cone-ph_Wmass2+ii*ph_WmWw)/
-     -             (sp*cone-ph_Wmass2-ii*ph_WmWw)
-
-      amp2 =
-     -   (densp2*(pdpe*pdpn*puk - pdpn*pek*pupd + 
-     -      (-(pdpn*puk) + pnk*puk + 2*pdpn*pupd - pnk*pupd)*pupe + 
-     -      pdk*(pdpn*(pek - pupe) + pupe*pupn)))/(pdk*puk)
-
-      amp2 = amp2 * 16 
-     +            * g2*conjg(g2) * gs2/4d0
-     +            * CF/4d0/nc
-* for initial state gluons
-      if(dble(amp2).lt.0d0) amp2 = -amp2
-
-      end
-
-*
-** Subroutine for real part
-** mu = md = 0
-**
-**(pu) u \            / l+ (pl)
-**        \          /--- g (k)
-**         \________/
-**         /   W+   \       (g can be emitted by every charged leg)
-**        /          \
-**(pd) d~/            \ nu_l (pn)
-*
-*
-**
-*
-
-      subroutine setreal_ew(p,fermion_flav,amp2)
+      subroutine setreal_ew16(p,fermion_flav,amp2)
       implicit none
       include 'nlegborn.h'
       include 'PhysPars.h'
@@ -518,13 +10,13 @@ c      include 'pwhg_kn.h'
 *
       real * 8 p(0:3,nlegreal)
       integer fermion_flav(nlegreal)
-      real * 8 amp2,tmpamp2
+      real * 8 amp2
 *
-      complex*16 e_
-      external e_
+      complex * 32 e32_
+      external e32_
 
-      real*8 dotp
-      external dotp
+      real*16 dotp16
+      external dotp16
 *
       real*8 mlep2
       common/leptmass/mlep2
@@ -533,43 +25,37 @@ c      include 'pwhg_kn.h'
       common/cvecbos/idvecbos,vdecaymode
 
 *
-      real*8 qu2,qd2
+      real*16 qu2,qd2
 
-      real*8 pu(0:3),pd(0:3),pn(0:3),pl(0:3),k(0:3)
-      real*8 s,sp
+      real*16 pu(0:3),pd(0:3),pn(0:3),pl(0:3),k(0:3)
+      real*16 s,sp
 
-      integer i,j,nu
+      integer i,j,nu,kkk
 
-      real*8 pupd,pupe,pupn,puk
-      real*8 pdpe,pdpn,pdk
-      real*8 pnpe,pnk
-      real*8 pek
-      complex*16 mw2m1,mw2m2,mw2dm1
-      complex*16 epupdpek,epupdpnk,epupnpek,epdpnpek,epupdpnpe
-      real*8 ml2
+      real*16 pupd,pupe,pupn,puk
+      real*16 pdpe,pdpn,pdk
+      real*16 pnpe,pnk
+      real*16 pek
+      complex*32 mw2m1,mw2m2,mw2dm1
+      complex*32 epupdpek,epupdpnk,epupnpek,epdpnpek,epupdpnpe
+      real*16 ml2,deltae
 
-      complex*16 dens,densc,densp,denspc,dens2,densp2
-      real * 8 megammin
+      complex*32 dens,densc,densp,denspc,dens2,densp2
 *
-      integer ifirst,icounter
+      integer ifirst
       data ifirst/0/
-      data icounter /0/
-      save ifirst,icounter,ml2,mw2m1,mw2dm1,mw2m2,megammin
+      save ifirst,ml2,mw2m1,mw2dm1,mw2m2
+
+c      write(*,*) ' entering real16 '
 
       if (ifirst.eq.0) then
           ifirst = 1
-          megammin = 1d-5
 
-          ml2 = mlep2
+          ml2 = mlep2*1q0
     
-          mw2m1 = 1d0/mw2
+          mw2m1 = 1q0/mw2
           mw2dm1= conjg(mw2m1)
           mw2m2 = mw2m1*mw2dm1
-      endif
-
-      if(dotp(p(:,3),p(:,5)).lt.megammin) then
-         call setreal_ew16(p,fermion_flav,amp2)
-         return
       endif
 
       i = fermion_flav(1)
@@ -592,44 +78,71 @@ c      include 'pwhg_kn.h'
           pn(nu) = p(nu,4)
           k (nu) = p(nu,5)
       enddo
-*
+c adjust quadruple precision momenta to satisfy momentum conservation
+c and on mass-shell conditions.
+c Momentum conservation:
+      pu(1:2) = 0
+      pd(1:2) = 0
+      pn(1:3) =  pu(1:3)+pd(1:3)-k(1:3)-pl(1:3)
+c Mass shell
+      k(0)  = sqrt( k(1)**2+ k(2)**2 +k(3)**2)
+      pn(0) = sqrt(pn(1)**2+pn(2)**2+pn(3)**2)
+      pl(0) = sqrt(pl(1)**2+pl(2)**2+pl(3)**2+ml2)
+      pu(0) = abs(pu(3))
+      pd(0) = abs(pd(3))
+c energy conservation by rescaling final momenta.
+c fix electron on mass shell and iterate 4 times
+      do kkk=1,4
+         deltae = pu(0)+pd(0)-k(0)-pn(0)-pl(0)
+         pl = pl*(1+deltae/(pu(0)+pd(0)))
+         pn = pn*(1+deltae/(pu(0)+pd(0)))
+         k = k*(1+deltae/(pu(0)+pd(0)))
+         pl(0) = sqrt(pl(1)**2+pl(2)**2+pl(3)**2+ml2)
+      enddo
+      deltae = pu(0)+pd(0)-k(0)-pn(0)-pl(0)
+c      if(abs(deltae/(pu(0)+pd(0))).gt.1q-30) then
+c         write(*,*) ' worry: momentum not conserved!'
+c         write(*,*) deltae/(pu(0)+pd(0))
+c         call exit(-1)
+c      endif
+c
       ! CP symmetry for W-
       if (idvecbos.lt.0) then
-          call invertspace(pu,pu)
-          call invertspace(pd,pd)
-          call invertspace(pl,pl)
-          call invertspace(pn,pn)
-          call invertspace(k,k)
+          call invertspace16(pu,pu)
+          call invertspace16(pd,pd)
+          call invertspace16(pl,pl)
+          call invertspace16(pn,pn)
+          call invertspace16(k,k)
       endif
 
 *
-      pupd = dotp(pu,pd)
-      pupe = dotp(pu,pl)
-      pupn = dotp(pu,pn)
-      puk  = dotp(pu,k)
+      pupd = dotp16(pu,pd)
+      pupe = dotp16(pu,pl)
+      pupn = dotp16(pu,pn)
+      puk  = dotp16(pu,k)
 *
-      pdpe = dotp(pd,pl)
-      pdpn = dotp(pd,pn)
-      pdk  = dotp(pd,k)
+      pdpe = dotp16(pd,pl)
+      pdpn = dotp16(pd,pn)
+      pdk  = dotp16(pd,k)
 *
-      pnpe = dotp(pl,pn)
-      pnk  = dotp(pn,k)
+      pnpe = dotp16(pl,pn)
+      pnk  = dotp16(pn,k)
 *
-      pek  = dotp(pl,k)
+      pek  = dotp16(pl,k)
 *
-      epupdpek  = e_(pu,pd,pl,k)
-      epupdpnk  = e_(pu,pd,pn,k)
-      epupnpek  = e_(pu,pn,pl,k)
-      epdpnpek  = e_(pd,pn,pl,k)
-      epupdpnpe = e_(pu,pd,pn,pl)
+      epupdpek  = e32_(pu,pd,pl,k)
+      epupdpnk  = e32_(pu,pd,pn,k)
+      epupnpek  = e32_(pu,pn,pl,k)
+      epdpnpek  = e32_(pd,pn,pl,k)
+      epupdpnpe = e32_(pu,pd,pn,pl)
 *
-      s  = 2.d0*pupd
-      sp = 2.d0*pnpe + ml2
+      s  = 2.q0*pupd
+      sp = 2.q0*pnpe + ml2
 
-      dens   = 1d0/(s*cone - ph_Wmass2 + ii*ph_WmWw)
-      densc  = dconjg(dens)
-      densp  = 1d0/(sp*cone - ph_Wmass2 + ii*ph_WmWw)
-      denspc = dconjg(densp)
+      dens   = 1q0/(s*cone - ph_Wmass2 + ii*ph_WmWw)
+      densc  = conjg(dens)
+      densp  = 1q0/(sp*cone - ph_Wmass2 + ii*ph_WmWw)
+      denspc = conjg(densp)
       dens2  = dens*densc
       densp2 = densp*denspc
 *
@@ -702,7 +215,7 @@ c      include 'pwhg_kn.h'
      -                 (mw2m1*(pdpn + pnk) + 
      -                   2*mw2m2*pnpe*(pupe + pupn) - 
      -                   mw2dm1*(pdpn + pnk + 2*pupn))))*qu)))
-     -    /(pdk*pek*puk)
+     -    /(pdk*pek*puk) 
       amp2 = amp2 + 
      -  (4*epupdpnpe*(dens*
      -        (densc*pdk*puk*
@@ -793,8 +306,7 @@ c      include 'pwhg_kn.h'
      -                 (pek*pupd + (pdk + puk - 2*pupd)*pupe)
      -                 + pdk*pupe*pupn)*qd + pdk*pdpn*pek*qu)
      -           + pnk*pupe*qd*(puk*qd - pupd*qu))))/
-     -   (pdk*pek*puk)
-      amp2 = amp2 + 
+     -   (pdk*pek*puk) + 
      -  dens*((8*densc*(pdpn*
      -           (puk*(2 + 
      -                denspc*(pdpe + 2*pek - 2*pnpe - pupe))
@@ -854,7 +366,7 @@ c      include 'pwhg_kn.h'
      -                   pek*(2*puk + 2*pupd + pupe - pupn))
      -                 - (-2*pdk*pupe + pdpe*(puk + pupe))*
      -                 pupn + pek*(-(pnpe*pupd) + pdpe*pupn))*
-     -              qu))/(pdk*puk)))
+     -              qu))/(pdk*puk))) 
       amp2 = amp2 - 
      -  (2*epupdpnk*(dens*
      -        (2*densc*ml2*pdk*puk*
@@ -895,7 +407,7 @@ c      include 'pwhg_kn.h'
      -                 (-(mw2m1*(pdpe + pek - 2*pupn)) - 
      -                   2*mw2m2*pnpe*(pupe + pupn) + 
      -                   mw2dm1*(pdpe + pek + 2*(pupe + pupn))
-     -                   ))*qu))))/(pdk*pek*puk) 
+     -                   ))*qu))))/(pdk*pek*puk)
       amp2 = amp2 + 
      -  (2*ml2**2*(dens*(2*densc*pdk*puk*
      -           (densp*mw2m1*
@@ -1344,8 +856,8 @@ c      include 'pwhg_kn.h'
 
 
       amp2 = amp2*
-     +       g2*conjg(g2)*el2/4d0
-     +       /4d0/3
+     +       g2*conjg(g2)*el2/4q0
+     +       /4q0/3
      +       /(st_alpha/(2*pi))
 
       if(mod(abs(i),2).eq.0) then
@@ -1354,31 +866,20 @@ c      include 'pwhg_kn.h'
          amp2=amp2*ph_CKM(abs(j)/2,(abs(i)+1)/2)**2
       endif
 
-      icounter = icounter + 1
-      if(icounter.eq.1000) then
-         icounter = 0
-         call setreal_ew16(p,fermion_flav,tmpamp2)
-         if(abs(tmpamp2/amp2-1).gt.1d-4) then
-            megammin = max(megammin,dotp(p(:,3),p(:,5)))
-            write(*,*) ' abs(amp216/amp2-1)=',abs(tmpamp2/amp2-1)
-            write(*,*) ' megammin=',megammin
-         endif
-         amp2 = tmpamp2
-      endif
       return
       end 
-*
-**
-*
-      complex*16 function e_(q1,q2,q3,q4)
+
+
+      complex*32 function e32_(q1,q2,q3,q4)
       implicit none
-      real*8 q1(0:3),q2(0:3),q3(0:3),q4(0:3)
+      real*16 q1(0:3),q2(0:3),q3(0:3),q4(0:3)
 
-      complex*16 esign
+      complex*32 esign
 
-      esign = -(0.d0,1.d0)
+      esign = -(0.q0,1.q0)
 
-      e_ = q1(1)*q2(2)*q3(3)*q4(0) - q1(1)*q2(2)*q3(0)*q4(3) +
+      e32_ =
+     .     q1(1)*q2(2)*q3(3)*q4(0) - q1(1)*q2(2)*q3(0)*q4(3) +
      .     q1(1)*q2(3)*q3(0)*q4(2) - q1(1)*q2(3)*q3(2)*q4(0) +
      .     q1(1)*q2(0)*q3(2)*q4(3) - q1(1)*q2(0)*q3(3)*q4(2) +
      .     q1(2)*q2(1)*q3(0)*q4(3) - q1(2)*q2(1)*q3(3)*q4(0) +
@@ -1391,16 +892,24 @@ c      include 'pwhg_kn.h'
      .     q1(0)*q2(2)*q3(1)*q4(3) - q1(0)*q2(2)*q3(3)*q4(1) +
      .     q1(0)*q2(3)*q3(2)*q4(1) - q1(0)*q2(3)*q3(1)*q4(2)
 
-      e_ = esign * e_ 
+      e32_ = esign * e32_
 
       return
-      end function e_
-*
-**
-*
-      subroutine invertspace(p,pp)
+      end function e32_
+
+
+      function dotp16(p1,p2)
       implicit none
-      real*8 p(0:3),pp(0:3)
+      real * 16 dotp16,p1(0:3),p2(0:3)
+      dotp16 = (p1(0)*p2(0) - p1(3)*p2(3)) - p1(1)*p2(1) - p1(2)*p2(2)
+      end
+
+
+
+*
+      subroutine invertspace16(p,pp)
+      implicit none
+      real*16 p(0:3),pp(0:3)
       integer nu
 
       pp(0)=p(0)

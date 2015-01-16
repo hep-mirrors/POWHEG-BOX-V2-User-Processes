@@ -301,6 +301,7 @@ c     colored particles
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
+      include 'LesHouches.h'
 c     Set up the resonances whose mass must be preserved
 c     on the Les Houches interface.
 c     
@@ -309,6 +310,13 @@ c     vector boson id and decay
       common/cvecbos/idvecbos,vdecaymode
 
       call add_resonance(idvecbos,3,4)
+c if it is an isr photon, add it to the resonance
+      if(nup.eq.nlegreal+1.and.rad_kinreg.eq.2) then
+         mothup(1,6) = 3
+         mothup(2,6) = 3
+         pup(1:4,3) = pup(1:4,3) + pup(1:4,6)
+         pup(5,3)=sqrt(pup(4,3)**2-pup(1,3)**2-pup(2,3)**2-pup(3,3)**2)
+      endif
       call lhefinitemasses
 
       end

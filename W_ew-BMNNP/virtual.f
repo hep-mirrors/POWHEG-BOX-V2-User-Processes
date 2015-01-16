@@ -6,28 +6,51 @@ c     The as/(2pi) factor is attached at a later point
       implicit none
       include 'nlegborn.h'
       include 'pwhg_st.h'
+      include 'pwhg_flg.h'
       include 'mathx.h'
       include 'pwhg_math.h'
       include 'pwhg_physpar.h'
+      include 'strongcorr.h'
       real * 8 p(0:3,nlegborn)
       integer vflav(nlegborn)
       real * 8 virtual
       real * 8 virtual_st
       complex*16 virtual_ew
       real * 8 dummy(0:3,0:3)
+      real * 8 rborn
       complex*16 born
       real *8 s,dotp
       external dotp
+      logical pwhg_isfinite
+      external pwhg_isfinite
+
+      logical ini
+      data ini/.true./
+      real * 8 powheginput
+      save ini
 
       s=2d0*dotp(p(0,1),p(0,2))
-      call compborn(p,vflav,born,dummy)
-      virtual_st = pi2 - 8 - 3*log(st_muren2/s) - log(st_muren2/s)**2
+      call compborn(p,vflav,rborn,dummy)
+      born = rborn
 
-      call deltavirt(p,vflav,virtual_ew)
+      if(strongcorr) then
+         virtual_st = pi2 - 8 - 3*log(st_muren2/s) - log(st_muren2/s)**2
+      else
+         virtual_st = 0
+      endif
+
+      if(flg_with_em) then
+         call deltavirt(p,vflav,virtual_ew)
+      else
+         virtual_ew = 0
+      endif
 
       virtual=( virtual_st*cf + 
-     +          2d0*virtual_ew/(st_alpha/(2d0*pi)) )
+     +          2d0*dble(virtual_ew)/(st_alpha/(2d0*pi)) )
      +         *born
+
+      if(.not.pwhg_isfinite(virtual)) virtual=0.d0
+
 
       end
 
@@ -292,8 +315,8 @@ c$$$      end
 * here f= up and down quark (if we change final state this should 
 *                            be changed accordingly)
 *
-          call deltazfl(qd,gdm,gdp,zero,zero,delzdl)
-          call deltazfl(qu,gum,gup,zero,zero,delzul)
+          call deltazfl(qd,gdm,gdp,dble(zero),dble(zero),delzdl)
+          call deltazfl(qu,gum,gup,dble(zero),dble(zero),delzul)
 *
 * eq. (2.13) of Dittmaier-Kraemer PRD65 073007
 *
@@ -426,8 +449,8 @@ c$$$      end
 * here f= electron and neutrino (if we change final state this should 
 *                                be changed accordingly)
 *
-          call deltazfl(ql,glm,glp,mlep2*cone,zero,delzll)
-          call deltazfl(qnu,gnm,gnp,zero,mlep2*cone,delznul)
+          call deltazfl(ql,glm,glp,mlep2,dble(zero),delzll)
+          call deltazfl(qnu,gnm,gnp,dble(zero),mlep2,delznul)
 *
 * eq. (2.13) of Dittmaier-Kraemer PRD65 073007
 *
@@ -497,9 +520,9 @@ c$$$      end
 
       endif
 
-      call b0m0(s,mw2,b0ds0mw)
-      call b0reg(s,mw2,mz2,b0dsmwmz)
-      call b0m0m0(s,b0ds00)
+      call b0m0(dcmplx(s),mw2,b0ds0mw)
+      call b0reg(dcmplx(s),mw2,mz2,b0dsmwmz)
+      call b0m0m0(dcmplx(s),b0ds00)
 
       if (abs(qf).lt.epsilon) then
           b0dmf20mf = zero

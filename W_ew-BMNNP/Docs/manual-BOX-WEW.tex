@@ -17,7 +17,8 @@
 \newcommand\POWHEG{{\tt POWHEG}}
 \newcommand\POWHEGBOX{{\tt POWHEG BOX}}
 \newcommand\HERWIG{{\tt HERWIG}}
-\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\PYTHIASIX{{\tt PYTHIA6}}
+\newcommand\PYTHIAEIGHT{{\tt PYTHIA8}}
 \newcommand\PHOTOS{{\tt PHOTOS}}
 \newcommand\MCatNLO{{\tt MC@NLO}}
 
@@ -28,11 +29,11 @@
 %%%%%%%%%% End TeXmacs macros
 
 
-\title{The POWHEG BOX user manual:\\
-  $\boldsymbol{W^\pm}$ NLO EW \& QCD production} \vfill
+\title{The  $\boldsymbol{W^\pm}$ EW NLO \& QCD production \\
+in the POWHEG BOX-V2 user manual } \vfill
 \author{Luca Barz\`e\\
-  Dipartimento di Fisica Nucleare e Teorica, Universit\`a di Pavia and INFN, Sezione di Pavia, Via A. Bassi 6, 27100 Pavia, Italy\\
-  E-mail: \email{Luca.Barze@pv.infn.it}}
+  PH-TH Department, CERN, CH-1211 Geneva 23, Switzerland\\
+  E-mail: \email{Luca.Barze@cern.ch}}
 \author{Guido Montagna\\
   Dipartimento di Fisica Nucleare e Teorica, Universit\`a di Pavia and INFN, Sezione di Pavia, Via A. Bassi 6, 27100 Pavia, Italy\\
   E-mail: \email{Guido.Montagna@pv.infn.it}}
@@ -52,11 +53,11 @@
 \keywords{POWHEG, Shower Monte Carlo, NLO, Electroweak}
 
 \abstract{This note documents the use of the package
-  \tmtexttt{POWHEG BOX} for $W^\pm$ production processes including
+  \tmtexttt{POWHEG-BOX-V2} for $W^\pm$ production processes including
   QCD and ElectroWeak NLO corrections.
   Results can be easily interfaced to shower Monte Carlo programs, in
   such a way that both NLO and shower accuracy are maintained.}
-\preprint{\today\\ \tmtexttt{POWHEG BOX} 1.0}
+\preprint{\today\\ \tmtexttt{POWHEG-BOX-V2}}
 
 \begin{document}
 
@@ -81,7 +82,8 @@ This program is an implementation of the Drell-Yan NLO cross sections
 $pp\to W \to \ell \nu$ including QCD and ElectroWeak (EW) 
 radiative corrections. 
 A detailed description of the implementation can be found in 
-Ref.~\cite{Barze:2012tt}. Please cite the paper when you use the program. \\
+Ref.~\cite{Barze:2012tt}. 
+%Please cite the paper when you use the program. \\
 In order to run the \tmtexttt{POWHEG BOX} program, we recommend the
 reader to start from the \tmtexttt{POWHEG BOX} user manual, which
 contains all the information and settings that are common between
@@ -91,28 +93,34 @@ parameters specific to the $W$ implementation.
 \section{Generation of events}
 
 Build the executable\\
-\tmtexttt{\$ cd POWHEG-BOX/WEW \\
+\tmtexttt{\$ cd POWHEG-BOX-V2/W\_ew-BMNNP \\
 \$ make pwhg\_main }\\
 Then do (for example) \\
 \tmtexttt{\$
-cd test-el\\
+cd runtest-lhc-8TeV\\
 \$ ../pwhg\_main}\\
 At
 the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
-100000 events for $W^+ \to e^+ \nu_e$  in the Les Houches format. In
-order to shower them with \PYTHIA{} do\\~\\
+100000 events for $W^+ \to e^+ \nu_e$  in the Les Houches format. 
+In order to shower them with \PYTHIASIX{} do\\~\\
 \tmtexttt{\$
-cd POWHEG-BOX/WEW \\ \$ make
+cd POWHEG-BOX-V2/W\_ew-BMNNP \\ \$ make
 main-PYTHIA-lhef \\ \$ cd
-test-el \\
+runtest-lhc-8TeV \\
 \$ ../main-PYTHIA-lhef}
+\\
+\\
+If you prefer to shower the event with \PYTHIAEIGHT{} do\\~\\
+\tmtexttt{\$
+cd POWHEG-BOX-V2/W\_ew-BMNNP \\ \$ make
+main-PYTHIA8-lhef \\ \$ cd
+runtest-lhc-8TeV \\
+\$ ../main-PYTHIA-lhef}
+
 
 \section{Process specific input parameters}
 
-For the EW NLO $W^\pm$ production, it is required to activate the
-\tmtexttt{easlight} option, to enable the new final state radiation mapping
-necessary to describe the final state collinear radiation.\\
-Other mandatory parameters are those needed to select the final state
+Mandatory parameters are those needed to select the final state
 leptonic species coming from the vector-boson:
 ~\\
 \tmtexttt{
@@ -121,11 +129,12 @@ leptonic species coming from the vector-boson:
   vdecaymode 11 !  code for selected W decay\\
   \phantom{aaaaaaaaaaaaa} ! (11(-11): electronic; 13(-13): muonic; 15(-15): tauonic)}
 \\
-Together with the mandatory parameters, the \POWHEGBOX{} input facility allows for an easy 
-setting of EW and run parameters, by explicitly adding the relevant lines to the input card. 
+Together with the mandatory parameters, the \POWHEGBOX{} input facility 
+allows for an easy 
+setting of EW and run parameters, by explicitly adding the relevant 
+lines to the input card. 
 If one of the following entries is not present in the input card  the reported default 
-value is assumed. In any case, these parameters are printed in the output of the program, 
-so their values can be easily tracked down. 
+value is assumed. In any case, these parameters are printed in the output of the program, so their values can be easily tracked down. 
 ~\\~\\
  \tmtexttt{
    Wmass\phantom{aa}  80.398 \phantom{aaaaaaa} ! W mass in GeV\\
@@ -133,16 +142,34 @@ so their values can be easily tracked down.
    Zmass\phantom{aa}  91.1876 \phantom{aaaaaa}   ! Z mass in GeV\\
    Zwidth\phantom{a} 2.4952 \phantom{aaaaaaa} ! Z width in GeV\\
    alphaem 0.00729735254 \phantom{a}! em coupling alpha(0)\\
+   gmu\phantom{aaaa} 1.16637d-5 \phantom{aaa} ! Fermi constant in GeV\^{}-2\\
    Hmass\phantom{aa}  120. \phantom{aaaaaaaa} ! Higgs mass in GeV\\
    Tmass\phantom{aa} 172.9 \phantom{aaaaaaaa} ! Top mass in GeV\\
-   gmu\phantom{aaaa} 1.16637d-5 \phantom{aaa} ! Fermi constant in GeV\^{}-2\\
+   Bmass\phantom{aa} 4.6 \phantom{aaaaaaaaaa} ! B quark mass in GeV\\
+   Cmass\phantom{aa} 1.2 \phantom{aaaaaaaaaa} ! C quark mass in GeV\\
+   Smass\phantom{aa} 0.15 \phantom{aaaaaaaaa} ! S quark mass in GeV\\
+   Umass\phantom{aa} 0.06983 \phantom{aaaaaa} ! U quark mass in GeV\\
+   Dmass\phantom{aa} 0.06984 \phantom{aaaaaa} ! D quark mass in GeV\\
+   Elmass\phantom{a} 0.005109989 \phantom{aa} ! Electron mass in GeV\\
+   Mumass\phantom{a} 0.105658369 \phantom{aa} ! Mu mass in GeV\\
+   Taumass\phantom{} 1.77699 \phantom{aaaaaa} ! Tau mass in GeV\\
 }
 \\
-\tmtexttt{masswindow\_low 10 \phantom{a}! M\_W > Wmass - masswindow\_low * Wwidth}\\
-\tmtexttt{masswindow\_high 10  ! M\_W < Wmass + masswindow\_high * Wwidth  }\\
+The following parameter limits from below the virtuality of the $W$ boson:
+\\
+\tmtexttt{mass\_low 1 \phantom{aaaaaaaa}! W virtuality > mass\_low in GeV}\\
+\\
+If absent, it is set to 1~GeV. 
+In order to avoid edge effects, the lower limit \tmtexttt{mass\_low} 
+should be more inclusive w.r.t. cuts applied at the analysis level.
+Notice that, if photons are generated, the $W$ virtuality is not
+necessarily the mass of the charged lepton neutrino system.
+\\
+\\
 \tmtexttt{runningscale 0 \phantom{aaaa}! choice for ren and fac scales in Bbar integration}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: fixed scale M\_W}\\
-\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 1: running scale inv mass W}\\ 
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 1: running scale 
+$l \nu$ inv mass}\\ 
 \tmtexttt{scheme 1! choice for EW NLO scheme calculation}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: Alpha(0)}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 1: G\_$\mu$}\\ 
@@ -165,14 +192,61 @@ input parameters are $G_\mu$, $M_W$ and $M_Z$. The latter one
 (default in the code) is preferred because it minimizes 
 the EW corrections and the uncertainties due to the light quark masses. 
 \\
-As described in Ref.~\cite{Barze:2012tt}, higher order QED corrections 
-are simulated by means of \PHOTOS~\cite{Golonka:2005pn} used in the 
-exponentiated mode {\tt (IEXP=.TRUE.)}. 
-An interface to the code is provided in the file {\tt main-PYTHIA.f} 
-and the photon cascade information is stored in the {\tt common/hepeup}. 
+The EW corrections can be switched off by setting
+\\
+\tmtexttt{no\_ew 1       ! default 0}
+\\
+and the strong corrections can be switched off by setting
+\\
+\tmtexttt{no\_strong 1       ! default 0}
+\\
+This last option is just to check EW corrections at the NLO level (i.e.,
+the Les Houches events do not have much meaning).
+\\
+\\
+The program can be interfaced to both \PYTHIASIX{} and  \PYTHIAEIGHT{},
+by doing
+\\
+\tmtexttt{make main-PYTHIA-lhef}
+\\
+for \PYTHIASIX{} and
+\\
+\tmtexttt{make main-PYTHIA8-lhef}.
+\\
+for \PYTHIAEIGHT{}.
+\\
+In the case of \PYTHIASIX{} one can also optionally switch off photon radiation
+from  \PYTHIASIX{} and use \PHOTOS{}~\cite{Golonka:2005pn}
+instead. This is done by setting:
+\\
+\tmtexttt{use\_photos 1   ! default 0}
+\\
+in the \tmtexttt{powheg.input} file.
 \\
 The \PHOTOS \, source code is included in the \POWHEGBOX. 
-
+\\
+\\
+For photon final state radiation a comment is in order. According to 
+the \POWHEG{} method, the radiation by the shower has to be generated 
+from a starting scale given by the hardest $\pt$ tried at the matrix element 
+level (the variable {\tt scalup} written in the event file 
+\tmtexttt{pwgevents.lhe}). This is true also in the case that both 
+QCD and QED radiation are present, as detailed in 
+Ref.~\cite{Barze:2012tt} . Both \PYTHIASIX{} and \PYTHIAEIGHT{} 
+do not use this starting scale for the generation of QED final state radiation 
+from the $W$. Hence, in order to avoid double counting of QED radiation, 
+a veto algorithm is necessary. The same problem is present also using 
+\PHOTOS{}. 
+This algorithm 
+is provided automatically in the files \tmtexttt{main-PYTHIA-lhef.f} and 
+\tmtexttt{scalupveto.f}. The same algorithm is implemented for 
+\PYTHIAEIGHT{}. In this case, however, the user can optionally 
+adopt the internal algorithm of \PYTHIAEIGHT, which is switched 
+on by setting:
+\\
+\tmtexttt{py8veto 1   ! default 0}
+\\
+in the \tmtexttt{powheg.input} file.
 
 
 \section{Generation of a sample with $W^+$ and $W^-$
@@ -253,6 +327,7 @@ method,''
 \end{thebibliography}
 
 \end{document}
+
 
 
 
