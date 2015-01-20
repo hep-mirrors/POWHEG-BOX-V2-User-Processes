@@ -18,6 +18,13 @@
       save ini
 c Setup gaussian weights and points
       if(ini) then
+         if(ph_bottommass.le.0d0) then
+            write(*,*) 'bmass_in_minlo:'
+            write(*,*) "cannot set option bmass_in_minlo to 1"
+            write(*,*) "unless also bottommass is set > 0 in "
+            write(*,*) "the input file. Exiting."
+            call exit(-1)
+         endif
          call dgset(0d0,1d0,ngauss,xgauss,wgauss)
          ini = .false.
       endif
