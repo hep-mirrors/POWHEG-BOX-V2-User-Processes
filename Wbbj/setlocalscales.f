@@ -106,12 +106,12 @@ c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
       save /cminlo_nlight/
-      logical Sudakovbb,sudmw2mb
-      save Sudakovbb,sudmw2mb
+      logical Sudakovbb,sudmw2mb,sudatlas2
+      save Sudakovbb,sudmw2mb,sudatlas2
       integer cluster
       common/ccluster/cluster
       save /ccluster/
-      real * 8 pg(0:3),pw(0:3),pj(0:3),mt2,ptj2,mtw2
+      real * 8 pg(0:3),pw(0:3),pj(0:3),mt2,ptj2,mtw2,pt2b1,pt2b2
       real * 8 q2mergefac
       save q2mergefac
 
@@ -139,7 +139,12 @@ c     consider the b quark as massless
             sudmw2mb = .true.
          endif          
 
-   
+
+         sudatlas2 = .false.
+         if(powheginput("#sudatlas2").eq.1) then
+            sudatlas2 = .true.
+         endif          
+
          q2mergefac=powheginput("#q2mergefac")
          if(q2mergefac.lt.0) then
             q2mergefac=1d0
@@ -265,10 +270,14 @@ c     the invariant mass of the remaining system
       if (sudmw2mb) then
          q2merge=(ph_wmass+2*ph_bmass)**2
       endif
+      if (sudatlas2) then
+         pt2b1=p(1,5)**2+p(2,5)**2
+         pt2b2=p(1,6)**2+p(2,6)**2
+         q2merge=pw(0)**2-pw(3)**2 + 
+     $        (ph_bmass**2+pt2b1)/2+(ph_bmass**2+pt2b2)/2
+      endif
 
       q2merge=q2merge/q2mergefac
-
-
 
       if(scales(1).gt.0) then
          do j=1,nlegborn
