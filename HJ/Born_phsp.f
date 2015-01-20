@@ -37,6 +37,8 @@ c     set initial- and final-state masses for Born and real
       z=zlow+(zhigh-zlow)*xborn(1)
       xjac=zhigh-zlow
       m2=ph_HmHw*tan(z)+ph_Hmass2
+      mh2 = m2
+      mh = sqrt(mh2)
 c     The BW integrates to Pi ==> divide by Pi
       xjac=xjac/pi
 

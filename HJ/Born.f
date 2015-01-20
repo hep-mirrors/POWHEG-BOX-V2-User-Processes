@@ -3,11 +3,91 @@ c Wrapper subroutine to call the MadGraph Borns
 c and set the event-by-event couplings constant
       implicit none
       include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      integer equivto(maxprocborn)
+      common/cequivtoborn/equivto
+      include 'pwhg_flg.h'
+      include 'pwhg_math.h'
+      include 'pwhg_st.h'
+      include 'PhysPars.h'
+      integer iborn
       real * 8 p(0:3,nlegborn),bornjk(nlegborn,nlegborn)
       integer bflav(nlegborn)
-      real * 8 bmunu(0:3,0:3,nlegborn),born
+      real * 8 bmunu(0:3,0:3,nlegborn),born,resc,born_tm,born_tm_nob
+      integer saveafer
+      include 'resc_array.h'
       call set_ebe_couplings
       call sborn_proc(p,bflav,born,bornjk,bmunu)
+      if(.not.flg_in_smartsig.and.quarkmasseffects) then
+         call setborn_tm(p,bflav,born_tm)
+         born_tm = born_tm * st_alpha/(2*pi)
+         saveafer = afer
+         if(rescalenlotoponly) then
+c afer is the number of fermions in the loop; exclude bottom:
+            afer = 1
+            call setborn_tm(p,bflav,born_tm_nob)
+            afer = saveafer
+
+            born_tm_nob = born_tm_nob * st_alpha/(2*pi)
+c rescale factor with top only in this case
+            resc = born_tm_nob/born
+            iborn = flst_cur_iborn
+            do while(equivto(iborn).ne.-1)
+               iborn = equivto(iborn)
+            enddo
+c store also the full rescaling factor. The Born term, at
+c the end, must be rescaled to this
+            resc_array_tm_all(iborn) = born_tm/born
+         else
+C     full rescale factor
+            resc   = born_tm/born
+         endif
+c rescalebornonly is on, the born is not rescaled here (it is
+c also used for computing subtraction terms, and in the
+c denominator of the sudakov exponent. It is rescaled in the
+c btildeborn routine, using the pwhg_born_rescaling.h hook,
+c that calls the rescaleborn routine
+         if(.not.rescalebornonly) then
+            born   = born * resc
+            bornjk = bornjk * resc
+            bmunu  = bmunu  * resc
+         endif
+         iborn = flst_cur_iborn
+         do while(equivto(iborn).ne.-1)
+            iborn = equivto(iborn)
+         enddo
+         resc_array_tm(iborn) = resc
+      endif
+      end
+
+      subroutine rescaleborn(res)
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      integer equivto(maxprocborn)
+      common/cequivtoborn/equivto
+      include 'resc_array.h'
+      real * 8 res(*)
+      integer j,iborn
+      if(quarkmasseffects) then
+         if(rescalebornonly) then
+            do j=1,flst_nborn
+               iborn = j
+               do while(equivto(iborn).ne.-1)
+                  iborn = equivto(iborn)
+               enddo
+               res(j) = res(j) * resc_array_tm(iborn)
+            enddo
+         elseif(rescalenlotoponly) then
+            do j=1,flst_nborn
+               iborn = j
+               do while(equivto(iborn).ne.-1)
+                  iborn = equivto(iborn)
+               enddo
+               res(j) = res(j) * resc_array_tm_all(iborn)/resc_array_tm(iborn)
+            enddo
+         endif
+      endif
       end
 
       subroutine borncolour_lh

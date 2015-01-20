@@ -6,11 +6,30 @@
       include "pwhg_par.h"
       include "pwhg_st.h"
       include "coupl.inc"
+      include "resc_array.h"
       integer i
       real * 8 tmp
       real * 8 powheginput
       external powheginput
 
+c determined if quark mass effects are required
+      if(powheginput("#quarkmasseffects").eq.1) then
+         quarkmasseffects = .true.
+         rescalebornonly  = .false.
+         rescalenlotoponly = .false.
+      elseif(powheginput("#quarkmasseffects").eq.2) then
+         quarkmasseffects = .true.
+         rescalebornonly  = .true.
+         rescalenlotoponly = .false.
+      elseif(powheginput("#quarkmasseffects").eq.3) then
+         quarkmasseffects = .true.
+         rescalebornonly  = .false.
+         rescalenlotoponly = .true.
+      else
+         quarkmasseffects = .false.
+         rescalebornonly  = .false.
+         rescalenlotoponly = .false.
+      endif
 c The following should be on by default ...
       if(powheginput("#evenmaxrat").ne.0) flg_evenmaxrat = .true.
 

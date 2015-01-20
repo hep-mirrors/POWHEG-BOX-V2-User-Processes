@@ -15,25 +15,27 @@ c coupling rescaling, for Born (imode=1) and NLO corrections (imode=2)
       integer oimode,i,flav
       save optb2,omb2,orescfac,oimode,omuf2
       data optb2/-1d0/
-      logical ini
+      logical ini,bmass_in_minlo_flg
       data ini/.true./
       save ini
-      real * 8 powheginput,factsc2min,frensc2min,as,y,b1
-      save factsc2min,frensc2min,b0,b1
+      real * 8 powheginput,factsc2min,frensc2min,as,y,b1,tmp,bfact
+      save factsc2min,frensc2min,b0,b1,bmass_in_minlo_flg
       integer imax
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2
       
       if(ini) then
+         bmass_in_minlo_flg = powheginput("#bmass_in_minlo").eq.1
          factsc2min = powheginput("#factsc2min")
          frensc2min = powheginput("#frensc2min")
          if(factsc2min.lt.0) factsc2min = 0
          if(frensc2min.lt.0) frensc2min = 1
+         call getq2min(1,tmp)
+         write(*,*) ' ***** minimum Q of pdf:',sqrt(tmp)
          b0=(33d0-2d0*st_nlight)/(12*pi)
          b1=(153d0-19d0*st_nlight)/(24*pi**2)
          ini = .false.
       endif
-
 
 
       rescfac = 1
@@ -121,9 +123,14 @@ c     $      st_lambda5MSB,st_nlight)
      1           (1+alphas*(expsud+b0*log(mu2/st_muren2)))
          endif
       endif
-      orescfac=rescfac
 
 c      rescfac2 = rescfac
+      if(bmass_in_minlo_flg) then
+         call bmass_in_minlo(bfact,alphas)
+         rescfac = rescfac * bfact
+      endif
+
+      orescfac=rescfac
 
       end
 

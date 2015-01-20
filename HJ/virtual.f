@@ -2,8 +2,14 @@
 c Virtual needs to be provided by the user and put here
       implicit none
       include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      integer equivto(maxprocborn)
+      common/cequivtoborn/equivto
+      integer iborn
+      include 'pwhg_flg.h'
       include 'pwhg_st.h'
       include 'pwhg_math.h'
+      include 'resc_array.h'
       real * 8 p(0:3,nlegborn)
       integer vflav(nlegborn)
       double precision res(0:3),c1,c2,c4
@@ -43,6 +49,16 @@ c         c4=4d0/3
 c      endif
 c      write(*,*) ' Pole check: ',vflav,
 c     1 (res(2)/(st_alpha/(2*pi)))/(born*(-(c1+c2+c4))),virtual_DR
+
+c rescale to finite top mass; find uborn
+      if(.not.flg_in_smartsig.and.quarkmasseffects.and.
+     1   .not.rescalebornonly) then
+         iborn = flst_cur_iborn
+         do while(equivto(iborn).ne.-1)
+            iborn = equivto(iborn)
+         enddo
+         virtual = virtual * resc_array_tm(iborn)
+      endif
 
       end
 

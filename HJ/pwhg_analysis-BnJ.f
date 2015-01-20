@@ -53,7 +53,7 @@ C - Set bin widths
       dptzm=2d0
       dptzm_alt=1d0
 
-C     - Total cross-section 
+C - Total cross-section 
       call bookupeqbins('sigmatot', 1d0,0d0,1d0)
 
 C - Inclusive boson:
@@ -222,62 +222,31 @@ C - Booking GPS's evil pT spectra ~ the volcano region:
 C - End loop over jet algorithms:
       enddo
 
-      call bookupeqbins('vbf-pt3',5d0,0d0,100d0)
-      call bookupeqbins('vbf-pt3-veto',5d0,0d0,100d0)
-      call bookupeqbins('vbf-y3-020',0.1d0,-5d0,5d0)
-      call bookupeqbins('vbf-y3-030',0.1d0,-5d0,5d0)
-      call bookupeqbins('vbf-y3-040',0.1d0,-5d0,5d0)
+C - Inclusive boson pt in pseudorapidity bins (differential):
+      call bookupeqbins('B-pt--inf-eta-+inf',3d0,0d0,300d0)
+      call bookupeqbins('B-pt--inf-eta--004',3d0,0d0,300d0)
+      call bookupeqbins('B-pt--004-eta--003',3d0,0d0,300d0)
+      call bookupeqbins('B-pt--003-eta--002',3d0,0d0,300d0)
+      call bookupeqbins('B-pt--002-eta--001',3d0,0d0,300d0)
+      call bookupeqbins('B-pt--001-eta-+000',3d0,0d0,300d0)
+      call bookupeqbins('B-pt-+000-eta-+001',3d0,0d0,300d0)
+      call bookupeqbins('B-pt-+001-eta-+002',3d0,0d0,300d0)
+      call bookupeqbins('B-pt-+002-eta-+003',3d0,0d0,300d0)
+      call bookupeqbins('B-pt-+003-eta-+004',3d0,0d0,300d0)
+      call bookupeqbins('B-pt-+004-eta-+inf',3d0,0d0,300d0)
 
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C
-C - Relative differences in pT spectra between jet algorithms - C
-C - (done in pwhgfinalopshist):                               - C
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C
-
-C - Loop over CA and AkT jet algorithms:
-      do ixx=2,3
-        suffix=calgs(ixx)//calgs(1)
-
-C - Jet pT spectra:
-        do kxx=1,3
-          ctmp1=cnums(kxx)
-C - "Inclusively"
-          call bookupeqbins('j'//ctmp1//'-pt'//suffix,dpt,0d0,400d0)
-C - Loop over jet pT cuts (skipping 1st one which goes down to 1 GeV jets):
-          do jxx=2,nptmin
-             cptcut=cptcuts(jxx)
-             suffix12=cptcut//suffix
-C - in >=1 jet events
-             call bookupeqbins('Nj>=1-j'//ctmp1//'-pt'//suffix12,
-     $                          dpt,0d0,400d0)
-C - in >=2 jet events
-             call bookupeqbins('Nj>=2-j'//ctmp1//'-pt'//suffix12,
-     $                          dpt,0d0,400d0)
-          enddo
-C - End loop over jet pT cuts
-        enddo
-
-C - Zoomed jet pT spectra:
-        do kxx=1,3
-          ctmp1=cnums(kxx)
-C - "Inclusively"
-          call bookupeqbins('j'//ctmp1//'-ptzm'//suffix,
-     $                      dptzm_alt,0d0,100d0)
-C - Loop over jet pT cuts (skipping 1st one which goes down to 1 GeV jets):
-          do jxx=2,nptmin
-             cptcut=cptcuts(jxx)
-             suffix12=cptcut//suffix
-C - in >=1 jet events
-             call bookupeqbins('Nj>=1-j'//ctmp1//'-ptzm'//suffix12,
-     $                          dpt,0d0,400d0)
-C - in >=2 jet events
-             call bookupeqbins('Nj>=2-j'//ctmp1//'-ptzm'//suffix12,
-     $                          dpt,0d0,400d0)
-          enddo
-C - End loop over jet pT cuts
-        enddo
-
-C - End loop over CA and AkT algorithms
-      enddo
+C - Inclusive boson pt in pseudorapidity bins (cumulative):
+      call bookupeqbins('B-ptint--inf-eta-+inf',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint--inf-eta--004',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint--004-eta--003',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint--003-eta--002',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint--002-eta--001',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint--001-eta-+000',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint-+000-eta-+001',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint-+001-eta-+002',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint-+002-eta-+003',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint-+003-eta-+004',3d0,0d0,300d0)
+      call bookupeqbins('B-ptint-+004-eta-+inf',3d0,0d0,300d0)
 
       write(*,*) 'booked ',jhist,' histograms !'
       end
@@ -332,6 +301,11 @@ C - We need to tell to this analysis file which program is running it
       logical vbfcuts 
       integer      iMaxPt
       integer      nBosons
+
+      real*8       yB_com,etaB_com,ptB_com,mB_com
+      real*8       yJ_com,etaJ_com,ptJ_com,mJ_com
+      real*8       beta,pJ1(4),pB_BJ_com(4),pJ1_BJ_com(4)
+      real * 8     low_pt_bin_edge
 
       logical ini
       data ini/.true./
@@ -485,7 +459,7 @@ c     or the final Higgs, if undecayed
 C - Boson kinematics fully inclusive w.r.t radiation:
       call getyetaptmass(pB,y,eta,pt,m)
 
-C     - Fill total cross-section 
+C - Fill total cross-section 
       call filld('sigmatot',0.5d0,dsig)
 
 C - Inclusive boson:
@@ -551,36 +525,99 @@ C - Erase any jet building output leftover from previous jet building:
         enddo
 
 C - Build jets:
-        jetRadius=0.5d0
-        call buildjets(1,jetalgs(ixx),jetRadius,1d0,mjets,
+        jetRadius=0.4d0
+        call buildjets(1,jetalgs(ixx),jetRadius,0d0,mjets,
      $                 ktj,etaj,rapj,phij,ptrel,pj,yijs)
 
+        if(ixx.eq.3) then   ! (If it's anti-Kt ...)
+C - Variable for leading jet
+           if(mjets.ge.1) then  ! Always true unless running gg_H program
+              pJ1 = pJ(:,1)
+           else
+              pJ1 = 0d0
+           endif
 
+C - Longitudinal boost to frame in which leading jet + Higgs have zero rapidity
+           beta  = (pB(3)+pJ1(3))/(pB(4)+pJ1(4))
+           call longitudinalBoost(beta,pB ,pB_BJ_com )
+           call longitudinalBoost(beta,pJ1,pJ1_BJ_com)
+
+C - Boson kinematics fully inclusive w.r.t radiation:
+           call getyetaptmass(pB,y,eta,pt,m)
+
+C - Jet COM kinematics 
+           call getyetaptmass(pJ1_BJ_com,yJ_com,etaJ_com,ptJ_com,mJ_com)
+
+C - Boson COM kinematics 
+           call getyetaptmass(pB_BJ_com ,yB_com,etaB_com,ptB_com,mB_com)
+
+C - Inclusive boson pt in pseudorapidity bins (differential):
+           call filld("B-pt--inf-eta-+inf",ptB_com,dsig)
+           if(etaB_com.lt.-4d0) then
+              call filld("B-pt--inf-eta--004",ptB_com,dsig)
+           elseif(etaB_com.gt.-4d0.and.etaB_com.lt.-3d0) then
+              call filld("B-pt--004-eta--003",ptB_com,dsig)
+           elseif(etaB_com.gt.-3d0.and.etaB_com.lt.-2d0) then
+              call filld("B-pt--003-eta--002",ptB_com,dsig)
+           elseif(etaB_com.gt.-2d0.and.etaB_com.lt.-1d0) then
+              call filld("B-pt--002-eta--001",ptB_com,dsig)
+           elseif(etaB_com.gt.-1d0.and.etaB_com.lt. 0d0) then
+              call filld("B-pt--001-eta-+000",ptB_com,dsig)
+           elseif(etaB_com.gt. 0d0.and.etaB_com.lt. 1d0) then
+              call filld("B-pt-+000-eta-+001",ptB_com,dsig)
+           elseif(etaB_com.gt. 1d0.and.etaB_com.lt. 2d0) then
+              call filld("B-pt-+001-eta-+002",ptB_com,dsig)
+           elseif(etaB_com.gt. 2d0.and.etaB_com.lt. 3d0) then
+              call filld("B-pt-+002-eta-+003",ptB_com,dsig)
+           elseif(etaB_com.gt. 3d0.and.etaB_com.lt. 4d0) then
+              call filld("B-pt-+003-eta-+004",ptB_com,dsig)
+           elseif(etaB_com.gt. 4d0) then
+              call filld("B-pt-+004-eta-+inf",ptB_com,dsig)
+           endif
+
+C - Inclusive boson pt in pseudorapidity bins (cumulative):
+           do jxx=1,100
+              low_pt_bin_edge = (jxx-1d0)*3d0
+              if(ptB_com.gt.low_pt_bin_edge) then
+                 call filld("B-ptint--inf-eta-+inf",
+     $                low_pt_bin_edge+1d-3,dsig)
+                 if(etaB_com.lt.-4d0) then
+                    call filld("B-ptint--inf-eta--004",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt.-4d0.and.etaB_com.lt.-3d0) then
+                    call filld("B-ptint--004-eta--003",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt.-3d0.and.etaB_com.lt.-2d0) then
+                    call filld("B-ptint--003-eta--002",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt.-2d0.and.etaB_com.lt.-1d0) then
+                    call filld("B-ptint--002-eta--001",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt.-1d0.and.etaB_com.lt. 0d0) then
+                    call filld("B-ptint--001-eta-+000",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt. 0d0.and.etaB_com.lt. 1d0) then
+                    call filld("B-ptint-+000-eta-+001",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt. 1d0.and.etaB_com.lt. 2d0) then
+                    call filld("B-ptint-+001-eta-+002",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt. 2d0.and.etaB_com.lt. 3d0) then
+                    call filld("B-ptint-+002-eta-+003",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt. 3d0.and.etaB_com.lt. 4d0) then
+                    call filld("B-ptint-+003-eta-+004",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 elseif(etaB_com.gt. 4d0) then
+                    call filld("B-ptint-+004-eta-+inf",
+     $                   low_pt_bin_edge+1d-3,dsig)
+                 endif
+              endif
+           enddo
+
+        endif  ! <--- This was the if block starting if(ixx.eq.3) i.e. a-kT
 
         mjets=min(mjets,3)
-
-c VBF plots
-        if(ixx.eq.3.and.mjets.ge.2) then
-           vbfcuts = rapj(1)*rapj(2).lt.0
-           vbfcuts = vbfcuts .and. ktj(1).gt.20.and.ktj(2).gt.20
-           vbfcuts = vbfcuts .and. abs(rapj(1)).lt.4.5
-     1          .and.abs(rapj(2)).lt.4.5
-           vbfcuts = vbfcuts .and.
-     1         sqrt( (pj(4,1)+pj(4,2))**2- (pj(1,1)+pj(1,2))**2
-     2          - (pj(2,1)+pj(2,2))**2- (pj(3,1)+pj(3,2))**2).gt.600d0
-           vbfcuts = vbfcuts .and. abs(rapj(1)-rapj(2)) .gt. 4d0 
-           if(vbfcuts.and.mjets.ge.3) then
-              call filld('vbf-pt3',ktj(3),dsig)
-              if (ktj(3).gt.20d0) call filld('vbf-y3-020',rapj(3),dsig)
-              if (ktj(3).gt.30d0) call filld('vbf-y3-030',rapj(3),dsig)
-              if (ktj(3).gt.40d0) call filld('vbf-y3-040',rapj(3),dsig)
-              ymin = min(rapj(1),rapj(2))
-              ymax = max(rapj(1),rapj(2))
-              if (ymin .lt. rapj(3) .and. rapj(3) .lt. ymax) 
-     1            call filld('vbf-pt3-veto',ktj(3),dsig)
-           endif
-        endif
-
 
            
 C - Differential jet rates.
@@ -1056,121 +1093,26 @@ c     loop over the hardest 3 jets
       get_ptrel = sqrt(pin2*abs(1d0 - cth2))
       end
 
-      subroutine pwhgfinalopshist
+
+      subroutine longitudinalBoost(beta,vin,vout)
+c     boosts vin(4) into the vector vout(4) with
+c     velocity beta. Lorentz convention: (x,y,z,t).
       implicit none
-      include     'pwhg_bookhist-new.h'
-      integer      maxjet
-      parameter   (maxjet=2048)
-      integer      nptmin
-      parameter   (nptmin=4)
-      character*1  cnums(9)
-      character*4  cptcuts(nptmin)
-      real*8       ptcuts(nptmin)
-      character*4  cycuts(5)
-      real*8       ycuts(5)
-      character*4  calgs(3)
-      real*8       jetalgs(3)
-      common/infohist/ptcuts,ycuts,jetalgs,cnums,cptcuts,cycuts,calgs
-      save  /infohist/
-      character*4  cptcut,cycut,calg
-      character*1  ctmp
-      integer      a_idx,b_idx,d_idx
-      integer      ixx,jxx,kxx
-      integer      indexhist
-      character*1  ctmp1
-      character*8  suffix
-      character*12 suffix12
+      real * 8 beta,gamma,vin(4),vout(4)
+      real * 8 tiny
+      parameter (tiny=1d-14)
 
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C
-C - Relative differences in pT spectra between jet algorithms - C
-C - (done in pwhgfinalopshist):                               - C
-C - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - C
+      if (beta.ge.1d0) then
+         beta =  1-tiny
+      elseif (beta.le.-1d0) then
+         beta = -1+tiny
+      endif
 
-C - Loop over CA and AkT jet algorithms:
-      do ixx=2,3
-        suffix=calgs(ixx)//calgs(1)
+      gamma=1/sqrt((1-beta)*(1+beta))
 
-C - Jet pT spectra:
-        do kxx=1,3
-          ctmp1=cnums(kxx)
-C - "Inclusively"
-          a_idx=indexhist('j'//ctmp1//'-pt'//calgs(1))
-          b_idx=indexhist('j'//ctmp1//'-pt'//calgs(ixx))
-          d_idx=indexhist('j'//ctmp1//'-pt'//suffix)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-
-C - Loop over jet pT cuts (skipping 1st one which goes down to 1 GeV jets):
-          do jxx=2,nptmin
-          cptcut=cptcuts(jxx)
-          suffix12=cptcut//suffix
-C - in >=1 jet events
-          a_idx=indexhist('Nj>=1-j'//ctmp1//'-pt'//cptcut//calgs(1))
-          b_idx=indexhist('Nj>=1-j'//ctmp1//'-pt'//cptcut//calgs(ixx))
-          d_idx=indexhist('Nj>=1-j'//ctmp1//'-pt'//suffix12)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-C - in >=2 jet events
-          a_idx=indexhist('Nj>=2-j'//ctmp1//'-pt'//cptcut//calgs(1))
-          b_idx=indexhist('Nj>=2-j'//ctmp1//'-pt'//cptcut//calgs(ixx))
-          d_idx=indexhist('Nj>=2-j'//ctmp1//'-pt'//suffix12)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-          enddo
-C - End loop over jet pT cuts
-
-        enddo
-
-C - Zoomed jet pT spectra:
-        do kxx=1,3
-          ctmp1=cnums(kxx)
-C - "Inclusively"
-          a_idx=indexhist('j'//ctmp1//'-ptzm'//calgs(1))
-          b_idx=indexhist('j'//ctmp1//'-ptzm'//calgs(ixx))
-          d_idx=indexhist('j'//ctmp1//'-ptzm'//suffix)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-
-C - Loop over jet pT cuts (skipping 1st one which goes down to 1 GeV jets):
-          do jxx=2,nptmin
-          cptcut=cptcuts(jxx)
-          suffix12=cptcut//suffix
-C - in >=1 jet events
-          a_idx=indexhist('Nj>=1-j'//ctmp1//'-ptzm'//cptcut//calgs(1))
-          b_idx=indexhist('Nj>=1-j'//ctmp1//'-ptzm'//cptcut//calgs(ixx))
-          d_idx=indexhist('Nj>=1-j'//ctmp1//'-ptzm'//suffix12)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-C - in >=2 jet events
-          a_idx=indexhist('Nj>=2-j'//ctmp1//'-ptzm'//cptcut//calgs(1))
-          b_idx=indexhist('Nj>=2-j'//ctmp1//'-ptzm'//cptcut//calgs(ixx))
-          d_idx=indexhist('Nj>=2-j'//ctmp1//'-ptzm'//suffix12)
-          call get_diff_hists(a_idx,b_idx,d_idx)
-          enddo
-C - End loop over jet pT cuts
-        enddo
-
-C - End loop over CA and AkT algorithms
-      enddo
+      vout(1) = vin(1)
+      vout(2) = vin(2)
+      vout(3) = vin(3)*gamma-beta*gamma*vin(4)
+      vout(4) = vin(4)*gamma-beta*gamma*vin(3)
 
       end
-
-      subroutine get_diff_hists(a_idx,b_idx,d_idx)
-      implicit none
-      include 'pwhg_bookhist-new.h'
-      real*8   a,ea,b,eb
-      integer  ixx,a_idx,b_idx,d_idx
-      
-      do ixx=1,nbins(a_idx)
-         a=yhistarr2(ixx,a_idx)
-         ea=errhistarr2(ixx,a_idx)
-         b=yhistarr2(ixx,b_idx)
-         eb=errhistarr2(ixx,b_idx)
-         if((a+b).gt.0d0) then         ! Guard against division by zero.
-            yhistarr2(ixx,d_idx)=(a-b)/(a+b)
-            errhistarr2(ixx,d_idx)=2*sqrt((b*ea)**2+(a*eb)**2)
-     1                              /(a+b)**2
-         else
-            yhistarr2(ixx,d_idx)=0d0
-            errhistarr2(ixx,d_idx)=0d0
-         endif
-      enddo
-
-      end
-
-

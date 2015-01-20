@@ -5,15 +5,16 @@ FC=$(COMPILER)
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
 PDF=lhapdf
-## ANALYSIS: none, BnJ, HnJ, alt
-##           the analysis require the FASTJET package, that has to be 
+## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
+##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
-ANALYSIS=BnJ
+ANALYSIS=NZ
 ## For static linking uncomment the following
 #STATIC= -static
 #
 ifeq ("$(COMPILER)","gfortran")	
-F77=gfortran -fno-automatic 	
+F77=gfortran -fno-automatic -ffixed-line-length-none
+# -finit-real=nan -ffpe-trap=invalid,zero,overflow
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -60,13 +61,14 @@ PWD=$(shell pwd)
 OBJ=$(PWD)/obj-$(COMPILER)
 WDNAME=$(shell basename $(PWD))
 HJ=$(PWD)
-VPATH= ./:../:./Madlib/:./MODEL/:./DHELAS/:$(OBJ)/
+VPATH= ./:../:./Madlib/:./MODEL/:./DHELAS/:./Topmass/:$(OBJ)/
 
 
 INCLUDE1=$(HJ)
 INCLUDE2=$(shell dirname $(PWD))/include
 INCLUDE3=$(HJ)/MCFM_Include 
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
+INCLUDE4=$(HJ)/Topmass 
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3) -I$(INCLUDE4)
 
 LIBFILES=$(shell  for dir in $(HJ)/Madlib $(HJ)/MODEL $(HJ)/DHELAS ; do cd $$dir ; echo *.[fF] ' ' | sed 's/[fF] /o /g' ; cd .. ; done  )
 
@@ -101,6 +103,38 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HnJ.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
 
+ifeq ("$(ANALYSIS)","NZ")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-NZ.o fastjetfortran.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+endif
+
+ifeq ("$(ANALYSIS)","tmp")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-tmp.o fastjetfortran.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+endif
+
+ifeq ("$(ANALYSIS)","fintest")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-fintest.o fastjetfortran.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+endif
+
+
+
 ifeq ("$(ANALYSIS)","BnJ")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
@@ -121,6 +155,17 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-alt-H2J.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 endif
 
+ifeq ("$(ANALYSIS)","NNLOPS")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-pheno_2.o fastjetfortran.o \
+         genclust_kt.o miscclust.o ptyrap.o r.o swapjet.o jet_finder.o  \
+         auxiliary.o get_hdamp.o
+endif
+
 %.o: %.f $(INCLUDE)
 	$(FF) -c -o $(OBJ)/$@ $<
 
@@ -133,7 +178,7 @@ endif
 %.o: %.cc
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
-USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
+USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o\
      real.o matchcolour.o $(PWHGANAL)
 
 MCFMFILES=i2mcfm_2_POWHEG.o set_interface_MCFM.o i2mcfm_fill.o \
@@ -148,9 +193,11 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
 	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
-	reshufflemoms.o setlocalscales.o validflav.o mint_upb.o  \
-	minlo_checks.o  pwhgreweight.o opencount.o ubprojections.o \
-        sigcollsoft.o sigvirtual.o           \
+	reshufflemoms.o setlocalscales.o bmass_in_minlo.o validflav.o \
+        mint_upb.o minlo_checks.o pwhgreweight.o opencount.o \
+        ubprojections.o sigcollsoft.o sigvirtual.o \
+        Born_tm.o  bornmatrix_tm.o  init_couplings-topmass.o nloutils.o   \
+        ew.o EWgint.o decay-util.o HPL_full.o \
         $(PDFPACK) $(USER)  $(FPEOBJ) $(MCFMFILES) $(H2JVIRTFILES) $(H2JVFILES)
 
 #LIBDIRMG=.
@@ -158,10 +205,20 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 
 #MADLIBS=libdhelas3.a libmadgraph.a libmodel.a
 
+# Get SVN info for SVN version stamping code
+$(shell ../svnversion/svnversion.sh>/dev/null)
+
 # target to generate LHEF output
 pwhg_main:$(PWHG) libfiles.a
 	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(OBJ)/libfiles.a $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
+
+NNLOPSREWEIGHTER=nnlopsreweighter.o cernroutines.o powheginput.o lhefread.o \
+                 newunit.o boostrot.o
+NNLOPSREWEIGHTER+=pwhg_bookhist-multi.o fastjetfortran.o
+
+nnlopsreweighter: $(NNLOPSREWEIGHTER) 
+	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(NNLOPSREWEIGHTER)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 libfiles.a: $(LIBFILES)
 	cd $(OBJ) ; \rm libfiles.a ; ar cru libfiles.a $(LIBFILES)
@@ -193,6 +250,12 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
 
+
+DELTASUD=integral-deltasud.o pdfcalls.o cernroutines.o newunit.o \
+         pwhg_bookhist-multi.o random.o  $(PDFPACK)
+
+deltasud: $(DELTASUD)
+	$(FF)  $(patsubst %,$(OBJ)/%,$(DELTASUD)) $(LIBS) -o $@
 # target to cleanup
 .PHONY: clean veryclean $(OBJ)
 
@@ -207,6 +270,9 @@ clean:
 veryclean:
 	cd $(OBJ) ; \rm *
 
+# Dependencies of SVN version stamp code
+pwhg_main.o: svn.version
+lhefwrite.o: svn.version
 
 ifeq ("$(COMPILER)","gfortran")
 XFFLAGS +=-ffixed-line-length-132

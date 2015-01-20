@@ -66,29 +66,31 @@ c the lh_readin routine in MODEL/couplings.f
 c the only parameters relevant for this process are set
 c via powheginput. All others are needed for the
 c madgraph routines not to blow.
-      alpha=1/128.9d0
+      alpha=1/128.89d0
       alpha=1/1.32506980d+02
-      gfermi = 1.16639000d-05
-      alfas = 0.119d0
-      zmass = 9.11880000d+01
-      tmass = 1.74300000d+02
+      gfermi = 1.16637000d-05
+      alfas = 0.11707d0
+      zmass = 9.11876000d+01
+      tmass = 1.72500000d+02
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
       mtMS = 174d0
       mtaMS = 1.777d0
       vud = 1d0
+ccc      cmass = 1.4d0
+ccc      bmass = 4.75d0
       cmass = 0d0
       bmass = 0d0
       lmass=0d0
       hmass = powheginput('hmass')
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
-      wmass=8.04190000d+01
-      twidth=1.50833649d+00
+      wmass=8.0398d+01
+      twidth=1.33d+00
       hwidth = powheginput('hwidth')
-      zwidth=2.44140351d+00
-      wwidth=2.04759951d+00
+      zwidth=2.49595d+00
+      wwidth=2.08872d+00
       end
 
       subroutine set_ebe_couplings
