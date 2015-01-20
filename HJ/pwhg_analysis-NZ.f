@@ -81,7 +81,7 @@ C - Inclusive boson pt in pseudorapidity bins (cumulative):
          if(lhrwgt_nids.gt.0) then
             call setupmulti(lhrwgt_nids)
          elseif(weights_num.gt.0) then
-            call setupmulti(weights_num)
+            call setupmulti(weights_num+1)
          else
             call setupmulti(1)
          endif
