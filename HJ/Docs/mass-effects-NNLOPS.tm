@@ -1,4 +1,4 @@
-<TeXmacs|1.99.2>
+<TeXmacs|1.0.7.14>
 
 <style|generic>
 
@@ -6,13 +6,13 @@
   <doc-data|<doc-title|Mass effects>|<doc-author|<author-data|<author-name|K.
   Hamilton, P. Nason and G. Zanderighi>>>>
 
-  This manual documents the upgrading of the <verbatim|HJ-MiNLO> code
+  This manual documents the upgrade of the <verbatim|HJ-MiNLO> code
   illustrated in ref. <cite|masseffects>, where we describe the
-  implementation of quark mass effects in the HJ-MiNLO generator, and its
-  NNLO accurate reweighting. It also updates the setup found in
-  <verbatim|HJ/NNLOPS>, describings the reweighting of the
+  implementation of quark mass effects in the <with|font-family|tt|HJ-MiNLO>
+  generator, and its NNLO accurate reweighting. It also updates the setup
+  found in <verbatim|HJ/NNLOPS>, describings the reweighting of the
   <verbatim|HJ-MiNLO> ouptut in order to achieve NNLO accuracy, since in the
-  new code we use extensivly the reweighting conventions agreed upon in the
+  new code we use extensively the reweighting conventions agreed upon in the
   Les Houches convention described in <hlink|http://phystev.in2p3.fr/wiki/2013:groups:tools_lheextension|>.
   The new NNLOPS code is in now in the \ <verbatim|HJ/NNLOPS-mass-effects>
   and in the main <verbatim|HJ> directory. The <verbatim|HJ/NNLOPS> directory
@@ -309,7 +309,7 @@
   <verbatim|nnlopsreweighter.input>, that contains the following lines:
 
   <\verbatim-code>
-    lhfile pwgevents.lhe make
+    lhfile pwgevents.lhe
   </verbatim-code>
 
   that instruct the program to read the events from the
@@ -452,9 +452,6 @@
   </bibliography>
 </body>
 
-<initial|<\collection>
-</collection>>
-
 <\references>
   <\collection>
     <associate|auto-1|<tuple|1|?>>
@@ -498,17 +495,17 @@
       Grazzini:2013mca
     </associate>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Production
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Production
       of the HJ-MiNLO events with mass effects.>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Generation
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Generation
       of the <with|font-family|<quote|tt>|language|<quote|verbatim>|hnnlo>
       output for reweighting> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Generation
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Generation
       of NNLOPS reweighted events> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-3><vspace|0.5fn>
 
