@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.14>
+<TeXmacs|1.99.2>
 
 <style|generic>
 
@@ -7,22 +7,23 @@
   Hamilton, P. Nason and G. Zanderighi>>>>
 
   This manual documents the upgrade of the <verbatim|HJ-MiNLO> code
-  illustrated in ref. <cite|masseffects>, where we describe the
-  implementation of quark mass effects in the <with|font-family|tt|HJ-MiNLO>
-  generator, and its NNLO accurate reweighting. It also updates the setup
-  found in <verbatim|HJ/NNLOPS>, describings the reweighting of the
+  illustrated in ref. <cite|masseffects> <cite|Hamilton:2013fea>
+  <cite|Hamilton:2012rf>, where we describe the implementation of quark-mass
+  effects in the <with|font-family|tt|HJ-MiNLO> generator, and its NNLO
+  accurate reweighting. It also updates the setup found in
+  <verbatim|HJ/NNLOPS>, describings the reweighting of the
   <verbatim|HJ-MiNLO> ouptut in order to achieve NNLO accuracy, since in the
   new code we use extensively the reweighting conventions agreed upon in the
   Les Houches convention described in <hlink|http://phystev.in2p3.fr/wiki/2013:groups:tools_lheextension|>.
-  The new NNLOPS code is in now in the \ <verbatim|HJ/NNLOPS-mass-effects>
-  and in the main <verbatim|HJ> directory. The <verbatim|HJ/NNLOPS> directory
-  has not been modified, and the manual included there is still useful for
-  all aspects that have not been updated in the present manual.\ 
+  The new NNLOPS code is now in <verbatim|HJ/NNLOPS-mass-effects> and in the
+  main <verbatim|HJ> directory. The <verbatim|HJ/NNLOPS> directory has not
+  been modified, and the manual included there is still useful for all
+  aspects that have not been updated in the present manual.\ 
 
   The use of the code is illustrated in the directory
   <with|font-family|tt|HJ/PaperRun>, where a script for reproducing the runs
-  performed for the preparation of ref. <cite|masseffects> are reported. Here
-  we refer to this example in order to illustrate how the program works.
+  performed for the preparation of ref. <cite|masseffects> is given. Here we
+  refer to this example in order to illustrate how the program works.
 
   <section|Production of the HJ-MiNLO events with mass effects.>
 
@@ -43,10 +44,10 @@
   </verbatim-code>
 
   The first line must be present if we want to include quark mass effects. If
-  the second line is present, top mass effects are included. If the second
+  the second line is present, top mass effects are included. If the third
   line is present, also bottom mass effects are included. If the fourth line
   is present (and also the third line is present), bottom mass effects are
-  assumed to affect also the MiNLO Sudakof form factor, as discussed in
+  assumed to affect also the MiNLO Sudakov form factor, as discussed in
   <cite|masseffects>.
 
   In the setup of the <with|font-family|tt|PaperRun> directory, a first
@@ -178,7 +179,7 @@
     \<less\>/header\<gtr\>
   </verbatim-code>
 
-  and after each events, we find reweighting information of the form:
+  and after each event, we find reweighting information of the form:
 
   <\verbatim-code>
     \<less\>rwgt\<gtr\>
@@ -201,14 +202,14 @@
   spectrum.<footnote|In general, for NNLOPS simulations one requires an NNLO
   accurate distribution for some Born kinematics. In this case the Born
   kinematics is fully specified in terms of the rapidity of the boson.> This
-  are obtained using the <verbatim|hnnlo> program of <cite|Grazzini:2008tf>
+  is obtained using the <verbatim|hnnlo> program of <cite|Grazzini:2008tf>
   <cite|Catani:2007vq> <cite|Grazzini:2013mca>. We here give instructions on
   how to obtain such distributions, suitable for combination with the
-  <verbatim|HJ-MiNLO> events via the <with|font-family|tt| nllopsreweighter>
+  <verbatim|HJ-MiNLO> events via the <with|font-family|tt|nllopsreweighter>
   program.
 
   <\enumerate-numeric>
-    <item>Make sure that the <verbatim|lhapdf > package is
+    <item>Make sure that the <verbatim|lhapdf >package is
     installed:<next-line><hlink|https://lhapdf.hepforge.org|>
 
     <item>Download <verbatim|hnnlo> from the url:<next-line><verbatim|$ wget>
@@ -312,7 +313,7 @@
     lhfile pwgevents.lhe
   </verbatim-code>
 
-  that instruct the program to read the events from the
+  that instructs the program to read the events from the
   <verbatim|pwgevents.lhe> file. Then the section
 
   <\verbatim-code>
@@ -398,23 +399,22 @@
     \<less\>/header\<gtr\>
   </verbatim-code>
 
-  with the new entry mentioned in the <verbatim|nnlopsreweighter.input>
-  appear, and with the corresponding weights appearing also at the end of
-  each event. The weights are obtained as follows. The
-  <verbatim|nnlopsreweighter> program looks in the description line of each
-  new weight mentioned in the <verbatim|nnlopsreweighter.input> file, looking
-  for a string that appears as a weight id in the <verbatim|pwgevents.lhe>
-  file, and for a string that appears as a prefix to a file name in the
-  <verbatim|nnlofiles> section of the <verbatim|nnlopsreweighter.input> file.
-  The new weight is then defined as the combination of the corresponding
-  weight in the event file, and in the corresponding <verbatim|hnnlo> output
-  file. In this way, any combination can be produced, and it is up to the
-  user to use a sensible one. In the example reported in the
-  <verbatim|PaperRun> directory, we combine <verbatim|HJ-MiNLO> and
-  <verbatim|hnnlo> results that match in the accuracy of the quark mass
-  effects that have been included. Note that the <verbatim|'mtmb'> and the
-  <verbatim|'mtmb-bminlo'> weights are reweighted with the same
-  <verbatim|'nn-mtmb'> tagged file, i.e. the
+  where the new entry mentioned in the <verbatim|nnlopsreweighter.input>
+  appear, as well as the corresponding weights at the end of each event. The
+  weights are obtained as follows. The <verbatim|nnlopsreweighter> program
+  looks in the description line of each new weight mentioned in the
+  <verbatim|nnlopsreweighter.input> file, looking for a string that appears
+  as a weight id in the <verbatim|pwgevents.lhe> file, and for a string that
+  appears as a prefix to a file name in the <verbatim|nnlofiles> section of
+  the <verbatim|nnlopsreweighter.input> file. The new weight is then defined
+  as the combination of the corresponding weight in the event file, and in
+  the corresponding <verbatim|hnnlo> output file. In this way, any
+  combination can be produced, and it is up to the user to use a sensible
+  one. In the example reported in the <verbatim|PaperRun> directory, we
+  combine <verbatim|HJ-MiNLO> and <verbatim|hnnlo> results that match in the
+  accuracy of the quark mass effects that have been included. Note that the
+  <verbatim|'mtmb'> and the <verbatim|'mtmb-bminlo'> weights are reweighted
+  with the same <verbatim|'nn-mtmb'> tagged file, i.e. the
   <verbatim|HNNLO-LHC8-R04-APX2-11.top> file. In fact, there is no analog of
   the<verbatim| bmass_in_minlo> option in the <verbatim|hnnlo> program, that
   we only use to compute <math|p<rsub|T>> integrated distributions, without
@@ -427,7 +427,18 @@
       in the NNLOPS POWHEG+MiNLO Higgs generator>,
       <hlink|<with|font-family|tt|xxxx.xxxx>|http://xxx.lanl.gov/abs/xxxx.xxxx>.
 
-      <bibitem*|2><label|bib-Grazzini:2008tf>M.<nbsp>Grazzini,
+      <bibitem*|2><label|bib-Hamilton:2013fea>K.<nbsp>Hamilton,
+      P.<nbsp>Nason, E.<nbsp>Re, and G.<nbsp>Zanderighi,
+      <with|font-shape|italic|NNLOPS simulation of Higgs boson production>,
+      <with|font-shape|italic|JHEP> <with|font-series|bold|1310> (2013) 222,
+      [<hlink|<with|font-family|tt|1309.0017>|http://xxx.lanl.gov/abs/1309.0017>].
+
+      <bibitem*|3><label|bib-Hamilton:2012rf>K.<nbsp>Hamilton, P.<nbsp>Nason,
+      C.<nbsp>Oleari, and G.<nbsp>Zanderighi, <with|font-shape|italic|Merging
+      H/W/Z + 0 and 1 jet at NLO with no merging scale: a path to parton
+      shower + NNLO matching>, <hlink|<with|font-family|tt|1212.4504>|http://xxx.lanl.gov/abs/1212.4504>.
+
+      <bibitem*|4><label|bib-Grazzini:2008tf>M.<nbsp>Grazzini,
       <with|font-shape|italic|NNLO predictions for the Higgs boson signal in
       the H <math|\<rightarrow\>> <math|W<rsup|+>*W<rsup|->>
       <math|\<rightarrow\>> <math|<wide|l|\<bar\>>\<nu\>>
@@ -436,14 +447,14 @@
       <with|font-series|bold|0802> (2008) 043,
       [<hlink|<with|font-family|tt|0801.3232>|http://xxx.lanl.gov/abs/0801.3232>].
 
-      <bibitem*|3><label|bib-Catani:2007vq>S.<nbsp>Catani and
+      <bibitem*|5><label|bib-Catani:2007vq>S.<nbsp>Catani and
       M.<nbsp>Grazzini, <with|font-shape|italic|An NNLO subtraction formalism
       in hadron collisions and its application to Higgs boson production at
       the LHC>, <with|font-shape|italic|Phys.Rev.Lett.>
       <with|font-series|bold|98> (2007) 222002,
       [<hlink|<with|font-family|tt|hep-ph/0703012>|http://xxx.lanl.gov/abs/hep-ph/0703012>].
 
-      <bibitem*|4><label|bib-Grazzini:2013mca>M.<nbsp>Grazzini and
+      <bibitem*|6><label|bib-Grazzini:2013mca>M.<nbsp>Grazzini and
       H.<nbsp>Sargsyan, <with|font-shape|italic|Heavy-quark mass effects in
       Higgs boson production at the LHC>, <with|font-shape|italic|JHEP>
       <with|font-series|bold|1309> (2013) 129,
@@ -451,6 +462,9 @@
     </bib-list>>
   </bibliography>
 </body>
+
+<initial|<\collection>
+</collection>>
 
 <\references>
   <\collection>
@@ -460,10 +474,11 @@
     <associate|auto-4|<tuple|3|?>>
     <associate|bib-Campbell:2012am|<tuple|1|?>>
     <associate|bib-Campbell:2013vha|<tuple|2|?>>
-    <associate|bib-Catani:2007vq|<tuple|3|?>>
-    <associate|bib-Grazzini:2008tf|<tuple|2|?>>
-    <associate|bib-Grazzini:2013mca|<tuple|4|?>>
+    <associate|bib-Catani:2007vq|<tuple|5|?>>
+    <associate|bib-Grazzini:2008tf|<tuple|4|?>>
+    <associate|bib-Grazzini:2013mca|<tuple|6|?>>
     <associate|bib-Hamilton:2012rf|<tuple|3|?>>
+    <associate|bib-Hamilton:2013fea|<tuple|2|?>>
     <associate|bib-masseffects|<tuple|1|?>>
     <associate|footnote-1|<tuple|1|?>>
     <associate|footnote-2|<tuple|2|?>>
@@ -477,6 +492,10 @@
   <\collection>
     <\associate|bib>
       masseffects
+
+      Hamilton:2013fea
+
+      Hamilton:2012rf
 
       masseffects
 
@@ -495,17 +514,17 @@
       Grazzini:2013mca
     </associate>
     <\associate|toc>
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Production
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Production
       of the HJ-MiNLO events with mass effects.>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-1><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Generation
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|2<space|2spc>Generation
       of the <with|font-family|<quote|tt>|language|<quote|verbatim>|hnnlo>
       output for reweighting> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-2><vspace|0.5fn>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Generation
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|3<space|2spc>Generation
       of NNLOPS reweighted events> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-3><vspace|0.5fn>
 
