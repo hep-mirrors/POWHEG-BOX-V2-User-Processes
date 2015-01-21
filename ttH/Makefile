@@ -24,12 +24,12 @@ F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow 
 ## gfortran 4.4.1 optimized with -O3 yields erroneous results
 ## Use -O2 to be on the safe side
-OPT=-O0
-#OPT=-O2
+#OPT=-O0
+OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb 
 ifdef DEBUG
-OPT=-O0
+OPT=-O2
 FPE=-ffpe-trap=invalid,zero,overflow,underflow
 endif
 endif
@@ -129,9 +129,9 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	validflav.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 LIBDIRMG=$(OBJ)
-LINKMGLIBS=-L$(LIBDIRMG) -lmadgraph -lmodel -ldhelas3 -ldecay -lvirt
+LINKMGLIBS=-L$(LIBDIRMG) -lmadgraph -lmodel -ldecay -lvirt -ldhelas3
 
-MADLIBS=libdhelas3.a libmadgraph.a libmodel.a libdecay.a libvirt.a 
+MADLIBS=libmadgraph.a libmodel.a libdecay.a libvirt.a libdhelas3.a 
 
 # target to generate LHEF output
 pwhg_main: $(PWHG) $(MADLIBS)
@@ -169,17 +169,17 @@ main-PYTHIA-lhef: $(PYTHIA)
 
 XFFLAGS=$(DEBUG) $(OPT)
 libdhelas3.a:
-	cd DHELAS ; make FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd DHELAS ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 libmadgraph.a:
-	cd Madlib ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd Madlib ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 libdecay.a:
-	cd decay ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd decay ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 libvirt.a:
-	cd virtuals ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd virtuals ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 ifeq ("$(COMPILER)","gfortran")
@@ -189,15 +189,10 @@ XFFLAGS +=-extend-source
 endif
 
 libmodel.a:
-	cd MODEL ; make FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd MODEL ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 clean:
-	rm -f $(patsubst %,$(OBJ)/%,$(USER) $(PWHG) $(LHEF) $(HERWIG) $(PYTHIA)) pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef
-
-
-veryclean:
 	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main lhef_analysis main-HERWIG-lhef	\
 	main-PYTHIA-lhef *.a DHELAS/*.o Madlib/*.o MODEL/*.o decay/*.o virtuals/*.o 
 
