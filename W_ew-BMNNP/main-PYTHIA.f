@@ -217,10 +217,10 @@ c find the colour of the emitted parton, if any
       endif
 
       nup=nhep
-      istup(6:nup)=isthep(6:nup)
-      idup(6:nup)=idhep(6:nup)
-      mothup(:,6:nup)=jmohep(:,6:nup)
-      pup(:,6:nup)=phep(:,6:nup)
+      istup(1:nup)=isthep(1:nup)
+      idup(1:nup)=idhep(1:nup)
+      mothup(:,1:nup)=jmohep(:,1:nup)
+      pup(:,1:nup)=phep(:,1:nup)
 
       vtimup(1:nup)=0d0
       spinup(1:nup)=9d0
