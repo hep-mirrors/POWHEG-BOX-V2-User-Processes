@@ -22,7 +22,7 @@ c     lepton masses
       logical condition
 
 c even up upper bound limits for radiation in equivalent amplitudes
-      flg_evenmaxrat = .true.
+c      flg_evenmaxrat = .true.
 
 c invert default behaviour for the following flags:
 c whether to save btilde calls to set up upper bounding envelope
