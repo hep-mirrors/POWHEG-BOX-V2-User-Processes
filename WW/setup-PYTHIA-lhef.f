@@ -126,16 +126,23 @@ c pythia routine to abort event
       call init_hist
       end
 
+
       subroutine pyaend
       character * 20 pwgprefix
+      character * 100 filename
       integer lprefix
       common/cpwgprefix/pwgprefix,lprefix
-      open(unit=99,file=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output.top'
-     #     ,status='unknown')
+      include 'pwhg_rnd.h'
+      if(rnd_cwhichseed.ne.'none') then
+         filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output-'
+     1        //rnd_cwhichseed
+      else
+         filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output'
+      endif
       call pwhgsetout
-      call pwhgtopout
-      close(99)
+      call pwhgtopout(filename)
       end
+
 
 
       subroutine pyanal

@@ -149,8 +149,8 @@ c     we need to tell to this analysis file which program is running it
       integer ihep,itmp
       real * 8 powheginput,random
       external powheginput,random
-      logical comesfrom,isnu,isquark,islepton,condition
-      external comesfrom
+      logical comesfromid,isnu,isquark,islepton,condition
+      external comesfromid
 
       if(dsig0.eq.0) return
 
@@ -222,13 +222,13 @@ c keep only W+ in WZ
 c     find vector decay products
       do ihep=1,nhep
          if(isthep(ihep).eq.1) then
-            if(comesfrom(ihepv1,ihep)) then
+            if(comesfromid(idhep(ihepv1),ihep)) then
                if(idhep(ihep).gt.0) then
                   lep1=ihep
                else
                   alp1=ihep
                endif
-            elseif(comesfrom(ihepv2,ihep)) then
+            elseif(comesfromid(idhep(ihepv2),ihep)) then
                if(idhep(ihep).gt.0) then
                   lep2=ihep
                else
