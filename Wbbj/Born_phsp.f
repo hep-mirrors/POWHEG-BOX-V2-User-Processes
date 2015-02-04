@@ -196,19 +196,30 @@ c     now boost everything BACK along z-axis
       include 'pwhg_kn.h'
       include 'pwhg_flg.h'
       real * 8 fact,ptmin,ptminW
-      real * 8 pt2,pt2W
+      real * 8 pt2,pt2W,pbb(0:3),m2bb,m2bbc,expm2bb
+      integer mu
       logical ini
       data ini/.true./
       real * 8 powheginput
-      save ini,ptmin,ptminW    
+      save ini,ptmin,ptminW,m2bbc,expm2bb
+      real * 8 dotp
+      external dotp
       if (ini) then
          ptmin=powheginput("#bornsuppfact")      
          ptminW=powheginput("#bornsuppfactW")      
+         m2bbc=powheginput("#m2bb")
+         expm2bb=powheginput("#expm2bb")
          if (ptmin.lt.0d0) then
             ptmin=0d0
          endif
          if (ptminW.lt.0d0) then
             ptminW=0d0
+         endif
+         if (m2bbc.lt.0d0) then
+            m2bbc=0d0
+         endif
+         if (expm2bb.lt.0d0) then
+            expm2bb=1d0
          endif
          ini=.false.
       endif
@@ -218,6 +229,12 @@ c     now boost everything BACK along z-axis
          pt2W=(kn_cmpborn(1,3)+kn_cmpborn(1,4))**2+
      $        (kn_cmpborn(2,3)+kn_cmpborn(2,4))**2
          fact=fact*(pt2W+1d0)/(pt2W+1d0+ptminW**2)
+c     importance sampling on m_bb
+         do mu=0,3
+            pbb(mu)=kn_cmpborn(mu,5)+kn_cmpborn(mu,6)
+         enddo
+         m2bb=dotp(pbb,pbb)
+         fact=fact * (m2bb/(m2bb + m2bbc))**expm2bb
       else
          fact=1
       endif

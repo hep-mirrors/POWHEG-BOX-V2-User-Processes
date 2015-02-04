@@ -106,14 +106,14 @@ c     number of flavors that MiNLO consider as light partons
       integer minlo_nlight
       common/cminlo_nlight/minlo_nlight
       save /cminlo_nlight/
-      logical Sudakovbb,sudmw2mb,sudatlas2
-      save Sudakovbb,sudmw2mb,sudatlas2
+      logical Sudakovbb,sudmw2mb,atlas_scale
+      save Sudakovbb,sudmw2mb,atlas_scale
       integer cluster
       common/ccluster/cluster
       save /ccluster/
       real * 8 pg(0:3),pw(0:3),pj(0:3),mt2,ptj2,mtw2,pt2b1,pt2b2
-      real * 8 q2mergefac
-      save q2mergefac
+      real * 8 q2mergefac,minloscfac
+      save q2mergefac,minloscfac
 
       if(ini) then
          if(powheginput("#raisingscales").eq.0) then
@@ -125,14 +125,17 @@ c     number of flavors that MiNLO consider as light partons
             Sudakovbb = .false.
          else
             Sudakovbb = .true.
-         endif         
-         if(powheginput("#minlo_nlight").lt.0) then
-c     consider the b quark as massless
-            minlo_nlight=5
-         else
-            minlo_nlight=powheginput("#minlo_nlight")
-         endif   
-      
+         endif     
+    
+C$$$         if(powheginput("#minlo_nlight").lt.0) then
+C$$$c     consider the b quark as massless
+C$$$            minlo_nlight=5
+C$$$         else
+C$$$            minlo_nlight=powheginput("#minlo_nlight")
+C$$$         endif   
+
+         minlo_nlight=4
+         
          if(powheginput("#sudmw2mb").le.0) then
             sudmw2mb = .false.
          else
@@ -140,14 +143,18 @@ c     consider the b quark as massless
          endif          
 
 
-         sudatlas2 = .false.
-         if(powheginput("#sudatlas2").eq.1) then
-            sudatlas2 = .true.
+         atlas_scale = .false.
+         if(powheginput("#atlas_scale").eq.1) then
+            atlas_scale = .true.
          endif          
 
          q2mergefac=powheginput("#q2mergefac")
          if(q2mergefac.lt.0) then
             q2mergefac=1d0
+         endif
+         minloscfac=powheginput("#minloscfac")
+         if(minloscfac.lt.0) then
+            minloscfac=1d0
          endif
          ini = .false.
       endif
@@ -270,7 +277,7 @@ c     the invariant mass of the remaining system
       if (sudmw2mb) then
          q2merge=(ph_wmass+2*ph_bmass)**2
       endif
-      if (sudatlas2) then
+      if (atlas_scale) then
          pt2b1=p(1,5)**2+p(2,5)**2
          pt2b2=p(1,6)**2+p(2,6)**2
          q2merge=pw(0)**2-pw(3)**2 + 
@@ -278,6 +285,9 @@ c     the invariant mass of the remaining system
       endif
 
       q2merge=q2merge/q2mergefac
+
+c     provide a more friendly rescaling factor
+      q2merge=q2merge*(minloscfac)**2
 
       if(scales(1).gt.0) then
          do j=1,nlegborn

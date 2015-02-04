@@ -10,9 +10,7 @@ PDF=lhapdf
 #Choose Analysis: dummy, process specific
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=dummy
-#ANALYSIS=Wbbj
 ANALYSIS=Wbj
-#ANALYSIS=ATLAS-CMS
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -91,32 +89,12 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 
-ifeq ("$(ANALYSIS)","Wbbj")
-##To include Fastjet configuration uncomment the following lines. 
-FASTJET_CONFIG=$(shell which fastjet-config)
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-Wbbnj.o observables.o
-## Also add required Fastjet drivers to PWHGANAL (examples are reported)
-#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
-PWHGANAL+=  fastjetfortran.o
-else ifeq ("$(ANALYSIS)","Wbj")
+ifeq ("$(ANALYSIS)","Wbj")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-Wbnj.o observables.o
-## Also add required Fastjet drivers to PWHGANAL (examples are reported)
-#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
-PWHGANAL+=  fastjetfortran.o
-else ifeq ("$(ANALYSIS)","ATLAS-CMS")
-##To include Fastjet configuration uncomment the following lines. 
-FASTJET_CONFIG=$(shell which fastjet-config)
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-Wbj-ATLAS-CMS.o observables.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
