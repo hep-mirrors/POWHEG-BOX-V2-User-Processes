@@ -237,8 +237,10 @@ c     The Born cross section is perfectly FINITE!!!
       real * 8 ptot(0:3)
       integer i,nu
       real * 8 powheginput,dotp
-      external powheginput,dotp    
-      save ini,runningscales
+      external powheginput,dotp   
+      real * 8 pw(0:3),pt2b1,pt2b2
+      logical sudatlas2 
+      save ini,runningscales,sudatlas2 
       if (ini) then
          runningscales=powheginput("#runningscales")
          if(powheginput("#minlo").eq.1) then
@@ -257,6 +259,12 @@ c     The Born cross section is perfectly FINITE!!!
             write(*,*) '**   check Born_phsp.f file           **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
+c     check if sudatlas2 flag is present
+            sudatlas2 = .false.
+            if(powheginput("#sudatlas2").eq.1) then
+               sudatlas2 = .true.
+               write(*,*) '**     USE ATLAS2 SCALE         **'
+            endif                      
          else
             write(*,*) '****************************************'
             write(*,*) '****************************************'
@@ -264,6 +272,7 @@ c     The Born cross section is perfectly FINITE!!!
             write(*,*) '****************************************'
             write(*,*) '****************************************'            
          endif
+
          ini=.false.
       endif
       
@@ -300,17 +309,25 @@ c$$$c     HT/2 scale:
 c$$$         mur = HT/2d0
 c$$$c     if(mur.lt.2) mur=2
 c$$$         muf = mur         
-
-
-c     use the invariant mass of the bb sysytem
-         ptot=0
-         do i=5,6
-            do nu=0,3
-               ptot(nu) = ptot(nu) + kn_cmpborn(nu,i)
+         if (sudatlas2) then
+            pw =  kn_cmpborn(:,3)+ kn_cmpborn(:,4)
+            pt2b1=kn_cmpborn(1,5)**2+kn_cmpborn(2,5)**2
+            pt2b2=kn_cmpborn(1,6)**2+kn_cmpborn(2,6)**2
+            mu2=pw(0)**2-pw(3)**2 +
+     $           (ph_bmass**2+pt2b1)/2+(ph_bmass**2+pt2b2)/2            
+            muf=sqrt(mu2)
+            mur=muf 
+         else
+c     use the invariant mass of the Wbb sysytem
+            ptot=0
+            do i=3,6
+               do nu=0,3
+                  ptot(nu) = ptot(nu) + kn_cmpborn(nu,i)
+               enddo
             enddo
-         enddo
-         muf=sqrt(ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2)
-         mur=muf     
+            muf=sqrt(ptot(0)**2-ptot(1)**2-ptot(2)**2-ptot(3)**2)
+            mur=muf     
+         endif
       else
 c         muf=ph_wmass
 c         mur=ph_wmass

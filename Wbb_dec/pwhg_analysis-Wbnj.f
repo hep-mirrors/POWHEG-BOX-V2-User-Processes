@@ -10,7 +10,7 @@ c  pwhgfill  :  fills the histograms with data
       include  'LesHouches.h'
       include 'pwhg_math.h'
       integer i,j
-      real * 8 dy,dylep,dpt,dr,dphi,deta
+      real * 8 dy,dylep,dpt,dr
       
       real * 8 powheginput
       external powheginput
@@ -49,12 +49,10 @@ c  pwhgfill  :  fills the histograms with data
       dylep=0.4d0
       dpt=10d0
       dr=0.2d0
-      dphi=pi/20d0
 
       call bookupeqbins('XS Wbj ATLAS 1',1d0,0.5d0,3.5d0)
       call bookupeqbins('XS Wbj ATLAS 2',1d0,0.5d0,3.5d0)
       call bookupeqbins('XS Wbb CMS',1d0,0.5d0,1.5d0)
-      call bookupeqbins('XS Wbb CMS pTwbb>5',1d0,0.5d0,1.5d0)
       call bookupeqbins('CMS Wbb-pt',dpt,0d0,400d0)
       call bookupeqbins('CMS Wbb-ptzoom2',0.5d0,0d0,20d0)
 
@@ -127,27 +125,16 @@ c  pwhgfill  :  fills the histograms with data
      $     2d0,1d0,151d0)
       call bookupeqbins('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),
      $     0.5d0,0d0,20d0)
-
       call bookupeqbins('Wbb-ptzoom3'//cptmin(i)//cptbmin(j),
      $     0.002d0,0d0,0.04d0)
-
-      call bookupeqbins('bb-y'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('bb-eta'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('bb-pt'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-      call bookupeqbins('bb-ptzoom'//cptmin(i)//cptbmin(j),
-     $     2d0,1d0,151d0)
-      call bookupeqbins('bb-ptzoom2'//cptmin(i)//cptbmin(j),
-     $     0.5d0,0d0,20d0)
-      call bookupeqbins('bb-m'//cptmin(i)//cptbmin(j),dpt,0d0,400d0)
-
-
-      call bookupeqbins('bblept-dy'//cptmin(i)//cptbmin(j),dy,-5d0,5d0)
-      call bookupeqbins('bblept-deta'//cptmin(i)//cptbmin(j),
-     $     dy,-5d0,5d0)
-      call bookupeqbins('bblept-dphi'//cptmin(i)//cptbmin(j),
-     $     dphi,0d0,pi)
-      call bookupeqbins('bblept-dr'//cptmin(i)//cptbmin(j),dr,0d0,10d0)
-
+      call bookupeqbins('mbb'//cptmin(i)//cptbmin(j),
+     $     1d0,9d0,100d0)
+      call bookupeqbins('XS-b-ptcut'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,30d0)
+      call bookupeqbins('XS-b-j-ptcut'//cptmin(i)//cptbmin(j),
+     $     0.5d0,0d0,30d0)
+      call bookupeqbins('Nev'//cptmin(i)//cptbmin(j),
+     $     1d0,0.5d0,1.5d0)
       enddo
       enddo
 
@@ -208,7 +195,7 @@ c      include 'LesHouches.h'
       common/cinfohist/ptminarr,ptbminarr,cnum,cptmin,cptbmin,cptjmin
       save /cinfohist/
 
-      real * 8 ptb1min,ptb2min,ybmax,yjmax
+      real * 8 ptb1min,ptb2min,ybmax,yjmax,ptb1,ptb2,pt1,pt2
       integer j,i,k
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
@@ -216,7 +203,6 @@ c     we need to tell to this analysis file which program is running it
       data WHCPRG/'NLO   '/
       real * 8 pw(4)
       real * 8 y,eta,pt,m
-      real * 8 dybbl,detabbl,dphibbl,drbbl
       integer ihep
       real * 8 powheginput,dotp
       external powheginput,dotp
@@ -261,7 +247,9 @@ c      common /crescfac/rescfac1,rescfac2
       common/ccluster/cluster
       save /ccluster/
       real * 8 ppp(0:3,9),pppcm(0:3,9),beta,vec(3)
-      
+      integer ibin
+      real * 8 ptbin
+
       if (.not.pwhg_isfinite(dsig0)) then
          write(*,*) "*** NaN in analysis ***"
          return
@@ -583,6 +571,14 @@ c     try to avoid unstable point with pt_Wbb less than 2 MeV
             call filld('Wbb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
             call filld('Wbb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
             call filld('Wbb-ptzoom3'//cptmin(i)//cptbmin(j),pt,dsig)
+
+            do mu=1,4
+               pbb(mu) = pbjout(mu,1)+ pbjout(mu,2)
+            enddo
+            call getyetaptmass(pbb,y,eta,pt,m)
+            call filld('mbb'//cptmin(i)//cptbmin(j),m,dsig)
+            call filld('Nev'//cptmin(i)//cptbmin(j),1d0,1d0)
+
 c         endif
 
 
@@ -613,6 +609,7 @@ c     neutrino
 
 c     hardest b jet
          call getyetaptmass(pbjout(:,1),y,eta,pt,m)
+         ptb1 = pt
          call filld('b1-y'//cptmin(i)//cptbmin(j),y,dsig)
          call filld('b1-eta'//cptmin(i)//cptbmin(j),eta,dsig)
          call filld('b1-pt'//cptmin(i)//cptbmin(j),pt,dsig)
@@ -622,24 +619,46 @@ c     hardest b jet
 
 c     next-to-hardest b jet
          call getyetaptmass(pbjout(:,2),y,eta,pt,m)
+         ptb2 = pt
          call filld('b2-y'//cptmin(i)//cptbmin(j),y,dsig)
          call filld('b2-eta'//cptmin(i)//cptbmin(j),eta,dsig)
          call filld('b2-pt'//cptmin(i)//cptbmin(j),pt,dsig)
          call filld('b2-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
          call filld('b2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
          call filld('b2-m'//cptmin(i)//cptbmin(j),m,dsig)
+         
 
-         do mu=1,4
-            pbb(mu) = pbjout(mu,1)+ pbjout(mu,2)
+         if (njout.eq.1) then
+            call getyetaptmass(pjout(:,1),y,eta,pt1,m)
+         endif
+         if (njout.eq.2) then
+            call getyetaptmass(pjout(:,1),y,eta,pt1,m)
+            call getyetaptmass(pjout(:,2),y,eta,pt2,m)
+         endif
+
+         do ibin=1,30*2
+            ptbin = ibin*0.5d0 
+c     0.5d0,0d0,20d0)         
+            if (ptbin.lt.ptb1.and.ptbin.lt.ptb2) then 
+               call filld('XS-b-ptcut'//cptmin(i)//cptbmin(j),
+     $              ptbin-0.25d0,dsig)
+               if (njout.eq.0) then
+c     no extra jet with pt > ptbin
+                  call filld('XS-b-j-ptcut'//cptmin(i)//cptbmin(j),
+     $                 ptbin-0.25d0,dsig)
+               elseif (njout.eq.1) then
+                  if (pt1.lt.ptbin) then
+                     call filld('XS-b-j-ptcut'//cptmin(i)//cptbmin(j),
+     $                 ptbin-0.25d0,dsig)
+                  endif
+               elseif (njout.eq.2) then
+                  if (pt1.lt.ptbin.and.pt2.lt.ptbin) then
+                     call filld('XS-b-j-ptcut'//cptmin(i)//cptbmin(j),
+     $                    ptbin-0.25d0,dsig)
+                  endif                                     
+               endif
+            endif
          enddo
-
-         call getyetaptmass(pbb,y,eta,pt,m)
-         call filld('bb-y'//cptmin(i)//cptbmin(j),y,dsig)
-         call filld('bb-eta'//cptmin(i)//cptbmin(j),eta,dsig)
-         call filld('bb-pt'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('bb-ptzoom'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('bb-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
-         call filld('bb-m'//cptmin(i)//cptbmin(j),m,dsig)
 
          if (njout.ge.1) then
 c     hardest jet plots
@@ -662,13 +681,6 @@ c     next-to-hardest jet
             call filld('j2-ptzoom2'//cptmin(i)//cptbmin(j),pt,dsig)
             call filld('j2-m'//cptmin(i)//cptbmin(j),m,dsig)
          endif
-         
-         call getdydetadphidr(pbb,plep,dybbl,detabbl,dphibbl,drbbl)
-         call filld('bblept-dy'//cptmin(i)//cptbmin(j),dybbl,dsig)
-         call filld('bblept-deta'//cptmin(i)//cptbmin(j),detabbl,dsig)
-         call filld('bblept-dphi'//cptmin(i)//cptbmin(j),dphibbl,dsig)
-         call filld('bblept-dr'//cptmin(i)//cptbmin(j),drbbl,dsig)
-
 
       enddo
       enddo
@@ -1422,27 +1434,14 @@ c     this jet contains a b and a bbar
       enddo
 
 
-
-
-c**************************************************************************************
-      if (njet.eq.0) then
-c         write(*,*) 'CMS return condition ',dsig0
-c         return
-      endif
-c**************************************************************************************
-
-
-
-
-
       if (nbjet.eq.2) then
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCC           W b b analysis CMS arXiv:1312.6608
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c     lepton cuts
       ptminlep_CMS  = 25d0
-c      ptminmis_CMS  = 25d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
-      ptminmis_CMS  = 0d0   ! ??????????????????????????????????? --> don't see cuts on Et_miss
+c     ptminmis_CMS  = 25d0   ! ??????? --> don't see cuts on Et_miss
+      ptminmis_CMS  = 0d0    ! ??????? --> don't see cuts on Et_miss
       etamaxlep_CMS = 2.1d0
 c      mtWmin_CMS    = 45d0
       mtWmin_CMS    = 0d0
@@ -1510,9 +1509,6 @@ c               vetojet = .false.
                ptwbb = sqrt(pWbb(1)**2+pWbb(2)**2)
                call filld('CMS Wbb-ptzoom2',ptwbb,dsig)
                call filld('CMS Wbb-pt',ptwbb,dsig)
-               if (ptwbb.gt.5d0) then
-                  call filld('XS Wbb CMS pTwbb>5',1d0,dsig)
-               endif
             endif
          endif  ! isolated lepton
       endif ! lepton cuts
