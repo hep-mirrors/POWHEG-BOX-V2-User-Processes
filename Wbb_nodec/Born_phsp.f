@@ -289,8 +289,8 @@ c     improve statistics at high pt_W with this factor
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       real * 8 muf,mur
-      muf=ph_Wmass   ! +2*ph_mb
-      mur=ph_Wmass   ! +2*ph_mb
+      muf=ph_Wmass+2*ph_mb
+      mur=ph_Wmass+2*ph_mb
       end
 
 
