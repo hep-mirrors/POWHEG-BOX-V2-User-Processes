@@ -1,0 +1,278 @@
+\documentclass[paper]{JHEP3}
+\usepackage{amsmath,amssymb,enumerate,url}
+\bibliographystyle{JHEP}
+
+%%%%%%%%%% Start TeXmacs macros
+\newcommand{\tmtextit}[1]{{\itshape{#1}}}
+\newcommand{\tmtexttt}[1]{{\ttfamily{#1}}}
+\newenvironment{enumeratenumeric}{\begin{enumerate}[1.] }{\end{enumerate}}
+\newcommand\sss{\mathchoice%
+{\displaystyle}%
+{\scriptstyle}%
+{\scriptscriptstyle}%
+{\scriptscriptstyle}%
+}
+
+\newcommand\as{\alpha_{\sss\rm S}}
+\newcommand\POWHEG{{\tt POWHEG}}
+\newcommand\POWHEGBOX{{\tt POWHEG BOX}}
+\newcommand\POWHEGBOXV{{\tt POWHEG-BOX-V2}}
+\newcommand\HERWIG{{\tt HERWIG}}
+\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\MCatNLO{{\tt MC@NLO}}
+\newcommand\Wbbj{{\tt Wbbj}}
+
+\newcommand\kt{k_{\sss\rm T}}
+
+\newcommand\pt{p_{\sss\rm T}}
+\newcommand\LambdaQCD{\Lambda_{\scriptscriptstyle QCD}}
+%%%%%%%%%% End TeXmacs macros
+
+
+\title{The POWHEG BOX V2 user manual:\\
+  $\boldsymbol{Wb\bar{b}j}$ production at NLO with POWHEG+MiNLO} \vfill
+\author{Gionata Luisoni\\ 
+  Max-Planck Institut f{\"u}r Physik, F\"ohringer 6, D-80805 Munich, Germany\\
+  E-mail: \email{luisonig@mpp.mpg.de}
+}
+
+\author{Carlo Oleari\\
+  Universit\`a di Milano-Bicocca and INFN, Sezione di Milano-Bicocca\\
+  Piazza della Scienza 3, 20126 Milano, Italy\\
+  E-mail: \email{carlo.oleari@mib.infn.it}}
+
+\author{Francesco Tramontano\\
+  Universit\`a di Napoli ``Federico II'' and INFN, Sezione di Napoli,\\
+  Complesso di Monte Sant'Angelo, via Cintia, 80126 Napoli, Italy\\
+  E-mail: \email{francesco.tramontano@na.infn.it}
+}
+\vskip -0.5truecm
+
+\keywords{POWHEG, Shower Monte Carlo, NLO}
+
+\abstract{This note documents the use of the package \POWHEGBOXV{} for the
+  associated production of a $W$ boson plus a $b\bar{b}$ pair and a jet. All
+  bottom-quark mass effects and spin correlations of the leptonic decay
+  products of the $W$ boson have been fully taken into account.  Results can
+  be easily interfaced to shower Monte Carlo programs, in such a way that
+  both NLO and shower accuracy are maintained.}  \preprint{\today\\ {\tt
+    POWHEG BOX V2} 1.0}
+
+\begin{document}
+
+
+\section{Introduction}
+
+The \POWHEGBOX{} program is a framework for implementing NLO calculations in
+shower Monte Carlo programs according to the \POWHEG{} method. An explanation
+of the method and a discussion on how the code is organized can be found in
+refs.~\cite{Nason:2004rx,Frixione:2007vw,Alioli:2010xd}.
+The code is distributed according to the ``MCNET GUIDELINES for Event Generator Authors
+and Users'' and can be found at the web page
+%
+\begin{center}
+ \url{http://powhegbox.mib.infn.it}
+\end{center}
+%
+In this manual, we describe the \POWHEG{} implementation of the associated
+production of a $W$ boson plus a $b\bar{b}$ quark pair and a jet, as
+described in ref.~\cite{Luisoni:2015mpa}. The relevant matrix elements have been
+computed with {\tt MadGraph4}~\cite{Stelzer:1994ta,Alwall:2007st} and {\tt
+  GoSam}~\cite{Cullen:2011ac,Cullen:2014yla} and embedded in the \POWHEG{}
+framework in a fully automated way.
+
+The code can be found in the \Wbbj{} directory under {\tt User-Processes-V2},
+and can be used to generate NLO+PS QCD corrections to $Wb\bar{b}j$ production
+at hadronic colliders.  The $W$ boson is allowed to decay only
+leptonically.
+
+This document describes the input parameters that are specific to this
+implementation. The parameters that are common to all \POWHEGBOX{}
+implementation can be found in the manual in the \POWHEGBOXV{}/{\tt Docs}
+directory.
+
+
+\section{Generation of events}
+
+According to the \POWHEGBOXV{} manual, it is possible to split a \POWHEG{}
+run into several parallel ones.  See \POWHEGBOXV{}/{\tt Docs/V2-paper.pdf}
+for a detailed discussion. Here we briefly recall how it works.
+
+A template input file ({\tt powheg.input-save}) can be found under {\tt
+  Wbbj/testrun-lhc} directory. The following flags have to be activated:
+
+\noindent
+{\tt manyseeds 1 \qquad \quad \,\,\,! get the
+  seeds for the random number generator from 
+\\ \# \qquad \qquad \qquad
+  \qquad \qquad pwgseeds.dat
+\\ parallelstage <x> \,\,\,! <x>=1...4, which
+  level of parallel stage
+\\ xgriditeration <y> ! <y> is the iteration level
+  for the calculation of the \# \qquad \qquad \qquad \qquad \qquad importance
+  sampling grid improvement (relevant only 
+\\ \# \qquad \qquad \qquad \qquad
+  \qquad for parallelstage=1)}
+
+\noindent
+The file {\tt pwgseeds.dat} in the directory {\tt testrun-lhc}
+contains a list of integer seeds, one per line. When the program starts, it
+asks for an integer number $m$. This number is used to select a line in the
+{\tt pwgseeds.dat} file, and the integer found there is used to
+initialize the random number generator. In this way, several runs can be
+performed simultaneously in the same directory, all using different random
+number seeds. Furthermore, the integer $m$ appears as a four digit integer
+(with leading zeros) in the name of all files that are generated by the
+corresponding run.
+
+The generation of events is done by the \POWHEGBOXV{} in four stages.  An
+example of script file to drive the runs can be found in {\tt
+  testrun-lhc/run.sh}.  The user has to set the number of cores she/he wants
+to use ({\tt ncores}) and the number {\tt xgriditeration} for the first
+stage. All the other parameters are set in the {\tt powheg.input-save} file,
+that is copied into the {{\tt powheg.input} at each stage by the {\tt run.sh}
+  script.
+
+Other useful scripts can be found in the {\tt Wbbj} directory:
+\begin{itemize}
+\item {\tt runNLO.sh}: to combine the NLO partial results of the parallel
+  runs into a unique file
+
+\item {\tt runLHEF.sh}: to run the analysis in the {\tt
+  pwhg\_analysis-Wbnj.f} on the LHE events
+
+\item {\tt runpy.sh}: to run {\tt Pythia} on the event files
+
+\item {\tt runrwgt.sh}: to run the reweighting procedure on the event files
+
+\end{itemize}
+
+
+
+
+\section{Process-specific input parameters}
+
+
+\noindent The main mandatory process-specific parameters that have to be set are {\tt idvecbos} and {\tt vdecaymode}:\\
+{\tt idvecbos -24 \,\,\, \quad ! 24: W+ boson, \   -24: W- boson}\\
+{\tt vdecaymode  1 \quad \quad ! 1, 2, 3: W decay to electron, muon, tau}\\
+
+
+\noindent The mass of the bottom quark, in GeV,  can be set throught the
+parameter:\\ 
+{\tt bmass \quad \,\,\, 4.75}\\
+\noindent If this parameter is not present in the {\tt powheg.input} file,
+the default value of 4.2~GeV is assumed.
+
+\noindent The last step performed by the \POWHEGBOXV{} before writing a
+generated event on a Les Houches file, is to perform the reshuffling of the
+momenta of the final-state particles, in order to give masses to them.  The
+user can set these masses in the {\tt init\_couplings.f} file, by changing
+{\tt physpar\_mq}, for the quarks, and {\tt physpar\_ml}, for the
+charged leptons.\newpage
+
+\noindent Three useful optional process-specific  parameters are the following:
+
+\noindent {\tt Msbarscheme 0 \, ! (default value 1) 1: MSbar renormalisation scheme}\\
+\noindent {\tt \phantom{Msbarscheme 0 \, }! \phantom{(default value 1)} 0:  decoupling scheme}\\
+\noindent {\tt \phantom{Msbarscheme 0 \, }! \phantom{(default value 1)} PDFs should be changed accordingly}\\
+
+\noindent {\tt minloscfac ~1 \,! (default 1d0) MiNLO scaling factor}\\
+
+
+\noindent {\tt atlas\_scale \,0 \,! (default 0), 1: use ATLAS scale (see arXiv:1302.2929)}\\
+
+\noindent The first parameter, {\tt Msbarscheme}, allows to switch between
+two possible renormalization schemes: the $\overline{\mathrm{MS}}$ and the
+decoupling scheme. The default scheme is the $\overline{\mathrm{MS}}$ one
+that allows to use standard 5-flavours pdf sets and $\overline{\mathrm{MS}}$
+$\as$ running with 5 light flavours. If the decoupling scheme is chosen,
+i.e.~{\tt Msbarscheme 0}, the user must choose only 4-flavours pdf sets.
+%
+The second parameter, {\tt minloscfac}, allows to change the scale of the
+{\tt MiNLO} primary process by a constant factor. This parameter is similar
+to {\tt renscfac} and {\tt facscfac}, for the renormalization and
+factorization scales, respectively.  Finally, the flag {\tt atlas\_scale} can
+be used to set the {\tt MiNLO} scale of the primary process to the scale
+chosen by the ATLAS Collaboration in ref.~\cite{Aad:2013vka}.
+
+\begin{thebibliography}{10}
+
+\bibitem{Nason:2004rx}
+  P.~Nason,
+  ``A new method for combining NLO QCD with shower Monte Carlo algorithms,''
+  JHEP {\bf 0411} (2004) 040
+  [arXiv:hep-ph/0409146].
+  %%CITATION = JHEPA,0411,040;%%
+
+%\cite{Frixione:2007vw}
+\bibitem{Frixione:2007vw}
+  S.~Frixione, P.~Nason and C.~Oleari,
+``Matching NLO QCD computations with Parton Shower simulations: the POWHEG
+method,''
+  JHEP {\bf 0711} (2007) 070
+  [arXiv:0709.2092 [hep-ph]].
+  %%CITATION = JHEPA,0711,070;%%
+
+%\cite{Alioli:2010xd}
+\bibitem{Alioli:2010xd}
+  S.~Alioli, P.~Nason, C.~Oleari and E.~Re,
+``A general framework for implementing NLO calculations in shower Monte Carlo
+  programs: the POWHEG BOX,''
+  [arXiv:1002.2581 [hep-ph]].
+  %%CITATION = ARXIV:1002.2581;%%
+
+
+\bibitem{Luisoni:2015mpa}
+  G.~Luisoni, C.~Oleari and F.~Tramontano,
+  ``$Wb\bar{b}j$ production at NLO with POWHEG+MiNLO'', arXiv:1502.01213.
+
+%\cite{Stelzer:1994ta}
+\bibitem{Stelzer:1994ta}
+  T.~Stelzer and W.~F.~Long,
+  ``Automatic generation of tree level helicity amplitudes,''
+  Comput.\ Phys.\ Commun.\  {\bf 81} (1994) 357
+  [hep-ph/9401258].
+  %%CITATION = HEP-PH/9401258;%%
+  
+%\cite{Alwall:2007st}
+\bibitem{Alwall:2007st}
+  J.~Alwall, P.~Demin, S.~de Visscher, R.~Frederix, M.~Herquet, F.~Maltoni, T.~Plehn and D.~L.~Rainwater {\it et al.},
+  ``MadGraph/MadEvent v4: The New Web Generation,''
+  JHEP {\bf 0709} (2007) 028
+  [arXiv:0706.2334 [hep-ph]].
+  %%CITATION = ARXIV:0706.2334;%%
+
+%\cite{Cullen:2011ac}
+\bibitem{Cullen:2011ac}
+  G.~Cullen, N.~Greiner, G.~Heinrich, G.~Luisoni, P.~Mastrolia, G.~Ossola, T.~Reiter and F.~Tramontano,
+  ``Automated One-Loop Calculations with GoSam,''
+  Eur.\ Phys.\ J.\ C {\bf 72} (2012) 1889
+  [arXiv:1111.2034 [hep-ph]].
+  %%CITATION = ARXIV:1111.2034;%%
+
+%\cite{Cullen:2014yla}
+\bibitem{Cullen:2014yla}
+  G.~Cullen, H.~van Deurzen, N.~Greiner, G.~Heinrich, G.~Luisoni, P.~Mastrolia, E.~Mirabella and G.~Ossola {\it et al.},
+  ``G$\scriptsize{O}$S$\scriptsize{AM}$-2.0: a tool for automated one-loop calculations within the Standard Model and beyond,''
+  Eur.\ Phys.\ J.\ C {\bf 74} (2014) 8,  3001
+  [arXiv:1404.7096 [hep-ph]].
+  %%CITATION = ARXIV:1404.7096;%%
+
+%\cite{Aad:2013vka}
+\bibitem{Aad:2013vka}
+  G.~Aad {\it et al.}  [ATLAS Collaboration],
+  ``Measurement of the cross-section for W boson production in association with b-jets in pp collisions at $\sqrt{s}$ = 7 TeV with the ATLAS detector,''
+  JHEP {\bf 1306} (2013) 084
+  [arXiv:1302.2929 [hep-ex]].
+  %%CITATION = ARXIV:1302.2929;%%
+
+
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
