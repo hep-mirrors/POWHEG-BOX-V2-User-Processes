@@ -61,7 +61,7 @@ nubound 10000 ! number of calls to set up the upper bounding norms for radiation
 ! OPTIONAL PARAMETERS
 
 withnegweights 1   ! (default 0) if on (1) use negative weights
-hfact    150d0    ! (default no dumping factor) dump factor for high-pt radiation: > 0 dumpfac=h**2/(pt2+h**2)
+hdamp    150d0    ! (default no dumping factor) dump factor for high-pt radiation: > 0 dumpfac=h**2/(pt2+h**2)
 #bornonly 1        ! (default 0) if 1 do Born only
 #dummyvirtual 1    ! Run with dummy virtual
 #ptsqmin    0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
