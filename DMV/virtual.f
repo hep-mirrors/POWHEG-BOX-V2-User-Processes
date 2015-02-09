@@ -104,6 +104,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34V = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,phdm_Vmass*phdm_Vwidth)
+         if(phdm_rw) prop34V = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,(2*p34+2*mass2)*phdm_Vwidth/phdm_Vmass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 

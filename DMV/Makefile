@@ -219,5 +219,5 @@ main-PYTHIA831-lhef: $(PYTHIA831)
 .PHONY: clean
 clean:
 	rm -f obj/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef
+	main-PYTHIA-lhef main-PYTHIA8-lhef main-PYTHIA831-lhef
 

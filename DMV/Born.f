@@ -10,8 +10,8 @@
       real * 8 bmunu(0:3,0:3,nlegs),bbmunu(0:3,0:3),born,colcf
       integer j,k,mu,nu
       
-      write(*,*) 'this version is beta - stop run'
-      stop
+c      write(*,*) 'this version is beta - stop run'
+c      stop
 c Colour factors for colour-correlated Born amplitudes;
 c Rule from 2.98 in FNO2007, leads to B_i j=B*(C_i+C_j-C_k)/2,
 c where k#i,j
@@ -286,6 +286,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34V = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,phdm_Vmass*phdm_Vwidth)
+         if(phdm_rw) prop34V = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,(2*p34+2*mass2)*phdm_Vwidth/phdm_Vmass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 
@@ -632,6 +634,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34V = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,phdm_Vmass*phdm_Vwidth)
+         if(phdm_rw) prop34V = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_Vmass**2,(2*p34+2*mass2)*phdm_Vwidth/phdm_Vmass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 

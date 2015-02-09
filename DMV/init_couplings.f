@@ -55,7 +55,7 @@ c         if(physpar_ml(3).lt.0) physpar_ml(3)=1.777d0
          write(*,*) 'Wrong vdecaymode: ',powheginput('vdecaymode')
          call exit(-1)
       endif
-      if(absdecaymode.le.2) then
+      if(absdecaymode.le.4) then
          if(powheginput('#DMmass').gt.0) then
             physpar_ml(3)=powheginput('#DMmass')
          else
@@ -80,6 +80,8 @@ c         if(physpar_ml(3).lt.0) physpar_ml(3)=1.777d0
          if(phdm_gSM.eq.-1000000) phdm_gSM=1
          phdm_gDM=powheginput('#DMgDM')
          if(phdm_gDM.eq.-1000000) phdm_gDM=1
+
+         phdm_rw=powheginput('#runningwidth').gt.0
 
       endif
 
@@ -179,6 +181,7 @@ c     Needed in case one wants to do BW integration when using EFT approach
             write(*,*) 'DM mediator width = ',phdm_Vwidth
             write(*,*) 'coupling q_q_mediator = ',phdm_gSM
             write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
+            write(*,*) 'running width = ',phdm_rw
          endif
          write(*,*) '*************************************'
          write(*,*)
