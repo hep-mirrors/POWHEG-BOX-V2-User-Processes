@@ -32,7 +32,9 @@ c     the code and we change often from one process to the other
          stop
       endif
       vdecaymode=abs(powheginput("#vdecaymode"))
-      if(vdecaymode.eq.1.or.vdecaymode.eq.2) then
+      if(vdecaymode.eq.1.or.vdecaymode.eq.2.or.vdecaymode.eq.3.or.vdecaymode.
+     $     eq.4) then
+c     !ER: 4 feb 2015, D Salek request
 c     DM decay
          i3=19
          i4=-19

@@ -21,7 +21,6 @@ cccccc   INDEPENDENT QUANTITIES
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_Zmass  = 91.188d0     
       ph_Zwidth =  2.486d0
-
       ph_alphaem = 1d0/128.930d0
       ph_sthw2 = 0.2312d0
 
@@ -40,6 +39,10 @@ c     !:
          phdm_mode='VE'
       elseif(absdecaymode.eq.2) then
          phdm_mode='AX'
+      elseif(absdecaymode.eq.3) then
+         phdm_mode='VA'
+      elseif(absdecaymode.eq.4) then
+         phdm_mode='AV'
       elseif(absdecaymode.eq.5) then
          phdm_mode='bb'
          physpar_ml(3)=powheginput('bmass')
@@ -66,18 +69,18 @@ c         if(physpar_ml(3).lt.0) physpar_ml(3)=1.777d0
          else
             phdm_LambdaUV=500d0
          endif
+         phdm_gSM=1
+         phdm_gDM=1        
       else 
          phdm_efftheory='F'
-         print*, 'Full theory in DMV case implemented '//
-     $        'but not yet fully tested, program stops'
          phdm_Vmass=powheginput('DMVmass')
          phdm_Vwidth=powheginput('DMVwidth')
-c$$$c     needed for the effective coupling...
-c$$$         phdm_LambdaUV=powheginput('DMLambda')
-c$$$         if(phdm_LambdaUV.lt.0d0) then
-c$$$            write(*,*) 'Error: phdm_LambdaUV<0 !'
-c$$$            call exit(-1)
-c$$$         endif
+
+         phdm_gSM=powheginput('#DMgSM')
+         if(phdm_gSM.eq.-1000000) phdm_gSM=1
+         phdm_gDM=powheginput('#DMgDM')
+         if(phdm_gDM.eq.-1000000) phdm_gDM=1
+
       endif
 
 c     mass window
@@ -105,33 +108,52 @@ cccccc   DEPENDENT QUANTITIES
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_sthw = sqrt(ph_sthw2)
       ph_cthw = sqrt(1-ph_sthw2)
-      ph_Zmass2 = ph_Zmass**2
-      ph_ZmZw = ph_Zmass * ph_Zwidth
 
       if(mass_low.ge.0d0) then
          ph_Zmass2low=mass_low**2
       else
-         ph_Zmass2low=(max(0d0,ph_Zmass-masswindow_low*ph_Zwidth))**2
+c         ph_Zmass2low=(max(0d0,ph_Zmass-masswindow_low*ph_Zwidth))**2
+         ph_Zmass2low=0
       endif
       if (sqrt(ph_Zmass2low).lt.(2*physpar_ml(3))) then
          ph_Zmass2low=(2*physpar_ml(3))**2
       endif
      
       if(mass_high.ge.0d0) then
-         ph_Zmass2high=mass_high
+         ph_Zmass2high=mass_high**2
       else
-         ph_Zmass2high=ph_Zmass+masswindow_high*ph_Zwidth
+c         ph_Zmass2high=ph_Zmass+masswindow_high*ph_Zwidth
+         ph_Zmass2high=kn_sbeams
       endif
-c     !: check next line again
-      ph_Zmass2high=min(kn_sbeams-2*kn_ktmin*sqrt(kn_sbeams),
-     $     ph_Zmass2high**2)
-
-      ph_unit_e = sqrt(4*pi*ph_alphaem)
+c     !: m2 obtained by solving
+c     shat = m2 + 2 ph*pj. 
+c     (going in frame where yj=yh=0, and then shat -> shad, since we are computing
+c     the maximum value for m2)
+c     *0.99 to stay on the safe side
+      ph_Zmass2high=min((kn_sbeams-2*kn_ktmin*sqrt(kn_sbeams))*0.99,
+     $     ph_Zmass2high)
 
       if( ph_Zmass2low.ge.ph_Zmass2high ) then
-         write(*,*) "Error in init_couplings: mass_low >= mass_high"
-         call exit(1)
+         write(*,*) "Error in init_couplings: mass_low >= mass_high ",
+     $        sqrt(ph_Zmass2low),sqrt(ph_Zmass2high)
+         call exit(-1)
       endif
+
+      if(phdm_efftheory.eq.'F') then
+c     Needed for the mass integration interval, when BW integration
+         ph_Zmass  = phdm_Vmass
+         ph_Zwidth = phdm_Vwidth
+      else
+c     Needed in case one wants to do BW integration when using EFT approach
+         ph_Zmass  = sqrt(ph_Zmass2high) - sqrt(ph_Zmass2low) 
+         ph_Zmass  = ph_Zmass /2d0
+         ph_Zwidth = ph_Zmass /10d0
+      endif
+
+      ph_Zmass2 = ph_Zmass**2
+      ph_ZmZw = ph_Zmass * ph_Zwidth
+      ph_unit_e = sqrt(4*pi*ph_alphaem)
+
 
       write(*,*) '****************************************************'
       write(*,*) 'When using this code, please follow the citation'
@@ -142,10 +164,12 @@ c     !: check next line again
       write(*,*) '****************************************************'
 
 
-      if(absdecaymode.eq.1.or.absdecaymode.eq.2) then
+      if(absdecaymode.eq.1.or.absdecaymode.eq.2.or.
+     $     absdecaymode.eq.3.or.absdecaymode.eq.4) then
          write(*,*) '*************************************'
          write(*,*) 'mediator type: ',phdm_mode
          write(*,*) 'DM mass = ',physpar_ml(3)
+         write(*,*) 'coupling structure: ',phdm_mode
          if(phdm_efftheory.eq.'T') then
             write(*,*) 'Effective theory'
             write(*,*) 'DM LambdaUV = ',phdm_LambdaUV
@@ -153,6 +177,8 @@ c     !: check next line again
             write(*,*) 'Full theory'
             write(*,*) 'DM mediator mass =  ',phdm_Vmass
             write(*,*) 'DM mediator width = ',phdm_Vwidth
+            write(*,*) 'coupling q_q_mediator = ',phdm_gSM
+            write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
          endif
          write(*,*) '*************************************'
          write(*,*)

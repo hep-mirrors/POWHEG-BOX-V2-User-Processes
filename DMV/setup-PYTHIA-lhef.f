@@ -3,7 +3,7 @@ C   100       A : Rick Field's CDF Tune A                     (Oct 2002)
 C   103      DW : Rick Field's CDF Tune DW                    (Apr 2006)
 C   320 Perugia 0 : "Perugia" update of S0-Pro                (Feb 2009)
 C   
-      call PYTUNE(320)
+c      call PYTUNE(320)
       end
 
       subroutine setup_PYTHIA_parameters
@@ -33,13 +33,13 @@ c     multiple interactions
       common/canalysis_jetveto/analysis_jetveto
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c$$$c     multiple interactions
-c$$$c     (MI can increase a lot the execution time)
-c$$$      if(.not.mult_inter) then
-c$$$         mstp(81)=20   !No Multiple interactions. Force a call to PYEVNW 
-c$$$      else
-c$$$         mstp(81)=21   ! MPI on in the PYEVNW MPI scenario
-c$$$      endif
+c     multiple interactions
+c     (MI can increase a lot the execution time)
+      if(.not.mult_inter) then
+         mstp(81)=20   !No Multiple interactions. Force a call to PYEVNW 
+      else
+         mstp(81)=21   ! MPI on in the PYEVNW MPI scenario
+      endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -184,7 +184,8 @@ c     g-q
          call exit(-1)
       endif
 
-      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AX') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AX'.or.
+     $     phdm_mode.eq.'AV'.or.phdm_mode.eq.'VA') then
 c     V or A current, universal, couplings set to 1
          prop34gamma = 0d0
 
@@ -194,10 +195,10 @@ c     V or A current, universal, couplings set to 1
          call VirtualHelicityAmplitudes(mode,order_L,st_muren2,pmcfmmassless,virtamp_qL)
          call VirtualHelicityAmplitudes(mode,order_R,st_muren2,pmcfmmassless,virtamp_qR)
 
-         bornamp_qL(:,:)=bornamp_qL(:,:)*prop34V
-         bornamp_qR(:,:)=bornamp_qR(:,:)*prop34V
-         virtamp_qL(:,:)=virtamp_qL(:,:)*prop34V
-         virtamp_qR(:,:)=virtamp_qR(:,:)*prop34V
+         bornamp_qL(:,:)=bornamp_qL(:,:)*prop34V *(phdm_gSM*phdm_gDM)
+         bornamp_qR(:,:)=bornamp_qR(:,:)*prop34V *(phdm_gSM*phdm_gDM)
+         virtamp_qL(:,:)=virtamp_qL(:,:)*prop34V *(phdm_gSM*phdm_gDM)
+         virtamp_qR(:,:)=virtamp_qR(:,:)*prop34V *(phdm_gSM*phdm_gDM)
 
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
 c     Here I need to include couplings and factors that could depend
@@ -297,6 +298,13 @@ c     present in Born.f
       bornamp(+1,:,:)=bornamp_qR(:,:)
       virtamp(-1,:,:)=virtamp_qL(:,:)
       virtamp(+1,:,:)=virtamp_qR(:,:)
+
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+         bornamp(-1,:,:) = - bornamp(-1,:,:)
+         virtamp(-1,:,:) = - virtamp(-1,:,:)
+      endif
+
 
 c     Finite renormalization term, needed to
 c     -1. go to MS bar scheme

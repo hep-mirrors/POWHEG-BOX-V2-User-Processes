@@ -130,6 +130,10 @@ endif
 # MADGRAPH+=helas.o	
 # ##########
 
+PYTHIA8LOCATION=/home/re/C_Cpp/pythia8180
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
+
 
 %.o: %.f $(INCLUDE)
 	$(FF) -c -o obj/$@ $<
@@ -190,6 +194,26 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+
+
+PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
+	$(PWHGANAL) lhefread.o newunit.o pdfdummies.o		\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
+	$(FPEOBJ)
+
+main-PYTHIA8-lhef: $(PYTHIA8)
+	$(FF) $(patsubst %,obj/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(STATIC) -o $@
+
+
+PYTHIA831=main-PYTHIA831.o pythia831F77.o boostrot.o powheginput.o \
+	$(PWHGANAL) lhefread.o newunit.o pdfdummies.o		\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
+	$(FPEOBJ)
+
+main-PYTHIA831-lhef: $(PYTHIA831)
+	$(FF) $(patsubst %,obj/%,$(PYTHIA831)) $(LIBSFASTJET) $(LIBPYTHIA8) $(STATIC) -o $@
+
+
 
 # target to cleanup
 .PHONY: clean

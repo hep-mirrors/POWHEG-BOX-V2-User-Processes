@@ -9,6 +9,9 @@
       integer bflav(nlegs)
       real * 8 bmunu(0:3,0:3,nlegs),bbmunu(0:3,0:3),born,colcf
       integer j,k,mu,nu
+      
+      write(*,*) 'this version is beta - stop run'
+      stop
 c Colour factors for colour-correlated Born amplitudes;
 c Rule from 2.98 in FNO2007, leads to B_i j=B*(C_i+C_j-C_k)/2,
 c where k#i,j
@@ -373,20 +376,20 @@ c$$$      stop
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -427,6 +430,12 @@ c     bb/tata
      $                 *prop34V
                else
 c     DM
+                  if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+                     jquark(:,-1) = - jquark(:,-1)
+                  endif
+                     
+                  jquark = jquark * phdm_gSM
                   Jlep_dot_Jquark = 
      $                 ccdotp(jlepZ(0,hel_lep),jquark(0,hel_quark))
      $                 *prop34V
@@ -673,20 +682,20 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -727,6 +736,11 @@ c     bb/tata
      $                 *prop34V
                else
 c     DM
+                  if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+                     jquark(:,-1) = - jquark(:,-1)
+                  endif
+                  jquark = jquark * phdm_gSM
                   Jlep_dot_Jquark = 
      $                 ccdotp(jlepZ(0,hel_lep),jquark(0,hel_quark))
      $                 *prop34V

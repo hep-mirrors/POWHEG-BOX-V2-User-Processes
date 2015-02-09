@@ -408,20 +408,20 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -535,15 +535,19 @@ c     sum
             else
 c     DM
 c     sum
+               if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+                  amp_3gv_Z(:,-1) = - amp_3gv_Z(:,-1)
+               endif
                amp_Ta_Tb(hel_lep,hel_qua) =
      $              amp_Ta_Tb_Z(hel_lep,hel_qua)
-     $              *prop34V
+     $              *prop34V *phdm_gSM
                amp_Tb_Ta(hel_lep,hel_qua) =
      $              amp_Tb_Ta_Z(hel_lep,hel_qua)
-     $              *prop34V
+     $              *prop34V *phdm_gSM
                amp_3gv(hel_lep,hel_qua) =
      $              amp_3gv_Z(hel_lep,hel_qua)
-     $              *prop34V
+     $              *prop34V *phdm_gSM
             endif
 ccccccccc
             amp2=amp2 + CF*CF*nc*
@@ -963,20 +967,20 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -1021,6 +1025,11 @@ c     correnti
          call bra_gamma_ket(psi6,psi2,i,jqua26(0,i))
          call bra_gamma_ket(psi5,psi1,i,jqua15(0,i))
       enddo
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+         jqua26(:,-1) = - jqua26(:,-1)
+         jqua15(:,-1) = - jqua15(:,-1)
+      endif
 
       amp2=0d0      
 
@@ -1068,11 +1077,11 @@ c     bb/tata
 c     DM
             amp_ljj(1,hel_lep,hel_1,hel_2) =
      $           amp_ljj_Z(1,hel_lep,hel_1,hel_2)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
             
             amp_ljj(2,hel_lep,hel_1,hel_2) =
      $           amp_ljj_Z(2,hel_lep,hel_1,hel_2)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
          endif
       enddo
       enddo
@@ -1136,7 +1145,12 @@ c     correnti
          call bra_gamma_ket(psi6,psi1,i,jqua16(0,i))
          call bra_gamma_ket(psi5,psi2,i,jqua25(0,i))
       enddo
-         
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+         jqua16(:,-1) = - jqua16(:,-1)
+         jqua25(:,-1) = - jqua25(:,-1)
+      endif         
+
       do hel_lep=-3,3,2         
          do hel_1=-1,1,2            
               do hel_2=-1,1,2                
@@ -1181,11 +1195,11 @@ c     bb/tata
 c     DM
             amp_ljj(3,hel_lep,hel_1,hel_2) = 
      $           amp_ljj_Z(3,hel_lep,hel_1,hel_2)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
             
             amp_ljj(4,hel_lep,hel_1,hel_2) =
      $           amp_ljj_Z(4,hel_lep,hel_1,hel_2)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
          endif
 cccccccccccccccccccc
 c     final coherent sum   
@@ -1537,20 +1551,20 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -1582,6 +1596,11 @@ c     correnti
          call bra_gamma_ket(psi6,psi2,i,jqua26(0,i))
          call bra_gamma_ket(psi5,psi1,i,jqua15(0,i))
       enddo
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+         jqua26(:,-1) = - jqua26(:,-1)
+         jqua15(:,-1) = - jqua15(:,-1)
+      endif
       
       amp2=0d0
 
@@ -1629,11 +1648,11 @@ c     bb/tata
 c     DM
             amp_ljj(1,hel_lep,hel_15,hel_26) = 
      $           amp_ljj_Z(1,hel_lep,hel_15,hel_26)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
             
             amp_ljj(2,hel_lep,hel_15,hel_26) = 
      $           amp_ljj_Z(2,hel_lep,hel_15,hel_26)
-     $           *prop34V
+     $           *prop34V *phdm_gSM
          endif
 cccccccccccc
 c final coherent sum               
@@ -1895,20 +1914,20 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccccccc
 
 c     V/A current, universal  couplings set to 1
-      if(phdm_mode.eq.'VE') then
+      if(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AV') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Vmm(:)
-         jlepZ(:,-1)=Vmp(:)
-         jlepZ(:,+1)=Vpm(:)
-         jlepZ(:,+3)=Vpp(:)
-      elseif(phdm_mode.eq.'AX') then
+         jlepZ(:,-3)=Vmm(:) * phdm_gDM
+         jlepZ(:,-1)=Vmp(:) * phdm_gDM
+         jlepZ(:,+1)=Vpm(:) * phdm_gDM
+         jlepZ(:,+3)=Vpp(:) * phdm_gDM
+      elseif(phdm_mode.eq.'AX'.or.phdm_mode.eq.'VA') then
          prop34gamma = 0d0
          jlepA(:,:)=0d0
-         jlepZ(:,-3)=Amm(:)
-         jlepZ(:,-1)=Amp(:)
-         jlepZ(:,+1)=Apm(:)
-         jlepZ(:,+3)=App(:)
+         jlepZ(:,-3)=Amm(:) * phdm_gDM
+         jlepZ(:,-1)=Amp(:) * phdm_gDM
+         jlepZ(:,+1)=Apm(:) * phdm_gDM
+         jlepZ(:,+3)=App(:) * phdm_gDM
       elseif(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
          prop34V = 1d0/dcmplx(2*p34+2*mass2-ph_Zmass2,ph_ZmZw)
          prop34gamma = 1d0/(2*p34+2*mass2)
@@ -1940,6 +1959,11 @@ c     correnti
          call bra_gamma_ket(psi5,psi6,i,jqua56(0,i))
          call bra_gamma_ket(psi2,psi1,i,jqua12(0,i))
       enddo
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+         jqua56(:,-1) = - jqua56(:,-1)
+         jqua12(:,-1) = - jqua12(:,-1)
+      endif
       
       amp2=0d0
 
@@ -1986,10 +2010,10 @@ c     bb/tata
 c     DM
                   amp_ljj(1,hel_lep,hel_12,hel_56) =
      $              amp_ljj_Z(1,hel_lep,hel_12,hel_56)
-     $                 *prop34V
+     $                 *prop34V *phdm_gSM
                   amp_ljj(2,hel_lep,hel_12,hel_56) =
      $                 amp_ljj_Z(2,hel_lep,hel_12,hel_56)
-     $                 *prop34V
+     $                 *prop34V *phdm_gSM
                endif
 cccccccccccc
 c     final coherent sum               

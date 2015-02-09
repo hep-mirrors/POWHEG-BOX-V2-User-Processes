@@ -13,11 +13,12 @@
       logical ini
       data ini/.true./
       save ini
-      real * 8 powheginput
-      external powheginput
+c$$$      real * 8 powheginput
+c$$$      external powheginput
 
+      integer sampling
       logical genflat
-      save genflat
+      save genflat,sampling
 
 cccccccccccc
 c     !:
@@ -34,19 +35,43 @@ c     set initial- and final-state masses for Born and real
          kn_masses(nlegreal)=0
          kn_masses(3)=m_1
          kn_masses(4)=m_2
-         if(powheginput("vdecaymode").eq.5.or.
-     $        powheginput("vdecaymode").eq.15) then
-            genflat=.false.
-         else
-            genflat=.true.
-         endif
+c$$$         if(powheginput("vdecaymode").eq.5.or.
+c$$$     $        powheginput("vdecaymode").eq.15) then
+c$$$            genflat=.false.
+c$$$         else
+c$$$            genflat=.true.
+c$$$         endif
+         genflat=.false.
          if(genflat) then
             write(*,*) '*************************************'
-            write(*,*) "DM case: m34 not importance sampled. "
+            write(*,*) "WARNING: m34 not importance sampled. "
             write(*,*) '*************************************'
          else
             write(*,*) '*************************************'
             write(*,*) "m34  importance sampled. "
+            if(phdm_mode.eq.'bb'.or.phdm_mode.eq.'ta') then
+               write(*,*) 'BW importance sampling'
+               sampling=0
+            elseif(phdm_mode.eq.'VE'.or.phdm_mode.eq.'AX'.or.
+     $              phdm_mode.eq.'AV'.or.phdm_mode.eq.'VA') then
+               if(phdm_efftheory.eq.'F') then
+                  if(sqrt(ph_Zmass2).lt.0.8*sqrt(kn_sbeams)) then
+                     write(*,*) 'BW importance sampling'
+                     sampling=0
+                  else
+c     this option has been tested, although not as extensively
+c     as everything else. However, it should work better when
+c     an explicit mediator is present but it's very heavy: the
+c     xxx(1) grid will look better.
+                     write(*,*) 'mediator present, but very heavy'
+                     write(*,*) 'xxx^2 importance sampling'
+                     sampling=2
+                  endif
+               elseif(phdm_efftheory.eq.'T') then
+                  write(*,*) 'xxx^2 importance sampling'
+                  sampling=2
+               endif
+            endif
             write(*,*) '*************************************'
          endif
          ini=.false.
@@ -58,13 +83,18 @@ c d omegadec/(8*(2 pi)^2)
 c omega: 3d angle in CM system
 c omegadec: 3d angle in CM system of Z decay products
       if(.not.genflat) then
-         zlow=atan((ph_Zmass2low  - ph_Zmass2)/ph_ZmZw)
-         zhigh=atan((min(ph_Zmass2high,kn_sbeams)  - ph_Zmass2)/ph_ZmZw)
-         z=zlow+(zhigh-zlow)*xborn(1)
-         xjac=zhigh-zlow
-         m2=ph_ZmZw*tan(z)+ph_Zmass2
+         if(sampling.eq.2) then
+            m2=ph_Zmass2low+(ph_Zmass2high-ph_Zmass2low)*xborn(1)**2
+            xjac=2*xborn(1)*(ph_Zmass2high-ph_Zmass2low) / (2*pi)
+         elseif(sampling.eq.0) then
+            zlow=atan((ph_Zmass2low  - ph_Zmass2)/ph_ZmZw)
+            zhigh=atan((min(ph_Zmass2high,kn_sbeams)  - ph_Zmass2)/ph_ZmZw)
+            z=zlow+(zhigh-zlow)*xborn(1)
+            xjac=zhigh-zlow
+            m2=ph_ZmZw*tan(z)+ph_Zmass2
 c     d m^2/(2pi) jacobian
-         xjac=xjac*ph_ZmZw/cos(z)**2/(2*pi)
+            xjac=xjac*ph_ZmZw/cos(z)**2/(2*pi)
+         endif
       else
          m2=ph_Zmass2low+(ph_Zmass2high-ph_Zmass2low)*xborn(1)
 c     d m^2/(2pi) jacobian
