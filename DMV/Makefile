@@ -130,9 +130,9 @@ endif
 # MADGRAPH+=helas.o	
 # ##########
 
-PYTHIA8LOCATION=/home/re/C_Cpp/pythia8180
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/
-LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
+#PYTHIA8LOCATION=/home/re/C_Cpp/pythia8180
+#FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/
+#LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 
 %.o: %.f $(INCLUDE)
