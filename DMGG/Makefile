@@ -124,13 +124,13 @@ pythia.o: pythia.f
 	gfortran -fno-automatic -ffixed-line-length-132 -Wall -c -o obj/pythia.o $<
 
 %.o: %.c
-	$(CC) $(DEBUG) -c -o obj/$@ $^ 
+	$(CC) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
 %.o: %.cc
 	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
-     real.o $(PWHGANAL)
+     real.o matchcolour.o $(PWHGANAL)
 
 MCFMFILES=i2mcfm_2_POWHEG.o set_interface_MCFM.o i2mcfm_fill.o \
 	gg_hg_vi.o gg_hg_eval_v.o hjetfill.o dotem.o set_epinv.o coupling.o 
@@ -183,6 +183,23 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+
+
+PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
+	$(PWHGANAL) lhefread.o newunit.o pdfdummies.o		\
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
+	$(FPEOBJ)
+
+main-PYTHIA8-lhef: $(PYTHIA8)
+	$(FF) $(patsubst %,obj/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(STATIC) -o $@
+
+
+
+
+
+
+
+
 
 # target to cleanup
 .PHONY: clean

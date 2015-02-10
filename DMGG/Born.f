@@ -11,11 +11,17 @@ c and set the event-by-event couplings constant
       integer bflav(nlegborn)
       real * 8 bmunu(0:3,0:3,nlegborn),born
       double precision old_p,new_p,rescalefactor,pH2,dotp,old_c,new_c,
-     $     m_1
+     $     m_1,decayamp2
 ccccccccccccccccccccccccccccccccc
 c     !: couplings are in this routine. In particular
-c     old_c=gh(1) !=dcmplx( g**2/4d0/PI/(3d0*PI*V), 0d0)
-      old_c=(1d0/(3d0*pi*v))**2
+c     old_c=gh(1) or gh(2), where
+c      gh(1) = dcmplx( scalarf*g**2/4d0/PI/(3d0*PI*V), 0d0)
+c      gh(2) = dcmplx( axialf *g**2/4d0/PI/(2d0*PI*V), 0d0)
+      if(phdm_mode.eq.'SC') then
+         old_c=(1d0/(3d0*pi*v))**2
+      elseif(phdm_mode.eq.'PS') then
+         old_c=(1d0/(2d0*pi*v))**2
+      endif
       call set_ebe_couplings
 ccccccccccccccccccccccccccccccccc
       call sborn_proc(p,bflav,born,bornjk,bmunu)
@@ -32,26 +38,35 @@ c--------
       bmunu(:,:,:)=bmunu(:,:,:)*old_p
 cccccccccccc
       m_1=physpar_ml(3)
-      if(phdm_efftheory.eq.'T') then
+      decayamp2=-1d0
 c           / k1
 c     ...../
 c          \
 c           \ k2
 c     This amplitude squared is equal to
-c     (1/lambda**6)*2*(pH2-4mX**2)
-         new_p=2*(pH2-4*m_1**2)/(phdm_LambdaUV**3)**2
+c     2*(pH2-4mX**2)  [SC]
+c     or to
+c     2*(pH2)  [PS]
+      if(phdm_mode.eq.'SC') then
+         decayamp2 = 2*(pH2-4*m_1**2)
+      elseif(phdm_mode.eq.'PS') then
+         decayamp2 = 2*pH2
+      endif
+
+      if(phdm_efftheory.eq.'T') then
+         new_p=decayamp2 /(phdm_LambdaUV**3)**2
          new_p=new_p * 16
          new_c=1d0
       else
-         new_p=2*(pH2-4*m_1**2) /
+         new_p=decayamp2 /
      $     ((pH2-phdm_phimass**2)**2 + (phdm_phimass*phdm_phiwidth)**2)
          new_p=new_p * 16
          new_c=(1d0/phdm_LambdaUV)**2
       endif
 
       rescalefactor= (new_p / old_p) * (new_c/old_c)
+      rescalefactor=rescalefactor * (phdm_gSM*phdm_gDM)**2
 
-      
       born=born*rescalefactor
       bornjk(:,:)=bornjk(:,:)*rescalefactor
       bmunu(:,:,:)=bmunu(:,:,:)*rescalefactor
@@ -62,19 +77,29 @@ c Wrapper subroutine to call the MadGraph code to associate
 c a (leading) color structure to an event.
       implicit none
       include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      include 'pwhg_rad.h'
+      integer equivto(maxprocborn)
+      common/cequivtoborn/equivto
       include 'LesHouches.h'
-      integer bflav(nlegborn),color(2,nlegborn)
-      integer i,j
-      do i=1,nlegborn
-         bflav(i)=idup(i)
-         if (bflav(i).eq.21) bflav(i)=0
+      integer bflav0(nlegborn),bflav(nlegborn),color(2,nlegborn)
+      integer i,j,iborn
+      logical samecol,conjcol
+c We should reach the madgraph flavour configuration that
+c was actually computed, in case smartsig is on
+      iborn = rad_ubornidx
+      bflav0 = flst_born(:,iborn)
+      do while(equivto(iborn).ne.-1)
+         iborn=equivto(iborn)
       enddo
+      bflav = flst_born(:,iborn)
       call born_color(bflav,color)
-      do i=1,2
-         do j=1,nlegborn
-            icolup(i,j)=color(i,j)
-         enddo
-      enddo
+c Now we have the colour configuration associated with the
+c amplitude that was computed instead of rad_ubornidx.
+c However, that amplitude may differ from the original one
+c by charge conjugation. Check if this is the case
+      call matchcolour(nlegborn,bflav0,color)
+      icolup(:,1:nlegborn)=color(:,1:nlegborn)
       end
 
       subroutine finalize_lh
@@ -190,6 +215,7 @@ c$$$      do mu=1,4
 c$$$         print*, pup(mu,3)-pup(mu,nup)-pup(mu,nup-1)
 c$$$      enddo
 ccccccccccccccccccccccccccccccccccccccccccccc
+c      if(flg_ckkwscalup) call change_scalup
       end
 
 

@@ -17,7 +17,7 @@ c$$$      real * 8 bornjk(nlegborn,nlegborn),bmunu(0:3,0:3,nlegborn),born
       external dotp
 cccccccccccccccccccccccccccccc
       double precision old_p,new_p,rescalefactor,pH2,old_c,new_c,
-     $     m_1
+     $     m_1,decayamp2
       include 'MCFM_Include/ewcouple.f'
 cccccccccccccccccccccccccccccc
 
@@ -31,8 +31,16 @@ c     Notice that this overall factor is used in gg_hg_eval_v:
 c     Asq=(as/(3d0*pi))**2/vevsq
 c     and it is equal to v used in madgraph throughout all
 c     tree-level routines.
-      old_c=(1d0/(3d0*pi*v))**2
+      m_1=physpar_ml(3)
+      decayamp2=-1d0
       pH2=dotp(p(0,3),p(0,3))
+      if(phdm_mode.eq.'SC') then
+         old_c=(1d0/(3d0*pi*v))**2
+         decayamp2 = 2*(pH2-4*m_1**2)
+      elseif(phdm_mode.eq.'PS') then
+         old_c=(1d0/(2d0*pi*v))**2
+         decayamp2 = 2*pH2
+      endif
 c--------
 c$$$      old_p=ph_hmhw /pi /((ph_Hmass**2-pH2)**2 + (ph_HmHw)**2)
 c     With old_p included as above + flat integration, I re-obtain the 
@@ -42,18 +50,18 @@ c--------
       old_p=1d0
       virtual_DR=virtual_DR*old_p
 cccccccccccc
-      m_1=physpar_ml(3)
       if(phdm_efftheory.eq.'T') then
-         new_p=2*(pH2-4*m_1**2)/(phdm_LambdaUV**3)**2
+         new_p=decayamp2/(phdm_LambdaUV**3)**2
          new_p=new_p * 16
          new_c=1d0
       else
-         new_p=2*(pH2-4*m_1**2) /
+         new_p=decayamp2 /
      $    ((pH2-phdm_phimass**2)**2 + (phdm_phimass*phdm_phiwidth)**2)
          new_p=new_p * 16
          new_c=(1d0/phdm_LambdaUV)**2
       endif
       rescalefactor= (new_p / old_p) * (new_c/old_c)
+      rescalefactor=rescalefactor * (phdm_gSM*phdm_gDM)**2
       virtual_DR=virtual_DR*rescalefactor
 cccccccccccccccccccccccccccccccccccc
 

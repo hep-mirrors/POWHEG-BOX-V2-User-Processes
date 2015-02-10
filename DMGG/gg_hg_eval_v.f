@@ -30,6 +30,9 @@ C     Modified by overall factors
       data oldss/0d0/
       data oldtt/0d0/
       data olduu/0d0/
+cccccccccccccccccc
+      include 'PhysPars.h'
+cccccccccccccccccc
 
       scheme='dred'
 !      call check_scheme
@@ -41,7 +44,11 @@ C     Modified by overall factors
 
       mb=bmass
       mbsq=mb**2
-      Asq=(as/(3d0*pi))**2/vevsq
+      if(phdm_mode.eq.'SC') then
+         Asq=(as/(3d0*pi))**2/vevsq
+      elseif(phdm_mode.eq.'PS') then
+         Asq=(as/(2d0*pi))**2/vevsq
+      endif
 
 c      print*, sqrt(vevsq)
 

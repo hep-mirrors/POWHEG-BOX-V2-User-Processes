@@ -10,37 +10,41 @@ decaymode  1    ! 1 for GG-mediated fermionic DM
                 ! -1, for full theory (mediator mass and width needed)
 
 DMmass      20   ! DM-candidate mass
-DMLambda    500 ! UV scale
 
-#DMphimass 500
-#DMphiwidth 100
+##############################
+# EFT (and also FULL)
+DMLambda   500 ! UV scale
+##############################
+# FULL
+DMphimass 500    ! mediator mass
+DMphiwidth 100   ! mediator width
+#DMgSM      1    ! G-G-med coupling (w/o as/LambdaUV)
+#DMgDM      1    ! X-Xbar-med coupling
+###############################
 
-testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+#nloformfact 1     ! (default 0) if 1, include Higgs-specific corrections
+                   ! into GGS and GGP form factor
 
+#testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 #bornonly 1        ! (default 0) if 1 do Born only in fixed-order
 #LOevents 1        ! (default 0) if 1, produce LOPS events (scalup=ptj)
 
 runningscale 3    ! (default 3) 0, 1, 2, 3 correspond to 2mX (fixed), ptj, XXbar invmass, Ht/2
-                 ! Details in Born_phsp.f
-
-renscfact  1     ! (default 1d0) ren scale factor: muren  = muref * renscfact 
-facscfact  1     ! (default 1d0) fac scale factor: mufact = muref * facscfact 
-
-mass_low 20      ! minimum value for XXbar invariant mass
-mass_high 8000   ! maximum value for XXbar invariant mass
+                  ! Details in Born_phsp.f
+renscfact  1      ! (default 1d0) ren scale factor: muren  = muref * renscfact 
+facscfact  1      ! (default 1d0) fac scale factor: mufact = muref * facscfact 
 
 bornktmin 1     ! (default 0d0) generation cut. Minimum kt in underlying Born
-###
 bornsuppfact 80 ! (default 0d0) mass param for Born suppression factor. If < 0 suppfact = 1
-###
 withnegweights 1  ! (default 0) if 1, use negative weights
+
 smartsig 1
 
 numevts 50000     ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
-ebeam1 4000d0     ! energy of beam 1
-ebeam2 4000d0     ! energy of beam 2
+ebeam1 6500d0     ! energy of beam 1
+ebeam2 6500d0     ! energy of beam 2
 
 ! To be set only if using internal (mlm) pdfs
 ! ndns1 131         ! pdf set for hadron 1 (mlm numbering)

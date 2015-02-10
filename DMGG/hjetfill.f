@@ -9,6 +9,10 @@ c     !:
 c$$$      include 'MCFM_Include/qcdcouple.f'
 c$$$      include 'MCFM_Include/ewcouple.f'
 cccccccccccccccc
+      double precision bshift,nbfactor
+      include 'PhysPars.h'
+      double precision  powheginput
+cccccccccccccccc
 
       double precision virtgg,virtqa,virtaq,virtqg,virtgq,
      . logg,loqa,loaq,loqg,logq,ddilog,Li2s,Li2t,Li2u,
@@ -40,7 +44,30 @@ c--- UV counterterm in MS bar scheme.
 c--- See C.R.Schmidt, PLB (413) 391, eq. (16),(17)
 c--- Factor of ason2pi included in gg_hg_v.f
 C--- Three powers of as in Born --> 3      
+ccccccccccccccccc
+c     !: for DM production, since this is an effective vertex and we
+c     don't know anything about the exact UV Physics (other than it is a
+c     QCD loop and hence as^2 will be there), there is no reason to use
+c     the Delta factor that comes from the 2-loops QCD correction to the
+c     effective SM GGH coupling.
+c     
+c     Notice that in the original version of the code (used in
+c     1310.4491), Delta was still set to 11.
+      Delta=0d0
+      if(powheginput('#nloformfact').eq.1) Delta=11
+ccccccccccccccccc
+
       subuv=3d0*subuv+Delta
+
+cccccccccccccccccccccccc
+      if(phdm_mode.eq.'SC') then
+         bshift=0d0
+         nbfactor=1d0
+      elseif(phdm_mode.eq.'PS') then
+         bshift=4d0
+         nbfactor=-1d0
+      endif
+cccccccccccccccccccccccc
   
       virtgg=-3d0*epinv**2*xn*logg 
      . +epinv*xn*logg*(lns+lnt+lnu-3d0*lnm )
@@ -48,7 +75,9 @@ C--- Three powers of as in Born --> 3
      . *(2d0*(Li2t+Li2u+Li2s)
      . +lnm*(lns+lnt+lnu)-lns*lnt-lns*lnu-lnt*lnu
      . +0.5d0*(lns**2-lnt**2-lnu**2)-1.5d0*lnm**2
-     . +2d0*(lnu*ln2u+lnt*ln2t)+4d0/3d0*pisq)
+     . +2d0*(lnu*ln2u+lnt*ln2t)+4d0/3d0*pisq
+     . + bshift
+     . )
      . +V_i2*xn*(xn-xlf)/3d0*mhsq*(1d0+mhsq/s+mhsq/t+mhsq/u)
      . +subuv*logg
  
@@ -59,12 +88,14 @@ C--- Three powers of as in Born --> 3
      . +loqa*xlf*(-10d0/9d0+2d0/3d0*lns-2d0/3d0*lnm)
      . +xn*loqa* (40d0/9d0+Li2t+Li2u+2d0*Li2s-13d0/6d0*(lns-lnm)
      . +(lnm-lns)*(lnt+lnu)+lns**2-lnm**2-0.5d0*lnt**2-0.5d0*lnu**2
-     . +lnt*ln2t+lnu*ln2u)
+     . +lnt*ln2t+lnu*ln2u
+     . + bshift
+     . )
      . +loqa/xn
      . *(4d0-Li2t-Li2u-1.5d0*(lns-lnm)+0.5d0*(lns-lnm)**2
      . +lnt*lnu-lnt*ln2t-lnu*ln2u)
      . -4d0/3d0*pi**2/xn*loqa
-     . -0.25d0*(xn**3-1d0/xn)*(t+u)
+     . -0.25d0*(xn**3-1d0/xn)*(t+u)*nbfactor
      . +subuv*loqa
 
       virtaq=(-2d0*xn+1d0/xn)*loaq*epinv**2
@@ -74,12 +105,14 @@ C--- Three powers of as in Born --> 3
      . +loaq*xlf*(-10d0/9d0+2d0/3d0*lns-2d0/3d0*lnm)
      . +xn*loaq* (40d0/9d0+Li2u+Li2t+2d0*Li2s-13d0/6d0*(lns-lnm)
      . +(lnm-lns)*(lnu+lnt)+lns**2-lnm**2-0.5d0*lnu**2-0.5d0*lnt**2
-     . +lnu*ln2u+lnt*ln2t)
+     . +lnu*ln2u+lnt*ln2t
+     . + bshift
+     . )
      . +loaq/xn
      . *(4d0-Li2u-Li2t-1.5d0*(lns-lnm)+0.5d0*(lns-lnm)**2
      . +lnu*lnt-lnu*ln2u-lnt*ln2t)
      . -4d0/3d0*pi**2/xn*loaq
-     . -0.25d0*(xn**3-1d0/xn)*(u+t)
+     . -0.25d0*(xn**3-1d0/xn)*(u+t)*nbfactor
      . +subuv*loaq
  
 
@@ -91,11 +124,13 @@ C--- Three powers of as in Born --> 3
      . +xn*logq*(40d0/9d0+Li2t+2d0*Li2u+Li2s
      . +lns*lnm-lns*lnu-13d0/6d0*(lnu-lnm)
      . +lnm*lnt-lnm**2-lnt*lnu-0.5d0*lnt**2
-     . +2d0*lnu*ln2u+lnt*ln2t)
+     . +2d0*lnu*ln2u+lnt*ln2t
+     . + bshift
+     . )
      . +logq/xn*(4d0-Li2t-Li2s+lns*lnt+0.5d0*lnu**2-0.5d0*lns**2
      . -lnm*lnu+0.5d0*lnm**2-lnt*ln2t-1.5d0*(lnu-lnm))
      . +4d0/3d0*pi**2*xn*logq
-     . +0.25d0*(xn**3-1d0/xn)*(t+s)
+     . +0.25d0*(xn**3-1d0/xn)*(t+s)*nbfactor
      . +subuv*logq
 
       virtqg=(-2d0*xn+1d0/xn)*epinv**2*loqg
@@ -106,11 +141,13 @@ C--- Three powers of as in Born --> 3
      . +xn*loqg*(40d0/9d0+Li2u+2d0*Li2t+Li2s
      . +lns*lnm-lns*lnt-13d0/6d0*(lnt-lnm)
      . +lnm*lnu-lnm**2-lnu*lnt-0.5d0*lnu**2
-     . +2d0*lnt*ln2t+lnu*ln2u)
+     . +2d0*lnt*ln2t+lnu*ln2u
+     . + bshift
+     . )
      . +loqg/xn*(4d0-Li2u-Li2s+lns*lnu+0.5d0*lnt**2-0.5d0*lns**2
      . -lnm*lnt+0.5d0*lnm**2-lnu*ln2u-1.5d0*(lnt-lnm))
      . +4d0/3d0*pi**2*xn*loqg
-     . +0.25d0*(xn**3-1d0/xn)*(u+s)
+     . +0.25d0*(xn**3-1d0/xn)*(u+s)*nbfactor
      . +subuv*loqg
 
 ccccccccccccccccccccc

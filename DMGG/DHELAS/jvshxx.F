@@ -59,6 +59,7 @@ c      PARAMETER(DIM=18)
       endif
 
       if (gc(1).NE.(0D0,0D0)) then
+c         print*, 'jvshxx sc '
          qvc = vc(1)*q(1) - vc(2)*q(2) - vc(3)*q(3) - vc(4)*q(4)	
          qp1 = q(1)*p1(1) - q(2)*p1(2) - q(3)*p1(3) - q(4)*p1(4)	
          
@@ -69,6 +70,7 @@ c      PARAMETER(DIM=18)
       endif
  
       if (gc(2).NE.(0D0,0D0)) then
+c         print*, 'jvshxx ps '
          p12 = p1(1)*q(2) - p1(2)*q(1)
          p13 = p1(1)*q(3) - p1(3)*q(1)
          p14 = p1(1)*q(4) - p1(4)*q(1)

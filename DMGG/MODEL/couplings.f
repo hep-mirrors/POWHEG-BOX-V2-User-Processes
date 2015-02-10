@@ -84,6 +84,9 @@ c
 
       save scalarf,axialf,series_t,series_p
 
+c     !ER:
+      include '../PhysPars.h'
+
 
 ccccccccccccccccccccccccc
 c     !ER:
@@ -221,11 +224,20 @@ c$$$	    series_p = 1d0 + tau/3d0      + tau**2*8d0/45d0 + tau**3*4d0/35d0
         series_t=1d0
         series_p=1d0
 
-        scalarf = 1d0
-        axialf  = 0d0
+ccccccccc
+c     !ER: notice that this setting is not really relevant
+c     since gh and gh4 are set on an event-by-event base
+c     by set_ebe_couplings...
+        if(phdm_mode.eq.'SC') then
+           scalarf = 1d0
+           axialf  = 0d0
+        elseif(phdm_mode.eq.'PS') then
+           scalarf = 0d0
+           axialf  = 1d0
+        endif
+
 
 c Coupling to photons
-
 	tau_t = hmass**2/(4d0*tmass**2)
 	tau_w = hmass**2/(4d0*wm**2)
         series_a = 1d0 + tau_w*66d0/235d0 +tau_w**2*228d0/1645d0
@@ -252,6 +264,10 @@ c Higgs coupling:
 
       gh(1) = dcmplx( scalarf*g**2/4d0/PI/(3d0*PI*V)*series_t, Zero)
       gh(2) = dcmplx( axialf *g**2/4d0/PI/(2d0*PI*V)*series_p, Zero)
+
+      print*, gh
+c      stop
+
 
 c Pseudo-scalar Higgs coupling:
       ga(1) = dcmplx( Zero                  , Zero)

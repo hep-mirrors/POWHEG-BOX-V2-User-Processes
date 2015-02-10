@@ -33,13 +33,13 @@ c     multiple interactions
       common/canalysis_jetveto/analysis_jetveto
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-c$$$c     multiple interactions
-c$$$c     (MI can increase a lot the execution time)
-c$$$      if(.not.mult_inter) then
-c$$$         mstp(81)=20   !No Multiple interactions. Force a call to PYEVNW 
-c$$$      else
-c$$$         mstp(81)=21   ! MPI on in the PYEVNW MPI scenario
-c$$$      endif
+c     multiple interactions
+c     (MI can increase a lot the execution time)
+      if(.not.mult_inter) then
+         mstp(81)=20   ! No Multiple interactions. Force a call to PYEVNW 
+      else
+         mstp(81)=21   ! MPI on in the PYEVNW MPI scenario
+      endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -15,10 +15,8 @@ c but never closed ...
 
       real * 8 powheginput
       external powheginput
-
       real * 8 masswindow_low,masswindow_high
       real * 8 mass_low,mass_high
-
       integer absdecaymode
 
 
@@ -55,11 +53,13 @@ c     !:
          else
             phdm_LambdaUV=500d0
          endif
+         phdm_gSM=1
+         phdm_gDM=1
+c     Needed in case one wants to do BW integration when using EFT approach
+         phdm_phimass = phdm_LambdaUV
+         phdm_phiwidth= phdm_LambdaUV/10d0
       else 
          phdm_efftheory='F'
-c         print*, 'Full theory in DMGG case implemented '//
-c     $        'but not yet tested, program stops'
-c         stop
          phdm_phimass=powheginput('DMphimass')
          phdm_phiwidth=powheginput('DMphiwidth')
 c     needed for the effective coupling...
@@ -68,6 +68,14 @@ c     needed for the effective coupling...
             write(*,*) 'Error: phdm_LambdaUV<0 !'
             call exit(-1)
          endif
+         
+         phdm_gSM=powheginput('#DMgSM')
+         if(phdm_gSM.eq.-1000000) phdm_gSM=1
+         phdm_gDM=powheginput('#DMgDM')
+         if(phdm_gDM.eq.-1000000) phdm_gDM=1
+
+c         phdm_rw=powheginput('#runningwidth').gt.0
+
       endif
 
 c     mass window
@@ -90,46 +98,47 @@ c$$$      masswindow_high = powheginput("#masswindow_high")
 c$$$      if (masswindow_high.le.0d0) masswindow_high=30d0
 
 ccccccccccccccccccccccccccccccc
-c     These are arbitrary values.
-c     I need them to prevent madgraph to blow up, and I also
-c     need them to recover the old program output.
-c     I also use them as references for the mass integration
-c     interval.
-c      hmass = powheginput('hmass')
-c      hwidth = powheginput('hwidth')
-c      hmass =  500d0
-c      hwidth =  10d0
-      hmass = 120d0
-      hwidth =  5.75308848d-03
-      ph_Hmass  = hmass
-      ph_Hmass2 = ph_Hmass**2
-      ph_Hwidth = hwidth
-      ph_HmHw = ph_Hmass * ph_Hwidth
 
       if(mass_low.ge.0d0) then
          ph_Hmass2low=mass_low**2
       else
-         ph_Hmass2low=(max(0d0,ph_Hmass-masswindow_low*ph_Hwidth))**2
+c         ph_Hmass2low=(max(0d0,ph_Hmass-masswindow_low*ph_Hwidth))**2
+         ph_Hmass2low=0
       endif
       if (sqrt(ph_Hmass2low).lt.(2*physpar_ml(3))) then
          ph_Hmass2low=(2*physpar_ml(3))**2
       endif
      
       if(mass_high.ge.0d0) then
-         ph_Hmass2high=mass_high
+         ph_Hmass2high=mass_high**2
       else
-         ph_Hmass2high=ph_Hmass+masswindow_high*ph_Hwidth
+c         ph_Hmass2high=(ph_Hmass+masswindow_high*ph_Hwidth)**2
+         ph_Hmass2high=kn_sbeams
       endif 
-c     !: check next line again
-      ph_Hmass2high=min(kn_sbeams-2*kn_ktmin*sqrt(kn_sbeams),
-     $     ph_Hmass2high**2)
-
-      ph_unit_e = sqrt(4*pi*ph_alphaem)
+c     !: m2 obtained by solving
+c     shat = m2 + 2 ph*pj. 
+c     (going in frame where yj=yh=0, and then shat -> shad, since we are computing
+c     the maximum value for m2)
+c     *0.99 to stay on the safe side
+      ph_Hmass2high=min((kn_sbeams-2*kn_ktmin*sqrt(kn_sbeams))*0.99,
+     $     ph_Hmass2high)
 
       if( ph_Hmass2low.ge.ph_Hmass2high ) then
-         write(*,*) "Error in init_couplings: mass_low >= mass_high"
-         call exit(1)
+         write(*,*) "Error in init_couplings: mass_low >= mass_high ",
+     $        sqrt(ph_Hmass2low),sqrt(ph_Hmass2high)
+         call exit(-1)
       endif
+
+c      hmass =  500d0
+c      hwidth =  10d0
+      hmass =   phdm_phimass
+      hwidth =  phdm_phiwidth
+      ph_Hmass  = hmass
+      ph_Hmass2 = ph_Hmass**2
+      ph_Hwidth = hwidth
+      ph_HmHw = ph_Hmass * ph_Hwidth
+      ph_unit_e = sqrt(4*pi*ph_alphaem)
+
 
       write(*,*) '****************************************************'
       write(*,*) 'When using this code, please follow the citation'
@@ -156,6 +165,10 @@ c         write(*,*) 'hmass,hwidth= ',hmass,hwidth
             write(*,*) 'DM mediator width = ',phdm_phiwidth
             write(*,*) 'DM lambda scale for GGS coupling = ',
      $           phdm_LambdaUV
+            write(*,*) 'coupling G_G_mediator (w/o as/LambdaUV) = ',
+     $           phdm_gSM
+            write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
+c            write(*,*) 'running width = ',phdm_rw
          endif
          write(*,*) '*************************************'
       endif
@@ -243,14 +256,44 @@ c      hwidth =  5.75308848d-03
       include 'pwhg_st.h'
       include 'pwhg_math.h'
       include "coupl.inc"
+      include 'PhysPars.h'
+      logical ini
+      data ini/.true./
+      double precision axialf,scalarf
+      save ini,axialf,scalarf
 c QCD coupling constant
       G=sqrt(st_alpha*4d0*pi)
       GG(1)=-G
       GG(2)=-G
 
 c HEFT coupling
-      gh(1) = dcmplx( g**2/4d0/PI/(3d0*PI*V), 0d0)
-      gh(2) = dcmplx( 0d0                   , 0d0)
+ccccccccccccccc
+c     !ER: orig
+c$$$      gh(1) = dcmplx( g**2/4d0/PI/(3d0*PI*V), 0d0)
+c$$$      gh(2) = dcmplx( 0d0                   , 0d0)
+      !ER: new
+      if(ini) then
+         if(phdm_mode.eq.'SC') then
+            scalarf = 1d0
+            axialf  = 0d0
+         elseif(phdm_mode.eq.'PS') then
+            scalarf = 0d0
+            axialf  = 1d0
+         endif
+         ini=.false.
+      endif
+c     this is how the couplings should look for a scalar or pseudoscalar
+c     
+      gh(1) = dcmplx( scalarf*g**2/4d0/PI/(3d0*PI*V), 0d0) 
+c     
+      gh(2) = dcmplx( axialf *g**2/4d0/PI/(2d0*PI*V), 0d0)
+c     
+c$$$c     but for simplicity and later convenience I use the 1/(3*pi*v)
+c$$$c     normalization factor (i.e. the SM Higgs) for both of them
+c$$$      gh(1) = dcmplx( scalarf*g**2/4d0/PI/(3d0*PI*V), 0d0)
+c$$$      gh(2) = dcmplx( axialf *g**2/4d0/PI/(3d0*PI*V), 0d0)
+
+ccccccccccccc
       ga(1) = dcmplx( 0d0                   , 0d0)
       ga(2) = dcmplx( g**2/4d0/PI/(2d0*PI*V), 0d0)
       gh4(1) = G*gh(1)

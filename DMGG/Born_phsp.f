@@ -18,7 +18,7 @@
       external powheginput
 
       logical genflat
-      data genflat/.true./
+      data genflat/.false./
       save genflat
 
 cccccccccccc
@@ -43,9 +43,13 @@ c     !:
          else
             write(*,*) '*************************************'
             write(*,*)
-     $           "WARNING: k3 virtuality imp sampling not implemented. "
+     $           "k3 virtuality is importance sampled. "
+            if(phdm_efftheory.eq.'F') then
+               write(*,*) 'BW importance sampling'
+            elseif(phdm_efftheory.eq.'T') then
+               write(*,*) 'xxx^2 importance sampling'
+            endif
             write(*,*) '*************************************'
-            call exit(-1)
          endif
 c     !: following stuff defined in init_couplings
 c$$$         ph_HmHw=hmass*hwidth
@@ -58,13 +62,36 @@ cccccccccccccccccccccccccccccccccccccc
       endif
 
       if(.not.genflat) then
-         zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
-         zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
-         z=zlow+(zhigh-zlow)*xborn(1)
-         xjac=zhigh-zlow
-         m2=ph_HmHw*tan(z)+ph_Hmass2
-c     The BW integrates to Pi ==> divide by Pi
-         xjac=xjac/pi
+         if(phdm_efftheory.eq.'F') then
+c     !ER: keep this for backward compatibility, it is correct to recover
+c     the original Higgs+1jet code.
+c     This is a BW importance sampling that integrates to 1
+c$$$            zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
+c$$$            zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
+c$$$            z=zlow+(zhigh-zlow)*xborn(1)
+c$$$            xjac=zhigh-zlow
+c$$$            m2=ph_HmHw*tan(z)+ph_Hmass2
+c$$$c     The BW integrates to Pi ==> divide by Pi
+c$$$            xjac=xjac/pi
+c     !ER: BW importance sampling for dM^2
+            zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
+            zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
+            z=zlow+(zhigh-zlow)*xborn(1)
+            xjac=zhigh-zlow
+            m2=ph_HmHw*tan(z)+ph_Hmass2
+c     d m^2 jacobian
+            xjac=xjac*ph_HmHw/cos(z)**2
+         elseif(phdm_efftheory.eq.'T') then
+            m2=ph_Hmass2low+(ph_Hmass2high-ph_Hmass2low)*xborn(1)**2
+            xjac=2*xborn(1)*(ph_Hmass2high-ph_Hmass2low)
+c     !ER: uncomment to test BW sampling also in EFT approach
+c$$$            zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
+c$$$            zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
+c$$$            z=zlow+(zhigh-zlow)*xborn(1)
+c$$$            xjac=zhigh-zlow
+c$$$            m2=ph_HmHw*tan(z)+ph_Hmass2
+c$$$            xjac=xjac*ph_HmHw/cos(z)**2
+         endif
       else
          m2=ph_Hmass2low+(ph_Hmass2high-ph_Hmass2low)*xborn(1)
 c     d m^2 jacobian
