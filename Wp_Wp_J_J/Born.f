@@ -329,6 +329,54 @@ C     -- chn qbb
 
       end
 
+      subroutine fixifleptsum(i1,i2)
+      implicit none
+      include 'LesHouches.h'
+      include 'PhysPars.h'
+      include 'cvecbos.h' 
+      integer i1,i2
+      real * 8 random
+      external random
+      if (vdecaymodeW1 .eq. 113) then 
+         if(random().gt.0.5d0) then
+            idup(i1) = -12
+            idup(i2) = 11
+         else
+            idup(i1) = -14
+            idup(i2) = 13
+         endif
+      elseif (vdecaymodeW1 .eq. -113) then 
+         if(random().gt.0.5d0) then
+            idup(i1) = 12
+            idup(i2) = -11
+         else
+            idup(i1) = 14
+            idup(i2) = -13
+         endif
+      elseif (vdecaymodeW1 .eq. 135) then 
+         if(random().lt.1d0/3d0) then
+            idup(i1) = -12
+            idup(i2) = 11
+         elseif(random().lt.2d0/3d0) then
+            idup(i1) = -14
+            idup(i2) = 13
+         else
+            idup(i1) = -16
+            idup(i2) = 15
+         endif
+      elseif (vdecaymodeW1 .eq. -135) then 
+         if(random().lt.1d0/3d0) then
+            idup(i1) = 12
+            idup(i2) = -11
+         elseif(random().lt.2d0/3d0) then
+            idup(i1) = 14
+            idup(i2) = -13
+         else
+            idup(i1) = 16
+            idup(i2) = -15
+         endif
+      endif
+      end
 
 
       
@@ -344,8 +392,9 @@ c     kinematics defined in the Les Houches interface
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
-      
-      integer iq1,iq2,iq3,iq4,i
+      include 'cvecbos.h' 
+
+      integer iq1,iq2,iq3,iq4,i, id_dif 
       integer idpar(8)
       character(len=3) :: chn 
       real *8 w1,w2,r,p(12,4), random  
@@ -407,8 +456,16 @@ C     -- qbq -> qqb
          stop 'borncolor_lc: idup out of range'
       endif
 
+      if (vdecaymodeW1 < 0) then 
+!     W+W+ case 
+         id_dif = -1 
+      else
+!     W-W- case 
+         id_dif =  1 
+      endif
+
 C     distinct families, 1 diag, LC color flow fixed  
-         if (idpar(iq1)+idpar(iq3)==-1 .and.
+         if (idpar(iq1)+idpar(iq3)==id_dif .and.
      .     idpar(iq1)/=idpar(iq2)) then
             if (idup(iq1) > 0) then 
                icolup(1,iq1) = 501
@@ -431,7 +488,7 @@ C     distinct families, 1 diag, LC color flow fixed
                icolup(2,iq3) = 502 
             endif
 C     distinct families, 1 diag, LC color flow fixed  
-         elseif (idpar(iq1)+idpar(iq4)==-1 .and.
+         elseif (idpar(iq1)+idpar(iq4)==id_dif .and.
      .           idpar(iq1)/=idpar(iq2)) then
             if (idup(iq1) > 0) then 
                icolup(1,iq1) = 501
@@ -455,7 +512,7 @@ C     distinct families, 1 diag, LC color flow fixed
             endif
 
 C     identical case, two LC possible color flows  
-         elseif (idpar(iq1)+idpar(iq3)==-1 .and.
+         elseif (idpar(iq1)+idpar(iq3)==id_dif .and.
      .           idpar(iq1)==idpar(iq2)) then
 
 C     need to pick one of the two above possibilities based on |M|^2 at LC 
@@ -531,13 +588,18 @@ c     lepton masses
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
 
+      if(abs(vdecaymodeW1).eq.113 .or. abs(vdecaymodeW1).eq.135) then
+         call fixifleptsum(3,4)
+         call fixifleptsum(5,6)
+      endif
+
       call add_resonance(idvecbos,3,4)
 C     need to shift (56) to (67) since previous res adds a label 
       call add_resonance(idvecbos,6,7)
 
-C     c     The following routine also performs the reshuffling of momenta if
-Cc     a massive decay is chosen
-C      call momenta_reshuffle(3,4,5,decmass)
+      if(abs(vdecaymodeW1).eq.113 .or. abs(vdecaymodeW1).eq.135) then
+         call lhefinitemasses
+      endif
       end
 
 

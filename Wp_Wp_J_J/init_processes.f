@@ -7,6 +7,7 @@
       include 'LesHouches.h'
       include 'pwhg_flg.h'
       include 'pwhg_par.h'
+      include 'pwhg_physpar.h'
       integer i1,i2,i3,i4,i5,i6,i7,i8,i9,k,ii(nlegreal)
       equivalence (i1,ii(1)),(i2,ii(2)),(i3,ii(3)),
      #  (i4,ii(4)),(i5,ii(5)),(i6,ii(6)),(i7,ii(7)),
@@ -27,8 +28,7 @@ c     vector boson id and decay
 c     lepton masses
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
-
-      flg_fastbtlbound = .true.
+      flg_fastbtlbound=.true.
       flg_storemintupb = .true.
 
       par_isrtinycsi = 1d-6
@@ -59,54 +59,95 @@ c   decay products of the vector boson
          write(*,*) 'block data lepmass not loaded. stop running' 
          stop
       endif
-      
+
+      write(*,*) 'idvecbos,vdecaymodeW1,vdecaymodeW2',
+     $     idvecbos,vdecaymodeW1,vdecaymodeW2
       if(idvecbos.eq.24) then
          if ((vdecaymodeW1.ne.-11).and.(vdecaymodeW1.ne.-13)
-     $        .and.(vdecaymodeW1.ne.-15)) then
+     $      .and.(vdecaymodeW1.ne.-15).and.(vdecaymodeW1.ne.-113)
+     $        .and.(vdecaymodeW1.ne.-135)) then
             write(*,*) 'ERROR: The decay mode for W1 you selected' /
      $           /' is not allowed '
             stop 
          endif 
          if ((vdecaymodeW2.ne.-11).and.(vdecaymodeW2.ne.-13)
-     $        .and.(vdecaymodeW2.ne.-15)) then
+     $      .and.(vdecaymodeW2.ne.-15).and.(vdecaymodeW2.ne.-113)
+     $        .and.(vdecaymodeW2.ne.-135)) then
             write(*,*) 'ERROR: The decay mode for W2 you selected' /
      $           /' is not allowed '
             
             stop
          endif
+         if ((vdecaymodeW1.eq.-113 .and. vdecaymodeW2.ne.-113) .or. 
+     $        (vdecaymodeW1.ne.-113 .and. vdecaymodeW2.eq.-113)) then 
+            write(*,*) 'ERROR: The decay mode for W1 and W2' /
+     $           /' you selected is not allowed '
+            stop 
+         endif
+         if ((vdecaymodeW1.eq.-135 .and. vdecaymodeW2.ne.-135) .or. 
+     $        (vdecaymodeW1.ne.-135 .and. vdecaymodeW2.eq.-135)) then 
+            write(*,*) 'ERROR: The decay mode for W1 and W2' /
+     $           /' you selected is not allowed '
+            stop 
+         endif
+
          write(*,*) 
          write(*,*) ' POWHEG: W+ W+ + 2j production and decay ' 
          if (vdecaymodeW1.eq.-11) write(*,*) '         to e+ ve '
          if (vdecaymodeW1.eq.-13) write(*,*) '         to mu+ vmu'
          if (vdecaymodeW1.eq.-15) write(*,*) '         to tau+ vtau'
-         write(*,*)                          '            and'
-         if (vdecaymodeW2.eq.-11) write(*,*) '         to e+ ve '
+         if (vdecaymodeW1.eq.-113) write(*,*)'     to e+ ve and mu+ vmu'
+         if (vdecaymodeW1.eq.-135) write(*,*)'to e+ ve,mu+ vmu,tau+vtau'
+        write(*,*)                          '            and'
+        if (vdecaymodeW2.eq.-11) write(*,*) '         to e+ ve '
          if (vdecaymodeW2.eq.-13) write(*,*) '         to mu+ vmu'
          if (vdecaymodeW2.eq.-15) write(*,*) '         to tau+ vtau'
+         if (vdecaymodeW2.eq.-113) write(*,*)'     to e+ ve and mu+ vmu'
+         if (vdecaymodeW2.eq.-135) write(*,*)'to e+ ve,mu+ vmu,tau+vtau'
          write(*,*) 
       elseif(idvecbos.eq.-24) then
          if ((vdecaymodeW1.ne.11).and.(vdecaymodeW1.ne.13)
-     $        .and.(vdecaymodeW1.ne.15)) then
+     $        .and.(vdecaymodeW1.ne.15).and.(vdecaymodeW1.ne.113)
+     $        .and. (vdecaymodeW1.ne.135)) then 
             write(*,*) 'ERROR: The decay mode for W1 you selected' /
      $           /' is not allowed '
             stop
          endif
          if ((vdecaymodeW2.ne.11).and.(vdecaymodeW2.ne.13)
-     $        .and.(vdecaymodeW2.ne.15)) then
+     $        .and.(vdecaymodeW2.ne.15).and.(vdecaymodeW2.ne.113)
+     $        .and. (vdecaymodeW2.ne.135)) then 
             write(*,*) 'ERROR: The decay mode for W2 you selected' /
      $           /' is not allowed '
             stop
          endif
+         if ((vdecaymodeW1.eq.113 .and. vdecaymodeW2.ne.113) .or. 
+     $        (vdecaymodeW1.ne.113 .and. vdecaymodeW2.eq.113)) then 
+            write(*,*) 'ERROR: The decay mode for W1 and W2' /
+     $           /' you selected is not allowed '
+            stop 
+         endif
+         if ((vdecaymodeW1.eq.135 .and. vdecaymodeW2.ne.135) .or. 
+     $        (vdecaymodeW1.ne.135 .and. vdecaymodeW2.eq.135)) then 
+            write(*,*) 'ERROR: The decay mode for W1 and W2' /
+     $           /' you selected is not allowed '
+            stop 
+         endif
+         write(*,*) 
 
          write(*,*) 
          write(*,*) ' POWHEG: W- W- + 2j production and decay '
          if (vdecaymodeW1.eq.11) write(*,*) '         to e- ve~ '
          if (vdecaymodeW1.eq.13) write(*,*) '         to mu- vmu~'
          if (vdecaymodeW1.eq.15) write(*,*) '         to tau- vtau~'
+         if (vdecaymodeW1.eq.113) write(*,*)'    to e- ve~ and mu- vmu~'
+         if (vdecaymodeW1.eq.135) write(*,*)'to e- ve~,mu-vmu~,tau-vt~'
+
          write(*,*)                          '            and'
          if (vdecaymodeW2.eq.11) write(*,*) '         to e- ve~ '
          if (vdecaymodeW2.eq.13) write(*,*) '         to mu- vmu~'
          if (vdecaymodeW2.eq.15) write(*,*) '         to tau- vtau~'
+         if (vdecaymodeW2.eq.113) write(*,*)'    to e- ve~ and mu- vmu~'
+         if (vdecaymodeW2.eq.135) write(*,*)'to e- ve~,mu-vmu~,tau-vt~'
          write(*,*)    
       else
          write(*,*) 'ERROR: The ID of vector boson you selected' 
@@ -137,6 +178,16 @@ c     and decay
       elseif(lprup(1).eq.(10000-15)) then
          decmass=lepmass(3) 
   
+      elseif((lprup(1).eq.(10000-113)) .or. 
+     .        (lprup(1).eq.(10000-135))) then
+         decmass=0d0 ! to be set later... 
+         physpar_ml(1)=lepmass(1)
+         physpar_ml(2)=lepmass(2)
+      elseif((lprup(1).eq.(10000+113)) .or. 
+     .        (lprup(1).eq.(10000+135))) then
+         decmass=0d0 ! to be set later... 
+         physpar_ml(1)=lepmass(1)
+         physpar_ml(2)=lepmass(2)
       else
 c     not yet implemented
          write(*,*) 'non leptonic W decays '//
@@ -162,6 +213,12 @@ c     not yet implemented
       elseif(lprup(2).eq.(10000-15)) then
          decmass=lepmass(3) 
   
+      elseif(lprup(2).eq.(10000-113) .or. 
+     .        lprup(2).eq.(10000-135)) then
+         decmass=0d0            ! to be set later... 
+      elseif(lprup(2).eq.(10000+113) .or. 
+     .        lprup(2).eq.(10000+135)) then
+         decmass=0d0            ! to be set later... 
       else
 c     not yet implemented
          write(*,*) 'non leptonic W decays '//
@@ -191,7 +248,15 @@ c     (all subsequent particles are coloured)
 !      i6 = i4 
 
 
-      if(vdecaymodeW1.eq.vdecaymodeW2) then
+      if(vdecaymodeW1.eq.vdecaymodeW2 .and. 
+     .     abs(vdecaymodeW1) .eq. 113) then
+C     -- factor 2 accounts for 1 emu + 1/2 ee + 1/2 mumu
+         vsymfact=2d0
+      elseif(vdecaymodeW1.eq.vdecaymodeW2 .and. 
+     .     abs(vdecaymodeW1) .eq. 135) then
+C     -- factor 4.5 accounts for 1 (emu),1 (mutau),1 (etau), + 1/2 (ee) + 1/2 (mumu) +1/2 (tautau)
+         vsymfact=4.5d0
+      elseif(vdecaymodeW1.eq.vdecaymodeW2) then
          vsymfact=0.5d0
       else
          vsymfact=1d0

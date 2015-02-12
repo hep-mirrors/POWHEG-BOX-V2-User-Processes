@@ -126,7 +126,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o  setlocalscales.o validflav.o mint_upb.o  \
-        pwhgreweight.o opencount.o ubprojections.o utils.o \
+        pwhgreweight.o opencount.o ubprojections.o utils.o reshufflemoms.o   \
         $(PDFPACK) $(USER) $(FPEOBJ)
 
 
