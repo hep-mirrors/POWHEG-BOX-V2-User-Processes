@@ -81,7 +81,7 @@
 
 %%%%%%%%%% End TeXmacs macros
 
-\title{Manual for electroweak $W^+W^+ jj$ production in the \POWHEGBOXV{}}
+\title{Manual for electroweak $W^+W^+ jj$ and $W^-W^- jj$ production in the \POWHEGBOXV{}}
 \date{}
 %\author{}
 %\keywords{}
@@ -94,9 +94,9 @@
 %
 \noindent
 The {\tt VBF\_Wp\_Wp} program is an implementation of the electroweak
-$W^+W^+ jj$ production cross section within the \pbox{} framework. It
+$W^+W^+ jj$ and $W^-W^- jj$ production cross sections within the \pbox{} framework. It
 complements the {\tt Wp\_Wp\_j\_j} program, which provides the
-QCD-induced contributions to $W^+W^+ jj$ production in hadronic
+QCD-induced contributions to same-sign weak-boson production in hadronic
 collisions.
 \\[2ex]
 This document describes the input parameters that are specific to the
@@ -175,12 +175,13 @@ At this point the user
 has to decide whether the weak bosons are to be generated on-shell
 ({\tt zerowidth = 1}) or off-shell, distributed according to a
 Breit-Wigner distribution ({\tt zerowidth = 0}).  By default on-shell
-weak bosons are generated. The user can also select the decay modes of
+weak bosons are generated. The user can also select the signs and decay modes of
 the weak bosons by assigning appropriate PDG code to the parameters
 {\tt vdecaymodew1} and {\tt vdecaymodew2} in {\tt powheg.input}. Note
 that only leptonic decays are supported. 
 %
-The parameters {\tt vdecaymodew1} and {\tt vdecaymodew2} are to be set to -11, -13 or -15  for decays to
+In the $W^+W^+ jj$ mode, 
+the parameters {\tt vdecaymodew1} and {\tt vdecaymodew2} are to be set to -11, -13 or -15  for decays to
 positrons, anti-muons, or anti-taus, respectively. Is it also
 possible to generate events with combinations of positron and anti-muon
 decays, in which case {\tt vdecaymodew1} and {\tt vdecaymodew2} at the same time should
@@ -188,12 +189,13 @@ be set to -113. A combination of all leptons (positron, anti-muons, and
 anti-taus) can be obtained by setting {\tt vdecaymodew1} and {\tt vdecaymodew2}
 to -135.
 %
+Predictions for $pp\to W^-W^-jj$ can be obtained by obvious sign changes in the aforementioned input parameters. 
+%
 The template analysis file
 {\tt pwhg\_analysis.f} needed in subsequent steps of the analysis is
-designed for the $e^+\nu_e \,\mu^+\nu_{\mu}$ mode.
+designed for the $e^+\nu_e \,\mu^+\nu_{\mu}$ and  $e^-\bar\nu_e \,\mu^-\bar\nu_{\mu}$ modes.
 %
-In order to obtain predictions for $pp\to W^-W^-jj$, one can do a calculation for $\bar p\bar p\to W^+W^+jj$, treat the decay leptons of the $W^+$ bosons as if they were negatively charged and reverse the momentum directions for parity-odd distributions. In the \POWHEGBOX{}, predictions for anti-protons can be obtained by 
-setting the input parameters {\tt ih1} and {\tt ih2} to {\tt -1} in the {\tt powheg.input} file.  
+%In order to obtain predictions for $pp\to W^-W^-jj$, one can do a calculation for $\bar p\bar p\to W^+W^+jj$, treat the decay leptons of the $W^+$ bosons as if they were negatively charged and reverse the momentum directions for parity-odd distributions. In the \POWHEGBOX{}, predictions for anti-protons can be obtained by setting the input parameters {\tt ih1} and {\tt ih2} to {\tt -1} in the {\tt powheg.input} file.  
 %
 \\[2ex]
 %

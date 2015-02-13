@@ -4,9 +4,10 @@
       include 'nlegborn.h'
       include 'pwhg_math.h'
       include 'pwhg_st.h'
+      include 'cvecbos.h'
 
-      real * 8 p(0:3,nlegborn)
-      integer vflav(nlegborn)
+      real * 8 p(0:3,nlegborn),p0(0:3,nlegborn)
+      integer vflav(nlegborn),vflav0(nlegborn)
       real * 8 virtual
 
       integer nlegs
@@ -28,10 +29,21 @@
       firsttime = .false.
       endif
 
+
+      if(idvecbos.eq.24) then
+         vflav0=vflav
+         p0=p
+      else
+c Apply CP to the kinematics
+         vflav0=-vflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
+
       if(fakevirt.eq.1) then  
  
-      call compute_tensors(p)     
-      call compborn_ew(p,vflav,born,bbmunu) 
+      call compute_tensors(p0)     
+      call compborn_ew(p0,vflav0,born,bbmunu) 
 
       virtual = 0.2d0*born
       
@@ -39,8 +51,8 @@
 
 c numbering of momenta is q(1) q(2) -> l1(3)v1(4) l2(5)v2(6) q(7)q(8)
 c
-      call compute_tensors(p) 
-      call compvirt_ew(p,vflav,virtual) 
+      call compute_tensors(p0) 
+      call compvirt_ew(p0,vflav0,virtual) 
 
 c     cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
       virtual = virtual/(st_alpha/(2d0*pi))

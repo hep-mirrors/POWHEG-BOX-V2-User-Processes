@@ -43,12 +43,20 @@ c******************************************************
 c     Choose the process to be implemented
 c******************************************************
 c    ID of vector bosons produced (both same type)
-c    (enforce W+W+jj final state):
-      idvecbos=24 
-
+c
 c   decay products of the two vector bosons
       vdecaymodew1=powheginput('vdecaymodew1')
       vdecaymodew2=powheginput('vdecaymodew2')
+      if(vdecaymodeW1*vdecaymodeW2.lt.0) then
+         write(*,*) ' incompatible decay modes for W1 and W2;'
+         write(*,*) ' Must have the same sign! Aborting'
+         call exit(-1)
+      endif
+      if(vdecaymodeW1.gt.0) then
+         idvecbos=-24
+      else
+         idvecbos=24
+      endif
 
 C     default if zerowidth = .true. 
       if (powheginput("#zerowidth").eq.0) then 
@@ -64,6 +72,7 @@ C     default if zerowidth = .true.
          stop
       endif
       
+      if(idvecbos.eq.24) then
 
       if (((vdecaymodew1.ne.-11).and.(vdecaymodew1.ne.-13)
      $     .and.(vdecaymodew1.ne.-15).and.(vdecaymodeW1.ne.-113)
@@ -98,7 +107,48 @@ C     default if zerowidth = .true.
       if (vdecaymodew2.eq.-15) write(*,*) '         tau+ vtau'
       if (vdecaymodeW2.eq.-113) write(*,*)'     to e+ ve and mu+ vmu'
       if (vdecaymodeW2.eq.-135) write(*,*)'to e+ ve,mu+ vmu,tau+vtau'
-      write(*,*)            
+      write(*,*)   
+
+      elseif(idvecbos.eq.-24) then
+      if (((vdecaymodew1.ne.11).and.(vdecaymodew1.ne.13)
+     $     .and.(vdecaymodew1.ne.15).and.(vdecaymodeW1.ne.113)
+     $     .and.(vdecaymodeW1.ne.135)).or.(
+     $     (vdecaymodew2.ne.11).and.(vdecaymodew2.ne.13)
+     $     .and.(vdecaymodew2.ne.15).and.(vdecaymodeW2.ne.113)
+     $     .and.(vdecaymodeW2.ne.135))) then
+         write(*,*) 'ERROR: The decay mode you selected' /
+     $        /' is not allowed '
+         stop
+      endif
+
+      if (((vdecaymodew1.eq.113).and.(vdecaymodeW2.ne.113)).or.(
+     &     (vdecaymodew1.eq.135).and.(vdecaymodeW2.ne.135)).or.(
+     &     (vdecaymodew2.eq.113).and.(vdecaymodeW1.ne.113)).or.(
+     &     (vdecaymodew2.eq.135).and.(vdecaymodeW1.ne.135))) then 
+         write(*,*) 'ERROR: The decay mode you selected' /
+     $        /' is not allowed '
+         stop
+      endif
+         
+         write(*,*) 
+         write(*,*) ' POWHEG: W- W- + 2j production and decay '
+         if (vdecaymodeW1.eq.11) write(*,*) '         to e- ve~ '
+         if (vdecaymodeW1.eq.13) write(*,*) '         to mu- vmu~'
+         if (vdecaymodeW1.eq.15) write(*,*) '         to tau- vtau~'
+         if (vdecaymodeW1.eq.113) write(*,*)'     to e-ve~ and mu- vmu~'
+         if (vdecaymodeW1.eq.135) write(*,*)'to e-ve~,mu-vmu~,tau-vtau~'
+         write(*,*)                          '            and'
+         if (vdecaymodeW2.eq.11) write(*,*) '         to e- ve~ '
+         if (vdecaymodeW2.eq.13) write(*,*) '         to mu- vmu~'
+         if (vdecaymodeW2.eq.15) write(*,*) '         to tau- vtau~'
+         if (vdecaymodeW2.eq.113) write(*,*)'     to e-ve~ and mu- vmu~'
+         if (vdecaymodeW2.eq.135) write(*,*)'to e-ve~,mu-vmu~,tau-vtau~'
+         write(*,*)    
+      else
+         write(*,*) 'ERROR: The ID of vector boson you selected' 
+     $        //' is not allowed (24: W+ -24: W-)'
+         stop
+      endif         
 
 c     change the LHUPI id of the process according to vector boson id
 c     and decay
@@ -267,6 +317,7 @@ C assume diagonal CKM and no s-channel contributions:
       enddo !i7
       enddo !i2
       enddo !i1
+
       if (debug) then
          write(*,*) ' born processes',flst_nborn
          do j=1,flst_nborn
@@ -387,6 +438,7 @@ c    assume diagonal CKM and no s-channel annihilation:
       enddo !i2
       enddo !i1
 
+
 C the qg->qqq case:
       do i1=-max_flav,max_flav
       do i2=0,0
@@ -438,12 +490,14 @@ c    assume diagonal CKM and not s-channel annihilation:
       enddo !i2
       enddo !i1
 
+
       if (debug) then
          write(*,*) ' real processes',flst_nreal
          do j=1,flst_nreal
             write(*,*) (flst_real(k,j),k=1,nlegreal)
          enddo
       endif
+
       return
  998  write(*,*) 'init_processes: increase maxprocreal'
       stop

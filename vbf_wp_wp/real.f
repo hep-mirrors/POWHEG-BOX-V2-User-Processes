@@ -1,17 +1,28 @@
 c
-      subroutine setreal(p,fermion_flav,amp2)
+      subroutine setreal(p,rflav,amp2)
       implicit none
       include 'nlegborn.h'
       include 'pwhg_math.h'
       include 'pwhg_st.h'
+      include 'cvecbos.h' 
       integer nleg
       parameter (nleg=nlegreal)
-      real * 8 p(0:3,nleg)
-      integer fermion_flav(nleg)
+      real * 8 p(0:3,nleg),p0(0:3,nleg)
+      integer rflav(nleg),rflav0(nleg)
       real * 8 amp2
 
-      call compute_tensors_real(p) 
-      call compreal_ew(p,fermion_flav,amp2)
+      if(idvecbos.eq.24) then
+         rflav0=rflav
+         p0=p
+      else
+c Apply CP to the kinematics
+         rflav0=-rflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
+
+      call compute_tensors_real(p0) 
+      call compreal_ew(p0,rflav0,amp2)
 
 c     cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
       amp2 = amp2/(st_alpha/(2d0*pi))
@@ -272,16 +283,36 @@ c
 
       polcol = polcolg
 
-      elseif (bflav(1).lt.0.and.bflav(2).eq.0.and.bflav(7).lt.0) then
+      elseif (bflav(1).lt.0.and.bflav(2).eq.0.and.
+     &        bflav(7).lt.0.and.bflav(8).lt.0) then
  
 C*******************  qbar2 g ---> qbar1 qb3 q4 W W   **********************
 c
-      physToDiag(1)=2!1             
-      physToDiag(5)=3            
-      physToDiag(3)=1!2             
-      physToDiag(2)=5
-      physToDiag(4)=4
+      physToDiag(1)= 2!            
+      physToDiag(4)= 3!            
+      physToDiag(3)= 1!            
+      physToDiag(2)= 5!
+      physToDiag(5)= 4!
+c
+      fsign(1) = -1
+      fsign(2) = -1
+      fsign(3) = -1
+      fsign(4) = 1
+      gsign    = -1
+      
+      polcol = polcolg
 
+      elseif (bflav(1).lt.0.and.bflav(2).eq.0.and.
+     &        bflav(7).lt.0.and.bflav(8).gt.0) then
+
+C*******************  qbar2 g ---> qbar1 q3 qb4 W W   **********************
+c
+      physToDiag(1)= 2!            
+      physToDiag(4)= 4!            
+      physToDiag(3)= 1!            
+      physToDiag(2)= 5!
+      physToDiag(5)= 3!
+c
       fsign(1) = -1
       fsign(2) = -1
       fsign(3) = -1
@@ -294,7 +325,7 @@ c
          
          print*,'this flav combination is not implemented'
          print*,'bflav=',bflav
-
+         stop
       endif
          
 C*****************  end of process evaluation  **********************

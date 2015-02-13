@@ -156,15 +156,15 @@ c     from pico to femto
          if(WHCPRG.eq.'NLO   ') then
             write (*,*) 'Fixed order ANALYSIS CALLED '
          
-           if((vdecaymodew1.eq.-11.and.vdecaymodew2.eq.-11).or. 
-     $           (vdecaymodew1.eq.-13.and.vdecaymodew2.eq.-13).or.
-     $           (vdecaymodew1.eq.-11.and.vdecaymodew2.eq.-13).or.
-     $           (vdecaymodew1.eq.-13.and.vdecaymodew2.eq.-11)   
+           if((abs(vdecaymodew1).eq.11.and.abs(vdecaymodew2).eq.11).or. 
+     $        (abs(vdecaymodew1).eq.13.and.abs(vdecaymodew2).eq.13).or.
+     $        (abs(vdecaymodew1).eq.11.and.abs(vdecaymodew2).eq.13).or.
+     $        (abs(vdecaymodew1).eq.13.and.abs(vdecaymodew2).eq.11)   
      $        ) then
               continue
            else
              write(*,*) '**************************************'
-             write(*,*) ' template analysis works only for Wp  '
+             write(*,*) ' template analysis works only for ssWW  '
              write(*,*) ' bosons decaying to electrons or muons'
              write(*,*) '                 STOP                 '
              write(*,*) '**************************************'

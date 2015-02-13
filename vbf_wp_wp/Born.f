@@ -6,21 +6,32 @@
       include 'pwhg_flst.h'
       include 'pwhg_kn.h'
       include 'PhysPars.h'
+      include 'cvecbos.h'
       integer nlegs
       parameter (nlegs=nlegborn)
-      real * 8 p(0:3,nlegs),bornjk(nlegs,nlegs)
+      real * 8 p(0:3,nlegs),p0(0:3,nlegs),bornjk(nlegs,nlegs)
       real * 8 bmunu(0:3,0:3,nlegs),bbmunu(0:3,0:3),born,colcf
-      integer bflav(nlegs)
+      integer bflav0(nlegs),bflav(nlegs)
       integer j,k,mu,nu
 c
 c numbering of momenta is q(1) q(2) -> l1(3)v1(4) l2(5)v2(6) q(7)q(8)
+
+      if(idvecbos.eq.24) then
+         bflav0=bflav
+         p0=p
+      else
+c Apply CP to the kinematics
+         bflav0=-bflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
 c
-      call compute_tensors(p) 
-      call compborn_ew(p,bflav,born,bbmunu) 
+      call compute_tensors(p0) 
+      call compborn_ew(p0,bflav0,born,bbmunu) 
       
       do j=1,nlegs
-         if(abs(bflav(j)).le.6) then
-             if(bflav(j).eq.0) then
+         if(abs(bflav0(j)).le.6) then
+             if(bflav0(j).eq.0) then
                do mu=0,3
                   do nu=0,3
                      bmunu(mu,nu,j)=bbmunu(mu,nu)
