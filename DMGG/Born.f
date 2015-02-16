@@ -60,6 +60,8 @@ c     2*(pH2)  [PS]
       else
          new_p=decayamp2 /
      $     ((pH2-phdm_phimass**2)**2 + (phdm_phimass*phdm_phiwidth)**2)
+         if(phdm_rw)  new_p=decayamp2 /
+     $     ((pH2-phdm_phimass**2)**2 + (pH2*phdm_phiwidth/phdm_phimass)**2)
          new_p=new_p * 16
          new_c=(1d0/phdm_LambdaUV)**2
       endif

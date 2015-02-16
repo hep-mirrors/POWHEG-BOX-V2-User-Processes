@@ -74,7 +74,7 @@ c     needed for the effective coupling...
          phdm_gDM=powheginput('#DMgDM')
          if(phdm_gDM.eq.-1000000) phdm_gDM=1
 
-c         phdm_rw=powheginput('#runningwidth').gt.0
+         phdm_rw=powheginput('#runningwidth').gt.0
 
       endif
 
@@ -146,6 +146,11 @@ c      hwidth =  10d0
       write(*,*) 'In particular, for DM+monojet processes,'
       write(*,*) '    http://arxiv.org/abs/arXiv:1310.4491'
       write(*,*) 'should always be included as a reference'
+      write(*,*) ''
+      write(*,*) 'When DM production through gluonic operator'
+      write(*,*) 'is simulated as in this run, a citation to'
+      write(*,*) '    http://arxiv.org/abs/arXiv:1202.5475'
+      write(*,*) 'should also be included'
       write(*,*) '****************************************************'
 
       if(absdecaymode.eq.1.or.absdecaymode.eq.2) then
@@ -168,7 +173,7 @@ c         write(*,*) 'hmass,hwidth= ',hmass,hwidth
             write(*,*) 'coupling G_G_mediator (w/o as/LambdaUV) = ',
      $           phdm_gSM
             write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
-c            write(*,*) 'running width = ',phdm_rw
+            write(*,*) 'running width = ',phdm_rw
          endif
          write(*,*) '*************************************'
       endif

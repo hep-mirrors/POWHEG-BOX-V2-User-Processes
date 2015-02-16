@@ -20,6 +20,7 @@ DMphimass 500    ! mediator mass
 DMphiwidth 100   ! mediator width
 #DMgSM      1    ! G-G-med coupling (w/o as/LambdaUV)
 #DMgDM      1    ! X-Xbar-med coupling
+#runningwidth 1  ! (default 0) if 1, use running width in propagator
 ###############################
 
 #nloformfact 1     ! (default 0) if 1, include Higgs-specific corrections
