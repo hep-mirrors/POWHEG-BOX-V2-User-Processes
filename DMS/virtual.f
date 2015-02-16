@@ -78,6 +78,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 
@@ -174,11 +176,11 @@ c     (*8) comes from conventions in helicity amplitudes.
       if(vflav(1)*vflav(2).eq.0) then
 c     QG
          helcol=(cf*nc)/(4*nc*(nc**2-1)) *8
-         helcol=helcol * phdm_qqphi(abs(vflav(5)))**2
+         helcol=helcol * (phdm_gDM*phdm_qqphi(abs(vflav(5))))**2
       else
 c     QQBAR
          helcol=(cf*nc)/(4*nc**2) *8
-         helcol=helcol * phdm_qqphi(abs(vflav(1)))**2
+         helcol=helcol * (phdm_gDM*phdm_qqphi(abs(vflav(1))))**2
       endif
       virtualNEW=virtualNEW * helcol * (4*pi*st_alpha)
       bornNEW=bornNEW * helcol * (4*pi*st_alpha)

@@ -58,6 +58,8 @@ c     !:
          else
             phdm_LambdaUV=500d0
          endif
+         phdm_gSM=1
+         phdm_gDM=1
       else 
          phdm_efftheory='F'
          phdm_phimass=powheginput('DMphimass')
@@ -68,6 +70,14 @@ c     needed for the coupling q-q-S
             write(*,*) 'Error: phdm_LambdaUV<0 !'
             call exit(-1)
          endif
+
+         phdm_gSM=powheginput('#DMgSM')
+         if(phdm_gSM.eq.-1000000) phdm_gSM=1
+         phdm_gDM=powheginput('#DMgDM')
+         if(phdm_gDM.eq.-1000000) phdm_gDM=1
+
+         phdm_rw=powheginput('#runningwidth').gt.0
+
       endif
 
 c     !:
@@ -85,13 +95,11 @@ c$$$      smass=1d-6
 c$$$      cmass=1.5d0
 c$$$      bmass=4.75d0
 
-
-
-      phdm_qqphi(1)=dmass/phdm_LambdaUV
-      phdm_qqphi(2)=umass/phdm_LambdaUV
-      phdm_qqphi(3)=smass/phdm_LambdaUV
-      phdm_qqphi(4)=cmass/phdm_LambdaUV
-      phdm_qqphi(5)=bmass/phdm_LambdaUV
+      phdm_qqphi(1)=dmass/phdm_LambdaUV *phdm_gSM
+      phdm_qqphi(2)=umass/phdm_LambdaUV *phdm_gSM
+      phdm_qqphi(3)=smass/phdm_LambdaUV *phdm_gSM
+      phdm_qqphi(4)=cmass/phdm_LambdaUV *phdm_gSM
+      phdm_qqphi(5)=bmass/phdm_LambdaUV *phdm_gSM
 
 cccccccccccccccccccccccccccccccccccccccccccccc
 c     !: useful for checking...
@@ -114,11 +122,11 @@ c     mass window
       
       if(powheginput("#masswindow_low").gt.0) then
          write(*,*) 'masswindow_low NOT implemented'
-         stop
+         call exit(-1)
       endif
       if(powheginput("#masswindow_high").gt.0) then
          write(*,*) 'masswindow_high NOT implemented'
-         stop
+         call exit(-1)
       endif
 c$$$      masswindow_low = powheginput("#masswindow_low")
 c$$$      if (masswindow_low.le.0d0) masswindow_low=30d0
@@ -131,30 +139,51 @@ cccccc   DEPENDENT QUANTITIES
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_sthw = sqrt(ph_sthw2)
       ph_cthw = sqrt(1-ph_sthw2)
-      ph_Hmass2 = ph_Hmass**2
 
       if(mass_low.ge.0d0) then
          ph_Hmass2low=mass_low**2
       else
-         ph_Hmass2low=(max(0d0,ph_Hmass-masswindow_low*ph_Hwidth))**2
+c         ph_Hmass2low=(max(0d0,ph_Hmass-masswindow_low*ph_Hwidth))**2
+         ph_Hmass2low=0
       endif
       if (sqrt(ph_Hmass2low).lt.(2*physpar_ml(3))) then
          ph_Hmass2low=(2*physpar_ml(3))**2
       endif
      
       if(mass_high.ge.0d0) then
-         ph_Hmass2high=mass_high
+         ph_Hmass2high=mass_high**2
       else
-         ph_Hmass2high=ph_Hmass+masswindow_high*ph_Hwidth
+c         ph_Hmass2high=ph_Hmass+masswindow_high*ph_Hwidth
+         ph_Hmass2high=kn_sbeams
       endif
-      ph_Hmass2high=min(kn_sbeams,ph_Hmass2high**2)
-      ph_HmHw = ph_Hmass * ph_Hwidth
-      ph_unit_e = sqrt(4*pi*ph_alphaem)
+c     !: m2 obtained by solving
+c     shat = m2 + 2 ph*pj. 
+c     (going in frame where yj=yh=0, and then shat -> shad, since we are computing
+c     the maximum value for m2)
+c     *0.99 to stay on the safe side
+      ph_Hmass2high=min((kn_sbeams-2*kn_ktmin*sqrt(kn_sbeams))*0.99,
+     $     ph_Hmass2high)
 
       if( ph_Hmass2low.ge.ph_Hmass2high ) then
          write(*,*) "Error in init_couplings: mass_low >= mass_high"
-         call exit(1)
+         call exit(-1)
       endif
+
+      if(phdm_efftheory.eq.'F') then
+c     Needed for the mass integration interval, when BW integration
+         ph_Hmass  = phdm_phimass
+         ph_Hwidth = phdm_phiwidth
+      else
+c     Needed in case one wants to do BW integration when using EFT approach
+         ph_Hmass  = sqrt(ph_Hmass2high) - sqrt(ph_Hmass2low) 
+         ph_Hmass  = ph_Hmass /2d0
+         ph_Hwidth = ph_Hmass /10d0
+      endif
+
+      ph_Hmass2 = ph_Hmass**2
+      ph_HmHw = ph_Hmass * ph_Hwidth
+      ph_unit_e = sqrt(4*pi*ph_alphaem)
+
 
 c$$$      write(*,*) '*************************************'
 c$$$      write(*,*) 'H mass = ',ph_Hmass
@@ -173,25 +202,27 @@ c$$$      write(*,*) '*************************************'
       write(*,*) 'In particular, for DM+monojet processes,'
       write(*,*) '    http://arxiv.org/abs/arXiv:1310.4491'
       write(*,*) 'should always be included as a reference'
-      write(*,*) ''
-      write(*,*) 'When DM production through gluonic operator'
-      write(*,*) 'is simulated, a citation to'
-      write(*,*) '    http://arxiv.org/abs/arXiv:1202.5475'
-      write(*,*) 'should also be included'
       write(*,*) '****************************************************'
 
       if(absdecaymode.eq.1.or.absdecaymode.eq.2) then
          write(*,*) '*************************************'
          write(*,*) 'mediator type: ',phdm_mode
          write(*,*) 'DM mass = ',physpar_ml(3)
-         write(*,*) 'qqphi couplings (mq/LambdaUV)= ',phdm_qqphi(1:5)
+c     write(*,*) 'qqphi couplings (mq/LambdaUV)= ',phdm_qqphi(1:5)
          if(phdm_efftheory.eq.'T') then
             write(*,*) 'Effective theory'
             write(*,*) 'DM LambdaUV = ',phdm_LambdaUV
+            write(*,*) 'coupling q_q_mediator (mq/LambdaUV)= ',
+     $           phdm_qqphi(1:5)
          else
             write(*,*) 'Full theory'
             write(*,*) 'DM mediator mass =  ',phdm_phimass
             write(*,*) 'DM mediator width = ',phdm_phiwidth
+
+            write(*,*) 'coupling q_q_mediator (gSM*mq/LambdaUV)= ',
+     $           phdm_qqphi(1:5)
+            write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
+            write(*,*) 'running width = ',phdm_rw
          endif
          write(*,*) '*************************************'
          write(*,*)

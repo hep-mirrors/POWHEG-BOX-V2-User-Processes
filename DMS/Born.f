@@ -204,6 +204,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 
@@ -267,16 +269,16 @@ cccccccccccccccccccccccccccccccccccccccccccc
 c     SC/PS current, universal  couplings set to 1
       fl_tag=abs(fermion_fl(1))
       if(phdm_mode.eq.'SC') then
-         jlepZ(-3)=Smm
-         jlepZ(+3)=Spp
+         jlepZ(-3)=Smm * phdm_gDM
+         jlepZ(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
          jquark(-1)=phdm_qqphi(fl_tag)
          jquark(+1)=jquark(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlepZ(-3)=PSmm
-         jlepZ(+3)=PSpp
+         jlepZ(-3)=PSmm * phdm_gDM
+         jlepZ(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
          jquark(-1)=phdm_qqphi(fl_tag)
          jquark(+1)=-jquark(-1)
@@ -436,6 +438,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 
@@ -471,16 +475,16 @@ c     plus-plus
 cccccccccccccccccccccccccccccccccccccccc
 c     SC/PS current, universal  couplings set to 1
       if(phdm_mode.eq.'SC') then
-         jlepZ(-3)=Smm
-         jlepZ(+3)=Spp
+         jlepZ(-3)=Smm * phdm_gDM
+         jlepZ(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
          jquark(-1)=phdm_qqphi(fl_tag)
          jquark(+1)=jquark(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlepZ(-3)=PSmm
-         jlepZ(+3)=PSpp
+         jlepZ(-3)=PSmm * phdm_gDM
+         jlepZ(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
          jquark(-1)=phdm_qqphi(fl_tag)
          jquark(+1)=-jquark(-1)

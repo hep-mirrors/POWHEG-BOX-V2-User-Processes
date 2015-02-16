@@ -14,9 +14,10 @@
       data ini/.true./
       save ini
 
+      integer sampling
       logical genflat
-      data genflat/.true./
-      save genflat
+      data genflat/.false./
+      save genflat,sampling
 
 cccccccccccc
 c     !:
@@ -37,6 +38,17 @@ c     set initial- and final-state masses for Born and real
             write(*,*) '*************************************'
             write(*,*) "WARNING: m34 not importance sampled. "
             write(*,*) '*************************************'
+         else
+            write(*,*) '*************************************'
+            write(*,*) "m34  importance sampled. "
+            if(phdm_efftheory.eq.'F') then
+               write(*,*) 'BW importance sampling'
+               sampling=0
+            elseif(phdm_efftheory.eq.'T') then
+               write(*,*) 'xxx^3 importance sampling'
+               sampling=2
+            endif
+            write(*,*) '*************************************'
          endif
          ini=.false.
       endif
@@ -47,13 +59,18 @@ c d omegadec/(8*(2 pi)^2)
 c omega: 3d angle in CM system
 c omegadec: 3d angle in CM system of H decay products
       if(.not.genflat) then
-         zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
-         zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
-         z=zlow+(zhigh-zlow)*xborn(1)
-         xjac=zhigh-zlow
-         m2=ph_HmHw*tan(z)+ph_Hmass2
+         if(sampling.eq.2) then
+            m2=ph_Hmass2low+(ph_Hmass2high-ph_Hmass2low)*xborn(1)**3
+            xjac=3*xborn(1)**2 * (ph_Hmass2high-ph_Hmass2low) / (2*pi)
+         elseif(sampling.eq.0) then
+            zlow=atan((ph_Hmass2low  - ph_Hmass2)/ph_HmHw)
+            zhigh=atan((min(ph_Hmass2high,kn_sbeams)  - ph_Hmass2)/ph_HmHw)
+            z=zlow+(zhigh-zlow)*xborn(1)
+            xjac=zhigh-zlow
+            m2=ph_HmHw*tan(z)+ph_Hmass2
 c     d m^2/(2pi) jacobian
-         xjac=xjac*ph_HmHw/cos(z)**2/(2*pi)
+            xjac=xjac*ph_HmHw/cos(z)**2/(2*pi)
+         endif
       else
          m2=ph_Hmass2low+(ph_Hmass2high-ph_Hmass2low)*xborn(1)
 c     d m^2/(2pi) jacobian

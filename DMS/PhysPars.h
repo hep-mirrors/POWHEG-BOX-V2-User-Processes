@@ -8,9 +8,11 @@ c -*- Fortran -*-
 
       character *2 phdm_mode
       character *1 phdm_efftheory
-      real *8 phdm_LambdaUV,phdm_phimass,phdm_phiwidth
+      real *8 phdm_LambdaUV,phdm_phimass,phdm_phiwidth,phdm_gDM,phdm_gSM
       real *8 phdm_qqphi(5)
+      logical phdm_rw
       common/phdm_common/phdm_LambdaUV,phdm_phimass,phdm_phiwidth,
+     $     phdm_gDM,phdm_gSM,
      $     phdm_qqphi,
-     $     phdm_mode,phdm_efftheory
+     $     phdm_mode,phdm_efftheory,phdm_rw
       

@@ -356,6 +356,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 c     massive->massless momenta
@@ -396,16 +398,16 @@ c     for scalar if I use (Smm,Spp) and for PS if I use (PSmm,PSpp).
 c     However, I trust my version more, especially because it gives a better
 c     agreement when I check the limits.....
 cccccccccccccccccc
-         jlep(-3)=Smm 
-         jlep(+3)=Spp
+         jlep(-3)=Smm * phdm_gDM 
+         jlep(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
          jqua(-1)=phdm_qqphi(fl_tag)
          jqua(+1)=jqua(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlep(-3)=PSmm
-         jlep(+3)=PSpp
+         jlep(-3)=PSmm * phdm_gDM
+         jlep(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
          jqua(-1)=-phdm_qqphi(fl_tag)
          jqua(+1)=-jqua(-1)
@@ -798,6 +800,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 c     massive->massless momenta
@@ -828,16 +832,16 @@ cccccccccccccccccccccccccccccccccccccccccccc
 c     SC/PS current, universal  couplings set to 1
       fl_tag=abs(fermion_fl(1))
       if(phdm_mode.eq.'SC') then
-         jlep(-3)=Smm
-         jlep(+3)=Spp
+         jlep(-3)=Smm * phdm_gDM
+         jlep(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
          jqua(-1)=phdm_qqphi(fl_tag)
          jqua(+1)=jqua(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlep(-3)=PSmm
-         jlep(+3)=PSpp
+         jlep(-3)=PSmm * phdm_gDM
+         jlep(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
          jqua(-1)=-phdm_qqphi(fl_tag)
          jqua(+1)=-jqua(-1)
@@ -1307,6 +1311,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 c     massive->massless momenta
@@ -1338,8 +1344,8 @@ c     SC/PS current, universal  couplings set to 1
       fl_tag15=abs(fermion_fl(1))
       fl_tag26=abs(fermion_fl(2))
       if(phdm_mode.eq.'SC') then
-         jlep(-3)=Smm
-         jlep(+3)=Spp
+         jlep(-3)=Smm * phdm_gDM
+         jlep(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
@@ -1352,8 +1358,8 @@ c$$$         jqua_c26(+1)=1d0 !:xxxxxxxxxx
          jqua_c26(-1)=phdm_qqphi(fl_tag26)
          jqua_c26(+1)=jqua_c26(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlep(-3)=PSmm
-         jlep(+3)=PSpp
+         jlep(-3)=PSmm * phdm_gDM
+         jlep(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
 c$$$         jqua_c15(-1)=-1d0 !:xxxxxxxxxxx
 c$$$         jqua_c15(+1)=1d0  !:xxxxxxxxxxx
@@ -1573,6 +1579,8 @@ cccccccccccccccccccccccccccccccccccccccc
       else
          prop34 = 1d0/
      $        dcmplx(2*p34+2*mass2-phdm_phimass**2,phdm_phimass*phdm_phiwidth)
+         if(phdm_rw) prop34 = 1d0/
+     $        dcmplx(2*p34+2*mass2-phdm_phimass**2,(2*p34+2*mass2)*phdm_phiwidth/phdm_phimass)
       endif
 ccccccccccccccccccccccccccccccccccccccccc
 c     massive->massless momenta
@@ -1604,8 +1612,8 @@ c     SC/PS current, universal  couplings set to 1
       fl_tag12=abs(fermion_fl(1))
       fl_tag56=abs(fermion_fl(5))
       if(phdm_mode.eq.'SC') then
-         jlep(-3)=Smm
-         jlep(+3)=Spp
+         jlep(-3)=Smm * phdm_gDM
+         jlep(+3)=Spp * phdm_gDM
 c     notationally the following 2 lines should be with
 c     (-3),(3), since quark and antiquark have same helicity
 c     Id = P_L + P_R
@@ -1618,8 +1626,8 @@ c$$$         jqua_c56(+1)=0d0 !:xxxxxxxxxx
          jqua_c56(-1)=phdm_qqphi(fl_tag56)
          jqua_c56(+1)=jqua_c56(-1)
       elseif(phdm_mode.eq.'PS') then
-         jlep(-3)=PSmm
-         jlep(+3)=PSpp
+         jlep(-3)=PSmm * phdm_gDM
+         jlep(+3)=PSpp * phdm_gDM
 c     gamma5 = P_R - P_L
 c$$$         jqua_c12(-1)=-1d0
 c$$$         jqua_c12(+1)=1d0
