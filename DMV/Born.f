@@ -434,7 +434,7 @@ c     bb/tata
 c     DM
                   if(phdm_mode.eq.'AV') then
 c     !ER: 4 feb 2015, D Salek request
-                     jquark(:,-1) = - jquark(:,-1)
+                     jquark(0:3,-1) = - jquark(0:3,-1)
                   endif
                      
                   jquark = jquark * phdm_gSM
@@ -742,7 +742,7 @@ c     bb/tata
 c     DM
                   if(phdm_mode.eq.'AV') then
 c     !ER: 4 feb 2015, D Salek request
-                     jquark(:,-1) = - jquark(:,-1)
+                     jquark(0:3,-1) = - jquark(0:3,-1)
                   endif
                   jquark = jquark * phdm_gSM
                   Jlep_dot_Jquark = 

@@ -539,7 +539,9 @@ c     DM
 c     sum
                if(phdm_mode.eq.'AV') then
 c     !ER: 4 feb 2015, D Salek request
-                  amp_3gv_Z(:,-1) = - amp_3gv_Z(:,-1)
+                  amp_3gv_Z(-3:3,-1)   = - amp_3gv_Z(-3:3,-1)
+                  amp_Ta_Tb_Z(-3:3,-1) = - amp_Ta_Tb_Z(-3:3,-1)
+                  amp_Tb_Ta_Z(-3:3,-1) = - amp_Tb_Ta_Z(-3:3,-1)
                endif
                amp_Ta_Tb(hel_lep,hel_qua) =
      $              amp_Ta_Tb_Z(hel_lep,hel_qua)
@@ -1029,11 +1031,6 @@ c     correnti
          call bra_gamma_ket(psi6,psi2,i,jqua26(0,i))
          call bra_gamma_ket(psi5,psi1,i,jqua15(0,i))
       enddo
-      if(phdm_mode.eq.'AV') then
-c     !ER: 4 feb 2015, D Salek request
-         jqua26(:,-1) = - jqua26(:,-1)
-         jqua15(:,-1) = - jqua15(:,-1)
-      endif
 
       amp2=0d0      
 
@@ -1044,6 +1041,14 @@ cccccccccccc
 c     Z
          call bra_gamma_ket_curr(psi6,psi2,hel_2,p6,p2,pcurr15,
      $        jqua15(0,hel_1),jtemp(0,hel_2))
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(1,hel_lep,hel_1,hel_2) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_2))
 c     A
@@ -1054,6 +1059,14 @@ c     A
 c     Z
          call bra_gamma_ket_curr(psi5,psi1,hel_1,p5,p1,pcurr26,
      $        jqua26(0,hel_2),jtemp(0,hel_1))
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(2,hel_lep,hel_1,hel_2) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_1))
 c     A
@@ -1149,11 +1162,6 @@ c     correnti
          call bra_gamma_ket(psi6,psi1,i,jqua16(0,i))
          call bra_gamma_ket(psi5,psi2,i,jqua25(0,i))
       enddo
-      if(phdm_mode.eq.'AV') then
-c     !ER: 4 feb 2015, D Salek request
-         jqua16(:,-1) = - jqua16(:,-1)
-         jqua25(:,-1) = - jqua25(:,-1)
-      endif         
 
       do hel_lep=-3,3,2         
          do hel_1=-1,1,2            
@@ -1162,6 +1170,14 @@ cccccccccccc
 c     Z
         call bra_gamma_ket_curr(psi6,psi1,hel_1,p6,p1,pcurr25,
      $        jqua25(0,hel_2),jtemp(0,hel_1))        
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(3,hel_lep,hel_1,hel_2) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_1))
 c     A
@@ -1172,6 +1188,14 @@ c     A
 c     Z
          call bra_gamma_ket_curr(psi5,psi2,hel_2,p5,p2,pcurr16,
      $        jqua16(0,hel_1),jtemp(0,hel_2))         
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(4,hel_lep,hel_1,hel_2) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_2))
 c     A
@@ -1220,6 +1244,10 @@ c     minus sign for fermion statistic
          if (hel_1.eq.hel_2) then
             amp2 = amp2
      $           -CF/2*(z1*DCONJG(z2)+z2*DCONJG(z1))               
+c     !ER: 4 feb 2015, D Salek request
+c     Not 100% sure this is correct also when doing AV case, but it should, because after
+c     flipping jtemp, the hel_1 and hel_2 helicity labels of amp_ljj_Z are consistent (they have
+c     been filled with the correct content), so z1 and z2 are also ok.
          endif               
       enddo      
       enddo         
@@ -1602,11 +1630,6 @@ c     correnti
          call bra_gamma_ket(psi6,psi2,i,jqua26(0,i))
          call bra_gamma_ket(psi5,psi1,i,jqua15(0,i))
       enddo
-      if(phdm_mode.eq.'AV') then
-c     !ER: 4 feb 2015, D Salek request
-         jqua26(:,-1) = - jqua26(:,-1)
-         jqua15(:,-1) = - jqua15(:,-1)
-      endif
       
       amp2=0d0
 
@@ -1617,6 +1640,14 @@ ccccccccc
 c     Z
          call bra_gamma_ket_curr(psi6,psi2,hel_26,p6,p2,pcurr15,
      $        jqua15(0,hel_15),jtemp(0,hel_26))
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(1,hel_lep,hel_15,hel_26) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_26))
 c     A
@@ -1627,6 +1658,14 @@ c     A
 c     Z
          call bra_gamma_ket_curr(psi5,psi1,hel_15,p5,p1,pcurr26,
      $        jqua26(0,hel_26),jtemp(0,hel_15))
+      if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+         jtemp(0:3,-1) = - jtemp(0:3,-1) 
+      endif
          amp_ljj_Z(2,hel_lep,hel_15,hel_26) = 
      $        ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_15))
 c     A
@@ -1967,11 +2006,6 @@ c     correnti
          call bra_gamma_ket(psi5,psi6,i,jqua56(0,i))
          call bra_gamma_ket(psi2,psi1,i,jqua12(0,i))
       enddo
-      if(phdm_mode.eq.'AV') then
-c     !ER: 4 feb 2015, D Salek request
-         jqua56(:,-1) = - jqua56(:,-1)
-         jqua12(:,-1) = - jqua12(:,-1)
-      endif
       
       amp2=0d0
 
@@ -1982,6 +2016,14 @@ ccccccccc
 c     Z
                call bra_gamma_ket_curr(psi2,psi1,hel_12,p2,p1,pcurr56,
      $              jqua56(0,hel_56),jtemp(0,hel_12))
+               if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+                  jtemp(0:3,-1) = - jtemp(0:3,-1) 
+               endif
                amp_ljj_Z(1,hel_lep,hel_12,hel_56) = 
      $              ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_12))
 c     A
@@ -1992,6 +2034,14 @@ c     A
 c     Z
                call bra_gamma_ket_curr(psi5,psi6,hel_56,p5,p6,pcurr12,
      $              jqua12(0,hel_12),jtemp(0,hel_56))
+               if(phdm_mode.eq.'AV') then
+c     !ER: 4 feb 2015, D Salek request
+c     jtemp is used just below to contract with the leptonic current. Its helicity
+c     index is the helicity index of the quark current that will be dotted with the
+c     leptonic one via the mediator exchange. Therefore, if q-q-med is axial, one of the 2
+c     helicity components of jtemp gets a minus sign. I've chosen always to flip hel=-1
+                  jtemp(0:3,-1) = - jtemp(0:3,-1) 
+               endif
                amp_ljj_Z(2,hel_lep,hel_12,hel_56) = 
      $              ccdotp(jlepZ(0,hel_lep),jtemp(0,hel_56))
 c     A

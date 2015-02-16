@@ -303,8 +303,8 @@ c     present in Born.f
 
       if(phdm_mode.eq.'AV') then
 c     !ER: 4 feb 2015, D Salek request
-         bornamp(-1,:,:) = - bornamp(-1,:,:)
-         virtamp(-1,:,:) = - virtamp(-1,:,:)
+         bornamp(-1,-3:3,-1:1) = - bornamp(-1,-3:3,-1:1)
+         virtamp(-1,-3:3,-1:1) = - virtamp(-1,-3:3,-1:1)
       endif
 
 
