@@ -19,9 +19,9 @@ DMLambda    500 ! UV scale
 # FULL
 DMphimass 500    ! mediator mass
 DMphiwidth 100   ! mediator width
-#DMgSM 1         ! t-tbar-med coupling
+#DMgSM 1         ! t-tbar-med coupling (w/o mtop/EW_vev)
 #DMgDM 1         ! X-Xbar-med coupling
-runningwidth 1  ! (default 0) if 1, use running width in propagator
+#runningwidth 1  ! (default 0) if 1, use running width in propagator
 ###############################
 
 #testplots  1      ! (default 0, do not) do NLO and PWHG distributions

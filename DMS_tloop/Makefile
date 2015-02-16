@@ -18,7 +18,7 @@ PDF=lhapdf
 #pwhg_analysis_DM_paperttmet_mul.f
 ############
 # tt+met paper: tt+met analysis (amt2)
-ANALYSIS=paperttmet_ttptmiss
+#ANALYSIS=paperttmet_ttptmiss
 #pwhg_analysis_DM_paperttmet_TTPTMISS_mul.f
 ############
 

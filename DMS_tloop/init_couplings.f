@@ -172,6 +172,12 @@ c      ph_gfermi=sqrt(2d0)*g_weak**2/(8*wmass**2)
       write(*,*) 'In particular, for DM+monojet processes,'
       write(*,*) '    http://arxiv.org/abs/arXiv:1310.4491'
       write(*,*) 'should always be included as a reference'
+      write(*,*) ''
+      write(*,*) 'When DM production via (pseudo)scalar exchange with'
+      write(*,*) 'full top-mass dependence is simulated as in this '
+      write(*,*) 'run, a citation to'
+      write(*,*) '    Haisch,Re: On dark matter top-quark interactions'
+      write(*,*) 'should also be included'
       write(*,*) '****************************************************'
 
       if(absdecaymode.eq.1.or.absdecaymode.eq.2) then
@@ -193,7 +199,12 @@ c            write(*,*) 'DM lambda scale for GGS coupling = ',
 c     $           phdm_LambdaUV
             write(*,*) 'coupling t_tbar_mediator = ',
      $           phdm_gSM
+            write(*,*) '  the full coupling t_tbar_mediator is'//
+     $           ' Yukawa like:'
+            write(*,*) '  its value is ',phdm_gSM,'  times mtop/EWvev'
             write(*,*) 'coupling X_Xbar_mediator = ',phdm_gDM
+            write(*,*) '  the full coupling X_Xbar_mediator is'//
+     $           ' NOT Yukawa like: its value is as given above'
             write(*,*) 'running width = ',phdm_rw
          endif
          write(*,*) '*************************************'
