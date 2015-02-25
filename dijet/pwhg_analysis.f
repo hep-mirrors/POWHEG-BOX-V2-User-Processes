@@ -7,7 +7,7 @@ C - pwhgfill: fills the histograms with data.
       subroutine init_hist
       implicit none
       include 'LesHouches.h'
-      include '../pwhg_book.h'
+      include 'pwhg_book.h'
       include 'pwhg_math.h'
       integer  diag
       real * 8 binsize(700)
