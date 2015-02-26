@@ -1,0 +1,17 @@
+Detailed explanation of generator features in:
+
+John Campbell, R. Keith Ellis, Paolo Nason, Emanuele Re,
+Dec 4, 2014. : arXiv:1412.1828
+
+Look at the test-lhc or test-parallel-lhc for sample setups.
+
+Do:
+
+$ make pwhg_main
+$ pwhg_main
+
+to generate events.
+
+$ make main-PYTHIA8-lhef
+
+to shower and analyze events.

@@ -1,0 +1,2 @@
+	DOUBLE COMPLEX CWcomplex,SWcomplex,CWcomplex__EXP__2,SWcomplex__EXP__2
+	COMMON/COMPLESSMASS_C/CWcomplex,SWcomplex,CWcomplex__EXP__2,SWcomplex__EXP__2
