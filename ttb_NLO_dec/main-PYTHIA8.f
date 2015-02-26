@@ -15,6 +15,7 @@
      1                      vetoscalewp,vetoscalewm,canveto
       integer ntpdec,ntmdec,tpiddec(8),tmiddec(8)
       real * 8 tpdecsc,tmdecsc,tppdec(4,8),tmpdec(4,8)
+      real * 8 wpdecsc,wmdecsc
       common/ctptmdec/tpdecsc,tmdecsc,tppdec,tmpdec,
      1     ntpdec,ntmdec,tpiddec,tmiddec
       integer py8tune,nohad
@@ -68,6 +69,18 @@ c            canveto = 1
             if(allrad.eq.1) then
                call findresscale( 6,vetoscaletp)
                call findresscale(-6,vetoscaletm)
+c 7 and 9 are the fermions from W+ or W-; if they are hadrons,
+c find the veto scales.
+               if(abs(idup(7)).lt.5) then
+                  call findresscale(24,vetoscalewp)
+               else
+                  vetoscalewp = 1d30
+               endif
+               if(abs(idup(9)).lt.5) then
+                  call findresscale(-24,vetoscalewm)
+               else
+                  vetoscalewm = 1d30
+               endif
             else
                vetoscaletp = scalup
                vetoscaletm = scalup
@@ -127,18 +140,39 @@ c Insist to shower this event;
                if(weveto) then
                   call getdechardness(1,tpdecsc,ntpdec,tpiddec,tppdec)
                   call getdechardness(-1,tmdecsc,ntmdec,tmiddec,tmpdec)
+
+
+c the followins is probably not needed
                   call boost2reson4(tppdec,ntpdec,tppdec,tppdec)
                   call boost2reson4(tmpdec,ntmdec,tmpdec,tmpdec)
+c 7 and 9 are the fermions from W+ or W-; if they are hadrons,
+c find the veto scales.
+                  if(abs(idup(7)).lt.5) then
+                     call getdechardnessw(1,wpdecsc)
+                  else
+                     wpdecsc = 0
+                  endif
+                  if(abs(idup(9)).lt.5) then
+                     call getdechardnessw(1,wmdecsc)
+                  else
+                     wmdecsc = 0
+                  endif
+
                   if(nlowhich.eq.0) then
                      if(allrad.eq.1) then
-                        if(tpdecsc.gt.vetoscaletp.or.
-     1                    tmdecsc.gt.vetoscaletm) then
+                        if(tpdecsc.gt.vetoscaletp .or.
+     1                     tmdecsc.gt.vetoscaletm .or.
+     2                     wpdecsc.gt.vetoscalewp .or.
+     3                     wmdecsc.gt.vetoscalewm ) then
                            continue
                         else
                            exit
                         endif
                      else
-                        if(tpdecsc.gt.scalup.or.tmdecsc.gt.scalup) then
+                        if(tpdecsc.gt.scalup .or.
+     1                     tmdecsc.gt.scalup .or.
+     1                     wpdecsc.gt.scalup .or.
+     1                     wmdecsc.gt.scalup ) then
                            continue
                         else
                            exit
@@ -255,7 +289,8 @@ c...writes event information to a les houches events file on unit nlf.
       integer idres
       real * 8 scale
       real * 8 p(0:3,3),p0(0:3),dotp
-      integer nres,ids(3),idb,idg,idw
+      integer nres,ids(3),idb,idg,idw,idq,ida
+      real * 8 yq,ya,csi,q2
       integer j,k
       nres=0
       do j=3,nup
@@ -308,6 +343,22 @@ c            scale = min(5d0,p(0,idg))
 c         endif
          scale = sqrt( 2 * dotp(p(:,idg),p(:,idb))*
      1        p(0,idg)/p(0,idb) )
+      elseif(abs(idres).eq.24) then
+         do j=1,3
+            if(ids(j).eq.21) then
+               idg=j
+            elseif(ids(j).gt.0) then
+               idq=j
+            elseif(ids(j).lt.0) then
+               ida=j
+            endif
+         enddo
+         p0 = p(:,idg)+p(:,idq)+p(:,ida)
+         q2 = dotp(p0,p0)
+         csi = 2*(dotp(p0,p(:,idg)))/sqrt(q2)
+         yq = 1 - dotp(p(:,idg),p(:,idq))/(p(0,idg)*p(0,idq))
+         ya = 1 - dotp(p(:,idg),p(:,ida))/(p(0,idg)*p(0,ida))
+         scale = sqrt(min(1-yq,1-ya)*csi**2*q2/2)
       endif
       end
 
@@ -457,4 +508,153 @@ c     the b has radiated a gluon
       call exit(-1)
  100  format(i4,2x,i5,2x,i5,2x,i4,1x,i4,2x,i4,1x,i4,2x,5(d10.4,1x))
  999  end
+
+
+      subroutine getdechardnessw(ichw,hardness)
+c ichtop = +- 1, is the charge of the top.
+c it returns the hardness of b radiation
+      implicit none
+      integer ichw
+      real * 8 hardness
+      integer nmoms
+      integer iddec(8)
+      real * 8 pmoms(4,8)
+      include 'hepevt.h'
+      integer jhep
+      integer i_top,i_b,i_w,i_g,j,k,wid,bid,tid
+      real * 8 pchain(4,3)
+      real * 8 phepdot
+      nmoms = 0
+      pmoms = 0
+      iddec = 0
+      tid = 6*ichw
+      wid = 24*ichw
+      bid = 5*ichw
+c find last top in record
+      do jhep=1,nhep
+         if(idhep(jhep).eq.tid) then
+            i_top = jhep
+         endif
+      enddo
+      pchain(:,1)=phep(1:4,i_top)
+      pmoms(:,1) = pchain(:,1)
+      iddec(1)=tid
+      nmoms = 1
+c look for top direct sons
+      if(jdahep(2,i_top)-jdahep(1,i_top).eq.1) then
+         i_w = jdahep(1,i_top)
+         i_b = jdahep(2,i_top)
+         if(idhep(i_w).ne.wid) then
+            write(*,*) ' top did not go in W!'
+            goto 998
+         endif
+         if(idhep(i_b).ne.bid) then
+            write(*,*) ' top did not go in b!'
+            goto 998
+         endif
+         nmoms = nmoms+1
+         pmoms(:,nmoms) = phep(1:4,i_w)
+         iddec(nmoms) = wid
+         nmoms = nmoms+1
+         pmoms(:,nmoms) = phep(1:4,i_b)
+         iddec(nmoms) = bid
+         if(jdahep(2,i_b)-jdahep(1,i_b).gt.1) then
+            write(*,*) ' found b-> more than 2 particles'
+            goto 998
+         elseif(idhep(jdahep(1,i_b)).eq.bid
+     1        .and.idhep(jdahep(2,i_b)).eq.21) then
+c     the b has radiated a gluon
+            pchain(:,2) = phep(1:4,jdahep(1,i_b))
+            pchain(:,3) = phep(1:4,jdahep(2,i_b))
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(:,2)
+            iddec(nmoms) = bid
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(:,3)
+            iddec(nmoms) = 21
+         else
+            hardness = -1
+            return
+         endif
+c now pchain contains the 4-momenta of the top, and the b-g pair
+         call boost2reson4(pchain,3,pchain,pchain)
+         
+         hardness = sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
+     1        * pchain(4,3)/pchain(4,2) )
+         return
+      elseif(jdahep(2,i_top)-jdahep(1,i_top).eq.2) then         
+c here we have W b g 
+         if(.not.(idhep(jdahep(1,i_top)).eq.wid
+     1        .and.idhep(jdahep(1,i_top)+1).eq.bid
+     2        .and.idhep(jdahep(2,i_top)).eq.21)) then
+            write(*,*) ' was not expecting this!'
+            goto 998
+         endif
+         i_w = jdahep(1,i_top)
+         i_b = i_w+1
+         i_g = i_b+1
+         nmoms = nmoms+1
+         pmoms(:,nmoms) = phep(1:4,i_w)
+         iddec(nmoms) = wid
+         nmoms = nmoms+1
+         pmoms(:,nmoms) = phep(1:4,i_b)
+         iddec(nmoms) = bid
+         nmoms = nmoms+1
+         pmoms(:,nmoms) = phep(1:4,i_g)
+         iddec(nmoms) = 21
+c see if b goes into b g
+         if(jdahep(2,i_b)-jdahep(1,i_b).gt.1) then
+            write(*,*) ' found b-> more than 2 particles'
+            goto 998            
+         endif
+         if(idhep(jdahep(1,i_b)).eq.bid
+     1        .and.idhep(jdahep(2,i_b)).eq.21) then
+c     the b has radiated a gluon
+            pchain(:,2) = phep(1:4,jdahep(1,i_b))
+            pchain(:,3) = phep(1:4,jdahep(2,i_b))
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(1:4,2)
+            iddec(nmoms) = bid
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(1:4,3)
+            iddec(nmoms) = 21
+            call boost2reson4(pchain,2,pchain(1,2),pchain(1,2))
+            hardness = sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
+     1        * pchain(4,3)/pchain(4,2) )
+         else
+            hardness = -1
+         endif
+         if(jdahep(2,i_g)-jdahep(1,i_g).eq.1) then
+            pchain(:,2) = phep(1:4,jdahep(1,i_g))
+            pchain(:,3) = phep(1:4,jdahep(2,i_g))
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(1:4,2)
+            iddec(nmoms) = idhep(jdahep(1,i_g))
+            nmoms = nmoms+1
+            pmoms(:,nmoms) = pchain(1:4,3)
+            iddec(nmoms) = idhep(jdahep(2,i_g))
+            call boost2reson4(pchain,2,pchain(1,2),pchain(1,2))
+            hardness = max(hardness,
+     1           sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
+     2        * (pchain(4,3)*pchain(4,2))
+     3           /(pchain(4,3)**2+pchain(4,2)**2)))
+         elseif(jdahep(2,i_g)-jdahep(1,i_g).gt.1) then
+            write(*,*) ' found g-> more than 2 particles'
+            goto 998            
+         endif
+         return
+      else
+         write(*,*) ' was not expecting this!'
+      endif
+ 998  continue
+      write(*,*) 'top=',i_top
+      do j=1,nhep
+         write(*,100)j,isthep(j),idhep(j),jmohep(1,j),
+     1        jmohep(2,j),jdahep(1,j),jdahep(2,j), (phep(k,j),k=1,5)
+      enddo
+      call exit(-1)
+ 100  format(i4,2x,i5,2x,i5,2x,i4,1x,i4,2x,i4,1x,i4,2x,5(d10.4,1x))
+ 999  end
+
+
 
