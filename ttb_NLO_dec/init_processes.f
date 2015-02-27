@@ -181,14 +181,14 @@ c fictitious production process resonance
 c
       jnlowhich = powheginput("#nlowhich")
       allrad = powheginput("#allrad")
+      if(jnlowhich.lt.0) jnlowhich = 0
+      if(allrad.lt.0) allrad = 1
+
       if(allrad.eq.1.and.jnlowhich.ne.0) then
          write(*,*) ' allrad requires all regions to radiate'
          write(*,*) ' but jnlowhich is not 0; exiting ...'
          call exit(-1)
       endif
-c for now default to include only NLO corrections in production.
-c nlowhich = 0 does all corrections.
-      if(jnlowhich.lt.0) jnlowhich = 1
 
       if(jnlowhich.eq.1) then
          flst_nreson=1

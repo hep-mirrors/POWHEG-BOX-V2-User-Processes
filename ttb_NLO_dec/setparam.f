@@ -10,8 +10,8 @@ c***********************************************************************
 
 c     MG5: constants and parameters relevant for 
 c     the process at hand.
-      include 'madgraph/coupl.inc'
-      include 'madgraph/input.inc'
+      include 'madgraph5all/coupl.inc'
+      include 'madgraph5all/input.inc'
 
 ccccccccccccccccccccccccccccccccc
 c     MG5: 'GLOBAL VARIABLES'
@@ -125,8 +125,8 @@ c***********************************************************************
       DOUBLE PRECISION PI
       PARAMETER  (PI=3.141592653589793D0)
       include 'pwhg_st.h'
-      include 'madgraph/coupl.inc'
-      include 'madgraph/input.inc'
+      include 'madgraph5all/coupl.inc'
+      include 'madgraph5all/input.inc'
       G = dsqrt(4*pi*st_alpha)
       AS = G**2/4/PI
       SQRT__AS = SQRT(AS)
