@@ -144,7 +144,9 @@ c plots to test pythia radiation in decay
       call bookupeqbins('2o1scale',0.1d0,0d0,4d0)
       call bookupeqbins('pyzero',0.1d0,0d0,4d0)
 
-
+      call bookupeqbins('w_j1-E',1d0,0d0,100d0)
+      call bookupeqbins('w_j2-E',1d0,0d0,100d0)
+      call bookupeqbins('w_j3-E',1d0,0d0,100d0)
 
       end
 
@@ -180,7 +182,7 @@ c plots to test pythia radiation in decay
      1     i_part,njets20,njets30,njets40
       real * 8 mtop,mtb,mwp,mwm,mb,mbb,p_bmax,e_bmax,xb,
      1     p_bbmax,e_bbmax,xbb,ewp,pwp,ewm,pwm,xw,
-     2     dy,deta,dphi,dr,cth1,cth2,ptmiss
+     2     dy,deta,dphi,dr,cth1,cth2,ptmiss,ptmiss2(2)
       real * 8 ptop(4),patop(4)
       integer jcth1
       real * 8 w(4),pb(4),ptb
@@ -261,6 +263,7 @@ c t w b g (from powheg) +  (b g) and/or (g g)
             call filld('2o1scale',tpdecsc/ptpw,dsig)
          endif
       endif
+
 
       ngenerations = powheginput("#ngenerations")
       if(ngenerations.lt.0) ngenerations = 4
@@ -493,22 +496,22 @@ c$$$      endif
          write(*,*) 'wm not found'
          inotfound = inotfound + 1
       endif
-      if(i_lwp.eq.0) then
-         write(*,*) 'lwp not found'
-         inotfound = inotfound + 1
-      endif
-      if(i_lwm.eq.0) then
-         write(*,*) 'lwm not found'
-         inotfound = inotfound + 1
-      endif
-      if(i_nuwp.eq.0) then
-         write(*,*) 'nuwp not found'
-         inotfound = inotfound + 1
-      endif
-      if(i_nuwm.eq.0) then
-         write(*,*) 'nuwm not found'
-         inotfound = inotfound + 1
-      endif
+c      if(i_lwp.eq.0) then
+c         write(*,*) 'lwp not found'
+c         inotfound = inotfound + 1
+c      endif
+c      if(i_lwm.eq.0) then
+c         write(*,*) 'lwm not found'
+c         inotfound = inotfound + 1
+c      endif
+c      if(i_nuwp.eq.0) then
+c         write(*,*) 'nuwp not found'
+c         inotfound = inotfound + 1
+c      endif
+c      if(i_nuwm.eq.0) then
+c         write(*,*) 'nuwm not found'
+c         inotfound = inotfound + 1
+c      endif
       if(i_bfromtop.eq.0) then
          write(*,*) 'b from top not found'
          inotfound = inotfound + 1
@@ -524,7 +527,7 @@ c$$$      endif
      1        i_nuwp,i_nuwm,i_bfromtop,i_abfromatop
          return
       endif
-c 
+ 
       if(whcprg.ne.'NLO'.and.whcprg.ne.'LHE') then
 c Setup a flag:
 c 1 for events with no production radiation in the LHE
@@ -602,10 +605,10 @@ c skip the analysis unless the subprocess matches.
       p_atop=phep(1:4,i_atop)
       p_wp=phep(1:4,i_wp)
       p_wm=phep(1:4,i_wm)
-      p_lwp=phep(1:4,i_lwp)
-      p_lwm=phep(1:4,i_lwm)
-      p_nuwp=phep(1:4,i_nuwp)
-      p_nuwm=phep(1:4,i_nuwm)
+      if(i_lwp.gt.0) p_lwp=phep(1:4,i_lwp)
+      if(i_lwm.gt.0) p_lwm=phep(1:4,i_lwm)
+      if(i_nuwp.gt.0) p_nuwp=phep(1:4,i_nuwp)
+      if(i_nuwm.gt.0) p_nuwm=phep(1:4,i_nuwm)
       p_b=phep(1:4,i_bfromtop)
       p_bb=phep(1:4,i_abfromatop)
 
@@ -616,12 +619,12 @@ c skip the analysis unless the subprocess matches.
          if(mass.lt.172-masswindow.or.mass.gt.172+masswindow) return
       endif
 
-      if(asyanal) then
+      if(i_lwm*i_lwp.ne.0.and.asyanal) then
          call doasyanal(p_top,p_atop,p_lwp,p_lwm,dsig)
       endif
 
       mjets = maxjets
-      call buildjets(mjets,j_kt,j_eta,j_rap,j_phi,j_p,jetvec,
+      call buildjets(mjets,-1d0,j_kt,j_eta,j_rap,j_phi,j_p,jetvec,
      1     isForClustering)
 
       bhadfromtop = 0
@@ -713,15 +716,27 @@ c    Denner-like cuts
          if(j_kt(i_abjet).lt.cut3_ptbj.or.abs(j_eta(i_abjet)).gt.cut3_etabj)
      $        cut3=.false.
 
-         call getyetaptmass(p_lwp,y,eta,pt,mass)
-         if(abs(eta).gt.cut3_etal.or.pt.lt.cut3_ptl) cut3=.false.
+         if(i_lwp.gt.0) then
+            call getyetaptmass(p_lwp,y,eta,pt,mass)
+            if(abs(eta).gt.cut3_etal.or.pt.lt.cut3_ptl) cut3=.false.
+         endif
 
-         call getyetaptmass(p_lwm,y,eta,pt,mass)
-         if(abs(eta).gt.cut3_etal.or.pt.lt.cut3_ptl) cut3=.false.
+         if(i_lwm.gt.0) then
+            call getyetaptmass(p_lwm,y,eta,pt,mass)
+            if(abs(eta).gt.cut3_etal.or.pt.lt.cut3_ptl) cut3=.false.
+         endif
          
-         ptmiss = sqrt((p_nuwp(1)+p_nuwm(1))**2+(p_nuwp(2)+p_nuwm(2))
-     $        **2)
+         ptmiss2 = 0
+         if(i_nuwm.gt.0) then
+            ptmiss2 = ptmiss2 + p_nuwm(1:2)
+         endif
+         if(i_nuwp.gt.0) then
+            ptmiss2 = ptmiss2 + p_nuwp(1:2)
+         endif
+         ptmiss = sqrt(ptmiss2(1)**2+ptmiss2(2)**2)
+
          if(ptmiss.lt.cut3_ptmiss) cut3=.false.
+
       endif
 
 ccccccccccccccccccccccccc
@@ -791,13 +806,17 @@ c-----------
       if(cut2)call yetaptmassplot(p_bb,dsig,'bbtop',suffix(2))
       if(cut3)call yetaptmassplot(p_bb,dsig,'bbtop',suffix(3))
 
-      call yetaptmassplot(p_lwp,dsig,'lwp',suffix(1))
-      if(cut2)call yetaptmassplot(p_lwp,dsig,'lwp',suffix(2))
-      if(cut3)call yetaptmassplot(p_lwp,dsig,'lwp',suffix(3))
+      if(i_lwp.gt.0) then
+         call yetaptmassplot(p_lwp,dsig,'lwp',suffix(1))
+         if(cut2)call yetaptmassplot(p_lwp,dsig,'lwp',suffix(2))
+         if(cut3)call yetaptmassplot(p_lwp,dsig,'lwp',suffix(3))
+      endif
 
-      call yetaptmassplot(p_lwm,dsig,'lwm',suffix(1))
-      if(cut2)call yetaptmassplot(p_lwm,dsig,'lwm',suffix(2))
-      if(cut3)call yetaptmassplot(p_lwm,dsig,'lwm',suffix(3))
+      if(i_lwm.gt.0) then
+         call yetaptmassplot(p_lwm,dsig,'lwm',suffix(1))
+         if(cut2)call yetaptmassplot(p_lwm,dsig,'lwm',suffix(2))
+         if(cut3)call yetaptmassplot(p_lwm,dsig,'lwm',suffix(3))
+      endif
 
       call yetaptmassplot(p_top+p_atop,dsig,'ttb',suffix(1))
       if(cut2)call yetaptmassplot(p_top+p_atop,dsig,'ttb',suffix(2))
@@ -813,35 +832,45 @@ c-----------
          if(cut3)call yetaptmassplot(p_top+p_atop,dsig,'ttb-radPW',suffix(3))
       endif
 
-      call getyetaptmass(p_lwp+p_lwm,y,eta,pt,mass)
-      call fillplotcuts('m_lp_lm',mass,dsig,.true.,cut2,cut3)
+      if(i_lwp*i_lwm.gt.0) then
+         call getyetaptmass(p_lwp+p_lwm,y,eta,pt,mass)
+         call fillplotcuts('m_lp_lm',mass,dsig,.true.,cut2,cut3)
+      endif
 
-      call getyetaptmass(p_lwp+p_nuwp,y,eta,pt,mass)
-      call fillplotcuts('mT_lp_MET',mass,dsig,.true.,cut2,cut3)
+      if(i_lwp*i_nuwp.gt.0) then
+         call getyetaptmass(p_lwp+p_nuwp,y,eta,pt,mass)
+         call fillplotcuts('mT_lp_MET',mass,dsig,.true.,cut2,cut3)
+      endif
 
-      call getyetaptmass(p_lwm+p_nuwm,y,eta,pt,mass)
-      call fillplotcuts('mT_lm_MET',mass,dsig,.true.,cut2,cut3)
+      if(i_lwm*i_nuwm.gt.0) then
+         call getyetaptmass(p_lwm+p_nuwm,y,eta,pt,mass)
+         call fillplotcuts('mT_lm_MET',mass,dsig,.true.,cut2,cut3)
+      endif
 
 c l+ b mass
-      call getyetaptmass(p_lwp+pbhadtp,y,eta,pt,mass)
-      call fillplotcuts('m_lp_b',mass,dsig,.true.,cut2,cut3)
+      if(i_lwp.gt.0) then
+         call getyetaptmass(p_lwp+pbhadtp,y,eta,pt,mass)
+         call fillplotcuts('m_lp_b',mass,dsig,.true.,cut2,cut3)
+c-----------
+         if(i_bjet.ne.0) then
+            call getyetaptmass(p_lwp+j_p(:,i_bjet),y,eta,pt,mass)
+            call fillplotcuts('m_lp_jb',mass,dsig,.true.,cut2,cut3)
+         endif
+      endif
 
 c-----------
 c l- bb mass
-      call getyetaptmass(p_lwm+pbhadtm,y,eta,pt,mass)
-      call fillplotcuts('m_lm_bbar',mass,dsig,.true.,cut2,cut3)
-
+      if(i_lwm.gt.0) then
+         call getyetaptmass(p_lwm+pbhadtm,y,eta,pt,mass)
+         call fillplotcuts('m_lm_bbar',mass,dsig,.true.,cut2,cut3)
 c-----------
-      if(i_bjet.ne.0) then
-         call getyetaptmass(p_lwp+j_p(:,i_bjet),y,eta,pt,mass)
-         call fillplotcuts('m_lp_jb',mass,dsig,.true.,cut2,cut3)
+         if(i_abjet.ne.0) then
+            call getyetaptmass(p_lwm+j_p(:,i_abjet),y,eta,pt,mass)
+            call fillplotcuts('m_lm_jbbar',mass,dsig,.true.,cut2,cut3)
+         endif
       endif
 
-c-----------
-      if(i_abjet.ne.0) then
-         call getyetaptmass(p_lwm+j_p(:,i_abjet),y,eta,pt,mass)
-         call fillplotcuts('m_lm_jbbar',mass,dsig,.true.,cut2,cut3)
-      endif
+
 
 c-----------
 c b W mass
@@ -943,78 +972,189 @@ c W momentum relative to its maximum in top rest frame
       xw=pwm/p_bbmax
       call fillplotcuts('wmmom',xw,dsig,.true.,cut2,cut3)
 
-      call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(1))
-      if(cut2)call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(2))
-      if(cut3)call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(3))
+      if(i_lwp*i_lwm.gt.0) then
+         call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(1))
+         if(cut2)call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(2))
+         if(cut3)call deltaplot(p_lwp,p_lwm,dsig,'lwp-lwm',suffix(3))
 
 c theta1 and theta2 from Bernreuther
-      call boost2reson4(p_top+p_atop,1,p_top,ptzmf)
-      call boost2reson4(p_top+p_atop,1,p_lwp,plzmf)
-      call boost2reson4(ptzmf,1,plzmf,w)
-      cth1 = (w(1)*ptzmf(1)+w(2)*ptzmf(2)+w(3)*ptzmf(3))/
-     1 sqrt((w(1)**2+w(2)**2+w(3)**2)
-     2     *(ptzmf(1)**2+ptzmf(2)**2+ptzmf(3)**2))
+         call boost2reson4(p_top+p_atop,1,p_top,ptzmf)
+         call boost2reson4(p_top+p_atop,1,p_lwp,plzmf)
+         call boost2reson4(ptzmf,1,plzmf,w)
+         cth1 = (w(1)*ptzmf(1)+w(2)*ptzmf(2)+w(3)*ptzmf(3))/
+     1        sqrt((w(1)**2+w(2)**2+w(3)**2)
+     2        *(ptzmf(1)**2+ptzmf(2)**2+ptzmf(3)**2))
 
 
-      call boost2reson4(p_top+p_atop,1,p_atop,ptzmf)
-      call boost2reson4(p_top+p_atop,1,p_lwm,plzmf)
-      call boost2reson4(ptzmf,1,plzmf,w)
-      cth2 = (w(1)*ptzmf(1)+w(2)*ptzmf(2)+w(3)*ptzmf(3))/
-     1 sqrt((w(1)**2+w(2)**2+w(3)**2)
-     2     *(ptzmf(1)**2+ptzmf(2)**2+ptzmf(3)**2))
+         call boost2reson4(p_top+p_atop,1,p_atop,ptzmf)
+         call boost2reson4(p_top+p_atop,1,p_lwm,plzmf)
+         call boost2reson4(ptzmf,1,plzmf,w)
+         cth2 = (w(1)*ptzmf(1)+w(2)*ptzmf(2)+w(3)*ptzmf(3))/
+     1        sqrt((w(1)**2+w(2)**2+w(3)**2)
+     2        *(ptzmf(1)**2+ptzmf(2)**2+ptzmf(3)**2))
 
 
-      jcth1 = int((cth1+1) * 5) + 1
-      if(jcth1.eq.0) jcth1=1
-      if(jcth1.eq.11) jcth1=10
-      call fillplotcuts("cth1cth2-"//digit(jcth1),cth2,dsig,.true.,cut2,cut3)
+         jcth1 = int((cth1+1) * 5) + 1
+         if(jcth1.eq.0) jcth1=1
+         if(jcth1.eq.11) jcth1=10
+         call fillplotcuts("cth1cth2-"//digit(jcth1),cth2,dsig,.true.,cut2,cut3)
+
+
 c Simulation of t tbar reconstruction
 c Reconstruct a t tbar pair based upon the MC W's and the jets tagged as b jets.
 c Require a tag cut on the B meson transverse momentum
-      if(bhadfromtop.ne.0.or.bhadfromatop.ne.0) then
-c some realistic cuts on leptons         
-         call getyetaptmass(p_lwp,y,eta,pt,mass)
-         if(pt.lt.20.or.abs(y).gt.2.5d0) return
-         call getyetaptmass(p_lwm,y,eta,pt,mass)
-         if(pt.lt.20.or.abs(y).gt.2.5d0) return
-c cut on missing et
-         call getyetaptmass((p_nuwp+p_nuwm),y,eta,pt,mass)
-         if(pt.lt.20) return
-         if(bhadfromtop.ne.0) then
-c cut on b jets
-            i_bjet = jetvec(bhadfromtop)
-            if(i_bjet.eq.0.or.j_kt(i_bjet).lt.30) i_bjet = 0
-c Cut on taggable b mesons
-            call getyetaptmass(phep(1:4,bhadfromtop),y,eta,pt,mass)
-            if(pt.lt.0) i_bjet = 0
-         endif
-         if(bhadfromatop.ne.0) then
-c cut on b jets
-            i_abjet = jetvec(bhadfromatop)
-            if(i_abjet.eq.0.or.j_kt(i_abjet).lt.30) i_abjet = 0
-c Cut on taggable b mesons
-            call getyetaptmass
+         if(bhadfromtop.ne.0.or.bhadfromatop.ne.0) then
+c     some realistic cuts on leptons         
+            call getyetaptmass(p_lwp,y,eta,pt,mass)
+            if(pt.lt.20.or.abs(y).gt.2.5d0) return
+            call getyetaptmass(p_lwm,y,eta,pt,mass)
+            if(pt.lt.20.or.abs(y).gt.2.5d0) return
+c     cut on missing et
+            call getyetaptmass((p_nuwp+p_nuwm),y,eta,pt,mass)
+            if(pt.lt.20) return
+            if(bhadfromtop.ne.0) then
+c     cut on b jets
+               i_bjet = jetvec(bhadfromtop)
+               if(i_bjet.eq.0.or.j_kt(i_bjet).lt.30) i_bjet = 0
+c     Cut on taggable b mesons
+               call getyetaptmass(phep(1:4,bhadfromtop),y,eta,pt,mass)
+               if(pt.lt.0) i_bjet = 0
+            endif
+            if(bhadfromatop.ne.0) then
+c     cut on b jets
+               i_abjet = jetvec(bhadfromatop)
+               if(i_abjet.eq.0.or.j_kt(i_abjet).lt.30) i_abjet = 0
+c     Cut on taggable b mesons
+               call getyetaptmass
      1           (phep(1:4,bhadfromatop),y,eta,pt,mass)
-            if(pt.lt.0) i_abjet = 0
-         endif
-
-         if(i_bjet.gt.0) then
-            ptop(1:4)  = phep(1:4,i_wp)+j_p(1:4,i_bjet)
-            call getyetaptmass
-     1           (ptop,y,eta,pt,mass)
-            call fillplotcuts('Rect-pt',pt,dsig/2,.true.,cut2,cut3)
-         endif
+               if(pt.lt.0) i_abjet = 0
+            endif
+        
+         
+            if(i_bjet.gt.0) then
+               ptop(1:4)  = phep(1:4,i_wp)+j_p(1:4,i_bjet)
+               call getyetaptmass
+     1              (ptop,y,eta,pt,mass)
+               call fillplotcuts('Rect-pt',pt,dsig/2,.true.,cut2,cut3)
+            endif
             
-         if(i_abjet.gt.0) then
-            patop(1:4)  = phep(1:4,i_wm)+j_p(1:4,i_abjet)
-            call getyetaptmass
-     1           (patop,y,eta,pt,mass)
-            call fillplotcuts('Rect-pt',pt,dsig/2,.true.,cut2,cut3)
-         endif
+            if(i_abjet.gt.0) then
+               patop(1:4)  = phep(1:4,i_wm)+j_p(1:4,i_abjet)
+               call getyetaptmass
+     1              (patop,y,eta,pt,mass)
+               call fillplotcuts('Rect-pt',pt,dsig/2,.true.,cut2,cut3)
+            endif
 
+         endif
+      endif
+
+c If W- decays hadronically analize jets.      
+      if(lwm.le.0) then
+         call dowjets(dsig)
       endif
 
       end
+
+      subroutine dowjets(dsig)
+      implicit none
+      include 'hepevt.h'
+      real *8 dsig
+      integer  maxtracks,maxjets
+      parameter (maxtracks=nmxhep,maxjets=nmxhep)
+      integer mjets,jetvec(maxtracks)
+      logical   isForClustering(maxtracks)
+      real * 8 j_kt(maxjets),j_eta(maxjets),j_rap(maxjets),
+     1     j_phi(maxjets),j_p(4,maxjets),ptot(4)
+      integer itracks(maxtracks)
+      integer j,m,lev,ntracks,ntracks1,id,k
+      integer sonofid,sonofidn
+      ntracks=0
+      isForClustering = .false.
+      do j = 1,nhep
+         if(isthep(j).eq.1) then
+            if(sonofid(-24,j).ne. 1 000 000) then
+               isForClustering(j) = .true.
+               ntracks=ntracks+1
+            endif
+ccccccccccccccccccccccc
+c$$$c     !ER: manual fix - try 10 levels
+c$$$            m=j
+c$$$            do lev=1,10
+c$$$               m=jmohep(1,m)
+c$$$               if(idhep(m).eq.-24) then
+c$$$                  isForClustering(j) = .true.
+c$$$                  ntracks=ntracks+1
+c$$$                  goto 111
+c$$$               else
+c$$$                  continue
+c$$$               endif
+c$$$            enddo
+c$$$ 111        continue
+cccccccccccccccccccccc
+         endif
+      enddo
+
+      call sonofidbydaughters(-24,maxtracks,ntracks1,itracks)
+      ptot = 0
+      do j=1,ntracks1
+         ptot = ptot + phep(1:4,itracks(j))
+      enddo
+      do j=1,nhep
+         if(isForClustering(j)) then
+            ptot = ptot - phep(1:4,j)
+         endif
+      enddo
+
+      if(sum(abs(ptot)).gt.1d-6) then
+         write(*,*) ' dowjets: not all W momenta are found'
+         write(*,*) sum(abs(ptot))
+         write(*,*) ntracks,ntracks1
+         write(*,*) ' daughters of W without W mother:'
+         do j=1,ntracks1
+            id = itracks(j)
+            if(.not.isforclustering(id)) then
+               write(*,*) 'id =',id
+            endif
+         enddo
+         write(*,*) ' with W mother but not W daughters:'
+         do j=1,nhep
+            if(isforclustering(j)) then
+               do k=1,ntracks1
+                  if(itracks(k).eq.j) exit
+               enddo
+               if(k.eq.ntracks1+1) then
+                  write(*,*) 'id =',j
+               endif
+               if(j.eq.250) then
+                  write(*,*)  sonofidN(-24,j)
+               endif
+            endif
+         enddo
+         call printhep
+      endif
+
+c 11 is e+e- kt
+      mjets = 3
+      call buildjets(mjets,11d0,j_kt,j_eta,j_rap,j_phi,j_p,jetvec,
+     1     isForClustering)
+
+c      print*, mjets,j_p(4,1),j_p(4,2),dsig
+
+
+      if(mjets.ge.1) then
+         call filld('w_j1-E',j_p(4,1),dsig)
+      endif
+
+      if(mjets.ge.2) then
+         call filld('w_j2-E',j_p(4,2),dsig)
+      endif
+
+      if(mjets.ge.3) then
+         call filld('w_j3-E',j_p(4,3),dsig)
+      endif
+
+      end
+
 
 
       function in_jet(i_part,jetvec)
@@ -1292,7 +1432,7 @@ c     p1 and p2 in azi and pseudorapidity
       end
 
 
-      subroutine buildjets(mjets,kt,eta,rap,phi,pjet,jetvechep,
+      subroutine buildjets(mjets,palg,kt,eta,rap,phi,pjet,jetvechep,
      1                                               isForClustering)
 c     arrays to reconstruct jets
       implicit  none
@@ -1303,7 +1443,7 @@ c     arrays to reconstruct jets
       real * 8  kt(maxjets),eta(maxjets),rap(maxjets),
      1     phi(maxjets),pjet(4,maxjets)
       logical   isForClustering(maxtracks)
-      real * 8  ptrack(4,maxtracks),pj(4,maxjets)
+      real * 8  ptrack(4,maxtracks),pj(4,maxjets),ptot(4)
       integer   jetvec(maxtracks),itrackhep(maxtracks)
       integer   ntracks,njets
       integer   j,k,mu
@@ -1339,14 +1479,23 @@ C - Extract final state particles to feed to jet finder
          mjets=0
          return
       endif
+      if(palg.eq.11) then
+c better to boost everything to the total CM of the tracks
+         ptot = 0
+c         print*, 'ntracks in buildjets for epem',ntracks
+         do j=1,ntracks
+            ptot = ptot + ptrack(:,j)
+         enddo
+         call boost2reson4(ptot,ntracks,ptrack,ptrack)
+      endif
 C --------------- C
 C - Run FastJet - C
 C --------------- C
 C - R = 0.7   radius parameter
 C - f = 0.75  overlapping fraction
-      palg  = -1
       r     = 0.5d0
       ptmin = 0d0
+      njets=mjets
       call fastjetppgenkt(ptrack,ntracks,r,palg,ptmin,pjet,njets,jetvec)
       mjets=min(mjets,njets)
       if(njets.eq.0) return
@@ -1396,6 +1545,79 @@ c      print*, 'sonofid ',m,k
       sonofid = sonofid0(m,k,0)
       end
 
+
+      function sonofidn(m,k)
+c if k'th particle in hep common block
+c is son of a particle with idhep=m returns
+c how far back (along the jmohep sequence) the ancestor is.
+c It looks back for no more than ngenerations levels.
+c In case of failure it returns 1 000 000.
+      implicit none
+      integer, intent(in):: m,k
+      integer sonofidn,sonofidn0
+c      print*, 'sonofid ',m,k
+      sonofidn = sonofidn0(m,k,0)
+      end
+
+      subroutine sonofidbydaughters(id,max,narr,arr)
+c find all sons of last particle with given id, put them in arr,
+c narr is their number
+      implicit none
+      integer id,max,narr,arr(max)
+      include  'hepevt.h'
+      integer jhep,jid
+      jid=-1
+      do jhep=1,nhep
+         if(idhep(jhep).eq.id) then
+            jid = jhep
+         endif
+      enddo
+      if(jid.eq.-1) then
+         write(*,*) ' sonofidbydaughters: warning, id ',id,' not found'
+         narr = 0
+         return
+      endif
+      call sonofindbydaughters(jid,max,narr,arr)
+      end
+
+      subroutine sonofindbydaughters(ind,max,narr,arr)
+c find all sons of last particle with given index, put them in arr,
+c narr is their number
+      implicit none
+      integer ind,max,narr,arr(max)
+      narr=0
+      call sonofindbydaughters0(ind,max,narr,arr)
+      end
+
+      recursive subroutine sonofindbydaughters0(ind,max,narr,arr)
+c find all sons of last particle with given index, put them in arr,
+c narr is their number
+      implicit none
+      integer ind,max,narr,arr(max)
+      include  'hepevt.h'
+      integer jhep,j
+      if(isthep(ind).eq.1) then
+         do j=1,narr
+            if(arr(j).eq.ind) return
+         enddo
+         if(narr.eq.max) then
+            write(*,*)
+     1           ' sonofindbydaughters: too many sons! increase max'
+         else
+            narr=narr+1
+            arr(narr) = ind
+         endif
+      else
+         if(jdahep(2,ind).ge.jdahep(1,ind)) then
+            do jhep=jdahep(1,ind),jdahep(2,ind)
+               call sonofindbydaughters0(jhep,max,narr,arr)
+            enddo
+         elseif(jdahep(1,ind).gt.1) then
+            call sonofindbydaughters0(jdahep(1,ind),max,narr,arr)
+         endif
+      endif
+      end
+
       recursive function sonofid0(m,k,level) result(result)
       implicit none
       integer, intent(in):: m,k,level
@@ -1417,6 +1639,34 @@ c      print*, 'sonofid0 ',k
       k2 = jmohep(2,k)
       r1 = sonofid0(m,k1,level+1)
       r2 = sonofid0(m,k2,level+1)
+      result = min(r1,r2)
+      end
+
+
+      recursive function sonofidn0(m,k,level) result(result)
+      implicit none
+      integer, intent(in):: m,k,level
+      integer result
+      include  'hepevt.h'
+      integer k1,k2,r1,r2
+      integer ngenerations
+      common/cngenerations/ngenerations
+c      print*, 'sonofid0 ',k
+      write(*,*) k
+      if(level.gt.ngenerations.or.k.eq.0) then
+         result = 1000000
+         write(*,*) ' return ',result
+         return
+      endif
+      if(idhep(k).eq.m) then
+         result = level
+         write(*,*) ' return ',level
+         return
+      endif
+      k1 = jmohep(1,k)
+      k2 = jmohep(2,k)
+      r1 = sonofidn0(m,k1,level+1)
+      r2 = sonofidn0(m,k2,level+1)
       result = min(r1,r2)
       end
 
@@ -1605,5 +1855,20 @@ c     beta.  Lorents convention: (t,x,y,z).
       implicit none
       real * 8 p(3),avec3
       avec3 = sqrt( p(1)**2 + p(2)**2 + p(3)**2 )
+      end
+
+      subroutine printhep
+      implicit none
+      include 'hepevt.h'
+      integer j,k
+      write(*,101)
+      do j=1,nhep
+         write(*,100)j,isthep(j),idhep(j),jmohep(1,j),
+     1        jmohep(2,j),jdahep(1,j),jdahep(2,j), (phep(k,j),k=1,5)
+      enddo
+ 100  format(i4,    2x, i5,2x,   i5,2x, i4,1x,   i4,2x,   i4,1x,    i4,
+     1     2x,5(d10.4,1x))
+ 101  format('ihep',2x,'ist',4x,'id',5x,'mo1',2x,'mo2',3x,'da1',2x,'da2'
+     1     ,3x,'moms')
       end
 

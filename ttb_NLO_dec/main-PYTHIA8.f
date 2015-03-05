@@ -29,8 +29,13 @@
       py8tune = powheginput("#py8tune")
       nohad = powheginput("#nohad")
 
+c read allrad (default is 1)
       allrad = powheginput("#allrad")
+      if(allrad.lt.0) allrad=1
+
+c read nlowhich (default is 0)
       nlowhich = powheginput("#nlowhich")
+      if(nlowhich.lt.0) nlowhich=0
 
 c default is .true. ; set it to zero to switch it off (not recommended!)      
       weveto = .not. powheginput("#weveto") .ne. 0
@@ -48,13 +53,26 @@ c we do the vetoing
       scalupfac=powheginput('#scalupfac')
       if(scalupfac.lt.0) scalupfac=1
 
+
+
+
       call init_hist
 
       call getmaxev(maxev)
 
       call lhefreadhdr(97)
 
+      if(powheginput("#pyMEC").eq.0) then
+         call pythia_option("TimeShower:MEcorrections = off");
+      endif
+
+      if(powheginput("#pyMEaf").eq.0) then
+         call pythia_option("TimeShower:MEafterFirst = off");
+      endif
+
       call pythia_init
+
+
 
       nevhep=0
       kpy8 = 0
@@ -91,6 +109,17 @@ c            canveto = 0
 c            canveto = 1
             vetoscaletp = scalup
             vetoscaletm = scalup
+         elseif(nlowhich.eq.3) then
+            call findresscale(-24,vetoscalewm)
+            if(dabs(scalup-vetoscalewm).gt.0.01d0) then
+               if(l.lt.10) then
+                  write(*,*) 'nlowhich = 3: problem with veto scales'
+                  write(*,*) scalup,vetoscalewm
+               endif
+            endif
+            vetoscalewm=scalup
+            vetoscalewp=1d30
+            scalup = sqrt(2*phepdot(pup(:,1),pup(:,2)))
          elseif(nlowhich.eq.4) then
 c            canveto = 1
             vetoscaletp = scalup
@@ -105,20 +134,19 @@ c            write(*,*) 'vetoscaletp/scalup', vetoscaletp/scalup
             call pwhg_exit(-1)
          endif
 
-c don't veto W's
-         vetoscalewp=100
-         vetoscalewm=100
-
-c useful to check that py8 is doing what we are telling him
+c useful to check that py8 is doing what we are asking
          if(l.lt.10) then
-            write(*,*) 'veto scales: ',l,scalup,vetoscaletp,
-     1           vetoscaletm,canveto
+            write(*,*) 'veto scales: ',l,scalup,vetoscaletp,vetoscalewp,
+     1           vetoscaletm,vetoscalewm,canveto
          endif
 
          m=1
+         call copylh
          do kloop=1,1000000
 c Insist to shower this event;
             call pythia_next(iret)
+            call resetlh
+            call checklh
             kpy8 = kpy8+1
             
             if(iret.ne.1) then
@@ -141,8 +169,8 @@ c Insist to shower this event;
                   call getdechardness(1,tpdecsc,ntpdec,tpiddec,tppdec)
                   call getdechardness(-1,tmdecsc,ntmdec,tmiddec,tmpdec)
 
-
-c the followins is probably not needed
+c the following is probably not needed (was used at some point to
+c produce some plots)
                   call boost2reson4(tppdec,ntpdec,tppdec,tppdec)
                   call boost2reson4(tmpdec,ntmdec,tmpdec,tmpdec)
 c 7 and 9 are the fermions from W+ or W-; if they are hadrons,
@@ -194,7 +222,7 @@ c find the veto scales.
          enddo
 
          if(iret.eq.1) then
-            if(nevhep.lt.0) then
+            if(nevhep.lt.10) then
                do j=1,nhep
                   write(*,100)j,isthep(j),idhep(j),jmohep(1,j),
      1           jmohep(2,j),jdahep(1,j),jdahep(2,j), (phep(k,j),k=1,5)
@@ -355,10 +383,12 @@ c         endif
          enddo
          p0 = p(:,idg)+p(:,idq)+p(:,ida)
          q2 = dotp(p0,p0)
-         csi = 2*(dotp(p0,p(:,idg)))/sqrt(q2)
+         csi = 2*p(0,idg)/sqrt(q2)
          yq = 1 - dotp(p(:,idg),p(:,idq))/(p(0,idg)*p(0,idq))
          ya = 1 - dotp(p(:,idg),p(:,ida))/(p(0,idg)*p(0,ida))
          scale = sqrt(min(1-yq,1-ya)*csi**2*q2/2)
+c         print*, 'scaleq,scalea = ',sqrt((1-ya)*csi**2*q2/2),sqrt((1-yq)*csi**2*q2/2)
+c         print*, 'scale,scalup = ',scale,scalup
       endif
       end
 
@@ -498,7 +528,9 @@ c     the b has radiated a gluon
          return
       else
          write(*,*) ' was not expecting this!'
+         goto 998
       endif
+      goto 999
  998  continue
       write(*,*) 'top=',i_top
       do j=1,nhep
@@ -518,136 +550,41 @@ c it returns the hardness of b radiation
       real * 8 hardness
       integer nmoms
       integer iddec(8)
-      real * 8 pmoms(4,8)
+      real * 8 pw(4),h1,h2,h3
       include 'hepevt.h'
       integer jhep
-      integer i_top,i_b,i_w,i_g,j,k,wid,bid,tid
-      real * 8 pchain(4,3)
-      real * 8 phepdot
-      nmoms = 0
-      pmoms = 0
-      iddec = 0
-      tid = 6*ichw
+      integer i_w,j,k,wid
       wid = 24*ichw
-      bid = 5*ichw
-c find last top in record
+      i_w=0
+c find last W in record
       do jhep=1,nhep
-         if(idhep(jhep).eq.tid) then
-            i_top = jhep
+         if(idhep(jhep).eq.wid) then
+            i_w = jhep
          endif
       enddo
-      pchain(:,1)=phep(1:4,i_top)
-      pmoms(:,1) = pchain(:,1)
-      iddec(1)=tid
-      nmoms = 1
-c look for top direct sons
-      if(jdahep(2,i_top)-jdahep(1,i_top).eq.1) then
-         i_w = jdahep(1,i_top)
-         i_b = jdahep(2,i_top)
-         if(idhep(i_w).ne.wid) then
-            write(*,*) ' top did not go in W!'
-            goto 998
-         endif
-         if(idhep(i_b).ne.bid) then
-            write(*,*) ' top did not go in b!'
-            goto 998
-         endif
-         nmoms = nmoms+1
-         pmoms(:,nmoms) = phep(1:4,i_w)
-         iddec(nmoms) = wid
-         nmoms = nmoms+1
-         pmoms(:,nmoms) = phep(1:4,i_b)
-         iddec(nmoms) = bid
-         if(jdahep(2,i_b)-jdahep(1,i_b).gt.1) then
-            write(*,*) ' found b-> more than 2 particles'
-            goto 998
-         elseif(idhep(jdahep(1,i_b)).eq.bid
-     1        .and.idhep(jdahep(2,i_b)).eq.21) then
-c     the b has radiated a gluon
-            pchain(:,2) = phep(1:4,jdahep(1,i_b))
-            pchain(:,3) = phep(1:4,jdahep(2,i_b))
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(:,2)
-            iddec(nmoms) = bid
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(:,3)
-            iddec(nmoms) = 21
-         else
-            hardness = -1
-            return
-         endif
-c now pchain contains the 4-momenta of the top, and the b-g pair
-         call boost2reson4(pchain,3,pchain,pchain)
-         
-         hardness = sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
-     1        * pchain(4,3)/pchain(4,2) )
-         return
-      elseif(jdahep(2,i_top)-jdahep(1,i_top).eq.2) then         
-c here we have W b g 
-         if(.not.(idhep(jdahep(1,i_top)).eq.wid
-     1        .and.idhep(jdahep(1,i_top)+1).eq.bid
-     2        .and.idhep(jdahep(2,i_top)).eq.21)) then
-            write(*,*) ' was not expecting this!'
-            goto 998
-         endif
-         i_w = jdahep(1,i_top)
-         i_b = i_w+1
-         i_g = i_b+1
-         nmoms = nmoms+1
-         pmoms(:,nmoms) = phep(1:4,i_w)
-         iddec(nmoms) = wid
-         nmoms = nmoms+1
-         pmoms(:,nmoms) = phep(1:4,i_b)
-         iddec(nmoms) = bid
-         nmoms = nmoms+1
-         pmoms(:,nmoms) = phep(1:4,i_g)
-         iddec(nmoms) = 21
-c see if b goes into b g
-         if(jdahep(2,i_b)-jdahep(1,i_b).gt.1) then
-            write(*,*) ' found b-> more than 2 particles'
-            goto 998            
-         endif
-         if(idhep(jdahep(1,i_b)).eq.bid
-     1        .and.idhep(jdahep(2,i_b)).eq.21) then
-c     the b has radiated a gluon
-            pchain(:,2) = phep(1:4,jdahep(1,i_b))
-            pchain(:,3) = phep(1:4,jdahep(2,i_b))
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(1:4,2)
-            iddec(nmoms) = bid
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(1:4,3)
-            iddec(nmoms) = 21
-            call boost2reson4(pchain,2,pchain(1,2),pchain(1,2))
-            hardness = sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
-     1        * pchain(4,3)/pchain(4,2) )
-         else
-            hardness = -1
-         endif
-         if(jdahep(2,i_g)-jdahep(1,i_g).eq.1) then
-            pchain(:,2) = phep(1:4,jdahep(1,i_g))
-            pchain(:,3) = phep(1:4,jdahep(2,i_g))
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(1:4,2)
-            iddec(nmoms) = idhep(jdahep(1,i_g))
-            nmoms = nmoms+1
-            pmoms(:,nmoms) = pchain(1:4,3)
-            iddec(nmoms) = idhep(jdahep(2,i_g))
-            call boost2reson4(pchain,2,pchain(1,2),pchain(1,2))
-            hardness = max(hardness,
-     1           sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
-     2        * (pchain(4,3)*pchain(4,2))
-     3           /(pchain(4,3)**2+pchain(4,2)**2)))
-         elseif(jdahep(2,i_g)-jdahep(1,i_g).gt.1) then
-            write(*,*) ' found g-> more than 2 particles'
-            goto 998            
-         endif
-         return
-      else
-         write(*,*) ' was not expecting this!'
+      if(i_w.eq.0) then
+         write(*,*) 'getdechardnessw: could not find the W! exiting ...'
+         call exit(-1)
       endif
+      pw(:)=phep(1:4,i_w)
+c look for W direct sons
+      if(jdahep(2,i_w)-jdahep(1,i_w).eq.1) then
+         call findpy8dec(jdahep(2,i_w),pw,h1)
+         call findpy8dec(jdahep(1,i_w),pw,h2)
+         hardness=max(h1,h2)
+         if(hardness.gt.1d0) hardness = 1d25
+      elseif(jdahep(2,i_w)-jdahep(1,i_w).eq.2) then
+         call findpy8dec(jdahep(1,i_w),pw,h1)
+         call findpy8dec(jdahep(1,i_w)+1,pw,h2)
+         call findpy8dec(jdahep(2,i_w),pw,h3)
+         hardness = max(h1,h2,h3)
+      else
+         write(*,*) 'getdechardnessw: was not expecting this!'
+         goto 998
+      endif
+      goto 999
  998  continue
-      write(*,*) 'top=',i_top
+      write(*,*) 'getdechardnessw: wid=',wid
       do j=1,nhep
          write(*,100)j,isthep(j),idhep(j),jmohep(1,j),
      1        jmohep(2,j),jdahep(1,j),jdahep(2,j), (phep(k,j),k=1,5)
@@ -657,4 +594,162 @@ c     the b has radiated a gluon
  999  end
 
 
+      subroutine findpy8dec(j,p0,h)
+      implicit none
+      include 'hepevt.h'
+      integer j
+      real * 8 p0(4),h
+      real * 8 pchain(4,3)
+      real * 8 phepdot
+      if(jdahep(2,j).eq.jdahep(1,j)) then
+         h = 0
+         return
+      endif
 
+      pchain(:,1) = p0
+      pchain(:,2) = phep(1:4,jdahep(1,j))
+      pchain(:,3) = phep(1:4,jdahep(2,j))
+
+      if(jdahep(2,j)-jdahep(1,j).eq.1) then
+         call boost2reson4(p0,3,pchain(:,:),pchain(:,:))
+         h = sqrt( 2 * phepdot(pchain(:,2),pchain(:,3))
+     2        * (pchain(4,3)*pchain(4,2))
+     3        /(pchain(4,3)**2+pchain(4,2)**2))
+      else
+         write(*,*) 'findpy8dec: was not expecting this!'
+         call exit(-1)
+      endif
+
+      end
+
+
+
+      subroutine copylh
+      implicit none
+      include 'LesHouches.h'
+      integer idbmupz,pdfgupz,pdfsupz,idwtupz,nprupz,lprupz
+      double precision ebmupz,xsecupz,xerrupz,xmaxupz
+      common /heprups/ idbmupz(2),ebmupz(2),pdfgupz(2),pdfsupz(2),
+     &                idwtupz,nprupz,xsecupz(maxpup),xerrupz(maxpup),
+     &                xmaxupz(maxpup),lprupz(maxpup)
+      integer nupz,idprupz,idupz,istupz,mothupz,icolupz
+      double precision xwgtupz,scalupz,aqedupz,aqcdupz,pupz,vtimupz,spinupz
+      common/hepeups/nupz,idprupz,xwgtupz,scalupz,aqedupz,aqcdupz,
+     &              idupz(maxnup),istupz(maxnup),mothupz(2,maxnup),
+     &              icolupz(2,maxnup),pupz(5,maxnup),vtimupz(maxnup),
+     &              spinupz(maxnup)
+      idbmupz = idbmup
+      pdfgupz = pdfgup
+      pdfsupz = pdfsup
+      idwtupz = idwtup
+      nprupz  = nprup
+      lprupz  = lprup
+
+
+
+      ebmupz  =       ebmup   
+      xsecupz =       xsecup  
+      xerrupz =       xerrup  
+      xmaxupz =       xmaxup   
+
+
+
+      nupz       =      nup   
+      idprupz    =      idprup
+      idupz      =      idup  
+      istupz     =      istup 
+      mothupz    =      mothup
+      icolupz    =      icolup
+                              
+      xwgtupz    =      xwgtup
+      scalupz    =      scalup
+      aqedupz    =      aqedup
+      aqcdupz    =      aqcdup
+      pupz       =      pup   
+      vtimupz    =      vtimup
+      spinupz    =      spinup
+
+      end
+
+
+      
+      
+      subroutine checklh
+      implicit none
+      include 'LesHouches.h'
+      integer idbmupz,pdfgupz,pdfsupz,idwtupz,nprupz,lprupz
+      double precision ebmupz,xsecupz,xerrupz,xmaxupz
+      common /heprups/ idbmupz(2),ebmupz(2),pdfgupz(2),pdfsupz(2),
+     &                idwtupz,nprupz,xsecupz(maxpup),xerrupz(maxpup),
+     &                xmaxupz(maxpup),lprupz(maxpup)
+      integer nupz,idprupz,idupz,istupz,mothupz,icolupz
+      double precision xwgtupz,scalupz,aqedupz,aqcdupz,pupz,vtimupz,spinupz
+      common/hepeups/nupz,idprupz,xwgtupz,scalupz,aqedupz,aqcdupz,
+     &              idupz(maxnup),istupz(maxnup),mothupz(2,maxnup),
+     &              icolupz(2,maxnup),pupz(5,maxnup),vtimupz(maxnup),
+     &              spinupz(maxnup)
+      if(sum(abs(idbmupz - idbmup)).ne.0
+     1 .or. sum(abs(pdfgupz - pdfgup)).ne.0
+     2 .or. sum(abs(pdfsupz - pdfsup)).ne.0
+     3 .or. idwtupz - idwtup .ne.0
+     4 .or. nprupz  - nprup .ne.0
+     5 .or. sum(abs(lprupz  - lprup)).ne.0 ) goto 998
+
+
+
+      if(    sum(abs(ebmupz  -       ebmup  ))  .ne.0
+     1 .or.  sum(abs(xsecupz -       xsecup ))  .ne.0
+     1 .or.  sum(abs(xerrupz -       xerrup ))  .ne.0
+     1 .or.  sum(abs(xmaxupz -       xmaxup ))  .ne.0) goto 998
+
+
+      if( nupz   -    nup     .ne.0
+     1 .or. idprupz    -      idprup   .ne.0
+     1 .or. sum(abs( idupz      -      idup  )).ne.0
+     1 .or. sum(abs( istupz     -      istup )).ne.0
+     1 .or. sum(abs( mothupz    -      mothup)).ne.0
+     1 .or. sum(abs( icolupz    -      icolup)).ne.0 ) goto 998
+
+      if(    xwgtupz    -      xwgtup   .ne.0
+     1 .or.  scalupz    -      scalup   .ne.0
+     1 .or.  aqedupz    -      aqedup   .ne.0
+     1 .or.  aqcdupz    -      aqcdup   .ne.0
+     1 .or.  sum(abs( pupz       -      pup   )).ne.0
+     1 .or.  sum(abs( vtimupz    -      vtimup)).ne.0
+     1 .or.  sum(abs( spinupz    -      spinup)).ne.0) goto 998
+      return
+ 998  write(*,*) ' checklh: fails ...'
+      call exit(-1)
+
+      end
+
+
+      
+      
+      
+      subroutine resetlh
+      implicit none
+      include 'LesHouches.h'
+      integer idbmupz,pdfgupz,pdfsupz,idwtupz,nprupz,lprupz
+      double precision ebmupz,xsecupz,xerrupz,xmaxupz
+      common /heprups/ idbmupz(2),ebmupz(2),pdfgupz(2),pdfsupz(2),
+     &                idwtupz,nprupz,xsecupz(maxpup),xerrupz(maxpup),
+     &                xmaxupz(maxpup),lprupz(maxpup)
+      integer nupz,idprupz,idupz,istupz,mothupz,icolupz
+      double precision xwgtupz,scalupz,aqedupz,aqcdupz,pupz,vtimupz,spinupz
+      common/hepeups/nupz,idprupz,xwgtupz,scalupz,aqedupz,aqcdupz,
+     &              idupz(maxnup),istupz(maxnup),mothupz(2,maxnup),
+     &              icolupz(2,maxnup),pupz(5,maxnup),vtimupz(maxnup),
+     &              spinupz(maxnup)
+      idprup = idprupz
+      end
+
+
+      
+      
+      subroutine pythia_option(string)
+      character * (*) string
+      character * 1 null
+      null=char(0)
+      call  pythia_option0(trim(string)//null)
+      end

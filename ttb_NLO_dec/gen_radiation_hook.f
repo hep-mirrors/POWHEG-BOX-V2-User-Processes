@@ -69,8 +69,9 @@ c in gen_radiation
          index = 0
       endif
       o_radkinreg = rad_kinreg
-c if no radiation was generted at this stage, skip
-      if(kn_csi.eq.0) return
+c if no radiation was generted at this stage, skip;
+c but go to last lines to setup output values of t, tmax and rad_kinreg
+      if(kn_csi.eq.0) goto 998
       index = index + 1
       if(rad_kinreg.eq.1) then
          indcur = index
@@ -89,7 +90,7 @@ c see if radiation from this resonance is already there
                else
 c this radiation looses the bid (a harder one is already there)
                   index = index - 1
-                  return
+                  goto 998
                endif
             endif
          enddo
@@ -105,15 +106,15 @@ c this radiation looses the bid (a harder one is already there)
       betal = ( kn_x1 - kn_x2 )/( kn_x1 + kn_x2 )
       call mboost(nlegreal,vecl,-betal,preal_os,
      1     skn_cmpreal(0:3,1:nlegreal,indcur))
-      if(rad_kinreg.eq.1) then
+ 998  if(rad_kinreg.eq.1) then
 c make sure that ISR always wins, since t>tmax
-         if(t.gt.0) then
 c with this settings, tmax will be still 0 at the first
 c round (we want all regions to try to radiate down to 0
-            t    =  0
-            tmax = -1
-         endif
+         if(kn_csi.eq.0) rad_kinreg = 0
+         t    =  0
+         tmax = -1
       else
+c non-isr always fail t>tmax, so that only the ISR (whether it radiated or not)
          t    = -1
          tmax =  0
       endif
