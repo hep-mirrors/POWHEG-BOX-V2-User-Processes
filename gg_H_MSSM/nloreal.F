@@ -19,21 +19,21 @@ c     gg->Ag
           l2 = lambdafer(2)
 
 ccccccccccccc    top top
-          if (flg_notop.leq.0) then
+          if (flg_notop.le.0) then
              agg2 = agg2 + aijgg(mtop,mtop,l1,l1,mh,u,s,t)
              agg2 = agg2 + aijgg(mtop,mtop,l1,l1,mh,t,u,s)
              agg2 = agg2 + aijgg(mtop,mtop,l1,l1,mh,s,t,u)
           endif
 
 ccccccccccccc    bottom bottom
-          if (flg_nobot.leq.0) then
+          if (flg_nobot.le.0) then
              agg2 = agg2 + aijgg(mbot,mbot,l2,l2,mh,u,s,t)
              agg2 = agg2 + aijgg(mbot,mbot,l2,l2,mh,t,u,s)
              agg2 = agg2 + aijgg(mbot,mbot,l2,l2,mh,s,t,u)
           endif
 
 ccccccccccccc    top bottom
-          if ((flg_nobot.leq.0).or.(flg_notop.leq.0)) then
+          if ((flg_nobot.le.0).or.(flg_notop.le.0)) then
              agg2 = agg2 + 2d0*aijgg(mtop,mbot,l1,l2,mh,u,s,t)
              agg2 = agg2 + 2d0*aijgg(mtop,mbot,l1,l2,mh,t,u,s)
              agg2 = agg2 + 2d0*aijgg(mtop,mbot,l1,l2,mh,s,t,u)
