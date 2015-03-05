@@ -71,6 +71,10 @@ MyUserHooks* MyHook=new MyUserHooks();
 
 extern "C" {
   // F77 interface to pythia8
+  void pythia_option0_(char *string) {
+    pythia.readString(string);
+  }
+
   void pythia_init_() {
   // Generator. Process selection. LHC initialization. Histogram.
     //  pythia.readString("Beams:eCM = 8000.");    

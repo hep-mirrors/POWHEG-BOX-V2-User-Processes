@@ -91,6 +91,8 @@ void fastjetppgenkt_(const double * p, const int & npart,
       jet_def = fj::JetDefinition(fj::cambridge_algorithm, R);
     }  else if (palg == -1.0) {
       jet_def = fj::JetDefinition(fj::antikt_algorithm, R);
+    }  else if (palg == 11.0) {
+      jet_def = fj::JetDefinition(fj::ee_kt_algorithm);
     } else {
       jet_def = fj::JetDefinition(fj::genkt_algorithm, R, palg);
     }
@@ -99,7 +101,13 @@ void fastjetppgenkt_(const double * p, const int & npart,
     // perform clustering
     fj::ClusterSequence cs(input_particles, jet_def);
     // extract jets (pt-ordered)
-    vector<fj::PseudoJet> jets = sorted_by_pt(cs.inclusive_jets(ptmin));
+    vector<fj::PseudoJet> jets ;
+      if (palg == 11.0) {
+	jets = sorted_by_pt(cs.exclusive_jets(njets));
+      }
+      else {
+	jets = sorted_by_pt(cs.inclusive_jets(ptmin));
+      }
     njets = jets.size();
 
     // find particles inside i-th jet

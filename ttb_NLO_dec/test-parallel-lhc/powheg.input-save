@@ -55,5 +55,7 @@ parallelstage 1
 xgriditeration 1
 
 
+#pyMEC 0      ! Discussion with Pythia developers has led us to try this
+              ! flag if we generate the corrections in decays (our default setting)
 
 
