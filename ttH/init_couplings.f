@@ -2,6 +2,7 @@
       implicit none
       include "coupl.inc"
       include 'PhysPars.h'
+      include "pwhg_physpar.h"
 
       real * 8 powheginput
       external powheginput
@@ -24,6 +25,16 @@ c except the strong coupling constant, which is defined
 c somewhere else
       call setpara("param_card.dat",.true.)
       call madtophys
+
+c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
+      physpar_ml(1) = 0.51099891d-3
+      physpar_ml(2) = 0.1056583668d0
+      physpar_ml(3) = 1.77684d0
+      physpar_mq(1) = 0.33d0     ! down
+      physpar_mq(2) = 0.33d0     ! up
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = 4.5d0      ! bottom
 
       end
 
