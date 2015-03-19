@@ -1117,7 +1117,7 @@ c     and change the NLO weights to the NNLO ones.
       else
          if(string.eq.'</rwgt>') then
             do k=istart,lhrwgt_nids
-               write(nlo,'(a,d16.10,a)') '<wgt id='//
+               write(nlo,'(a,e16.10,a)') '<wgt id='//
      1      trim(lhrwgt_id_arr(k))// '> ',lhrwgt_weights(k),' </wgt>'
             enddo
          endif
