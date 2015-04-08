@@ -176,7 +176,9 @@ c      ph_gfermi=sqrt(2d0)*g_weak**2/(8*wmass**2)
       write(*,*) 'When DM production via (pseudo)scalar exchange with'
       write(*,*) 'full top-mass dependence is simulated as in this '
       write(*,*) 'run, a citation to'
-      write(*,*) '    Haisch,Re: On dark matter top-quark interactions'
+      write(*,*) '    Haisch,Re: Simplified dark matter top-quark '
+      write(*,*) '    interactions at the LHC'
+      write(*,*) '    http://arxiv.org/abs/1503.00691'
       write(*,*) 'should also be included'
       write(*,*) '****************************************************'
 
