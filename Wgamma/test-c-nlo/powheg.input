@@ -39,26 +39,33 @@ nubound 100000  ! number of bbarra calls to setup norm of upper bounding functio
 icsimax  1      ! <= 100, number of csi subdivision when computing the upper bounds
 iymax    1      ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0    ! increase upper bound for radiation generation
+bornktmin  1d0       ! (default 0d0) generation cut. Minimum kt in underlying Born
 
 ! process dependent settings
-bornktmin  1d0       ! kt_min at Born level for gamma in Wgamma (or j in Wj)
-minlo 1              ! use MiNLO (default=1) 
-phspseparation 0.5d0 ! weight for phase space dual-channel sampling (default=0d0)
-kt2minqed 0.8d0      ! kt2_rad_min for photon radiation from leptons (default=0.8)
-modept2gamlep 0      ! pt_rel definition in setlocalscales (default=0)
+minlo 1              ! (default=1) if 0 do not use MiNLO  
+#powheg-nc  1        ! (default=0, competition-at-nlo scheme) non-competition scheme 
+#powheg-c-lo  1      ! (default=0, competition-at-nlo scheme) competition-at-lo scheme 
+phspseparation 0.5d0 ! (default=0.5d0) weight for phase space dual-channel sampling 
+kt2minqed 0.8d0      ! (default=0.8d0) kt2_rad_min for photon radiation from leptons 
+modept2gamlep 0      ! (default=0) pt_rel definition in setlocalscales 
+#Deltak_gam  0.2d0   ! (default 0) anomalous coupling
+#Lambda_gam  0.02d0  ! (default 0) anomalous coupling
+
+! input variables for the shower
+#use_photos 1         ! (default 0) if 1 use photos for photon radiation from leptons 
 ! settings for shower with pythia6 
-use_photos 0         ! if 1 use photos for photon radiation from leptons (default: do not use)
-pythiatune 320       ! choose tune for pythia6 (default 320, Perugia tune)
+pythiatune 320       ! (default 320, Perugia tune) tune for pythia6 
 ! settings for shower with pythia8
-py8tune  5           ! choose tune for pythia8 (default 5) (14 -> Monash2013 tune)
+py8tune  5           ! (default 5) tune for pythia8 (14 -> Monash2013 tune)
 nohad    0           ! (default 0) if 1 switch off hadronization
 py8veto  1           ! (default 0, use scalupveto routines) if 1 use pythia8 internal routines 
+me_corr 1            ! (default 0, do not use), if 1 use matrix element corrections in photos
+double_brem 1        ! (default 0, do not use), if 1 use double bremsstrahlung generation in photos
 
-#compute_rwgt 1   ! uncomment in order to reweight events for scale variations 
+#compute_rwgt 1   ! if 1 reweight events for scale variations 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
-#ptsupp     0     ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 su\
-ppfact = 1
+#ptsupp     0     ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 suppfact = 1
 bornonly   0      ! (default 0) if 1 do Born only
 #withnegweights 1 ! (default 1) allows negative weighted events
 #olddij 1         ! (default 0) if 1 use old dijterm definition 

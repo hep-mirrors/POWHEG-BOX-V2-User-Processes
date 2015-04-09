@@ -12,7 +12,7 @@ vdecaymode 1  ! (1:electronic decay, 2: muonic decay, 3: tauonic decay)
 #CKM_Vts 0
 #CKM_Vtb 1
  
-numevts 200000 ! number of events to be generated
+numevts      0 ! number of events to be generated
 ih1   1        ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2   1        ! hadron 2 (1 for protons, -1 for antiprotons)
 ndns1 131      ! pdf set for hadron 1 (mlm numbering)
@@ -27,25 +27,28 @@ lhans2  10800  ! pdf set for hadron 2 (LHA numbering)
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present (<> 1 regenerate)
  
-ncall1 30000   ! number of calls for initializing the integration grid
+ncall1 300000  ! number of calls for initializing the integration grid
 itmx1   5      ! number of iterations for initializing the integration grid
-ncall2 100000  ! number of calls for computing the integral and finding upper bound
+ncall2 1000000 ! number of calls for computing the integral and finding upper bound
 itmx2   5      ! number of iterations for computing the integral and finding upper bound
 
 foldcsi   1     ! number of folds on csi integration
 foldy     1     ! number of folds on y integration
 foldphi   1     ! number of folds on phi integration
-nubound 100000  ! number of bbarra calls to setup norm of upper bounding function
+nubound   0     ! number of bbarra calls to setup norm of upper bounding function
 icsimax  1      ! <= 100, number of csi subdivision when computing the upper bounds
 iymax    1      ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0    ! increase upper bound for radiation generation
 
-! process dependent settings
-bornktmin  1d0       ! kt_min at Born level for gamma in Wgamma (or j in Wj)
-nlotestonly 1        ! do nlo analysis only, using smooth isolation cut
-phspseparation 0.5d0 ! weight for phase space dual-channel sampling (default=0d0)
+bornktmin  1d0       ! (default 0d0) generation cut. Minimum kt in underlying Born
 
-#compute_rwgt 1   ! uncomment in order to reweight events for scale variations 
+! process dependent settings
+nlotestonly 1        ! (default 0) if 1 do nlo analysis only, using smooth isolation cut
+phspseparation 0.5d0 ! (default=0.5d0) weight for phase space dual-channel sampling
+#Deltak_gam  0.2d0   ! (default 0) anomalous coupling
+#Lambda_gam  0.02d0  ! (default 0) anomalous coupling
+
+#compute_rwgt 1   ! reweight events for scale variations 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
 #ptsupp     0     ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 su\
