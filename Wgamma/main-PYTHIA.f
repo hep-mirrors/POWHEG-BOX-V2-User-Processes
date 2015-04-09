@@ -27,14 +27,11 @@ c     veto QED shower from leptons above the SCALUP value
 c     (in pythia6 the default Q_max is the resonance mass)
       integer photostrial,pythiatrial,trial_max
       real * 8 ptrel
-      logical lepveto
 c     powheg-nc/c-lo
       logical powheg_nc,powheg_c_lo
       common/wgammode/powheg_nc,powheg_c_lo
       real * 8 powheginput
       external powheginput
-      integer ngamma
-      common/ngamma/ngamma
 
       use_photos = powheginput("#use_photos") .eq. 1
 
@@ -73,17 +70,15 @@ c Set up initial parameter
             write(*,*) ' no event generated; skipping'
             goto 111
          endif
-c$$$c DEBUG STARTS *******************************************
-c$$$         if(use_photos) then
-c$$$         write(*,*) ' incoming Les Houches event **********************'
-c$$$         call printleshouches
-c$$$         write(*,*) ' End incoming Les Houches event  *****************'
-c$$$         endif
-c$$$c DEBUG ENDS ********************************************
-
-c     PHOTOS
+c PHOTOS
          if(use_photos) then
+c$$$c DEBUG STARTS *******************************************
+c$$$c         write(*,*) ' ɪncoming Les Houches event********'
+c$$$c         call printleshouches
+c$$$c         write(*,*) ' End incoming Les Houches event  **'
+c$$$c DEBUG ENDS *********************************************
             photostrial=0
+c set IR cutoff for photon emission
             call seteps
 c position of the W/Z resonance in the LH common block
             id_v=3
@@ -93,19 +88,22 @@ c Must restore it at each loop
  15         continue
 c copy LH common to PHHEPEVT common, used by photos
             call lhuptophhepevt(iev)
-c$$$            write(*,*) ' incoming hep block for photos **************'
+c$$$c DEBUG STARTS ***********************************************
+c$$$            write(*,*) ' Incoming hep block for photos ******'
 c$$$            call  printphhepblock
-c$$$            write(*,*) ' End incoming hep block for photos **************'
+c$$$            write(*,*) ' End incoming hep block for photos **'
 c$$$            call checkresmomphhep
+c$$$c DEBUG ENDS *************************************************
 c Photos adds photons to  PHHEPEVT common
             call photos_make(id_v)
-c$$$            write(*,*) ' outgoing hep block for photos **************'
+c$$$c DEBUG STARTS ***********************************************
+c$$$            write(*,*) ' Outgoing hep block for photos ******'
 c$$$            call  printphhepblock
 c$$$            call checkresmomphhep
-c$$$            write(*,*) ' End outgoing hep block for photos **************'
+c$$$            write(*,*) ' End outgoing hep block for photos **'
+c$$$c DEBUG ENDS *************************************************
 c check if Photo's photons violate scalup veto
             call pass_veto(ok)
-
             if (.not.ok) then
                photostrial=photostrial+1
                if(photostrial.le.trial_max) then
@@ -117,13 +115,11 @@ c check if Photo's photons violate scalup veto
             endif
 c Copy event from photos hepevt block to the LH block
             call phhepevttolhef
-c$$$c DEBUG STARTS *******************************************
-c$$$            if(ngamma.gt.1) then 
-c$$$               write(*,*) ' outgoing Les Houches event **********************'
-c$$$               call printleshouches
-c$$$               write(*,*) ' End outgoing Les Houches event  *****************'
-c$$$            endif
-c$$$c DEBUG ENDS ********************************************
+c$$$c DEBUG STARTS **********************************************
+c$$$c            write(*,*) ' Outgoing Les Houches event *******'
+c$$$c            call printleshouches
+c$$$c            write(*,*) ' End outgoing Les Houches event  **'
+c$$$c DEBUG ENDS ************************************************
          endif
 
 c     PYTHIA
@@ -162,24 +158,25 @@ c     if virtuality shower routines (PYEVNT) are used, call old veto routine
             endif
 c     if pt_rel(gam-lep) is above SCALUP 
 c     veto the event and retry to shower (a maximum of trial_max times)  
-            if ((powheg_nc.and.ptrel.gt.0) .or. ptrel .gt.scalup) goto 888
-
+            if ((powheg_nc.and.ptrel.gt.0) 
+     &           .or. ptrel .gt.scalup) goto 888
+c     in powheg_nc QED shower should be off, all photons are vetoed
             if(powheg_nc) then
-c see if there are other shower photons not from resoannce decay
+c see if there are other shower photons not from resonance decay
                call examine_other_photons(ptrel)
                if(ptrel.gt.0) goto 888
             endif
 
          else
-c no photons from resonance decay are allowed
+c no photons from resonance decay are allowed from PYTHIA if PHOTOS is used
             call examine_res_photons(ptrel)
             if(ptrel.ge.0) goto 888
+         endif
 c no photons from other sources that violate scalup are allowed.
 c The shower should take care of that, if pt ordered.
 c Pherhaps it is better to veto them explicitly ...
-            call examine_other_photons(ptrel)
-            if(ptrel.gt.scalup) goto 888
-         endif
+         call examine_other_photons(ptrel)
+         if(ptrel.gt.scalup) goto 888
 
          call PYANAL
 
@@ -226,23 +223,15 @@ c     W/Zgamma(+j) events, if the photon comes from the resonance
       elseif(nup.eq.7.and.idhep(7).eq.22.and.jmohep(1,7).eq.3) then
 c     W/Zj+gamma events, if the photon comes from the resonance
 c     exchange j <-> gamma in the lhe list
-         idtmp=idup(6)
-         idup(6)=idup(7)
-         idup(7)=idtmp
-         mothtmp(:)=mothup(:,6)
-         mothup(:,6)=mothup(:,7)
-         mothup(:,7)=mothtmp(:)
-         ptmp(:)=pup(:,6)
-         pup(:,6)=pup(:,7)
-         pup(:,7)=ptmp(:)
-         coltmp(:)=icolup(:,6)
-         icolup(:,6)=icolup(:,7)
-         icolup(:,7)=coltmp(:)
-c     hep list
-         idhep(1:nhep)=idup(1:nup)
-         jmohep(1:2,1:nhep)=mothup(1:2,1:nup)
-         jdahep(1:2,1:nhep)=0
-         phep(1:5,1:nhep)=pup(1:5,1:nup)            
+         idtmp=idhep(6)
+         idhep(6)=idhep(7)
+         idhep(7)=idtmp
+         mothtmp(:)=jmohep(:,6)
+         jmohep(:,6)=jmohep(:,7)
+         jmohep(:,7)=mothtmp(:)
+         ptmp(:)=phep(:,6)
+         phep(:,6)=phep(:,7)
+         phep(:,7)=ptmp(:)
 c     last daughter is the photon (now number 6) 
          jdahep(2,3)=6
       else
@@ -261,22 +250,24 @@ c to the LH common block
       include 'PhotosHep.h'
 
       integer i,j,mu,nold
-      integer icoltmp(2,nhep)
-
-      integer ngamma
-      common/ngamma/ngamma
-
-      ngamma=0
+      integer idtmp(nhep),icoltmp(2,nhep)
+      real*8 ptmp(5,nhep)
+      integer index(nhep)
 
 c in case no photons were generated by photos
       if(nhep.eq.nup) return
 
       nold=nup
       nup=nhep
+c auxiliary variables
+      idtmp(1:nold)=idup(1:nold)
+      ptmp(:,1:nold)=pup(:,1:nold)
       icoltmp(:,1:nold)=icolup(:,1:nold)
-      do i=nold+1,nup
-         icoltmp(:,i)=(/0,0/)
+c colour index from the resonance onwards set to 0 (to be corrected at the end for partons)
+      do i=3,nup
+         icolup(:,i)=0
       enddo
+
       istup(1:nup)=isthep(1:nup)
       idup(1:nup)=idhep(1:nup)
       mothup(:,1:nup)=jmohep(:,1:nup)
@@ -285,14 +276,20 @@ c in case no photons were generated by photos
       vtimup(1:nup)=0d0
       spinup(1:nup)=9d0
 
-      do i=1,nup
-         if (idup(i).eq.22) then
-            ngamma=ngamma+1
-            if (icolup(1,i).ne.0.or.icolup(2,i).ne.0) then
-               icolup(:,i)=(/0,0/)
-               icolup(:,i+1:nup)=icoltmp(:,i:nup-1)
-               icoltmp(:,i+1:nup)=icolup(:,i+1:nup)
-            endif
+c color assignement: 
+c particles 1 and 2 have not been changed
+c particle 3 is the colorless resonance
+c we look for the position of the outgoing parton
+      do i=4,nup
+         if ((idup(i).eq.21.or.abs(idup(i)).le.5)) then
+            do j=4,nold
+               if(idup(i).eq.idtmp(j).and.
+     &            abs(pup(1,i)-ptmp(1,j)).lt.1.d-6) then 
+c parton at position i in the new up list was at position j in the original up list before photos call
+                  index(i)=j
+               endif
+            enddo
+            icolup(1:2,i)=icoltmp(1:2,index(i))
          endif
       enddo
 
@@ -330,8 +327,11 @@ c (with respect to the emitting lepton) less than scalup
       data vec/0d0,0d0,1d0/
       save vec
       real*8 plep(0:3),ppho(0:3),p_lep_ph(0:3,1:2)
-      integer jlep,iph,first_photos
+      integer i,jlep,iph,first_photos
+      logical lhe_da_photon
       real*8 pt,ptmin
+      real*8 get_ptrelFSR
+      external get_ptrelFSR
       logical ini
       data ini/.true./
       save ini
@@ -347,20 +347,27 @@ c (with respect to the emitting lepton) less than scalup
 
 c W/Z is at 3
       iv = 3
+
 c Photos puts its photon right after the last particle belonging to
-c the resonance in the hep common block. In case of photon radiation,
-c this is the 7th particle (2 incoming, W/Z, l+, l-,gamma, 7th particle)
-c otherwise it is the 6th particle.
-      if(idup(6).eq.22.and.mothup(1,6).eq.iv) then
-         first_photos = 7
+c the resonance in the hep common block (at the end of the list) 
+      lhe_da_photon = .false.
+      do i=1,nup
+         if(idup(i).eq.22.and.mothup(1,i).eq.3) lhe_da_photon = .true.
+      enddo
+
+      if(lhe_da_photon) then
+c     first PHOTOS photons after leptons and lhe daughter photon 
+         first_photos = jdahep(1,iv)+3
       else
-         first_photos = 6
+c     first photons after leptons
+         first_photos = jdahep(1,iv)+2
       endif
+
 c The last photos photon is jdahep(2,iv)
       do iph=first_photos,jdahep(2,iv)
-c the leptons are 4 and 5
+c the leptons are jdahep(1,iv) and jdahep(1,iv)+1
          ptmin = -1
-         do jlep=4,5
+         do jlep=jdahep(1,iv),jdahep(1,iv)+1
             if((idhep(jlep)/2)*2.eq.idhep(jlep)) then
 c It is a neutrino, skip
                cycle
@@ -379,7 +386,7 @@ c Boost photon and its mother lepton to the partonic CM
             ppho(:) = p_lep_ph(:,1)
             plep(:) = p_lep_ph(:,2)
             
-            call get_ptrelFSR(ppho,plep,pt)
+            pt = get_ptrelFSR(ppho,plep)
 
             if(ptmin.lt.0) then
                ptmin = pt

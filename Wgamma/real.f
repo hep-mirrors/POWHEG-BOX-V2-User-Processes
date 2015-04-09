@@ -34,7 +34,7 @@ c cmode = 0: btilde, 1: remnant, 2: regular, 3 radiation, 4 smartsig
 c if powheg-c-lo Wjj only for radiation dynamics
          if(cmode.le.2.and.
      1        rflav(5).ne.22.and.rflav(6).ne.22) then
-            amp2 = 0
+            amp2 = 0d0
             return
          endif
       endif        

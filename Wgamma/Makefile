@@ -53,10 +53,16 @@ OPT = -O3 #-fast
 #DEBUG= -debug -g
 endif
 
-
+#necessary staff for PHOTOS++ and PYTHIA8
+HEPMC_CONFIG= hepmc-config
+HEPMCLOCATION = $(shell $(HEPMC_CONFIG) --prefix)
+LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
+PHOTOSCC_CONFIG=photoscc-config
+PHOTOSCC_LOCATION= $(shell $(PHOTOSCC_CONFIG) --prefix)
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
 PYTHIA8_CONFIG=pythia8-config
 PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PHOTOSCC_LOCATION)/include
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 PWD=$(shell pwd)
@@ -176,7 +182,7 @@ PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) -L/usr/local/lib $(STATIC)$(LIBSLHAPDF) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)$(LIBSLHAPDF) -o $@
 
 # target to cleanup
 .PHONY: clean
@@ -188,7 +194,7 @@ clean:
 .PHONY: veryclean
 veryclean:
 	rm -f $(OBJ)/*.o $(OBJ)/MCFM/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef main-PHOTOS-lhef
+	main-PYTHIA-lhef main-PYTHIA8-lhef
 
 ###################################################################
 # From here on there are targets specific to the W implementation

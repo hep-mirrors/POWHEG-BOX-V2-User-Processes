@@ -73,15 +73,13 @@ c     lepton masses
          nlo_test=.false.
       endif
 
-      physpar_mq(1)=0.2d0
-      physpar_mq(2)=0.2d0
-      physpar_mq(3)=0.3d0
-      physpar_mq(4)=1.5d0
-      physpar_mq(5)=5d0
+*******************************************************
+c    Choose: powheg-nc / powheg-c-lo / powheg-c-nlo
+c    default: powheg-c-nlo
+*******************************************************
+      powheg_nc    = powheginput("#powheg-nc")  .eq. 1
 
-      physpar_ml(1)=lepmass(1)
-      physpar_ml(2)=lepmass(2)
-      physpar_ml(3)=lepmass(3)
+      powheg_c_lo  = powheginput("#powheg-c-lo") .eq. 1
 
 *******************************************************
 c    Anomalous triple gauge couplings: Deltak_gam,Lambda_gam
@@ -98,20 +96,17 @@ c    default (SM): Deltak_gam=0 -- Lambda_gam=0
          Lambda_gam=0d0
       endif
 
-*******************************************************
-c    Choose: powheg-nc / powheg-c-lo / powheg-c-nlo
-c    default: powheg-c-nlo
-*******************************************************
-      if(powheginput("#powheg-nc").ne.1) then
-         powheg_nc=.false.
-      else
-         powheg_nc=.true.
-      endif
-      if(powheginput("#powheg-c-lo").ne.1) then
-         powheg_c_lo=.false.
-      else
-         powheg_c_lo=.true.
-      endif
+
+      physpar_mq(1)=0.2d0
+      physpar_mq(2)=0.2d0
+      physpar_mq(3)=0.3d0
+      physpar_mq(4)=1.5d0
+      physpar_mq(5)=5d0
+
+      physpar_ml(1)=lepmass(1)
+      physpar_ml(2)=lepmass(2)
+      physpar_ml(3)=lepmass(3)
+
 
 c******************************************************
 c     Choose the process to be implemented

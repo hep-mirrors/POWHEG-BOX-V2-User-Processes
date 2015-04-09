@@ -75,7 +75,7 @@ c     to avoid divergent integral (25 is an ad hoc value
                   endif
                   if(flg_nlotest) then
                      out1=out1+rrr0
-                     if(flg_withsubtr) then
+                     if(flg_withsubtr.and.nonzreal(j)) then
                         out0=out0-rrrc-rrr0s+rrrcs+remnant
                      endif
                   endif
@@ -106,7 +106,6 @@ c     remnants (see xscaled.pdf in docs directory)
                   xlm=log(kn_csimaxm/par_csicut)
                endif
                do j=1,flst_nalr
-                  iuborn=flst_alr2born(j)
                   rrr0=r0(j)*kn_jacborn
      #                 *jac_over_csi/(1-kn_y**2)/kn_csitilde
                   if(flg_withsubtr.and.nonzreal(j)) then
@@ -320,7 +319,7 @@ c are consistent with total Born
                enddo
                tot=tot/br_born(iborn)
                if(abs((tot-1)/tot).gt.1d-8) then
-                  write(iun,'(f6.3,a,i2,a,20(i2,1x))')
+                  write(iun,'(f6.3,a,i2,a,20(i3,1x))')
      1    tot, ' spin correlated amplitude'//
      2 ' wrong for leg', j, ' flavour struct:',
      3                 (flst_born(k,iborn),k=1,nlegborn)
@@ -349,6 +348,7 @@ c are consistent with total Born
      #r0s(maxalr,nexp),jac_over_csi_p,jac_over_csi_m
       integer j,jexp,alr,alrp
       character * 15 flag
+      character * 32 fff
       logical ident(maxalr)
       real * 8 random,dotp
       external random,dotp
@@ -386,8 +386,9 @@ c Check soft limits
             ident(alr)=.false.
          enddo
          do alr=1,flst_nalr
-c only radiated gluons
-            if(flst_alr(nlegreal,alr).ne.0) cycle
+c only radiated gluons or photons
+            if(flst_alr(nlegreal,alr).ne.0 .and.
+     1         flst_alr(nlegreal,alr).ne.22  ) cycle
             if(ident(alr)) cycle
 c     if one r0 is zero, all others must be zero
             iszero=.false.
@@ -402,7 +403,9 @@ c               if(r0s(alr,jexp).eq.0) iszero=.true.
                write(iun,*) ' some vanish and some do not'
             endif
             if(isnonzero.and..not.iszero) then
-               write(iun,'(a,1x,i3,1x,a,20(1x,i3))')
+               fff = '(a,1x,i3,1x,a, 20(1x,i3),a,a,a)'
+               write(fff(15:17),'(i3)') nlegreal
+               write(iun,fff)
      $              ' emitter ',kn_emitter, ', process ',
      $              (flst_alr(j,alr),j=1,nlegreal)!,', ',label,':'
                do alrp=alr+1,flst_nalr
@@ -584,7 +587,7 @@ c     endif
       include 'pwhg_flg.h'
       include 'pwhg_par.h'
       include 'pwhg_pdf.h'
-      real * 8 r0(maxalr),rc(maxalr),rs(maxalr)
+      real * 8 r0(maxalr),rc(maxalr),rs(maxalr),rcs(maxalr)
       integer alr,alrpr,iret,em
       integer nmomset,emitter
       parameter (nmomset=10)
@@ -607,6 +610,7 @@ c     endif
             equivto(alr)=-1
          enddo
          if(flg_smartsig) then
+            flg_in_smartsig = .true.
             call randomsave
 c     generate "nmomset" random real-phase space configurations
             call fillmomenta(nlegreal,nmomset,kn_masses,preal)
@@ -636,6 +640,7 @@ c     < 0 for unequal:
             enddo
             call randomrestore
          endif
+         flg_in_smartsig = .false.
          ini=.false.
       endif
 c End initialization phase; compute graphs
@@ -646,6 +651,7 @@ c End initialization phase; compute graphs
       call pdfcall(2,kn_x2,pdf2)
       if(flg_withdamp) then
          call collrad(rc)
+         call collsoftrad(rcs)
          call softrad(rs)
       endif
       do alr=1,flst_nalr
@@ -687,6 +693,7 @@ c            if(equivto(alr).lt.0.or..not.computed(equivto(alr))) then
                else
                   kn_resemitter=flst_alrres(nlegreal,alr)
                endif
+               flst_cur_alr = alr
                call realgr(3,alr,flst_alr(1,alr),kn_cmpreal,r0(alr))
                sumdijinv=0
                do k=1,flst_allreg(1,0,alr)
@@ -721,7 +728,8 @@ c     are both gluons, supply a factor E_em/(E_em+E_rad) * 2
 c supply Born zero damping factor, if required
                if(flg_withdamp) then
                   r=r0(alr)
-                  call bornzerodamp(alr,r,rc(alr),rs(alr),dampfac)
+                  call bornzerodamp(alr,r,rc(alr),rs(alr),rcs(alr),
+     1                 dampfac)
                   r0(alr)=r0(alr) * dampfac
                endif
                computed(alr)=.true.
@@ -771,7 +779,7 @@ c    csi^2 (1-y)   for FSR regions
       include 'pwhg_pdf.h'
       integer imode
       real * 8 r0(maxalr)
-      real * 8 rc(maxalr),rs(maxalr),r
+      real * 8 rc(maxalr),rs(maxalr),rcs(maxalr),r
       logical nonzreal(maxalr)
       common/cnonzreal/nonzreal
       integer alr,alrpr,iret
@@ -780,6 +788,8 @@ c    csi^2 (1-y)   for FSR regions
       real * 8 res(nmomset,maxalr),preal(0:3,nlegreal,nmomset),cprop
       integer equivto(maxalr),markused(maxalr)
       real * 8 equivcoef(maxalr)
+      common/cequivtoreal/equivto
+      common/cequivcoefreal/equivcoef
       integer j,k
       real * 8 sumdijinv,dampfac
       real * 8 pdf1(-pdf_nparton:pdf_nparton),
@@ -787,7 +797,7 @@ c    csi^2 (1-y)   for FSR regions
       real * 8 rescfac
       logical ini
       data ini/.true./
-      save ini,equivto,equivcoef
+      save ini,/cequivtoreal/,/cequivcoefreal/
       real * 8 dijterm
       external dijterm
       if(ini) then
@@ -795,6 +805,8 @@ c    csi^2 (1-y)   for FSR regions
             equivto(alr)=-1
          enddo
          if(flg_smartsig) then
+            flg_in_smartsig = .true.
+            call  printrealequiv         
             call randomsave
 c     generate "nmomset" random real-phase space configurations
             call fillmomenta(nlegreal,nmomset,kn_masses,preal)
@@ -824,6 +836,8 @@ c     < 0 for unequal:
             enddo
             call randomrestore
          endif
+         call printrealequivregions
+         flg_in_smartsig = .false.
          ini=.false.
       endif
 c End initialization phase; compute graphs
@@ -834,6 +848,7 @@ c End initialization phase; compute graphs
       enddo
       if(flg_withdamp) then
          call collbtl(rc)
+         call collsoftbtl(rcs)
          call softbtl(rs)
       endif
       do alr=1,flst_nalr
@@ -848,6 +863,7 @@ c First mark as being computed
                else
                   kn_resemitter=flst_alrres(nlegreal,alr)
                endif
+               flst_cur_alr = alr
                call realgr(imode,alr,flst_alr(1,alr),kn_preal,r0(alr))
                nonzreal(alr) = r0(alr) .ne. 0d0
 c Supply FKS factor to separate singular region:
@@ -893,7 +909,8 @@ c supply Born zero damping factor, if required
                      r=r0(alr)*(1-kn_y**2)*kn_csi**2
                   endif
                   r=r*flst_mult(alr)
-                  call bornzerodamp(alr,r,rc(alr),rs(alr),dampfac)
+                  call bornzerodamp(alr,r,rc(alr),rs(alr),rcs(alr),
+     1                 dampfac)
                   if(imode.eq.0) then
                      r0(alr) =r0(alr) * dampfac
                   elseif(imode.eq.1) then
@@ -939,46 +956,124 @@ c include pdf's
       end
 
 
-      subroutine fillmomenta(nlegreal,nmomset,kn_masses,preal)
+
+      subroutine fillmomenta(nparticles,nmomset,masses,p)
       implicit none
-      integer nlegreal,nmomset
-      real * 8 preal(0:3,nlegreal,nmomset),kn_masses(nlegreal)
-      integer mu,j,k
-      real * 8 pl,en
+      include 'nlegborn.h'
+      include 'pwhg_kn.h'
+      integer nparticles,nmomset
+      real * 8 p(0:3,nparticles,nmomset),masses(nparticles)
+      integer mu,j,k,i
+      real * 8 pl,en,scale,ptki
       real * 8 random
       external random
+      real * 8 ptmin,pt,ptcut,beta, vec(3),plab(0:3,nparticles),
+     $     pcm(0:3,nparticles)!,costh,modk,modi
+      integer last,sign
+      logical debug
+      parameter (debug=.false.)
+      real * 8 dotp
+      external dotp
+
+c     produce ONLY events with minimum pt larger than ptcut
+      ptcut=sqrt(kn_sbeams)/((nparticles+2)*10)
+      if(nparticles.eq.3) ptcut = 0d0
+      if (debug)  write(*,*) 'ptcut min in fillmomenta = ',ptcut
+
+c     average value of the generated momentum.
+      scale = sqrt(kn_sbeams)/(nparticles+2)
       do j=1,nmomset
-         do k=3,nlegreal-1
-            do mu=1,3
-               preal(mu,k,j)=random()
+ 1       ptmin=1d30
+         last = (nparticles-2)*random()+1
+         last=last+2
+         do k=3,nparticles
+            if (k.ne.last) then
+               do mu=1,3
+                  plab(mu,k)=scale*(random()-0.5d0)
+               enddo
+            endif
+         enddo
+         plab(3,last)=scale*(random()-0.5d0)
+         plab(1,last)=0d0
+         plab(2,last)=0d0
+         do k=3,nparticles
+            if (k.ne.last) then
+               plab(1,last)=plab(1,last)-plab(1,k)
+               plab(2,last)=plab(2,last)-plab(2,k)
+            endif
+         enddo
+         pl=0d0
+         en=0d0
+         do k=3,nparticles
+            plab(0,k)=sqrt(masses(k)**2+
+     #         plab(1,k)**2+plab(2,k)**2+plab(3,k)**2)
+            pl=pl+plab(3,k)
+            en=en+plab(0,k)
+         enddo
+         plab(0,1)=(en+pl)/2
+         plab(0,2)=(en-pl)/2
+         plab(3,1)=plab(0,1)
+         plab(3,2)=-plab(0,2)
+         plab(1,1)=0d0
+         plab(1,2)=0d0
+         plab(2,1)=0d0
+         plab(2,2)=0d0
+
+c         do k=1,nparticles
+c            do mu=0,3
+c               plab(mu,k)=plab(mu,k)*scale
+c            enddo
+c         enddo
+c     boost momenta in the center-of-mass frame
+
+         beta=-(plab(0,1)-plab(0,2))/(plab(0,1)+plab(0,2))
+         vec(1)=0d0
+         vec(2)=0d0
+         vec(3)=1d0
+         call mboost(nparticles,vec,beta,plab(0,1),pcm(0,1))
+         
+c     compute the minimum pt wrt the beam axis
+         do k=3,nparticles
+            pt=sqrt(pcm(1,k)**2+pcm(2,k)**2)
+            ptmin=min(ptmin,pt)
+         enddo
+         if (ptmin.lt.ptcut) then
+c            write(*,*) 'ptmin = ',ptmin            
+            goto 1
+         endif
+c     compute the minimum pt among each pair of final-state momenta
+         do k=3,nparticles-1
+            do i=k+1,nparticles
+c               modk=sqrt(pcm(1,k)**2+pcm(2,k)**2+pcm(3,k)**2)
+c               modi=sqrt(pcm(1,i)**2+pcm(2,i)**2+pcm(3,i)**2)
+c               costh=
+c     $          (pcm(1,k)*pcm(1,i)+pcm(2,k)*pcm(2,i)+pcm(3,k)*pcm(3,i))/
+c     $              modk/modi
+c               ptmin=min(ptmin,modk*sqrt(abs(1-costh**2)),
+c     $                         modi*sqrt(abs(1-costh**2)))
+               ptki = sqrt(abs(2*dotp(pcm(0,k),pcm(0,i))*
+     $              pcm(0,k)*pcm(0,i)/(pcm(0,k)+pcm(0,i))**2))               
+               ptmin=min(ptmin,ptki)
             enddo
          enddo
-         preal(3,nlegreal,j)=random()
-         preal(1,nlegreal,j)=0
-         preal(2,nlegreal,j)=0
-         do k=3,nlegreal-1
-            preal(1,nlegreal,j)=preal(1,nlegreal,j)-preal(1,k,j)
-            preal(2,nlegreal,j)=preal(2,nlegreal,j)-preal(2,k,j)
-         enddo
-         pl=0
-         en=0
-         do k=3,nlegreal
-c We should have the masses as a function of flavour id, somewhere!
-            preal(0,k,j)=sqrt(kn_masses(k)**2+
-     #         preal(1,k,j)**2+preal(2,k,j)**2+preal(3,k,j)**2)
-            pl=pl+preal(3,k,j)
-            en=en+preal(0,k,j)
-         enddo
-         preal(0,1,j)=(en+pl)/2
-         preal(0,2,j)=(en-pl)/2
-         preal(3,1,j)=preal(0,1,j)
-         preal(3,2,j)=-preal(0,2,j)
-         preal(1,1,j)=0
-         preal(1,2,j)=0
-         preal(2,1,j)=0
-         preal(2,2,j)=0
+         if (ptmin.lt.ptcut) then
+c            write(*,*) 'ptmin = ',ptmin            
+            goto 1
+         endif
+
+         if (debug) then
+            write(*,*) 'set of momenta # ',j
+            do k=1,nparticles
+               write(*,'(10d12.4)') pcm(:,k), 
+     $              sqrt(abs(pcm(0,k)**2-pcm(1,k)**2-pcm(2,k)**2-
+     $              pcm(3,k)**2))
+            enddo
+            write(*,*) 'last particle ',last
+         endif         
+         p(:,:,j)=pcm(:,:)
       enddo
       end
+
          
 
       subroutine compare_vecs(nmomset,alr,res,imode,alrpr,cprop,iret)
@@ -986,7 +1081,7 @@ c We should have the masses as a function of flavour id, somewhere!
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       real * 8 ep
-      parameter (ep=1d-12)
+      parameter (ep=1d-8)
       integer nmomset,alr,alrpr,imode,iret,j,k
       real * 8 res(nmomset,*),cprop,rat
 c imode=0 when called from btilde,
@@ -1052,6 +1147,110 @@ c         write(*,*) 'realgr:', rflav
 c     check if amp2 is finite
       if (.not.pwhg_isfinite(amp2)) amp2=0d0
       amp2 = amp2*st_alpha/(2*pi)
+      end
+
+
+
+      subroutine printrealequivregions
+c it prints the set of equivalent alr regions
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      integer equivto(maxalr)
+      common/cequivtoreal/equivto
+      real * 8 equivcoef(maxalr)
+      common/cequivcoefreal/equivcoef
+      integer j,k,iun,count
+      save count
+      data count/0/
+      call newunit(iun)
+      write(*,*) 'Writing realequivregions file...'
+      open(unit=iun,file='realequivregions',status='unknown')
+      do j=1,flst_nalr
+         if(equivto(j).eq.-1) then
+            write(iun,'(a)')
+     1           'Beginning sequence of equivalent amplitudes'
+            write(iun,100) 1d0,j, flst_alr(:,j)
+            do k=1,flst_nalr
+               if(equivto(k).eq.j) then
+                  write(iun,100) equivcoef(k),k,flst_alr(:,k)
+               endif
+            enddo
+            count=count+1
+         endif
+      enddo
+      write(iun,*) ''
+      write(iun,'(a,i4,a)') 'Found ',count, ' equivalent groups'
+      close(iun)
+      write(*,*) 'Done'
+ 100  format(d11.4,5x,i4,5x,100(i4,1x))
+      end
+
+
+      subroutine printrealequiv
+c it prints the set of equivalent real configurations
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      include 'pwhg_flg.h'
+      include 'pwhg_kn.h'
+      integer nmomset
+      parameter (nmomset=10)
+      real * 8 res(nmomset,maxprocreal),preal(0:3,nlegreal,nmomset)
+      real * 8 cprop
+      integer equivto(maxprocreal)
+      real * 8 equivcoef(maxprocreal)
+      Integer j,k,iun,count
+      integer ireal,irealpr,iret
+      save count
+      data count/0/      
+      do ireal=1,flst_nreal
+         equivto(ireal)=-1
+      enddo
+      call randomsave
+c     generate "nmomset" random real-phase space configurations
+      call fillmomenta(nlegreal,nmomset,kn_masses,preal)
+      do ireal=1,flst_nreal
+         do j=1,nmomset            
+            call setreal(preal(0,1,j),flst_real(1,ireal),res(j,ireal))
+         enddo
+         call compare_vecs(nmomset,ireal,res,0,irealpr,cprop,iret)
+         if(iret.eq.0) then
+c     they are equal:
+            equivto(ireal)=irealpr
+            equivcoef(ireal)=1
+         elseif(iret.eq.1) then
+c     they are proportional:
+            equivto(ireal)=irealpr
+            equivcoef(ireal)=cprop
+         else
+c     < 0 for unequal:
+            equivto(ireal)=-1
+         endif
+      enddo
+      call randomrestore
+
+      call newunit(iun)
+      open(unit=iun,file='realequiv',status='unknown')
+      write(*,*) 'Writing realequiv file...'
+      do j=1,flst_nreal
+         if(equivto(j).eq.-1) then
+            write(iun,'(a)')
+     1           'Beginning sequence of equivalent amplitudes'
+            write(iun,100) 1d0,j, flst_real(:,j)
+            do k=1,flst_nreal
+               if(equivto(k).eq.j) then
+                  write(iun,100) equivcoef(k),k,flst_real(:,k)
+               endif
+            enddo
+            count=count+1
+         endif
+      enddo
+      write(iun,*) ''
+      write(iun,'(a,i4,a)') 'Found ',count, ' equivalent groups'
+      close(iun)
+      write(*,*) 'Done'
+ 100  format(d11.4,5x,i4,5x,100(i4,1x))
       end
 
 

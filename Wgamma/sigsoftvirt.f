@@ -36,6 +36,11 @@
       external sigma
       logical is_charged, is_coloured
       external is_charged, is_coloured
+c     if virtual.f, will not do smartsig when this flag is active
+      if (flg_novirtual) then
+         resvirt = 0d0
+         return
+      endif
 c from 2.100 of FNO2007
       if(ini) then
          do j=-6,6

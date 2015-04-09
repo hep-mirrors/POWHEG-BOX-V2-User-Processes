@@ -57,7 +57,7 @@ c the following is needed to compute soft and collinear limits
      # valid_emitter(0).or.valid_emitter(1).or.valid_emitter(2)))) then
          call gen_real_phsp_isr(xrad,
      #    jac_over_csi,jac_over_csi_p,jac_over_csi_m,jac_over_csi_s)
-         xjac=jac_over_csi*kn_csi*kn_csimax*kn_jacborn*suppfact*ww*hc2
+         xjac=jac_over_csi*kn_csi*kn_csimax*kn_jacborn*ww*hc2
       endif
       if(flg_withreg) then
 c This subroutine may set the scales with values depending
@@ -65,11 +65,7 @@ c upon the real emission kinematics
          call setscalesbtlreal
          call sigreal_reg(xjac,rad_reg_tot,rad_reg_arr)
          if(flg_nlotest) then
-            if(suppfact.ne.0) then
-               call analysis_driver(rad_reg_tot/suppfact,1)
-            else
-               call analysis_driver(0d0,1)
-            endif
+            call analysis_driver(rad_reg_tot,1)
          endif
       else
          rad_reg_tot=0
@@ -86,26 +82,18 @@ c     No need to generate phase space; it is already available
                   call setscalesbtlreal
                   call sigreal_damp_rem(xjac,ttt,rad_damp_rem_arr)
                   if(flg_nlotest) then
-                     if(suppfact.ne.0) then
-                        call analysis_driver(ttt/suppfact,1)
-                     else
-                        call analysis_driver(0d0,1)
-                     endif
+                     call analysis_driver(ttt,1)
                   endif
                   rad_damp_rem_tot=rad_damp_rem_tot+ttt
                else
                   call gen_real_phsp_fsr(xrad,
      #jac_over_csi,jac_over_csi_coll,jac_over_csi_s)
                   xjac=jac_over_csi*kn_csi*kn_csimax
-     #                *kn_jacborn*suppfact*ww*hc2
+     #                *kn_jacborn*ww*hc2
                   call setscalesbtlreal
                   call sigreal_damp_rem(xjac,ttt,rad_damp_rem_arr)
                   if(flg_nlotest) then
-                     if(suppfact.ne.0) then
-                        call analysis_driver(ttt/suppfact,1)
-                     else
-                        call analysis_driver(0d0,1)
-                     endif
+                     call analysis_driver(ttt,1)
                   endif
                   rad_damp_rem_tot=rad_damp_rem_tot+ttt
                endif
@@ -123,7 +111,15 @@ c     No need to generate phase space; it is already available
          rad_damp_rem_tot=0d0
          rad_damp_rem_arr=0d0
       endif
+
+      rad_reg_tot = rad_reg_tot * suppfact
+      rad_reg_arr = rad_reg_arr * suppfact
+
+      rad_damp_rem_tot = rad_damp_rem_tot * suppfact
+      rad_damp_rem_arr = rad_damp_rem_arr * suppfact
+
       retval=rad_reg_tot+rad_damp_rem_tot
+
       end
 
       subroutine sigreal_reg(xjac,sig,r0)
@@ -154,6 +150,7 @@ c contributions from real graphs that do not have a singular region
             equivto(lreg)=-1
          enddo
          if(flg_smartsig) then
+            flg_in_smartsig = .true.
             call randomsave
 c     generate "nmomset" random real-phase space configurations
             call fillmomenta(nlegreal,nmomset,kn_masses,preal)
@@ -175,6 +172,7 @@ c     they are proportional
             enddo
             call randomrestore
          endif
+         flg_in_smartsig = .false.
          ini=.false.
       endif
 c End initialization phase; compute graphs
@@ -183,6 +181,7 @@ c End initialization phase; compute graphs
       do lreg=1,flst_nregular
 c ----------------
          if(equivto(lreg).lt.0) then
+            flst_cur_alr = -1
             call realgr(2,lreg,flst_regular(1,lreg),kn_cmpreal,r0(lreg))
          else
             r0(lreg)=r0(equivto(lreg))*equivcoef(lreg)

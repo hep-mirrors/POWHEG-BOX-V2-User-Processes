@@ -123,6 +123,13 @@ c for fsr csi is y independent
       phi=kn_azi
       x=kn_csi*xocsi
       call buildkperp(phi,pem,kperp,kperp2)
+c The correctness of this has not been tested yet in any specific process
+c (typically a process with a gluon splitting in resonance decay).
+c The question is: should the kperp vector be boosted back from
+c the resonance frame to the CM frame?
+c      if(kres.ne.0) then
+c         call boost2reson(kn_cmpborn(:,kres),1,kperp,kperp)
+c      endif
       end
 
       subroutine buildkperp(phi,pem,kperp,kperp2)
@@ -449,6 +456,10 @@ c Commented out: now this is done at the end of the if block
          is_em = .true.
          ap=(1+(1-x)**2)/xocsi*br_born(iub)
      1        *chargeofparticle(emflav)**2
+      elseif(raflav.ne.0.and.emflav.eq.22) then
+         is_em = .true.
+         ap=(1+x**2)/(1-x)*csi*br_born(iub)
+     1        *chargeofparticle(emflav)**2
       else
          write(*,*) 'coll (fsr): unammissible flavour structure'
          call pwhg_exit(-1)
@@ -563,6 +574,14 @@ c     The remaining csi=1-x factor has been applied earlier
 
 
       function colcorr(j,iub,res)
+c Returns true if parton j, in the underlying Born flavour
+c structure iub, belongs to a group of colour correlated particles
+c arising from the decay of the resonance res. This group is formed
+c by all coloured particles that are sons of the resonance res
+c (including eventually other coloured resonances) and by the resonance
+c itself if coloured.
+c The case res=0 corresponds to the partons produced promptly in the
+c hard process.
       implicit none
       logical colcorr
       integer iub,res,j
@@ -595,6 +614,11 @@ c - 1 for incoming antifermion or outgoing fermion
       end
 
       function colcorrem(j,iub,em)
+c Returns true if parton j, in the underlying Born flavour structure
+c iub, belongs to a group of colour correlated partons relevant for the
+c emitter em. This is essentially as the colcorr function, except that
+c it deals with the special case em=0 (that in POWHEG means radiation
+c from either initial state partons)
       implicit none
       logical colcorrem
       integer iub,em,res,j
@@ -834,6 +858,66 @@ c Construct kperp
       endif
       end
 
+c This returns in rcs the soft-collinear approximation to
+c the real cross section (multiplied by csi^2(1-y^2) or (1-y))
+c to be used to construct the damping factor in the real
+c cross section used in Btilde
+      subroutine collsoftbtl(rcs)
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      include 'pwhg_kn.h'
+      real * 8 rcs(maxalr)
+      integer alr,em,i
+      real * 8 kperp(0:3),kperp2,q0,xocsi,csi,x,phi,r1,r2,kncsisave
+      kncsisave = kn_csi
+      kn_csi = 0
+      em=kn_emitter
+      if(em.gt.2) then
+c     for fsr csi is y independent
+         csi=kn_csi
+         call buildfsrvars(em,q0,xocsi,x,kperp,kperp2)
+         do alr=1,flst_nalr
+            if(em.eq.flst_emitter(alr)) then
+               call collfsralr(alr,csi,xocsi,x,q0,kperp,kperp2,rcs(alr))
+            else
+               rcs(alr)=0
+            endif
+         enddo
+      else
+         phi=kn_azi
+c Construct kperp
+         kperp(1)=sin(phi)
+         kperp(2)=cos(phi)
+         kperp(3)=0
+         kperp(0)=0
+         do alr=1,flst_nalr
+            if(flst_emitter(alr).eq.em) then
+               if(em.ne.2) then
+                  i=1
+                  csi=kn_csi*kn_csimaxp/kn_csimax
+                  call collisralr(alr,i,csi,kperp,r1)
+               endif
+               if(em.ne.1) then
+                  i=2
+                  csi=kn_csi*kn_csimaxm/kn_csimax
+                  call collisralr(alr,i,csi,kperp,r2)
+               endif
+               if(em.eq.0) then
+                  rcs(alr)=(r1*(1+kn_y)+r2*(1-kn_y))/2
+               elseif(em.eq.1) then
+                  rcs(alr)=r1
+               elseif(em.eq.2) then
+                  rcs(alr)=r2
+               endif
+            else
+               rcs(alr)=0
+            endif
+         enddo
+      endif
+      kn_csi = kncsisave
+      end
+
 c This returns in rc the collinear approximation to
 c the real cross section to be used to construct the damping factor
 c in the real radiation cross section
@@ -910,4 +994,59 @@ c     Construct kperp
             r0(alr)=0
          endif
       enddo
+      end
+
+
+c This returns in rcs the soft-collinear approximation to
+c the real cross section to be used to construct the damping factor
+c in the real radiation cross section
+      subroutine collsoftrad(rcs)
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_flst.h'
+      include 'pwhg_kn.h'
+      include 'pwhg_rad.h'
+      real * 8 rcs(maxalr)
+      integer alr,em
+      real * 8 q0,xocsi,csi,phi,x,kperp(0:3),kperp2,r1,r2,kncsisave
+      integer j
+      kncsisave = kn_csi
+      kn_csi = 0
+      do j=1,rad_alr_nlist
+         alr=rad_alr_list(j)
+         em=flst_emitter(alr)
+c     check if emitter corresponds to current radiation region (i.e. rad_kinreg):
+         if(rad_kinreg.eq.1.and.em.le.2) then
+            phi=kn_azi
+c     Construct kperp
+            kperp(1)=sin(phi)
+            kperp(2)=cos(phi)
+            kperp(3)=0
+            kperp(0)=0
+            if(em.ne.2) then
+               csi=kn_csi*kn_csimaxp/kn_csimax
+               call collisralr(alr,1,csi,kperp,r1)
+            endif
+            if(em.ne.1) then
+               csi=kn_csi*kn_csimaxm/kn_csimax
+               call collisralr(alr,2,csi,kperp,r2)
+            endif
+            if(em.eq.0) then
+               rcs(alr)=(r1*(1+kn_y)+r2*(1-kn_y))/2
+            elseif(em.eq.1) then
+               rcs(alr)=r1
+            elseif(em.eq.2) then
+               rcs(alr)=r2
+            endif
+            rcs(alr)=rcs(alr)/(kncsisave**2*(1-kn_y**2))
+         elseif(flst_lightpart+rad_kinreg-2.eq.em) then
+            csi=kn_csi
+            call buildfsrvars(em,q0,xocsi,x,kperp,kperp2)
+            call collfsralr(alr,csi,xocsi,x,q0,kperp,kperp2,rcs(alr))
+            rcs(alr)=rcs(alr)/kncsisave**2/(1-kn_y)
+         else
+            rcs(alr)=0
+         endif
+      enddo
+      kn_csi = kncsisave
       end

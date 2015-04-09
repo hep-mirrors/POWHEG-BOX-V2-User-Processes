@@ -55,7 +55,6 @@ c check if the running particle is a charged lepton or neutrino
       enddo
 c Now il(1) and il(2) are the lepton as they come from the resonance
 
-
 c Check that these two are opposite leptons
       if(idup(3).eq.23) then
          if(idhep(il(1)).ne.-idhep(il(2))) then
@@ -122,10 +121,9 @@ c check for consistency
       implicit none
       include 'LesHouches.h'
       include 'hepevt.h'
-      integer maxpart
       integer nvec,idvector(nvec)
-      real * 8 ptrel,tmpptrel
-      integer k,j,jgam
+      real * 8 ptrel
+      integer j,jgam
       real *8 p_gamma(0:3),p_lepton(0:3)
       real * 8 beta,vec(3),p_lph(0:3,1:2)
       data vec/0d0,0d0,1d0/
@@ -286,7 +284,7 @@ c     veto in the CoM frame
             p_gamma(:)=p_lph(:,2)
 c     FSR ptrel
             ptrel = get_ptrelFSR(p_gamma,p_lepton)
-            if((ptrel-scalup)/scalup.gt.0) then
+            if((ptrel-scalup)/scalup.gt.0d0) then
 c     write(*,*) 'vetoed event'
                return 
             endif

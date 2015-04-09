@@ -30,6 +30,10 @@ c     uncomment the following (with or without the flux factor 1/(2*kn_sborn)
 c        
 c         res(j)=kn_jacborn/(2*kn_sborn)/flst_nborn
       enddo
+c If born rescaling of some sort is needed, the user should provide
+c its own rescaling procedure in a file named pwhg_born_rescaling_hook.h.
+c The default one is in the include directory, and is empty
+      include 'pwhg_born_rescaling_hook.h'
       end
 
       subroutine sigborn_rad(born)
@@ -46,6 +50,7 @@ c         res(j)=kn_jacborn/(2*kn_sborn)/flst_nborn
      2         bornjk(nlegborn,nlegborn),bmunu(0:3,0:3,nlegborn)
       call pdfcall(1,kn_xb1,pdf1)
       call pdfcall(2,kn_xb2,pdf2)
+      flst_cur_iborn = rad_ubornidx
       call setborn0(kn_cmpborn,flst_born(1,rad_ubornidx),born,
      #        bornjk,bmunu)
 c Store in the br_born arrays; they are used to compute
@@ -71,7 +76,7 @@ c of the remnant component.
       integer equivto(maxprocborn)
       common/cequivtoborn/equivto
       real * 8 equivcoef(maxprocborn)
-      common/cequivcoef/equivcoef
+      common/cequivcoefborn/equivcoef
       integer nmomset
       parameter (nmomset=10)
       real * 8 pborn(0:3,nlegborn,nmomset),cprop
@@ -81,7 +86,7 @@ c of the remnant component.
       integer iborn,ibornpr,mu,nu,k,j,iret
       logical ini
       data ini/.true./
-      save ini,/cequivtoborn/,/cequivcoef/
+      save ini,/cequivtoborn/,/cequivcoefborn/
       if(ini) then
          do iborn=1,flst_nborn
             equivto(iborn)=-1
@@ -113,6 +118,7 @@ c of the remnant component.
       endif
       do iborn=1,flst_nborn
          if(equivto(iborn).lt.0) then
+            flst_cur_iborn = iborn
             call setborn0(kn_cmpborn,flst_born(1,iborn),br_born(iborn),
      #        br_bornjk(1,1,iborn),br_bmunu(0,0,1,iborn))
          else
@@ -253,10 +259,13 @@ c it prints the set of equivalent Born configurations
       integer equivto(maxprocborn)
       common/cequivtoborn/equivto
       real * 8 equivcoef(maxprocborn)
-      common/cequivcoef/equivcoef
-      integer j,k,iun
+      common/cequivcoefborn/equivcoef
+      integer j,k,iun,count
+      save count
+      data count/0/
       call newunit(iun)
-      open(unit=iun,file='Bornequiv',status='unknown')
+      open(unit=iun,file='bornequiv',status='unknown')
+      write(*,*) 'Writing bornequiv file...'
       do j=1,flst_nborn
          if(equivto(j).eq.-1) then
             write(iun,'(a)')
@@ -267,8 +276,12 @@ c it prints the set of equivalent Born configurations
                   write(iun,100) equivcoef(k),k,flst_born(:,k)
                endif
             enddo
+            count=count+1
          endif
       enddo
+      write(iun,*) ''
+      write(iun,'(a,i4,a)') 'Found ',count, ' equivalent groups'
       close(iun)
- 100  format(d10.4,5x,i4,5x,100(i4,1x))
+      write(*,*) 'Done'
+ 100  format(d11.4,5x,i4,5x,100(i4,1x))
       end

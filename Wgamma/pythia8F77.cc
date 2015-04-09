@@ -1,15 +1,17 @@
-// main01.cc is a part of the PYTHIA event generator.
+// main31.cc is a part of the PYTHIA event generator.
 // Copyright (C) 2012 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
-// This is a simple test program. It fits on one slide in a talk.
-// It studies the charged multiplicity distribution at the LHC.
-
 #include "Pythia.h"
 #include "LHAFortran.h"
 
+#include "Photos/Photos.h"
+#include "Photos/PhotosHEPEVTEvent.h"
+
 using namespace Pythia8;
+
+using namespace Photospp;
 
 extern "C" {
   extern struct
@@ -23,9 +25,123 @@ extern "C" {
   } cpy8tune_;
   extern struct
   {
-    bool powheg_nc,powheg_c_nlo;
+    bool powheg_nc,powheg_c_lo;
   } wgammode_;
+  
+  extern struct
+  {
+    bool use_photos;
+  } optionphotos_;
+
+  extern struct
+  {
+    double xphcut;
+  } photoscutoff_;
+
+  extern struct
+  {
+    bool me_corr,double_brem;
+  } photon_corr_;
+
+  extern struct
+  {
+    int    nevhep;
+    int    nhep;
+    int    isthep[10000];
+    int    idhep[10000];
+    int    jmohep[10000][2];
+    int    jdahep[10000][2];
+    double phep[10000][5];
+    double vhep[10000][4];
+  } ph_hepevt_;
 }
+
+//==========================================================================
+
+// PHOTOS C++ interface
+
+extern "C" {
+
+  void photos_init_()
+  {
+    Photos::initialize();
+
+    // matrix element corrections
+    Photos::setMeCorrectionWtForW(photon_corr_.me_corr);
+    // double bremsstrahlung generation
+    Photos::setDoubleBrem(photon_corr_.double_brem);
+  }
+
+  void photos_process_()
+  {
+    PhotosHEPEVTEvent *event = new PhotosHEPEVTEvent();
+
+    for(int i=0; i<ph_hepevt_.nhep; i++) {
+                                    
+     PhotosHEPEVTParticle *p = new PhotosHEPEVTParticle 
+    (
+      ph_hepevt_.idhep [i],  
+      ph_hepevt_.isthep[i], 
+      ph_hepevt_.phep  [i][0],
+      ph_hepevt_.phep  [i][1], 
+      ph_hepevt_.phep  [i][2],
+      ph_hepevt_.phep  [i][3],  
+      ph_hepevt_.phep  [i][4],
+      ph_hepevt_.jmohep[i][0]-1,
+      ph_hepevt_.jmohep[i][1]-1,
+      ph_hepevt_.jdahep[i][0]-1, 
+      ph_hepevt_.jdahep[i][1]-1
+    );
+    event->addParticle(p);
+  }
+
+    // Set IR cutoff (in units of decaying particle mass)
+    Photos::setInfraredCutOff(photoscutoff_.xphcut);
+                                                           
+    //PhotosHEPEVTEvent::read_event_from_HEPEVT(event);
+
+    //    cout << "Event before photos" << endl;   
+    //event->print();
+
+    event->process();
+
+    //    cout << "Event after photos" << endl;
+    //    event->print();
+
+    //PhotosHEPEVTEvent::write_event_to_HEPEVT(event);
+
+    ph_hepevt_.nhep = event->getParticleCount();
+
+  for(int i=0; i<ph_hepevt_.nhep; i++)
+  {
+    PhotosHEPEVTParticle *p = event->getParticle(i);
+
+    ph_hepevt_.idhep [i]   =p->getPdgID();
+    ph_hepevt_.isthep[i]   =p->getStatus();
+    ph_hepevt_.phep  [i][0]=p->getPx();
+    ph_hepevt_.phep  [i][1]=p->getPy();
+    ph_hepevt_.phep  [i][2]=p->getPz();
+    ph_hepevt_.phep  [i][3]=p->getE();
+    ph_hepevt_.phep  [i][4]=p->getMass();
+    ph_hepevt_.jmohep[i][0]=p->getFirstMotherIndex()  +1;
+    ph_hepevt_.jmohep[i][1]=p->getSecondMotherIndex() +1;
+    ph_hepevt_.jdahep[i][0]=p->getDaughterRangeStart()+1;
+    ph_hepevt_.jdahep[i][1]=p->getDaughterRangeEnd()  +1;
+    ph_hepevt_.vhep  [i][0]=0.0;
+    ph_hepevt_.vhep  [i][1]=0.0;
+    ph_hepevt_.vhep  [i][2]=0.0;
+    ph_hepevt_.vhep  [i][3]=0.0;
+
+  }
+
+
+    delete event;
+  } 
+
+}
+
+
+
 
 
 //==========================================================================
@@ -48,22 +164,26 @@ public:
 
   // Allow process cross section to be modified..
 
-  virtual bool canSetResonanceScale()
-  {
-    if(resonancevetos_.py8veto == 1) return true;
-    else return false;
-  }
+  //// We are vetoing photon radiation from resonance using doVetoFSREmission
+  //// with inr==1; the following functions therefore are not needed  
+  //  virtual bool canSetResonanceScale()
+  //  {
+  //    if(resonancevetos_.py8veto == 1) return true;
+  //    else return false;
+  //  }
+  //  virtual double scaleResonance( const int iRes, const Event& event)
+  //  {
+  //    return resonancevetos_.vetoscale;
+  //  }
 
-  virtual double scaleResonance( const int iRes, const Event& event)
-  {
-    return resonancevetos_.vetoscale;
-  }
 
+  // print event list
   virtual double doVetoResonanceScale( const Event& event)
   {
-	event.list();
+    event.list();
     return false;
   }
+
 
 
 //--------------------------------------------------------------------------
@@ -131,6 +251,8 @@ public:
   }
 
   // Compute the POWHEG pT separation between i and j
+  // ISR: absolute pT of j
+  // FSR: pT of j w.r.t. to i
   double pTpowheg(const Event &e, int i, int j, bool FSR) {
 
     // pT value for FSR and ISR
@@ -193,10 +315,8 @@ public:
       // If all necessary arguments have been given, then directly calculate.
       // POWHEG ISR and FSR, need i and j.
       if ((pTdefMode == 0 || pTdefMode == 1) && i > 0 && j > 0) {
-	// relative to the mother
-	//	pTemt = pTpowheg(e, i, j, (pTdefMode == 0) ? false : FSR);
-	// relative to the daughter
-        pTemt = pTpowheg(e, k, j, (pTdefMode == 0) ? false : FSR);
+	pTemt = pTpowheg(e, i, j, (pTdefMode == 0) ? false : FSR);
+
       // Pythia ISR, need i, j and r.
       } else if (!FSR && pTdefMode == 2 && i > 0 && j > 0 && r > 0) {
         pTemt = pTpythia(e, i, j, r, FSR);
@@ -226,83 +346,67 @@ public:
 
           // POWHEG
           if (pTdefMode == 0 || pTdefMode == 1) {
-
+    
             // ISR - only done once as just kinematical pT
             if (!FSR) {
-
               pTnow = pTpowheg(e, iInA, jNow, (pTdefMode == 0) ? false : FSR);
-
               if (pTnow > 0.) pTemt = (pTemt < 0) ? pTnow : min(pTemt, pTnow);
-  
               // FSR - try all outgoing partons from system before branching 
               // as i. Note that for the hard system, there is no 
               // "before branching" information.
-              } else {
-    
-		//
-	      //                int outSize = partonSystemsPtr->sizeOut(0);
-		//		for (int iMem = 0; iMem < outSize; iMem++) {
-		//		  int iNow = partonSystemsPtr->getOut(0, iMem);
-
-                  // Coloured only, i != jNow and no carbon copies
-		//                  if (iNow == jNow) continue;
-		//                  if (jNow == e[iNow].daughter1() 
-		//                    && jNow == e[iNow].daughter2()) continue;
-
-		  //		  pTnow = pTpowheg(e, iNow, jNow, (pTdefMode == 0) 
-		  //				   ? false : FSR);
-		  //                  if (pTnow > 0.) pTemt = (pTemt < 0) 
-		  //                    ? pTnow : min(pTemt, pTnow);
-		//		}  for (iMem)
-
-		  // FSR - try all final-state coloured partons as radiator
-		  //       after emission (k).
-		for (int kNow = 0; kNow < e.size(); kNow++) {
-		  if (kNow == jNow || !e[kNow].isFinal()) continue;
-		  
-		  pTnow = pTpowheg(e, kNow, jNow, (pTdefMode == 0) 
-				   ? false : FSR);
-		  if (pTnow > 0.) pTemt = (pTemt < 0) 
-				    ? pTnow : min(pTemt, pTnow);		  
-		} // for (kNow)
-		//
-
+	    } else {
+	      
+	      int outSize = partonSystemsPtr->sizeOut(0);
+	      for (int iMem = 0; iMem < outSize; iMem++) {
+		int iNow = partonSystemsPtr->getOut(0, iMem);
+		
+		// Coloured only, i != jNow and no carbon copies
+		if (iNow == jNow) continue;
+		if (jNow == e[iNow].daughter1() 
+		    && jNow == e[iNow].daughter2()) continue;
+		
+		pTnow = pTpowheg(e, iNow, jNow, (pTdefMode == 0) 
+				 ? false : FSR);
+		if (pTnow > 0.) pTemt = (pTemt < 0) 
+				  ? pTnow : min(pTemt, pTnow);
+	      } // for (iMem)
+	      
 	    } // if (!FSR)
   
-          // Pythia
+	    // Pythia
           } else if (pTdefMode == 2) {
-  
+	    
             // ISR - other incoming as recoiler
             if (!FSR) {
               pTnow = pTpythia(e, iInA, jNow, iInB, FSR);
               if (pTnow > 0.) pTemt = (pTemt < 0) ? pTnow : min(pTemt, pTnow);
               pTnow = pTpythia(e, iInB, jNow, iInA, FSR);
               if (pTnow > 0.) pTemt = (pTemt < 0) ? pTnow : min(pTemt, pTnow);
-  
-            // FSR - try all final-state coloured partons as radiator
-            //       after emission (k).
+	      
+	      // FSR - try all final-state coloured partons as radiator
+	      //       after emission (k).
             } else {
               for (int kNow = 0; kNow < e.size(); kNow++) {
                 if (kNow == jNow || !e[kNow].isFinal()) continue;
-  
+		
                 // For this kNow, need to have a recoiler.
                 // Try two incoming.
                 pTnow = pTpythia(e, kNow, jNow, iInA, FSR);
                 if (pTnow > 0.) pTemt = (pTemt < 0) 
-                  ? pTnow : min(pTemt, pTnow);
+				  ? pTnow : min(pTemt, pTnow);
                 pTnow = pTpythia(e, kNow, jNow, iInB, FSR);
                 if (pTnow > 0.) pTemt = (pTemt < 0) 
-                  ? pTnow : min(pTemt, pTnow);
-
+				  ? pTnow : min(pTemt, pTnow);
+		
                 // Try all other outgoing.
                 for (int rNow = 0; rNow < e.size(); rNow++) {
                   if (rNow == kNow || rNow == jNow ||
                       !e[rNow].isFinal()) continue;
                   pTnow = pTpythia(e, kNow, jNow, rNow, FSR);
                   if (pTnow > 0.) pTemt = (pTemt < 0) 
-                    ? pTnow : min(pTemt, pTnow);
+				    ? pTnow : min(pTemt, pTnow);
                 } // for (rNow)
-  
+		
               } // for (kNow)
             } // if (!FSR)
           } // if (pTdefMode)
@@ -345,15 +449,18 @@ public:
         pTsum += e[i].pT();
       } else break;
     }
+
     // Extra check that we have the correct final state
-    //    if (count != nFinal && count != nFinal + 1) {
-    //      cout << "Error: wrong number of final state particles in event" << endl;
-    //      exit(1);
-    //    }
+    if (count != nFinal && count != nFinal + 1 && count != nFinal - 1) {
+      cout << "Error: wrong number of final state particles in event: count= " << count << endl;
+      exit(1);
+    }
+
     // Flag if POWHEG radiation present and index
     bool isEmt = (count == nFinal) ? false : true;
     int  iEmt  = (isEmt) ? e.size() - 1 : -1;
 
+    pThard = -1;
     // If there is no radiation or if pThardMode is 0 then set pThard = SCALUP.
     if (!isEmt || pThardMode == 0) {
       pThard = resonancevetos_.vetoscale;
@@ -371,10 +478,17 @@ public:
       pThard = pTcalc(e, -1, -1, -1, -1, -1);
     }
 
+    //check if pThard has been inizialized correctly
+    if(pThard < 0)
+      {
+	cout << "something wrong with pThard = " << pThard << endl;
+        exit(1);
+      }
+
     // Find MPI veto pT if necessary
     if (MPIvetoMode == 1) {
-      pTMPI = infoPtr->QFac();
-      //      pTMPI = (isEmt) ? pTsum / 2. : pT1;
+      //      pTMPI = infoPtr->QFac();
+      pTMPI = (isEmt) ? pTsum / 2. : pT1;
     }
 
 #ifdef DBGOUTPUT
@@ -382,7 +496,6 @@ public:
          << ", pThard = " << pThard << endl << endl;
 #endif
 
-    // Initialise other variables
     // Initialise other variables
     accepted   = false;
     nAcceptSeq = nISRveto = nFSRveto = 0;
@@ -399,11 +512,13 @@ public:
 
   bool canVetoISREmission() { return (vetoMode == 0) ? false : true; }
   bool doVetoISREmission(int, const Event &e, int iSys) {
+
     // Must be radiation from the hard system
     if (iSys != 0) return false;
 
-    // If we already have accepted 'vetoCount' emissions in a row, do nothing
-//    if (vetoMode == 1 && nAcceptSeq >= vetoCount) return false;
+    // If vetocount != 0 and we already have accepted 'vetoCount' emissions in a row,
+    // do nothing; if vetocount = 0 check all emissions
+    if (vetoCount != 0 && nAcceptSeq >= vetoCount) return false;
 
     // Pythia radiator after, emitted and recoiler after.
     int iRadAft = -1, iEmt = -1, iRecAft = -1;
@@ -452,12 +567,21 @@ public:
 
   bool canVetoFSREmission() { return (vetoMode == 0) ? false : true; }
   bool doVetoFSREmission(int, const Event &e, int iSys, bool inr) {
-    // Must be radiation from the hard system or from a resonance
-//    if (iSys != 0 && inr != 1) return false;
-    if (iSys != 0) return false;
+    // radiation from the hard system: isys=0
+    // radiation from resonances: isys!=0 and inr=1
+    // MPI radiation: isys!=0 and inr=0
 
-    // If we already have accepted 'vetoCount' emissions in a row, do nothing
-//    if (vetoMode == 1 && nAcceptSeq >= vetoCount) return false;
+    // we do not veto MPI radiation
+    // if we veto here gamma from resonance (inr==1), 
+    // we do not have to use canSetResonanceScale 
+    if (iSys != 0 && inr != 1) return false;
+
+    // in case of radiation from resonance and py8veto != 1, we veto through scalupveto
+    if (inr == 1 && resonancevetos_.py8veto != 1) return false;
+
+    // If vetocount != 0 and we already have accepted 'vetoCount' emissions in a row,
+    // do nothing; if vetocount = 0 check all emissions
+    if (vetoCount != 0 && nAcceptSeq >= vetoCount) return false;
 
     // Pythia radiator (before and after), emitted and recoiler (after)
     int iRecAft = e.size() - 1;
@@ -477,18 +601,24 @@ public:
     //  2 - min(pT of all outgoing w.r.t. all incoming/outgoing)
     int xSR = (pTemtMode == 0) ? 1       : -1;
     int i   = (pTemtMode == 0) ? iRadBef : -1;
+    // using POWHEG pT definition i should be iRadAft (daugther)
+    i = (pTdefMode == 1) ? iRadAft : iRadBef;
     int k   = (pTemtMode == 0) ? iRadAft : -1;
     int r   = (pTemtMode == 0) ? iRecAft : -1;
 
     // When pTemtMode is 0 or 1, iEmt has been selected
-    double pTemt;
+    double pTemt = 0.;
     if (pTemtMode == 0 || pTemtMode == 1) {
       // Which parton is emitted, based on emittedMode:
       //  0 - Pythia definition of emitted
       //  1 - Pythia definition of radiated after emission
       //  2 - Random selection of emitted or radiated after emission
       //  3 - Try both emitted and radiated after emission
+
+      // j = radiator after
       int j = iRadAft;
+
+      //emittedMode = 0 -> j = iRadAft + 1 = iEmt 
       if (emittedMode == 0 || (emittedMode == 2 && rndmPtr->flat() < 0.5)) j++;
 
       for (int jLoop = 0; jLoop < 2; jLoop++) {
@@ -504,7 +634,6 @@ public:
     } else if (pTemtMode == 2) {
       pTemt = pTcalc(e, i, -1, k, r, xSR);
     }
-
 
 #ifdef DBGOUTPUT
     cout << "doVetoFSREmission: pTemt = " << pTemt << endl << endl;
@@ -560,7 +689,7 @@ private:
 
 };
 
-Pythia pythia;
+Pythia pythia("/usr/local/xmldoc");
 LHAupFortran LHAinstance;
 
 extern "C" {
@@ -569,22 +698,64 @@ extern "C" {
 
     // Generator. Process selection.
     pythia.settings.addMode("POWHEG:nFinal",    2, true, false, 1, 0);
-    pythia.settings.addMode("POWHEG:veto",      1, true, true,  0, 2);
-    pythia.settings.addMode("POWHEG:vetoCount", 3, true, false, 0, 0);
+    pythia.settings.addMode("POWHEG:veto",      1, true, true,  0, 1);
+    // maximum POWHEG:veto=2 not documented
+    pythia.settings.addMode("POWHEG:vetoCount", 0, true, false, 0, 0);
     pythia.settings.addMode("POWHEG:pThard",    0, true, true,  0, 2);
     pythia.settings.addMode("POWHEG:pTemt",     0, true, true,  0, 2);
     pythia.settings.addMode("POWHEG:emitted",   0, true, true,  0, 3);
     pythia.settings.addMode("POWHEG:pTdef",     1, true, true,  0, 2);
-    pythia.settings.addMode("POWHEG:MPIveto",   1, true, true,  0, 1);
+    pythia.settings.addMode("POWHEG:MPIveto",   0, true, true,  0, 1);
 
-    pythia.readString("POWHEG:nFinal = 3");
+    // Number of outgoing particles of POWHEG Born level process
+    // (i.e. not counting additional POWHEG radiation)
+    // The resonance is counted as one particle (disregarding its decay products)
+    pythia.readString("POWHEG:nFinal = 2");
+
+    // How vetoing is performed:
+    // 0 - No vetoing is performed
+    // 1 - Showers are started at the kinematical limit (pTmaxMatch = 2)
+    //     and emissions are vetoed if pTemt > pThard = scalup
     pythia.readString("POWHEG:veto = 1");
-    pythia.readString("POWHEG:vetoCount = 3");
+
+    // After 'vetoCount' accepted emissions in a row, no more emissions
+    // are checked. 'vetoCount = 0' means all emissions are checked.
+    pythia.readString("POWHEG:vetoCount = 0");
+
+    // Selection of pThard 
+    // 0 - pThard = scalup
+    // 1 - the pT of the POWHEG emission is tested against all other
+    //     incoming and outgoing partons, with the minimal value chosen
+    // 2 - the pT of all final-state partons is tested against all other
+    //     incoming and outgoing partons, with the minimal value chosen
     pythia.readString("POWHEG:pThard = 0");
+
+    // Selection of pTemt:
+    //  0 - pTemt is pT of the emitted parton w.r.t. radiating parton
+    //  1 - pT of the emission is checked against all incoming and outgoing
+    //      partons. pTemt is set to the minimum of these values
+    //  2 - the pT of all final-state partons is tested against all other
+    //      incoming and outgoing partons, with the minimal value chosen
     pythia.readString("POWHEG:pTemt = 0");
+
+    // Selection of emitted parton for FSR
+    //  0 - Pythia definition of emitted
+    //  1 - Pythia definition of radiator
+    //  2 - Random selection of emitted or radiator
+    //  3 - Both emitted and radiator are tried
     pythia.readString("POWHEG:emitted = 0");
+    // pT definitions
+    //  0 - POWHEG ISR pT definition is used for both ISR and FSR
+    //  1 - POWHEG ISR pT and FSR d_ij definitions
+    //  2 - Pythia definitions
     pythia.readString("POWHEG:pTdef = 1");
-    pythia.readString("POWHEG:MPIveto = 1");
+
+    // MPI vetoing
+    //  0 - No MPI vetoing is done
+    //  1 - When there is no radiation, MPIs with a scale above pT_1 are vetoed,
+    //      else MPIs with a scale above (pT_1 + pT_2 + pT_3) / 2 are vetoed
+    //  (Option 1 is intended specifically for POWHEG simulations of 2->2 + 2->3 QCD processes) 
+    pythia.readString("POWHEG:MPIveto = 0");
 
     // Read in main settings
     int nEvent      = pythia.settings.mode("Main:numberOfEvents");
@@ -602,12 +773,14 @@ extern "C" {
     // Add in user hooks for shower vetoing
     PowhegHooks *PWGHooks = NULL;
 
-    pythia.readString("SpaceShower:pTmaxMatch = 2");
-    pythia.readString("TimeShower:pTmaxMatch = 2");
+    if(vetoMode == 1)
+      {
+	pythia.readString("SpaceShower:pTmaxMatch = 2");
+	pythia.readString("TimeShower:pTmaxMatch = 2");
+      }
 
     // MPI
     pythia.readString("PartonLevel:MPI = off");
-
     // Set MPI to start at the kinematical limit
     if (MPIvetoMode > 0)
       {
@@ -642,9 +815,11 @@ extern "C" {
     pythia.readString("TimeShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg
     pythia.readString("SpaceShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg
 
-    // lower QCD shower cutoff
-    pythia.readString("TimeShower:pTmin=0.8944e0"); // QCD to comply with PowHeg
-    pythia.readString("SpaceShower:pTmin=0.8944e0"); // QCD to comply with PowHeg
+    // if photon radiation from leptons is performed by PHOTOS, turn off in pythia
+    if (optionphotos_.use_photos)
+      {
+	pythia.readString("TimeShower:QEDshowerByL  = off");
+      }
 
     // in powheg-nc mode turn off QED shower
     if (wgammode_.powheg_nc)
@@ -668,6 +843,7 @@ extern "C" {
     // Begin event loop. Generate event. Skip if error. List first one.
     iret = pythia.next();
   }
+
   void pythia_to_hepevt_(const int &nmxhep, int & nhep, int * isthep,
                          int * idhep,
                          int  (*jmohep)[2], int (*jdahep)[2],

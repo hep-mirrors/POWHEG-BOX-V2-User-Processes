@@ -41,14 +41,20 @@ c     multiple interactions
       common/optionphotos/use_photos
       logical powheg_nc,powheg_c_lo
       common/wgammode/powheg_nc,powheg_c_lo
-c cut-off for photon/parton emission (in PYEVNW 2*pT_min)
-c 0.8944 GeV is to comply with POWHEG
-c 1 GeV for radiation from leptons is to mimic a dressed lepton
-      parj(83)=2d0*0.8944d0     !FSR photon emission from quarks (default=1)
-      parj(90)=2d0*1d0          !FSR photon emission from leptons (default=0.0001)
 
-c     virtuality ordered shower (PYEVNT called)
-c     p_t ordered shower (PYEVNW called)
+c cut-off for photon emission (2*pT_min new model, m_min old model)
+      parj(83)=2d0*0.8944d0     !FS photon emission from quarks (0.8944 GeV to comply with POWHEG)
+      parj(90)=2d0*1d0          !FS photon emission from leptons (1 GeV to mimic a dressed lepton)
+
+c cut-off for parton and photon emission:
+c      parj(82)  ->  FS parton shower, parton emissions (default=1)
+c      parj(83)  ->  FS photon emission from quarks (default=1)
+c      parj(90)  ->  FS photon emission from leptons (default=0.0001)
+c      parp(62)  ->  IS parton showers, parton and photon emissions (default=1)
+c      parp(68)  ->  IS qed shower from leptons (default=0.001)
+
+c     Old model: virtuality ordered shower (PYEVNT called)
+c     New model: p_t ordered shower (PYEVNW called)
 
 c     multiple interactions
 c     (MPI can increase a lot the execution time)
@@ -130,14 +136,6 @@ C--- Opens input file and counts number of events, setting MAXEV;
       nevhep=0
 c read the header first, so lprup is set
       call lhefreadhdr(97)
-
-
-c in PYEVNT m_min
-c      parj(82)=0.8944d0         !parton shower, parton emissions (default=1)
-c      parj(83)=0.8944d0         !photon emission from quarks (default=1)
-c      parj(90)=1d0              !photon emission from leptons (default=0.0001)
-c      parp(62)=0.8944d0         !space-like parton showers, parton and photon emissions (default=1)
-cc      parp(68)=2d0*1d0          !space-like qed shower (from leptons) (default=0.001)
 
 c     Reduce background from non-prompt photons
 c     Make PI0 stable as in herwig default

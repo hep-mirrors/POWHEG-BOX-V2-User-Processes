@@ -8,7 +8,6 @@ c ptrel is for leptons, ptrelq for quarks
       integer maxpart
       parameter (maxpart=100)
       integer qidvector(2)
-      logical ok
       integer nphq
       integer idph(maxpart)
 
@@ -40,7 +39,7 @@ c or from the LH hard process
          endif
          tmp= jmohep(1,tmp)
          
-         if(abs(idhep(tmp)).gt.6) then
+         if(abs(idhep(tmp)).gt.22.or.(abs(idhep(tmp)).ge.11.and.abs(idhep(tmp)).le.16)) then
 c It is a photon from leptons or from a heavy hadronic resonance decay.
 c Not considered here.
             cycle

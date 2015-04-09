@@ -478,7 +478,7 @@ c
       jac_over_csi_m=xjac*(kn_sborn/(1-kn_csim))/(4*pi)**3/(1-kn_csim)
 c here we need the Born s (real s is function of Born s via csi)
       jac_over_csi_s=xjac*(kn_sborn)/(4*pi)**3
-c      call checkmomzero(nlegreal,kn_preal)
+      call checkmomzero(nlegreal,kn_preal)
 c in case of nlo test only, apply the smooth isolation prescription 
 c to remove the collinear photon FSR from quark
       if(nlo_test) then 
@@ -935,6 +935,11 @@ c this in case a massive fermion j, treated as light, radiates
 c a massless boson k 
                kn_dijterm(j,k)=(2*dotp(kn_cmpreal(0,k),kn_cmpreal(0,j))*
      1              ek/ej )**par_dijexp
+            elseif(kn_masses(k).gt.0.and.kn_masses(j).eq.0) then
+c this in case a massive fermion k, treated as light, radiates
+c a massless boson j 
+               kn_dijterm(j,k)=(2*dotp(kn_cmpreal(0,k),kn_cmpreal(0,j))*
+     1              ej/ek )**par_dijexp
             else
                kn_dijterm(j,k)=(2*dotp(kn_cmpreal(0,k),kn_cmpreal(0,j))*
      1              ek*ej /  (ek+ej)**2 )**par_dijexp
