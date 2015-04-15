@@ -16,4 +16,7 @@ c     the resonance's masses
      .    + 0 )  ! 0=no resonance, 1=1 resonance
 
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=200,maxprocreal=500)
+      parameter (maxprocborn=72,maxprocreal=180)
+
+      integer maxalr
+      parameter (maxalr=288)

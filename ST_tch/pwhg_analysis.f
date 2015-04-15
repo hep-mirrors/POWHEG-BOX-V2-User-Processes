@@ -8,7 +8,7 @@ c  pwhgfill  :  fills the histograms with data
       subroutine init_hist
       implicit none
       include  'LesHouches.h'
-      include '../pwhg_book.h'
+      include 'pwhg_bookhist-multi.h'
       include 'pwhg_math.h' 
       integer numplots
       real * 8 binsize(100)
@@ -73,184 +73,64 @@ c$$$      cut_ptsj = 50d0
       write(*,*) '**************************************************'
       write(*,*) '**************************************************'
 
-      call pwhginihist
+      call inihists
       
-      icut=-1
-      diag=0
-
- 111  continue
-      icut=icut+1
-
-      if (icut.eq.0) then
-         cut = ' nocut'
-      elseif (icut.eq.1) then
-         numplots=diag
-         cut = ' cut_1'
-      elseif (icut.eq.2) then
-         goto 222
-      else
-         write(*,*) 'Error in init_hist, icut ',icut
-         call exit(1)
-      endif
-
+      cut = '_nocut'
 
 c     top
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'t pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 1.2d0
-      call pwhgbookup(diag,'t pt zoom'//cut,'LOG',binsize(diag),
-     $     0d0,60d0)
-
-      diag=diag+1
-      binsize(diag) = 20d0
-      call pwhgbookup(diag,'t pt tail'//cut,'LOG',binsize(diag),
-     $     0d0,1000d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'t y'//cut,'LOG',binsize(diag),-6d0,6d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'t eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
-      diag=diag+1
-      binsize(diag) = 0.8d0
-      call pwhgbookup(diag,'t minv'//cut,'LOG',binsize(diag),
-     $     175d0-20d0,175d0+20d0)
-
-
+      call bookupeqbins('t_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('t_pt_zoom'//cut,1.2d0,0d0,60d0)
+      call bookupeqbins('t_pt_tail'//cut,20d0,0d0,1000d0)
+      call bookupeqbins('t_y'//cut,0.24d0,-6d0,6d0)
+      call bookupeqbins('t_eta'//cut,0.24d0,-6d0,6d0)
+      call bookupeqbins('t_minv'//cut,0.8d0,175d0-20d0,175d0+20d0)
 c     W
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'W pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 1.2d0
-      call pwhgbookup(diag,'W pt zoom'//cut,'LOG',binsize(diag),
+      call bookupeqbins('W_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('W_pt_zoom'//cut,1.2d0,
      $     0d0,60d0)
-
-      diag=diag+1
-      binsize(diag) = 20d0
-      call pwhgbookup(diag,'W pt tail'//cut,'LOG',binsize(diag),
+      call bookupeqbins('W_pt_tail'//cut,20d0,
      $     0d0,1000d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'W y'//cut,'LOG',binsize(diag),-6d0,6d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'W eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
-      diag=diag+1
-      binsize(diag) = 0.8d0
-      call pwhgbookup(diag,'W minv'//cut,'LOG',binsize(diag),
+      call bookupeqbins('W_y'//cut,0.24d0,-6d0,6d0)
+      call bookupeqbins('W_eta'//cut,0.24d0,-6d0,6d0)
+      call bookupeqbins('W_minv'//cut,0.8d0,
      $     80d0-20d0,80d0+20d0)
-
 c     hardest b
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'b pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 1.2d0
-      call pwhgbookup(diag,'b pt zoom'//cut,'LOG',binsize(diag),
+      call bookupeqbins('b_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('b_pt_zoom'//cut,1.2d0,
      $     0d0,60d0)
-
-      diag=diag+1
-      binsize(diag) = 20d0
-      call pwhgbookup(diag,'b pt tail'//cut,'LOG',binsize(diag),
+      call bookupeqbins('b_pt_tail'//cut,20d0,
      $     0d0,1000d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'b y'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('b_y'//cut,0.24d0,-6d0,6d0)
 c     hardest bbar
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'bbar pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 1.2d0
-      call pwhgbookup(diag,'bbar pt zoom'//cut,'LOG',binsize(diag),
+      call bookupeqbins('bbar_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('bbar_pt_zoom'//cut,1.2d0,
      $     0d0,60d0)
-
-      diag=diag+1
-      binsize(diag) = 20d0
-      call pwhgbookup(diag,'bbar pt tail'//cut,'LOG',binsize(diag),
+      call bookupeqbins('bbar_pt_tail'//cut,20d0,
      $     0d0,1000d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'bbar y'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('bbar_y'//cut,0.24d0,-6d0,6d0)
 c     J1
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'j1 pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'j1 eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('j1_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('j1_eta'//cut,0.24d0,-6d0,6d0)
 c     J2
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'j2 pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'j2 eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('j2_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('j2_eta'//cut,0.24d0,-6d0,6d0)
 c     pt(t,j1)
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'tj1 pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
+      call bookupeqbins('tj1_pt'//cut,4d0,0d0,200d0)
 c     dphi t-j1
-      diag=diag+1
-      binsize(diag) = pi/50d0
-      call pwhgbookup(diag,'phitj1'//cut,'LIN',binsize(diag),0d0,pi)
-
+      call bookupeqbins('phitj1'//cut,pi/50,0d0,pi)
 c     hardest charged lepton
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'lep pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'lep eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('lep_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('lep_eta'//cut,0.24d0,-6d0,6d0)
 c     hardest neutrino
-      diag=diag+1
-      binsize(diag) = 4d0
-      call pwhgbookup(diag,'v pt'//cut,'LOG',binsize(diag),0d0,200d0)
-
-      diag=diag+1
-      binsize(diag) = 0.24d0
-      call pwhgbookup(diag,'v eta'//cut,'LOG',binsize(diag),-6d0,6d0)
-
+      call bookupeqbins('v_pt'//cut,4d0,0d0,200d0)
+      call bookupeqbins('v_eta'//cut,0.24d0,-6d0,6d0)
 c     t-channel spin correlation
 c     cth between charged lepton and spectator jet
-      diag=diag+1
-      binsize(diag) = 0.04d0
-      call pwhgbookup(diag,'cth l-sj'//cut,'LIN',binsize(diag),-1d0,1d0)
-
-
+      call bookupeqbins('cth_l-sj'//cut,0.04d0,-1d0,1d0)
 c     total cross section sanity check
-      diag=diag+1
-      binsize(diag) = 1d0
-      call pwhgbookup(diag,'total'//cut,'LOG',binsize(diag),0d0,3d0)
+      call bookupeqbins('total'//cut,1d0,0d0,3d0)
 
-      goto 111
-
-
- 222  end
+      end
 
      
       subroutine analysis(dsig)
@@ -260,7 +140,7 @@ c     total cross section sanity check
       include 'pwhg_math.h' 
       include  'LesHouches.h'
 c     other common blocks
-      integer numplots
+      integer numplots,icuts
       real * 8 binsize(100)
       common/pwhghistcommon/binsize,numplots
       real *8 cut_etabj,cut_ptbj,cut_etal,cut_ptl,
@@ -270,7 +150,7 @@ c     other common blocks
       real *8 jet_ktRadius,jet_ktptmin
       common/cjetsparam/jet_ktRadius,jet_ktptmin
 
-      integer i,ihep,mu,ist_top,ist_w,ist,id,diag,j,jjet
+      integer i,ihep,mu,ist_top,ist_w,ist,id,j,jjet
       logical cuts,ini,condition_b,condition_bbar,condition,skipjet
       data ini/.true./
       save ini
@@ -299,7 +179,7 @@ c     other common blocks
 
 
 c     we need to tell to this analysis file which program is running it
-      character * 6 WHCPRG
+      character * 6 WHCPRG,cut
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
 
@@ -675,345 +555,163 @@ c     spin-correlation (theta asymmetry)
       endif
       
 
-cccccccccccccccccccccccccccccccccc
-c     Histograms filling, no cuts
-cccccccccccccccccccccccccccccccccc
-      diag=0
 
+      do icuts = 1,2
+c 1 no cuts, 2 with cuts
 
-c-----top
-c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
-
-c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
-
-c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
-
-c     y_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,y_t,dsig/binsize(diag))
-
-c     eta_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,eta_t,dsig/binsize(diag))
-
-c     minv_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,minv_t,dsig/binsize(diag))
-
-c-----w
-c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
-
-c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
-
-c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
-
-c     y_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,y_w,dsig/binsize(diag))
-
-c     eta_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,eta_w,dsig/binsize(diag))
-
-c     minv_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,minv_w,dsig/binsize(diag))
-
-c-----b
-c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
-
-c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
-
-c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
-
-c     y_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,y_b,dsig/binsize(diag))
-
-c-----bbar
-c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
-
-c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
-
-c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
-
-c     y_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,y_bbar,dsig/binsize(diag))
-
-c-----J1
-c     pt_j1
-      diag=diag+1
-      if(ij1.gt.0.and..not.skipjet) 
-     $     call pwhgfill(diag,pt_j1,dsig/binsize(diag))
-
-c     eta_j1
-      diag=diag+1
-      if(ij1.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,eta_j1,dsig/binsize(diag))
-
-c-----J2
-c     pt_j2
-      diag=diag+1
-      if(ij2.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,pt_j2,dsig/binsize(diag))
-
-c     eta_j2
-      diag=diag+1
-      if(ij2.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,eta_j2,dsig/binsize(diag))
-
-c-----pt(t,j1)
-      diag=diag+1
-      if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) then
-         pt_tj1=sqrt((p_top(1,1)+pj1(1))**2+(p_top(2,1)+pj1(2))**2 )
-         call pwhgfill(diag,pt_tj1,dsig/binsize(diag))
-      endif
-
-c-----phi(t-j1)
-c     dphi_tj1
-      diag=diag+1
-      if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) 
-     $     call pwhgfill(diag,dphi_tj1,dsig/binsize(diag))
-
-c-----lept
-c     pt_l
-      diag=diag+1
-      if(nl.gt.0) call pwhgfill(diag,pt_l,dsig/binsize(diag))
-
-c     eta_l
-      diag=diag+1
-      if(nl.gt.0) call pwhgfill(diag,eta_l,dsig/binsize(diag))
-
-c-----neutr
-c     pt_l
-      diag=diag+1
-      if(nv.gt.0) call pwhgfill(diag,pt_v,dsig/binsize(diag))
-
-c     eta_l
-      diag=diag+1
-      if(nv.gt.0) call pwhgfill(diag,eta_v,dsig/binsize(diag))
-
-c-----spin corr
-      diag=diag+1
-      if(specjet.gt.0.and.nt.gt.0) 
-     $     call pwhgfill(diag,cth,dsig/binsize(diag))
-
-c-----total
-      diag=diag+1
-      call pwhgfill(diag,1.5d0,dsig/binsize(diag))
-
-
+         if(icuts.eq.2) then
 ccccccccccccccccccccccccccccc
 c     Histogram filling, cuts
 ccccccccccccccccccccccccccccc
-
+            cut = '_cuts'
 c     Cuts, set 1
-      cuts=.false.
-      if(bflavjet.gt.0.and.specjet.gt.0) then
-         pbj(0)=pjet(4,bflavjet)
-         do mu=1,3
-            pbj(mu)=pjet(mu,bflavjet)
-         enddo
-         pt_bjet=sqrt(pbj(1)**2+pbj(2)**2)
-         call get_pseudorap(pbj,eta_bjet)
-
+            cuts=.false.
+            if(bflavjet.gt.0.and.specjet.gt.0) then
+               pbj(0)=pjet(4,bflavjet)
+               do mu=1,3
+                  pbj(mu)=pjet(mu,bflavjet)
+               enddo
+               pt_bjet=sqrt(pbj(1)**2+pbj(2)**2)
+               call get_pseudorap(pbj,eta_bjet)
+               
 cccccccccccccccccccccccccccccccccccc
-c$$$         pt_bjet=pt_b
-c$$$         eta_bjet=y_b
+c$$$  pt_bjet=pt_b
+c$$$  eta_bjet=y_b
 cccccccccccccccccccccccccccccccccccc
 
-         pt_sj=sqrt(pspecj(1)**2+pspecj(2)**2)
-         call get_pseudorap(pspecj,eta_sj)
-
-         cuts=(
-     $        (dabs(eta_bjet) .lt.cut_etabj).and.
-     $        (pt_bjet        .gt.cut_ptbj).and.
-     $        (dabs(eta_l) .lt.cut_etal).and.
-     $        (pt_l        .gt.cut_ptl).and.
-     $        (pt_v        .gt.cut_ptv).and.
-     $        (dabs(eta_sj).lt.cut_etasj).and.
-     $        (pt_sj       .gt.cut_ptsj))
-c$$$     $        (dabs(eta_sj).gt.cut_etasj).and.
-c$$$     $        (pt_sj       .gt.cut_ptsj))
-
-
-      endif
-
-      if(cuts) then
-c     reply same structure as above, without definition of variables
-c-----top
-c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
+               pt_sj=sqrt(pspecj(1)**2+pspecj(2)**2)
+               call get_pseudorap(pspecj,eta_sj)
+               
+               cuts=(
+     $              (dabs(eta_bjet) .lt.cut_etabj).and.
+     $              (pt_bjet        .gt.cut_ptbj).and.
+     $              (dabs(eta_l) .lt.cut_etal).and.
+     $              (pt_l        .gt.cut_ptl).and.
+     $              (pt_v        .gt.cut_ptv).and.
+     $              (dabs(eta_sj).lt.cut_etasj).and.
+     $              (pt_sj       .gt.cut_ptsj))
+c$$$  $        (dabs(eta_sj).gt.cut_etasj).and.
+c$$$  $        (pt_sj       .gt.cut_ptsj))
+               
+               
+            endif
+            if(.not.cuts) cycle
+         else
+            cut = '_nocut'
+         endif
 
 c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
+         if(nt.gt.0) call filld('t_pt'//cut,pt_t,dsig)
 
 c     pt_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,pt_t,dsig/binsize(diag))
+         if(nt.gt.0) call filld('t_pt_zoom'//cut,pt_t,dsig)
+
+c     pt_top
+         if(nt.gt.0) call filld('t_pt_tail'//cut,pt_t,dsig)
 
 c     y_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,y_t,dsig/binsize(diag))
+         if(nt.gt.0) call filld('t_y'//cut,y_t,dsig)
 
 c     eta_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,eta_t,dsig/binsize(diag))
+         if(nt.gt.0) call filld('t_eta'//cut,eta_t,dsig)
 
 c     minv_top
-      diag=diag+1
-      if(nt.gt.0) call pwhgfill(diag,minv_t,dsig/binsize(diag))
-
+         if(nt.gt.0) call filld('t_minv'//cut,minv_t,dsig)
 c-----w
 c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_pt'//cut,pt_w,dsig)
 
 c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_pt_zoom'//cut,pt_w,dsig)
 
 c     pt_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,pt_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_pt_tail'//cut,pt_w,dsig)
 
 c     y_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,y_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_y'//cut,y_w,dsig)
 
 c     eta_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,eta_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_eta'//cut,eta_w,dsig)
 
 c     minv_w
-      diag=diag+1
-      if(nw.gt.0) call pwhgfill(diag,minv_w,dsig/binsize(diag))
+         if(nw.gt.0) call filld('W_minv'//cut,minv_w,dsig)
 
 c-----b
 c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
+         if(nb.gt.0) call filld('b_pt'//cut,pt_b,dsig)
 
 c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
+         if(nb.gt.0) call filld('b_pt_zoom'//cut,pt_b,dsig)
 
 c     pt_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,pt_b,dsig/binsize(diag))
+         if(nb.gt.0) call filld('b_pt_tail'//cut,pt_b,dsig)
 
 c     y_b
-      diag=diag+1
-      if(nb.gt.0) call pwhgfill(diag,y_b,dsig/binsize(diag))
+         if(nb.gt.0) call filld('b_y'//cut,y_b,dsig)
 
 c-----bbar
 c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
+         if(nbbar.gt.0) call filld('bbar_pt'//cut,pt_bbar,dsig)
 
 c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
+         if(nbbar.gt.0) call filld('bbar_pt_zoom'//cut,pt_bbar,dsig)
 
 c     pt_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,pt_bbar,dsig/binsize(diag))
+         if(nbbar.gt.0) call filld('bbar_pt_tail'//cut,pt_bbar,dsig)
 
 c     y_bbar
-      diag=diag+1
-      if(nbbar.gt.0) call pwhgfill(diag,y_bbar,dsig/binsize(diag))
+         if(nbbar.gt.0) call filld('bbar_y'//cut,y_bbar,dsig)
 
 c-----J1
 c     pt_j1
-      diag=diag+1
-      if(ij1.gt.0.and..not.skipjet) 
-     $     call pwhgfill(diag,pt_j1,dsig/binsize(diag))
+         if(ij1.gt.0.and..not.skipjet) 
+     $        call filld('j1_pt'//cut,pt_j1,dsig)
 
 c     eta_j1
-      diag=diag+1
-      if(ij1.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,eta_j1,dsig/binsize(diag))
+         if(ij1.gt.0.and..not.skipjet)
+     $        call filld('j1_eta'//cut,eta_j1,dsig)
 
-c-----J2
 c     pt_j2
-      diag=diag+1
-      if(ij2.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,pt_j2,dsig/binsize(diag))
+         if(ij2.gt.0.and..not.skipjet) 
+     $        call filld('j2_pt'//cut,pt_j2,dsig)
 
 c     eta_j2
-      diag=diag+1
-      if(ij2.gt.0.and..not.skipjet)
-     $     call pwhgfill(diag,eta_j2,dsig/binsize(diag))
+         if(ij2.gt.0.and..not.skipjet)
+     $        call filld('j2_eta'//cut,eta_j2,dsig)
 
 c-----pt(t,j1)
-      diag=diag+1
-      if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) then
-         pt_tj1=sqrt((p_top(1,1)+pj1(1))**2+(p_top(2,1)+pj1(2))**2 )
-         call pwhgfill(diag,pt_tj1,dsig/binsize(diag))
-      endif
+         if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) then
+            pt_tj1=sqrt((p_top(1,1)+pj1(1))**2+(p_top(2,1)+pj1(2))**2 )
+            call filld('tj1_pt'//cut,pt_tj1,dsig)
+         endif
 
 c-----phi(t-j1)
 c     dphi_tj1
-      diag=diag+1
-      if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) 
-     $     call pwhgfill(diag,dphi_tj1,dsig/binsize(diag))
+         if(ij1.gt.0.and.nt.gt.0.and..not.skipjet) 
+     $        call filld('phitj1'//cut,dphi_tj1,dsig)
 
 c-----lept
 c     pt_l
-      diag=diag+1
-      if(nl.gt.0) call pwhgfill(diag,pt_l,dsig/binsize(diag))
+         if(nl.gt.0) call filld('lep_pt'//cut,pt_l,dsig)
 
 c     eta_l
-      diag=diag+1
-      if(nl.gt.0) call pwhgfill(diag,eta_l,dsig/binsize(diag))
+         if(nl.gt.0) call filld('lep_eta'//cut,eta_l,dsig)
 
 c-----neutr
 c     pt_l
-      diag=diag+1
-      if(nv.gt.0) call pwhgfill(diag,pt_v,dsig/binsize(diag))
+         if(nv.gt.0) call filld('v_pt'//cut,pt_v,dsig)
 
 c     eta_l
-      diag=diag+1
-      if(nv.gt.0) call pwhgfill(diag,eta_v,dsig/binsize(diag))
+         if(nv.gt.0) call filld('v_eta'//cut,eta_v,dsig)
 
 c-----spin corr
-      diag=diag+1
-      if(specjet.gt.0.and.nt.gt.0) 
-     $     call pwhgfill(diag,cth,dsig/binsize(diag))
+         if(specjet.gt.0.and.nt.gt.0) 
+     $        call filld('cth_l-sj'//cut,cth,dsig)
 
 c-----total
-      diag=diag+1
-      call pwhgfill(diag,1.5d0,dsig/binsize(diag))
+         call filld('total'//cut,1.5d0,dsig)
 
-
-      endif
+      enddo
 
  999  end
       
