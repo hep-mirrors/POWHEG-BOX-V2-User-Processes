@@ -163,7 +163,7 @@ c     Resonance Z -> e-(3) e+(4)
 
       call add_resonance(23,3,4)
 c if it is a fsr photon, add it to the resonance
-      if(nup.eq.nlegreal+1.and.rad_kinreg.eq.2) then
+      if(nup.eq.nlegreal+1.and.rad_kinreg.ge.2) then
          mothup(1,6) = 3
          mothup(2,6) = 3
          pup(1:4,3) = pup(1:4,3) + pup(1:4,6)

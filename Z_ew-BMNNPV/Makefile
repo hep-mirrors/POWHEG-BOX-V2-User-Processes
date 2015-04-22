@@ -4,6 +4,7 @@ COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
 PDF = lhapdf
+#PDF = native
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=report
@@ -12,6 +13,8 @@ ANALYSIS=report
 #
 ifeq ("$(COMPILER)","gfortran")	
 F77= gfortran -fno-automatic  -ffixed-line-length-none
+#F77= gfortran -fno-automatic -ggdb -ffixed-line-length-none
+#FPE=-ffpe-trap=invalid,zero,overflow,underflow -finit-real=nan
 # -finit-real=nan
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -42,8 +45,18 @@ endif
 
 OBJ = obj-$(COMPILER)
 
+HEPMCLOCATION = /usr/local
+LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
+
+PHOTOSCC_CONFIG=PHOTOSPP-config
+PHOTOSCC_LOCATION=$(shell $(PHOTOSCC_CONFIG) --prefix)
+#PHOTOSCC_LOCATION=/home/fulvio/POWHEG-BOX-V2/W_ew-BMNNP/PHOTOS
+PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
+
 PYTHIA8_CONFIG=pythia8-config
 PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+#PYTHIA8LOCATION=/usr/local
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
@@ -106,9 +119,11 @@ endif
 %.o: %.c
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
-%.o: %.cc
-	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
+#%.o: %.cc
+#	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
+%.o: %.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS) $(PHOTOSFLAGS)
 
 $(shell ../svnversion/svnversion.sh>/dev/null)
 
@@ -165,7 +180,7 @@ PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o pow
         $(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) -L/usr/local/lib $(STATIC)\
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
 $(LIBSLHAPDF) -o $@
 
 
