@@ -50,6 +50,9 @@ c     sumCKM*(1 + alphas(mw)/pi) from sum over hadronic W decay products
 c     and to take into account the corrections to the decay products, 
 c     nleptfam for leptonic W decay products
          multiplicity = (nleptfam+sumCKM*opasopi*nc)
+      elseif (vdecaymode.eq.112) then
+c     nleptfam for leptonic W decay products
+         multiplicity = nleptfam
       endif
 
 

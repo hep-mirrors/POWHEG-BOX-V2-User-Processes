@@ -49,6 +49,9 @@ c     sumCKM*(1 + alphas(mw)/pi) from sum over hadronic W decay products
 c     and to take into account the corrections to the decay products, 
 c     nleptfam for leptonic W decay products
          multiplicity = nleptfam+sumCKM*opasopi*nc
+      elseif(vdecaymode.eq.112) then
+c     nleptfam for leptonic W decay products
+         multiplicity = nleptfam
       endif
 *********************************************************      
 ***   MODIFICATION OF Higgs-W couplings:
@@ -274,7 +277,7 @@ c     on the Les Houches interface.
 
 c     fix here the flavours of the quarks coming from W decay, 
 c     in case of hadronic W decay
-      if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10.or.vdecaymode.eq.112) then
          if(init) then
             int_ud =          ph_CKM(1,1)**2/sumCKM
             int_us = int_ud + ph_CKM(1,2)**2/sumCKM
@@ -305,7 +308,7 @@ c     in case of hadronic W decay
                idup(5) = Wsign*(-5)
                idup(6) = Wsign*4
             endif
-         elseif(vdecaymode.eq.10) then
+         elseif(vdecaymode.eq.10.or.vdecaymode.eq.112) then
             if(icolup(1,5).eq.0.and.icolup(2,5).eq.0) then
 c           leptonic decay
                if(rand_num.le.1d0/nleptfam) then

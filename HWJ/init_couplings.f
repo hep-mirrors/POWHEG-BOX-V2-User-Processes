@@ -95,6 +95,9 @@ c     hadronic decay
          elseif (Vdecmod.eq.10) then
 c     inclusive decay
             vdecaymode=10
+         elseif (Vdecmod.eq.11) then
+c     inclusive lepton decay
+            vdecaymode=112
          else
             write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $           ' is not allowed '
@@ -102,11 +105,12 @@ c     inclusive decay
          endif
          write(*,*) 
          write(*,*) ' POWHEG: H W+ J production with W+ decay ' 
-         if (vdecaymode.eq.-11) write(*,*) '         to e+ ve '
-         if (vdecaymode.eq.-13) write(*,*) '         to mu+ vmu'
-         if (vdecaymode.eq.-15) write(*,*) '         to tau+ vtau'
-         if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
-         if (vdecaymode.eq. 10) write(*,*) '         inclusive decay'
+         if (vdecaymode.eq.-11) write(*,*) '     to e+ ve '
+         if (vdecaymode.eq.-13) write(*,*) '     to mu+ vmu'
+         if (vdecaymode.eq.-15) write(*,*) '     to tau+ vtau'
+         if (vdecaymode.eq.  0) write(*,*) '     to hadrons'
+         if (vdecaymode.eq. 10) write(*,*) '     inclusive decay'
+         if (vdecaymode.eq.112) write(*,*) '     inclusive lepton decay'
          write(*,*) 
       elseif(idvecbos.eq.-24) then
          if (Vdecmod.eq.1) then
@@ -119,6 +123,8 @@ c     inclusive decay
             vdecaymode=0
          elseif (Vdecmod.eq.10) then
             vdecaymode=10
+         elseif (Vdecmod.eq.11) then
+            vdecaymode=112
          else
             write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $           ' is not allowed '
@@ -126,11 +132,12 @@ c     inclusive decay
          endif
          write(*,*) 
          write(*,*) ' POWHEG: H W- J production with W- decay '
-         if (vdecaymode.eq.11) write(*,*) '         to e- ve~ '
-         if (vdecaymode.eq.13) write(*,*) '         to mu- vmu~'
-         if (vdecaymode.eq.15) write(*,*) '         to tau- vtau~'
-         if (vdecaymode.eq. 0) write(*,*) '         to hadrons'
-         if (vdecaymode.eq.10) write(*,*) '         inclusive decay'
+         if (vdecaymode.eq.11)  write(*,*) '     to e- ve~ '
+         if (vdecaymode.eq.13)  write(*,*) '     to mu- vmu~'
+         if (vdecaymode.eq.15)  write(*,*) '     to tau- vtau~'
+         if (vdecaymode.eq. 0)  write(*,*) '     to hadrons'
+         if (vdecaymode.eq.10)  write(*,*) '     inclusive decay'
+         if (vdecaymode.eq.112) write(*,*) '     inclusive lepton decay'
          write(*,*)    
       else
          write(*,*) 'ERROR: The ID of vector boson you selected ',
@@ -141,6 +148,8 @@ c     inclusive decay
 c     set lepton mass
       if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
          decmass = physpar_mq(5)+ physpar_mq(4) ! worst case: W -> b c 
+      elseif(vdecaymode.eq.112) then
+         decmass=physpar_ml(3)                  ! worst case: W -> tau + nutau
       else
          decmass=physpar_ml(Vdecmod)
       endif

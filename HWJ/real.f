@@ -49,6 +49,9 @@ c     sumCKM*(1 + alphas(mw)/pi) from sum over hadronic W decay products
 c     and to take into account the corrections to the decay products, 
 c     nleptfam for leptonic W decay products
          amp2 = (nleptfam+sumCKM*opasopi*nc)*amp2
+      elseif(vdecaymode.eq.112) then
+c     nleptfam for leptonic W decay products
+         amp2 = (nleptfam)*amp2
       endif
       end
 
