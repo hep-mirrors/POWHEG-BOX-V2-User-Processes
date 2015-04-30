@@ -36,7 +36,8 @@ c     11  : lepton decay: multiply by nleptfam (e,mu, or e,mu,tau)
 c     12  : neutrino decay: multiply by 3 (ve, vmu, vtau)
 c     Factor (1 + alphas(mz)/pi) to take into account the corrections to
 c     the Z decay products
-      if (vdecaymode.eq.0 .or. vdecaymode.eq.10) then
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10 
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
          if (decflav.eq.11) then
 c     leptons 
             multiplicity = nleptfam
@@ -188,7 +189,8 @@ c     on the Les Houches interface
       call add_resonance(idvecbos,4,5)
 
 c     fix here the Z decay mode
-      if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10  
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
          rand_num=random()
          if(idup(5).eq.-1001) then
 c        down-type quark

@@ -70,6 +70,10 @@ c     decay products of the vector boson
          vdecaymode=0
       elseif (Vdecmod.eq.10) then
          vdecaymode=10
+      elseif (Vdecmod.eq.11) then
+         vdecaymode=11
+      elseif (Vdecmod.eq.12) then
+         vdecaymode=12
       else
          write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $        ' is not allowed '
@@ -85,6 +89,8 @@ c     decay products of the vector boson
       if (vdecaymode.eq.-16) write(*,*) '         to antinutau nutau'
       if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
       if (vdecaymode.eq. 10) write(*,*) '         inclusive'
+      if (vdecaymode.eq. 11) write(*,*) '         to leptons'
+      if (vdecaymode.eq. 12) write(*,*) '         to neutrinos'
 
 
 *********************************************************
@@ -131,7 +137,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     electron         
          t3lep = -1d0/2   
          qlep  = -1d0
-      elseif (Vdecmod.ge.4.and.Vdecmod.le.6) then
+      elseif (Vdecmod.ge.4.and.Vdecmod.le.6.or.
+     $        Vdecmod.eq.12) then
 c     neutrino
          do i=1,flst_nborn
             flst_born(   4,   i)=         -12

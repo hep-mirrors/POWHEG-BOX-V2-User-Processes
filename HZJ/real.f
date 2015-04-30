@@ -38,7 +38,8 @@ c     11  : lepton decay: multiply by nleptfam (e,mu or e,mu,tau)
 c     12  : neutrino decay: multiply by 3 (ve, vmu, vtau)
 c     Factor (1 + alphas(mz)/pi) to take into account the corrections to
 c     the Z decay products     
-      if (vdecaymode.eq.0 .or. vdecaymode.eq.10) then
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
          if (decflav.eq.11) then
 c     leptons 
             multiplicity = nleptfam

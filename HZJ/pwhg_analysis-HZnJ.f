@@ -262,7 +262,7 @@ c      if(dsig.eq.0) return
 c     from now on, nu is the positron!
 
       if (ini) then
-c         if (WHCPRG.ne.'NLO   ') then
+         if (WHCPRG.ne.'NLO   ') then
             if (Vdecmod.eq.1) then
                idl=11
             elseif (Vdecmod.eq.2) then
@@ -276,10 +276,18 @@ c         if (WHCPRG.ne.'NLO   ') then
             elseif (Vdecmod.eq.6) then
                idl=16
             endif
-c         endif
-c         else
-c            idl=11
-c         endif
+c     If instead we are doing NLO analysis:
+         else 
+            if (Vdecmod.eq.1 .or.
+     $          Vdecmod.eq.2 .or.
+     $          Vdecmod.eq.3) then
+               idl=11
+            elseif(Vdecmod.eq.4 .or.
+     $             Vdecmod.eq.5 .or.
+     $             Vdecmod.eq.6) then
+               idl=12
+            endif
+         endif
 
          idnu=-idl
          
@@ -302,7 +310,8 @@ c         endif
       enddo
 
       if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
-         if (Vdecmod.ne.0.and.Vdecmod.ne.10) then
+         if (Vdecmod.ne.0.and.Vdecmod.ne.10.and.
+     $       Vdecmod.ne.11.and.Vdecmod.ne.12) then
             do ihep=1,nhep            
                if(idhep(ihep).eq.idl) then
                   ilep=ihep

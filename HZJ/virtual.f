@@ -83,7 +83,8 @@ c     Factor (1 + alphas(mz)/pi) to take into account the decay corrections
 
       multiplicity=1d0
 
-      if (vdecaymode.eq.0 .or. vdecaymode.eq.10) then
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
          if (decflav.eq.11) then
 c     leptons 
             multiplicity = nleptfam
