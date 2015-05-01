@@ -133,7 +133,8 @@ c     Save the leptonic Z coupling to be used in the subroutine setZcouplings
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     set parameter for GoSam: Z couplings to final-state leptons
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc      
-      if (Vdecmod.ge.1.and.Vdecmod.le.3) then
+      if (Vdecmod.ge.1.and.Vdecmod.le.3.or.
+     $    Vdecmod.eq.11) then
 c     electron         
          t3lep = -1d0/2   
          qlep  = -1d0
@@ -163,11 +164,11 @@ c     neutrino
       gel=gev+gea
       ger=gev-gea
 
-      call golem_initialize
- 
 c     set lepton mass
       if (Vdecmod.eq.0.or.Vdecmod.eq.10) then
-         decmass=physpar_mq(5)   ! worst case: Z -> b ~b 
+         decmass=physpar_mq(5)  ! worst case: Z -> b ~b 
+      elseif (Vdecmod.eq.11) then
+         decmass=physpar_ml(3)
       elseif (Vdecmod.gt.3) then
          decmass=0d0
       else
@@ -206,6 +207,7 @@ c     nleptfam = 2: the Z boson can decay into e+/e-, mu+/mu-
 c     nleptfam = 3: the Z boson can decay into e+/e-, mu+/mu-, tau+/tau-
       nleptfam = 3
 
+      call golem_initialize
 
       end
 
