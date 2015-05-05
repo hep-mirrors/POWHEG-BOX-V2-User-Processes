@@ -1,10 +1,12 @@
       subroutine init_couplings
       implicit none
-      include "coupl.inc"
-      include 'PhysPars.h'
       include "nlegborn.h"
       include "pwhg_flst.h"
-
+      include "coupl.inc"
+      include 'PhysPars.h'
+      include 'pwhg_physpar.h'
+      include 'pwhg_math.h'
+      include 'pwhg_st.h'
       real * 8 powheginput
       external powheginput
 c Avoid multiple calls to this subroutine. The parameter file is opened
@@ -13,17 +15,24 @@ c but never closed ...
       data called/.false./
       save called
       integer idvecbos,vdecaymode,Vdecmod
-      common/cvecbos/idvecbos,vdecaymode
+      common/cvecbos/idvecbos,vdecaymode,Vdecmod
+      save/cvecbos/
       real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
-      data lepmass/0.51099891d-3,0.1056583668d0,1.77684d0/
-      integer i
+c      common/clepmass/lepmass,decmass
+c      data lepmass/0.51099891d-3,0.1056583668d0,1.77684d0/
+      real * 8 kappa_ghb, kappa_ght, kappa_ghz
+      real * 8 ghb,ght,ghz
+      common/Hcoupl/ghb,ght,ghz
+      save/Hcoupl/
       real * 8 ger,gel
       common/Zlepcoupl/ger,gel
       real * 8 t3lep,qlep,gev,gea
-      real * 8 ghb,ght,ghz
-      common/Hcoupl/ghb,ght,ghz
-      real * 8 kappa_ghb, kappa_ght, kappa_ghz
+      real * 8 pwhg_alphas
+      external pwhg_alphas
+      real *8 opasopi,nleptfam
+      common/decay_corr/opasopi,nleptfam
+      integer i
+      
 
       if(called) then
          return
@@ -31,19 +40,9 @@ c but never closed ...
          called=.true.
       endif
 
-*********************************************************
-***********         MADGRAPH                 ************
-*********************************************************
-c Parameters are read from the MadGraph param_card.dat,
-c except the strong coupling constant, which is defined
-c somewhere else
-      call lh_readin("none")
-      call madtophys
-
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
-
       idvecbos = 23
 c     decay products of the vector boson
       Vdecmod=powheginput('vdecaymode')
@@ -60,6 +59,14 @@ c     decay products of the vector boson
          vdecaymode=-14
       elseif (Vdecmod.eq.6) then
          vdecaymode=-16
+c$$$      elseif (Vdecmod.eq.0) then
+c$$$         vdecaymode=0
+c$$$      elseif (Vdecmod.eq.10) then
+c$$$         vdecaymode=10
+      elseif (Vdecmod.eq.11) then
+         vdecaymode=11
+      elseif (Vdecmod.eq.12) then
+         vdecaymode=12
       else
          write(*,*) 'ERROR: The decay mode you selected ',Vdecmod, 
      $        ' is not allowed '
@@ -73,23 +80,87 @@ c     decay products of the vector boson
       if (vdecaymode.eq.-12) write(*,*) '         to antinue nue'
       if (vdecaymode.eq.-14) write(*,*) '         to antinumu numu'
       if (vdecaymode.eq.-16) write(*,*) '         to antinutau nutau'
+c$$$      if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
+c$$$      if (vdecaymode.eq. 10) write(*,*) '         inclusive'
+      if (vdecaymode.eq. 11) write(*,*) '         to leptons'
+      if (vdecaymode.eq. 12) write(*,*) '         to neutrinos'
+
+
+*********************************************************
+***********         MADGRAPH                 ************
+*********************************************************
+c Parameters are read from the MadGraph param_card.dat,
+c except the strong coupling constant, which is defined
+c somewhere else
+
+      ph_bmass=powheginput("#bmass")
+      if (ph_bmass.lt.0d0) then
+         ph_bmass=4.2d0         ! b-quark mass used in the massive 
+                                ! VIRTUAL diagrams and in the final-state 
+                                ! momenta reshuffling
+      endif
+      ph_tmass=powheginput("#tmass")
+      if (ph_tmass.lt.0d0) then
+         ph_tmass=172.5d0
+      endif
+
+      physpar_ml(1) = 0.511d-3   ! electron
+      physpar_ml(2) = 0.1057d0   ! muon
+      physpar_ml(3) = 1.777d0    ! tau
+      physpar_mq(1) = 0.33d0     ! down
+      physpar_mq(2) = 0.33d0     ! up
+      physpar_mq(3) = 0.50d0     ! strange
+      physpar_mq(4) = 1.50d0     ! charm
+      physpar_mq(5) = ph_bmass   ! bottom
+
+      call lh_readin("none")
+      call madtophys
+c     Save the leptonic Z coupling to be used in the subroutine setZcouplings
+c      gzl1=gzl(1)
+c      gzl2=gzl(2)
+
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     set parameter for GoSam: Z couplings to final-state leptons
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc      
-      if (Vdecmod.le.3) then
+      if (Vdecmod.ge.1.and.Vdecmod.le.3.or.
+     $    Vdecmod.eq.11) then
 c     electron         
-         t3lep =-1d0/2   
-         qlep = -1d0
-      else
+         t3lep = -1d0/2   
+         qlep  = -1d0
+      elseif (Vdecmod.ge.4.and.Vdecmod.le.6.or.
+     $        Vdecmod.eq.12) then
 c     neutrino
-         t3lep =+1d0/2   
-         qlep = 0d0
+         t3lep = +1d0/2   
+         qlep  = 0d0
+      else
+         write(*,*) '***********************************************'
+         write(*,*) 'Decay mode of the Z boson NOT contemplated'
+         write(*,*) 'POWHEG exits'       
+         write(*,*) '***********************************************'
+         call pwhg_exit(-1)
       endif
       gev = (t3lep - 2*qlep*ph_sthw**2)/(2*ph_sthw*sqrt(1-ph_sthw**2))
       gea = t3lep/(2*ph_sthw*sqrt(1-ph_sthw**2))
+
       gel=gev+gea
       ger=gev-gea
+
+c     set lepton mass
+      if (Vdecmod.eq.11) then
+         decmass=physpar_ml(3)
+      elseif (Vdecmod.gt.3) then
+         decmass=0d0
+      else
+         decmass=physpar_ml(Vdecmod)   
+      endif
+
+      if (ph_Zmass2low.lt.4*decmass**2) then
+         write(*,*) 'min_z_mass less than the minimun invariant mass of'
+         write(*,*) 'Z decay products',2*decmass
+         write(*,*) 'POWHEG exits'
+         call pwhg_exit(-1)
+      endif
 
 *********************************************************      
 ***  MODIFICATION OF Higgs-top and Higgs-Z couplings:
@@ -120,23 +191,16 @@ c     neutrino
       ghz = (ph_Wmass / ((1d0-ph_sthw2) * ph_sthw)) * kappa_ghz
 
 *********************************************************
+c     hadronic and inclusive Z decay:
+c     factor 1+alpha_s(mz)/pi to take into account the corrections
+c     to the Z decay products
+      opasopi = 1+pwhg_alphas(ph_Zmass**2,st_lambda5MSB,st_nlight)/pi
+c     number of leptonic families considered in inclusive decay:
+c     nleptfam = 2: the Z boson can decay into e+/e-, mu+/mu-
+c     nleptfam = 3: the Z boson can decay into e+/e-, mu+/mu-, tau+/tau-
+      nleptfam = 3
 
       call golem_initialize
-
-c     set lepton mass
-      if (Vdecmod.gt.3) then
-         decmass=0d0
-      else
-         decmass=lepmass(Vdecmod)   
-      endif
-
-      if (ph_Zmass2low.lt.4*decmass**2) then
-         write(*,*) 'min_z_mass less than the minimun invariant mass of'
-         write(*,*) 'the final-state leptonic system ',2*decmass
-         write(*,*) 'POWHEG aborts'
-         call pwhg_exit(-1)
-      endif
-
 
       end
 
@@ -172,14 +236,16 @@ c madgraph routines not to blow.
       gfermi = 0.1166390d-4
       alfas = 0.119d0
       zmass = 91.188d0
-      tmass = 172.5d0
+c     tmass = 172.5d0
+      tmass = ph_tmass
       lmass = 0d0
       mcMS = 0d0
       mbMS = 0d0
       mtMS = 172.5d0
       mtaMS = 1.777d0
       cmass = 0d0
-      bmass = 4.2d0
+c     bmass = 4.2d0
+      bmass = ph_bmass
       lmass=0d0
       wmass=sqrt(zmass**2/Two+
      $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))

@@ -15,6 +15,11 @@ c     computation of the Born amplitude
       logical equalintlists
       external equalintlists
       integer dim_mom_array
+      integer idvecbos,vdecaymode,Vdecmod
+      common/cvecbos/idvecbos,vdecaymode,Vdecmod
+      real * 8 multiplicity
+      real *8 opasopi,nleptfam
+      common/decay_corr/opasopi,nleptfam
       parameter (dim_mom_array=50)
       real * 8 pgosam(dim_mom_array)
 C     real * 8 pgosam(5*nlegborn)
@@ -26,6 +31,8 @@ C     real * 8 pgosam(5*nlegborn)
      $      25,
      $     -11,
      $      11/
+
+      multiplicity=1d0
       
       do i=0,flst_nborn-1
          if (equalintlists(nlegborn,bflav,bflav_gosam(1,i))) then
@@ -38,6 +45,14 @@ C     real * 8 pgosam(5*nlegborn)
       call pwhg_exit(-1)
       
  222  call gosam_momenta(p,pgosam)
+
+      if (vdecaymode.eq.11) then
+c     leptons 
+         multiplicity = nleptfam
+      elseif(vdecaymode.eq.12) then
+c     neutrinos
+         multiplicity = 3
+      endif
       
       muren=sqrt(st_muren2)
       params(1)=1d0
@@ -76,6 +91,11 @@ c     spin correlated born amplitude
             enddo
          enddo
       enddo
+***   MODIFICATION for inclusive decays:
+      born   =  multiplicity * born
+      bornjk =  multiplicity * bornjk
+      bmunu  =  multiplicity * bmunu
+
       end
 
       subroutine gosam_momenta(p,pgosam)
@@ -153,97 +173,165 @@ c     colored particles
 
 
       subroutine finalize_lh
+      implicit none
+      include "nlegborn.h"
+      include "pwhg_flst.h"
+      include "LesHouches.h"
+      include "PhysPars.h"
 c     Set up the resonances whose mass must be preserved
 c     on the Les Houches interface.
 c     
 c     vector boson id and decay
-      integer idvecbos,vdecaymode
-      common/cvecbos/idvecbos,vdecaymode
-c     lepton masses
-      real *8 lepmass(3),decmass
-      common/clepmass/lepmass,decmass
-
+      integer idvecbos,vdecaymode,Vdecmod,id5,id6
+      common/cvecbos/idvecbos,vdecaymode,Vdecmod
+      real * 8 opasopi,nleptfam
+      common/decay_corr/opasopi,nleptfam
+      real * 8 random,rand_num
+      external random
+c     Set up the resonances whose mass must be preserved
+c     on the Les Houches interface
       call add_resonance(idvecbos,4,5)
-c     The following routine also performs the reshuffling of momenta if
-c     a massive decay is chosen
-      call momenta_reshuffle(4,5,6,decmass,decmass)
 
-c     fix here the W decay mode
-      id5=vdecaymode
-      id6=-vdecaymode
-      call change_id_particles(5,6,id5,id6)
-
-      end
-
-
-
-
-      subroutine change_id_particles(i1,i2,id1,id2)
-      implicit none
-      include 'LesHouches.h'
-      integer i1,i2,id1,id2
-      idup(i1)=id1
-      idup(i2)=id2
-      end
-
-
-
-c     i1<i2
-      subroutine momenta_reshuffle(ires,i1,i2,m1,m2)
-      implicit none
-      include 'LesHouches.h'
-      integer ires,i1,i2
-      real * 8 m1,m2
-      real * 8 ptemp(0:3),pfin(0:3),beta(3),betainv(3),modbeta,m
-      real * 8 mod_pfin,m0
-      integer j,id,dec
-      if (i1.ge.i2) then
-         write(*,*) 'wrong sequence in momenta_reshuffle'
-         stop
-      endif
-cccccccccccccccccccccccccccccc
-c construct boosts from/to vector boson rest frame 
-      do j=1,3
-         beta(j)=-pup(j,ires)/pup(4,ires)
-      enddo
-      modbeta=sqrt(beta(1)**2+beta(2)**2+beta(3)**2)
-      do j=1,3
-         beta(j)=beta(j)/modbeta
-         betainv(j)=-beta(j)
-      enddo
-
-      m0 = pup(5,ires)
-      mod_pfin=
-     $     1/(2*m0)*sqrt(abs((m0**2-m1**2-m2**2)**2 - 4*m1**2*m2**2))
-               
-cccccccccccccccccccccccccccccccccccccccc
-c     loop of the two decay products
-      
-      do dec=1,2
-         if(dec.eq.1) then
-            id=i1
-            m=m1
+c     fix here the Z decay mode
+      if(vdecaymode.eq.11 .or. vdecaymode.eq.12) then
+         rand_num=random()
+         if (vdecaymode.eq.11) then
+c        lepton
+            if(rand_num.le.1d0/nleptfam) then
+               idup(5) = -11
+               idup(6) =  11
+            elseif(rand_num.gt.1d0/nleptfam.and.
+     $              rand_num.le.2d0/nleptfam) then
+               idup(5) = -13
+               idup(6) =  13
+            else
+               idup(5) = -15
+               idup(6) =  15
+            endif         
+         elseif (vdecaymode.eq.12) then
+c        neutrino
+            if(rand_num.le.1d0/3d0) then
+               idup(5) = -12
+               idup(6) =  12
+            elseif(rand_num.gt.1d0/3d0.and.rand_num.le.2d0/3d0) then
+               idup(5) = -14
+               idup(6) =  14
+            else
+               idup(5) = -16
+               idup(6) =  16
+            endif         
          else
-            id=i2
-            m=m2
+            write(*,*) 'Error in finalize_lh'
+            call pwhg_exit(-1)
          endif
-         ptemp(0)=pup(4,id)
-         do j=1,3
-            ptemp(j)=pup(j,id)
-         enddo
-         call mboost(1,beta,modbeta,ptemp,ptemp)
-         pfin(0)=sqrt(mod_pfin**2 + m**2)
-         do j=1,3
-            pfin(j)=ptemp(j)*mod_pfin/ptemp(0)
-         enddo
-         call mboost(1,betainv,modbeta,pfin,ptemp)
-         do j=1,3
-            pup(j,id)=ptemp(j)
-         enddo
-         pup(4,id)=ptemp(0)
-         pup(5,id)=sqrt(abs(pup(4,id)**2-pup(1,id)**2
-     $        -pup(2,id)**2-pup(3,id)**2))
-         
-      enddo
-
+      else
+         idup(5) =  vdecaymode
+         idup(6) = -vdecaymode
+      endif
+      call lhefinitemasses
       end
+
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c                    OLD STUFF
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+c$$$      subroutine finalize_lh
+c$$$c     Set up the resonances whose mass must be preserved
+c$$$c     on the Les Houches interface.
+c$$$c     
+c$$$c     vector boson id and decay
+c$$$      integer idvecbos,vdecaymode
+c$$$      common/cvecbos/idvecbos,vdecaymode
+c$$$c     lepton masses
+c$$$      real *8 lepmass(3),decmass
+c$$$      common/clepmass/lepmass,decmass
+c$$$
+c$$$      call add_resonance(idvecbos,4,5)
+c$$$c     The following routine also performs the reshuffling of momenta if
+c$$$c     a massive decay is chosen
+c$$$      call momenta_reshuffle(4,5,6,decmass,decmass)
+c$$$
+c$$$c     fix here the W decay mode
+c$$$      id5=vdecaymode
+c$$$      id6=-vdecaymode
+c$$$      call change_id_particles(5,6,id5,id6)
+c$$$
+c$$$      end
+c$$$
+c$$$
+c$$$
+c$$$
+c$$$      subroutine change_id_particles(i1,i2,id1,id2)
+c$$$      implicit none
+c$$$      include 'LesHouches.h'
+c$$$      integer i1,i2,id1,id2
+c$$$      idup(i1)=id1
+c$$$      idup(i2)=id2
+c$$$      end
+c$$$
+c$$$
+c$$$
+c$$$c     i1<i2
+c$$$      subroutine momenta_reshuffle(ires,i1,i2,m1,m2)
+c$$$      implicit none
+c$$$      include 'LesHouches.h'
+c$$$      integer ires,i1,i2
+c$$$      real * 8 m1,m2
+c$$$      real * 8 ptemp(0:3),pfin(0:3),beta(3),betainv(3),modbeta,m
+c$$$      real * 8 mod_pfin,m0
+c$$$      integer j,id,dec
+c$$$      if (i1.ge.i2) then
+c$$$         write(*,*) 'wrong sequence in momenta_reshuffle'
+c$$$         stop
+c$$$      endif
+c$$$cccccccccccccccccccccccccccccc
+c$$$c construct boosts from/to vector boson rest frame 
+c$$$      do j=1,3
+c$$$         beta(j)=-pup(j,ires)/pup(4,ires)
+c$$$      enddo
+c$$$      modbeta=sqrt(beta(1)**2+beta(2)**2+beta(3)**2)
+c$$$      do j=1,3
+c$$$         beta(j)=beta(j)/modbeta
+c$$$         betainv(j)=-beta(j)
+c$$$      enddo
+c$$$
+c$$$      m0 = pup(5,ires)
+c$$$      mod_pfin=
+c$$$     $     1/(2*m0)*sqrt(abs((m0**2-m1**2-m2**2)**2 - 4*m1**2*m2**2))
+c$$$               
+c$$$cccccccccccccccccccccccccccccccccccccccc
+c$$$c     loop of the two decay products
+c$$$      
+c$$$      do dec=1,2
+c$$$         if(dec.eq.1) then
+c$$$            id=i1
+c$$$            m=m1
+c$$$         else
+c$$$            id=i2
+c$$$            m=m2
+c$$$         endif
+c$$$         ptemp(0)=pup(4,id)
+c$$$         do j=1,3
+c$$$            ptemp(j)=pup(j,id)
+c$$$         enddo
+c$$$         call mboost(1,beta,modbeta,ptemp,ptemp)
+c$$$         pfin(0)=sqrt(mod_pfin**2 + m**2)
+c$$$         do j=1,3
+c$$$            pfin(j)=ptemp(j)*mod_pfin/ptemp(0)
+c$$$         enddo
+c$$$         call mboost(1,betainv,modbeta,pfin,ptemp)
+c$$$         do j=1,3
+c$$$            pup(j,id)=ptemp(j)
+c$$$         enddo
+c$$$         pup(4,id)=ptemp(0)
+c$$$         pup(5,id)=sqrt(abs(pup(4,id)**2-pup(1,id)**2
+c$$$     $        -pup(2,id)**2-pup(3,id)**2))
+c$$$         
+c$$$      enddo
+c$$$
+c$$$      end
