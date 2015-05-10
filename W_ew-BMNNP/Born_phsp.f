@@ -185,13 +185,15 @@ c minimal final state mass
             write(*,*) '*************************************'
             ini=.false.
          endif
-         if(flg_btildepart.eq.'r') then
-            muref=sqrt(2d0*dotp(kn_preal(0,3),kn_preal(0,4))
-     1           +kn_masses(3)**2+kn_masses(4)**2)
-         else
-            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
-     1           +kn_masses(3)**2+kn_masses(4)**2)
-         endif
+c
+c in case of FSR the running scale is the l+ l- gamma virtuality
+c         if(flg_btildepart.eq.'r') then
+c            muref=sqrt(2d0*dotp(kn_preal(0,3),kn_preal(0,4))
+c     1           +kn_masses(3)**2+kn_masses(4)**2)
+c         else
+         muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
+     1        +kn_masses(3)**2+kn_masses(4)**2)
+c         endif
 c         if(powheginput('#runningscale').eq.2) then
 c            pt2=(kn_pborn(1,3)+kn_pborn(1,4))**2+(kn_pborn(2,3)
 c     $           +kn_pborn(2,4))**2

@@ -82,8 +82,8 @@ c      call bookupeqbins('dr2',0.1d0,0d0,3.2d0)
       include 'hepevt.h'
       include 'pwhg_math.h' 
       include  'LesHouches.h'
-      integer   maxphot,nphot
-      parameter (maxphot=2048)
+      integer   maxphot,nphot,maxnumg,maxnumlep
+      parameter (maxphot=2048,maxnumlep=100)
       real * 8 pg(4,maxphot)
       character * 1 cnum(9)
       data cnum/'1','2','3','4','5','6','7','8','9'/
@@ -92,10 +92,13 @@ c      call bookupeqbins('dr2',0.1d0,0d0,3.2d0)
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
-      data WHCPRG/'NLO   '/
+c      data WHCPRG/'NLO   '/
+      data WHCPRG/'PYTHIA'/
       real * 8 pw(4),pl(4),pnu(4)
       real * 8 pl03(0:3),pnu03(0:3)
       real * 8 y,eta,pt,m
+      real * 8 y1,eta1,ptl1,m1
+      real * 8 y2,eta2,ptl2,m2
       real * 8 dy,deta,delphi,dr
       real * 8 getpt,getdphi,getmass,geteta
       external getpt,getdphi,getmass,geteta
@@ -115,6 +118,13 @@ c spin correlation observables
       external cstar,phistar_report
       logical pwhg_isfinite
       external pwhg_isfinite
+      integer nlep,nnu,ngamma,i
+      integer mu,nu,jnu,inu,igam,jgam,gam,il,jl,lep
+      real*8 lepvec(maxnumlep),nuvec(maxnumlep),gammavec(maxphot)
+      real*8 p_gamma(0:3)
+      real*8 pt_nu,pt_nu_max
+      real*8 pt_lep,pt_lep_max
+      real*8 pt_gamma,pt_gamma_max
       logical ini
       data ini/.true./
       save ini
@@ -126,7 +136,6 @@ c spin correlation observables
          return
       endif
       
-
       if (ini) then
           vdecaytemp = lprup(1)-10000
           if(vdecaytemp.lt.0) then
@@ -142,22 +151,105 @@ c spin correlation observables
       pnu= (/0,0,0,0/)
       nphot = 0
 
-      do ihep=1,nhep
-c p_W = p_l + p_nu
-         if( idhep(ihep).eq.vdecaytemp  ) then
-             if (phep(4,ihep).gt.pl(4)) pl = phep(1:4,ihep)
+      IF(WHCPRG.ne.'PYTHIA') then
+         do ihep=1,nhep
+c     p_W = p_l + p_nu
+            if( idhep(ihep).eq.vdecaytemp  ) then
+               if (phep(4,ihep).gt.pl(4)) pl = phep(1:4,ihep)
+            endif
+            if( idhep(ihep).eq.vdecay2temp ) then
+               if (phep(4,ihep).gt.pnu(4)) pnu = phep(1:4,ihep)
+            endif
+            pw = pl + pnu
+            if( idhep(ihep).eq.22 ) then 
+               if (phep(4,ihep).gt.10d0)then
+                  nphot = nphot + 1
+                  pg(1:4,nphot) = phep(1:4,ihep)
+               endif
+            endif
+         enddo
+      ELSE
+         nlep=0
+         nnu=0
+         ngamma=0
+         do i=1,maxnumlep
+            lepvec(i) = 0
+            nuvec(i) = 0
+         enddo
+         maxnumg=maxphot
+         do i=1,maxphot
+            gammavec(i) = 0
+         enddo
+         do ihep=1,nhep
+            if(isthep(ihep).eq.1) then
+C     Scan over final state particle and record the entries
+                 if(idhep(ihep).eq.vdecay2temp) then
+C     with a neutrino
+                  nnu=nnu+1
+                  nuvec(nnu)=ihep
+               elseif(idhep(ihep).eq.vdecaytemp) then
+c     with a lepton
+                  nlep=nlep+1
+                  lepvec(nlep)=ihep
+               elseif(idhep(ihep).eq.22) then
+C     with a gamma
+                  ngamma=ngamma+1
+                  gammavec(ngamma)=ihep
+               endif
+            endif
+         enddo
+         if(nlep.eq.0.and.nnu.eq.0) then
+c            write(*,*)" not enough leptons or gamma! drop event"
+c            call exit(1)
+            return
          endif
-         if( idhep(ihep).eq.vdecay2temp ) then
-             if (phep(4,ihep).gt.pnu(4)) pnu = phep(1:4,ihep)
-         endif
+c hardest neutrino
+         pt_nu_max=0d0
+         jnu=0
+         do nu=1,nnu
+            inu=nuvec(nu)
+            pt_nu=sqrt(phep(1,inu)**2 + phep(2,inu)**2)
+            if (pt_nu.gt.pt_nu_max) then
+               jnu = inu
+               pt_nu_max = pt_nu
+            endif
+         enddo
+c hardest lepton
+         pt_lep_max=0d0
+         jl=0
+         do lep=1,nlep
+            il=lepvec(lep)
+            pt_lep=sqrt(phep(1,il)**2 + phep(2,il)**2)
+            if (pt_lep.gt.pt_lep_max) then
+               jl = il
+               pt_lep_max = pt_lep
+            endif
+         enddo
+         pt_gamma_max= 0.d0
+         jgam=0
+         do gam=1,ngamma
+            igam=gammavec(gam)
+            pt_gamma=sqrt(phep(1,il)**2 + phep(2,il)**2)
+            if (pt_gamma.gt.pt_gamma_max) then
+               jgam = igam
+               pt_gamma_max = pt_gamma
+            endif
+         enddo
+         pl = phep(1:4,jl)
+         pnu = phep(1:4,jnu)
          pw = pl + pnu
-         if( idhep(ihep).eq.22 ) then 
-             if (phep(4,ihep).gt.10d0)then
-                 nphot = nphot + 1
-                 pg(1:4,nphot) = phep(1:4,ihep)
-             endif
-         endif
-      enddo
+c            if( idhep(ihep).eq.22.and.isthep(ihep).eq.1) then 
+c               if (phep(4,ihep).gt.10d0)then
+c                  nphot = nphot + 1
+c                  pg(1:4,nphot) = phep(1:4,ihep)
+c               endif
+c            p_gamma(0)=phep(4,igam)
+c            do mu=1,3
+c               p_gamma(mu)=phep(mu,igam)
+c            enddo
+c            endif
+c         enddo
+      ENDIF
 
 
       pl03(0)=pl(4)
@@ -179,52 +271,49 @@ c p_W = p_l + p_nu
       phistar = phistar_report(pnu,pl)   !pl2 is the negatively charged lepton
 
       call filld('total',0d0,dsig)
-
       if(getpt(pl).gt.25.and.abs(geteta(pl))<2.5d0.and.
      1   getpt(pnu).gt.25.and.
      2   m.gt.1) then
          call filld('totalcut',0d0,dsig)
-      endif
-
-
 c      call filld('Nphot',dble(nphot),dsig)
 
 c lepton 1
-      call filld('l_y',    yl, dsig)
-      call filld('l_eta',etal, dsig)
-      call filld('l_pt', ptl, dsig)
-      call filld('l_pt_report', ptl, dsig)
+         call filld('l_y',    yl, dsig)
+         call filld('l_eta',etal, dsig)
+         call filld('l_pt', ptl, dsig)
+         call filld('l_pt_report', ptl, dsig)
 
 c lepton 2
-      call filld('nu_y',    ynu, dsig)
-      call filld('nu_eta',etanu, dsig)
-      call filld('nu_pt', ptnu, dsig)
-      call filld('nu_pt_report', ptnu, dsig)
+         call filld('nu_y',    ynu, dsig)
+         call filld('nu_eta',etanu, dsig)
+         call filld('nu_pt', ptnu, dsig)
+         call filld('nu_pt_report', ptnu, dsig)
 
 
 c azimuthal separation betwen lepton and neutrino
-      call filld('delta_phi',delphi,dsig)
+         call filld('delta_phi',delphi,dsig)
 c      call filld('dr1',dr1,dsig)
 c      call filld('dr2',dr2,dsig)
 
 c W
 c      call filld('V_pt_zoom',pt, dsig)
-      call filld('V_pt1_report',pt, dsig)
-      call filld('V_pt2_report',pt, dsig)
-      call filld('V_m',  m, dsig)
-      call filld('V_m_report',  m, dsig)
-c transverse mass of the lepton-neutrino system
-      call filld('V_mt',mtv,dsig)
+         call filld('V_pt1_report',pt, dsig)
+         call filld('V_pt2_report',pt, dsig)
+         call filld('V_m',  m, dsig)
+         call filld('V_m_report',  m, dsig)
+c     transverse mass of the lepton-neutrino system
+         call filld('V_mt',mtv,dsig)
 
-      call filld('X_m_report',mtv/mz,dsig)
-      call filld('X_p_report',ptl*2d0/mz,dsig)
+         call filld('X_m_report',mtv/mz,dsig)
+         call filld('X_p_report',ptl*2d0/mz,dsig)
 
-      if (cs.lt.0d0) then
-          call filld('backward', m, dsig)
-      else
-          call filld('forward', m, dsig)
+         if (cs.lt.0d0) then
+            call filld('backward', m, dsig)
+         else
+            call filld('forward', m, dsig)
+         endif
+         call filld('phistar_report',phistar,dsig)
       endif
-      call filld('phistar_report',phistar,dsig)
 
       end
 

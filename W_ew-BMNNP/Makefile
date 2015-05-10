@@ -12,6 +12,7 @@ ANALYSIS=default
 #
 ifeq ("$(COMPILER)","gfortran")	
 F77= gfortran -fno-automatic  -finit-real=nan -ffixed-line-length-none
+#F77= gfortran -fno-automatic -ggdb -pg -finit-real=nan -ffixed-line-length-none
 # -fno-whole-file
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -44,6 +45,16 @@ endif
 
 OBJ = obj-$(COMPILER)
 
+HEPMCLOCATION = /usr/local
+LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
+
+#user defined location of PHOTOSCC
+PHOTOSCC_CONFIG=photoscc-config
+PHOTOSCC_LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
+
+#user defined location of PYTHIA8
 PYTHIA8_CONFIG=pythia8-config
 PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
@@ -99,7 +110,7 @@ endif
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
 %.o: %.cc
-	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)  $(PHOTOSFLAGS)
 
 
 $(shell ../svnversion/svnversion.sh>/dev/null)
@@ -157,7 +168,7 @@ PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o pow
         $(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) -L/usr/local/lib $(STATIC)\
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
 $(LIBSLHAPDF) -o $@
 
 

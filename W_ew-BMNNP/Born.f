@@ -311,7 +311,7 @@ c     vector boson id and decay
 
       call add_resonance(idvecbos,3,4)
 c if it is an isr photon, add it to the resonance
-      if(nup.eq.nlegreal+1.and.rad_kinreg.eq.2) then
+      if(nup.eq.nlegreal+1.and.rad_kinreg.ge.2) then
          mothup(1,6) = 3
          mothup(2,6) = 3
          pup(1:4,3) = pup(1:4,3) + pup(1:4,6)
