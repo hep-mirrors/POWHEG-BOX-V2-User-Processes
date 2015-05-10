@@ -1,0 +1,36 @@
+\BOOKMARK [0][-]{toc.0}{Table of Contents}{}% 1
+\BOOKMARK [1][-]{section.1}{Introduction}{toc.0}% 2
+\BOOKMARK [1][-]{section.2}{Requirements of the PHOTOS Interface}{toc.0}% 3
+\BOOKMARK [2][-]{subsection.2.1}{C++ and HepMC Specific Requirements}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Object Oriented Event Records \205 The Case of HepMC}{section.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Event Record Structure Scenarios}{subsection.2.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{Interface to the Event Record of FORTRAN}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Design}{toc.0}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Classes and Responsibilities}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Directory Structure}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.3}{Algorithm Outline}{section.3}% 11
+\BOOKMARK [1][-]{section.4}{Extensibility}{toc.0}% 12
+\BOOKMARK [2][-]{subsection.4.1}{PHOTOS Extensions}{section.4}% 13
+\BOOKMARK [2][-]{subsection.4.2}{Event Record Interface}{section.4}% 14
+\BOOKMARK [1][-]{section.5}{Testing}{toc.0}% 15
+\BOOKMARK [2][-]{subsection.5.1}{MC-TESTER Benchmark Files}{section.5}% 16
+\BOOKMARK [2][-]{subsection.5.2}{Results}{section.5}% 17
+\BOOKMARK [2][-]{subsection.5.3}{Tests Relevant for Physics Precision}{section.5}% 18
+\BOOKMARK [1][-]{section.6}{Summary and outlook}{toc.0}% 19
+\BOOKMARK [1][-]{appendix.A}{Appendix: Interface to PHOTOS FORTRAN}{toc.0}% 20
+\BOOKMARK [2][-]{subsection.A.1}{Common Blocks}{appendix.A}% 21
+\BOOKMARK [2][-]{subsection.A.2}{Routines}{appendix.A}% 22
+\BOOKMARK [1][-]{appendix.B}{Appendix: User Guide}{toc.0}% 23
+\BOOKMARK [2][-]{subsection.B.1}{Installation}{appendix.B}% 24
+\BOOKMARK [2][-]{subsection.B.2}{ LCG configuration scripts; available from version 3.1 }{appendix.B}% 25
+\BOOKMARK [2][-]{subsection.B.3}{Elementary Tests}{appendix.B}% 26
+\BOOKMARK [2][-]{subsection.B.4}{Executing Examples}{appendix.B}% 27
+\BOOKMARK [2][-]{subsection.B.5}{How to Run PHOTOS with Other Generators}{appendix.B}% 28
+\BOOKMARK [3][-]{subsubsection.B.5.1}{Running PHOTOS C++ Interface in FORTRAN environment}{subsection.B.5}% 29
+\BOOKMARK [1][-]{appendix.C}{Appendix: User Configuration}{toc.0}% 30
+\BOOKMARK [2][-]{subsection.C.1}{Suppress Bremsstrahlung}{appendix.C}% 31
+\BOOKMARK [2][-]{subsection.C.2}{Force PHOTOS Processing }{appendix.C}% 32
+\BOOKMARK [2][-]{subsection.C.3}{Use of the processParticle and processBranch Methods}{appendix.C}% 33
+\BOOKMARK [2][-]{subsection.C.4}{Logging and Debugging}{appendix.C}% 34
+\BOOKMARK [2][-]{subsection.C.5}{Other User Configuration Methods}{appendix.C}% 35
+\BOOKMARK [2][-]{subsection.C.6}{Creating Advanced Plots and Custom Analysis}{appendix.C}% 36
