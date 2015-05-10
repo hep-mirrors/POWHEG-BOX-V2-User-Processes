@@ -180,7 +180,10 @@ necessarily the mass of the dilepton.
 \tmtexttt{runningscale 0 \phantom{aaaa}! choice for ren and fac scales in Bbar integration}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: fixed scale M\_Z}\\
 \phantom{pppppppppppppppppppppppppppppp} 
-\tmtexttt{ 1: running scale $\ell^+ \ell^-$ inv mass }\\ 
+\tmtexttt{ 1: running scale $\ell^+ \ell^- (\gamma)$ inv mass }\\ 
+\phantom{pppppppppppppppppppppppppppppppppp} 
+\tmtexttt{ $\gamma$ included with QED FSR }\\ 
+
 With running scale, a minimum cutoff of 5 GeV is imposed on $m(\ell^+ \ell^-)$.
 \\
 \\
@@ -248,12 +251,55 @@ This algorithm
 is provided automatically in the files \tmtexttt{main-PYTHIA-lhef.f} and 
 \tmtexttt{scalupveto.f}. The same algorithm is implemented for 
 \PYTHIAEIGHT{}. In this case, however, the user can optionally 
-adopt the internal algorithm of \PYTHIAEIGHT, which is switched 
-on by setting:
+adopt the internal algorithm of \PYTHIAEIGHT, described below, 
+which is switched on by setting:
 \\
 \tmtexttt{py8veto 1   ! default 0}
 \\
 in the \tmtexttt{powheg.input} file.
+\\
+\\
+A general issue is the matching between the NLO calculation and the 
+(QCD and QED) higher order corrections given by the parton shower: 
+due to the different definitions of $p_\perp$ in \POWHEG{} and 
+\PYTHIAEIGHT{}/\PYTHIASIX{}, some double counting or dead zone 
+can arise. In \PYTHIAEIGHT{} the default is to generate all QCD/QED 
+shower emissions up to the kinematical limit and then veto emissions 
+harder than the \POWHEG{} emission, according to the \POWHEG{} 
+$p_\perp$ definition. This is done, as default, by means of the provided 
+\tmtexttt{class PowhegHooks}. With the provided \PYTHIAEIGHT{} interface 
+the user can optionally choose an alternative scheme, where 
+the shower starting scale is fixed to {\tt scalup} and no veto 
+is performed. This choice can be activated by setting 
+\\
+\tmtexttt{veto1 1   ! default 0}
+\\
+in the \tmtexttt{powheg.input} file.
+\\
+\\
+In this case, if the QED higher order radiation is handled by \PYTHIAEIGHT{}, 
+also the QED starting scale is set to {\tt scalup} through the 
+\tmtexttt{class MyUserHooks}. 
+\\ 
+\\
+\\
+Additional flags available for the \PYTHIAEIGHT{} interface 
+are the following (they can be set in the \tmtexttt{powheg.input} file): 
+\\
+\tmtexttt{noQEDq 1   ! default 0}, which allows to switch off QED radiation 
+from quarks; 
+\\
+\tmtexttt{pytune xx  ! default 5}, which allows to change the tune; 
+\\
+\tmtexttt{nohad 1  ! default 0}, which allows to swith off the hadronization. 
+\\
+\\
+\\
+As a last comment, in the provided interface to \PYTHIAEIGHT{} 
+the decay of hadronic resonances which can proceed radiatively has been 
+suppressed. In order to let the resonances decay, the user should 
+open the file \tmtexttt{pythia8F77.cc} and comment the relevant lines 
+in {\tt pythia\_init}.
 
 
 
