@@ -165,19 +165,17 @@ c pythia routine to abort event
       implicit none
       include 'pwhg_rnd.h'
       character * 20 pwgprefix
+      character * 100 filename
       integer lprefix
       common/cpwgprefix/pwgprefix,lprefix
-      if(rnd_cwhichseed.eq.'none') then
-         open(unit=99,file=pwgprefix(1:lprefix)//
-     1     'POWHEG+PYTHIA-output.top',status='unknown')
+      if(rnd_cwhichseed.ne.'none') then
+         filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output-'
+     1        //rnd_cwhichseed
       else
-         open(unit=99,file=pwgprefix(1:lprefix)//'-'//
-     1        rnd_cwhichseed //'-'//
-     2     'POWHEG+PYTHIA-output.top',status='unknown')
+         filename=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output'
       endif
       call pwhgsetout
-      call pwhgtopout
-      close(99)
+      call pwhgtopout(filename)
       end
 
 
