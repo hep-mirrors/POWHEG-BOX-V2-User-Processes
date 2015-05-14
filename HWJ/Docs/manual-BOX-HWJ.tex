@@ -86,14 +86,16 @@ associated production of a Higgs boson with a $W$ boson and a jet, as
 described in ref.~\cite{Luisoni:2013cuh}, together with some new
 features.
 
-The code can be found in the \HWJ{} directory under {\tt User-Processes-V2},
-and can be used to generate NLO+PS QCD corrections to $HWj$ production at
-hadronic colliders.  The $W$ boson is allowed to decay leptonically,
-hadronically, or both (inclusive decay).  In case of hadronic and
-inclusive decay, the NLO corrections to the decay quarks are not included in
-the POWHEG Monte Carlo simulation, but the NLO corrections to the decay
-products are taken into account by multiplying the respective branching
-ratios by an overall factor $1+\as(m_{\sss W})/\pi$.
+The code can be found in the \HWJ{} directory under {\tt
+  User-Processes-V2}, and can be used to generate NLO+PS QCD
+corrections to $HWj$ production at hadronic colliders.  The $W$ boson
+is allowed to decay leptonically, hadronically and inclusively (in
+leptons or in both leptons and hadrons).  In case of hadronic and
+inclusive decay, the NLO corrections to the decay quarks are not
+included in the POWHEG Monte Carlo simulation, but the NLO corrections
+to the decay products are taken into account by multiplying the
+respective branching ratios by an overall factor $1+\as(m_{\sss
+  W})/\pi$.
 
 Virtual loop-induced massive bottom and top corrections are fully included,
 with the possibility to switch them off or on separately.  Anomalous
@@ -204,18 +206,19 @@ Other useful scripts can be found in the {\tt HWJ} directory:
 The first parameter that has to be set is {\tt idvecbos}:\\
 {\tt idvecbos -24 \quad \qquad ! 24: W+ boson, \   -24: W- boson}\\
 
-\noindent The $W$ boson can decay into leptons or hadrons, but also the
-inclusive decay mode has been implemented.  In the hadronic mode, the $W$
-boson is allowed to decay into the following: $W \to \{ ud, us, ub, cd, cs,
-cb\}$. No decay into top quark allowed. 
-In the inclusive decay, the $W$ can decay both hadronically and leptonically,
-i.e.~$W \to \{e \nu_e, \mu \nu_\mu, \tau \nu_\tau\}$.  
-The decay mode of the $W$ boson is set by the
-parameter {\tt vdecaymode}:\\
-\noindent {\tt vdecaymode \,\, 1 \quad\, ! 1: e-nu, \ 2: mu-nu,
-  \ 3:  tau-nu, \ 0: had, \ 10: inc}\\
+\noindent The $W$ boson can decay into leptons or hadrons, but also
+the inclusive decay modes have been implemented.  In the hadronic mode,
+the $W$ boson is allowed to decay into the following: $W \to \{ ud,
+us, ub, cd, cs, cb\}$. No decay into top quark allowed.  In the
+inclusive leptonic decay, the following decay modes are allowed: $W
+\to \{e \nu_e, \mu \nu_\mu, \tau \nu_\tau\}$. In the inclusive decay,
+the $W$ boson can decay both hadronically and leptonically. The decay
+mode of the $W$ boson is set by the parameter {\tt vdecaymode}:\\
+\noindent {\tt vdecaymode \,\, 1 \quad\, ! 1: e-nu, \quad 2: mu-nu,
+  \quad 3:  tau-nu, \\
+\# \qquad \qquad \qquad \qquad \quad\, 0: had, \quad 10: inc, \quad\, 11: inc lep}\\
 
-\noindent In the inclusive decay mode, the user has the possibility to
+\noindent In the inclusive decay modes, the user has the possibility to
 neglect $W \to \tau\nu_\tau$ decay by setting the parameter {\tt nleptfam}
 in the file {\tt init\_couplings.f} to 2. By default this parameter is set to
 3, so that all the three lepton families are considered.\\

@@ -309,7 +309,7 @@ c     if idvecbos=24 idl and idnu are ok
       enddo
       
       if ((WHCPRG.eq.'NLO   ').or.(WHCPRG.eq.'LHE   ')) then 
-         if (Vdecmod.ne.0.and.Vdecmod.ne.10) then
+         if (Vdecmod.ne.0.and.Vdecmod.ne.10.and.Vdecmod.ne.11) then
             do ihep=1,nhep            
                if(idhep(ihep).eq.idl) then
                   ilep=ihep
