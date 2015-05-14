@@ -1,4 +1,4 @@
-vdecaymode   1   ! 1: e, 2: mu, 3: tau, 4:nu_e, 5: nu_mu, 6: nu_tau, 0: hadrons, 10: inclusive, 11: leptons, 12: neutrinos
+vdecaymode   1   ! 1: e, 2: mu, 3: tau, 4:nu_e, 5: nu_mu, 6: nu_tau, 0: hadronic, 10: inclusive, 11: inclusive leptons, 12: inclusive neutrinos
 hdecaymode  -1   ! for PYTHIA or HERWIG: do not decay the Higgs boson
 
 hmass  125d0        ! Higgs boson mass 
@@ -44,9 +44,9 @@ facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
 use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
 use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
 
-ncall1 100000     ! Number of calls for the construction of the importance sampling grid
+ncall1 10000     ! Number of calls for the construction of the importance sampling grid
 itmx1 1           ! Number of iterations for grid. NOT READ if run in parallel
-ncall2 100000     ! Number of calls for the computation of the upper bounding envelope
+ncall2 10000     ! Number of calls for the computation of the upper bounding envelope
                   ! for the generation of radiation
 itmx2 1           ! Number of iterations for the above
                   ! Notice: the total number of calls is ncall2*itmx2*foldcsi*foldy*foldphi

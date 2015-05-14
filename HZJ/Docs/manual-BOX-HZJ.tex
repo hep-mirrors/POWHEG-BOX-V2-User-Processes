@@ -89,12 +89,13 @@ features.
 The code can be found in the \HZJ{} directory under {\tt
   User-Processes-V2}, and can be used to generate NLO+PS QCD
 corrections to $HZj$ production at hadronic colliders.  The $Z$ boson
-is allowed to decay leptonically, hadronically, or both (inclusive
-decay).  In case of hadronic and inclusive decay, the NLO corrections
-to the decay quarks are not included in the POWHEG Monte Carlo
-simulation, but the NLO corrections to the decay products are taken
-into account by multiplying the respective tree-level hadronic widths
-by an overall factor $1+\as(m_{\sss Z})/\pi$.
+is allowed to decay leptonically, hadronically, in both of them (inclusive
+decay), inclusively in leptons or in neutrinos.  In case of hadronic
+and inclusive decay, the NLO corrections to the decay quarks are not
+included in the POWHEG Monte Carlo simulation, but the NLO corrections
+to the decay products are taken into account by multiplying the
+respective tree-level hadronic widths by an overall factor
+$1+\as(m_{\sss Z})/\pi$.
 
 Virtual loop-induced massive bottom and top corrections are fully included,
 with the possibility to switch them off or on separately.  Anomalous
@@ -202,22 +203,27 @@ Other useful scripts can be found in the {\tt HZJ} directory:
 \section{Process-specific input parameters}
 
 \noindent The $Z$ boson can decay into leptons or hadrons,
-but also the inclusive decay mode has been implemented.  In the
+but also the inclusive decay modes have been implemented.  In the
 hadronic mode, the $Z$ boson is allowed to decay into the following:
 $Z \to \{ d\bar{d}, u\bar{u}, s\bar{s}, c\bar{c}, b\bar{b} \}$. No
 decay into top quark allowed.  In the inclusive decay, the $Z$ boson
 can decay both hadronically and leptonically, i.e.~$Z \to \{e^- e^+,\,
 \mu^- \mu^+,\, \tau^- \tau^+, \,
-\nu_e\bar{\nu}_e,\, \nu_\mu\bar{\nu}_\mu, \,\nu_\tau\bar{\nu}_\tau\}$.  The
+\nu_e\bar{\nu}_e,\, \nu_\mu\bar{\nu}_\mu, \,\nu_\tau\bar{\nu}_\tau\}$. 
+In the inclusive leptonic decay all the charged leptonic decays are allowed,
+while in the inclusive neutrino decay the $Z$ boson can decay into $\{
+\nu_e\bar{\nu}_e,\, \nu_\mu\bar{\nu}_\mu, \,\nu_\tau\bar{\nu}_\tau\}$.
+ The
 decay mode of the $Z$ boson is set by the parameter {\tt
   vdecaymode}:\\
 \noindent \tmtexttt{vdecaymode \,\, 1 \quad\, ! 1: e, \quad \quad\,\,2: mu,
   \quad \quad\,\,3:  tau,\\
 \# \qquad \qquad \qquad \qquad \quad\,\,\,4:  nu\_e, \quad 5:  nu\_mu, \quad 6:
 nu\_tau,\\ 
-\# \qquad \qquad \qquad \qquad \quad\,\,\,0:  had, \quad 10: inc}\\  
+\# \qquad \qquad \qquad \qquad \quad\,\,\,0:  had, \quad 10: inc, \,\quad 11:
+inc lep, \quad 12: inc neu}\\  
 
-\noindent In the inclusive decay mode, the user has the possibility to
+\noindent In the inclusive decay modes, the user has the possibility to
 neglect $Z \to \tau^-\tau^+$ decay by setting the parameter {\tt nleptfam} in
 the file {\tt init\_couplings.f} to 2. By default this parameter is set to 3,
 so that all the three lepton families are considered.\\
