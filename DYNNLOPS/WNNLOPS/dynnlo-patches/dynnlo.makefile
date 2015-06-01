@@ -100,7 +100,7 @@ higgsp.o \
 higgsw.o \
 histofinLH.o \
 includedipole.o \
-lowintHstnew.o \
+lowintHst.o \
 lowint_incldip.o \
 masscuts.o \
 dynnlo.o \
@@ -139,6 +139,7 @@ dclaus.o \
 a06.o \
 a09.o \
 scaleset.o \
+# lowintHstnew.o \
 
 PHASEFILES = \
 gen2.o \
