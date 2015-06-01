@@ -114,11 +114,13 @@ changed straightforwardly.
 
 
 \section{NNLO input\label{sec:NNLO-ingredients}}
-A fundamental  ingredient required to obtain NNLO accurate
-event samples is a triple differential distribution for the Z boson Born kinematics.\footnote{
-In this case the Born kinematics is fully specified in terms of the
-rapidity of the boson, an (arbitrary) angle describing the final state leptons and the invariant mass of the lepton pair.} We here give instructions on how to obtain
-such distributions, in a format suitable for upgrading the \ZJMINLO{}
+A fundamental ingredient required to obtain NNLO accurate event
+samples is a triple differential distribution for the Z boson Born
+kinematics.\footnote{In this case the Born kinematics is fully
+  specified in terms of the rapidity of the boson, an (arbitrary)
+  angle describing the final state leptons and the invariant mass of
+  the lepton pair.} We here give instructions on how to obtain such
+distributions, in a format suitable for upgrading the \ZJMINLO{}
 events via the {\tt{Zj/DYNNLOPS}} reweighting code.
 
 \begin{enumerate}
@@ -130,23 +132,26 @@ In particular, for the installation of \DYNNLO{},
 the command {\tt{lhapdf-config ---libdir}} should return the 
 location of the installed {\noun{LHAPDF}} libraries.
 
-\item Download \DYNNLO{} from the following URL:\\
+\item Download \DYNNLO{} from the following URL:\footnote{Make sure
+  that version 1.5 is used, since a problem with the dependence of the
+  genuine NNLO results upon varying the factorisation scale was fixed
+  by the \DYNNLO{} authors in version 1.5.}\\
 \hspace*{5mm}
-{\url{http://theory.fi.infn.it/grazzini/codes/dynnlo-v1.4.tgz}}
+{\url{http://theory.fi.infn.it/grazzini/codes/dynnlo-v1.5.tgz}}
 
 \item Unpack the tarball in a convenient location\\
 \hspace*{5mm}
-{\tt{\$ cp ~/Downloads/dynnlo-v1.4.tgz ./}}\\
+{\tt{\$ cp ~/Downloads/dynnlo-v1.5.tgz ./}}\\
 \hspace*{5mm}
-{\tt{\$ tar -xzvf dynnlo-v1.4.tgz}}\\
+{\tt{\$ tar -xzvf dynnlo-v1.5.tgz}}\\
 \hspace*{5mm}
-{\tt{\$ ls dynnlo-v1.4}}\\
-Under the parent directory {\tt{dynnlo-v1.4}} one should find subdirectories
+{\tt{\$ ls dynnlo-v1.5}}\\
+Under the parent directory {\tt{dynnlo-v1.5}} one should find subdirectories
 {\tt{bin}}, {\tt{doc}}, {\tt{obj}}, {\tt{src}}, and a {\tt{makefile}}.
 
 \item Enter the \DYNNLO{} parent directory\\
 \hspace*{5mm}
-{\tt{\$ cd dynnlo-v1.4}}
+{\tt{\$ cd dynnlo-v1.5}}
 
 \item  Replace (or link) the \DYNNLO{} default {\tt{makefile}} with the one
 from the \\ {\tt{Zj/DYNNLOPS/ZNNLOPS/dynnlo-patches}} directory\\
