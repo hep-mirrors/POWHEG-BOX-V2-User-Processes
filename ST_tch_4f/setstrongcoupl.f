@@ -105,7 +105,7 @@ c we are in a counterterm.
       save ini
       
       if (ini.eq.0) then
-         if( whichpdfpk().eq.'lha') then    
+         if( whichpdfpk().eq.'lha') then
             continue
          elseif( whichpdfpk().eq.'mlm') then    
             continue
@@ -164,7 +164,7 @@ c     the proper physics description is not known, we just adopt
 c     a more crude approach, and freeze CMW alphas when it gets
 c     bigger than 1.
 
-      if(st_alpha.gt.1d0) st_alpha=0.9999d0
+      if(st_alpha.gt.1d0) st_alpha=0.9999d0 !:
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
@@ -199,6 +199,16 @@ c for better NLL accuracy (FNO2006, (4.32) and corresponding references)
       real * 8 b0
       b0=(33-2*inf)/(12*pi)
       pwhg_alphas0=1/(b0*log(q2/xlam**2))
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c     !: 18-05-2015: Fix for bug reported by Benedikt Maier
+c     Freeze alphas0 when it gets > 1, or when argument becomes
+c     smaller than xlam.
+
+c      if(pwhg_alphas0.gt.1d0.or.q2.lt.xlam**2) pwhg_alphas0=1d0
+      if(q2.lt.xlam**2) pwhg_alphas0=1d0
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
       end
       
 C----------------------------------------------------------------------------
@@ -232,9 +242,6 @@ c
 
       double precision alphasPDF
 
-c     pwhg_alphas = 1d0
-c     pwhg_alphas = 0.118d0
-c      pwhg_alphas=0.130717d0
 c$$$      pwhg_alphas = 0.10676291 ! to compare with mcfm
       if (ini) then
 c$$$         write(*,*) '****************************************'
