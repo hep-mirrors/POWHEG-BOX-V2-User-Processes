@@ -124,7 +124,7 @@ c     and 1/(n^2-1) from average over gluon colours
       if (mod(i,2).eq.0) then
          amp2=amp2*ph_CKM(abs(i)/2,(abs(j)+1)/2)**2
       else
-         amp2=amp2*ph_CKM((abs(i)+1)/2,abs(j)/2)**2
+         amp2=amp2*ph_CKM(abs(j)/2,(abs(i)+1)/2)**2
       endif
 
       amp2=amp2*colfac*t0

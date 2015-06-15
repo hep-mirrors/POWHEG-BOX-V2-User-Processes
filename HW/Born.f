@@ -13,6 +13,7 @@ c     maple+average over initial spin and colour)
       real *8 p13,p14,p23,p24,p34,p12,p33
       real *8 dotp
       external dotp
+      integer tmp1, tmp2
 
       amp2 = 0d0
       n=3d0 !number of initial colour
@@ -63,10 +64,11 @@ c     W propagators
 c     CKM matrix
       i=bflav(1)
       j=bflav(2)
+
       if (mod(i,2).eq.0) then
          born=born*ph_CKM(abs(i)/2,(abs(j)+1)/2)**2
-      elseif (mod(j,2).eq.0) then
-         born=born*ph_CKM((abs(i)+1)/2,abs(j)/2)**2
+      elseif (mod(abs(i),2).eq.1) then   
+         born=born*ph_CKM(abs(j)/2,(abs(i)+1)/2)**2
       endif
 c
 c     coupling constants and W mass
