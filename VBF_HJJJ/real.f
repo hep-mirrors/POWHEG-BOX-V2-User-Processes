@@ -8,10 +8,47 @@ c
       parameter (nleg=nlegreal)
       real * 8 p(0:3,nleg)
       integer rflav(nleg)
-      real * 8 amp2         
+      real * 8 amp2    
+
+
+      include 'pwhg_flst.h'
+      include 'pwhg_flst_2.h'
+
+      integer k,j  
+      logical, save :: init_real = .true. 
+
 c
 cccccccccccccccccccccccccccccccccccccccccccccccc
 c
+      if (init_real) then
+      do k=1, 2!nlegreal
+         do j=1, maxalr
+            flst_alr_tag(k,j)=abs(flst_alr(k,j))*10000 + flst_alrtags(k,j)
+            if(flst_alr(k,j).lt.0) flst_alr_tag(k,j)=-flst_alr_tag(k,j)
+         enddo
+      enddo
+      do k=4,nlegreal
+         do j=1, maxalr
+            flst_alr_tag(k,j)=abs(flst_alr(k,j))*10000 + flst_alrtags(k,j)
+            if(flst_alr(k,j).lt.0) flst_alr_tag(k,j)=-flst_alr_tag(k,j)
+         enddo
+      enddo      
+      do k=1, 2!nlegreal
+         do j=1, flst_nreal
+            flst_real_tag(k,j)=abs(flst_real(k,j))*10000 + flst_realtags(k,j)
+            if(flst_real(k,j).lt.0) flst_real_tag(k,j)=-flst_real_tag(k,j)
+         enddo
+      enddo
+      do k=4,nlegreal
+         do j=1, flst_nreal
+            flst_real_tag(k,j)=abs(flst_real(k,j))*10000 + flst_realtags(k,j)
+            if(flst_real(k,j).lt.0) flst_real_tag(k,j)=-flst_real_tag(k,j)
+         enddo
+      enddo       
+      init_real = .false.
+      endif
+
+
       call calc_als
       call ctrans(1)  ! SETS GG to the right value!!! Argument not needed for 2nd etc call
 
