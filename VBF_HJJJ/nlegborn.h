@@ -21,7 +21,7 @@ C      parameter (ndiminteg=(nlegreal-2)*3-4+2-2) ! GZ Ok ?
      1    + 1 )  ! one resonance
 
       integer maxprocborn,maxprocreal
-      parameter (maxprocborn=192,maxprocreal=1368)
+      parameter (maxprocborn=396,maxprocreal=2392)
 
       integer maxalr
       parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)
