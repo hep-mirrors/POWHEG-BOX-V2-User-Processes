@@ -59,10 +59,10 @@ c     decay products of the vector boson
          vdecaymode=-14
       elseif (Vdecmod.eq.6) then
          vdecaymode=-16
-c$$$      elseif (Vdecmod.eq.0) then
-c$$$         vdecaymode=0
-c$$$      elseif (Vdecmod.eq.10) then
-c$$$         vdecaymode=10
+      elseif (Vdecmod.eq.0) then
+         vdecaymode=0
+      elseif (Vdecmod.eq.10) then
+         vdecaymode=10
       elseif (Vdecmod.eq.11) then
          vdecaymode=11
       elseif (Vdecmod.eq.12) then
@@ -80,8 +80,8 @@ c$$$         vdecaymode=10
       if (vdecaymode.eq.-12) write(*,*) '         to antinue nue'
       if (vdecaymode.eq.-14) write(*,*) '         to antinumu numu'
       if (vdecaymode.eq.-16) write(*,*) '         to antinutau nutau'
-c$$$      if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
-c$$$      if (vdecaymode.eq. 10) write(*,*) '         inclusive'
+      if (vdecaymode.eq.  0) write(*,*) '         to hadrons'
+      if (vdecaymode.eq. 10) write(*,*) '         inclusive'
       if (vdecaymode.eq. 11) write(*,*) '         to leptons'
       if (vdecaymode.eq. 12) write(*,*) '         to neutrinos'
 
@@ -133,12 +133,12 @@ c     electron
 c     neutrino
          t3lep = +1d0/2   
          qlep  = 0d0
-      else
-         write(*,*) '***********************************************'
-         write(*,*) 'Decay mode of the Z boson NOT contemplated'
-         write(*,*) 'POWHEG exits'       
-         write(*,*) '***********************************************'
-         call pwhg_exit(-1)
+c$$$      else
+c$$$         write(*,*) '***********************************************'
+c$$$         write(*,*) 'Decay mode of the Z boson NOT contemplated'
+c$$$         write(*,*) 'POWHEG exits'       
+c$$$         write(*,*) '***********************************************'
+c$$$         call pwhg_exit(-1)
       endif
       gev = (t3lep - 2*qlep*ph_sthw**2)/(2*ph_sthw*sqrt(1-ph_sthw**2))
       gea = t3lep/(2*ph_sthw*sqrt(1-ph_sthw**2))
@@ -147,7 +147,9 @@ c     neutrino
       ger=gev-gea
 
 c     set lepton mass
-      if (Vdecmod.eq.11) then
+      if (Vdecmod.eq.0.or.Vdecmod.eq.10) then
+         decmass=physpar_mq(5)  ! worst case: Z -> b ~b 
+      elseif (Vdecmod.eq.11) then
          decmass=physpar_ml(3)
       elseif (Vdecmod.gt.3) then
          decmass=0d0

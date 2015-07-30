@@ -1,7 +1,7 @@
 module     olp_module
    implicit none
    private
-   public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
+   public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option, OLP_init_functions
 
 contains
 
@@ -152,6 +152,15 @@ contains
       end if
       stat = 1
    end subroutine OLP_Option
+
+   subroutine OLP_init_functions() &
+   & bind(C,name="olp_init_functions_")
+     use p0_gg_hepem_model, only: init_functions
+
+     call init_functions()
+
+   end subroutine OLP_init_functions
+
    !---#[ init_event_parameters :
    subroutine     init_event_parameters(sp, parameters)
       use, intrinsic :: iso_c_binding

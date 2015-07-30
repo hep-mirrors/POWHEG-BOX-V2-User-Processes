@@ -18,6 +18,7 @@ c     computation of the Born amplitude
       integer idvecbos,vdecaymode,Vdecmod
       common/cvecbos/idvecbos,vdecaymode,Vdecmod
       real * 8 multiplicity
+      integer decflav
       real *8 opasopi,nleptfam
       common/decay_corr/opasopi,nleptfam
       parameter (dim_mom_array=50)
@@ -33,25 +34,48 @@ C     real * 8 pgosam(5*nlegborn)
      $      11/
 
       multiplicity=1d0
+      decflav=abs(bflav(4)) 
+
+      call setZcouplings(decflav)
       
-      do i=0,flst_nborn-1
-         if (equalintlists(nlegborn,bflav,bflav_gosam(1,i))) then
-            proc=i
-            goto 222
-         endif
-      enddo
- 111  write(*,*) 'NO matching flavour string between POWHEG and GoSam'
-      write(*,*) 'PROGRAM ABORT'
-      call pwhg_exit(-1)
+c$$$      do i=0,flst_nborn-1
+c$$$         if (equalintlists(nlegborn,bflav,bflav_gosam(1,i))) then
+c$$$            proc=i
+c$$$            goto 222
+c$$$         endif
+c$$$      enddo
+c$$$ 111  write(*,*) 'NO matching flavour string between POWHEG and GoSam'
+c$$$      write(*,*) 'PROGRAM ABORT'
+c$$$      call pwhg_exit(-1)
       
  222  call gosam_momenta(p,pgosam)
 
-      if (vdecaymode.eq.11) then
+c     hadronic and inclusive Z decay: consider all possible Z decay products
+c     ==> they have the same kinematics but different flavors:
+c     1001: down-type decay: multiply by 3 (d, s, b)
+c     1002: up-type decay: multiply by 2 (u, c)
+c     11  : lepton decay: multiply by nleptfam (e,mu, or e,mu,tau)
+c     12  : neutrino decay: multiply by 3 (ve, vmu, vtau)
+c     Factor (1 + alphas(mz)/pi) to take into account the corrections to
+c     the Z decay products
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10 
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
+         if (decflav.eq.11) then
 c     leptons 
-         multiplicity = nleptfam
-      elseif(vdecaymode.eq.12) then
+            multiplicity = nleptfam
+         elseif(decflav.eq.12) then
 c     neutrinos
-         multiplicity = 3
+            multiplicity = 3
+         elseif(decflav.eq.1002) then
+c     up-type quarks
+            multiplicity = 2*opasopi*nc
+         elseif (decflav.eq.1001) then
+c     down-type quarks
+            multiplicity = 3*opasopi*nc
+         else
+            write(*,*) 'Wrong case in Born.f'
+            call pwhg_exit(-1)
+         endif
       endif
       
       muren=sqrt(st_muren2)
@@ -59,7 +83,7 @@ c     neutrinos
 
 c      write(*,*) pgosam
 
-      call OLP_EvalSubProcess(proc,pgosam,muren,params,res)
+      call OLP_EvalSubProcess(0,pgosam,muren,params,res)
       born=res(3)
 
 c      write(*,*) 'born ',born
@@ -130,6 +154,43 @@ c         write(*,*) i,p(0,i)**2-p(1,i)**2-p(2,i)**2-p(3,i)**2
       end
 
 
+      subroutine setZcouplings(decflav)
+      implicit none
+      integer decflav
+      include 'coupl.inc'
+      include 'PhysPars.h'
+      real * 8 t3lep,qlep,gev,gea,gel,ger
+      common/Zlepcoupl/ger,gel
+
+      if(decflav.eq.1001) then
+c     down-type quark
+         t3lep = -1d0/2   
+         qlep  = -1d0/3
+      elseif(decflav.eq.1002) then
+c     up-type quark
+         t3lep = +1d0/2   
+         qlep  = +2d0/3
+      elseif(decflav.eq.11) then
+c     electron         
+         t3lep = -1d0/2   
+         qlep  = -1d0
+      elseif(decflav.eq.12) then
+c     neutrino
+         t3lep = +1d0/2   
+         qlep  = 0d0
+      endif
+
+      gev = (t3lep - 2*qlep*ph_sthw**2)/(2*ph_sthw*sqrt(1-ph_sthw**2))
+      gea = t3lep/(2*ph_sthw*sqrt(1-ph_sthw**2))
+
+      gel=gev+gea
+      ger=gev-gea
+
+      call OLP_init_functions()
+
+      end
+
+
 
       subroutine borncolour_lh     
 c Sets up the colour for the given flavour configuration
@@ -193,9 +254,31 @@ c     on the Les Houches interface
       call add_resonance(idvecbos,4,5)
 
 c     fix here the Z decay mode
-      if(vdecaymode.eq.11 .or. vdecaymode.eq.12) then
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10  
+     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
          rand_num=random()
-         if (vdecaymode.eq.11) then
+         if(idup(5).eq.-1001) then
+c        down-type quark
+            if(rand_num.le.1d0/3d0) then
+               idup(5) = -1
+               idup(6) =  1
+            elseif(rand_num.gt.1d0/3d0.and.rand_num.le.2d0/3d0) then
+               idup(5) = -3
+               idup(6) =  3
+            else
+               idup(5) = -5
+               idup(6) =  5
+            endif         
+         elseif(idup(5).eq.-1002) then
+c        up-type quark
+            if(rand_num.le.1d0/2d0) then
+               idup(5) = -2
+               idup(6) =  2
+            else
+               idup(5) = -4
+               idup(6) =  4                  
+            endif
+         elseif (idup(5).eq.-11) then
 c        lepton
             if(rand_num.le.1d0/nleptfam) then
                idup(5) = -11
@@ -208,7 +291,7 @@ c        lepton
                idup(5) = -15
                idup(6) =  15
             endif         
-         elseif (vdecaymode.eq.12) then
+         elseif (idup(5).eq.-12) then
 c        neutrino
             if(rand_num.le.1d0/3d0) then
                idup(5) = -12
@@ -230,6 +313,7 @@ c        neutrino
       endif
       call lhefinitemasses
       end
+
 
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
