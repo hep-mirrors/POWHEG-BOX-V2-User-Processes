@@ -67,22 +67,22 @@ FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2)
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
+# default
+PDFPACK=mlmpdfif.o hvqpdfpho.o
+
+ifeq ("$(PDF)","lhapdf6")
+LHAPDF_CONFIG=lhapdf-config
+FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
+PDFPACK=lhapdf6if.o lhapdf6ifcc.o
+LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF -lstdc++
+LIBS+=$(LIBSLHAPDF)
+endif
+
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
 PDFPACK=lhapdfif.o
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
-ifeq  ("$(STATIC)","-static") 
-## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
-## libgfortran as well. The same holds for libstdc++. 
-## One possible solution is to use fastjet, since $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-## does perform this inclusion. The path has to be set by the user. 
- LIBGFORTRANPATH=/usr/lib/gcc/x86_64-redhat-linux/4.1.2
- LIBSTDCPP=/lib64
- LIBSLHAPDF+=  -L$(LIBGFORTRANPATH)  -lgfortranbegin -lgfortran -L$(LIBSTDCPP) -lstdc++
-endif
 LIBS+=$(LIBSLHAPDF)
-else
-PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 PWHGANAL=pwhg_analysis-dummy.o
