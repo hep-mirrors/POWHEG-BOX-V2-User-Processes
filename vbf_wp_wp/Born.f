@@ -222,41 +222,41 @@ c
       external random
       if (vdecaymodeW1 .eq. 113) then 
          if(random().gt.0.5d0) then
-            idup(i1) = -12
-            idup(i2) = 11
+            idup(i2) = -12
+            idup(i1) = 11
          else
-            idup(i1) = -14
-            idup(i2) = 13
+            idup(i2) = -14
+            idup(i1) = 13
          endif
       elseif (vdecaymodeW1 .eq. -113) then 
          if(random().gt.0.5d0) then
-            idup(i1) = 12
-            idup(i2) = -11
+            idup(i2) = 12
+            idup(i1) = -11
          else
-            idup(i1) = 14
-            idup(i2) = -13
+            idup(i2) = 14
+            idup(i1) = -13
          endif
       elseif (vdecaymodeW1 .eq. 135) then 
          if(random().lt.1d0/3d0) then
-            idup(i1) = -12
-            idup(i2) = 11
+            idup(i2) = -12
+            idup(i1) = 11
          elseif(random().lt.2d0/3d0) then
-            idup(i1) = -14
-            idup(i2) = 13
+            idup(i2) = -14
+            idup(i1) = 13
          else
-            idup(i1) = -16
-            idup(i2) = 15
+            idup(i2) = -16
+            idup(i1) = 15
          endif
       elseif (vdecaymodeW1 .eq. -135) then 
          if(random().lt.1d0/3d0) then
-            idup(i1) = 12
-            idup(i2) = -11
+            idup(i2) = 12
+            idup(i1) = -11
          elseif(random().lt.2d0/3d0) then
-            idup(i1) = 14
-            idup(i2) = -13
+            idup(i2) = 14
+            idup(i1) = -13
          else
-            idup(i1) = 16
-            idup(i2) = -15
+            idup(i2) = 16
+            idup(i1) = -15
          endif
       endif
       end
