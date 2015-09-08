@@ -500,7 +500,7 @@ c Boost photon and its mother lepton to the partonic CM
             endif
          enddo
           
-         if (ptmin**2.lt.kt2minqed) return
+c         if (ptmin**2.lt.kt2minqed) return
 
          if (ptmin.gt.scalup) return
  
