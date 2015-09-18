@@ -149,7 +149,7 @@ lhef_analysis:$(LHEF)
 	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 # target to read event file, shower events with PYTHIA + analysis
-PYTHIA=main-PYTHIA.o setup-PYTHIA-bbH.o pythia.o boostrot.o powheginput.o \
+PYTHIA=main-PYTHIA.o setup-PYTHIA.o pythia.o boostrot.o powheginput.o \
 	$(PWHGANAL) lhefread.o newunit.o printleshouches.o		\
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(FPEOBJ)
