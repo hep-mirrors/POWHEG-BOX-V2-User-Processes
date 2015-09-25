@@ -771,6 +771,7 @@ contains
 !     I've added the following two lines. Carlo Oleari
       real(ki) :: gerpwg,gelpwg
       real(ki) :: ghbpwg,ghtpwg,ghzpwg
+      real(ki) :: kappa_ghz
       common/Zlepcoupl/gerpwg,gelpwg
       common/Hcoupl/ghbpwg,ghtpwg,ghzpwg
       gAPP = (-1.0_ki)
@@ -793,6 +794,8 @@ contains
 !     I've commented the following line and added the next one. Gionata Luisoni
 !      gHZZ = reg5
       gHZZ = ghzpwg
+!     I've added the following, in order to get kappa_ghz. Carlo Oleari
+      kappa_ghz = gHZZ/reg5
       gW = (1.0_ki)/(sqrt2*sw)
       reg6 = mH*mH
       reg7 = mW*sw
@@ -884,6 +887,8 @@ contains
       gnmuv = reg8
       gnmul = (gnmua+gnmuv)
       gZXH = (-1.0_ki/2.0_ki)/reg12*i_
+!     I've modified the ZXH coupling. Carlo Oleari
+      gZXH = gZXH * kappa_ghz
       gnmur = (gnmuv-gnmua)
       gHmu = -(reg16)
       reg16 = (1.0_ki/2.0_ki)/reg7*mT
