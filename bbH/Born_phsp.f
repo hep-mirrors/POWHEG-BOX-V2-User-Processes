@@ -360,8 +360,6 @@ c scale parameters for suppression factor:
 
       endif
 
-      stop
-
       end
             
 
