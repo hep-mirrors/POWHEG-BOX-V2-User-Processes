@@ -137,7 +137,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     electron         
          t3lep = -1d0/2   
          qlep  = -1d0
-      elseif (Vdecmod.ge.4.and.Vdecmod.le.6) then
+      elseif ((Vdecmod.ge.4.and.Vdecmod.le.6).or.(Vdecmod.eq.12)) then
 c     neutrino
          do i=1,flst_nborn
             flst_born(   4,   i)=         -12
