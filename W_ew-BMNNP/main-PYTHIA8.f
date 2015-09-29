@@ -62,7 +62,7 @@ c
       if(use_photos) py8veto = 0  !if photos is used, photons are vetoed with pass_veto
 c This is needed by Photos seteps routine
       kt2minqed = powheginput("#kt2minqed")
-      if (kt2minqed.le.0d0) kt2minqed  = 0.001d0**2
+      if (kt2minqed.le.0d0) kt2minqed  = 0.0001d0**2
 c
       call init_hist
 
