@@ -1049,9 +1049,9 @@ c     Cut on taggable b mesons
       endif
 
 c If W- decays hadronically analize jets.      
-      if(lwm.le.0) then
-         call dowjets(dsig)
-      endif
+c      if(lwm.le.0) then
+c         call dowjets(dsig)
+c      endif
 
       end
 
