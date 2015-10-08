@@ -340,8 +340,6 @@ c     lepton masses
          call fixifleptsum(5,6)
       endif
 
-c W+ id:
-      idvecbos=24
       call add_resonance(idvecbos,3,4)
 C     need to shift (56) to (67) since previous res adds a label 
       call add_resonance(idvecbos,6,7)

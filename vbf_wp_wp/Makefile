@@ -89,7 +89,7 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis_v2.o fastjetfortran.o
 # Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o #fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 else
-PWHGANAL=pwhg_analysis-dummy.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-dummy.o
 endif
 
 LIBS+=$(LHAPDFLIB) -Lvbfnlo-files -lvbfnlo 
