@@ -12,7 +12,6 @@ ANALYSIS=dummy
 #STATIC= -static
 #
 ifeq ("$(COMPILER)","gfortran")	
-OBJ=obj-ifort
 F77= gfortran -fno-automatic 	
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -27,7 +26,6 @@ OPT=-O2
 endif
 
 ifeq ("$(COMPILER)","ifort")
-OBJ=obj-ifort
 F77 = ifort -save  -extend_source
 CXX = icpc
 LIBS = -limf
@@ -39,6 +37,7 @@ OPT = -O3 #-fast
 #DEBUG= -debug -g
 endif
 
+OBJ=obj-$(COMPILER)
 
 
 PWD=$(shell pwd)
