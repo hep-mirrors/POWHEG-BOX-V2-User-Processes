@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
-COMPILER=ifort
+COMPILER=gfortran
 FC=$(COMPILER)
 #CXX=g++
 ## Choose PDF: native,lhapdf
@@ -63,7 +63,7 @@ CXXFLAGS=$(OPT)
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../progress/:../:$(OBJ)
+VPATH= ./:../:$(OBJ)
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(PWD)/include
