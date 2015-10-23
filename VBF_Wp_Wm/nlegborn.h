@@ -21,3 +21,7 @@ C      parameter (ndiminteg=(nlegreal-2)*3-4+2-2) ! GZ Ok ?
 
       integer maxprocborn,maxprocreal
       parameter (maxprocborn=200,maxprocreal=500)
+
+      integer maxalr
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)
+

@@ -34,7 +34,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -190,7 +190,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -357,7 +357,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -554,7 +554,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -746,7 +746,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -860,7 +860,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       logical lswitch
       parameter (lswitch=.true.)
@@ -975,7 +975,7 @@ C
 c  lepton spinors and W+- polarization vectors
       include 'tensor_born.inc'
       include 'tensor_real.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 
       complex*16 wm_loc(6),wmu_loc(6),wvm_loc(6)
 

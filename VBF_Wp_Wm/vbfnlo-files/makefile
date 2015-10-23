@@ -1,8 +1,8 @@
 FC = gfortran
 INCLUDE1=$(PWD)
 INCLUDE2=$(PWD)/..
-INCLUDE3=$(PWD)/../boxfiles-pre2-1
-FFLAGS = -g -fno-automatic -ffixed-line-length-none -O2 -I$(INCLUDE1) -I$(INCLUDE2) 
+INCLUDE3=$(PWD)/../../include
+FFLAGS = -g -fno-automatic -ffixed-line-length-none -O2 -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
 
 # ----------------------------------------------------------------------------
 

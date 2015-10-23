@@ -22,11 +22,11 @@ C
       real * 8 pi,pi2
       parameter (pi=3.141592653589793238462643383279502884197D0,
      1           pi2=pi**2)
-      include '../boxfiles-pre2-1/pwhg_st.h'
+      include 'pwhg_st.h'
 
       include 'global.inc'
       include 'tensor.inc'
-      include '../higgs_graphs.h'
+      include 'higgs_graphs.h'
 c
 c electroweak couplings:
 c

@@ -17,8 +17,8 @@ c
      #  (i4,ii(4)),(i5,ii(5)),(i6,ii(6)),(i7,ii(7)),
      #  (i8,ii(8)),(i9,ii(9))
       logical debug
-c      parameter (debug=.false.)
-      parameter (debug=.true.)
+      parameter (debug=.false.)
+c      parameter (debug=.true.)
       integer j
       integer charge3(-6:6)
       data charge3 /-2,1,-2,1,-2,1,0,-1,2,-1,2,-1,2/
