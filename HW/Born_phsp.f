@@ -15,6 +15,10 @@
      2         tau,ymax,ycm,xx(2),p1(4),p2(4),p3(4),p4(4),p5(4),
      3         p12(4),p45(4),beta,vec(3),expon
       integer mu
+      logical complexpole
+      save complexpole
+      real * 8 weight,m
+      integer BWflag
 
       if(ini) then
 c     set initial- and final-state masses for Born and real
@@ -23,6 +27,15 @@ c     set initial- and final-state masses for Born and real
          enddo
          kn_masses(nlegreal)=0
          kn_masses(3)=ph_Hmass
+         complexpole=powheginput("#complexpolescheme").gt.0
+         if (complexpole) then
+            write(*,*) '*******************************************'
+            write(*,*) '*******************************************'
+            write(*,*) '****        COMPLEX-POLE SCHEME        ****'
+            write(*,*) '****          Passarino et al          ****'
+            write(*,*) '*******************************************'
+            write(*,*) '*******************************************'
+         endif
          ini = .false.
       endif      
 
@@ -42,17 +55,23 @@ c   ((s-ph_hmass)**2+(ph_hmass*ph_hwidth)**2)/ph_hmass*ph_hwidth
 c Take it off
       xjac=xjac*wt/(pi)*ph_hmass*ph_hwidth/
      1     ((s-ph_hmass**2)**2+(ph_hmass*ph_hwidth)**2)
+      m3=sqrt(s)
 
 c If you want Passarino's shape, put it here
+      if (complexpole) then
+         m=m3
+         BWflag=0
+         call pwhg_cpHTO_reweight(ph_Hmass,ph_Hwidth,ph_tmass,
+     $        BWflag,m,weight)
+         xjac = xjac * weight
+      endif
 
-      m3=sqrt(s)
-      smin=mllminsq
-      smax=mllmaxsq
 c the following better for Z/gamma
 c      z=xborn(2)**4
 c      xjac=xjac*4*xborn(2)**3
       z=xborn(2)
-
+      smin=mllminsq
+      smax=mllmaxsq
       call breitw(z,smin,smax,ph_Wmass,ph_Wwidth,s,wt)
       xjac=xjac*wt/(2*pi)
       m45=sqrt(s)  
