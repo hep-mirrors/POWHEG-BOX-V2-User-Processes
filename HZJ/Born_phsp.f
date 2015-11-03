@@ -16,6 +16,12 @@
      3     p12(4),p45(4),p345(4),beta,vec(3),s345min,s345max,s345,
      4     sratio,lnsratio,expon
       integer mu
+      logical complexpole
+      save complexpole
+      real * 8 weight,m
+      integer BWflag
+      real * 8 powheginput
+      external  powheginput
 
       if(ini) then
 c     set initial- and final-state masses for Born and real
@@ -25,12 +31,21 @@ c     set initial- and final-state masses for Born and real
          kn_masses(nlegreal)=0
          kn_masses(3)=ph_Hmass
          ph_HmHw=ph_Hmass*ph_Hwidth
+         complexpole=powheginput("#complexpolescheme").gt.0
+         if (complexpole) then
+            write(*,*) '*******************************************'
+            write(*,*) '*******************************************'
+            write(*,*) '****        COMPLEX-POLE SCHEME        ****'
+            write(*,*) '****          Passarino et al          ****'
+            write(*,*) '*******************************************'
+            write(*,*) '*******************************************'
+         endif
          ini = .false.
       endif      
 
       sqrts = sqrt(kn_sbeams)
       xjac=1
-c     First determine virtuality of the Higgs
+c     First determine the virtuality of the Higgs
       smin=ph_Hmass2low
       smax=ph_Hmass2high
       call breitw(xborn(1),smin,smax,ph_hmass,ph_hwidth,s,wt)
@@ -39,11 +54,16 @@ c   ((s-ph_hmass)**2+(ph_hmass*ph_hwidth)**2)/ph_hmass*ph_hwidth
 c Take it off
       xjac=xjac*wt/(pi)*ph_hmass*ph_hwidth/
      1     ((s-ph_hmass**2)**2+(ph_hmass*ph_hwidth)**2)
+      m3=sqrt(s)
 
 c If you want Passarino's shape, put it here
-
-      m3=sqrt(s)
-c      write(*,*)"--> mH mass in PWHG: ",m3
+      if (complexpole) then
+         m=m3
+         BWflag=0
+         call pwhg_cpHTO_reweight(ph_Hmass,ph_Hwidth,ph_tmass,
+     $        BWflag,m,weight)
+         xjac = xjac * weight
+      endif
 
       smin=ph_Zmass2low
       smax=ph_Zmass2high

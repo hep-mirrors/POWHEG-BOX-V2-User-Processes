@@ -112,7 +112,7 @@ endif
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
      real.o  phi1_2.o phi1_2m_nobw_ktmin.o phi3m0.o phi3m.o \
      boost.o breit.o virtual_amp.o  scalar_integrals.o \
-     $(PWHGANAL)
+     pwhg_cpHTO_reweight.o $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\

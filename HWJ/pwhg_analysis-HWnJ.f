@@ -23,7 +23,7 @@ c  pwhgfill  :  fills the histograms with data
       data ptminarr/   1d0,     10d0,    20d0/
       common/infohist/ptminarr,cnum,cptmin
       save /infohist/
-      real * 8 Hmass,Hwidth,powheginput
+      real * 8 Hmass,Hwidth,powheginput,ebeam1
       external powheginput
 
       call inihists
@@ -35,7 +35,7 @@ c  pwhgfill  :  fills the histograms with data
 
       Hmass = powheginput('hmass')
       Hwidth = powheginput('hwidth')
-
+      ebeam1 = powheginput('ebeam1')
       
       do i=1,nptmin
 c     total cross section sanity check
@@ -49,8 +49,12 @@ c     total cross section sanity check
       call bookupeqbins('H-y'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('H-eta'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('H-m'//cptmin(i),Hwidth,Hmass-20*Hwidth,
-     $     Hmass+20*Hwidth)
+c      call bookupeqbins('H-m'//cptmin(i),Hwidth/5,
+c     $     max(Hmass-20*Hwidth,0d0),
+c     $     min(Hmass+20*Hwidth,ebeam1))
+      call bookupeqbins('H-m'//cptmin(i),20d0,
+     $     0d0,1000d0)
+
 c      call bookupeqbins('H-m'//cptmin(i),0.2d-2,124.98d0,125.020d0)
 
       call bookupeqbins('W-y'//cptmin(i),dy,-5d0,5d0)

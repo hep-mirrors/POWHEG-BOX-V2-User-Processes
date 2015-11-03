@@ -49,9 +49,11 @@ c     total cross section sanity check
       call bookupeqbins('H-y'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('H-eta'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,400d0)
-      call bookupeqbins('H-m'//cptmin(i),Hwidth,Hmass-20*Hwidth,
-     $     Hmass+20*Hwidth)
-c      call bookupeqbins('H-m'//cptmin(i),0.2d-2,124.98d0,125.020d0)
+c      call bookupeqbins('H-m'//cptmin(i),Hwidth,Hmass-20*Hwidth,
+c     $     Hmass+20*Hwidth)
+      call bookupeqbins('H-m'//cptmin(i),20d0,
+     $     0d0,1000d0)
+
 
       call bookupeqbins('Z-y'//cptmin(i),dy,-5d0,5d0)
       call bookupeqbins('Z-eta'//cptmin(i),dy,-5d0,5d0)

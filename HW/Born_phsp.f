@@ -41,7 +41,7 @@ c     set initial- and final-state masses for Born and real
 
       sqrts = sqrt(kn_sbeams)
       xjac=1
-c     First determine virtualities of the Higgs
+c     First determine the virtuality of the Higgs
       smin=ph_Hmass2low
       smax=ph_Hmass2high
       mllminsq=ph_Wmass2low
