@@ -143,8 +143,8 @@ for the $WW$ continuum and
 \\[2ex]
 for the Higgs resonance contribution. After all the runs have been
 performed for each case, the results have to be added. This can be
-done, e.g., with the help of the file {\tt addplots.f} in the
-directory {\tt auxiliary}. 
+done, e.g., with the help of the file {\tt mergedata.f} in the
+directory {\tt plot-aux}. 
 \\[2ex]
 If the Higgs is heavy and broad, such a splitting is not necessary,
 and all contributions can be evaluated at the same time, setting
@@ -300,28 +300,47 @@ Run jobs in parallel, in the same way as explained for {\tt step 1} above.
 \\[2ex]
 Time is about 2.5~hours of CPU for each run with {\tt ncall2=25000}.
 \\[2ex]
-Depending on the decay mode selected, the program automatically chooses an appropriate analysis routine ({\tt pwhg\_analysis\_lep,pwhg\_analysis\_slp,pwhg\_analysis\_slm}), unless the option {\tt ANALYSIS} has been set to {\tt none} in the {\tt Makefile} when the code was compiled. The user is free to replace these analysis routines with her own ones, depending on her needs.  
+For the fully leptonic decay mode, we provide a representative analysis routine that is called by the program automatically, unless the option {\tt ANALYSIS} has been set to {\tt none} in the {\tt Makefile} when the code was compiled. The user is free to replace this analysis routine with her own one, depending on her needs.  
 \\[2ex]
-Upon the completion of {\tt step 2}, for each parallel run a file {\tt
+If the default analysis has been activated, upon the completion of {\tt step 2}, for each parallel run a file {\tt
   pwg-*-NLO.top} is generated (where the * denotes the integer
 identifier of the run).  These files contain the histograms defined in
-{\tt pwhg\_analysis.f} at NLO-QCD accuracy, if the variable {\tt
+{\tt pwhg\_analysis\_wpwm\_v2.f} at NLO-QCD accuracy, if the variable {\tt
   bornonly} is set to zero in {\tt powheg.input}.  Setting {\tt
   bornonly} to 1 yields the respective LO results. In either case, the
 individual results of the parallel runs can be combined with the help
-of the {\tt combineplots.f} file contained in the {\tt auxiliary}
+of the {\tt mergedata.f} file contained in the {\tt plot-aux}
 directory.  To this end, just compile the file by typing, e.g.,
 \\[2ex]
-{\tt \$ gfortran combineplots.f}
+{\tt \$ gfortran mergedata.f -o mergedata}
 \\[2ex]
-and run the resulting executable. The program will ask for the the
-number of {\tt pwg-*-NLO.top} files in the directory and the the number
-of calls per run which are set by {\tt ncall2} in {\tt
-  powheg.input}. Finally, enter the integer identifier of the first
-file. The program will then generate the files {\tt combinedNLO.top}
-and {\tt combinedNLO-gnu.top} which contain the combined histograms
-in two different formats (topdraw or gnuplot friendly). 
-
+and run the resulting executable in your run directory
+\\[2ex]
+{\tt mergedata 1 *NLO.top}
+\\[2ex]
+The program expects a number between 1 and 5 and a list of files to
+merge. If no number or no list is specified, the user will be prompted
+by the program to enter them. Running mergedata without any arguments
+will also explain what the 5 different options are. {\tt mergedata}
+will combine the histograms into a file called {\tt fort.12}. We
+provide a file {\tt plot-aux/genplots.sh} and {\tt
+  plot-aux/gnuplotsplit.gp} which can be used to plot the resulting
+histograms. First run {\tt genplots.sh}
+\\[2ex]
+{\tt ./genplots.sh file nameoutput}
+\\[2ex]
+or if a comparison between two different runs is wanted
+\\[2ex]
+{\tt ./genplots.sh file1 file2 nameoutput}
+\\[2ex]
+This will result in a file called {\tt genplots.gp}. In the later case
+the file {\tt plot-aux/pastegnudata.f} has to be compiled and either put
+in the working directory or in the users
+path. After {\tt genplots.sh} has been run, the user can produce a set
+of .eps files with gnuplot running
+\\[2ex]
+{\tt ./gnuplotsplit.gp genplots.gp}
+\\[2ex]
 %%%%%%%%%%
 \subsection*{Step 3}
 %%%%%%%%%%
