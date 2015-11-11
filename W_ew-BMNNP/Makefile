@@ -12,7 +12,8 @@ ANALYSIS=default
 #STATIC= -static
 #
 ifeq ("$(COMPILER)","gfortran")	
-F77= gfortran -fno-automatic  -finit-real=nan -ffixed-line-length-none
+F77= gfortran -fno-automatic  -ffixed-line-length-none
+#F77= gfortran -fno-automatic  -finit-real=nan -ffixed-line-length-none
 #F77= gfortran -fno-automatic -ggdb -pg -finit-real=nan -ffixed-line-length-none
 # -fno-whole-file
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
@@ -171,6 +172,14 @@ PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o pow
 main-PYTHIA8-lhef: $(PYTHIA8)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
 $(LIBSLHAPDF) -o $@
+
+
+
+INT_PHOTOS=main-PHOTOS-lhef.o photosCCF.o scalupveto.o boostrot.o powheginput.o lhefread.o cernroutines.o opencount.o newunit.o mwarn.o $(PDFPACK) $(FPE OBJ)
+
+main-PHOTOS-lhef: $(INT_PHOTOS)
+	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBSPHOTOSCC) $(LIBSHEPMC) $(STATIC) -o $@
+
 
 
 # target to cleanup
