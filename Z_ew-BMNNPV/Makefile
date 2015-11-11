@@ -184,6 +184,13 @@ main-PYTHIA8-lhef: $(PYTHIA8)
 $(LIBSLHAPDF) -o $@
 
 
+INT_PHOTOS=main-PHOTOS-lhef.o photosCCF.o scalupveto.o boostrot.o powheginput.o lhefread.o cernroutines.o opencount.o newunit.o mwarn.o $(PDFPACK) $(FPE OBJ)
+
+main-PHOTOS-lhef: $(INT_PHOTOS)
+	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBSPHOTOSCC) $(LIBSHEPMC) $(STATIC) -o $@
+
+
+
 # target to cleanup
 .PHONY: clean
 clean:
