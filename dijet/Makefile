@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## Choose compiler: gfortran,ifort
-COMPILER=ifort
+COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
 PDF=lhapdf
@@ -22,7 +22,12 @@ F77= gfortran -fno-automatic
 ## Use -O2 to be on the safe side
 OPT=-O2
 ## For debugging uncomment the following
-#DEBUG= -ggdb -pg
+DEBUG= -ggdb 
+ifdef DEBUG
+OPT=-O0
+FPE=-ffpe-trap=invalid,zero,overflow
+#,underflow
+endif
 endif
 
 ifeq ("$(COMPILER)","ifort")
@@ -75,7 +80,7 @@ ifeq ("$(ANALYSIS)","default")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_analysis.o pwhg_bookhist-multi.o
+PWHGANAL=pwhg_analysis.o pwhg_bookhist-multi.o  observables.o fastjetfortran.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 PWHGANAL+= fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o
 else
