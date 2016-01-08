@@ -247,3 +247,15 @@ c     SIGN(A,B) returns the value of A with the sign of B
       endif
       end      
 
+      function dotp4(p1,p2)
+      implicit none
+      real * 8 dotp4,p1(4),p2(4)
+      dotp4 = p1(4)*p2(4) - p1(3)*p2(3) - p1(1)*p2(1) - p1(2)*p2(2)
+      end
+   
+      function dotp3(p1,p2)
+      implicit none
+      real * 8 dotp3,p1(3),p2(3)
+      dotp3 = p1(3)*p2(3) + p1(1)*p2(1) + p1(2)*p2(2)
+      end
+   
