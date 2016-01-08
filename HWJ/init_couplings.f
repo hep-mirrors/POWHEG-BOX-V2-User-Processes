@@ -5,7 +5,7 @@
       include 'pwhg_physpar.h'
       include 'pwhg_st.h'
       include 'pwhg_math.h'
-c      include 'pwhg_par.h'
+      include 'pwhg_par.h'
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
       logical called
@@ -35,6 +35,11 @@ c but never closed ...
          called=.true.
       endif
 
+      par_isrtinycsi = 1d-5
+      par_isrtinyy = 1d-5
+      par_fsrtinycsi = 1d-5
+      par_fsrtinyy = 1d-5
+
       massivetop = .false.
       if (powheginput("#massivetop").eq.1) massivetop=.true.
       massivebottom = .false.
@@ -58,6 +63,8 @@ c somewhere else
          ph_tmass=172.5d0
       endif
 
+      call smcouplings
+      call lh_readin("none")
       call setpara("param_card.dat",.true.)
 
       physpar_ml(1) = 0.511d-3   ! electron
@@ -217,10 +224,13 @@ c the only parameters relevant for this process are set
 c via powheginput. All others are needed for the
 c madgraph routines not to blow.
 
-      alpha= 1/132.50698d0
-      gfermi = 0.1166390d-4
+      alpha = ph_alphaem
+      gfermi = ph_gfermi
+      zmass = ph_Zmass
+c      alpha= 1/132.50698d0
+c      gfermi = 0.1166390d-4
       alfas = 0.119d0
-      zmass = 91.188d0
+c      zmass = 91.188d0
 c      tmass = 172.5d0
       tmass = ph_tmass
       lmass = 0d0
@@ -232,8 +242,9 @@ c      tmass = 172.5d0
       bmass = 0d0 ! must be zero in MadGraph, otherwise the amplitudes are 
                   ! evaluated with massive bottom
       lmass=0d0
-      wmass=sqrt(zmass**2/Two+
-     $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
+c      wmass=sqrt(zmass**2/Two+
+c     $     sqrt(zmass**4/Four-Pi/Rt2*alpha/gfermi*zmass**2))
+      wmass = ph_Wmass
 
       twidth=1.5083d0
 
@@ -245,8 +256,10 @@ c      tmass = 172.5d0
       ph_Wmass2low=powheginput("min_w_mass")**2
       ph_Wmass2high=powheginput("max_w_mass")**2    
 
-      zwidth=2.441d0
-      wwidth=2.0476d0
+c      zwidth=2.441d0
+c      wwidth=2.0476d0
+      zwidth = ph_Zwidth
+      wwidth = ph_Wwidth
 
 c     POWHEG CKM matrix
 c
@@ -318,25 +331,27 @@ c
      &                  mtMS,mbMS,mcMS,mtaMS,
      &                  Vud,Vus,Vub,Vcd,Vcs,Vcb,Vtd,Vts,Vtb
       
-      e_em=gal(1)
-      ph_unit_e=e_em
-      ph_alphaem=e_em**2/(4*pi)
-      ph_sthw2=1-(wmass/zmass)**2
-      ph_sthw=sqrt(ph_sthw2)
+c      e_em=gal(1)
+c      ph_unit_e=e_em
+c      ph_alphaem=e_em**2/(4*pi)
+c      ph_sthw2=1-(wmass/zmass)**2
+c      ph_sthw=sqrt(ph_sthw2)
       g_weak=e_em/ph_sthw
-      ph_gfermi=sqrt(2d0)*g_weak**2/(8*wmass**2)
+c      ph_gfermi=sqrt(2d0)*g_weak**2/(8*wmass**2)
 
-      ph_Zmass = zmass
-      ph_Wmass = wmass
+c      ph_Zmass = zmass
+c      ph_Wmass = wmass
       ph_Hmass = hmass
-      ph_Zwidth = zwidth
-      ph_Wwidth = wwidth
+c      ph_Zwidth = zwidth
+c      ph_Wwidth = wwidth
       ph_Hwidth = hwidth
-c      ph_tmass = tmass
+cc      ph_tmass = tmass
 c      ph_bmass = physpar_mq(5)  ! b-quark mass used in the massive VIRTUAL diagrams 
-      ph_WmWw = ph_Wmass * ph_Wwidth
-      ph_Wmass2 = ph_Wmass**2
-      ph_Zmass2 = ph_Zmass**2
+c      ph_WmWw = ph_Wmass * ph_Wwidth
+c      ph_Wmass2 = ph_Wmass**2
+c      ph_Zmass2 = ph_Zmass**2
+      ph_HmHw = ph_Hmass * ph_Hwidth
+      ph_Hmass2 = ph_Hmass**2
 
 c     CKM from PDG 2010 (eq. 11.27)
       ph_CKM(1,1)=Vud

@@ -5,7 +5,7 @@
       include 'pwhg_physpar.h'
       include 'pwhg_st.h'
       include 'pwhg_math.h'
-c      include 'pwhg_par.h'
+      include 'pwhg_par.h'
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
       logical called
@@ -34,6 +34,11 @@ c but never closed ...
       else
          called=.true.
       endif
+
+      par_isrtinycsi = 1d-5
+      par_isrtinyy = 1d-5
+      par_fsrtinycsi = 1d-5
+      par_fsrtinyy = 1d-5
 
       massivetop = .false.
       if (powheginput("#massivetop").eq.1) massivetop=.true.

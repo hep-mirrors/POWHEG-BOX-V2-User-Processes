@@ -35,10 +35,10 @@ c but never closed ...
          called=.true.
       endif
 
-      par_isrtinycsi = 1d-7
-      par_isrtinyy = 1d-7
-      par_fsrtinycsi = 1d-7
-      par_fsrtinyy = 1d-7
+      par_isrtinycsi = 1d-5
+      par_isrtinyy = 1d-5
+      par_fsrtinycsi = 1d-5
+      par_fsrtinyy = 1d-5
 
       massivetop = .false.
       if (powheginput("#massivetop").eq.1) massivetop=.true.
