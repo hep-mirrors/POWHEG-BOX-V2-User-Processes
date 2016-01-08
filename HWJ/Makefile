@@ -8,9 +8,9 @@ PDF=lhapdf
 #Choose Analysis: dummy, HWnJ
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 # the following was the analysis used in the paper
-#ANALYSIS=HWnJ
+ANALYSIS=HWnJ
 # analysis to compare with the resonance version
-ANALYSIS=HWnJ_res
+#ANALYSIS=HWnJ_res
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -96,6 +96,7 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ.o observables.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
 PWHGANAL+=  fastjetfortran.o
 endif
+
 ifeq ("$(ANALYSIS)","HWnJ_res")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
@@ -106,8 +107,8 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ_res.o observables.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
 PWHGANAL+=  fastjetfortran.o
-else
-PWHGANAL=pwhg_analysis-dummy.o
+#else
+#PWHGANAL=pwhg_analysis-dummy.o
 endif
 
 
