@@ -123,16 +123,16 @@ c      include 'anomcoup.f'
       integer p1,p2,p3,p4,p5,p6
       double complex aLL,aRR,aRL,aLR,prp34,prp345,zazb
       double precision s345,s156,s256,xfac
-      double precision xdelk_g,xlambda_g
-
+c     anomalous TGC
+      real*8 Deltak_gam,Lambda_gam
+      common/aTGC/Deltak_gam,Lambda_gam
+      real*8 xdelk_g,xlambda_g
 
       zazb(p1,p2,p3,p4)=+za(p1,p2)*zb(p2,p4)+za(p1,p3)*zb(p3,p4)
 
-
 c anomalous couplings 
-
-      xdelk_g = 0d0
-      xlambda_g = 0d0
+      xdelk_g = Deltak_gam
+      xlambda_g = Lambda_gam
 
       s156=s(p1,p5)+s(p1,p6)+s(p5,p6)
       s256=s(p2,p5)+s(p2,p6)+s(p5,p6)
@@ -242,7 +242,7 @@ c     &    *(zb(p2,p1)*za(p1,p3)+zb(p2,p6)*za(p6,p3))*s(p3,p4))
 
 
 c--- additional anomalous coupling component
-c--- corretti
+c--- correct ones
       aRR=aRR+prp34*(Qd-Qu)
      & *zb(p4,p5)*(za(p1,p2)*zb(p2,p5)+za(p1,p6)*zb(p6,p5))
      & *prp345/s345/(2d0*s(p3,p4)**2*za(p1,p6)*za(p6,p2))

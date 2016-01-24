@@ -71,14 +71,14 @@ c      include 'anomcoup.f'
       double precision xfac
       double complex prp12,prp34
       integer p1,p2,p3,p4,p5,hgamma
-      complex*16 xdelk_g,xlambda_g
-
-
+c     anomalous TGC
+      real*8 Deltak_gam,Lambda_gam
+      common/aTGC/Deltak_gam,Lambda_gam
+      real*8 xdelk_g,xlambda_g
 
 c anomalous couplings 
-
-      xdelk_g = 0d0
-      xlambda_g = 0d0
+      xdelk_g = Deltak_gam
+      xlambda_g = Lambda_gam
 
       prp34=s(p3,p4)/dcmplx((s(p3,p4)-ph_Wmass2),ph_WmWw)
 

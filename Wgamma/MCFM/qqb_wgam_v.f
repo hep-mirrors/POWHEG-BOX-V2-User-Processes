@@ -26,7 +26,7 @@ c     q(-p1)+qbar(-p2)-->e^-(p3)+nu(p4)+gamma(p5)
 
       call spinoru(5,p,za,zb)
     
-*      fac=aveqq*cf*2d0*xn*ph_unit_e**4/ph_sthw2**2*ph_unit_e0**2
+c      fac=ason2pi*cf*aveqq*2d0*xn*gwsq**2*esq
 
       pigreco = 3.14159265358979312d0
 
