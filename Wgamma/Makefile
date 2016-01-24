@@ -187,7 +187,7 @@ main-PYTHIA8-lhef: $(PYTHIA8)
 # target to cleanup
 .PHONY: clean
 clean:
-	rm -f $(OBJ)/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
+	rm -f $(OBJ)/*.o $(OBJ)/MCFM/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
 	main-PYTHIA-lhef main-PYTHIA8-lhef
 
 # target to cleanup

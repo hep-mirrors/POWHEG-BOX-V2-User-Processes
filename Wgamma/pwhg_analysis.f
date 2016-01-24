@@ -119,6 +119,9 @@ c     separation of event types
 c     nlo test only 
       logical nlo_test
       common/nlotest/nlo_test 
+c     powheg-nc/c-lo
+      logical powheg_nc,powheg_c_lo
+      common/wgammode/powheg_nc,powheg_c_lo
 
       strcut(1)='_1'
       strcut(2)='_2'
@@ -131,8 +134,21 @@ c     nlo test only
          write (*,*) '********************************************'
          if(whcprg.eq.'NLO   ') then
             write (*,*) '           NLO ANALYSIS CALLED        '
+            write(*,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            write(*,*)'WARNING !!!! nlo analysis makes sense only '
+            write(*,*)'             for nlo_test = 1              '
+            write(*,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
          elseif(WHCPRG.eq.'LHE   ') then
             write (*,*) '           LHE ANALYSIS CALLED        '
+            if(.not.powheg_nc) then
+               write(*,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+               write(*,*)'!!!!        WARNING                      !!!!'
+               write(*,*)'!!!! lhefanalysis should be used only on !!!!'
+               write(*,*)'!!!! events with no competition mode :   !!!!'
+               write(*,*)'!!! al most 1 gamma and 1 jet            !!!!'
+               write(*,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            endif
+
          elseif(WHCPRG.eq.'HERWIG') then
             write (*,*) '           HERWIG ANALYSIS CALLED     '
          elseif(WHCPRG.eq.'PYTHIA') then
@@ -224,6 +240,7 @@ c     quarks and gluons
 
 c     isolation cuts (lhe analysis only)
          if(.not.nlo_test) then
+            pt_j=sqrt( p_j(1)**2 + p_j(2)**2 )
             Et_j=p_j(0)*pt_j/sqrt(p_j(1)**2+p_j(2)**2+p_j(3)**2)
             pt_gamma=sqrt(p_gamma(1)**2 + p_gamma(2)**2)
             call get_deltar(p_gamma,p_j,R_gamj)
