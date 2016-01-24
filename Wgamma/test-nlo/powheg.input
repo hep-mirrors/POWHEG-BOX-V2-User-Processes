@@ -51,8 +51,7 @@ phspseparation 0.5d0 ! (default=0.5d0) weight for phase space dual-channel sampl
 #compute_rwgt 1   ! reweight events for scale variations 
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
-#ptsupp     0     ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 su\
-ppfact = 1
+#ptsupp     0     ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 suppfact = 1
 bornonly   0      ! (default 0) if 1 do Born only
 #withnegweights 1 ! (default 1) allows negative weighted events
 #olddij 1         ! (default 0) if 1 use old dijterm definition 
