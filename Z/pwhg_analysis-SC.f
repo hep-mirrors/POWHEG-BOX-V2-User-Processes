@@ -128,10 +128,10 @@ c spin correlation observables
           ini=.false.
       endif
 
-      if(noheavy.and.
+      if(noheavy.and.(
      1       abs(idup(1)).eq.5.or.abs(idup(2)).eq.5
      2  .or. abs(idup(5)).eq.5.or.abs(idup(5)).eq.4
-     3  .or. abs(idup(1)).eq.4.or.abs(idup(2)).eq.4) then
+     3  .or. abs(idup(1)).eq.4.or.abs(idup(2)).eq.4)) then
          return
       endif
 
