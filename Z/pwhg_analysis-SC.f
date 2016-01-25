@@ -115,7 +115,7 @@ c spin correlation observables
       external cstar,phistar_report
       logical ini,noheavy
       data ini/.true./
-      save ini
+      save ini,noheavy
 
 
       if(dsig.eq.0) return
