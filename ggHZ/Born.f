@@ -210,7 +210,9 @@ c     neutral particles
       icolup(2,4)=0
       icolup(1,5)=0
       icolup(2,5)=0
-c     colored particles
+      icolup(1,6)=0
+      icolup(2,6)=0
+c     initial-state colored particles
       if((idup(1).gt.0).and.(idup(2).lt.0)) then
          icolup(1,1)=501
          icolup(2,1)=0
@@ -227,8 +229,16 @@ c     colored particles
          icolup(1,2)=502
          icolup(2,2)=501         
       else
-         write(*,*) ' invalid flavour'
+         write(*,*) ' invalid initial-state flavour'
          call pwhg_exit(-1)
+      endif
+c     final-state colored particles
+      if ((idup(4).eq.-1001 .or. idup(4).eq.-1002) .and.
+     $    (idup(5).eq. 1001 .or. idup(5).eq. 1002)) then
+         icolup(1,4)=0
+         icolup(2,4)=503
+         icolup(1,5)=503
+         icolup(2,5)=0
       endif
       end
 
