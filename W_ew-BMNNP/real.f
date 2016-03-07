@@ -561,8 +561,9 @@ c      include 'pwhg_kn.h'
           megammin = 1d-5
 
           ml2 = mlep2
-    
-          mw2m1 = 1d0/mw2
+*
+          mw2m1 = 1.d0/(ph_Wmass2 - ii*ph_WmWw)
+*
           mw2dm1= conjg(mw2m1)
           mw2m2 = mw2m1*mw2dm1
       endif
@@ -1396,8 +1397,6 @@ c      include 'pwhg_kn.h'
       return
       end function e_
 *
-**
-*
       subroutine invertspace(p,pp)
       implicit none
       real*8 p(0:3),pp(0:3)
@@ -1409,3 +1408,7 @@ c      include 'pwhg_kn.h'
       enddo
 
       end
+c
+
+
+

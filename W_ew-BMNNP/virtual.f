@@ -115,6 +115,8 @@ c$$$      end
       real*8 pu(0:3),pd(0:3),pn(0:3),pl(0:3)
       real*8 ptmpu(0:3),ptmpt(0:3),ptmps(0:3)
       integer nu
+      integer ibox0
+      common/box0/ibox0
 *
       if (mod(abs(flav(1)),2).eq.0) then
           do nu=0,3
@@ -144,7 +146,7 @@ c$$$      end
       t = dotp(ptmpt,ptmpt)
       u = dotp(ptmpu,ptmpu)
 *
-      complexmasses = .false.
+c      complexmasses = .false.   !already defined in init_couplings.f
 *
       call deltaww  (s,delww)
 
@@ -156,8 +158,11 @@ c$$$      end
 *
 * eq. (2.10) of Dittmaier-Kraemer PRD65 073007
 *
-      delvirt = delww + delwdu + delwnul + delbox
-
+      if(ibox0.gt.0) then 
+         delvirt = (0.d0,0.d0)
+      else
+         delvirt = delww + delwdu + delwnul + delbox
+      endif
       return
       end subroutine deltavirt
 *
@@ -650,13 +655,17 @@ c$$$      end
      +           d0dmd2ml200tsmdmgmlmw,d0dmu2ml200usmumgmlmw
 
       complex*16 mw2in,mz2in
+      integer id0,ibox0
+      common/flagid0/id0
+      common/box0/ibox0
+*
+      ibox0 = 0
 *
 *  remember: s+t+u=0! (if m=0)
 *
       call b0m0m0(t*cone,b0dt00)
       call b0reg(s*cone,mw2,mz2,b0dsmwmz)
       call b0m0(s*cone,mw2,b0ds0mw)
-     
 *
 * regular C0
 *
@@ -705,13 +714,14 @@ c$$$      end
       call d0reg(0.d0,t,0.d0,s,0.d0,0.d0,
      +           mw2,zero,zero,mz2,
      +           d0d0000ts0mw0mz)
-
+      if(id0.gt.0) ibox0=1
 *
 * regular D0
 *
       call d0reg(0.d0,u,0.d0,s,0.d0,0.d0,
      +           mw2,zero,zero,mz2,
      +           d0d0000us0mw0mz)
+      if(id0.gt.0) ibox0=1
 *
 * singular D0
 * D0(md2,ml2,0,0,t,s,md,mg,ml,mw)
@@ -751,7 +761,6 @@ c$$$      end
      +             -t*(cone+(mw2+t*cone)**2/u/u)*d0dmd2ml200tsmdmgmlmw)
      +          -2.d0*qu*ql*(c0dml20s0mlmw + c0dmu20s0mumw 
      +                       -u*d0dmu2ml200usmumgmlmw) )
-
       return
       end subroutine deltabox
 
@@ -793,7 +802,7 @@ c$$$      end
       include 'mathx.h'
       include 'pwhg_physpar.h'
 *
-      real*8 qf,mf2,mfp2,s
+      real*8 qf,mf2,mfp2,s,sch
       complex*16 gfm,gfp
       complex*16 sflout
 *
@@ -806,14 +815,15 @@ c$$$      end
       else
 
           call b1reg(s*cone,mf2*cone,zero,b1dsmfmg)
-
       endif
 
       call b1reg(s*cone,mf2*cone,mz2,b1dsmfmz)
       call b1reg(s*cone,mf2*cone,mh2,b1dsmfmh)
       call b1reg(s*cone,mfp2*cone,mw2,b1dsmfpmw)
 
-      sflout  = - alsu4pi * (   qf**2 * (2.d0*b1dsmfmg + cone)
+      sch= 1.d0
+      if(abs(mf2).lt.1.d-30) sch= 0.d0
+      sflout  = - alsu4pi * (   qf**2 * (2.d0*b1dsmfmg + cone*sch)
      +             + gfm**2 * (2.d0*b1dsmfmz + cone)
      +             + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
      +             + 0.5d0/sw2*((2.d0*cone+mfp2/mw2)*b1dsmfpmw+cone)   )
@@ -2034,32 +2044,19 @@ c$$$      end
 
           b0out = 2.d0*cone - log(p2/mudim2)
 
-      elseif (dble(m12).lt.abs(p2)) then
-
-          if (.not.complexmasses.and.abs(m12-mw2).le.epsilon.and.
-     +        abs(p2-mlep2).gt.epsilon) then
-              arglog = ( p2 - m12 + ii*ph_WmWw )/p2
-          else
-              arglog = ( p2 - m12 )/p2
-          endif
-
-          b0out = 2.d0*cone - log(p2/mudim2)
-     +          - m12/p2*log(m12/p2) 
-     +          - (cone-m12/p2)*log(arglog)
-     +          + ii*pi*(cone-m12/p2)
-      
       else
-
           if (.not.complexmasses.and.abs(m12-mw2).le.epsilon.and.
      +        abs(p2-mlep2).gt.epsilon) then
-              arglog = -( p2 - m12 + ii*ph_WmWw )/p2
+c fulvio-mauro
+c               arglog = cone - p2/(m12 - ii*ph_WmWw)
+               arglog = (m12 - ii*ph_WmWw  - p2*cone)/m12   !another possible choice
+c fulvio-mauro
           else
-              arglog = -( p2 - m12 )/p2
+              arglog = (m12 - p2)/m12
           endif
 
-          b0out = 2.d0*cone - log(p2/mudim2)
-     +          - m12/p2*log(m12/p2) 
-     +          - (cone-m12/p2)*log(arglog)
+          b0out = 2.d0*cone - log(m12/mudim2)
+     +          - ((p2-m12)/p2)*log(arglog)
 
       endif
           
@@ -2250,21 +2247,17 @@ c$$$      end
 * m12 = 0
 *
           if (.not.complexmasses.and.abs(m02-mw2).lt.2d0*epsilon) then
+c
+c fulvio-mauro
+c              arglog = ( m02 - ii*ph_WmWw - p2 )/(m02 - ii*ph_WmWw)
               arglog = ( m02 - ii*ph_WmWw - p2 )/m02
+c fulvio-mauro
           else
               arglog = ( m02 - p2 )/m02
           endif
 
-          if (dble(m02).le.dble(p2)) then
-   
-              b0pout = conjg(- m02*log(arglog)/(p2**2)-cone/p2)
+          b0pout = - m02*log(arglog)/(p2**2)-cone/p2
 
-          else
-
-              b0pout = - m02*log(arglog)/(p2**2)-cone/p2
-
-          endif
-      
       endif
 
       return
@@ -2592,14 +2585,16 @@ c$$$      end
       s  = s_in
       m22= m22in
 
-      s2bar = s*cone + ii*epsilon
+      s2bar = s*cone + ii*epsilon/10.d0
 *
 * eq. (B.2) Dittmaier
 *
-
       if (.not.complexmasses.and.abs(m22-mw2).lt.2d0*epsilon) then
           arglog1= ( m22 - ii*ph_WmWw - s2bar )/m12
+c fulvio-mauro
           arglog2= ( m22 - ii*ph_WmWw - s2bar )/m22
+c          arglog2= ( m22 - ii*ph_WmWw - s2bar )/(m22 - ii*ph_WmWw)
+c fulvio-mauro
           argli21= - s2bar/( m22 - ii*ph_WmWw - s2bar )
       else
           arglog1= ( m22 - s2bar )/m12
@@ -2652,10 +2647,13 @@ c$$$      end
       s  = s_in
       m22= m22in - ii*epsilon
 
-      s2bar= s*cone + ii*epsilon
+      s2bar= s*cone + ii*epsilon/10.d0
 *
       if (.not.complexmasses.and.abs(m22-mw2).le.2d0*epsilon) then
+c fulvio-mauro
+c          arglog = ( m22 - ii*ph_WmWw - s2bar )/(m22-ii*ph_WmWw)
           arglog = ( m22 - ii*ph_WmWw - s2bar )/m22
+c fulvio-mauro
       else
           arglog = ( m22 - s2bar )/m22
       endif
@@ -2691,7 +2689,7 @@ c$$$      end
       complex*16 m22,r,argli21
 *
       m22= p202in - ii*epsilon
-      r= p212in + ii*epsilon
+      r= p212in + ii*epsilon/10.d0
 *
 * eq. (B.12) Dittmaier
 *
@@ -2731,7 +2729,7 @@ c$$$      end
       complex*16 rbar
 *
       r    = p212in
-      rbar = r + ii*epsilon
+      rbar = r + ii*epsilon/10.d0
 
 *
 * eq. (B.16) Dittmaier
@@ -2787,6 +2785,7 @@ c$$$      end
       implicit none
       include 'mathx.h'
       include 'pwhg_math.h'
+      include 'PhysPars.h'
 *
       complex*16 p2i,m2
       complex*16 p2
@@ -2820,7 +2819,7 @@ c$$$      end
 *                  m02= 0d0, m12= mq2, m22= mw2, m32= mlep2
 *
       subroutine d0sing(p102,p212,p322,p302,p202,p312,
-     +                  m02,m12,m22,m32,
+     +                  m02in,m12in,m22in,m32in,
      +                  boxout)
       implicit none
       include 'mathx.h'
@@ -2829,8 +2828,8 @@ c$$$      end
       include 'PhysPars.h'
 *
       real*8 p102,p212,p322,p302,p202,p312
-      real*8 m02,m12,m32
-      complex*16 m22
+      real*8 m02in,m12in,m32in
+      complex*16 m22in
       complex*16 boxout
 *
       complex*16 myli2
@@ -2839,13 +2838,25 @@ c$$$      end
       complex*16 li2cont
       external li2cont
 *
-      real*8 m3
+      complex*16 p212b,p322b,p302b,p202b,p312b
+      complex*16 m02,m12,m22,m32
+      complex*16 m3
       complex*16 m2,x32
       complex*16 li21lp1,li21lm1,argli2
       complex*16 arg1,arg2
       complex*16 arglog
 *
       boxout= zero
+*
+      p212b= p212 + ii*epsilon/10.d0
+      p322b= p322 + ii*epsilon/10.d0
+      p202b= p202 + ii*epsilon/10.d0
+      p312b= p312 + ii*epsilon/10.d0
+
+      m02= cmplx(m02in)
+      m12= cmplx(m12in)
+      m22= m22in
+      m32= cmplx(m32in)
 *
       m2= sqrt(m22)
       m3= sqrt(m32)
@@ -2855,29 +2866,43 @@ c$$$      end
 *
 * l= +1
 *
-      arg1= (m32-p312)/(m22-p212*cone)
+      arg1= (m32-p312b)/(m22-p212b)
       arg2= m2/m3*x32
       li21lp1 = li2cont(arg1,arg2)
 *
 * l= -1
 *
-      arg1= (m32-p312)/(m22-p212*cone)
+      arg1= (m32-p312b)/(m22-p212b)
       arg2= m2/m3/x32
       li21lm1 = li2cont(arg1,arg2)
 *
       if (.not.complexmasses.and.abs(m22-mw2).le.2d0*epsilon) then
-          arglog = m22 - ii*ph_WmWw - p202*cone
-          argli2= (p212-p202)/(m22-ii*ph_WmWw-p202) * cone
+          arglog = m22 - ii*ph_WmWw - p202b
+          argli2= (p212b-p202b)/(m22-ii*ph_WmWw -p202b) * cone
+
+c fulvio-mauro
+c          boxout =  2.d0 * log((m22-ii*ph_WmWw-p212b)/arglog)
+c     +           * log(sqrt(mudim2)*m3/(m32-p312b))
+c     +           + (log(sqrt(mudim2)*m3/(m32-p312b)))**2 
+c     +           - 2.d0*myli2(argli2)
+c     +           + li21lp1 + li21lm1 - pi2/6.d0*cone
+          boxout =  2.d0 * log((m22-p212b)/arglog)
+     +           * log(sqrt(mudim2)*m3/(m32-p312b))
+     +           + (log(sqrt(mudim2)*m3/(m32-p312b)))**2 
+     +           - 2.d0*myli2(argli2)
+     +           + li21lp1 + li21lm1 - pi2/6.d0*cone
+c fulvio-mauro
       else
-          arglog = m22 - p202*cone 
-          argli2= (p212-p202)/(m22-p202) * cone
+          arglog = m22 - p202b 
+          argli2= (p212b-p202b)/(m22-p202b) * cone
+
+          boxout =  2.d0 * log((m22-p212b)/arglog)
+     +           * log(sqrt(mudim2)*m3/(m32-p312b))
+     +           + (log(sqrt(mudim2)*m3/(m32-p312b)))**2 
+     +           - 2.d0*myli2(argli2)
+     +           + li21lp1 + li21lm1 - pi2/6.d0*cone
       endif
 
-      boxout =  2.d0 * log((m22-p212)/arglog)
-     +               * log(sqrt(mudim2)*m3/(m32-p312))
-     +        + (log(sqrt(mudim2)*m3/(m32-p312)))**2 
-     +        - 2.d0*myli2(argli2)
-     +        + li21lp1 + li21lm1 - pi2/6.d0*cone
       boxout = boxout + pi2/12d0
       boxout = boxout / (p202-m22)/(p312-m32)
 *
@@ -2910,7 +2935,10 @@ c$$$      end
       complex*16 li21k2,li22k2,li23k2,li24k2
       complex*16 x1,x2,r031,r032
       complex*16 qdr1,qdr2,cquad1,cquad2
+      integer id0
+      common/flagid0/id0
 *
+      id0 = 0
       if(abs(dimag(m02in)).lt.epsilon) then
           m02 = m02in - ii*epsilon
       else
@@ -2977,12 +3005,16 @@ c$$$      end
          print*,'x1-x2 in d0reg= ',x1-x2
          print*,'x1= ',x1
          print*,'x2= ',x2
-         stop
+         id0 = 1
+         boxout = (0.d0,0.d0)
+         return
       endif
 
       if(abs(a).lt.1.d-15) then
          print*,'a in d0reg= ',a
-         stop
+         id0 = 1
+         boxout = (0.d0,0.d0)
+         return
       endif
 
       boxout  = boxout/a/(x1-x2)
@@ -3032,7 +3064,7 @@ c$$$      end
       complex*16 myli22
       external myli22
 *
-      if(abs(zz-cone).lt.1.d-8) then
+      if(abs(zz-cone).lt.1.d-12) then
          myli2=cone*pi2/6.d0
          return
       endif
@@ -3128,7 +3160,6 @@ c$$$      end
 
       return  
       end function myli23
-
 *
 * analytically continued dilogarithm of two variables
 * according to eq. (2.14) of Denner-Dittmaier ArXiv:1005.2076
@@ -3248,7 +3279,7 @@ c$$$      end
             argsq = dcmplx(dble(argsq),dimag(- 4.d0*qa*qc))
             sqdisc = sqrt(argsq)
             si = 1.d0
-            if (dble(dconjg(qb)*sqdisc).lt.0.d0) si = -1.d0
+            if (dble(conjg(qb)*sqdisc).lt.0.d0) si = -1.d0
          endif
 
          qtmp = -0.5d0*(qb + si*sqdisc)
@@ -3269,8 +3300,6 @@ c$$$      end
       qdr2 = qr2
       return
       end subroutine qcroots
-*
-**
 *
       real*8 function factorial(nl)
       integer n,nl

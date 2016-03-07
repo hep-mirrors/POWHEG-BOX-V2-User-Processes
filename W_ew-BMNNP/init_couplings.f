@@ -26,6 +26,7 @@ c     0 -> alpha(0)
 c     1 -> gmu
       integer scheme
       common/sch/scheme
+      complexmasses = .false.
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -139,10 +140,19 @@ c     It is used in the generation of the Born phase space
       el2_scheme = alpha*4.d0*pi
       alsu4pi = alpha/4d0/pi
 *
+      ph_Zmass2 = ph_Zmass*ph_Zmass
+      ph_Wmass2 = ph_Wmass*ph_Wmass
+      ph_WmWw = ph_Wmass * ph_Wwidth
+      ph_ZmZw = ph_Zmass * ph_Zwidth
+*
       mw2= ph_Wmass**2 
       mz2= ph_Zmass**2 
       mh2= ph_Hmass**2 
-
+      if(complexmasses) then
+         mw2= mw2 -(0d0,1d0)*ph_WmWw 
+         mz2= mz2 -(0d0,1d0)*ph_ZmZw 
+      endif
+*
       mw = sqrt(mw2)
       mz = sqrt(mz2)
       mh = sqrt(mh2)
@@ -158,9 +168,6 @@ c     It is used in the generation of the Born phase space
       ph_sthw2= (1d0,0d0) - mw2/mz2
       ph_sthw = sqrt(ph_sthw2)
       ph_cthw = sqrt(1-ph_sthw2)
-      ph_Zmass2 = ph_Zmass*ph_Zmass
-      ph_Wmass2 = ph_Wmass*ph_Wmass
-      ph_WmWw = ph_Wmass * ph_Wwidth
 
       if (scheme.eq.0) then
 c          g2 = el2/sw2

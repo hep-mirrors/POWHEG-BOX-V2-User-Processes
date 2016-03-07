@@ -52,8 +52,9 @@ c      write(*,*) ' entering real16 '
           ifirst = 1
 
           ml2 = mlep2*1q0
-    
-          mw2m1 = 1q0/mw2
+c
+          mw2m1 = 1.q0/(ph_Wmass2 - ii*ph_WmWw)
+c
           mw2dm1= conjg(mw2m1)
           mw2m2 = mw2m1*mw2dm1
       endif

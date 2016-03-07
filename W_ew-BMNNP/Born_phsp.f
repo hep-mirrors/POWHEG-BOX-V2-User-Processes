@@ -185,21 +185,24 @@ c minimal final state mass
             write(*,*) '*************************************'
             ini=.false.
          endif
-c
-c in case of FSR the running scale is the l+ l- gamma virtuality
+cc
+cc in case of FSR, if flg_btildepar.eq.'r', the running scale 
+cc is the l nu virtuality calculated with real radiation kinematics 
+cc if btlscalereal 1 otherwise the running scale is l nu virtuality calculated 
+cc with underlying Born kinematics. The counterterms are 
+cc always calculated with the underlying born kinematics. 
+cc
 c         if(flg_btildepart.eq.'r') then
 c            muref=sqrt(2d0*dotp(kn_preal(0,3),kn_preal(0,4))
 c     1           +kn_masses(3)**2+kn_masses(4)**2)
 c         else
-         muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
-     1        +kn_masses(3)**2+kn_masses(4)**2)
+            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4))
+     1          +kn_masses(3)**2+kn_masses(4)**2)
 c         endif
 c         if(powheginput('#runningscale').eq.2) then
 c            pt2=(kn_pborn(1,3)+kn_pborn(1,4))**2+(kn_pborn(2,3)
 c     $           +kn_pborn(2,4))**2
 c            muref=sqrt(pt2+ph_Wmass*ph_Wmass)
-c         else
-c            muref=sqrt(2d0*dotp(kn_pborn(0,3),kn_pborn(0,4)))
 c         endif
       else
          if (ini) then
