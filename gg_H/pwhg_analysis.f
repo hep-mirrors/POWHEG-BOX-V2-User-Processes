@@ -10,6 +10,7 @@ c     pwhgfill  :  fills the histograms with data
       include 'LesHouches.h'
       include 'pwhg_bookhist-multi-new.h'
       include 'PhysPars.h'
+      include 'pwhg_weights.h'
       integer i
       real *8 emmin,emmax
 c     we need to tell to this analysis file which program is running it
@@ -19,6 +20,12 @@ c     we need to tell to this analysis file which program is running it
       external powheginput
       character * 8 cuts(3)
       data cuts/'Pt>10GeV','Pt>40GeV','Pt>80GeV'/
+
+      if(weights_num.eq.0) then
+         call setupmulti(1)
+      else
+         call setupmulti(weights_num)
+      endif
 
       call inihists
 
@@ -95,11 +102,6 @@ c arrays to reconstruct jets
          endif
          write(*,*) '*****************************'
 
-         if(weights_num.eq.0) then
-            call setupmulti(1)
-         else
-            call setupmulti(weights_num)
-         endif
          ini=.false.
       endif
 
