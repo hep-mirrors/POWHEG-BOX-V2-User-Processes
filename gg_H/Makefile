@@ -45,9 +45,8 @@ WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:obj/
 
 INCLUDE0=$(PWD)
-INCLUDE1=$(PWD)/include
-INCLUDE2=$(shell dirname $(PWD))/include
-FF+= $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2)
+INCLUDE1=$(shell dirname $(PWD))/include
+FF+= $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
