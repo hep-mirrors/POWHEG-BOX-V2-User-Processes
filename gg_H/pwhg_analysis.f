@@ -22,7 +22,7 @@ c     we need to tell to this analysis file which program is running it
 
       call inihists
 
-      if(whcprg.eq.'NLO'.or.whcprg.eq.'LHE') then
+      if(whcprg.eq.'NLO') then
          EMMIN=sqrt(ph_Hmass2low)
          EMMAX=sqrt(ph_Hmass2high)
       elseif((WHCPRG.eq.'HERWIG').or.(WHCPRG.eq.'PYTHIA')
@@ -32,6 +32,7 @@ c     we need to tell to this analysis file which program is running it
       endif
 
       call bookupeqbins('total',1d0,0d0,3d0)
+      print *,(emmax-emmin)/50d0,emmin,emmax
       call bookupeqbins('m(H)',(emmax-emmin)/50d0,emmin,emmax)
       call bookupeqbins('y(H)',0.2d0,-3d0,3d0)
       call bookupeqbins('pt(H)',6d0,0d0,300d0)
