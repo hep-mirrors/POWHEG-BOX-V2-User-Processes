@@ -218,7 +218,7 @@ c
       include 'PhysPars.h'
       include 'cvecbos.h' 
       integer i1,i2
-      real * 8 random
+      real * 8 random,r
       external random
       if (vdecaymodeW1 .eq. 113) then 
          if(random().gt.0.5d0) then
@@ -237,10 +237,11 @@ c
             idup(i1) = -13
          endif
       elseif (vdecaymodeW1 .eq. 135) then 
-         if(random().lt.1d0/3d0) then
+         r = random() 
+         if(r.lt.1d0/3d0) then
             idup(i2) = -12
             idup(i1) = 11
-         elseif(random().lt.2d0/3d0) then
+         elseif(r.lt.2d0/3d0) then
             idup(i2) = -14
             idup(i1) = 13
          else
@@ -248,10 +249,11 @@ c
             idup(i1) = 15
          endif
       elseif (vdecaymodeW1 .eq. -135) then 
-         if(random().lt.1d0/3d0) then
+         r = random() 
+         if(r.lt.1d0/3d0) then
             idup(i2) = 12
             idup(i1) = -11
-         elseif(random().lt.2d0/3d0) then
+         elseif(r.lt.2d0/3d0) then
             idup(i2) = 14
             idup(i1) = -13
          else
