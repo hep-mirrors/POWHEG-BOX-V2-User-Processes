@@ -7,7 +7,8 @@ FC=$(COMPILER)
 PDF=lhapdf
 #Choose Analysis: dummy, HW
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
-ANALYSIS=HWnJ
+#ANALYSIS=HWnJ
+ANALYSIS=HWnJ_res
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -15,7 +16,7 @@ ANALYSIS=HWnJ
 
 
 ifeq ("$(COMPILER)","gfortran")	
-F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
+F77=gfortran -fno-automatic -ffixed-line-length-none -J$(OBJ) -I$(OBJ)
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -97,6 +98,20 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ.o observables.o
 PWHGANAL+= fastjetfortran.o
 else
 PWHGANAL=pwhg_analysis-dummy.o
+endif
+
+ifeq ("$(ANALYSIS)","HWnJ_res")
+##To include Fastjet configuration uncomment the following lines. 
+FASTJET_CONFIG=$(shell which fastjet-config)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-HWnJ_res.o observables.o boostrot4.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)
+#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
+PWHGANAL+=  fastjetfortran.o
+#else
+#PWHGANAL=pwhg_analysis-dummy.o
 endif
 
 
