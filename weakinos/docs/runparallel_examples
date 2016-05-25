@@ -1,0 +1,19 @@
+Tests with low statistics:
+./runparallel.sh -g -c -e pwhg_main_nixj -d testrun1 --ncall1 2000 --ncall2 3000 --ncall1osres 2000 --ncall2osres 3000
+./runparallel.sh -g -c -e pwhg_main_nixj -d testrun1 --ncall1 2000 --ncall2 3000 --ncall1osres 2000 --ncall2osres 3000 --nubound 500 --nevents 500 --genevents --merge
+./runparallel.sh -g -c -e pwhg_main_nixj -d testrun1 --ncall1 2000 --ncall2 3000 --ncall1osres 2000 --ncall2osres 3000 --lopdf 90400 --nubound 500 --nevents 500 --genevents --merge
+
+
+Fast calculations to get the cross section and to calculate some few events:
+nohup ./runparallel.sh -g -c -e pwhg_main_nixj -d run_mSUGRA_n2x1+ -p 4 --fin1 1000023 --fin2 1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 20000 --ncall2 30000 --ncall1osres 20000 --ncall2osres 30000 --nevents 250000 --nubound 250000 --genevents --merge > log_run_mSUGRA_n2x1+ &
+nohup ./runparallel.sh -g -c -e pwhg_main_ninj -d run_mSUGRA_n2n2  -p 4 --fin1 1000023 --fin2 1000023 --slha input_mSUGRA_1410.4999.slha --ncall1 20000 --ncall2 30000 --ncall1osres 20000 --ncall2osres 30000 --nevents 250000 --nubound 250000 --genevents --merge > log_run_mSUGRA_n2n2 &
+nohup ./runparallel.sh -g -c -e pwhg_main_xixj -d run_mSUGRA_x1x1 -p 4 --fin1 1000024 --fin2 -1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 20000 --ncall2 30000 --ncall1osres 20000 --ncall2osres 30000 --nevents 250000 --nubound 250000 --genevents --merge > log_run_mSUGRA_x1x1 &
+
+High precision event generation on cluster:
+nohup ./runparallel.sh -g -c -e pwhg_main_nixj -d run_mSUGRA_n2x1+ -p 50 --fin1 1000023 --fin2 1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 200000 --ncall2 300000 --ncall1osres 20000 --ncall2osres 30000 --nevents 400000 --nubound 400000 --genevents --usemsub --offset 0 > log_run_mSUGRA_n2x1+ &
+nohup ./runparallel.sh -g -c -e pwhg_main_ninj -d run_mSUGRA_n2n2  -p 50 --fin1 1000023 --fin2 1000023 --slha input_mSUGRA_1410.4999.slha --ncall1 200000 --ncall2 300000 --ncall1osres 20000 --ncall2osres 30000 --nevents 100000 --nubound 100000 --genevents --usemsub --offset 0 > log_run_mSUGRA_n2n2 &
+nohup ./runparallel.sh -g -c -e pwhg_main_xixj -d run_mSUGRA_x1x1 -p 50 --fin1 1000024 --fin2 -1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 200000 --ncall2 300000 --ncall1osres 20000 --ncall2osres 30000 --nevents 100000 --nubound 100000 --genevents --usemsub --offset 0 > log_run_mSUGRA_x1x1 &
+
+High precision LO event generation on cluster:
+nohup ./runparallel.sh -g -c -e pwhg_main_nixj -d runLO_mSUGRA_n2x1+ -p 4 --fin1 1000023 --fin2 1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 200000 --ncall2 300000 --ncall1osres 20000 --ncall2osres 30000 --lopdf 90400 --nevents 5000000 --nubound 5000000 --genevents --merge > log_runLO_mSUGRA_n2x1+ &
+nohup ./runparallel.sh -g -c -e pwhg_main_nixj -d runLO_mSUGRA_n2x1+ -p 50 --fin1 1000023 --fin2 1000024 --slha input_mSUGRA_1410.4999.slha --ncall1 200000 --ncall2 300000 --ncall1osres 20000 --ncall2osres 30000 --lopdf 90400 --nevents 400000 --nubound 400000 --genevents --usemsub --offset 0 > log_runLO_mSUGRA_n2x1+ &
