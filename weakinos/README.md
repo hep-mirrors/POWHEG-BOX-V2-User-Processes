@@ -13,7 +13,7 @@ To get started, compile the static libraries
 
 * libSLHA.a
 
-for your own operating system. To do this, call the configuration scripts in the main directory by simply typing
+for the operating system you are using. To this end, call the configuration scripts in the main directory by simply typing
 
         $ ./configure.sh
 

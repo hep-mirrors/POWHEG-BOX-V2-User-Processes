@@ -116,7 +116,7 @@ c modifies the jacobian.
 
         ! this is |M_R(res)|**2 (still with on-shell resonances)
         call sreal_proc_res(p,rflav,chan,amp)
-
+        
         ! calculate the on-shell counter terms BW*corrfac*|M_R^OS(res)|**2
         ! (don't subtract anything if the squark is off-shell, but if 
         ! the quark is on-shell subtract the divergent part) 
@@ -129,12 +129,12 @@ c modifies the jacobian.
           ampCT = corrfac(s12,mi,mj,mk,sij,mij)*ampCT             ! rescale the counter term to fit into the new ps
         else
           ampCT = 0D0
-        endif  
+        endif
 
         ! calculate the total resonant amplitude and substract the
         ! on-shell counter terms -> no on-shell resonances anymore
         ampreal = (+amp-ampCT)
- 
+
         if(isnan(ampreal)) then
           !print*,"got strange value for ampreal amplitude...",ampreal
           ampreal = 0D0

@@ -239,7 +239,6 @@ c set the madgraph and formcalc couplings event by event
 #include "PhysPars.h"
 #include "pwhg_st.h"
 #include "pwhg_math.h"
-
         ! MadGraph
         ! QCD coupling constant
         alphaS = st_alpha

@@ -22,6 +22,11 @@ c |M_R|**2 - BW*corrfac*|M_R^OS|**2.
         integer rflav(nlegreal), dflav(nlegreal)
         ! the real amplitudes
         double precision ampreal
+#ifdef DSUB_II_TEST
+        ! the real resonant amplitudes (testing)
+        double precision amposres
+        integer ichan
+#endif
         double precision amp
         ! function to calculate the squared momentum sum
         double precision momsum2sq
@@ -63,8 +68,17 @@ c |M_R|**2 - BW*corrfac*|M_R^OS|**2.
         ! calculate the couplings for this PS point
         call set_ebe_couplings
         
-        ! get the real amplitude from MadGraph
+        ! get the real amplitude from MadGraph...
         call sreal_proc(p,rflav,amp)
+        
+        ! ...and subtract the resonant amplitudes
+#if defined(DSUB_II)
+        do ichan=1,nosres
+          amposres = 0D0
+          call sreal_proc_res(p,rflav,osresID(ichan),amposres)
+          amp = amp - amposres
+        enddo
+#endif
 
         ! Cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
         ampreal = amp/(st_alpha/(2d0*pi))
