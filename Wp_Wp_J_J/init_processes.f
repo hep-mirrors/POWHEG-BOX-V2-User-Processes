@@ -30,6 +30,8 @@ c     lepton masses
       common/clepmass/lepmass,decmass
       flg_fastbtlbound=.true.
       flg_storemintupb = .true.
+      flg_mintupb_xless = .true.
+      par_mintupb_ratlim = 1000
 
       par_isrtinycsi = 1d-6
       par_isrtinyy = 1d-6
