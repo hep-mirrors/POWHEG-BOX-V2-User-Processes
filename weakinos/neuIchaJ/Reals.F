@@ -19,9 +19,9 @@ c |M_R|**2 - BW*corrfac*|M_R^OS|**2.
 #include "Flags.h"
 #include "osres.h"
         double precision p(0:3,nlegreal),p_in(0:3,nlegreal)
-        integer rflav(nlegreal), dflav(nlegreal)
+        integer rflav(nlegreal), dflav(nlegreal), ichan
         ! the real amplitudes
-        double precision ampreal
+        double precision ampreal, amposres
         double precision amp
         ! function to calculate the squared momentum sum
         double precision momsum2sq
@@ -74,7 +74,6 @@ c |M_R|**2 - BW*corrfac*|M_R^OS|**2.
           amp = amp - amposres
         enddo
 #endif
-
         ! Cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
         ampreal = amp/(st_alpha/(2d0*pi))
         
