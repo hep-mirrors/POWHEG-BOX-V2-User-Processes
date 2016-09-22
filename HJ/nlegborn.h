@@ -10,4 +10,4 @@ c -*- Fortran -*-
  
 
       integer maxalr
-      parameter (maxalr=408)
+      parameter (maxalr=maxprocreal*nlegreal*(nlegreal-1)/2)
