@@ -64,8 +64,7 @@ ifeq ("$(PDF)","lhapdf")
 # LHAPDF may be compiled with ifort or gfortran. The user might need to 
 # set up the correct path.
 LHAPDF_CONFIG=lhapdf-config
-PDFPACK=lhapdf6if.o lhapdf6ifcc.o
-FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
+PDFPACK=lhapdfif.o
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
 ifeq  ("$(STATIC)","-static") 
 ## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
@@ -104,7 +103,7 @@ LIBS+=$(LHAPDFLIB) -Lvbfnlo-files -lvbfnlo
 %.o: %.cc
 	$(CC) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
-LIBS+=-lz
+
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o \
 	calc_invariants.o compute_tensors.o compute_tensors_real.o \
 	convert_coup.o real.o  \
@@ -122,7 +121,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o            \
 	mint_upb.o \
 	opencount.o pwhgreweight.o setlocalscales.o validflav.o       \
 	ubprojections.o \
-	$(PDFPACK) $(USER) $(SYSOBJ) lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o
+	$(PDFPACK) $(USER) $(SYSOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG) vbfnlo-files/libvbfnlo.a
@@ -135,7 +134,7 @@ vbfnlo-files/libvbfnlo.a: vbfnlo-files/*f  vbfnlo-files/*/*f
 
 LHEFANAL=lhef_analysis.o boostrot.o random.o cernroutines.o         \
 	 opencount.o powheginput.o \
-	 lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o \
+	 lhefread.o newunit.o pwhg_analysis_driver.o \
 	 $(PWHGANAL) $(SYSOBJ)
 
 
@@ -147,7 +146,7 @@ lhef_analysis:$(LHEFANAL)
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig6510.o \
 	boostrot.o powheginput.o \
-        lhefread.o pwhg_io_interface.o rwl_weightlists.o pdfdummies.o newunit.o \
+        lhefread.o pdfdummies.o newunit.o \
 	pwhg_analysis_driver.o \
 	random.o cernroutines.o opencount.o  $(PWHGANAL) $(SYSOBJ)
 
@@ -158,7 +157,7 @@ main-HERWIG-lhef: $(HERWIG)
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o \
 	boostrot.o powheginput.o \
-        lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o \
+        lhefread.o newunit.o \
 	pwhg_analysis_driver.o pdfdummies.o \
 	random.o cernroutines.o opencount.o  $(PWHGANAL) $(SYSOBJ)
 
@@ -171,4 +170,3 @@ clean:
         vbfnlo-files/*.o  vbfnlo-files/libvbfnlo.a  vbfnlo-files/*/*.o \
         pwhg_main lhef_analysis main-HERWIG-lhef \
 	main-PYTHIA-lhef
-
