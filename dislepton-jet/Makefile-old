@@ -52,8 +52,7 @@ endif
 
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
-PDFPACK=lhapdf6if.o lhapdf6ifcc.o
-FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
+PDFPACK=lhapdfif.o
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
 ifeq  ("$(STATIC)","-static") 
 # if LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
@@ -125,7 +124,7 @@ else
 XFFLAGS +=-extend-source
 endif
 
-LIBS+=-lz
+
 USER=init_couplings.o init_processes.o                             \
      Born_phsp.o Born.o                                            \
      crossing_virtual.o                                            \
@@ -148,7 +147,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	reshufflemoms.o setlocalscales.o validflav.o mint_upb.o         \
 	sigcollsoft.o sigvirtual.o opencount.o ubprojections_ssj.o      \
 	printout.o pwhg_bookhist-multi.o         \
-        $(USER)  $(PDFPACK) lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o
+        $(USER)  $(PDFPACK)
 
 PWHGEXTRA=$(LIBQCDLOOP) $(LIBFF)
 
@@ -159,7 +158,7 @@ pwhg_main:$(PWHG) $(PWHGEXTRA) Makefile $(MADLIBS)
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	\
      opencount.o powheginput.o pwhg_bookhist-multi.o \
-     lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o \
+     lhefread.o newunit.o pwhg_analysis_driver.o \
      funcprocess.o init_couplings.o printout.o \
      $(PWHGANAL)
 
@@ -170,7 +169,7 @@ lhef_analysis:$(LHEF) libmodel.a
 
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia-6.4.25-decay.o \
 	boostrot.o powheginput.o init_couplings.o funcprocess.o \
-	pwhg_bookhist-multi.o lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o printout.o \
+	pwhg_bookhist-multi.o lhefread.o newunit.o pdfdummies.o printout.o \
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
 	$(PWHGANAL)
 
@@ -233,4 +232,3 @@ ifdef BUILDQCDLOOP
 	cd $(BUILDQCDLOOP) && make clean && cd ql && make clean && cd ../ff/ && make clean
 endif
 	rm -f *.a DHELAS/*.o Madlib/*.o MODEL/*.o
-
