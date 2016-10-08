@@ -107,6 +107,8 @@ pwhg_cpHTO_reweight.o: pwhg_cpHTO_reweight.f $(INCLUDE)
 %.o: %.cc
 	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
+LIBS+=-lz
+
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o \
         real.o btilde.o pt2maxreg.o LesHouchesreg.o pwhg_cpHTO_reweight.o \
 	$(PWHGANAL)
@@ -115,43 +117,47 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o lhefwrite.o LesHouches.o		\
 	gen_Born_phsp.o find_regions.o test_Sudakov.o sigborn.o		\
 	gen_real_phsp.o maxrat.o gen_index.o gen_radiation.o		\
 	Bornzerodamp.o sigremnants.o random.o boostrot.o		\
-	bra_ket_subroutines.o cernroutines.o init_phys.o powheginput.o	\
-	pdfcalls.o sigreal.o sigcollremn.o pwhg_bookhist-multi-new.o	\
-	pwhg_analysis_driver.o checkmomzero.o setstrongcoupl.o		\
-	integrator.o newunit.o mwarn.o sigsoftvirt.o sigcollsoft.o	\
-	sigvirtual.o setlocalscales.o validflav.o pwhgreweight.o        \
-	opencount.o ubprojections.o utils.o mint_upb.o $(PDFPACK) $(USER) $(FPEOBJ)
+	bra_ket_subroutines.o cernroutines.o init_phys.o		\
+	powheginput.o pdfcalls.o sigreal.o sigcollremn.o		\
+	pwhg_bookhist-multi-new.o pwhg_analysis_driver.o		\
+	checkmomzero.o setstrongcoupl.o integrator.o newunit.o		\
+	mwarn.o sigsoftvirt.o sigcollsoft.o sigvirtual.o		\
+	setlocalscales.o validflav.o pwhgreweight.o			\
+	pwhg_io_interface.o rwl_weightlists.o lhefread.o		\
+	rwl_setup_param_weights.o opencount.o ubprojections.o utils.o	\
+	mint_upb.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
 pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,obj/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
-LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL)	\
-     lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
+LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o opencount.o	\
+     powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL) lhefread.o	\
+     pwhg_io_interface.o rwl_weightlists.o newunit.o			\
+     pwhg_analysis_driver.o $(FPEOBJ)
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
 	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@
 
-
-
 # target to read event file, shower events with HERWIG + analysis
-HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL) lhefread.o	\
-	pdfdummies.o opencount.o $(FPEOBJ)
+HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o		\
+	powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL) newunit.o	\
+	lhefread.o pwhg_io_interface.o rwl_weightlists.o pdfdummies.o	\
+	opencount.o $(FPEOBJ)
 
 main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,obj/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,obj/%,$(HERWIG)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
-PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
-	pwhg_bookhist-multi-new.o $(PWHGANAL) lhefread.o newunit.o pdfdummies.o	\
-	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
-	$(FPEOBJ)
+PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o		\
+	powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL)		\
+	lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o	\
+	pdfdummies.o pwhg_analysis_driver.o random.o cernroutines.o	\
+	opencount.o $(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean
