@@ -94,7 +94,7 @@ endif
 
 # PYTHIA 8
 PYTHIA8LOCATION=/home/oleari/fortran/pythia8183
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include/ -I$(PYTHIA8LOCATION)/include/Pythia8
+PY8CXXFLAGS+=-I$(PYTHIA8LOCATION)/include/ -I$(PYTHIA8LOCATION)/include/Pythia8
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 PWHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
