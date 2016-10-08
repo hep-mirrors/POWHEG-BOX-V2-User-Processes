@@ -179,7 +179,7 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia-6.4.25-decay.o \
 # to which we applied a simple patch to enable slepton decays
 # (for clarity a separate patch file is included which is not needed otherwise)
 main-PYTHIA-lhef: $(PYTHIA) libmodel.a
-	$(FF) $(patsubst %,obj/%,$(PYTHIA)) -L$(LIBDIRMG) -lmodel $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,obj/%,$(PYTHIA)) -L$(LIBDIRMG) -lmodel $(LIBSFASTJET) $(LIBS) $(STATIC) -o $@
 
 
 # autobuild targets for scalar loop integral libraries FF and QCDLoop

@@ -1218,3 +1218,9 @@ c we need the parameter nlegreal
       enddo
       flavequiv=.true.
       end
+
+      subroutine finalize_tags
+      write(*,*)' finalize_tags: should not enter here'
+      write(*,*)' exiting ...'
+      call exit(-1)
+      end
