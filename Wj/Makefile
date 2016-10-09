@@ -1,6 +1,6 @@
 #-*- Makefile -*-
 ## COMPILER: gfortran, ifort
-COMPILER=ifort
+COMPILER=gfortran
 ## PDF: native, lhapdf
 ## For "lhapdf", the LAHPDF package has to be installed separately
 PDF=lhapdf
