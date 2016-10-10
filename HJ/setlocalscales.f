@@ -30,8 +30,10 @@ c      common /crescfac/rescfac1,rescfac2
          frensc2min = powheginput("#frensc2min")
          if(factsc2min.lt.0) factsc2min = 0
          if(frensc2min.lt.0) frensc2min = 1
-         call getq2min(1,tmp)
-         write(*,*) ' ***** minimum Q of pdf:',sqrt(tmp)
+c     The following lines created problems in lhapdf6, and are otherwise useless. Commented away
+c     following complain by P. Lenzi, 10/10/2016
+c         call getq2min(1,tmp)
+c         write(*,*) ' ***** minimum Q of pdf:',sqrt(tmp)
          b0=(33d0-2d0*st_nlight)/(12*pi)
          b1=(153d0-19d0*st_nlight)/(24*pi**2)
          ini = .false.
