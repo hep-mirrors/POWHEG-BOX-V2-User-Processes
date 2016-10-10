@@ -265,7 +265,7 @@ PWHG += cernroutines_mod.o find_regions_mod.o gen_real_phsp_mod.o	\
 	LesHouchesreg_mod.o gen_index_mod.o lhefwrite_mod.o		\
 	gen_radiation_mod.o sigremnants_mod.o pwhgreweight_mod.o 	\
 	pdfcalls.o newunit_mod.o pwhg_main_mod.o
-	
+
 ### LHEF ###
 # analyze LHEF output
 LHEF = lhef_analysis.o boostrot.o random.o cernroutines_mod.o		\
