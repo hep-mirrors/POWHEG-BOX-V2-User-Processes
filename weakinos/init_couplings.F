@@ -745,11 +745,6 @@ c ddbar_SquaredME.F and uubar_SquaredME.F.
         dZgs1y = 0 ! gs*Alfas/(3D0*Pi)
         ! counter term for quark-squark-neutralino yukawa coupling
         dZe1y  = -el*Alfas/(6D0*Pi)
-        
-#ifdef CHECKUV
-        dZgs1y = 0
-        dZe1y  = 0
-#endif
       end
 c############### end init_susy_restore subroutine ######################
 
@@ -775,7 +770,7 @@ c set the paramaters for treating the on-shell resonances
         osresM(8) = mur
 #endif
         
-#if defined(DSUB_I) || defined(DSUB_II) || defined(DSUB_II_TEST)
+#if defined(DSUB_I) || defined(DSUB_II)
         m_avrg = 0D0
         do i=1,nosres
           m_avrg = m_avrg + osresM(i)
