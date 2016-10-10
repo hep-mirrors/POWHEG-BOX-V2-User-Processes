@@ -76,8 +76,8 @@ INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
 PDFPACK=lhapdf6if.o lhapdf6ifcc.o
-FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
-LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
+LHCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
+LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF -lstdc++
 ifeq  ("$(STATIC)","-static") 
 ## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
 ## libgfortran as well. The same holds for libstdc++. 
@@ -93,7 +93,7 @@ PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 # PYTHIA 8
-PYTHIA8LOCATION=/home/oleari/fortran/pythia8183
+PYTHIA8LOCATION=$(shell pythia8-config --prefix)
 PY8CXXFLAGS+=-I$(PYTHIA8LOCATION)/include/ -I$(PYTHIA8LOCATION)/include/Pythia8
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
@@ -181,7 +181,10 @@ endif
 
 %.o: %.cc | $(OBJ)
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS) $(CXXFLAGS)
+
+
 LIBS+=-lz
+
 USER= init_processes_born_real.o init_processes.o  init_couplings.o \
      Born_phsp.o Born.o virtual.o real.o  $(PWHGANAL)
 
@@ -255,7 +258,7 @@ PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBS) $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean libdhelas3.a libmadgraph.a libmodel.a libnlojet.a
@@ -296,6 +299,30 @@ $(OBJ):
 	mkdir -p $(OBJ)
 
 ##########################################################################
+
+
+## Specific rules
+
+lhapdf6ifcc.o: lhapdf6ifcc.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(LHCXXFLAGS)
+
+fastjet-addon.o: fastjet-addon.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(FJCXXFLAGS)
+
+fastjetD0RunIIConewrap.o: fastjetD0RunIIConewrap.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(FJCXXFLAGS)
+
+fastjetfortran-BBUY.o: fastjetfortran-BBUY.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(FJCXXFLAGS)
+
+fastjetfortran.o: fastjetfortran.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(FJCXXFLAGS)
+
+splitandfilt.o: splitandfilt.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(FJCXXFLAGS)
+
+pythia8F77.o: pythia8F77.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^  $(PY8CXXFLAGS)
 
 
 
