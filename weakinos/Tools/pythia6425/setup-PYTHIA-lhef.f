@@ -192,9 +192,11 @@ c     initialize pythia
       integer maxev
       common/mcmaxev/maxev
       integer idc
+      integer iun
+      common/copencount/iun
       nevhep=0
       ! read the header first, so lprup is set
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun)
       ! make pi0 stable as in herwig default: 
       ! mdcy(pycomp(PDG_IDnumber),1) = 1 -> not stable
       ! mdcy(pycomp(PDG_IDnumber),1) = 0 -> stable
@@ -205,7 +207,9 @@ c     initialize pythia
 c     generate an event
       subroutine upevnt
       implicit none
-      call lhefreadev(97)
+      integer iun
+      common/copencount/iun
+      call lhefreadev(iun)
       end
 
 

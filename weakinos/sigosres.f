@@ -313,7 +313,6 @@ c set all new totals concerning regulars/remnants/osres to zero
         double precision totpososres(cnosres),etotpososres(cnosres)
         double precision totnegosres(cnosres),etotnegosres(cnosres)
         integer ncalls,j
-
         common/cadduptotalsosres/totosres,etotosres,totabsosres
         common/cadduptotalsosres/etotabsosres,totpososres
         common/cadduptotalsosres/etotpososres,totnegosres,etotnegosres
