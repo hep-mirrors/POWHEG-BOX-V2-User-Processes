@@ -413,14 +413,8 @@ c      stop
          itdec=powheginput('#topdecaymode')
          if(itdec.lt.0) itdec=0
 
-c         if (itdec.ne.0.and.itdec.ne.20000) then 
-c            print*,'top decay mode =',itdec
-c            print*,'not supported'
-c            stop
-c         endif   
-
          if(itdec.ne.0) then
-            lprup(1)=300000+itdec
+c            lprup(1)=300000+itdec !this works only for stable Higgs
 
 c first call to pickwdecay, to initialize and get back the branching fraction
             call  pickwdecays(iwp1,mdecwp1,iwp2,mdecwp2,
