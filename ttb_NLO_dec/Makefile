@@ -10,8 +10,8 @@ PDF=lhapdf
 
 #ANALYSIS=top-reconstruction
 #ANALYSIS=denner
-#ANALYSIS=denner-2
-ANALYSIS=top-reconstruction-2
+ANALYSIS=denner-2
+#ANALYSIS=top-reconstruction-2
 ## For static linking uncomment the following
 #STATIC= -static
 #

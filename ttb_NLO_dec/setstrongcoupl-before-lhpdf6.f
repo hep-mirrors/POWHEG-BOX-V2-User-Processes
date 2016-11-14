@@ -94,37 +94,23 @@ c we are in a counterterm.
       include 'pwhg_flst.h'
       include 'pwhg_st.h'
       include 'pwhg_rad.h'
+      include 'pwhg_pdf.h'
       real * 8 pwhg_alphas
       integer nf
       external pwhg_alphas
-ccccccccccccccccccccccccccccccccc
-c     SAER FIX
-      real * 8 q2min
       character * 3 whichpdfpk
       external whichpdfpk
-      integer ini,mem
-      data ini/0/
-      save ini,q2min
-      
-      if (ini.eq.0) then
-         if( whichpdfpk().eq.'lha') then    
-           mem = 0
-           call GetQ2min(mem,q2min)
-c     the previous value of q2min is not the value for which pdf is not
-c     zero but the minimum value of Q^2 in pdf grids. In the case of
-c     heavy quarks involved one should use their masses as minimum value
-c     of factorization scale, as we make later on. This works if ptmin
-c     is greater or equal to the mass of heavy quark 
-        elseif( whichpdfpk().eq.'mlm') then    
-c ad hoc value here (mlmpdf does not provide this)
-           q2min=2d0
-        else
-           write(*,*) ' unimplemented pdf package',whichpdfpk()
-           stop
-        endif 
-        ini=1
-      endif
-      st_mufact2=max(q2min,ptsq) 
+
+      if( whichpdfpk().eq.'lha') then
+         continue
+      elseif( whichpdfpk().eq.'mlm') then    
+         continue
+      else
+         write(*,*) ' unimplemented pdf package',whichpdfpk()
+         call exit(-1)
+      endif 
+
+      st_mufact2=max(pdf_q2min,ptsq) 
 cccccccccccccccccccccccccccccccccc
 c     In case of final-state radiation, Born and real PDF's
 c     should always cancel out in the ratio R/B. If the radiation scale
@@ -200,16 +186,10 @@ c
       integer nf
       data olam/0.d0/
       save olam,b5,bp5,b4,bp4,b3,bp3,xlc,xlb,xllc,xllb,c45,c35,xmc,xmb
-      
-      logical ini,usealpdf
-      data usealpdf/.false./
-      data ini/.true./
-      save ini,usealpdf
-      double precision alphasPDF
-      real * 8 powheginput
-      external powheginput
 
-
+c      logical ini
+c      data ini/.true./
+c      save ini
 c      pwhg_alphas = 30d0
 c      if (ini) then
 c         write(*,*) '****************************************'
@@ -220,27 +200,6 @@ c         write(*,*) '****************************************'
 c         ini = .false.         
 c      endif           
 c      return
-
-      if(ini) then
-         if(powheginput('#alphaspdf').eq.1) then
-            usealpdf=.true.
-            write(*,*) '****************************************'
-            write(*,*) '****************************************'
-            write(*,*) '      USING alpha from LHAPDF'
-            write(*,*) '****************************************'
-            write(*,*) '****************************************'
-         endif
-         ini=.false.
-      endif
-
-
-      if(usealpdf) then
-         q   = sqrt(q2)
-         pwhg_alphas=alphasPDF(q)
-         return
-      endif
-
-
 
       if(xlam.ne.olam) then
         olam = xlam
