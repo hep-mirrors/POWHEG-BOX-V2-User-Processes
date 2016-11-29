@@ -114,7 +114,7 @@ ifeq ("$(ANALYSIS)","minlo")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo.o
+PWHGANAL=pwhg_bookhist-multi.o  pwhg_analysis-minlo.o  observables.o 
 PWHGANAL+=  fastjetfortran.o
 endif
 ifeq ("$(ANALYSIS)","minlo-ycut")
