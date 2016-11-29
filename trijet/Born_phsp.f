@@ -776,7 +776,7 @@ c     suppress regions with high rapidities
       external powheginput
       save ini,fixedscale,muref
       if (ini) then
-         if(powheginput("#minlo").eq.1) then
+         if(flg_minlo) then
             write(*,*) '****************************************'
             write(*,*) '*******          MINLO ACTIVE    *******'
             write(*,*) '****************************************'
