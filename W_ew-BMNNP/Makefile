@@ -5,6 +5,7 @@ COMPILER=gfortran
 ## LHAPDF package has to be installed separately
 #PDF = lhapdf
 PDF = native
+#PDF = native
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=default
@@ -13,9 +14,9 @@ ANALYSIS=default
 #
 ifeq ("$(COMPILER)","gfortran")	
 F77= gfortran -fno-automatic  -ffixed-line-length-none
-#F77= gfortran -fno-automatic  -finit-real=nan -ffixed-line-length-none
-#F77= gfortran -fno-automatic -ggdb -pg -finit-real=nan -ffixed-line-length-none
-# -fno-whole-file
+#F77= gfortran -fno-automatic -ggdb -ffixed-line-length-none
+#FPE=-ffpe-trap=invalid,zero,overflow,underflow -finit-real=nan
+# -finit-real=nan
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -27,9 +28,8 @@ OPT=-O2
 ## For debugging uncomment the following
 ifdef DEBUG
 DEBUG= -ggdb -pg -finit-real=nan
-# FPE=-ffpe-trap=invalid,zero,overflow,underflow
-OPT=
-#FPE=-ffpe-trap=invalid,zero,overflow,underflow
+#FPE=-ffpe-trap=invalid,zero,overflow,underflow 
+OPT=-O0
 endif
 endif
 
@@ -50,21 +50,22 @@ OBJ = obj-$(COMPILER)
 HEPMCLOCATION = /usr/local
 LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
 
-#user defined location of PHOTOSCC
-PHOTOSCC_CONFIG=photoscc-config
-PHOTOSCC_LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
-PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
-LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
-
-#user defined location of PYTHIA8
-PYTHIA8_CONFIG=pythia8-config
-PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
-LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
-
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJ)/
+
+#PHOTOSCC_CONFIG=PHOTOSPP-config
+#PHOTOSCC_LOCATION=$(shell $(PHOTOSCC_CONFIG) --prefix)
+PHOTOSCC_LOCATION=$(PWD)/PHOTOS
+PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
+
+PYTHIA8_CONFIG=pythia8-config
+#PYTHIA8_CONFIG=/home/fulvio/Work/POWHEG-BOX-V2/pythia8186/bin/pythia8-config
+PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+#PYTHIA8LOCATION=/home/fulvio/Work/POWHEG-BOX-V2/pythia8186
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(shell dirname $(PWD))/include
@@ -77,7 +78,7 @@ ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
 PDFPACK=lhapdf6if.o lhapdf6ifcc.o
 FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
-LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
+LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF -lstdc++
 ifeq  ("$(STATIC)","-static") 
 ## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
 ## libgfortran as well. The same holds for libstdc++. 
@@ -103,7 +104,6 @@ ifeq ("$(ANALYSIS)","default")
 PWHGANAL=pwhg_analysis.o pwhg_bookhist-multi.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
-#PWHGANAL+= fastjetfortran.o
 endif
 
 %.o: %.f $(INCLUDE)
@@ -112,9 +112,11 @@ endif
 %.o: %.c
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
-%.o: %.cc
-	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)  $(PHOTOSFLAGS)
+#%.o: %.cc
+#	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
+%.o: %.cc
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS) $(PHOTOSFLAGS)
 
 $(shell ../svnversion/svnversion.sh>/dev/null)
 
@@ -163,7 +165,7 @@ PYTHIA=main-PYTHIA.o scalupveto.o scalupvetoqpy6.o setup-PYTHIA-lhef.o pythia.o 
 	$(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o powheginput.o \
         $(PWHGANAL) lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o bra_ket_subroutines.o \
@@ -171,15 +173,15 @@ PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o pow
         $(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBS) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
 $(LIBSLHAPDF) -o $@
-
 
 
 INT_PHOTOS=main-PHOTOS-lhef.o photosCCF.o scalupveto.o boostrot.o powheginput.o lhefread.o pwhg_io_interface.o rwl_weightlists.o cernroutines.o opencount.o newunit.o mwarn.o $(PDFPACK) $(FPE OBJ)
 
 main-PHOTOS-lhef: $(INT_PHOTOS)
-	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBSPHOTOSCC) $(LIBSHEPMC) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBS) $(LIBSPHOTOSCC) $(LIBSHEPMC) -lstdc++ $(STATIC) -o $@ \
+
 
 
 

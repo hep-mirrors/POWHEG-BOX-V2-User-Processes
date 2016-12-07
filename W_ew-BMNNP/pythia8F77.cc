@@ -6,8 +6,8 @@
 // This is a simple test program. It fits on one slide in a talk.
 // It studies the charged multiplicity distribution at the LHC.
 
-#include "Pythia.h"
-#include "LHAFortran.h"
+#include "Pythia8/Pythia.h"
+#include "Pythia8/LHAFortran.h"
 
 #include "Photos/Photos.h"
 #include "Photos/PhotosHEPEVTEvent.h"

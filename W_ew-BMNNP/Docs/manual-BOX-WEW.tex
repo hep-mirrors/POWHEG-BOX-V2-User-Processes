@@ -1,6 +1,8 @@
 \documentclass[paper]{JHEP3}
 \usepackage{amsmath,amssymb,enumerate,url}
 \bibliographystyle{JHEP}
+\usepackage{lineno}
+%\linenumbers
 
 %%%%%%%%%% Start TeXmacs macros
 \newcommand{\tmtextit}[1]{{\itshape{#1}}}
@@ -19,8 +21,11 @@
 \newcommand\HERWIG{{\tt HERWIG}}
 \newcommand\PYTHIASIX{{\tt PYTHIA6}}
 \newcommand\PYTHIAEIGHT{{\tt PYTHIA8}}
+\newcommand\PYTHIA{{\tt PYTHIA}}
 \newcommand\PHOTOS{{\tt PHOTOS}}
+\newcommand\PHOTOSPP{{\tt PHOTOS++}}
 \newcommand\MCatNLO{{\tt MC@NLO}}
+\newcommand\DIR{{\tt W\_ew-BMNNP}}
 
 \newcommand\kt{k_{\sss\rm T}}
 
@@ -30,7 +35,8 @@
 
 
 \title{The  $\boldsymbol{W^\pm}$ EW NLO \& QCD production \\
-in the POWHEG BOX-V2 user manual } \vfill
+in the POWHEG BOX-V2 user manual~\footnote{Upgraded version prepared 
+with the collaboration of Mauro Chiesa and Homero Martinez.} } \vfill
 \author{Luca Barz\`e\\
   PH-TH Department, CERN, CH-1211 Geneva 23, Switzerland\\
   E-mail: \email{Luca.Barze@cern.ch}}
@@ -91,36 +97,84 @@ all subprocesses. In this note we focus on  the settings and
 parameters specific to the $W$ implementation.
 
 \section{Generation of events}
+\label{sec:gen_events}
 
 Build the executable\\
-\tmtexttt{\$ cd POWHEG-BOX-V2/W\_ew-BMNNP \\
+
+\noindent\tmtexttt{\$ cd POWHEG-BOX-V2/\DIR{} \\
 \$ make pwhg\_main }\\
+
 Then do (for example) \\
-\tmtexttt{\$
+
+\noindent\tmtexttt{\$
 cd runtest-lhc-8TeV\\
 \$ ../pwhg\_main}\\
-At
-the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
-100000 events for $W^+ \to e^+ \nu_e$  in the Les Houches format. 
-In order to shower them with \PYTHIASIX{} do\\~\\
+
+At the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
+100000 events for $W^+~\to~e^+~\nu_e$  in the Les Houches format. 
+In order to shower them with \PYTHIASIX{} or \PYTHIAEIGHT{} you 
+must have \PHOTOS{} compiled (even if you do not use it, it must be linked in). 
+The minimal procedure to do this is:
+\\~\\
+\noindent\tmtexttt{\$ 
+cd PHOTOS \\ 
+\$./configure --without-hepmc  \\ 
+\$ make}
+\\
+\\
+Then, in order to shower them with \PYTHIASIX{} do\\~\\
 \tmtexttt{\$
-cd POWHEG-BOX-V2/W\_ew-BMNNP \\ \$ make
+cd POWHEG-BOX-V2/\DIR{}\\ \$ make
 main-PYTHIA-lhef \\ \$ cd
 runtest-lhc-8TeV \\
 \$ ../main-PYTHIA-lhef}
 \\
-\\
-If you prefer to shower the event with \PYTHIAEIGHT{} do\\~\\
+
+If you prefer to shower the events with \PYTHIAEIGHT{} do\\~\\
 \tmtexttt{\$
-cd POWHEG-BOX-V2/W\_ew-BMNNP \\ \$ make
+cd POWHEG-BOX-V2/\DIR{} \\ \$ make
 main-PYTHIA8-lhef \\ \$ cd
 runtest-lhc-8TeV \\
-\$ ../main-PYTHIA-lhef}
+\$ ../main-PYTHIA8-lhef}
+\\
 
+The executables \tmtexttt{main-PYTHIA-lhef} and \tmtexttt{main-PYTHIA8-lhe} are ``interfaces" that process the events in the file \tmtexttt{pwgevents.lhe} and give them as inputs to the parton shower, performing the required vetoes and setting the required flags of the shower programs, in a manner consistent with the physical accuracy of the input events. The output of the shower can be analyzed looking at the histograms in the \tmtexttt{.top}. file. The histograms and cuts can be customized editing the file \verb+pwhg_analysis.f+.
+
+\PYTHIA{} is used to perform the QCD shower. The QED shower can be done using \PYTHIA{} or the independent program \PHOTOS{}~\cite{Golonka:2005pn}. The external source codes required by \tmtexttt{main-PYTHIA-lhef} are the Fortran codes of \PYTHIASIX{} and \PHOTOS{}. They are included in the \POWHEGBOX{} and in the \DIR{} folder, respectively. 
+
+On the other hand, the interface \tmtexttt{main-PYTHIA8-lhef} requires the linking to the external libraries \PYTHIAEIGHT{} and \PHOTOSPP{} (both programs written in C++). \PHOTOSPP{} version 3.56 is included in the \DIR{} package, and can be compiled doing:\\
+
+\tmtexttt{
+\noindent \$ cd POWHEG-BOX-V2/\DIR{}/PHOTOS \\ 
+\$ configure --without-hepmc \\
+\$ make} \\
+
+The flag \verb+PHOTOSCC_LOCATION+ must be set in the \tmtexttt{Makefile} to the path of installation of \PHOTOSPP{}. This path can be the folder \tmtexttt{\DIR{}/PHOTOS} if the user wants to use the included version of \PHOTOSPP{}, otherwise it should be set to the folder of an external installation. The interface has been tested with \PHOTOSPP{} version 3.56.
+
+\PYTHIAEIGHT{} has to be downloaded and compiled by the user. The interface is designed to work with versions of \PYTHIAEIGHT{} up to 8.186 (an interface to {\tt PYTHIA8.2} is in progress). 
+The script \tmtexttt{pythia8-config} should configure automatically the path in the \tmtexttt{Makefile}, if this is not the case, the user must set the \verb+PYTHIA8LOCATION+ flag to the correct path of installation of \PYTHIAEIGHT{}. 
+
+Once \PHOTOSPP{} and \PYTHIAEIGHT{} are compiled and the flags are set properly in the \tmtexttt{Makefile}, the interface \tmtexttt{main-PYTHIA8-lhef} should compile. Then, before running it, the path to \PHOTOSPP{} libraries needs to be added to the list of dynamically linked libraries, and a variable pointing to the path of \PYTHIAEIGHT{} particle data (\tmtexttt{.xml}) files) needs to be set. In order to do this, the script \tmtexttt{setlibrarypaths.sh} must be edited to point to the correct paths, and then executed in the current shell, doing:
+\\~\\
+\tmtexttt{\$ source setlibrarypaths.sh }\\
+
+Another interface is provided which processes the \POWHEG{} generated events, calls the QED final state shower implemented by \PHOTOSPP{} and generates a new event file in LHE format, that can be then interfaced to a QCD shower program, where QED radiation must
+be switched off to avoid double counting. To compile and execute this interface, do:
+\\~\\
+\noindent\tmtexttt{\$
+cd POWHEG-BOX-V2/\DIR{} \\ 
+\$ make main-PHOTOS-lhef \\ \$ cd
+runtest-lhc-8TeV \\
+\$ ../main-PHOTOS-lhef}
+\\
+
+The compilation requires the setting of the flag \verb+PHOTOSCC_LOCATION+ in the \tmtexttt{Makefile}, and the \PHOTOSPP{} path as environmental variable, as explained above.
+
+%There is the possibility to set the flag \verb+HEPMCLOCATION+ in the \tmtexttt{Makefile}, in case the user wants to link to \tmtexttt{HEPMC} libraries. However, they are in principle not needed by the executables mentioned before, so this flag can be left empty.
 
 \section{Process specific input parameters}
 
-Mandatory parameters are those needed to select the final state
+All the parameters and flags are set in the input card file \tmtexttt{powheg.input}. The mandatory parameters are those needed to select the final state
 leptonic species coming from the vector-boson:
 ~\\
 \tmtexttt{
@@ -129,8 +183,7 @@ leptonic species coming from the vector-boson:
   vdecaymode 11 !  code for selected W decay\\
   \phantom{aaaaaaaaaaaaa} ! (11(-11): electronic; 13(-13): muonic; 15(-15): tauonic)}
 \\
-Together with the mandatory parameters, the \POWHEGBOX{} input facility 
-allows for an easy 
+In addition to the mandatory parameters, the \POWHEGBOX{} input allows for an easy 
 setting of EW and run parameters, by explicitly adding the relevant 
 lines to the input card. 
 If one of the following entries is not present in the input card  the reported default 
@@ -186,7 +239,6 @@ $l \nu (\gamma)$ inv mass}\\
    CKM\_Vts   1d-10 \\
    CKM\_Vtb   1.0\\}
 \\
-\\
 The EW radiative corrections can be calculated according to two 
 different schemes: the $\alpha(0)$ scheme, where the input parameters 
 are $\alpha(0)$, $M_W$ and $M_Z$; the $G_\mu$ scheme, where the 
@@ -206,27 +258,11 @@ This last option is just to check EW corrections at the NLO level (i.e.,
 the Les Houches events do not have much meaning).
 \\
 \\
-The program can be interfaced to both \PYTHIASIX{} and  \PYTHIAEIGHT{},
-by doing
-\\
-\tmtexttt{make main-PYTHIA-lhef}
-\\
-for \PYTHIASIX{} and
-\\
-\tmtexttt{make main-PYTHIA8-lhef}.
-\\
-for \PYTHIAEIGHT{}.
-\\
-In the case of \PYTHIASIX{} one can also optionally switch off photon radiation
-from  \PYTHIASIX{} and use \PHOTOS{}~\cite{Golonka:2005pn}
-instead. This is done by setting:
+The program can be interfaced to both \PYTHIASIX{} and  \PYTHIAEIGHT{}, as explained in section~\ref{sec:gen_events}. In order to switch off photon radiation from \PYTHIA{} and use \PHOTOS{} instead, use the setting:
 \\
 \tmtexttt{use\_photos 1   ! default 0}
 \\
 in the \tmtexttt{powheg.input} file.
-\\
-The \PHOTOS \, source code is included in the \POWHEGBOX. 
-\\
 \\
 For photon final state radiation a comment is in order. According to 
 the \POWHEG{} method, the radiation by the shower has to be generated 
@@ -240,11 +276,10 @@ from the $W$. Hence, in order to avoid double counting of QED radiation,
 a veto algorithm is necessary. The same problem is present also using 
 \PHOTOS{}. 
 This algorithm 
-is provided automatically in the files \tmtexttt{main-PYTHIA-lhef.f} and 
-\tmtexttt{scalupveto.f}. The same algorithm is implemented for 
-\PYTHIAEIGHT{}. In this case, however, the user can optionally 
-adopt the internal algorithm of \PYTHIAEIGHT, which is switched 
-on by setting:
+is provided automatically in the files \tmtexttt{main-PYTHIA.f}, \tmtexttt{main-PYTHIA8.f} and 
+\tmtexttt{scalupveto.f}. For the case of the interface to \PYTHIAEIGHT{}, the user can optionally 
+adopt the internal matching algorithm of \PYTHIAEIGHT{}, which is switched 
+on by setting the flag:
 \\
 \tmtexttt{py8veto 1   ! default 0}
 \\
@@ -268,31 +303,35 @@ is performed. This choice can be activated by setting
 \\
 in the \tmtexttt{powheg.input} file.
 \\
-\\
 In this case, if the QED higher order radiation is handled by \PYTHIAEIGHT{}, 
 also the QED starting scale is set to {\tt scalup} through the 
 \tmtexttt{class MyUserHooks}. 
 \\ 
 \\
-\\
 Additional flags available for the \PYTHIAEIGHT{} interface 
-are the following (they can be set in the \tmtexttt{powheg.input} file): 
+are the following: 
 \\
 \tmtexttt{noQEDq 1   ! default 0}, which allows to switch off QED radiation 
 from quarks; 
 \\
 \tmtexttt{pytune xx  ! default 5}, which allows to change the tune; 
 \\
-\tmtexttt{nohad 1  ! default 0}, which allows to swith off the hadronization. 
+\tmtexttt{nohad 1  ! default 0}, which allows to switch off the hadronization. 
 \\
-\\
-\\
-As a last comment, in the provided interface to \PYTHIAEIGHT{} 
+In the provided interface to \PYTHIAEIGHT{} 
 the decay of hadronic resonances which can proceed radiatively has been 
 suppressed. In order to let the resonances decay, the user should 
 open the file \tmtexttt{pythia8F77.cc} and comment the relevant lines 
 in {\tt pythia\_init}.
+\\
+\\
+For further customization of the settings used by the shower interfaces, beyond the flags available in \tmtexttt{powheg.input}, the user can modify the following source code files:
 
+\begin{itemize}
+\item Interface \tmtexttt{main-PYTHIA-lhef}: Settings in files \tmtexttt{setup-PYTHIA-lhef.f} and \tmtexttt{photos.f}.
+\item Interface \tmtexttt{main-PYTHIA8-lhef}: Settings in file \tmtexttt{pythia8F77.cc}.
+\item Interface \tmtexttt{main-PHOTOS-lhef}: Settings in file \tmtexttt{photosCCF.cc}.
+\end{itemize}
 
 
 \section{Generation of a sample with $W^+$ and $W^-$
@@ -317,7 +356,7 @@ invocation lines should be as follows:~\\~\\ \tmtexttt{\$ sh
 
 Few remarks are needed:
 \begin{itemize}
-\item it is responsability of the user to check that the 2 input files
+\item it is responsibility of the user to check that the 2 input files
   are equal. The \tmtexttt{idvecbos}  and \tmtexttt{vdecaymode} tokens have to be different,
   obviously.
 \item the two values of \tmtexttt{numevts} are not really used: the

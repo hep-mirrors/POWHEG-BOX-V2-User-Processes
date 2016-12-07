@@ -93,6 +93,7 @@ c we are in a counterterm.
       include 'pwhg_flst.h'
       include 'pwhg_st.h'
       include 'pwhg_rad.h'
+      include 'pwhg_pdf.h'
       real * 8 pwhg_alphas
       integer nf
       external pwhg_alphas
@@ -106,24 +107,19 @@ c     SAER FIX
       save ini,q2min
       
       if (ini.eq.0) then
-         if( whichpdfpk().eq.'lha') then    
-           mem = 0
-           call GetQ2min(mem,q2min)
-c     the previous value of q2min is not the value for which pdf is not
-c     zero but the minimum value of Q^2 in pdf grids. In the case of
-c     heavy quarks involved one should use their masses as minimum value
-c     of factorization scale, as we make later on. This works if ptmin
-c     is greater or equal to the mass of heavy quark 
-        elseif( whichpdfpk().eq.'mlm') then    
-c ad hoc value here (mlmpdf does not provide this)
-           q2min=2d0
-        else
-           write(*,*) ' unimplemented pdf package',whichpdfpk()
-           stop
-        endif 
+         if( whichpdfpk().eq.'lha') then
+            continue
+         elseif( whichpdfpk().eq.'mlm') then    
+            continue
+         else
+            write(*,*) ' unimplemented pdf package',whichpdfpk()
+            call exit(-1)
+         endif 
         ini=1
       endif
-      st_mufact2=max(q2min,ptsq) 
+
+      st_mufact2=max(pdf_q2min,ptsq) 
+
 cccccccccccccccccccccccccccccccccc
 c     In case of final-state radiation, Born and real PDF's
 c     should always cancel out in the ratio R/B. If the radiation scale

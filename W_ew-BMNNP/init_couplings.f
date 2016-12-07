@@ -26,7 +26,8 @@ c     0 -> alpha(0)
 c     1 -> gmu
       integer scheme
       common/sch/scheme
-      complexmasses = .false.
+c      complexmasses = .false.
+      complexmasses = .true.
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

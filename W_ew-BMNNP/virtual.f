@@ -2048,8 +2048,7 @@ c      complexmasses = .false.   !already defined in init_couplings.f
           if (.not.complexmasses.and.abs(m12-mw2).le.epsilon.and.
      +        abs(p2-mlep2).gt.epsilon) then
 c fulvio-mauro
-c               arglog = cone - p2/(m12 - ii*ph_WmWw)
-               arglog = (m12 - ii*ph_WmWw  - p2*cone)/m12   !another possible choice
+               arglog = cone - p2/(m12 - ii*ph_WmWw)
 c fulvio-mauro
           else
               arglog = (m12 - p2)/m12
@@ -2249,8 +2248,7 @@ c fulvio-mauro
           if (.not.complexmasses.and.abs(m02-mw2).lt.2d0*epsilon) then
 c
 c fulvio-mauro
-c              arglog = ( m02 - ii*ph_WmWw - p2 )/(m02 - ii*ph_WmWw)
-              arglog = ( m02 - ii*ph_WmWw - p2 )/m02
+              arglog = ( m02 - ii*ph_WmWw - p2 )/(m02 - ii*ph_WmWw)
 c fulvio-mauro
           else
               arglog = ( m02 - p2 )/m02
@@ -2592,8 +2590,7 @@ c fulvio-mauro
       if (.not.complexmasses.and.abs(m22-mw2).lt.2d0*epsilon) then
           arglog1= ( m22 - ii*ph_WmWw - s2bar )/m12
 c fulvio-mauro
-          arglog2= ( m22 - ii*ph_WmWw - s2bar )/m22
-c          arglog2= ( m22 - ii*ph_WmWw - s2bar )/(m22 - ii*ph_WmWw)
+          arglog2= ( m22 - ii*ph_WmWw - s2bar )/(m22 - ii*ph_WmWw)
 c fulvio-mauro
           argli21= - s2bar/( m22 - ii*ph_WmWw - s2bar )
       else
@@ -2651,8 +2648,7 @@ c fulvio-mauro
 *
       if (.not.complexmasses.and.abs(m22-mw2).le.2d0*epsilon) then
 c fulvio-mauro
-c          arglog = ( m22 - ii*ph_WmWw - s2bar )/(m22-ii*ph_WmWw)
-          arglog = ( m22 - ii*ph_WmWw - s2bar )/m22
+          arglog = ( m22 - ii*ph_WmWw - s2bar )/(m22-ii*ph_WmWw)
 c fulvio-mauro
       else
           arglog = ( m22 - s2bar )/m22
@@ -2881,12 +2877,7 @@ c fulvio-mauro
           argli2= (p212b-p202b)/(m22-ii*ph_WmWw -p202b) * cone
 
 c fulvio-mauro
-c          boxout =  2.d0 * log((m22-ii*ph_WmWw-p212b)/arglog)
-c     +           * log(sqrt(mudim2)*m3/(m32-p312b))
-c     +           + (log(sqrt(mudim2)*m3/(m32-p312b)))**2 
-c     +           - 2.d0*myli2(argli2)
-c     +           + li21lp1 + li21lm1 - pi2/6.d0*cone
-          boxout =  2.d0 * log((m22-p212b)/arglog)
+          boxout =  2.d0 * log((m22-ii*ph_WmWw-p212b)/arglog)
      +           * log(sqrt(mudim2)*m3/(m32-p312b))
      +           + (log(sqrt(mudim2)*m3/(m32-p312b)))**2 
      +           - 2.d0*myli2(argli2)

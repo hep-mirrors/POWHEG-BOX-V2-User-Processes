@@ -36,6 +36,12 @@ c if EWK corrections are OFF in PowHeg, QEDPS should not be vetoed
       logical mustveto_gamma,not_finite_kin_lh
       common/optionpwhggamma/mustveto_gamma
       integer iun
+
+
+      integer iun97
+      common/c_unit_new/iun97
+
+
 c This is needed by Photos seteps routine
       kt2minqed = powheginput("#kt2minqed")
       if (kt2minqed.le.0d0) kt2minqed  = 0.001d0**2
@@ -63,7 +69,7 @@ c Set up initial parameter
       nevhep=0
       do iev=1,maxev
 c Count the number of trials for showering each LH event
- 1       call lhefreadev(97)
+ 1       call lhefreadev(iun97)
          if(not_finite_kin_lh()) goto 1
 c$$$c DEBUG STARTS *******************************************
 c$$$         write(*,*) ' incoming Les Houches event **********************'
