@@ -18,6 +18,10 @@
       external powheginput
       logical mustveto_gamma,not_finite_kin_lh
 
+      integer iun97
+      common/c_unit_new/iun97
+
+
       extrainfo = .false.
       extrainfolines = 0
 
@@ -41,11 +45,11 @@ c Open new file to write to
 c Open file 'pwgevents.lhe', count the number 
 c of events and read header (fill in some important variables)
       call getmaxev(maxev)
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun97)
 
 c Go back to beginning of file, print header to output file (powheg information)
-      rewind(97)
-      call readandwrite(97,oun,'-->')
+      rewind(iun97)
+      call readandwrite(iun97,oun,'-->')
 
 c Initialize Photos, return initialization information
       photos_init_info = ' '
@@ -56,7 +60,7 @@ c Write Photos initialization information in output file
       write(oun,'(a)') trim(photos_init_info)
 
 c Write other remaining header info in output file (up to first event)
-      call readandwrite(97,oun,'<event>')
+      call readandwrite(iun97,oun,'<event>')
 
 
 c Loop on events 
@@ -69,7 +73,7 @@ c Loop on events
       do l=1,maxev
 
 c Read event from LHE input file
-1       call lhefreadev(97)
+1       call lhefreadev(iun97)
 
         if(not_finite_kin_lh()) goto 1
 
@@ -130,16 +134,16 @@ c Print event (particle information) to output file
 c Check first event of the input file to see if there is extra info
         if (evtphotos.eq.1) then
           write(*,*) 'Checking first event for extra info'
-          backspace(97)
-          backspace(97)
-          read(unit=97,fmt='(a)') readstring
+          backspace(iun97)
+          backspace(iun97)
+          read(unit=iun97,fmt='(a)') readstring
           if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) then 
             extrainfo=.true.
 c Count the number of extra lines per event
             extrainfolines=1
-20          backspace(97)
-            backspace(97)
-            read(unit=97,fmt='(a)') readstring
+20          backspace(iun97)
+            backspace(iun97)
+            read(unit=iun97,fmt='(a)') readstring
             if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) then
               extrainfolines=extrainfolines+1
               goto 20
@@ -148,27 +152,27 @@ c Count the number of extra lines per event
           write(*,*) 'Found ', extrainfolines, ' lines of extra info'
 c Move forward to end of event
           do j=1,extrainfolines+1
-            read(unit=97,fmt='(a)') readstring
+            read(unit=iun97,fmt='(a)') readstring
           enddo
         endif
 
 c Write extra block, if present, to output file
         if (extrainfo) then
 c Move backwards in event, until last line with particle data
-40        backspace(97)
-          backspace(97)
-          read(unit=97,fmt='(a)') readstring
+40        backspace(iun97)
+          backspace(iun97)
+          read(unit=iun97,fmt='(a)') readstring
 c          write(*,*) 'HH: ', readstring
           if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) goto 40
 c Move forward and write to output file
           do j=1,extrainfolines
-            read(unit=97,fmt='(a)',end=50) readstring
+            read(unit=iun97,fmt='(a)',end=50) readstring
 50          continue
             write(oun,'(a)') trim(readstring)
 c            write(*,*) 'HH: ', j, readstring
           enddo
 c Move extra line to reach end of event
-          read(unit=97,fmt='(a)',end=30) readstring
+          read(unit=iun97,fmt='(a)',end=30) readstring
         endif
 
 30      continue
@@ -184,10 +188,23 @@ c Write 'end of file' statement
       end
 
 
+c$$$      subroutine getmaxev(maxev)
+c$$$      integer maxev
+c$$$C--- Opens input file and counts number of events, setting MAXEV;
+c$$$      call opencount(maxev)
+c$$$      end
+
       subroutine getmaxev(maxev)
       integer maxev
+      integer nev,j,iun,iret
+      common/copencount/iun
+      integer iun97
+      common/c_unit_new/iun97
+      save /c_unit_new/
 C--- Opens input file and counts number of events, setting MAXEV;
       call opencount(maxev)
+
+      iun97=iun
       end
 
 

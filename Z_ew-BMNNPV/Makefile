@@ -3,7 +3,8 @@
 COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
-PDF = lhapdf
+#PDF = lhapdf
+PDF = native
 #PDF = native
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
@@ -45,24 +46,25 @@ endif
 
 OBJ = obj-$(COMPILER)
 
-HEPMCLOCATION = /usr/local
-LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
-
-PHOTOSCC_CONFIG=PHOTOSPP-config
-PHOTOSCC_LOCATION=$(shell $(PHOTOSCC_CONFIG) --prefix)
-#PHOTOSCC_LOCATION=/home/fulvio/POWHEG-BOX-V2/W_ew-BMNNP/PHOTOS
-PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
-LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
-
-PYTHIA8_CONFIG=pythia8-config
-PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
-#PYTHIA8LOCATION=/usr/local
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
-LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
+#HEPMCLOCATION = /usr/local
+#LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJ)/
+
+#PHOTOSCC_CONFIG=PHOTOSPP-config
+#PHOTOSCC_LOCATION=$(shell $(PHOTOSCC_CONFIG) --prefix)
+PHOTOSCC_LOCATION=$(PWD)/PHOTOS
+PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
+
+PYTHIA8_CONFIG=pythia8-config
+#PYTHIA8_CONFIG=/home/fulvio/Work/POWHEG-BOX-V2/pythia8186/bin/pythia8-config
+PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+#PYTHIA8LOCATION=/home/fulvio/Work/POWHEG-BOX-V2/pythia8186
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(shell dirname $(PWD))/include
@@ -173,7 +175,7 @@ PYTHIA=main-PYTHIA.o scalupveto.o scalupvetoqpy6.o setup-PYTHIA-lhef.o pythia.o 
 	$(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o powheginput.o \
         $(PWHGANAL) lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o bra_ket_subroutines.o \
@@ -181,14 +183,15 @@ PYTHIA8=main-PYTHIA8.o scalupveto.o scalupvetoqpy8.o pythia8F77.o boostrot.o pow
         $(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBS) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)\
 $(LIBSLHAPDF) -o $@
 
 
 INT_PHOTOS=main-PHOTOS-lhef.o photosCCF.o scalupveto.o boostrot.o powheginput.o lhefread.o pwhg_io_interface.o rwl_weightlists.o cernroutines.o opencount.o newunit.o mwarn.o $(PDFPACK) $(FPE OBJ)
 
 main-PHOTOS-lhef: $(INT_PHOTOS)
-	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBSPHOTOSCC) $(LIBSHEPMC) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(INT_PHOTOS)) $(LIBS) $(LIBSPHOTOSCC) $(LIBSHEPMC) -lstdc++ $(STATIC) -o $@ \
+
 
 
 

@@ -33,6 +33,11 @@
       logical mustveto_gamma,not_finite_kin_lh
       integer ilh,nup0
 
+      integer iun97
+      common/c_unit_new/iun97
+
+
+
       WHCPRG='PYTHIA'
 
       if(powheginput("#veto1").eq.1) then
@@ -68,7 +73,7 @@ c
 
       call getmaxev(maxev)
 
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun97)
 
       call pythia_init
 
@@ -85,7 +90,7 @@ c that pass the veto.
 
       do l=1,maxev
          py8trial = 0
- 1       call lhefreadev(97)
+ 1       call lhefreadev(iun97)
          if(not_finite_kin_lh()) goto 1
 c     set the starting scale for QED shower from leptons to SCALUP
 c     (the default would be the resonance mass)
@@ -206,11 +211,25 @@ c     check parameters
       call pwhgaccumup 
       end
 
+c$$$      subroutine getmaxev(maxev)
+c$$$      integer maxev
+c$$$C--- Opens input file and counts number of events, setting MAXEV;
+c$$$      call opencount(maxev)
+c$$$      end
+
       subroutine getmaxev(maxev)
       integer maxev
+      integer nev,j,iun,iret
+      common/copencount/iun
+      integer iun97
+      common/c_unit_new/iun97
+      save /c_unit_new/
 C--- Opens input file and counts number of events, setting MAXEV;
       call opencount(maxev)
+      iun97=iun
       end
+
+
 
       subroutine pyaend
       character * 20 pwgprefix

@@ -149,7 +149,6 @@ c minimal final state mass
 
       end
 
-
       subroutine born_suppression(fact)
       implicit none
       include 'nlegborn.h'
@@ -157,26 +156,51 @@ c minimal final state mass
       include 'pwhg_kn.h'
       logical ini
       data ini/.true./
-      real * 8 fact,pt
+      real * 8 fact
+      real * 8, save :: zmasscut
       real * 8 powheginput
       external powheginput
+      integer npo
+      real*8 vv(0:3)
       if (ini) then
-         pt = powheginput("#ptsupp")         
-         if(pt.gt.0) then
+
+         zmasscut = powheginput("#ptsupp")         
+
+         if(zmasscut.gt.0) then
             write(*,*) ' ******** WARNING: ptsupp is deprecated'
             write(*,*) ' ******** Replace it with bornsuppfact'
          else
-            pt = powheginput("#bornsuppfact")
+            zmasscut = powheginput("#bornsuppfact")
          endif
-         if(pt.ge.0) then
+ 
+         if(zmasscut.ge.0) then
+            write(*,*) '***********************************************'
+            write(*,*) 'Born suppression = Mll^4/(Mll^2+bornsuppfact^4)'
+            write(*,*) '***********************************************'            
+         else
             write(*,*) '**************************'
             write(*,*) 'No Born suppression factor'
             write(*,*) '**************************'
          endif
+
          ini=.false.
       endif
-      fact=1d0
+      npo=2
+      if(zmasscut > 0) then
+         vv=kn_cmpborn(:,3) + kn_cmpborn(:,4)
+c         fact = (kn_cmpborn(0,3)**2 - kn_cmpborn(1,3)**2 -
+c     1        kn_cmpborn(2,3)**2 -kn_cmpborn(3,3)**2)**npo
+
+         fact = (vv(0)**2 - vv(1)**2 -
+     1           vv(2)**2 - vv(3)**2)**npo
+
+         fact = fact/(fact+zmasscut**(2*npo))
+      else
+         fact = 1
+      endif
+
       end
+
 
 
       subroutine set_fac_ren_scales(muf,mur)

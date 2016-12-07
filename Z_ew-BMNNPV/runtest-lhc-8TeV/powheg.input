@@ -1,7 +1,7 @@
 !Single vector boson production parameters
 vdecaymode 13      !(11: electronic decay, 13: muonic decay, 15: tauonic decay) 
 
-numevts 100000          ! number of events to be generated
+numevts 100          ! number of events to be generated
 ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
 ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
 ndns1 131         ! pdf set for hadron 1 (mlm numbering)
@@ -25,7 +25,7 @@ itmx2    15     ! number of iterations for computing the integral and finding up
 foldcsi   1    ! number of folds on csi integration
 foldy     1    ! number of folds on  y  integration
 foldphi   1    ! number of folds on phi integration
-nubound 100       ! number of bbarra calls to setup norm of upper bounding function
+nubound 100000       ! number of bbarra calls to setup norm of upper bounding function
 icsimax  1     ! <= 100, number of csi subdivision when computing the upper bounds
 iymax    1     ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0   ! increase upper bound for radiation generation
@@ -60,7 +60,7 @@ testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 # End group for parallel run
 
 
-mass_low 30
+mass_low 50
 
 # Input of the W mass working group report as of Dec. 2014
 Zmass 91.1876d0
@@ -74,13 +74,13 @@ Taumass 1.77682d0
 scheme 0
 alphaem 0.0072973525698163d0
 Tmass 173.5d0
-runningscale 1       ! default is 1, true, central scale equal to W virtuality, 0 equal to M_W
+#runningscale 1       ! default is 1, true, central scale equal to W virtuality, 0 equal to M_W
 #
 
 
 
 #no_strong 1         ! default 0; if 1, nostrong corrections are included
-#no_ew 1             ! default 0; if 1, no EW corrections are included
+no_ew 1             ! default 0; if 1, no EW corrections are included
 
 
 btlscalereal 1

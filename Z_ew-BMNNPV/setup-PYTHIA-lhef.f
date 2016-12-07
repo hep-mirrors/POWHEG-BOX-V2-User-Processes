@@ -114,11 +114,26 @@ c     tolerate 2% of killed events
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
       end
 
+c$$$      subroutine getmaxev(maxev)
+c$$$      integer maxev
+c$$$C--- Opens input file and counts number of events, setting MAXEV;
+c$$$      call opencount(maxev)
+c$$$      end
+
       subroutine getmaxev(maxev)
       integer maxev
+      integer nev,j,iun,iret
+      common/copencount/iun
+      integer iun97
+      common/c_unit_new/iun97
+      save /c_unit_new/
 C--- Opens input file and counts number of events, setting MAXEV;
       call opencount(maxev)
+
+      iun97=iun
       end
+
+
 
       subroutine UPINIT
       implicit none
@@ -140,10 +155,14 @@ C--- Opens input file and counts number of events, setting MAXEV;
       integer photoscount
       common/photoscount/photoscount
 
+      integer iun97
+      common/c_unit_new/iun97
+
+
       photoscount=0
       nevhep=0
 c read the header first, so lprup is set
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun97)
 
 c cut-off for photon emission
       parp(68)=2.d0* 0.8944d0 !to comply with powheg !1d-3  !ISR off quarks (default=0.001)
@@ -182,11 +201,15 @@ c     (in pythia6 the default Q_max is the resonance mass)
       integer photoscount
       common/photoscount/photoscount
 
+      integer iun97
+      common/c_unit_new/iun97
+
+
       if(use_photos) then
 c check dor events killed by PYTHIA QCD shower 
 c for QED radiation with PHOTOS
          if(nevhep.ne.photoscount) then 
-            call lhefreadev(97)
+            call lhefreadev(iun97)
             photoscount=nevhep
          endif
          photoscount=photoscount+1

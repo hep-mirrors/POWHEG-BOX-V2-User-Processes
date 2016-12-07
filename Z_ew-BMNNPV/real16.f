@@ -119,20 +119,15 @@ c Mass shell
       k2(0) = sqrt(k2(1)**2+k2(2)**2+k2(3)**2+ml2)
       p1(0) = abs(p1(3))
       p2(0) = abs(p2(3))
-c energy conservation by rescaling final momenta.
+c energy conservation by rescaling initial momenta.
 c fix electron on mass shell and iterate 4 times
-      do kkk=1,4
-         deltae = p1(0)+p2(0)-k(0)-k1(0)-k2(0)
-         k1 = k1*(1+deltae/(p1(0)+p2(0)))
-         k2 = k2*(1+deltae/(p1(0)+p2(0)))
-         k = k*(1+deltae/(p1(0)+p2(0)))
-         k1(0) = sqrt(k1(1)**2+k1(2)**2+k1(3)**2+ml2)
-      enddo
+      deltae = (k(0) + k1(0) + k2(0))/(p1(0)+p2(0))
+      p1 = deltae * p1
+      p2 = deltae * p2
+
       deltae = p1(0)+p2(0)-k(0)-k1(0)-k2(0)
-ccc modified fulvio
-ccc      if(abs(deltae/(pu(0)+pd(0))).gt.1q-30) then
-      if(abs(deltae/(p1(0)+p2(0))).gt.1q-20) then
-ccc modified fulvio
+ccc modified fulvio, + M.C. + P.N. 1-8-2016
+      if(abs(deltae/(p1(0)+p2(0))).gt.1q-25) then
          write(*,*) ' worry: momentum not conserved!'
          write(*,*) deltae/(p1(0)+p2(0))
          call exit(-1)
