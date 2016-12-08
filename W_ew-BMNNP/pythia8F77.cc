@@ -66,6 +66,17 @@ extern "C" {
 
   void photos_init_()
   {
+    
+    // Initialize two random seeds
+    srand (time(NULL));
+    int s1 = rand() % 31327;
+    int s2 = rand() % 30080;
+    cout << "**** SI: Setting PHOTOS random seeds: " << s1 << " " << s2 << endl;
+
+    
+    // Setting random seed for Photos
+    Photos::setSeed(s1, s2); 
+
     Photos::initialize();
     //Photos::setMeCorrectionWtForW(true); 
     //Photos::setDoubleBrem(true);
@@ -896,7 +907,24 @@ extern "C" {
 	pythia.setUserHooksPtr((UserHooks *) PWGHook2); 
       }
 
+    // Possibility to set the random seed 
+    cout << "**** SI: Setting random seed for PYTHIA" << endl;
+    pythia.readString("Random:setSeed = on");
+    
+    // Setting of the random seed
+    // A negative value gives the default seed,
+    // a value 0 gives a random seed based on the time, and
+    // a value between 1 and 900,000,000 a unique different random number sequence. 
+    pythia.readString("Random:seed = 0");
+
+    // Do the actual initialization      
     pythia.init(&LHAinstance);
+    
+    // Checking pythia random seed
+    double x1 = pythia.rndm.flat();
+    double x2 = pythia.rndm.flat();
+    cout << "**** SI: Random values by PYTHIA random generator (for check): x = " << x1 << ", " << x2 << endl;
+
   }
 
   void pythia_next_(int & iret)

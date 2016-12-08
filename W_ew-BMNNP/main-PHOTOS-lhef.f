@@ -48,7 +48,7 @@ c of events and read header (fill in some important variables)
       call lhefreadhdr(iun97)
 
 c Go back to beginning of file, print header to output file (powheg information)
-      rewind(iun97)
+	  call pwhg_io_rewind(iun97)
       call readandwrite(iun97,oun,'-->')
 
 c Initialize Photos, return initialization information
@@ -130,52 +130,8 @@ c$$$c DEBUG ENDS ********************************************
 
 c Print event (particle information) to output file
         call lhefwritev(oun)
+c Notice that extra information of the event is not written in the output file
        
-c Check first event of the input file to see if there is extra info
-        if (evtphotos.eq.1) then
-          write(*,*) 'Checking first event for extra info'
-          backspace(iun97)
-          backspace(iun97)
-          read(unit=iun97,fmt='(a)') readstring
-          if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) then 
-            extrainfo=.true.
-c Count the number of extra lines per event
-            extrainfolines=1
-20          backspace(iun97)
-            backspace(iun97)
-            read(unit=iun97,fmt='(a)') readstring
-            if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) then
-              extrainfolines=extrainfolines+1
-              goto 20
-            endif
-          endif
-          write(*,*) 'Found ', extrainfolines, ' lines of extra info'
-c Move forward to end of event
-          do j=1,extrainfolines+1
-            read(unit=iun97,fmt='(a)') readstring
-          enddo
-        endif
-
-c Write extra block, if present, to output file
-        if (extrainfo) then
-c Move backwards in event, until last line with particle data
-40        backspace(iun97)
-          backspace(iun97)
-          read(unit=iun97,fmt='(a)') readstring
-c          write(*,*) 'HH: ', readstring
-          if ((readstring(1:1)=='<').OR.(readstring(1:1)=='#').OR.(readstring(1:2)==' #')) goto 40
-c Move forward and write to output file
-          do j=1,extrainfolines
-            read(unit=iun97,fmt='(a)',end=50) readstring
-50          continue
-            write(oun,'(a)') trim(readstring)
-c            write(*,*) 'HH: ', j, readstring
-          enddo
-c Move extra line to reach end of event
-          read(unit=iun97,fmt='(a)',end=30) readstring
-        endif
-
-30      continue
 c Write 'end of event' statement
         write(oun,'(a)') '</event>'
 c Write 'end of file' statement
@@ -525,16 +481,16 @@ c      write(nlf,'(a)')'</event>'
       subroutine readandwrite(iun,oun,endstring)
 c Read input file and write into output, up to "endstring"
       implicit none
-      integer iun,oun
+      integer iun,oun,iret
       character(len=*) endstring
       character * 100 readstring
 
 1     continue
-      read(unit=iun,fmt='(a)') readstring
-      if(readstring /= endstring) then
+      call pwhg_io_read(iun,readstring,iret)
+      if(trim(readstring) /= endstring) then
         write(unit=oun,fmt='(a)') trim(readstring)
         goto 1
       endif
-      backspace(iun)  
+      call pwhg_io_backspace(iun)  
 
       end
