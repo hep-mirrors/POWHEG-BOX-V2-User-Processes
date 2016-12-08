@@ -2,6 +2,7 @@
       implicit none
       include 'LesHouches.h'
       include 'hepevt.h'
+      include 'pwhg_rwl.h'
       integer j,k,l,m,iret
       integer maxev,oun
       common/mcmaxev/maxev
@@ -83,6 +84,8 @@ c Set infrared cutoff (using kt2minqed variable)
         call seteps
         photostrial=0
 
+c        write(*,*) '*********** SI: event info: ', l, scalup
+
 c Run PHOTOS until event ok.
 c Photos overwrites the ph_hepevt common block (fills it with photons).
 c Must restore it at each loop
@@ -130,10 +133,18 @@ c$$$c DEBUG ENDS ********************************************
 
 c Print event (particle information) to output file
         call lhefwritev(oun)
-c Notice that extra information of the event is not written in the output file
-       
+
+c Trying extra info, print into output file if needed
+        if (rwl_type/=0) then
+c          write (*,*) 'SI: found reweighting information, writing into output'
+          if (rwl_type==1) then
+            write(oun,*)'#rwgt ',rwl_type, rwl_index,rwl_weight,rwl_seed,rwl_n1,rwl_n2
+          endif
+        endif       
+
 c Write 'end of event' statement
         write(oun,'(a)') '</event>'
+
 c Write 'end of file' statement
         if (l.eq.maxev) write(oun,'(a)') '</LesHouchesEvents>'
 
