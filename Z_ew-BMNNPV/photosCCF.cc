@@ -4,6 +4,8 @@
 #include "Photos/PhotosHEPEVTEvent.h"
 #include <sstream>
 #include <string.h>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>
 
 using namespace Photospp;
 
@@ -33,6 +35,15 @@ extern "C" {
 extern "C" {
 
   void photos_init_() {
+
+    // Initialize two random seeds
+    srand (time(NULL));
+    int s1 = rand() % 31327;
+    int s2 = rand() % 30080;
+    std::cout << "**** SI: Setting PHOTOS random seeds: " << s1 << " " << s2 << std::endl;
+
+    // Setting random seed for Photos
+    Photos::setSeed(s1, s2);
     
     Photos::initialize();
    
