@@ -8,7 +8,7 @@
       real * 8 xborn(ndiminteg-3)
       real * 8 m2,xjac,tau,y,beta,vec(3),cth,cthdec,phidec,s,
      # z,zhigh,zlow
-      integer mu,k
+      integer mu,k,i,j
       logical ini
       data ini/.true./
       save ini
@@ -17,8 +17,10 @@
       real*8 rkallen
       external rkallen
       real*8 pmod,sqla,betal
-      real * 8 mass_low,phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw
-      save phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw
+      real * 8 mass_low,phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw,
+     +         phsp_Wmass2low,phsp_Wmass2high
+      save phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw,
+     +     phsp_Wmass2low,phsp_Wmass2high
       real * 8 powheginput
       if(ini) then
 c     set initial- and final-state masses for Born and real
@@ -34,19 +36,37 @@ c     set initial- and final-state masses for Born and real
          phsp_Wmass2=phsp_Wm**2
          phsp_WmWw=phsp_Wm*phsp_Ww
 
-      endif
 c mass window
-      mass_low = powheginput("#mass_low")
-      if (mass_low.le.0d0) mass_low=1d0
-      mass_low = max(mass_low,decmass)
+         mass_low = powheginput("#mass_low")
+         if (mass_low.le.0d0) mass_low=1d0
+         mass_low = max(mass_low,decmass)
 
-      ph_Wmass2low= mass_low**2
-      ph_Wmass2high= kn_sbeams
+         phsp_Wmass2low= mass_low**2
+         phsp_Wmass2high= kn_sbeams
 
+         write(*,*) '*************************************'
+         write(*,*) 'Z mass = ',ph_Zmass
+         write(*,*) 'Z width = ',ph_Zwidth
+         write(*,*) 'W mass = ',ph_Wmass
+         write(*,*) 'W width = ',ph_Wwidth
+         write(*,*) '1/alphaem = ',1d0/ph_alphaem
+         write(*,*) 'sthw2 = ',ph_sthw2
+         write(*,*) '(unit_e)^2 = ',ph_unit_e**2
+         write(*,*) '(g_w)^2 = ',ph_unit_e*ph_unit_e/ph_sthw2
+         write(*,*) 'CKM matrix' 
+         do i=1,3
+            write(*,*) (ph_CKM(i,j),j=1,3)
+         enddo
+         write(*,*) '*************************************'
+         write(*,*)
+         write(*,*) '*************************************'
+         write(*,*) sqrt(phsp_Wmass2low),'< M_W <',sqrt(phsp_Wmass2high)
+         write(*,*) '*************************************'
+      endif
 c 1 /(16 pi S) d m^2 d cth d y
       xjac=1d0/kn_sbeams/(16*pi)
-      zlow=atan((ph_Wmass2low - phsp_Wmass2)/phsp_WmWw)
-      zhigh=atan((ph_Wmass2high - phsp_Wmass2)/phsp_WmWw)
+      zlow=atan((phsp_Wmass2low - phsp_Wmass2)/phsp_WmWw)
+      zhigh=atan((phsp_Wmass2high - phsp_Wmass2)/phsp_WmWw)
       z=zlow+(zhigh-zlow)*xborn(1)
       m2=phsp_WmWw*tan(z)+phsp_Wmass2
 c d m^2 jacobian
@@ -110,7 +130,7 @@ c      call checkmomzero(nlegborn,kn_pborn)
 c      call checkmass(2,kn_pborn(0,3))
 
 c minimal final state mass 
-      kn_minmass=sqrt(ph_Wmass2low)
+      kn_minmass=sqrt(phsp_Wmass2low)
       end
 
 

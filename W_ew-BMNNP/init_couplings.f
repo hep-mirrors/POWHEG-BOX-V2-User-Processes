@@ -12,8 +12,6 @@
       real * 8 masswindow_low,masswindow_high
       real * 8 powheginput
       external powheginput
-      logical verbose
-      parameter(verbose=.true.)
       integer i,j
       real *8 lepmass(3),decmass
       common/clepmass/lepmass,decmass
@@ -210,25 +208,5 @@ c          g2 = el2/sw2
       gdm=  (-0.5d0*cone - sw2 * qd)/sw/cw
       gdp= - sw/cw*qd
 
-      if (verbose) then
-          write(*,*) '*************************************'
-          write(*,*) 'Z mass = ',ph_Zmass
-          write(*,*) 'Z width = ',ph_Zwidth
-          write(*,*) 'W mass = ',ph_Wmass
-          write(*,*) 'W width = ',ph_Wwidth
-          write(*,*) '1/alphaem = ',1d0/ph_alphaem
-          write(*,*) 'sthw2 = ',ph_sthw2
-          write(*,*) '(unit_e)^2 = ',ph_unit_e**2
-          write(*,*) '(g_w)^2 = ',ph_unit_e*ph_unit_e/ph_sthw2
-          write(*,*) 'CKM matrix' 
-          do i=1,3
-             write(*,*) (ph_CKM(i,j),j=1,3)
-          enddo
-          write(*,*) '*************************************'
-          write(*,*)
-          write(*,*) '*************************************'
-          write(*,*) sqrt(ph_Wmass2low),'< M_W <',sqrt(ph_Wmass2high)
-          write(*,*) '*************************************'
-      endif
       end
 
