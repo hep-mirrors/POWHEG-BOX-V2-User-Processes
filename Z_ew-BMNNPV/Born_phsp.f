@@ -53,6 +53,22 @@ c     mass window
          phsp_Zmass2low = mass_low**2
          phsp_Zmass2high = kn_sbeams
 
+         write(*,*) '*************************************'
+         write(*,*) 'Z mass = ',ph_Zmass
+         write(*,*) 'Z width = ',ph_Zwidth
+         write(*,*) 'W mass = ',ph_Wmass
+         write(*,*) 'W width = ',ph_Wwidth
+         write(*,*) '1/alphaem = ',1d0/ph_alphaem
+         write(*,*) 'sthw2 = ',ph_sthw2
+         write(*,*) '(unit_e)^2 = ',ph_unit_e**2   
+         write(*,*) '(g_w)^2 = ',ph_unit_e*ph_unit_e/ph_sthw2   
+    
+         write(*,*) '*************************************'
+         write(*,*)
+         write(*,*) '*************************************'
+         write(*,*) sqrt(phsp_Zmass2low),'< M_Z <',
+     +              sqrt(phsp_Zmass2high)
+         write(*,*) '*************************************'
       endif
 c Phase space:
 c 1 /(16 pi S) d m^2 d cth d y
