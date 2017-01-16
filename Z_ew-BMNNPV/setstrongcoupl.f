@@ -7,15 +7,7 @@
       external pwhg_alphas
       real * 8 muf,mur
       real * 8 powheginput
-      logical ini
-      real * 8 resc_alphas
-      data ini/.true./
-      save ini,resc_alphas
       external powheginput
-c Switch off strong interaction
-      if(ini) then
-         ini = .false.
-      endif
 
       call set_fac_ren_scales(muf,mur)
       st_mufact2= muf**2*st_facfact**2
@@ -115,14 +107,19 @@ c     SAER FIX
       save ini,q2min
       
       if (ini.eq.0) then
-         if( whichpdfpk().eq.'lha') then    
+         if( whichpdfpk().eq.'lha') then
+            continue
          elseif( whichpdfpk().eq.'mlm') then    
+            continue
          else
             write(*,*) ' unimplemented pdf package',whichpdfpk()
-            stop
+            call exit(-1)
          endif 
+        ini=1
       endif
+
       st_mufact2=max(pdf_q2min,ptsq) 
+
 cccccccccccccccccccccccccccccccccc
 c     In case of final-state radiation, Born and real PDF's
 c     should always cancel out in the ratio R/B. If the radiation scale
