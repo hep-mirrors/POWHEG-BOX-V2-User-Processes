@@ -36,7 +36,9 @@ C     real * 8 pgosam(5*nlegborn)
       multiplicity=1d0
       decflav=abs(bflav(4)) 
 
-      call setZcouplings(decflav)
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10) then
+         call setZcouplings(decflav)
+      endif
       
 c$$$      do i=0,flst_nborn-1
 c$$$         if (equalintlists(nlegborn,bflav,bflav_gosam(1,i))) then
@@ -58,8 +60,7 @@ c     11  : lepton decay: multiply by nleptfam (e,mu, or e,mu,tau)
 c     12  : neutrino decay: multiply by 3 (ve, vmu, vtau)
 c     Factor (1 + alphas(mz)/pi) to take into account the corrections to
 c     the Z decay products
-      if (vdecaymode.eq.0 .or. vdecaymode.eq.10 
-     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
+      if (vdecaymode.eq.0 .or. vdecaymode.eq.10) then 
          if (decflav.eq.11) then
 c     leptons 
             multiplicity = nleptfam
@@ -76,6 +77,12 @@ c     down-type quarks
             write(*,*) 'Wrong case in Born.f'
             call pwhg_exit(-1)
          endif
+      elseif (vdecaymode.eq.11) then
+c     leptons 
+         multiplicity = nleptfam
+      elseif (vdecaymode.eq.12) then
+c     neutrinos
+         multiplicity = 3
       endif
       
       muren=sqrt(st_muren2)
@@ -264,8 +271,7 @@ c     on the Les Houches interface
       call add_resonance(idvecbos,4,5)
 
 c     fix here the Z decay mode
-      if(vdecaymode.eq.0.or.vdecaymode.eq.10  
-     $     .or. vdecaymode.eq.11 .or. vdecaymode.eq.12) then
+      if(vdecaymode.eq.0.or.vdecaymode.eq.10) then
          rand_num=random()
          if(idup(5).eq.-1001) then
 c        down-type quark
@@ -317,6 +323,33 @@ c        neutrino
             write(*,*) 'Error in finalize_lh'
             call pwhg_exit(-1)
          endif
+      elseif (vdecaymode.eq.11) then
+c     lepton
+         rand_num=random()
+         if(rand_num.le.1d0/nleptfam) then
+            idup(5) = -11
+            idup(6) =  11
+         elseif(rand_num.gt.1d0/nleptfam.and.
+     $           rand_num.le.2d0/nleptfam) then
+            idup(5) = -13
+            idup(6) =  13
+         else
+            idup(5) = -15
+            idup(6) =  15
+         endif         
+      elseif (vdecaymode.eq.12) then
+c     neutrino
+         rand_num=random()
+         if(rand_num.le.1d0/3d0) then
+            idup(5) = -12
+            idup(6) =  12
+         elseif(rand_num.gt.1d0/3d0.and.rand_num.le.2d0/3d0) then
+            idup(5) = -14
+            idup(6) =  14
+         else
+            idup(5) = -16
+            idup(6) =  16
+         endif         
       else
          idup(5) =  vdecaymode
          idup(6) = -vdecaymode
