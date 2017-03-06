@@ -298,7 +298,7 @@ c keep this order
           totnegosres(j)  = totnegosres(j)  + dtotnegosres(j)
           etotnegosres(j) = etotnegosres(j) + dtotnegosres(j)**2
 
-          sigosres = sigosres + dtotabsosres(i)
+          sigosres = sigosres + dtotabsosres(j)
         enddo
       end
 c############### end subroutine addupweightsosres ######################
