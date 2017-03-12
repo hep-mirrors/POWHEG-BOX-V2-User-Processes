@@ -21,8 +21,8 @@ c     vector boson id and decay
       integer vdecaymode,tmp
       common/cvecbos/vdecaymode
 c     lepton masses
-      real *8 ktmaxqed
-      common/showerqed/ktmaxqed
+      real *8 kt2minqed
+      common/showerqed/kt2minqed
       logical ifphotoninduced
       integer phind
 
@@ -72,9 +72,8 @@ c          ifdis=.false.
       par_fsrtinycsi = 1d-15
       par_fsrtinyy = 1d-15
 
-      ktmaxqed = powheginput("#ktmaxqed")
-      if (ktmaxqed.le.0d0) ktmaxqed  = 0.01d0     
-c      flg_jacsing = .true.
+      kt2minqed = powheginput("#kt2minqed")
+      if (kt2minqed.le.0d0) kt2minqed  = 0.001d0**2     
 
       if ((vdecaymode.lt.11).or.(vdecaymode.gt.16)) then
          write(*,*) 'ERROR: The decay mode you selected'

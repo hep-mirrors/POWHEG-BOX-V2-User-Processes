@@ -172,7 +172,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 *
 ** couplings / boson masses (cw = mw/mz)
 *
-      cmpmass = 1  ! complex masses scheme used
+      cmpmass = -1  ! complex masses scheme used
 c      cmpmass = powheginput("#complexmasses")
       if (cmpmass.lt.0) cmpmass = 0
 
