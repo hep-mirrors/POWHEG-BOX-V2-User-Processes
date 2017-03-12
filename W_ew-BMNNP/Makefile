@@ -140,7 +140,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
-LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
+LHEF=lhef_analysis.o boostrot.o random.o bra_ket_subroutines.o cernroutines.o		\
      opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
 
