@@ -308,15 +308,93 @@ c
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
-
+      integer i1,i2
+      real*8 mc_isr_scale,mc_fsr_scale
+      common/mc_scale_lhe/mc_isr_scale,mc_fsr_scale
+      real*8 dbleradmom
+      common/mc_dbleradmom/dbleradmom(0:3,nlegreal+1)
+      real*8 mc_tmaxisr,mc_tmaxfsr
+      real*8 mc_csiisr,mc_yisr,mc_aziisr
+      real*8 mc_csifsr,mc_yfsr,mc_azifsr
+      logical mc_dlberad
+      common/dblerad/mc_tmaxisr,mc_tmaxfsr,
+     +     mc_csiisr,mc_yisr,mc_aziisr,
+     +     mc_csifsr,mc_yfsr,mc_azifsr,
+     +     mc_dlberad
+c
       call add_resonance(idvecbos,3,4)
 c if it is an isr photon, add it to the resonance
-      if(nup.eq.nlegreal+1.and.rad_kinreg.ge.2) then
+c
+      if(nup.eq.nlegreal+1.and.rad_kinreg.ge.2
+     +     .and.(.not.mc_dlberad)) then
          mothup(1,6) = 3
          mothup(2,6) = 3
          pup(1:4,3) = pup(1:4,3) + pup(1:4,6)
          pup(5,3)=sqrt(pup(4,3)**2-pup(1,3)**2-pup(2,3)**2-pup(3,3)**2)
       endif
+c isr scale in the LHE block
+      scalup=mc_isr_scale        
+      if(mc_dlberad) then
+         nup=nlegreal+2 ! one is the resonance
+c
+         mothup(1,6) = 1 ! isr gluon
+         mothup(2,6) = 2
+         istup( 6)=1
+         spinup(6)=9
+         vtimup(6)=0
+c
+         mothup(1,7) = 3
+         mothup(2,7) = 3
+         istup( 7)=1
+         spinup(7)=9
+         vtimup(7)=0
+         idup(  7)=22
+c
+         call add_azimuth2
+
+         
+         do i1=1,2!nup
+            do i2=1,3
+               pup(i2,i1)=dbleradmom(i2,i1)
+            enddo
+            pup(4,i1)=dbleradmom(0,i1)
+         enddo
+         do i1=4,nup
+            do i2=1,3
+               pup(i2,i1)=dbleradmom(i2,i1-1)
+            enddo
+            pup(4,i1)=dbleradmom(0,i1-1)
+         enddo
+         pup(5,7)=sqrt(abs(pup(4,7)**2-pup(1,7)**2-pup(2,7)**2-pup(3,7)**2))
+         pup(1:4,3) = pup(1:4,4) + pup(1:4,5) + pup(1:4,7)
+         pup(5,3)=sqrt(pup(4,3)**2-pup(1,3)**2-pup(2,3)**2-pup(3,3)**2)
+      endif
+c
       call lhefinitemasses
 
       end
+
+c-----added to rotate dblemom!!
+      subroutine add_azimuth2
+      implicit none
+      include 'pwhg_math.h'
+      include 'nlegborn.h'
+      integer ileg
+      real * 8 azi,sazi,cazi
+      real * 8 dir(3)
+      data dir/0d0,0d0,1d0/
+      real * 8 random
+      external random
+      real*8 dbleradmom
+      common/mc_dbleradmom/dbleradmom(0:3,nlegreal+1)
+      
+      azi=2d0*pi*random()
+      sazi = sin(azi)
+      cazi = cos(azi)
+
+      do ileg=1, nlegreal+1
+         call mrotate(dir,sazi,cazi,dbleradmom(1:3,ileg))
+      enddo
+
+      end
+c-----added to rotate dblemom!!

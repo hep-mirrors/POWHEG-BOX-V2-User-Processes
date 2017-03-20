@@ -6,10 +6,15 @@ C   320 Perugia 0 : "Perugia" update of S0-Pro                (Feb 2009)
 C   
       real * 8 powheginput
       integer ntune
-      ntune = powheginput("#pythiatune")
+c      ntune = powheginput("#pythiatune")
+      ntune = powheginput("#SI_pytune")
       if(ntune.gt.0) then
+      write(*,*) '*** SI: Setting PYTHIA tune to: ', ntune
          call PYTUNE(ntune)
+      else
+        write(*,*) "*** SI: PYTHIA will use default pp tune"
       endif
+
       end
 
       subroutine setup_PYTHIA_parameters
@@ -61,12 +66,13 @@ c     new model (force a call to PYEVNW)
 c PHOTONS can be handled with PYTHIA shower or with PHOTOS
 c if PowHeg events have EWK corrections, PYTHIA shower or PHOTOS 
 c must be vetoed, otherwise no veto has to be applied
-c
-
 c Unless no_ew is specified, gamma must be vetoed
-      mustveto_gamma = powheginput("#no_ew").ne.1
 
-      use_photos     = powheginput("#use_photos") .eq. 1
+c HH Already in common block, read from main program:
+       write (*,*) 'SI in setup_PYTHIA_parameters'
+       write (*,*) 'SI use_photos: ', use_photos, ', mustveto_gamma: ', mustveto_gamma
+c      mustveto_gamma = powheginput("#no_ew").ne.1
+c      use_photos     = powheginput("#use_photos") .eq. 1
 
 c     default: photon radiation off quarks and leptons
 c     if PYEVNW is called: 
@@ -78,6 +84,7 @@ c     No photon radiation from quarks and leptons
              mstj(41)=1
           endif
        else
+          write (*,*) '*** SI: QED shower is on in Pythia'
 c     photon radiation from quarks and leptons  
           if(mstj(41).gt.10) then
              mstj(41)=12
@@ -154,15 +161,14 @@ C--- Opens input file and counts number of events, setting MAXEV;
       common/mcmaxev/maxev
       integer photoscount
       common/photoscount/photoscount
-
-      integer iun97
-      common/c_unit_new/iun97
+      integer iun
+      common/c_unit_new/iun
 
 
       photoscount=0
       nevhep=0
 c read the header first, so lprup is set
-      call lhefreadhdr(iun97)
+      call lhefreadhdr(iun)
 
 c cut-off for photon emission
       parp(68)=2.d0* 0.8944d0 !to comply with powheg !1d-3  !ISR off quarks (default=0.001)
@@ -186,6 +192,8 @@ c     Make other hadrons stable
       if (lprup(1).eq.9985)  mdcy(pycomp(15),1)=0
       end
 
+
+c The following function is not called
       subroutine UPEVNT
       implicit none
       include 'hepevt.h'
@@ -201,15 +209,15 @@ c     (in pythia6 the default Q_max is the resonance mass)
       integer photoscount
       common/photoscount/photoscount
 
-      integer iun97
-      common/c_unit_new/iun97
+      integer iun
+      common/c_unit_new/iun
 
 
       if(use_photos) then
 c check dor events killed by PYTHIA QCD shower 
 c for QED radiation with PHOTOS
          if(nevhep.ne.photoscount) then 
-            call lhefreadev(iun97)
+            call lhefreadev(iun)
             photoscount=nevhep
          endif
          photoscount=photoscount+1
@@ -254,6 +262,10 @@ c      end
       common/cpwgprefix/pwgprefix,lprefix
       include 'pwhg_rnd.h'
 
+      character * 100 infl
+      integer nchar
+      common/otherfilename/infl,nchar
+      
 c--- if using bookhist-multi
 c      if(rnd_cwhichseed.ne.'none') then
 c         open(unit=99,file=pwgprefix(1:lprefix)//
@@ -266,15 +278,19 @@ c      endif
 c      call pwhgsetout
 c      call pwhgtopout
 c      close(99)
+      write (*,*) '*** SI FA: Closing and saving histograms'
       call pwhgsetout
-      if(rnd_cwhichseed.eq.'none') then
-         call pwhgtopout(pwgprefix(1:lprefix)//
-     >                   'POWHEG+PYTHIA_output')
-      else
-         call pwhgtopout(pwgprefix(1:lprefix)//
-     >                   '-'//rnd_cwhichseed //'-'//
-     >                   'POWHEG+PYTHIA_output')
-      endif
+!       if(rnd_cwhichseed.eq.'none') then
+!          call pwhgtopout(pwgprefix(1:lprefix)//
+!      >                   'POWHEG+PYTHIA_output')
+!       else
+!          call pwhgtopout(pwgprefix(1:lprefix)//
+!      >                   '-'//rnd_cwhichseed //'-'//
+!      >                   'POWHEG+PYTHIA_output')
+!       endif
+
+      call pwhgtopout(infl(1:nchar)//'output_py6_histos')
+
 
       end
 
@@ -287,7 +303,6 @@ c      close(99)
       integer mint
       double precision vint
       COMMON/PYINT1/MINT(400),VINT(400)
-c     check parameters
       logical verbose
       parameter (verbose=.false.)
       
@@ -300,7 +315,7 @@ c     check parameters
          endif
          return
       endif
-      nevhep=nevhep+1
+
       if(abs(idwtup).eq.3) xwgtup=xwgtup*xsecup(1)
       call analysis(xwgtup)
       call pwhgaccumup 

@@ -1,10 +1,10 @@
-// main01.cc is a part of the PYTHIA event generator.
+
+// This program is based in the example "main31.cc" from the Pythia8 examples, used to interface Pythia shower with Powheg events
+
 // Copyright (C) 2012 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
-// This is a simple test program. It fits on one slide in a talk.
-// It studies the charged multiplicity distribution at the LHC.
 
 #include "Pythia8/Pythia.h"
 #include "Pythia8/LHAFortran.h"
@@ -16,36 +16,9 @@ using namespace Pythia8;
 
 using namespace Photospp;
 
+// Only lower case letters allowed for the "interface" structures
 extern "C" {
-  extern struct
-  {
-    double vetoscale;
-    int py8veto;
-  } resonancevetos_;
-  extern struct {
-    int py8tune;
-    int nohad;
-  } cpy8tune_;
-  extern struct
-    {
-    bool vetopt1;
-  } vetochoice_;
-  extern struct
-    {
-    int evtnumber;
-  } evtprint_;
-  extern struct
-   {
-    bool noQEDqopt;
-  } noqedfromq_;
-  extern struct
-  {
-    bool use_photos;
-  } optionphotos_;
-  extern struct
-  {
-    double xphcut;
-  } photoscutoff_;
+
   extern struct
   {
     int    nevhep;
@@ -57,6 +30,19 @@ extern "C" {
     double phep[10000][5];
     double vhep[10000][4];
   } ph_hepevt_;
+
+  extern struct {
+    int pythiamatching, pytune;
+    bool dopythiaqed, use_photos, vetoqed, usepy8veto, nohad, savelhe;
+  } si_data_;
+
+  extern struct {
+    double xphcut;    
+    double vetoscale_isr;
+    double vetoscale_fsr;
+    int evtnumber;
+  } si_event_info_;
+
 }
 
 
@@ -66,6 +52,7 @@ extern "C" {
 
   void photos_init_()
   {
+    cout << "**** SI: Initializing PHOTOS" << endl;
     
     // Initialize two random seeds
     srand (time(NULL));
@@ -73,88 +60,97 @@ extern "C" {
     int s2 = rand() % 30080;
     cout << "**** SI: Setting PHOTOS random seeds: " << s1 << " " << s2 << endl;
 
-    
     // Setting random seed for Photos
     Photos::setSeed(s1, s2); 
 
+    // Initialize PHOTOS
     Photos::initialize();
+
+    // Other flags
     //Photos::setMeCorrectionWtForW(true); 
     //Photos::setDoubleBrem(true);
+    //Photos::setCorrectionWtForW(false);
+    //Photos::Photos::setInterference(false);
 
-    // Turn on NLO corrections - only for PHOTOS 3.2 or higher
+    // Print again initialization info
+    Photos::iniInfo();
 
-    //Photos::maxWtInterference(4.0);
-    //Photos::iniInfo();
+    //cout << "SI: phocop_.alpha: " << phocop_.alpha << endl;
+    
+    // Print explicit values of other flags
+   // phokey_.interf        (interference weight)               : on by default
+    cout << "**** SI: Other PHOTOS set: " << endl;
+    cout << "**** SI: phokey_.interf  (interference weight)             : " << phokey_.interf << endl;
+   // phokey_.isec          (double photon)                     : off by default
+    cout << "**** SI: phokey_.isec (double photon)                      : " << phokey_.isec << endl;
+   // phokey_.ifw           (correction weight in decay of W)   : on by default
+    cout << "**** SI: phokey_.ifw (correction weight in decay of W)     : " << phokey_.ifw << endl;
+   // meCorrectionWtForW    (ME correction in decay of W)       : off by default
+    cout << "**** SI: (meCorrectionWtForW) ME correction in decay of W  : " << Photos::meCorrectionWtForW << endl;
+        
   }
 
-  void photos_process_()
-  {
+  void photos_process_()  {
+    
+    // Create PHOTOS event
     PhotosHEPEVTEvent *event = new PhotosHEPEVTEvent();
 
-    for(int i=0; i<ph_hepevt_.nhep; i++) {
-                                    
-     PhotosHEPEVTParticle *p = new PhotosHEPEVTParticle 
-    (
-      ph_hepevt_.idhep [i],  
-      ph_hepevt_.isthep[i], 
-      ph_hepevt_.phep  [i][0],
-      ph_hepevt_.phep  [i][1], 
-      ph_hepevt_.phep  [i][2],
-      ph_hepevt_.phep  [i][3],  
-      ph_hepevt_.phep  [i][4],
-      ph_hepevt_.jmohep[i][0]-1,
-      ph_hepevt_.jmohep[i][1]-1,
-      ph_hepevt_.jdahep[i][0]-1, 
-      ph_hepevt_.jdahep[i][1]-1                                   
-    );
-    event->addParticle(p);
-  }
+    // Fill particles in the PHOTOS event using the "common" Photos HEPEVT block (data already filled in the .f file)
+    for(int i=0; i < ph_hepevt_.nhep; i++) {
+      PhotosHEPEVTParticle *p = new PhotosHEPEVTParticle (
+        ph_hepevt_.idhep [i],  
+        ph_hepevt_.isthep[i], 
+        ph_hepevt_.phep  [i][0],
+        ph_hepevt_.phep  [i][1], 
+        ph_hepevt_.phep  [i][2],
+        ph_hepevt_.phep  [i][3],  
+        ph_hepevt_.phep  [i][4],
+        ph_hepevt_.jmohep[i][0]-1,
+        ph_hepevt_.jmohep[i][1]-1,
+        ph_hepevt_.jdahep[i][0]-1, 
+        ph_hepevt_.jdahep[i][1]-1
+      );
+      event->addParticle(p);
+    }
+
 
     // Set IR cutoff (in units of decaying particle mass)
-    //    cout << "IR cutoff" << photoscutoff_.xphcut << endl;
-    Photos::setInfraredCutOff(photoscutoff_.xphcut);
-                                                           
-    //PhotosHEPEVTEvent::read_event_from_HEPEVT(event);
-
-    //cout << "phokey_.isec " << phokey_.isec << endl;
-    //cout << "ME corr      " << Photos::meCorrectionWtForW << endl;
-
-    //    cout << "Event before photos" << endl;   
-    //event->print();
-
+    Photos::setInfraredCutOff(si_event_info_.xphcut);
+    //cout << "SI: setting PHOTOS cut off: " << setprecision (10) << fixed << si_event_info_.xphcut << endl;
+    
+    // Process event with PHOTOS
     event->process();
 
-    //    cout << "Event after photos" << endl;
-    //    event->print();
-
-    //PhotosHEPEVTEvent::write_event_to_HEPEVT(event);
-
+    // Update Photos HEPEVT common block with the event already processed by PHOTOS
     ph_hepevt_.nhep = event->getParticleCount();
+    
+    for(int i=0; i < ph_hepevt_.nhep; i++) {
+      PhotosHEPEVTParticle *p = event->getParticle(i);
 
-  for(int i=0; i<ph_hepevt_.nhep; i++)
-  {
-    PhotosHEPEVTParticle *p = event->getParticle(i);
+      ph_hepevt_.idhep [i]   =p->getPdgID();
+      ph_hepevt_.isthep[i]   =p->getStatus();
+      ph_hepevt_.phep  [i][0]=p->getPx();
+      ph_hepevt_.phep  [i][1]=p->getPy();
+      ph_hepevt_.phep  [i][2]=p->getPz();
+      ph_hepevt_.phep  [i][3]=p->getE();
+      ph_hepevt_.phep  [i][4]=p->getMass();
+      ph_hepevt_.jmohep[i][0]=p->getFirstMotherIndex()  +1;
+      ph_hepevt_.jmohep[i][1]=p->getSecondMotherIndex() +1;
+      ph_hepevt_.jdahep[i][0]=p->getDaughterRangeStart()+1;
+      ph_hepevt_.jdahep[i][1]=p->getDaughterRangeEnd()  +1;
+      ph_hepevt_.vhep  [i][0]=0.0;
+      ph_hepevt_.vhep  [i][1]=0.0;
+      ph_hepevt_.vhep  [i][2]=0.0;
+      ph_hepevt_.vhep  [i][3]=0.0;
 
-    ph_hepevt_.idhep [i]   =p->getPdgID();
-    ph_hepevt_.isthep[i]   =p->getStatus();
-    ph_hepevt_.phep  [i][0]=p->getPx();
-    ph_hepevt_.phep  [i][1]=p->getPy();
-    ph_hepevt_.phep  [i][2]=p->getPz();
-    ph_hepevt_.phep  [i][3]=p->getE();
-    ph_hepevt_.phep  [i][4]=p->getMass();
-    ph_hepevt_.jmohep[i][0]=p->getFirstMotherIndex()  +1;
-    ph_hepevt_.jmohep[i][1]=p->getSecondMotherIndex() +1;
-    ph_hepevt_.jdahep[i][0]=p->getDaughterRangeStart()+1;
-    ph_hepevt_.jdahep[i][1]=p->getDaughterRangeEnd()  +1;
-    ph_hepevt_.vhep  [i][0]=0.0;
-    ph_hepevt_.vhep  [i][1]=0.0;
-    ph_hepevt_.vhep  [i][2]=0.0;
-    ph_hepevt_.vhep  [i][3]=0.0;
-
-  }
-
-
+    }
+    
+//     cout << "SI: Event after Photos: " << endl;
+//     for (int i = 0; i < ph_hepevt_.nhep; i++) {
+//       cout << i << " " << ph_hepevt_.idhep [i] << endl;
+//     }
     delete event;
+
   } 
 
 }
@@ -167,23 +163,28 @@ class MyUserHooks : public UserHooks {
 
 public:
 
-  MyUserHooks() {cout << "Setting up Hook";}
+  MyUserHooks() {
+    cout << "**** SI Setting up custom UserHook" << endl;    
+  }
 
-  // Destructor deletes anti-kT jet finder.
   ~MyUserHooks() {;}
 
   // Allow process cross section to be modified..
 
   virtual bool canSetResonanceScale() {
-    if(resonancevetos_.py8veto == 1) return true;
+    // If we are vetoing QED emissions, and ptmaxmatch = 1, and we are using PYTHIA8 based veto, set scale for QED radiation from leptons
+    //  (the default would be the resonance mass)
+    cout << "**** SI: Allow to set scale to veto QED emissions in PYTHIA" << endl;
+    if ((si_data_.vetoqed) && (si_data_.usepy8veto)) return true;
     else return false;
-    }
+  }
 
   virtual double scaleResonance( const int iRes, const Event& event) {
-    //cout << "in scaleResonance: resonance "; cout << event[iRes].id();
-    //cout << " " <<resonancevetos_.vetoscale ;
+    // Set scale for the emissions from the resonace (FSR), equal to the scale stored in the LHE file
+    //cout << "SI in scaleResonance. Setting scale: " << si_event_info_.vetoscale_fsr << endl; 
+    //cout << event[iRes].id();
     //cout << "\n";
-    return  resonancevetos_.vetoscale;
+    return si_event_info_.vetoscale_fsr;
   }    
 
   virtual double EventList( const Event& event)
@@ -331,6 +332,14 @@ public:
   // partons are tried.
   // xSR set to 0 means ISR, while xSR set to 1 means FSR
   double pTcalc(const Event &e, int i, int j, int k, int r, int xSRin) {
+
+    //    cout << "APPENA ENTRATO IN pTcalc" << endl;
+
+    //cout << "idhep(i)= " << e[i].id() << endl;
+    //cout << "idhep(j)= " << e[j].id() << endl;
+    //cout << "idhep(k)= " << e[k].id() << endl;
+
+
     // Loop over ISR and FSR if necessary
     double pTemt = -1., pTnow;
     int xSR1 = (xSRin == -1) ? 0 : xSRin;
@@ -487,8 +496,13 @@ public:
 
     // If there is no radiation or if pThardMode is 0 then set pThard = SCALUP.
     pThard = -1;
+    // pThardMode is 0
     if (!isEmt || pThardMode == 0) {
-      pThard = resonancevetos_.vetoscale;
+      // This sets the scale to veto emissions in the QCD shower by Pythia
+      // This scale is used for all emissions, except if they come from the resonance
+      //cout << "SI: in doVetoMPIStep: " << si_event_info_.vetoscale_isr << endl;
+      pThard = si_event_info_.vetoscale_isr;
+      // Not using directly scalup, because the special file LHE (two scales)
       //      pThard = infoPtr->scalup();
       
     // If pThardMode is 1 then the pT of the POWHEG emission is checked against
@@ -572,6 +586,7 @@ public:
 #endif
 
     // Veto if pTemt > pThard
+    //cout << "SI In doVetoISREmission with pThard: " << pThard << endl;
     if (pTemt > pThard) {
       nAcceptSeq = 0;
       nISRveto++;
@@ -600,8 +615,22 @@ public:
     // we do not have to use canSetResonanceScale 
     if (iSys != 0 && inr != 1) return false;
 
-    // in case of radiation from resonance and py8veto != 1, we veto through scalupveto
-    if (inr == 1 && resonancevetos_.py8veto != 1) return false;
+    // In case of radiation from resonance we veto
+    // This is used for ptmaxmatch = 2. 
+    // If usepy8veto = 1, this method is also used to veto photons, otherwise, use external function
+    // force the radiation scale, pThard, to be equal to the one set in the LHE file
+    if (inr == 1) {
+      if ((si_data_.vetoqed == false) || (si_data_.usepy8veto == false)) {
+        //cout << "SI: not using doVetoFSREmission" << endl;
+        return false;
+      }
+      else {
+        // Set scale for FSR from the resonance
+        pThard = si_event_info_.vetoscale_fsr;
+        //cout << "SI: Using PYTHIA8 based veto with ptmaxmatch = 2 for FSR, pthard: " << pThard << endl;
+      }
+    }
+      
 
     // If vetocount != 0 and we already have accepted 'vetoCount' emissions in a row,
     // do nothing; if vetocount = 0 check all emissions
@@ -665,6 +694,7 @@ public:
 #endif
 
     // Veto if pTemt > pThard
+    //cout << "SI In doVetoFSREmission with pThard: " << pThard << endl;
     if (pTemt > pThard) {
       nAcceptSeq = 0;
       nFSRveto++;
@@ -715,37 +745,64 @@ private:
 
 };
 
-Pythia pythia;
-LHAupFortran LHAinstance;
 
 extern "C" {
-  // F77 interface to pythia8
-  void pythia_init_()
-  {
-    // Generator. Process selection.
-    pythia.settings.addMode("POWHEG:nFinal",    1, true, false, 1, 0);
-    pythia.settings.addMode("POWHEG:veto",      1, true, true,  0, 1);
-    // maximum POWHEG:veto=2 not documented
-    pythia.settings.addMode("POWHEG:vetoCount", 0, true, false, 0, 0);
-    pythia.settings.addMode("POWHEG:pThard",    0, true, true,  0, 2);
-    pythia.settings.addMode("POWHEG:pTemt",     0, true, true,  0, 2);
-    pythia.settings.addMode("POWHEG:emitted",   0, true, true,  0, 3);
-    pythia.settings.addMode("POWHEG:pTdef",     1, true, true,  0, 2);
-    pythia.settings.addMode("POWHEG:MPIveto",   0, true, true,  0, 1);
+  
+  // Main object
+  Pythia* pythia_p;
 
+  // LHA input Fortran interface (using derived class)
+  LHAupFortran LHAinstance;
+
+  // LHA output (to be used if .LHE events are requested)
+  LHAupFromPYTHIA8* myLHA;
+
+  void pythia_init_() {
+
+    cout << "**** SI: Initializing PYTHIA (interface to 8.1xx versions)" << endl;
+
+    // Create instance of Pythia generator and load parameters from path in variable PYTHIA8DATA
+    pythia_p = new Pythia();
+
+//     cout << "SI: pythiamatching: " << si_data_.pythiamatching << endl;
+//     cout << "SI: pytune: " << si_data_.pytune << endl;
+//     cout << "SI: dopythiaqed: " << si_data_.dopythiaqed << endl;
+//     cout << "SI: use_photos: " << si_data_.use_photos << endl;
+//     cout << "SI: vetoqed: " << si_data_.vetoqed << endl;
+//     cout << "SI: usepy8veto: " << si_data_.usepy8veto << endl;
+//     cout << "SI: nohad: " << si_data_.nohad << endl;
+//     cout << "SI: savelhe: " << si_data_.savelhe << endl;
+    
+    
+    // Add settings that can be set explicitly here, (or in external configuration file)
+    pythia_p->settings.addMode("POWHEG:nFinal",    1, true, false, 1, 0);
+    pythia_p->settings.addMode("POWHEG:veto",      1, true, true,  0, 1);
+    // maximum POWHEG:veto=2 not documented
+    pythia_p->settings.addMode("POWHEG:vetoCount", 0, true, false, 0, 0);
+    pythia_p->settings.addMode("POWHEG:pThard",    0, true, true,  0, 2);
+    pythia_p->settings.addMode("POWHEG:pTemt",     0, true, true,  0, 2);
+    pythia_p->settings.addMode("POWHEG:emitted",   0, true, true,  0, 3);
+    pythia_p->settings.addMode("POWHEG:pTdef",     1, true, true,  0, 2);
+    pythia_p->settings.addMode("POWHEG:MPIveto",   0, true, true,  0, 1);
+
+    // Load external configuration file
+    //pythia_p->readFile("main31.cmnd");    
+    // or set values for settings (hardcoded!)
+    
     // Number of outgoing particles of POWHEG Born level process (not counting daughters of resonance)
     // (i.e. not counting additional POWHEG radiation)
-    pythia.readString("POWHEG:nFinal = 1");
+    pythia_p->readString("POWHEG:nFinal = 1");
+//    pythia_p->readString("POWHEG:nFinal = 2");
 
     // How vetoing is performed:
     // 0 - No vetoing is performed
     // 1 - Showers are started at the kinematical limit (pTmaxMatch = 2)
     //     and emissions are vetoed if pTemt > pThard = scalup
-    pythia.readString("POWHEG:veto = 1");
+    pythia_p->readString("POWHEG:veto = 1");
 
     // After 'vetoCount' accepted emissions in a row, no more emissions
     // are checked. 'vetoCount = 0' means all emissions are checked.
-    pythia.readString("POWHEG:vetoCount = 0");
+    pythia_p->readString("POWHEG:vetoCount = 0");
 
     // Selection of pThard 
     // 0 - pThard = scalup
@@ -753,7 +810,7 @@ extern "C" {
     //     incoming and outgoing partons, with the minimal value chosen
     // 2 - the pT of all final-state partons is tested against all other
     //     incoming and outgoing partons, with the minimal value chosen
-    pythia.readString("POWHEG:pThard = 0");
+    pythia_p->readString("POWHEG:pThard = 0");
 
     // Selection of pTemt:
     //  0 - pTemt is pT of the emitted parton w.r.t. radiating parton
@@ -761,20 +818,20 @@ extern "C" {
     //      partons. pTemt is set to the minimum of these values
     //  2 - the pT of all final-state partons is tested against all other
     //      incoming and outgoing partons, with the minimal value chosen
-    pythia.readString("POWHEG:pTemt = 0");
+    pythia_p->readString("POWHEG:pTemt = 0");
 
     // Selection of emitted parton for FSR
     //  0 - Pythia definition of emitted
     //  1 - Pythia definition of radiator
     //  2 - Random selection of emitted or radiator
     //  3 - Both emitted and radiator are tried
-    pythia.readString("POWHEG:emitted = 0");
+    pythia_p->readString("POWHEG:emitted = 0");
 
     // pT definitions
     //  0 - POWHEG ISR pT definition is used for both ISR and FSR
     //  1 - POWHEG ISR pT and FSR d_ij definitions
     //  2 - Pythia definitions
-    pythia.readString("POWHEG:pTdef = 1");
+    pythia_p->readString("POWHEG:pTdef = 1");
 
     // MPI vetoing
     //  0 - No MPI vetoing is done
@@ -782,190 +839,263 @@ extern "C" {
     //      else MPIs with a scale above (pT_1 + pT_2 + pT_3) / 2 are vetoed
     // according to the PYTHIA8 manual, 1 is intended specifically 
     // for POWHEG simulations of 2 -> 2 + 2 -> 3 QCD processes
-    pythia.readString("POWHEG:MPIveto = 0"); 
+    pythia_p->readString("POWHEG:MPIveto = 0"); 
 
-    // Read in main settings
-    int nEvent      = pythia.settings.mode("Main:numberOfEvents");
-    int nError      = pythia.settings.mode("Main:timesAllowErrors");
+    // Read in settings
+//     int nEvent      = pythia_p->settings.mode("Main:numberOfEvents");
+//     int nError      = pythia_p->settings.mode("Main:timesAllowErrors");
+
     // Read in POWHEG settings
-    int nFinal      = pythia.settings.mode("POWHEG:nFinal");
-    int vetoMode    = pythia.settings.mode("POWHEG:veto");
-    int vetoCount   = pythia.settings.mode("POWHEG:vetoCount");
-    int pThardMode  = pythia.settings.mode("POWHEG:pThard");
-    int pTemtMode   = pythia.settings.mode("POWHEG:pTemt");
-    int emittedMode = pythia.settings.mode("POWHEG:emitted");
-    int pTdefMode   = pythia.settings.mode("POWHEG:pTdef");
-    int MPIvetoMode = pythia.settings.mode("POWHEG:MPIveto");
+    int nFinal      = pythia_p->settings.mode("POWHEG:nFinal");
+    int vetoMode    = pythia_p->settings.mode("POWHEG:veto");
+    int vetoCount   = pythia_p->settings.mode("POWHEG:vetoCount");
+    int pThardMode  = pythia_p->settings.mode("POWHEG:pThard");
+    int pTemtMode   = pythia_p->settings.mode("POWHEG:pTemt");
+    int emittedMode = pythia_p->settings.mode("POWHEG:emitted");
+    int pTdefMode   = pythia_p->settings.mode("POWHEG:pTdef");
+    int MPIvetoMode = pythia_p->settings.mode("POWHEG:MPIveto");
 
     // Add in user hooks for shower vetoing
     MyUserHooks *PWGHook1 = NULL;
     PowhegHooks *PWGHook2 = NULL;
 
-    // shower vetoing
-    if(vetochoice_.vetopt1) 
-      {
-         pythia.readString("SpaceShower:pTmaxMatch = 1");
-         pythia.readString("TimeShower:pTmaxMatch = 1");
-      } else if(vetoMode == 1)
-      {
-         pythia.readString("SpaceShower:pTmaxMatch = 2");
-         pythia.readString("TimeShower:pTmaxMatch = 2");
-      }
+    // Shower matching settings
+    // vetoMode is 1
+    if (si_data_.pythiamatching == 2) {
+      cout << "**** SI: Setting PYTHIA matching strategy to 2" << endl;
+      pythia_p->readString("SpaceShower:pTmaxMatch = 2");
+      pythia_p->readString("TimeShower:pTmaxMatch = 2");      
+    }
+    else if (si_data_.pythiamatching == 1) {
+      cout << "**** SI: Setting PYTHIA matching strategy to 1" << endl;
+      pythia_p->readString("SpaceShower:pTmaxMatch = 1");
+      pythia_p->readString("TimeShower:pTmaxMatch = 1");      
+    }
+    
+    // QED shower flags in PYTHIA    
+    if (si_data_.dopythiaqed) {
+      cout << "**** SI: QED shower is on in Pythia" << endl;
+      pythia_p->readString("TimeShower:QEDshowerByL  = on");
+      pythia_p->readString("TimeShower:QEDshowerByQ  = on");
+      pythia_p->readString("SpaceShower:QEDshowerByQ  = on");
+      pythia_p->readString("TimeShower:QEDshowerByGamma = on");
+    }
+    else {
+      cout << "**** SI: QED shower is off in Pythia" << endl;
+      pythia_p->readString("TimeShower:QEDshowerByL  = off");
+      pythia_p->readString("TimeShower:QEDshowerByQ  = off");
+      pythia_p->readString("SpaceShower:QEDshowerByQ  = off");
+      pythia_p->readString("TimeShower:QEDshowerByGamma = off");
+    }
 
-    // QED shower
-    pythia.readString("TimeShower:QEDshowerByL  = on");
-    pythia.readString("TimeShower:QEDshowerByQ  = on");
-    pythia.readString("SpaceShower:QEDshowerByQ  = on");
-    if(noqedfromq_.noQEDqopt) 
-     {
-       pythia.readString("TimeShower:QEDshowerByQ  = off");
-       pythia.readString("SpaceShower:QEDshowerByQ  = off");
-     } 
-    pythia.readString("TimeShower:alphaEMorder = 0"); //alpha(0) for QED shower
-    pythia.readString("SpaceShower:alphaEMorder = 0"); //alpha(0) for QED shower
+    // If photon radiation from leptons is performed by PHOTOS, turn off in pythia
+    //if (optionphotos_.use_photos) {
+    if (si_data_.use_photos) {
+      cout << "**** SI: QED radiation from leptons is off in PYTHIA (because PHOTOS is on)" << endl;
+      pythia_p->readString("TimeShower:QEDshowerByL  = off");
+      pythia_p->readString("TimeShower:QEDshowerByGamma  = off");
+    }
 
-    // lower QED shower cutoff 
-    pythia.readString("TimeShower:pTminChgL=1.e-6");
-    pythia.readString("TimeShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg//
-    pythia.readString("SpaceShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg//
-
-    // if photon radiation from leptons is performed by PHOTOS, turn off in pythia
-    if (optionphotos_.use_photos)
-      {
-	pythia.readString("TimeShower:QEDshowerByL  = off");
-      }
+    // lower QED shower cutoff     
+    pythia_p->readString("TimeShower:pTminChgL=1.0e-6");
+    pythia_p->readString("TimeShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg//
+    pythia_p->readString("SpaceShower:pTminChgQ=0.8944e0"); // QED to comply with PowHeg//
 
     // MPI
-    pythia.readString("PartonLevel:MPI = off");
-    pythia.readString("MultipartonInteractions:pTmaxMatch = 0"); //default
-
-    // Set MPI to start at the kinematical limit
-    //if (MPIvetoMode > 0)
-    //  {
-        //pythia.readString("MultipartonInteractions:pTmaxMatch = 2");
-    //  }
-
-    // tune
-    if(cpy8tune_.py8tune == 14) {
-      pythia.readString("Tune:pp = 14"); // Monash2013 tune
-      cout << "pythia8F77: setting pythia tune 14";
-      //      pythia.readString("Tune:pp = 5"); // Default
-    }
+    pythia_p->readString("PartonLevel:MPI = off");
+    pythia_p->readString("MultipartonInteractions:pTmaxMatch = 0"); //default
 
     // hadronization on by default
-    pythia.readString("HadronLevel:Hadronize = on");
+    pythia_p->readString("HadronLevel:Hadronize = on");
 
-    if(cpy8tune_.nohad == 1) {
-      pythia.readString("HadronLevel:All = off");
-      //     default on (hadronization and decays)//
+    if(si_data_.nohad) {
+      cout << "**** SI: Setting off all hadronization and decays" << endl;
+      pythia_p->readString("HadronLevel:All = off");
     }
 
+    if ((si_data_.pytune >= -1) && (si_data_.pytune <= 50)) {
+      cout << "**** SI: Setting PYTHIA tune to: " << si_data_.pytune << endl;
+      stringstream ss1;
+      ss1 << "Tune:pp = " << si_data_.pytune;
+      cout << "SI: " << ss1.str() << endl;
+      pythia_p->readString(ss1.str());
+//       pythia_p->readString("Tune:pp = 14"); // Monash2013 tune
+    }
+    else {
+      cout << "**** SI: PYTHIA will use default pp tune" << endl;
+    }
+
+    
     // setting stable hadrons
-    pythia.readString("111:mayDecay = off"); // pi0 stable//
-    pythia.readString("211:mayDecay = off"); // pi+ stable//
-    pythia.readString("221:mayDecay = off"); // eta stable//
-    pythia.readString("223:mayDecay = off"); // omega stable//
-    pythia.readString("313:mayDecay = off"); // K*0 stable//
-    pythia.readString("331:mayDecay = off"); // eta' stable//
-    pythia.readString("333:mayDecay = off"); // Phi stable//
-    pythia.readString("423:mayDecay = off"); // D*0 stable//
-    pythia.readString("413:mayDecay = off"); // D*+ stable//
-    pythia.readString("433:mayDecay = off"); // D*+_s stable//
-    pythia.readString("521:mayDecay = off");  // B+ stable//
-    pythia.readString("-521:mayDecay = off"); // B- stable//
-    pythia.readString("511:mayDecay = off"); // B0 stable//
-    pythia.readString("-511:mayDecay = off"); // B0bar stable//
-    pythia.readString("531:mayDecay = off"); // B0_s stable//
-    pythia.readString("-531:mayDecay = off"); // B0_s bar stable//
-    pythia.readString("5222:mayDecay = off"); // Sigma_b+ stable//
-    pythia.readString("5112:mayDecay = off"); // Sigma_b- stable//
-    pythia.readString("5232:mayDecay = off"); // Csi0_b stable//
-    pythia.readString("-5132:mayDecay = off"); // Csi_b+ stable//
-    pythia.readString("5132:mayDecay = off"); // Csi_b- stable//
-    pythia.readString("541:mayDecay = off"); // B_c+ stable//
-    pythia.readString("-541:mayDecay = off"); // B_c- stable//
-    pythia.readString("553:mayDecay = off"); // Y(1S) stable//
-    pythia.readString("2114:mayDecay = off"); // Delta0 stable//
-    pythia.readString("3212:mayDecay = off"); // Sigma0 stable//
-    pythia.readString("-5112:mayDecay = off"); // Sigma_b+ stable//
-    pythia.readString("-5222:mayDecay = off"); // Sigma_b- stable//
-    pythia.readString("-5122:mayDecay = off"); // Lambda0_b bar stable//
-    pythia.readString("5332:mayDecay = off"); // Omega_b- stable//
-    pythia.readString("-5232:mayDecay = off"); // Csi_b 0 bar stable//
-    pythia.readString("-5332:mayDecay = off"); // Omega_b+ stable//
-    pythia.readString("5122:mayDecay = off"); // Lambda0_b stable//
+    pythia_p->readString("111:mayDecay = off"); // pi0 stable//
+    pythia_p->readString("211:mayDecay = off"); // pi+ stable//
+    pythia_p->readString("221:mayDecay = off"); // eta stable//
+    pythia_p->readString("223:mayDecay = off"); // omega stable//
+    pythia_p->readString("313:mayDecay = off"); // K*0 stable//
+    pythia_p->readString("331:mayDecay = off"); // eta' stable//
+    pythia_p->readString("333:mayDecay = off"); // Phi stable//
+    pythia_p->readString("423:mayDecay = off"); // D*0 stable//
+    pythia_p->readString("413:mayDecay = off"); // D*+ stable//
+    pythia_p->readString("433:mayDecay = off"); // D*+_s stable//
+    pythia_p->readString("521:mayDecay = off");  // B+ stable//
+    pythia_p->readString("-521:mayDecay = off"); // B- stable//
+    pythia_p->readString("511:mayDecay = off"); // B0 stable//
+    pythia_p->readString("-511:mayDecay = off"); // B0bar stable//
+    pythia_p->readString("531:mayDecay = off"); // B0_s stable//
+    pythia_p->readString("-531:mayDecay = off"); // B0_s bar stable//
+    pythia_p->readString("5222:mayDecay = off"); // Sigma_b+ stable//
+    pythia_p->readString("5112:mayDecay = off"); // Sigma_b- stable//
+    pythia_p->readString("5232:mayDecay = off"); // Csi0_b stable//
+    pythia_p->readString("-5132:mayDecay = off"); // Csi_b+ stable//
+    pythia_p->readString("5132:mayDecay = off"); // Csi_b- stable//
+    pythia_p->readString("541:mayDecay = off"); // B_c+ stable//
+    pythia_p->readString("-541:mayDecay = off"); // B_c- stable//
+    pythia_p->readString("553:mayDecay = off"); // Y(1S) stable//
+    pythia_p->readString("2114:mayDecay = off"); // Delta0 stable//
+    pythia_p->readString("3212:mayDecay = off"); // Sigma0 stable//
+    pythia_p->readString("-5112:mayDecay = off"); // Sigma_b+ stable//
+    pythia_p->readString("-5222:mayDecay = off"); // Sigma_b- stable//
+    pythia_p->readString("-5122:mayDecay = off"); // Lambda0_b bar stable//
+    pythia_p->readString("5332:mayDecay = off"); // Omega_b- stable//
+    pythia_p->readString("-5232:mayDecay = off"); // Csi_b 0 bar stable//
+    pythia_p->readString("-5332:mayDecay = off"); // Omega_b+ stable//
+    pythia_p->readString("5122:mayDecay = off"); // Lambda0_b stable//
 
     // Choice of UserHooks defined above: 
-    // MyuserHooks uses pTmaxMatch=1 and QED veto
-    if(vetochoice_.vetopt1) 
-      {
-        PWGHook1=new MyUserHooks();
-	pythia.setUserHooksPtr((UserHooks *) PWGHook1); 
-      }  else 
-      { 
-        PWGHook2=new PowhegHooks(nFinal, vetoMode, vetoCount, pThardMode, pTemtMode, emittedMode, pTdefMode, MPIvetoMode);
-	pythia.setUserHooksPtr((UserHooks *) PWGHook2); 
-      }
-
+    if(si_data_.pythiamatching == 2) {
+      cout << "**** SI: Defining PowhegHook to perform the matching (ptmaxmatch = 2)" << endl;
+      // POWHEG matching implemented originally in main31.cc
+      PWGHook2=new PowhegHooks(nFinal, vetoMode, vetoCount, pThardMode, pTemtMode, emittedMode, pTdefMode, MPIvetoMode);
+      pythia_p->setUserHooksPtr((UserHooks *) PWGHook2); 
+    } 
+    else if (si_data_.pythiamatching == 1) {
+      // Matching based on the scale of the resonance
+      // Need custom "User Hook" to be able to veto QED emissions
+      cout << "**** SI: Defining custom UserHook needed to veto QED radiation (ptmaxmatch = 1)" << endl;
+      PWGHook1=new MyUserHooks();
+      pythia_p->setUserHooksPtr((UserHooks *) PWGHook1); 
+    }
+    
+    // Do not print particle data table
+    pythia_p->readString("Init:showChangedParticleData = off");
+    
     // Possibility to set the random seed 
     cout << "**** SI: Setting random seed for PYTHIA" << endl;
-    pythia.readString("Random:setSeed = on");
+    pythia_p->readString("Random:setSeed = on");
     
     // Setting of the random seed
     // A negative value gives the default seed,
     // a value 0 gives a random seed based on the time, and
     // a value between 1 and 900,000,000 a unique different random number sequence. 
-    pythia.readString("Random:seed = 0");
+    pythia_p->readString("Random:seed = 0");
 
-    // Do the actual initialization      
-    pythia.init(&LHAinstance);
+    // Do the actual initialization
+    bool pythiaok = pythia_p->init(&LHAinstance);
+
+    if (!pythiaok) {
+      cout << "**** SI: PYTHIA could not be initialized, aborting" << endl;
+      exit(1);
+    }
     
     // Checking pythia random seed
-    double x1 = pythia.rndm.flat();
-    double x2 = pythia.rndm.flat();
+    double x1 = pythia_p->rndm.flat();
+    double x2 = pythia_p->rndm.flat();
     cout << "**** SI: Random values by PYTHIA random generator (for check): x = " << x1 << ", " << x2 << endl;
 
+    // Initialize and open LHEF file for output, if requested
+    if (si_data_.savelhe) {
+      cout << "**** SI: Storing showered events in LHE file" << endl;
+      myLHA = new LHAupFromPYTHIA8(&(pythia_p->event), &(pythia_p->info));
+      // Open a file on which LHEF events should be stored, and write header.
+      myLHA->openLHEF("output_shower_events.lhe");
+      // Store initialization info in the LHAup object.
+      myLHA->setInit();
+      // Write out this initialization info on the file.
+      myLHA->initLHEF();
+    }
+    
+    
   }
 
   void pythia_next_(int & iret)
   {
-    // Begin event loop. Generate event. Skip if error. List first one.
-    iret = pythia.next();
+
+    //cout << "SI: Processing event with Pythia, info: " << si_event_info_.evtnumber << " " << si_event_info_.xphcut << " " << si_event_info_.vetoscale_isr << " " << si_event_info_.vetoscale_fsr << endl;
+    // Process event with Pythia
+    iret = pythia_p->next();
+    
+    // Here, some C++ based analysis can be done. 
+
+    // For example:
+    // Read event weight:
+    // double weight = pythia_p->info.weight();
+
+    // Access LHE input block (input to PYTHIA):
+//     for (int i = 0; i < pythia_p->process.size(); i++) {
+//       cout << i << " " << pythia_p->process[i].id() << endl;
+//     }
+
+    // Access particles after the PYTHIA shower:
+//     for (int i = 0; i < pythia_p->event.size(); i++) {
+//       cout << i << " " << pythia_p->event[i].id() << endl;
+//     }
+    
+
+    if (si_data_.savelhe) {
+      // Store event info in the LHAup object.
+      myLHA->setEvent();
+      // Write out this event info on the file.
+      // With optional argument (verbose =) false the file is smaller.
+      myLHA->eventLHEF();
+    }
+
   }
+
   void pythia_to_hepevt_(const int &nmxhep, int & nhep, int * isthep,
                          int * idhep,
                          int  (*jmohep)[2], int (*jdahep)[2],
                          double (*phep)[5], double (*vhep)[4])
   {
-    nhep = pythia.event.size();
+    nhep = pythia_p->event.size();
     if(nhep>nmxhep)
       {
 	cout << "too many particles!" ;
 	exit(-1);
     }
-    for (int i = 0; i < pythia.event.size(); ++i)
+    for (int i = 0; i < pythia_p->event.size(); ++i)
     {
-      *(isthep+i) = pythia.event.statusHepMC(i);
-      *(idhep+i) = pythia.event[i].id();
+      *(isthep+i) = pythia_p->event.statusHepMC(i);
+      *(idhep+i) = pythia_p->event[i].id();
       // All pointers should be increased by 1, since here we follow
       // the c/c++ convention of indeces from 0 to n-1, but i fortran
       // they are from 1 to n.
-      (*(jmohep+i))[0] = pythia.event[i].mother1() + 1;
-      (*(jmohep+i))[1] = pythia.event[i].mother2() + 1;
-      (*(jdahep+i))[0] = pythia.event[i].daughter1() + 1;
-      (*(jdahep+i))[1] = pythia.event[i].daughter2() + 1;
-      (*(phep+i))[0] = pythia.event[i].px();
-      (*(phep+i))[1] = pythia.event[i].py();
-      (*(phep+i))[2] = pythia.event[i].pz();
-      (*(phep+i))[3] = pythia.event[i].e();
-      (*(phep+i))[4] = pythia.event[i].m();
+      (*(jmohep+i))[0] = pythia_p->event[i].mother1() + 1;
+      (*(jmohep+i))[1] = pythia_p->event[i].mother2() + 1;
+      (*(jdahep+i))[0] = pythia_p->event[i].daughter1() + 1;
+      (*(jdahep+i))[1] = pythia_p->event[i].daughter2() + 1;
+      (*(phep+i))[0] = pythia_p->event[i].px();
+      (*(phep+i))[1] = pythia_p->event[i].py();
+      (*(phep+i))[2] = pythia_p->event[i].pz();
+      (*(phep+i))[3] = pythia_p->event[i].e();
+      (*(phep+i))[4] = pythia_p->event[i].m();
     }
     // override mother of very first event, set to 0
     *(jmohep)[0] = 0 ;
     *(jmohep)[1] = 0 ;
   }
 
+  void pythia_close_() {
+    //cout << "SI in pythia_close" << endl;
+    if (si_data_.savelhe) {
+      cout << "**** SI: Closing and saving output LHE file" << endl;
+      myLHA->closeLHEF();
+      delete myLHA;
+    }
+    delete pythia_p;
+  }
+
 }
+
 
 
 // User-written routine that does the event generation and fills hepeup.
@@ -981,4 +1111,5 @@ bool LHAupFortran::fillHepEup()
 {
   return true;
 }
+
 

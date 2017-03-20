@@ -93,6 +93,7 @@ c we are in a counterterm.
       include 'pwhg_flst.h'
       include 'pwhg_st.h'
       include 'pwhg_rad.h'
+      include 'pwhg_flg.h'
       include 'pwhg_pdf.h'
       real * 8 pwhg_alphas
       integer nf
@@ -130,7 +131,15 @@ c     threshold, so that PDF's are evaluated with a safe value for
 c     mufact (50 is an arbitrary choice).
       if(rad_kinreg.ge.2) st_mufact2=50.**2
       st_muren2=ptsq
-      st_alpha = pwhg_alphas(st_muren2,st_lambda5MSB,-1)
+c.....mod: taken from res (for )
+c      st_alpha = pwhg_alphas(st_muren2,st_lambda5MSB,-1)
+      if (flg_em_rad) then
+c     any value will do: in the R/B ratio, it will cancel
+         st_alpha = pwhg_alphas(rad_ptsqmin,st_lambda5MSB,-1)
+      else
+         st_alpha = pwhg_alphas(st_muren2,st_lambda5MSB,-1)
+      endif
+c.....mod      
       if(st_muren2.lt.rad_charmthr2) then
          nf=3
       elseif(st_muren2.lt.rad_bottomthr2) then
