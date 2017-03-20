@@ -1,32 +1,49 @@
-      program main_pythia8
+      program main_pythia
       implicit none
       include 'LesHouches.h'
       include 'hepevt.h'
+ 
       character * 100 inputfilename
-      integer pythiamatching,pytune
-      logical * 1 use_photos,vetoqed,py8veto,nohad,savelhe,noQEDqopt
-      common/si_data/pythiamatching,pytune,use_photos,vetoqed,py8veto,nohad,savelhe,noQEDqopt
-      real * 8 kt2minqed
-      real * 8 xphcut
-      real * 8 vetoscale_isr, vetoscale_fsr
-      integer evtnumber
-      common/si_event_info/xphcut,vetoscale_isr,vetoscale_fsr,evtnumber
+      integer maxshowerevents
+      logical no_ew,savehistos,no_tworadevents
       real*8 mc_isr_scale,mc_fsr_scale
       common/mc_scale_lhe/mc_isr_scale,mc_fsr_scale
-      logical no_tworadevents,no_ew
-      common/file_type_info/no_tworadevents
+
+
+      integer iev,temp,i,j
+      external pydata
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
-      integer j,k,l,m,iret
-      integer maxev,iun,maxshowerevents
-      integer py8trial,py8trialmax
-      integer photostrial,photostrialmax
-      logical ok,savehistos
+      integer maxpr
+c DEBUG *****
+      parameter (maxpr=1)
+c END DEBUG **********
+c     mcmaxev
+      integer maxev
+      common/mcmaxev/maxev
+      integer id_v
+
+      logical ok
+
       real * 8 powheginput
       external powheginput
       real * 8 ptrel
-      logical lepveto
-      logical not_finite_kin_lh
+      real * 8 ptrel1
+      real *8 kt2minqed
+      common/showerqed/kt2minqed
+      logical use_photos
+      common/optionphotos/use_photos
+c
+c     veto QED shower from leptons above the SCALUP value
+c     (in pythia6 the default Q_max is the resonance mass)
+      logical lepveto,lepveto1
+      integer photostrial,pythiatrial,trial_max     
+c if EWK corrections are ON in PowHeg, QEDPS has to be vetoed
+c if EWK corrections are OFF in PowHeg, QEDPS should not be vetoed
+      logical mustveto_gamma,not_finite_kin_lh
+      common/optionpwhggamma/mustveto_gamma
+      integer iun
+      common/c_unit_new/iun
 
 c Read options from powheg.input 
 
@@ -38,18 +55,6 @@ c Input file
       call powheginputstring_local('SI_inputfile',inputfilename,'pwgevents.lhe')
       write (*,*) 'SI: inputfilename: ', inputfilename      
 
-c Selection of veto strategy (as implemented by Pythia)
-      pythiamatching = powheginput("#SI_pythiamatching")
-      if (pythiamatching.lt.0) pythiamatching = 2
-      write(*,*) 'SI matching strategy: ', pythiamatching
-
-c PYTHIA tune
-      pytune=powheginput("#SI_pytune")
-      write(*,*) 'SI PYTHIA tune: ', pytune
-
-c PYTHIA QED shower from quarks
-      noQEDqopt = powheginput("#SI_noQEDq").eq.1
-
 c PHOTOS
       use_photos = powheginput("#SI_use_photos").eq.1
       write(*,*) 'SI use_photos: ', use_photos
@@ -59,26 +64,16 @@ c PHOTOS lower cut off parameter
       if (kt2minqed.le.0d0) kt2minqed  = 0.001d0**2
       write(*,*) 'SI kt2minqed: ', kt2minqed
 
+c Veto QED emissions (to be used if events contain NLO EW corrections)
+      mustveto_gamma = powheginput("#SI_vetoqed").eq.1
+      write(*,*) 'SI mustveto_gamma: ', mustveto_gamma
 c Check flag no_ew in input file, print warning if needed
       no_ew = powheginput("#no_ew").eq.1
       write(*,*) 'SI no_ew: ', no_ew
-      if(.not.no_ew) then
-         vetoqed=.true.
-      else
-         vetoqed=.false.
+      if ((.not.no_ew).and.(.not.mustveto_gamma)) then
+        write(*,*) '*** SI WARNING: The events could have been produced with EW NLO corrections'
+        write(*,*) '*** SI WARNING: The QED veto in that case must be active'
       endif
-
-c PYTHIA QED veto strategy
-      py8veto = powheginput("#SI_py8veto").eq.1
-      write(*,*) 'SI py8veto: ', py8veto
-
-c Hadronization in PYTHIA
-      nohad = powheginput("#SI_nohad").eq.1
-      write(*,*) 'SI nohad: ', nohad
-
-c Save LHE output
-      savelhe = powheginput("#SI_savelhe").eq.1
-      write(*,*) 'SI savelhe: ', savelhe
 
 c Save fortran based histograms for analysis
       savehistos = powheginput("#SI_savehistos").eq.1
@@ -89,70 +84,74 @@ c Set off the lecture of two scales (read traditional events)
       write(*,*) 'SI no_tworadevents: ', no_tworadevents
 
 
+c Maximum number of trials for PYTHIA and PHOTOS
+      trial_max=100
+
+
+
 c Open file, set number of events to be read (maxev)
 c The variable iun is assigned by the opencount_local function
       call opencount_local(inputfilename,maxev,iun)
       if(maxshowerevents.gt.0) maxev=maxshowerevents
       write (*,*) '*** SI: Number of events to be showered: ', maxev
+c      write (*,*) 'SI: iun', iun
 
-c Read header of event file (do before initializing PYTHIA and PHOTOS)
-      call lhefreadhdr(iun)
-
-c Initialize PYTHIA (.cc file)
-      call pythia_init
-c number of retry for pythia8, to generate photon events
-c that pass the veto.
-      py8trialmax = 20
+c Set up tune
+c function in setup-PYTHIA6-lhef.f
+c (reads SI_pytune flag from input file)
+      call setup_PYTHIA_tune
 
 
-c Initialize PHOTOS (.cc file)
-      if(use_photos) then
-         call photos_init
-         photostrialmax = 20
+c calls function in pythia.f, then calls UPINIT in setup-PYTHIA6-lhef.f
+c Set up PYTHIA to accept user processes
+c Reads header of event file, also perform settings of PYTHIA parameters
+      call PYINIT('USER','','',0d0)
+
+      
+c Set up initial parameter, routine in setup-PYTHIA6-lhef.f
+c Other pythia settings
+      call setup_PYTHIA_parameters
+
+      if(use_photos) call phoini
+
+      if (mustveto_gamma) then
+        write(*,*) '*** SI: Applying independent fortran based veto on FSR photons'
       endif
-
-c Print info about veto'es
-      if (vetoqed) then
-        if (use_photos) then
-          write(*,*) '*** SI: Applying independent fortran based veto on PHOTOS'
-        else 
-          if (py8veto) then
-            write(*,*) '*** SI: Applying PYTHIA (UserHooks) based veto on PYTHIA QED emissions'
-          else
-            write(*,*) '*** SI: Applying independent fortran based veto on PYTHIA QED emissions'
-          end if
-        end if
-      else 
-        write(*,*) '*** SI: No veto will be done on QED emissions'
-      end if
-
-c Initialize Fortran based analysis (histograms)
-      if (savehistos) then 
+ 
+      if (savehistos) then
+c     WHCPRG tells the analysis subroutine which program is calling the
+c     analysis
         WHCPRG='PYTHIA'
-        call init_hist
+c Routine in setup-PYTHIA6-lhef.f
+c initialize histograms
+        call PYABEG
       endif
 
       if (no_tworadevents) then 
         write (*,*) '*** SI: Using only scalup from LHE events as starting scale for radiation'
       endif
+      
 
- 
 c Main loop
       write (*,*) '*** SI: Showering events'
       nevhep=0
-      do l=1,maxev
-
-         py8trial = 0
-
-         mc_isr_scale = 0d0
-         mc_fsr_scale = 0d0
-         xphcut = 0d0;
+      do iev=1,maxev
+c Count the number of trials for showering each LH event
 
  1       call lhefreadev(iun)
 
          if(not_finite_kin_lh()) goto 1
+c$$$c DEBUG STARTS *******************************************
+c$$$         write(*,*) ' incoming Les Houches event **********************'
+c$$$         call printleshouches
+c$$$         write(*,*) ' End incoming Les Houches event  *****************'
+c$$$c DEBUG ENDS ********************************************
 
-         evtnumber= l
+         if(nup.eq.0) then
+            write(*,*) ' no event generated; skipping'
+            goto 111
+         endif
+
 c If we are reading only one scale from LHE events (scalup), set both needed variables for veto'es
 c to it (in principle, this events should contain only NLO QCD corrections, 
 c so no FSR veto should be done to them)
@@ -161,42 +160,42 @@ c so no FSR veto should be done to them)
            mc_fsr_scale = scalup
          endif         
 
-c        Set radiation scales to be used by the .cc program (PYTHIA)
-         vetoscale_isr = mc_isr_scale
-         vetoscale_fsr = mc_fsr_scale
+c          write(*,*) '*********** SI: event info: ', iev, scalup, mc_isr_scale, mc_fsr_scale
+!          do j=1,nup
+!           write (*,*) 'SI ', idup(j), mothup(1,j), mothup(2,j)
+!          enddo
 
-         if(use_photos)  then
-c Set infrared cutoff used by PHOTOS
-            xphcut = 2d0*sqrt( kt2minqed )/pup(5,3)
-
+         if(use_photos) then
             photostrial=0
+            call seteps
+c position of the Z resonance in the LH common block
+            id_v=3
 c Run PHOTOS until event ok.
+c Photos overwrites the phhepevt common block
+c (fills it with photons).
+c Must restore it at each loop
  15         continue
-c Put particle information from LHE block into HEPEVT block, to be used by PHOTOS
+c copy LH common to PHHEPEVT common, used by photos
             call lhuptophhepevt
-c$$$c DEBUG STARTS *******************************************
-!             write(*,*) '  '
-!             write(*,*) ' Incoming Les Houches block for photos ***'
-!             call  printleshouches
-!             write(*,*) ' End incoming Les Houches block for photos *'
-!             write(*,*) '  '
-c$$$c DEBUG STARTS *******************************************
-
-c Process event with PHOTOS (.cc file)
-            call photos_process
-
-c Copy event from photos hepevt block to the LH block
-
-            if(vetoqed) then
+c$$$            write(*,*) ' incoming hep block for photos **************'
+c$$$            call  printphhepblock
+c$$$            write(*,*) ' End incoming hep block for photos **************'
+c$$$            call checkresmomphhep
+c Photos adds photons to  PHHEPEVT common
+            call photos_make(id_v)
+c$$$            write(*,*) ' outgoing hep block for photos **************'
+c$$$            call  printphhepblock
+c$$$            call checkresmomphhep
+c$$$            write(*,*) ' End outgoing hep block for photos **************'
+            if(mustveto_gamma) then
 c check if Photo's photons violate scalup veto
                call pass_veto(ok)
-
                if (.not.ok) then
                   photostrial=photostrial+1
-                  if(photostrial.le.photostrialmax) then
+                  if(photostrial.le.trial_max) then
                      goto 15
                   else
-                     write(*,*) '*** SI: rejected event that can not pass the veto (PHOTOS)'
+                     write(*,*) '*** SI: rejected event that cannot pass the veto (PHOTOS)'
                      continue
                   endif
                endif
@@ -204,114 +203,100 @@ c check if Photo's photons violate scalup veto
 c Copy event from photos hepevt block to the LH block
             call phhepevttolhef
 c$$$c DEBUG STARTS *******************************************
-c$$$            call checkresmomphhep
-c$$$            write(*,*) '  '
-c$$$            write(*,*) ' added photons = ',nup-nup0
-c$$$            write(*,*) ' Outgoing Les Houches event *******'
-c$$$            call printleshouches
-c$$$            write(*,*) ' End outgoing Les Houches event  ***'
-c$$$            write(*,*) '  '
+c$$$         write(*,*) ' incoming Les Houches event **********************'
+c$$$         call printleshouches
+c$$$         write(*,*) ' End incoming Les Houches event  *****************'
 c$$$c DEBUG ENDS ********************************************
-         endif
 
- 888     continue
-         do m=1,5
-c Insist to shower this event
-c Process event with PYTHIA (.cc file)
-            call pythia_next(iret)
-            
-            if(iret.ne.1) then
-               if(m.eq.1) then
-                  write(*,*) '*** SI: Pythia could not shower this event'
+         endif
+c PYTHIA
+         pythiatrial = 0
+
+c The following line calls PYTHIA, to shower the event
+
+ 888     call pyevnt
+
+c     Convert from PYJETS event record to HEPEVT event record
+         temp=nevhep
+         call pyhepc(1)
+         nevhep=temp
+c     Print out the event record (for few events)
+         IF (IEV.le.maxpr) THEN 
+c     list the event
+c            call pystat(2)      ! print cross sections, widths, branchings,...
+c            CALL PYLIST(7)      ! print the HEPEUP common block
+             CALL PYLIST(5)      ! print the HEPEVT common block
+c            CALL PYLIST(2)      ! print the event
+c            call PYLIST(1)      ! as PYLIST(2) but with less information
+         ENDIF
+c
+c if QED shower from MC parton shower, here it applies veto 
+c
+         if( .not. use_photos .and. mustveto_gamma) then
+c examine_res_photons checks if the photons from the resonance violate scalup (mc_fsr_scale!)
+c HH: The routine is giving some errors for PYTHIA6, need to be checked
+            call examine_res_photons(lepveto,ptrel)
+c START CHECK *********************************************************
+c Only for Z!
+c Check that examine_ptotons yields the same result as old veto routine
+c scalupveto1 (commented in the rest of the code
+c               call scalupveto1(lepveto1,ptrel1)
+c               if((lepveto.and..not.lepveto1)
+c     1              .or.(lepveto1.and..not.lepveto)) then
+c                  write(*,*) ' problems ... lepveto,lepveto1 differ'
+c                  call printleshouches
+c                  call printhepblock
+c                  call scalupveto1(lepveto,ptrel)
+c                  call examine_res_photons(lepveto1,ptrel1)
+c               endif
+c               if(abs((ptrel-ptrel1)/(ptrel+ptrel1)).gt.0.01) then
+c                  write(*,*) ' problems ... ptrel,ptrel1',ptrel,ptrel1
+c               endif
+c END CHECK ***********************************************************
+
+c     if pt_rel(gam-lep) is above SCALUP 
+c     veto the event and retry to shower (a maximum of trial_max times)  
+            if (lepveto) then
+               pythiatrial=pythiatrial+1
+               if(pythiatrial.le.trial_max) then
+                  goto 888
+               else
                   call printleshouches
-               endif
-               write(*,*) '*** SI: retrying'
-            else
-               exit
-            endif
-         enddo
-
-c If event has been showered, proceed
-         if(iret.eq.1) then
-c Read the block of particles after the Pythia shower
-c Store the block in the hepevt common block (to be used in the veto's and analysis)
-            call pythia_to_hepevt(nmxhep,nhep,isthep,idhep,jmohep,
-     1           jdahep,phep,vhep)
-
-c Manual veto on PYTHIA QED emissions
-c If there are EW corrections in POWHEG, and PY8 is not vetoing photons,
-c then we veto by hand.
-c This is not needed if Photos is used
-            if( vetoqed.and.(py8veto.eqv.(.false.)).and.(use_photos.eqv.(.false.)) ) then
-c examine_res_photons checks if the photons from the resonance violate scalup.
-               call examine_res_photons(lepveto,ptrel)
-               if(lepveto) then
-                  py8trial = py8trial + 1
-                  if(py8trial .gt. py8trialmax) then
-                     write(*,*) '*** SI: cannot generate photons that passes scalup veto (PYTHIA)'
-                     iret = -1
-                  else
-                     goto 888
-                  endif
+                  write(*,*) '*** SI: Cannot add photons that pass the veto (PYTHIA)'
                endif
             endif
-            nevhep=nevhep+1
-            if (savehistos) then
-              call pyanal
-            endif
-            if(nevhep.gt.0.and.mod(nevhep,100000).eq.0) then
-               write(*,*)'*** SI: # of events processed: ',nevhep
-               if(savehistos) call pyaend
-            endif 
-
          endif
-         if(iret.ne.1) then
-           if (savehistos) call pwhgaccumup
+
+         if (savehistos) then
+c Call analysis, fill histograms (routine in setup-PYTHIA6-lhef.f)
+           call PYANAL
+         endif
+
+         nevhep=nevhep+1
+
+         IF(nevhep.gt.0.and.MOD(nevhep,20000).EQ.0) THEN
+            WRITE(*,*)'# of events processed=',NEVHEP
+            if (savehistos) then
+              CALL PYAEND
+            endif
+
          endif
 
       enddo
+ 111  continue
 
       if (savehistos) then
-        call pyaend
+C---USER'S TERMINAL CALCULATIONS
+        call PYAEND
       endif
 
-      call pythia_close
 
       write(*,*) '*** SI: Number of input events: ', maxev
       write(*,*) '*** SI: Number of event processed (NEVHEP): ', nevhep
       write(*,*) '*** SI: Success'
 
-      end
 
-
-      subroutine pyanal
-      implicit none
-      include 'LesHouches.h'
-      include 'hepevt.h'
-c     check parameters
-      logical verbose
-      parameter (verbose=.false.)
-
-c If events are unweighted (have weight 1.0), multiply current weight (xwgtup) by cross section 
-c of the current process (xsecup(1))
-      if(abs(idwtup).eq.3) xwgtup=xwgtup*xsecup(1)
-      call analysis(xwgtup)
-      call pwhgaccumup 
-      end
-
-      subroutine pyaend
-      character * 20 pwgprefix
-      integer lprefix
-      common/cpwgprefix/pwgprefix,lprefix
-      include 'pwhg_rnd.h'
-      character * 100 infl
-      integer nchar
-      common/otherfilename/infl,nchar
-
-      call pwhgsetout
-      call pwhgtopout(infl(1:nchar)//'output_py8_histos')
-
-      end
+      END
 
       logical function not_finite_kin_lh()
       implicit none
@@ -329,30 +314,34 @@ c of the current process (xsecup(1))
  998  not_finite_kin_lh = .true.
       end
 
-c Copy a LH event to the photos hep common block
+
+
+
       subroutine lhuptophhepevt
+c Copy a LH event to the photos hep common block
       implicit none
       include 'LesHouches.h'
-      include 'PhotosHep.h'
+      include "PhotosHep.h"
+
       integer n,j,i,nphotons,photon_index(2)
       integer idtmp,mothtmp(2),coltmp(2)
       real*8 ptmp(5)
 
-c     Copying all variables ('up' from LHE block to 'hep' of Photos HEPEVT block)
-c     After this the block HEPEVT contains the particles in the same order as the original LHE
-c     The daughters are assigned to 0 in the HEP block
+c      integer n
+      logical qedrad
+      common/ph_phoqed/qedrad(nmxhep)
 
-c Block with 'PhotosHep' variables 
       nhep=nup
+c      nevhep=n
       isthep(1:nhep)=istup(1:nup)
       idhep(1:nhep)=idup(1:nup)
       jmohep(1:2,1:nhep)=mothup(1:2,1:nup)
       jdahep(1:2,1:nhep)=0
       phep(1:5,1:nhep)=pup(1:5,1:nup)
-
-c Assign daughters of the resonance
+      qedrad(1:nhep)=.true.
 
 c New code, deals with more than 6 particles in LHE block
+C Taken from main-PYTHIA8.f
 c First daughter of particle (3) (resonance, V boson) is the 4th particle (first decay product)
       jdahep(1,3)=4
 c If there are "radiated" particles
@@ -398,7 +387,16 @@ c Last daughter of resonance if the 5th particle (second decay product)
       endif
 
 
+c Old code:
+!       jdahep(1,3) = 4
+!       if(nup.eq.6.and.jmohep(1,6).eq.3) then
+!          jdahep(2,3) = 6
+!       else
+!          jdahep(2,3) = 5
+!       endif
+
       end
+
 
 
 c     shift the particles j,..,j+n-1 (n=2 or 3) at the end of the list
@@ -472,6 +470,8 @@ c Copy temporal variables to position j
       end
 
 
+
+c Code from main-PYTHIA8.f
 c Use the phhep common block to add the photos generated particles
 c to the LH common block
       subroutine phhepevttolhef
@@ -556,6 +556,24 @@ c Assign color to the parton i in the new block as it was in the original block
       end
 
 
+
+
+      subroutine seteps
+c set the photos cutoff parameter for radiation
+      implicit none
+      include "LesHouches.h"
+      real * 8 kt2minqed
+      common/showerqed/kt2minqed
+      real * 8 alpha,xphcut
+      common/phocop/alpha,xphcut
+
+      xphcut = 2*sqrt( kt2minqed )/pup(5,3)
+c      write (*,*) 'SI Setting PHOTOS lower cutoff to: ', xphcut
+
+      end
+
+
+c Taken from main-PYTHIA8.f
       subroutine pass_veto(ok)
 c returns true if all photos generated photons have relative pt 
 c (with respect to the emitting lepton) less than scalup
@@ -665,6 +683,9 @@ c The routine vetoes the photons added by Photos if the relative pt is greater t
 
       end
 
+
+
+
       subroutine printleshouches
 c useful for debugging
       call lhefwritev(6)
@@ -677,6 +698,7 @@ c...writes event information to a les houches events file on unit nlf.
       integer nlf
       include 'LesHouches.h'
       include 'pwhg_flg.h'
+      include 'pwhg_lhrwgt.h'
       integer i,j
       write(nlf,'(a)')'<event>'
       write(nlf,210) nup,idprup,xwgtup,scalup,aqedup,aqcdup
@@ -686,15 +708,27 @@ c...writes event information to a les houches events file on unit nlf.
      & vtimup(i),spinup(i)
  200  continue
       write(nlf,'(a)')'</event>'      
- 210  format(1p,2(1x,i8),4(1x,e12.5))
+ 210  format(1p,2(1x,i6),4(1x,e12.5))
  220  format(1p,i8,5(1x,i5),5(1x,e16.9),1x,e12.5,1x,e10.3)
+      end
+
+
+      subroutine printphhepblock
+      implicit none
+      include "PhotosHep.h"
+      integer j
+      write(*,'(a)') '    j   id      ist   mo1  mo2    da1  da2   p'
+      do j=1,nhep
+         write(*,100) j,idhep(j),isthep(j),jmohep(1,j),jmohep(2,j),
+     1             jdahep(1,j),jdahep(2,j), phep(:,j)
+      enddo
+ 100  format(i4,3x,i6,2x,i3,2x,i4,1x,i4,3x,i4,1x,i4,3x(5(d10.4,2x)))
       end
 
 
       subroutine checkresmomphhep
       implicit none
-      include "PhotosHep.h" 
-c      include "hepevt_photos.h"
+      include "PhotosHep.h"
       real * 8 ptot(1:5)
       integer j
       ptot = phep(:,3)
@@ -708,30 +742,32 @@ c      include "hepevt_photos.h"
       endif
       end
 
+
 c Local version of opencount, based on the box version
 c adding flexibility (choose the input file name)
       subroutine opencount_local(inputfilename,maxev,iun)
       implicit none
-      character * 100 infl
+      integer maxev
+      character * 100 inputfilename,infl
       integer nchar
       common/otherfilename/infl,nchar
       save /otherfilename/
-      integer maxev
-      character * 100 inputfilename
       integer ios
       character * 7 string
       integer nev,j,iun,iret
       maxev=0
+c      write(*,*) 'SI: Trying to open file: ', trim(inputfilename)
       call pwhg_io_open_read(trim(inputfilename),iun,ios)
 
+c      write (*,*) 'SI: iun, ios', iun, ios
       if(ios.ne.0) then
          write(*,*)' file not found:',inputfilename
          write(*,*)' enter name of event file'
          read(*,'(a)') inputfilename
-
          infl=trim(inputfilename)
          call charnum(infl,nchar)
-
+         write(*,*)'inputfiename',inputfilename
+         write(*,*)'infl        ',infl
          call pwhg_io_open_read(trim(inputfilename),iun,ios)
          if(ios.ne.0) then
             write(*,*) 'cannot open; aborting ...'
@@ -816,4 +852,3 @@ c     Using input mode 1
       enddo
  10   n=n-1
       end subroutine charnum
-

@@ -16,20 +16,29 @@ c ptrel is for leptons, ptrelq for quarks
       logical lh_gamma,ok
       integer nphq
       integer idphfromq(maxpart)
+      real*8 mc_isr_scale,mc_fsr_scale
+      common/mc_scale_lhe/mc_isr_scale,mc_fsr_scale
 
-c First find out if there is a photon in the LH interfacs
+c      write(*,*) 'SI: In examine_res_photons with mc_fsr_scale:', mc_fsr_scale
+
+c First find out if there is a photon in the LH interface
       lh_gamma = .false.
       do iup=1,nup
+c         write (*,*) 'SI ', idup(iup), mothup(1,iup), mothup(2,iup)
          if(idup(iup).eq.22) then
             lh_gamma = .true.
             exit
          endif
       enddo
+
+c Find out position of W,Z boson in the HEP interface (after the shower)
       do ihep=1,nhep
          if(idhep(ihep).eq.idup(3)) then
             iv=ihep
          endif
       enddo
+c
+c Check the sons of the resonance
 c    look for the sons of the z
       if(jdahep(2,iv)-jdahep(1,iv).ne.1) then
 c         write(*,*) " more than 2 Zed's sons"
@@ -40,8 +49,6 @@ c         write(*,*) " more than 2 Zed's sons"
             write(*,*) ' examine_photons: error? third son, but no lh photon!'
          endif
       endif
-c      il(1) = jdahep(1,iv)
-c      il(2) = il(1)+1
       il(1) = 0
       il(2) = 0
 c cycle over daughters of resonance to assign lepton 1
@@ -60,24 +67,29 @@ c check if the running particle is a charged lepton or neutrino
          endif
       enddo
 
+c  il(1) and il(2) contain the indexes of the two leptons, sons of the resonance
+
+c Check id's of the two leptons, according to the boson
+c id(3) = 23: Z boson
 c Check that these two are opposite leptons
       if(idup(3).eq.23) then
          if(idhep(il(1)).ne.-idhep(il(2))) then
 c     this happens rarely when using the old virtuality ordered shower.
 c     Should not happen with pt ordered one.
             write(*,*)
-     1           ' examine_pqhotons: error: first and second son of Z'
+     1           ' examine_photons: error: first and second son of Z'
             write(*,*) 'are not opposite leptons !'
             lepveto= .true.     !avoid this event
             ptrel= 1.d6
             return
          endif
+c  id(3) = 24 : W boson
       elseif(abs(idup(3)).eq.24) then
          if( (idhep(il(1))+idhep(il(2)))*idup(3).ne.24) then
 c     this happens rarely when using the old virtuality ordered shower.
 c     Should not happen with pt ordered one.
             write(*,*)
-     1           ' examine_pqhotons: error: first and second son of W'
+     1           ' examine_photons: error: first and second son of W'
             write(*,*) 'do not match ! ',idup(3),' -> ',idhep(il(1)),idhep(il(2))
             lepveto= .true.     !avoid this event
             ptrel= 1.d6
@@ -90,10 +102,17 @@ c     Should not happen with pt ordered one.
      1        ' examine_photons: neither W nor Z! exiting ...'
          call exit(-1)
       endif
+
+c Finding sons of leptons
+c     il(i) : Indexes of lepton i
+c     nvec(i) : Integer containing number of sons of lepton i
+c     idvector(j,i) : Contains indexes of the sons of lepton i
       nvec = 0
+
       do k=1,2
          call sons_of_resonance(il(k),maxpart,idvector(:,k),nvec(k))
       enddo
+
 c check for consistency
       do k=1,2
          ok=.true.
@@ -114,22 +133,31 @@ c check for consistency
          endif
       enddo
 
+c     Computing relative pt of emmited photons with respect to the leptons
       call scaleupveto(nvec(1),idvector(:,1),ptrel1)
       call scaleupveto(nvec(2),idvector(:,2),ptrel2)
 
+
       ptrel = max(ptrel1,ptrel2)
 
-      if((ptrel-scalup)/scalup.gt.0) then
+c  Modification, use new variable "mc_fsr_scale" to examine photons, instead of traditional "scalup"
+      if((ptrel-mc_fsr_scale)/mc_fsr_scale.gt.0) then
          lepveto=.true.
 c         write(*,*) 'vetoed event',(ptrel-scalup)/scalup
-         return
+c         return
       else
          lepveto = .false.
       endif
+
+
 c The call below can be activated to check that both
 c PYTHIA6 and PYTHIA8 do honor the scalup requirements
 c on shower originated photons. In order to activate the
 c check, uncomment the call below.
+
+c WARNING: the following function needs revision, in order to use mc_fsr_scale and not scalup as the veto scale
+c file : scalupvetoqpy8.f
+
 c      call examine_other_photons(nvec,idvector,lepveto,ptrelq)
 
       end
@@ -148,6 +176,7 @@ c      call examine_other_photons(nvec,idvector,lepveto,ptrelq)
       data vec/0d0,0d0,1d0/
       ptrel = 0
 c     apply veto for QED shower from lepton above SCALUP
+c     Loop on the sons of particle j = 1 (lepton)
       do j=2,nvec
          jgam=idvector(j)
          p_gamma(0)=phep(4,jgam)
@@ -191,11 +220,14 @@ c If a photon splits into charged particles, we stop at the photon
             endif
          endif
       endif
+
       if(isthep(idpart).ne.1) then
+c If the particle in idpart is not a final state one, call again the function for each daughter
          do j=jdahep(1,idpart),jdahep(2,idpart)
             call sons_of_resonance(j,maxpart,idvector,n)
          enddo
       else
+c If the particle in idpart is a final state one, it has no daughter, so increase n and add new index to idvector
          if(n.eq.maxpart) then
             write(*,*) ' cannot add more particles! increase maxpart'
          else

@@ -10,13 +10,6 @@
 using namespace Photospp;
 
 extern "C" {
-  extern struct     {
-    int evtnumber;
-    char photos_init_info[1000];
-  } evtprint_;
-  extern struct   {
-    double xphcut;
-  } photoscutoff_;
   extern struct
   {
     int    nevhep;
@@ -28,6 +21,15 @@ extern "C" {
     double phep[10000][5];
     double vhep[10000][4];
   } ph_hepevt_;
+
+  extern struct     {
+    char photos_init_info[1000];
+  } si_data_;
+  extern struct {
+    double xphcut;    
+    int evtnumber;
+  } si_event_info_;
+  
 }
 
 // PHOTOS C++ interface
@@ -36,6 +38,8 @@ extern "C" {
 
   void photos_init_() {
 
+    std::cout << "**** SI: Initializing PHOTOS" << std::endl;
+    
     // Initialize two random seeds
     srand (time(NULL));
     int s1 = rand() % 31327;
@@ -43,21 +47,31 @@ extern "C" {
     std::cout << "**** SI: Setting PHOTOS random seeds: " << s1 << " " << s2 << std::endl;
 
     // Setting random seed for Photos
-    Photos::setSeed(s1, s2);
-    
-    Photos::initialize();
-   
-    // phokey_.interf        (interference weight)               : on by default
-    // phokey_.isec          (double photon)                     : off by default
-    // phokey_.ifw           (correction weight in decay of W)   : on by default
-    // meCorrectionWtForW    (ME correction in decay of W)       : off by default
+    Photos::setSeed(s1, s2); 
 
-    // Turn on NLO corrections - only for PHOTOS 3.2 or higher
+    // Initialize PHOTOS   
+    Photos::initialize();
+
+    // Other flags
     //Photos::setMeCorrectionWtForW(true); 
     //Photos::setDoubleBrem(true);
-    //Photos::maxWtInterference(4.0);
-             
+    //Photos::setCorrectionWtForW(false);
+    //Photos::Photos::setInterference(false);
+
+    // Print again initialization info
     Photos::iniInfo();
+    
+    // Print explicit values of other flags
+    // phokey_.interf        (interference weight)               : on by default
+    std::cout << "**** SI: Other PHOTOS set: " << std::endl;
+    std::cout << "**** SI: phokey_.interf  (interference weight)             : " << phokey_.interf << std::endl;
+    // phokey_.isec          (double photon)                     : off by default
+    std::cout << "**** SI: phokey_.isec (double photon)                      : " << phokey_.isec << std::endl;
+    // phokey_.ifw           (correction weight in decay of W)   : on by default
+    std::cout << "**** SI: phokey_.ifw (correction weight in decay of W)     : " << phokey_.ifw << std::endl;
+    // meCorrectionWtForW    (ME correction in decay of W)       : off by default
+    std::cout << "**** SI: (meCorrectionWtForW) ME correction in decay of W  : " << Photos::meCorrectionWtForW << std::endl;
+
     
    // Redirect Photos initialization output to a string, to be printed in the LHE file
     
@@ -69,11 +83,11 @@ extern "C" {
   
    std::string init_info = oss.str();
       
-   strcpy(evtprint_.photos_init_info, init_info.c_str());
+   strcpy(si_data_.photos_init_info, init_info.c_str());
 
-   evtprint_.photos_init_info[init_info.size() - 1] = ' ';
-   evtprint_.photos_init_info[init_info.size()] = ' ';
-   evtprint_.photos_init_info[init_info.size() + 1] = ' ';
+   si_data_.photos_init_info[init_info.size() - 1] = ' ';
+   si_data_.photos_init_info[init_info.size()] = ' ';
+   si_data_.photos_init_info[init_info.size() + 1] = ' ';
    
    std::cout.rdbuf(sbuf);
 
@@ -82,9 +96,10 @@ extern "C" {
 
   void photos_process_() {
 
-    // Define PhotosHEPEVT event from the common HEPEVT block
-    // The HEPEVT block is contained in the structure ph_hepevt_
+    // Create PHOTOS event
     PhotosHEPEVTEvent *event = new PhotosHEPEVTEvent();
+
+    // Fill particles in the PHOTOS event using the "common" Photos HEPEVT block (data already filled in the .f file)
     for(int i = 0; i < ph_hepevt_.nhep; i++) {                                    
       PhotosHEPEVTParticle *p = new PhotosHEPEVTParticle 
       (
@@ -105,7 +120,8 @@ extern "C" {
 
     
     // Set IR cutoff (in units of decaying particle mass)
-    Photos::setInfraredCutOff(photoscutoff_.xphcut);
+    //std::cout << "SI: Photos cutoff " << si_event_info_.xphcut << std::endl;
+    Photos::setInfraredCutOff(si_event_info_.xphcut);
 
     //cout << "Event before photos" << endl;   
     //event->print();
@@ -117,11 +133,12 @@ extern "C" {
     //cout << "Event after photos" << endl;
     //event->print();
 
-    // Update HEPEVT block with the Photos processed event
+    // Update Photos HEPEVT block with the Photos processed event
     ph_hepevt_.nhep = event->getParticleCount();
     // Number of particles of new block
     int n2 = ph_hepevt_.nhep;
     //std::cout << "Number of photons added: " << n2 - n1 << std::endl;
+    
     for(int i = 0; i < ph_hepevt_.nhep; i++) {
       PhotosHEPEVTParticle *p = event->getParticle(i);
 
