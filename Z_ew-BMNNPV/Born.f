@@ -354,6 +354,11 @@ c     fermion_charge = +2/3, -1/3, -2/3, +1/3
 
       save ifirst,onesucw2sw2,mlep4,mzm2
 
+      real*8 ramp2
+      complex*16 gzqbm,gzqm,gzqbp,gzqp,gzlbm,gzlm,gzlbp,gzlp
+      complex*16 propa,propz,cpropz
+
+      
       if (ifirst.eq.0) then
           ifirst = 1
           onesucw2sw2 = 1d0/( 4.d0*cw2*sw2 )
@@ -388,9 +393,19 @@ c     exchance particle 1 and 2
       if (abs(ferm_charge(1)).eq.qu) then
          qq = qu
          i3q = 0.5d0
+
+         gzqm=gu(0)
+         gzqp=gu(1)
+
+         
       elseif (abs(ferm_charge(1)).eq.-qd) then
          qq = qd
          i3q = -0.5d0
+
+         gzqm=gd(0)
+         gzqp=gd(1)
+
+         
       else
          write(*,*) 'What charge is this??', ferm_charge(1)
          stop
@@ -432,25 +447,42 @@ c     exchance particle 1 and 2
       deng  = 1d0/s
       denz  = 1.d0/(s*cone - ph_Zmass2 + ii*ph_ZmZw)
       denzd = dconjg(denz)
+      
+      propa=deng  != 1d0/s
+      propz=denz  != 1.d0/(s*cone - ph_Zmass2 + ii*ph_ZmZw)
+      cpropz=denzd != dconjg(denz)
       denz2 = denz*denzd
 
-      amp2= (el2_scheme**2*(16*deng**2*Ql**2*Qq**2*
-     -       (2*mlep2**2 + t**2 + 2*mlep2*(s - t - u) + u**2) +
-     -      (-4*deng*(denz + denzd)*Ql*Qq*(-1 + sw2)*sw2*
-     -          (gaf*gaq*(2*mlep2 - t - u)*(t - u) +
-     -       gvf*gvq*(2*mlep2**2 + t**2 + 2*mlep2*(s - t - u) + u**2)) +
-     -         denz2*(2*gvf2*gvq2*mlep2**2 + 2*gvf2*gvq2*mlep2*s +
-     -            8*gaf*gaq*gvf*gvq*mlep2*t - 2*gvf2*gvq2*mlep2*t -
-     -            4*gaf*gaq*gvf*gvq*t**2 + gvf2*gvq2*t**2 -
-     -            2*(4*gaf*gaq*gvf*gvq + gvf2*gvq2)*mlep2*u +
-     -            (4*gaf*gaq*gvf*gvq + gvf2*gvq2)*u**2 +
-     -     gaq2*gvf2*(2*mlep2**2 + t**2 + 2*mlep2*(s - t - u) + u**2) - 
-     -            gaf2*(gaq2 + gvq2)*
-     -             (8*mlep2**3*mzm2 - 4*mlep4*mzm2*s - t**2 - u**2 -
-     -               2*mlep2*(-1 + mzm2*(s - t - u))*(s + t + u) -
-     -               2*mlep2**2*(1 + 2*mzm2*(s + 2*(t + u))))))/
-     -       ((-1 + sw2)**2*sw2**2)))/2.
-      amp2 = amp2/4d0/nc
+      gzlm=gl(0)
+      gzlp=gl(1)
+
+      gzqbm=conjg(gzqm)
+      gzqbp=conjg(gzqp)
+      gzlbm=conjg(gzlm)
+      gzlbp=conjg(gzlp)
+
+      amp2=4*el2_scheme*conjg(el2_scheme)*
+     -     (cpropz*gzlbp*gzlm*gzqbm*gzqm*mlep2*propz*s +
+     -     cpropz*gzlbm*gzlp*gzqbm*gzqm*mlep2*propz*s +
+     -     cpropz*gzlbp*gzlm*gzqbp*gzqp*mlep2*propz*s +
+     -     cpropz*gzlbm*gzlp*gzqbp*gzqp*mlep2*propz*s +
+     -     cpropz*gzlbp*gzqbm*propa*ql*qq*(mlep4 + mlep2*(s - 2*t) +
+     -     t**2) + cpropz*gzlbm*gzqbp*propa*ql*qq*(mlep4 +
+     -     mlep2*(s - 2*t) + t**2) +
+     -     gzlp*gzqm*propa*propz*ql*qq*(mlep4 + mlep2*(s - 2*t) + t**2)+
+     -     gzlm*gzqp*propa*propz*ql*qq*(mlep4 + mlep2*(s - 2*t) + t**2)+
+     -     cpropz*gzlbp*gzlp*gzqbm*gzqm*propz*(mlep4 +t*(-2*mlep2 + t))+
+     -     cpropz*gzlbm*gzlm*gzqbp*gzqp*propz*(mlep4 +t*(-2*mlep2 + t))+
+     -     cpropz*gzlbm*gzqbm*propa*ql*qq*(mlep4 + mlep2*(s-2*u)+ u**2)+
+     -     cpropz*gzlbp*gzqbp*propa*ql*qq*(mlep4 + mlep2*(s-2*u)+u**2) +
+     -     gzlm*gzqm*propa*propz*ql*qq*(mlep4 + mlep2*(s - 2*u) +u**2) +
+     -     gzlp*gzqp*propa*propz*ql*qq*(mlep4 + mlep2*(s - 2*u) +u**2) +
+     -     2*propa**2*ql**2*qq**2*(2*mlep4 + t**2 +
+     -     2*mlep2*(s - t - u) + u**2) +
+     -     cpropz*gzlbm*gzlm*gzqbm*gzqm*propz*(mlep4+u*(-2*mlep2 + u)) +
+     -     cpropz*gzlbp*gzlp*gzqbp*gzqp*propz*(mlep4+u*(-2*mlep2 + u)))
+
+      amp2=amp2/4d0/nc
       
       do mi=0,3
          do nu=0,3
@@ -459,7 +491,6 @@ c     exchance particle 1 and 2
       enddo
 
       end subroutine q_aq_to_l_al
-
 
       subroutine a_a_to_l_al(p,fermion_type,fermion_charge,amp2,bmunu) 
       implicit none
