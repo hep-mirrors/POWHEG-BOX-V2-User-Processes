@@ -71,6 +71,10 @@ PHOTOSCC_LOCATION=$(PWD)/PHOTOS/
 PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
 LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran -lstdc++ -ldl
 
+# the line below is for PHOTOS 3.61
+# LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotospp -lPhotosppHEPEVT -lstdc++ -ldl
+
+
 #user defined location of PYTHIA8
 # PYTHIA8 needs to be compiled using the same version of the g++ compiler used to compile the .cc files needed by the POWHEG-PYTHIA interface
 # In order to compile PYTHIA8 with a "non default" compiler, set the variable CXX, for example: > export CXX=g++-5 , before compiling PYTHIA
