@@ -72,7 +72,7 @@ Elmass 0.510998928d-3
 Taumass 1.77682d0
 alphaem 0.0072973525698163d0
 Tmass 173.5d0
-scheme 0     ! (default 1) 1->gmu scheme, 0->alpha(0) scheme
+scheme 1     ! (default 1) 1->gmu scheme, 0->alpha(0) scheme
 runningscale 1       ! default is 1, true, central scale equal to W virtuality, 0 equal to M_W
 #
 
