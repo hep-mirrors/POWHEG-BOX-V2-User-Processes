@@ -67,6 +67,10 @@ PHOTOSCC_LOCATION=$(PWD)/PHOTOS/
 PHOTOSFLAGS+=-I$(PHOTOSCC_LOCATION)/include
 LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran -lstdc++ -ldl
 
+# the line below is for PHOTOS 3.61
+# LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotospp -lPhotosppHEPEVT -lstdc++ -ldl
+
+
 #user defined location of PYTHIA8
 
 # Pythia 8.1xx
