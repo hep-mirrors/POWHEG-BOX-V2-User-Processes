@@ -85,7 +85,7 @@ PYTHIA8_CONFIG=pythia8-config
 #PYTHIA8_CONFIG=
 PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include
-LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/ -lpythia8 -llhapdfdummy -lstdc++ -ldl
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/ -lpythia8 -lstdc++ -ldl
 
 
 INCLUDE0=$(PWD)
