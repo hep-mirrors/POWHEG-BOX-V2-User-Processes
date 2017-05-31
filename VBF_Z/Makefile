@@ -8,8 +8,8 @@ PDF=lhapdf
 # Choose Analysis: none, default
 # default analysis requires FASTJET package, that has to be installed 
 # separately (see below)
-#ANALYSIS=none
-ANALYSIS=default
+ANALYSIS=none
+###ANALYSIS=default
 ## For static linking uncomment the following
 #STATIC= -static
 
@@ -68,20 +68,24 @@ LIBS+=$(LHAPDFLIB) -Lnlo_files -lnlo
 %.o: %.cc
 	$(CC) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
-
+LIBS+=-lz
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o  \
 	calc_invariants.o compute_tensors_z.o compute_tensors_z_real.o \
 	convert_coup.o real.o boost.o breit.o  $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o            \
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o   \
-        test_Sudakov.o pt2maxreg.o sigborn.o gen_real_phsp_fix.o maxrat.o \
+        test_Sudakov.o pt2maxreg.o sigborn.o maxrat.o \
 	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o      \
 	random.o boostrot.o bra_ket_subroutines.o cernroutines.o      \
 	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o  \
         pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o         \
 	reshufflemoms.o setstrongcoupl.o integrator.o newunit.o       \
 	mwarn.o sigsoftvirt.o sigcollsoft.o sigvirtual.o  \
+	setlocalscales.o validflav.o pwhgreweight.o opencount.o \
+	ubprojections.o utils.o \
+	mint_upb.o pwhg_io_interface.o rwl_weightlists.o \
+	rwl_setup_param_weights.o gen_real_phsp.o lhefread.o \
 	$(PDFPACK) $(USER) $(SYSOBJ)
 
 # target to generate LHEF output
