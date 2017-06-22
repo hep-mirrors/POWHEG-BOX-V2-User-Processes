@@ -16,10 +16,11 @@ c coupling rescaling, for Born (imode=1) and NLO corrections (imode=2)
       save optb2,omb2,orescfac,oimode,omuf2
       data optb2/-1d0/
       logical ini,bmass_in_minlo_flg
+      common/c_bmass_in_minlo_flg/bmass_in_minlo_flg
       data ini/.true./
       save ini
       real * 8 powheginput,factsc2min,frensc2min,as,y,b1,tmp,bfact
-      save factsc2min,frensc2min,b0,b1,bmass_in_minlo_flg
+      save factsc2min,frensc2min,b0,b1
       integer imax
 c      real * 8 rescfac1,rescfac2
 c      common /crescfac/rescfac1,rescfac2

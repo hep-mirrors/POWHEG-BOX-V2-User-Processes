@@ -255,15 +255,33 @@ c     Fermions initialization subroutines used by SM and MW
       external pwhg_alphas
       external powheginput
 
+      ph_topmass = powheginput('#topmass')
+      ph_bottommass = powheginput('#bottommass')
+      ph_charmmass = powheginput('#charmmass')
+
+      call init_fermions0(.true.)
+      
+      end subroutine
+
+c     Fermions initialization subroutines used by SM and MW
+      subroutine init_fermions0(verbose)
+      implicit none
+      include 'PhysPars.h'
+      include 'pwhg_st.h'
+      include 'Flags.h'
+      real * 8 powheginput,getRSmass,muren2
+      real * 8 pwhg_alphas,alpha_s
+      logical verbose
+      external pwhg_alphas
+
 c     TODO: for the final release this should be changed
       muren2 = ph_Hmass2
       alpha_s =  pwhg_alphas(ph_Hmass2,st_lambda5MSB,st_nlight)
-      write(*,*) 'lambda', st_lambda5MSB, st_nlight
+      if(verbose) write(*,*) 'lambda', st_lambda5MSB, st_nlight
 
       afer = 0
-      ph_topmass = powheginput('#topmass')
       if (ph_topmass.ne.-1000000d0) then
-         write(*,*) "Top Quark enabled"
+         if(verbose) write(*,*) "Top Quark enabled"
          afer = afer + 1
          trfer(afer) = 1d0/2d0
          mfer(afer) = getRSmass(ph_topmass,massren,ph_Hmass,alpha_s)
@@ -273,9 +291,8 @@ c     TODO: for the final release this should be changed
             ferlogmratio(afer) = ferlogmratio(afer) - 1d0/3d0
          endif
       endif
-      ph_bottommass = powheginput('#bottommass')
       if (ph_bottommass.ne.-1000000d0) then
-         write(*,*) "Bottom Quark enabled"
+         if(verbose) write(*,*) "Bottom Quark enabled"
          afer = afer+1
          trfer(afer) = 1d0/2d0
          mfer(afer) = getRSmass(ph_bottommass,massren,ph_Hmass,alpha_s)
@@ -285,9 +302,8 @@ c     TODO: for the final release this should be changed
             ferlogmratio(afer) = ferlogmratio(afer) - 1d0/3d0
          endif
       endif
-      ph_charmmass = powheginput('#charmmass')
       if (ph_charmmass.ne.-1000000d0) then
-         write(*,*) "Charm Quark enabled"
+         if(verbose) write(*,*) "Charm Quark enabled"
          afer = afer+1
          trfer(afer) = 1d0/2d0
          mfer(afer) = getRSmass(ph_charmmass,massren,ph_Hmass,alpha_s)

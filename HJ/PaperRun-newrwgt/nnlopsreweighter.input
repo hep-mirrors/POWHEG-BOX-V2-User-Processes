@@ -31,7 +31,7 @@ nnlofiles
 
 <initrwgt>
 <weightgroup name='nnl'> 
-<weight id='nnlops-mt'> combine 'nn-mtinf' and 'mtinf' </weight> 
+<weight id='nnlops-mtinf'> combine 'nn-mtinf' and 'mtinf' </weight> 
 <weight id='nnlops-mt'> combine 'nn-mt' and 'mt' </weight> 
 <weight id='nnlops-mtmb'> combine 'nn-mtmb' and 'mtmb' </weight> 
 <weight id='nnlops-mtmb-bminlo'> combines 'nn-mtmb' and 'mtmb-bminlo' </weight> 
