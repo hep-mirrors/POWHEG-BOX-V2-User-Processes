@@ -101,7 +101,6 @@ C     maxbins: max number of bins per distribution
       character*(100) tmpLine,tmpLine2
 
       character*(1000) lhFile2
-      integer lprefix
 
       logical, allocatable :: filled(:)
       integer iunit_powheginput, fin, iret
@@ -109,6 +108,9 @@ C     maxbins: max number of bins per distribution
       character*16 nnlostring,weight_id
       integer nNum , num_old_weights, original_id, itest, nden
       integer iunit_nnlopsinput
+      character * 20 pwgprefix
+      integer lprefix
+      common/cpwgprefix/pwgprefix,lprefix
 
 
 C     to be set in command line ?
@@ -154,16 +156,23 @@ c$$$      prescription=2 !:
       write(*,*) '*************************************'
       write(*,*) ''
 
+
+C      Get the inputs from the command line and check for consistency
+      call readInputFile(iunit_nnlopsinput,lhFile,nFiles,rwgtFiles,
+     C     rwgtstring,dataIndex)
+      write(cdataIndex,'(i2)') dataIndex
+      cdataindex=trim(adjustl(cdataIndex))
+
 !     !>>>   create fake powheg.input; it must be there for the following calls to work
       call newunit(iunit_powheginput) 
-      open(unit=iunit_powheginput,file="powheg.input",status='unknown')
+      open(unit=iunit_powheginput,file="pwgpowheg.input",status='unknown')
       write(iunit_powheginput,*)'### FAKE powheg.input'
       write(iunit_powheginput,*)"rwl_file '-'"
       close(iunit_powheginput)      
 
-
+      pwgprefix='nnlopsreweighter'
+      lprefix=16
 c-----> look through LHE file (count events, read headers, ...)
-      call pwhg_io_open_read(trim(LHEfile),fin,iret)
       call opencountunit(nev,fin)
       call lhefreadhdr(fin)
       write(*,*)'>>> Found:'
@@ -172,13 +181,6 @@ c-----> look through LHE file (count events, read headers, ...)
       write(*,*)'    #NNLO tables=',nNum
       write(*,*)'>>> Preparing fake "powheg.input" for NNLO reweighting'
       num_old_weights=rwl_num_weights
-
-
-C      Get the inputs from the command line and check for consistency
-      call readInputFile(iunit_nnlopsinput,lhFile,nFiles,rwgtFiles,
-     C     rwgtstring,dataIndex)
-      write(cdataIndex,'(i2)') dataIndex
-      cdataindex=trim(adjustl(cdataIndex))
 
       
 cccccccccccccccccccccccccccc
@@ -2215,7 +2217,7 @@ c      include  'jetlabel.h'
       integer j,k, ios  
 
       call pwhg_io_rewind(iunit_in) 
-      open(unit=iunit_out,file='powheg.input',status='unknown')
+      open(unit=iunit_out,file='pwgpowheg.input',status='unknown')
       write(iunit_out,'(a)')"rwl_file '-'"
       do j=1,40
          call pwhg_io_read(iunit_in,string,ios)
@@ -2280,3 +2282,14 @@ c      include  'jetlabel.h'
       character * 3 whichpdfpk
       whichpdfpk = ''
       end
+
+      subroutine printrwghthdr
+      write(*,*) 'printrwghthdr: should not be here!'
+      call exit(-1)
+      end
+      
+      subroutine printrwgtev
+      write(*,*) 'printrwgtev: should not be here!'
+      call exit(-1)
+      end
+      

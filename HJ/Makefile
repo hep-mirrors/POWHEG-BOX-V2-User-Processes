@@ -224,7 +224,7 @@ nnlopsreweighter: $(NNLOPSREWEIGHTER)
 
 
 NNLOPSREWEIGHTERNRW=nnlopsreweighter-newrwgt.o cernroutines.o powheginput.o lhefread.o lhefwrite.o pwhg_io_interface.o rwl_weightlists.o \
-                 newunit.o boostrot.o pwhgreweight-nnlops.o opencount.o
+                 newunit.o boostrot.o opencount.o
 
 NNLOPSREWEIGHTERNRW+=pwhg_bookhist-multi.o fastjetfortran.o
 
@@ -277,7 +277,7 @@ $(OBJ):
 
 clean:
 	rm -f pwhg_main lhef_analysis main-HERWIG-lhef main-PYTHIA-lhef ; \
-        cd $(OBJ) ; rm -f $(PWHG) $(HERWIG) $(PYTHIA) $(LHEF) $(NNLOPSREWEIGHTER) 
+        cd $(OBJ) ; rm -f $(PWHG) $(HERWIG) $(PYTHIA) $(LHEF) $(NNLOPSREWEIGHTER)  $(NNLOPSREWEIGHTERNRW) 
 
 
 veryclean:
