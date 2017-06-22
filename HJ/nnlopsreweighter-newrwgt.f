@@ -165,7 +165,7 @@ C      Get the inputs from the command line and check for consistency
 
 !     !>>>   create fake powheg.input; it must be there for the following calls to work
       call newunit(iunit_powheginput) 
-      open(unit=iunit_powheginput,file="pwgpowheg.input",status='unknown')
+      open(unit=iunit_powheginput,file="nnlopsreweighterpowheg.input",status='unknown')
       write(iunit_powheginput,*)'### FAKE powheg.input'
       write(iunit_powheginput,*)"rwl_file '-'"
       close(iunit_powheginput)      
@@ -173,7 +173,9 @@ C      Get the inputs from the command line and check for consistency
       pwgprefix='nnlopsreweighter'
       lprefix=16
 c-----> look through LHE file (count events, read headers, ...)
-      call opencountunit(nev,fin)
+      call pwhg_io_open_read(lhfile,fin,iret)
+
+      call countevents(fin,nev)
       call lhefreadhdr(fin)
       write(*,*)'>>> Found:'
       write(*,*)'    #events=',nev
@@ -848,44 +850,6 @@ c            read(iunit_nnlopsinput,'(a)',end=666) string
             phep(mu,ihep)=pup(mu,ihep)
          enddo
       enddo
-      end
-
-
-      subroutine lheanend
-      implicit none
-      character * 20 pwgprefix
-      character * 1000 filename
-      integer lprefix
-      common/cpwgprefix/pwgprefix,lprefix
-cccccccccccc
-      include 'nnlopsreweighter.h'
-c      include 'maxrwgtfiles.h'
-      character*(1000) lhFile
-      integer nFiles
-C     maxgwgtfiles: max number of "input" files for reweighting
-      character*(1000) rwgtFiles(maxRwgtFiles)
-      character*(20) rwgtstring(maxRwgtFiles)
-      integer dataIndex
-cccccccccccc
-      include 'pwhg_rnd.h'
-      if(rnd_cwhichseed.ne.'none') then
-         filename=pwgprefix(1:lprefix)//'LHEF_analysis-'
-     1        //rnd_cwhichseed
-      else
-         filename=pwgprefix(1:lprefix)//'LHEF_analysis'
-      endif
-      call pwhgsetout
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-C     Uncommenting the following will produce files 
-C     containing LH-level plots from the HJ-MiNLO sample 
-C     (i.e. the 'denominator' plots).
-c$$$C     We don't really need to write results in a file, since 
-c$$$C     eveything is in common/histnew/ in pwhg_boookhist-multi.h.
-c$$$C     However, it's a good sanity check.
-c$$$      call readCommandLine(lhFile,nFiles,rwgtFiles,rwgtstring,dataIndex)
-c$$$      filename=trim(lhFILE)//'LHEF_analysis.top'
-c$$$      call pwhgtopout(filename)
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       end
 
 
@@ -2217,7 +2181,7 @@ c      include  'jetlabel.h'
       integer j,k, ios  
 
       call pwhg_io_rewind(iunit_in) 
-      open(unit=iunit_out,file='pwgpowheg.input',status='unknown')
+      open(unit=iunit_out,file='nnlopsreweighterpowheg.input',status='unknown')
       write(iunit_out,'(a)')"rwl_file '-'"
       do j=1,40
          call pwhg_io_read(iunit_in,string,ios)
@@ -2293,3 +2257,27 @@ c      include  'jetlabel.h'
       call exit(-1)
       end
       
+
+      subroutine countevents(iun,nev)
+      implicit none
+      character * 7 string
+      integer iun,nev
+      integer ios
+      nev = 0
+ 1    continue      
+      call pwhg_io_read(iun,string,ios)
+      if(ios /= 0) goto 2
+c     read(unit=iun,fmt='(a)',end=2) string
+      if(string.eq.'</event') then
+         nev=nev+1
+         goto 1
+      endif
+      goto 1
+ 2    continue
+      write(*,*) ' Found ',nev,' events'
+      if (nev.eq.0) then
+         write(*,*) ' NO EVENTS!! Program exits'
+         call exit(3)
+      endif
+      call pwhg_io_rewind(iun)
+      end
