@@ -215,11 +215,23 @@ pwhg_main:$(PWHG) libfiles.a
 
 
 NNLOPSREWEIGHTER=nnlopsreweighter.o cernroutines.o powheginput.o lhefread.o pwhg_io_interface.o rwl_weightlists.o \
-                 newunit.o boostrot.o
+                 newunit.o boostrot.o pwhgreweight-nnlops.o
 NNLOPSREWEIGHTER+=pwhg_bookhist-multi.o fastjetfortran.o
 
 nnlopsreweighter: $(NNLOPSREWEIGHTER) 
 	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(NNLOPSREWEIGHTER)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
+
+
+
+NNLOPSREWEIGHTERNRW=nnlopsreweighter-newrwgt.o cernroutines.o powheginput.o lhefread.o lhefwrite.o pwhg_io_interface.o rwl_weightlists.o \
+                 newunit.o boostrot.o pwhgreweight-nnlops.o opencount.o
+
+NNLOPSREWEIGHTERNRW+=pwhg_bookhist-multi.o fastjetfortran.o
+
+nnlopsreweighter-newrwgt: $(NNLOPSREWEIGHTERNRW) 
+	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(NNLOPSREWEIGHTERNRW)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
+
+
 
 libfiles.a: $(LIBFILES)
 	cd $(OBJ) ; \rm libfiles.a ; ar cru libfiles.a $(LIBFILES)
