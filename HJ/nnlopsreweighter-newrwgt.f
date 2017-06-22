@@ -755,7 +755,7 @@ C - index to be used for the reweighting.
      $     dataIndex)           ! all output
       implicit none
       include 'nnlopsreweighter.h'
-c      include 'maxrwgtfiles.h'
+      include 'pwhg_flg.h'
       character*(*) lhFile
       integer iunit_nnlopsinput,nFiles
       character*(*) rwgtFiles(maxRwgtFiles)
@@ -773,12 +773,16 @@ c     open(unit=iunit_nnlopsinput,file='nnlopsreweighter.input',status='old')
       endif
       lhfile=' '
       nFiles=0
+      flg_compress_lhe = .false.
  1    continue
 
 c     read(iunit_nnlopsinput,'(a)',end=777) string
       call pwhg_io_read(iunit_nnlopsinput,string,ios)
       if(ios<0) goto 777
       string = adjustl(string)
+
+      if(string(1:12).eq.'compress_lhe') flg_compress_lhe = .true.
+
       if(string(1:6).eq.'lhfile') then
          if(lhfile.ne.' ') then
             write(*,*) 'readInputFile: <lhfile> has already appeared'
