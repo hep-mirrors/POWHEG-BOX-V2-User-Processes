@@ -1,9 +1,14 @@
 # a line beginning with 'lhfile' followed by the name of the event file
 
-# uncomment the following if you want a compress les-houches file output.
-# lhfile pwgevents.lhe
+lhfile pwgevents.lhe
 
+# uncomment the following if you want a compress les-houches file output.
 compress_lhe
+
+
+# uncomment the following if you want the long format for the weights.
+rwl_format_rwgt
+
 
 # weights present in the lhfile: 'mtinf', 'mt', 'mtmb', 'mtmb-bminlo'
 

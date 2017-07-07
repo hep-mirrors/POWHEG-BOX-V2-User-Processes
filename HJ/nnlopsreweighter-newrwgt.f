@@ -756,6 +756,7 @@ C - index to be used for the reweighting.
       implicit none
       include 'nnlopsreweighter.h'
       include 'pwhg_flg.h'
+      include 'pwhg_rwl.h'
       character*(*) lhFile
       integer iunit_nnlopsinput,nFiles
       character*(*) rwgtFiles(maxRwgtFiles)
@@ -774,6 +775,7 @@ c     open(unit=iunit_nnlopsinput,file='nnlopsreweighter.input',status='old')
       lhfile=' '
       nFiles=0
       flg_compress_lhe = .false.
+      rwl_format_rwgt = .false.
  1    continue
 
 c     read(iunit_nnlopsinput,'(a)',end=777) string
@@ -782,6 +784,8 @@ c     read(iunit_nnlopsinput,'(a)',end=777) string
       string = adjustl(string)
 
       if(string(1:12).eq.'compress_lhe') flg_compress_lhe = .true.
+
+      if(string(1:15).eq.'rwl_format_rwgt') rwl_format_rwgt = .true.
 
       if(string(1:6).eq.'lhfile') then
          if(lhfile.ne.' ') then
