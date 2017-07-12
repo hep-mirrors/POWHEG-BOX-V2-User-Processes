@@ -39,7 +39,7 @@ c the real contribution to implement Born zero suppression
       endif
 c
       dampfac = 1
-      if(flst_realres(nlegreal,alr).eq.0) then
+      if(flst_alrres(nlegreal,alr).eq.0) then
 c hfact applied only for radiation in production
          if(h.gt.0) then
             
