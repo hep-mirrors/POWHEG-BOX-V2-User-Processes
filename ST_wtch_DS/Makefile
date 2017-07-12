@@ -29,7 +29,7 @@ FFLAGS=-ffixed-line-length-132
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow 
 ## gfortran 4.4.1 optimized with -O3 yields erroneous results
 ## Use -O2 to be on the safe side
-OPT=-O3
+OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb -pg
 endif
@@ -96,7 +96,7 @@ endif
 # add libdhelas3.2a to the list of linked libraries:
 LIBMADGRAPH=madgraph/dhelas3.2/libdhelas3.2.a
 # add libqcdloop.a and libff.a to the list of linked libraries:
-LIBSQCDLOOP= ../ST_wtch_DR/QCDLoop-1.9/ql/libqcdloop.a ../ST_wtch_DR/QCDLoop-1.9/ff/libff.a
+LIBSQCDLOOP= QCDLoop-1.9/ql/libqcdloop.a QCDLoop-1.9/ff/libff.a
 LIBS += $(LIBSQCDLOOP)
 # clear and reassign VPATH (needs also directories relevant to link madgraph):
 vpath
