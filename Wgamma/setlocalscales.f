@@ -52,8 +52,6 @@ c     powheg-nc/c-lo
          frensc2min = powheginput("#frensc2min")
          if(factsc2min.lt.0) factsc2min = 0
          if(frensc2min.lt.0) frensc2min = 1
-         call getq2min(1,tmp)
-         write(*,*) ' ***** minimum Q of pdf:',sqrt(tmp)
          b0=(33d0-2d0*st_nlight)/(12*pi)
          b1=(153d0-19d0*st_nlight)/(24*pi**2)
 c choose ptrel(gam-lep) definition
