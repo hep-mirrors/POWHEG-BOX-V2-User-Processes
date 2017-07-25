@@ -242,7 +242,7 @@ LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	      \
 	$(PWHGANAL) #boost.o
 
 lhef_analysis: $(LHEF)
-	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBSFASTJET) $(STATIC)  -o $@ 
+	$(FF) $(patsubst %,obj/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o powheginput.o \
