@@ -3,7 +3,8 @@
 COMPILER=gfortran
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
-PDF=native
+#PDF=native
+PDF=lhapdf
 #Choose Analysis: none, default
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=default
@@ -145,28 +146,28 @@ pwhg_main: $(PWHG) $(LIBMADGRAPH)
 
 # target to analyze LHEF output
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	      \
-	opencount.o powheginput.o pwhg_bookhist-multi.o lhefread.o pwhg_io_interface.o rwl_weightlists.o  \
+	opencount.o powheginput.o lhefread.o pwhg_io_interface.o rwl_weightlists.o  \
 	newunit.o pwhg_analysis_driver.o $(FPEOBJ)            \
 	$(PWHGANAL) boost.o
 
 lhef_analysis: $(LHEF)
-	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBSFASTJET) $(STATIC)  -o $@ 
+	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
 
 # target to read event file, shower events with HERWIG + analysis
 HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o powheginput.o \
-	pwhg_bookhist-multi.o lhefread.o pwhg_io_interface.o rwl_weightlists.o opencount.o pdfdummies.o $(FPEOBJ)      \
+	cernroutines.o newunit.o lhefread.o pwhg_io_interface.o rwl_weightlists.o opencount.o pdfdummies.o $(FPEOBJ)      \
 	$(PWHGANAL) boost.o
 
 main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG)) $(LIBSFASTJET) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
-	pwhg_bookhist-multi.o lhefread.o pwhg_io_interface.o rwl_weightlists.o opencount.o pdfdummies.o $(FPEOBJ)      \
+	cernroutines.o newunit.o lhefread.o pwhg_io_interface.o rwl_weightlists.o opencount.o pdfdummies.o $(FPEOBJ)      \
 	$(PWHGANAL) boost.o
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET) $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET) $(STATIC) -o $@
 
 # target to cleanup
 .PHONY: clean
