@@ -52,7 +52,12 @@ INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
-PDFPACK=lhapdfif.o
+LHAPDF_VERSION=$(shell $(LHAPDF_CONFIG) --version | cut -d'.' -f1)
+ifeq ("$(LHAPDF_VERSION)","6")
+   PDFPACK=lhapdf6if.o lhapdf6ifcc.o
+else
+   PDFPACK=lhapdfif.o
+endif
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
 ifeq  ("$(STATIC)","-static")
 ## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
@@ -158,6 +163,11 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o		\
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,obj/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
+
+##########################################################################
+
+lhapdf6ifcc.o: lhapdf6ifcc.cc
+	$(CXX) $(DEBUG) -c -o obj/$@ $^ $(shell $(LHAPDF_CONFIG) --cxxflags)
 
 # target to cleanup
 .PHONY: clean
