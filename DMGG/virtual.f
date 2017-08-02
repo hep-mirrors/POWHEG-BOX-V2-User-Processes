@@ -67,9 +67,14 @@ cccccccccccc
       virtual_DR=virtual_DR*rescalefactor
 cccccccccccccccccccccccccccccccccccc
 
+cccccccccc      
+c     THIS WAS WRONG, WE ARE ALREADY IN CDR !!!
 c from dimensional reduction to dimensional regularization
-      call from_DR_to_CDR(p,vflav,virtual_DR,virtual)
-
+c      call from_DR_to_CDR(p,vflav,virtual_DR,virtual)
+ccccccccc
+      virtual=virtual_DR
+ccccccccc
+      
 cc The following code is used to check the double pole
 cc in the virtual amplitude. Must set in
 cc set_interface_MCFM.f:      ret_poles=.true.
