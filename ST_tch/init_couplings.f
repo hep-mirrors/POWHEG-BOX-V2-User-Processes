@@ -114,8 +114,8 @@ c     CKM matrix entries
       if(CKM_pow(3,2).lt.0) CKM_pow(3,2)= 1d-6
       if(CKM_pow(3,3).lt.0) CKM_pow(3,3)= 1d0
 
-c      decayCKM=powheginput('#decayCKM')
-      decayCKM=0
+      decayCKM=powheginput('#decayCKM')
+
       if(decayCKM.eq.1) then
          write(*,*) '*************** WARNING ****************'
          write(*,*) 'Using special values for CKM matrix '
