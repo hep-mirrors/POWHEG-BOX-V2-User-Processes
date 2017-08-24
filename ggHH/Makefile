@@ -40,6 +40,7 @@ endif
 
 ifeq ("$(COMPILER)","ifort")
 FF = ifort -save -cpp -extend_source -assume bscc
+CC = icpc
 CXX = icpc
 LIBS = -limf
 #FFLAGS =  -check
@@ -228,6 +229,7 @@ clean:
 veryclean:
 	rm -f $(OBJDIR)/*.o $(MODDIR)/*.* $(OBJDIR)/*.a \
 	rm -f btilde_gghh.f sigremnants_gghh.f          \
+	rm -f main-PYTHIA8-lhef main-PYTHIA6-lhef	\
 	pwhg_main lhef_analysis main-HERWIG-lhef main-PYTHIA-lhef
 
 

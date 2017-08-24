@@ -23,6 +23,7 @@ c     mtdep = 2: full theory approx (with htl virtual)
 c     mtdep = 3: full theory
 c     mtdep = 4,5: checks
 c******************************************************
+      virtual = 0d0
 
       if (mtdep.eq.0) then
          call ME2virt_htl(p, virtual)
@@ -87,7 +88,7 @@ c     invariants, abbreviations:
 
       call ME2born_htl(p, born)
 
-      virtual = virtual + born*(11d0+CA*pi**2-CA*log(st_muren2/s)**2)
+      virtual = born*(11d0+CA*pi**2-CA*log(st_muren2/s)**2)
 
       virtual = virtual +
      $     (ph_GF**2*ao2pi**2*NA*s**2
