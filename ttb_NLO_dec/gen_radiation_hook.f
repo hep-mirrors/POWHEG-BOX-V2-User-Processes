@@ -231,6 +231,7 @@ c non-isr always fail t>tmax, so that only the ISR (whether it radiated or not)
       include 'pwhg_kn.h'
       include 'pwhg_rad.h'
       include 'LesHouches.h'
+      include 'onshellmap.h'
       real * 8 skn_cmpreal(0:3,nlegreal,5)
       integer index,radres(5)
       integer kir,ktp,ktm,kwp,kwm,em,j,newcolor
@@ -390,7 +391,7 @@ c boost back to top frame
             call mboost(7,vecl,betal,tmmoms,tmmoms)
          endif
       else
-         final_cm(:,1:nlegborn) = kn_cmpborn(:,1:nlegborn)
+         final_cm(:,1:nlegborn) = cmpborn_os(:,1:nlegborn)
          final_cm(:,nlegreal:nlegreal+4) = 0
       endif
       if(ktp.ne.0.or.kwp.ne.0) then
