@@ -19,6 +19,11 @@
       complex*16 el2_scheme
       common/leptmass/mlep2
       real*8 complextmp
+c.....mauro-pair b
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+      save  /csaveaem0/
+c.....mauro-pair e      
 c     renormalization scheme
 c     0 -> alpha(0)
 c     1 -> gmu
@@ -37,6 +42,9 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_alphaem = powheginput("#alphaem")
       if (ph_alphaem.le.0d0) ph_alphaem = 1d0/137.03599911d0
       em_alpha = ph_alphaem
+c.....mauro-pair b
+      saveaem0=em_alpha
+c.....mauro-pair e            
       if(.not.flg_with_em) then
          em_alpha = 0
       endif
@@ -81,6 +89,15 @@ c     CAVEAT:
 
 c     number of light flavors
       st_nlight = 5
+
+c     ph_Wmass and pw_Z mass are intended to be on-shell masses (LEP style).
+c     they need to be converted to complex pole positions
+c
+      ph_Wmass= ph_Wmass/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
+      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
+
+      ph_Zmass= ph_Zmass/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
+      ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
 
 c     mass window
       masswindow_low = powheginput("#masswindow_low")

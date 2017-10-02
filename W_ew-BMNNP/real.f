@@ -516,6 +516,10 @@ c      include 'pwhg_kn.h'
       include 'mathx.h'
       include 'pwhg_physpar.h'
 *
+c.....mauro-pair b
+      include 'pwhg_em.h'
+      real*8 running_el2
+c.....mauro-pair e      
       real * 8 p(0:3,nlegreal)
       integer fermion_flav(nlegreal)
       real * 8 amp2,tmpamp2
@@ -1343,9 +1347,11 @@ c      include 'pwhg_kn.h'
      -           )))
 
 
-
+c.....mauro-pair b
+      running_el2=dcmplx(em_alpha)*4.d0*pi
+c.....mauro-pair e      
       amp2 = amp2*
-     +       g2*conjg(g2)*el2/4d0
+     +       g2*conjg(g2)*running_el2/4d0
      +       /4d0/3
      +       /(st_alpha/(2*pi))
 

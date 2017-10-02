@@ -46,6 +46,11 @@ c      include 'pwhg_kn.h'
       data ifirst/0/
       save ifirst,ml2,mw2m1,mw2dm1,mw2m2
 
+c.....mauro-pair b
+      include 'pwhg_em.h'
+      real*8 running_el2
+c.....mauro-pair e      
+      
 c      write(*,*) ' entering real16 '
 
       if (ifirst.eq.0) then
@@ -855,9 +860,12 @@ c
      -           )))
 
 
-
+c.....mauro-pair b
+      running_el2=dcmplx(em_alpha)*4.d0*pi
+c.....mauro-pair e      
+      
       amp2 = amp2*
-     +       g2*conjg(g2)*el2/4q0
+     +       g2*conjg(g2)*running_el2/4q0
      +       /4q0/3
      +       /(st_alpha/(2*pi))
 
