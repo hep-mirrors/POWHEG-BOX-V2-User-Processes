@@ -8,6 +8,11 @@
       include 'pwhg_physpar.h'
       include 'pwhg_math.h'
       include 'mathx.h'
+c.....mauro-pair b
+      include 'pwhg_em.h'
+      real*8 running_el2
+c.....mauro-pair e      
+      
 *
       real * 8 p(0:3,nlegreal)
       integer fermion_flav(nlegreal)
@@ -1459,7 +1464,13 @@ ccc modified fulvio, + M.C. + P.N. 1-8-2016
      -             k2k*(ml2*(p1k - p2k) + p1k*(-2*p2k + s - t + u)))))))
      -     *e32_(p1,p2,k,k1))/(k1k*k2k*p1k*p2k)
       amp2 = amp216 * 1.d0
-      amp2 = dble( amp2 * el2_scheme*dconjg(el2_scheme) * el2 
+
+
+c.....mauro-pair b
+      running_el2=dcmplx(em_alpha)*4.d0*pi
+c.....mauro-pair e      
+      
+      amp2 = dble( amp2 * el2_scheme*dconjg(el2_scheme) * running_el2 
      +             /4/3/(st_alpha/(2*pi)) )
 
       end

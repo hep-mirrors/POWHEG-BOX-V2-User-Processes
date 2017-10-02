@@ -9,6 +9,12 @@
       real * 8 powheginput
       external powheginput
 
+c.....mauro-pair b
+      include 'pwhg_em.h'
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+c.....mauro-pair e      
+      
       call set_fac_ren_scales(muf,mur)
       st_mufact2= muf**2*st_facfact**2
       st_muren2 = mur**2*st_renfact**2
@@ -19,6 +25,11 @@ c with it prevents it.
       else
          st_alpha  = pwhg_alphas(st_muren2,st_lambda5MSB,st_nlight)
       endif
+
+c.....mauro-pair e            
+      em_alpha=saveaem0
+c.....mauro-pair b      
+      
       end
 
       subroutine setscalesbtilde
@@ -95,6 +106,10 @@ c we are in a counterterm.
       include 'pwhg_rad.h'
       include 'pwhg_flg.h'
       include 'pwhg_pdf.h'
+c.....mauro-pair b
+      include 'pwhg_em.h'
+      real*8 running_aem
+c.....mauro-pair e      
       real * 8 pwhg_alphas
       integer nf
       external pwhg_alphas
@@ -106,6 +121,12 @@ c     SAER FIX
       integer ini,mem
       data ini/0/
       save ini,q2min
+c.....mauro-pair b
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+c.....mauro-pair e      
+
+
       
       if (ini.eq.0) then
          if( whichpdfpk().eq.'lha') then
@@ -136,6 +157,14 @@ c      st_alpha = pwhg_alphas(st_muren2,st_lambda5MSB,-1)
       if (flg_em_rad) then
 c     any value will do: in the R/B ratio, it will cancel
          st_alpha = pwhg_alphas(rad_ptsqmin,st_lambda5MSB,-1)
+c.....mauro-pair b
+         if(rad_kinreg.ge.2) then
+            call running_aem_lep(ptsq,running_aem)
+            em_alpha=running_aem
+         else ! running alpha only for the FSR
+            em_alpha=saveaem0
+         endif
+c.....mauro-pair e         
       else
          st_alpha = pwhg_alphas(st_muren2,st_lambda5MSB,-1)
       endif
@@ -265,3 +294,106 @@ c      return
       endif
       return
       end
+
+c.....mauro-pair b
+      subroutine running_aem_lep(ptsq,out)
+      implicit none
+      real*8 ptsq,out
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+      real*8 vpol
+      external vpol
+c balpha b
+      real*8 ame,ammu,convfac,balpha,pi     
+      common/parameters/ame,ammu,convfac,balpha,pi
+      save /parameters/
+      integer iarun
+      common/ialpharunning/iarun
+      save /ialpharunning/
+      real*8 q2,pippo
+      integer ini
+      data ini/0/
+      save ini
+      real * 8 powheginput
+      external powheginput
+      include 'pwhg_physpar.h'
+      if(ini.eq.0) then
+         ini=1
+         iarun = 0
+         if(powheginput("#emalpharunnning").eq.1d0) iarun  = 1
+         ame    =me
+         ammu   =mm
+         convfac=389379.65999999997d0
+         pi     =3.1415926535897931d0
+      endif
+      balpha  =saveaem0
+c qui solo per il debug       
+c      out = saveaem0
+
+
+      out  = vpol(ptsq)*saveaem0
+
+c      write(*,*)'end q2,a0,a',ptsq,saveaem0,out
+
+      
+      end subroutine running_aem_lep
+c.....mauro-pair e      
+c.....below the routines for the running of alpha_elm
+
+
+* VACUUM POLARIZATION: ALPHA(0)->ALPHA(0)*VPOL(Q2)
+      FUNCTION VPOL(Q2) 
+!     essentially from BABAYAGA, previous releases
+      IMPLICIT REAL*8 (A-H,O-Z)
+      DIMENSION AMASSES(4)
+      common/parameters/ame,ammu,convfac,balpha,pi     
+      common/ialpharunning/iarun
+
+      vpol = 1.d0
+      if (iarun.eq.0) return
+
+      amasses(1) = ame
+      amasses(2) = ammu
+
+      SOMMA=0.D0
+      DO I=1,2
+         SOMMA=SOMMA+SUMMA(AMASSES(I),Q2,I)
+      ENDDO
+
+      DBALPHA=BALPHA/PI*SOMMA 
+      VPOL=1.D0/(1.D0-DBALPHA)      
+
+
+      
+      
+      RETURN
+      END
+*----------------------------------------------------------
+* LEPTONIC AND TOP CONTRIBUTION TO VACUUM POLARIZATION
+      FUNCTION SUMMA(AM,Q2,I)
+! from BABAYAGA, previous releases
+      IMPLICIT REAL*8 (A-H,O-Z)
+      REAL*8 NC(4),QF2(4)
+      data nc  /1.d0,1.d0,1.d0,3.d0/
+      data qf2 /1.d0,1.d0,1.d0,0.44444444444444444444d0/
+* NC AND QF ARE COLOR FACTOR (1 FOR LEPTONS, 
+* 3 FOR TOP) AND CHARGE**2
+      AM2=AM**2
+      IF (Q2.GE.0.D0.AND.Q2.LT.(4.D0*AM2)) THEN
+         SQ=SQRT(4.D0*AM2/Q2-1.D0)     
+         SUMMA=NC(I)*QF2(I)*(-5.D0/9.D0-(4.D0/3.D0)*(AM2/Q2)+
+     >        (4.D0/3.D0*(AM2/Q2)**2+1.D0/3.D0*AM2/Q2-1.D0/6.D0)*
+     >        4.D0/SQ*ATAN(1.D0/SQ))
+      ELSE
+         SQ=SQRT(1.D0-4.D0*AM2/Q2)
+         ARGLOG=ABS((1.D0-SQ)/(1.D0+SQ))
+         SUMMA=NC(I)*QF2(I)*(-5.D0/9.D0-(4.D0/3.D0)*(AM2/Q2)+
+     >        (4.D0/3.D0*(AM2/Q2)**2+1.D0/3.D0*AM2/Q2-1.D0/6.D0)*
+     >        2.D0/SQ*LOG(ARGLOG))
+      ENDIF
+      RETURN
+      END
+
+
+      
+c alpha e

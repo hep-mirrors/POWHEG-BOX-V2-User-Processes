@@ -1261,9 +1261,27 @@ c before a normal exit; not used here
       integer nlc
       common/cpt2solve/xlr,q2,kt2max,xlam2c,unorm,sborn,nlc
       real * 8 b0,xm,p,tmp
+
+c.....mauro-pair b
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+      integer paircorr
+      common/cpaircorr/paircorr      
+c     this is constant, as it was in the original code
+c     em_alpha=saveaem0 for ISR, it will change in FSR but
+c     if rad_iupperfsr=2 the boound is pt2 does not depend
+c     on the coupling:
+c     unorm is not function of alpha
+c     the constant saveaem0
+c     will be replaced with the running one
+c     for the vetoed generation, as it is done for st_alphas
+c     in the standard algorithm
+c.....mauro-pair e      
+
+      
       b0=(11*CA-4*TF*nlc)/(12*pi)
       if(flg_em_rad) then
-         cunorm=unorm*em_alpha
+         cunorm=unorm*saveaem0
       else
          cunorm=unorm
       endif
@@ -1300,6 +1318,14 @@ c     #        - log(kt2max/pt2)) + xlr
          em = flst_lightpart+rad_kinreg-2
          if(kn_masses(em).ne.0) then
             call compintub(pt2,pt2solve)
+            if(flg_em_rad) then
+               if(paircorr.eq.1)then
+                  cunorm=2d0*saveaem0*unorm ! trick to improve the statistics
+               endif
+            else
+               write(*,*)'cannot be here in Drell-Yan'
+               stop
+            endif
 c The following lines are used to test the analytic integration
 c versus a vegas one; uncomment to test
 c            call compintubveg(pt2,tmp)
@@ -1573,9 +1599,21 @@ c
       integer ini
       data ini/0/
       save ini,powhegv2opt
+c.....mauro-pair b
+      real*8 saveaem0
+      common/csaveaem0/saveaem0
+      include 'pwhg_em.h'
+      integer paircorr
+      common/cpaircorr/paircorr
+      save /cpaircorr/
+c.....mauro-pair e            
+
+      
 c
       if(ini.eq.0) then
          powhegv2opt = powheginput("#powhegv2opt")
+         paircorr = 0
+         if(powheginput("#emalpharunnning").eq.1d0) paircorr  = 1
          ini = 1
       endif
 c.....mauro-kine
@@ -1680,6 +1718,11 @@ c Only for pp ->W, to account for em radiation from the electron
       if(flg_em_rad) then
 c This should be equivalent at setting tmp=1
          tmp=tmp/st_alpha
+c.....mauro-pair b
+         if(paircorr.eq.1) then
+            tmp=tmp*em_alpha/(2d0*saveaem0)
+         endif
+c.....mauro-pair e                  
       endif
       if(tmp.gt.1.000000001d0) then
          write(*,*) ' Error: upper bound lower than actual value',
@@ -1691,7 +1734,10 @@ c This should be equivalent at setting tmp=1
       endif
 
       if(kn_masses(kn_emitter).eq.0) then
-         if(rad_iupperfsr.eq.1) then         
+         if(rad_iupperfsr.eq.1) then
+            write(*,*)'FIRST CHANGE PT2SOLVE for qed fsr if'
+     +           //' rad_iupperfsr.eq.1'
+            stop            
 c At this stage: pt generated according to (1) of upperbounding-fsr.pdf;
 c generate csi uniformly in 1/csi
 c in the range t/s < csi^2 < csimax^2
@@ -1713,6 +1759,10 @@ c At this point a csi-y pair is generated according to the
 c distribution upper(). It is automatically within range,
 c unless we have a massive emitter
          elseif(rad_iupperfsr.eq.3) then
+            write(*,*)'FIRST CHANGE PT2SOLVE for qed fsr if'
+     +           //' rad_iupperfsr.eq.3'
+            stop
+            
 c     csi distributed uniformly in 1/(csi-t/s)
             rv=random()
             csi=1/(rv/(sqrt(t/s)-t/s)+(1-rv)/(kn_csimax-t/s))+t/s
