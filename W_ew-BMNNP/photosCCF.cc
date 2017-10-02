@@ -63,14 +63,14 @@ extern "C" {
     
     // Print explicit values of other flags
     // phokey_.interf        (interference weight)               : on by default
-    std::cout << "**** SI: Other PHOTOS set: " << std::endl;
-    std::cout << "**** SI: phokey_.interf  (interference weight)             : " << phokey_.interf << std::endl;
+    // std::cout << "**** SI: Other PHOTOS set: " << std::endl;
+    // std::cout << "**** SI: phokey_.interf  (interference weight)             : " << phokey_.interf << std::endl;
     // phokey_.isec          (double photon)                     : off by default
-    std::cout << "**** SI: phokey_.isec (double photon)                      : " << phokey_.isec << std::endl;
+    // std::cout << "**** SI: phokey_.isec (double photon)                      : " << phokey_.isec << std::endl;
     // phokey_.ifw           (correction weight in decay of W)   : on by default
-    std::cout << "**** SI: phokey_.ifw (correction weight in decay of W)     : " << phokey_.ifw << std::endl;
+    // std::cout << "**** SI: phokey_.ifw (correction weight in decay of W)     : " << phokey_.ifw << std::endl;
     // meCorrectionWtForW    (ME correction in decay of W)       : off by default
-    std::cout << "**** SI: (meCorrectionWtForW) ME correction in decay of W  : " << Photos::meCorrectionWtForW << std::endl;
+    // std::cout << "**** SI: (meCorrectionWtForW) ME correction in decay of W  : " << Photos::meCorrectionWtForW << std::endl;
 
     
    // Redirect Photos initialization output to a string, to be printed in the LHE file
