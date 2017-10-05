@@ -22,7 +22,7 @@
 
       real*8 anorm,anbw,anlog,pbw,csi
 
-      real * 8 mass_low,
+      real * 8 mass_low,mass_high,
      1     phsp_Zmass2low,phsp_Zmass2high
       real * 8 phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw
       save phsp_Zm,phsp_Zw,phsp_Zmass2,phsp_ZmZw,
@@ -48,11 +48,14 @@ c     set initial- and final-state masses for Born and real
 c     mass window
          mass_low = powheginput("#mass_low")
          if (mass_low.le.0d0) mass_low=30d0
-
          mass_low = max(mass_low,2.d0*decmass)
          phsp_Zmass2low = mass_low**2
-         phsp_Zmass2high = kn_sbeams
-
+*
+         mass_high = powheginput("#mass_high")
+         if (mass_high.le.0.d0) mass_high=sqrt(kn_sbeams)
+         mass_high = min(mass_high,sqrt(kn_sbeams))
+         phsp_Zmass2high = mass_high**2
+*
          write(*,*) '*************************************'
          write(*,*) 'Z mass = ',ph_Zmass
          write(*,*) 'Z width = ',ph_Zwidth
