@@ -17,7 +17,7 @@
       real*8 rkallen
       external rkallen
       real*8 pmod,sqla,betal
-      real * 8 mass_low,phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw,
+      real * 8 mass_low,mass_high,phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw,
      +         phsp_Wmass2low,phsp_Wmass2high
       save phsp_Wm,phsp_Ww,phsp_Wmass2,phsp_WmWw,
      +     phsp_Wmass2low,phsp_Wmass2high
@@ -40,10 +40,13 @@ c mass window
          mass_low = powheginput("#mass_low")
          if (mass_low.le.0d0) mass_low=1d0
          mass_low = max(mass_low,decmass)
-
          phsp_Wmass2low= mass_low**2
-         phsp_Wmass2high= kn_sbeams
-
+*
+         mass_high = powheginput("#mass_high")
+         if (mass_high.le.0.d0) mass_high=sqrt(kn_sbeams)
+         mass_high = min(mass_high,sqrt(kn_sbeams))
+         phsp_Wmass2high= mass_high**2
+*
          write(*,*) '*************************************'
          write(*,*) 'Z mass = ',ph_Zmass
          write(*,*) 'Z width = ',ph_Zwidth
