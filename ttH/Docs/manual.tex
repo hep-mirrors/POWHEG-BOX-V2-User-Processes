@@ -88,23 +88,40 @@ The {\tt ttH} program in the \POWHEGBOXV{} is an implementation of Higgs boson p
 %
 \section*{Running the program}
 %
-Download the \POWHEGBOXV{}, following the instructions at the web site 
+Download the \POWHEGBOXV{}, following the instructions at the web site
 \\[2ex]
 {\tt http://powhegbox.mib.infn.it/}
-\\[2ex] 
-and go to the process directory by typing 
 \\[2ex]
-{\tt \$ cd \POWHEGBOXV/ttH}  
+and go to the process directory by typing
 \\[2ex]
-Running is most conveniently done in a separate directory. Together with the code, we provide the directory {\tt testrun} that contains sample input and seed files. 
+{\tt \$ cd \POWHEGBOXV/ttH}
 \\[2ex]
-For your runs, generate your own directory, for instance by doing 
+Notice that, in order to allow the use of a dynamical damping factor
+for high-$p_T$ radiation, the {\tt Bornzerodamp.f} file has been
+modified. Since this is not general, but specific to the
+implementation of the {\tt ttH} process, a local {\tt Bornzerodamp.f}
+file is provided in the {\tt /ttH} directory and can be linked
+directly from there.  In order to use a damping factor, either {\tt
+  hdamp} or {\tt dynamic\_hdamp} have to be set in {\tt powheg.input}.
+If {\tt hdamp} is active the code runs with a fixed value of $h=${\tt hdamp} in
+the damping factor for high-$p_T$ radiation ( damping factor
+$=h^2/(p_T^2+h^2)$), while if {\tt dynamic\_hdamp} is active it runs
+with a dynamic $h$ (defined in {\tt Bornzerdamp.f}). Only one of the
+two parameters can be active.
+\\[2ex]
+Running is most conveniently done in a separate directory. Together
+with the code, we provide the directory {\tt testrun} that contains
+sample input and seed files.
+\\[2ex]
+For your runs, generate your own directory, for instance by doing
 \\[2ex]
 {\tt \$ mkdir myruns}
 \\[2ex]
-The directory must contain the {\tt powheg.input} file, where parameters for the Higgs boson and the top quark decays as well as technical  parameters are specified, and, for
-parallel running, a {\tt pwgseeds.dat} file (see {\tt manual-BOX.pdf}
-and {\tt Manyseeds.pdf} in the  {\tt POWHEG-BOX-V2/Docs} directory).
+The directory must contain the {\tt powheg.input} file, where
+parameters for the Higgs boson and the top quark decays as well as
+technical parameters are specified, and, for parallel running, a {\tt
+  pwgseeds.dat} file (see {\tt manual-BOX.pdf} and {\tt Manyseeds.pdf}
+in the {\tt POWHEG-BOX-V2/Docs} directory).
 \\[2ex]
 Before compiling make sure that:
 \begin{itemize}
