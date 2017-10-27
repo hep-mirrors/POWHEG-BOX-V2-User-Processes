@@ -17,6 +17,7 @@ OBJDIR:=$(OBJ)
 
 ifeq ("$(COMPILER)","gfortran")	
 F77=gfortran -fno-automatic -J$(OBJ) -I$(OBJ)
+F77local=gfortran -fno-automatic 
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -170,17 +171,17 @@ main-PYTHIA-lhef: $(PYTHIA)
 
 XFFLAGS=$(DEBUG) $(OPT)
 libdhelas3.a:
-	cd DHELAS ; make FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd DHELAS ; make FC="$(F77local)" F77="$(F77local)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 libmadgraph.a:
-	cd Madlib ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd Madlib ; make FC="$(F77local)" F77="$(F77local)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 libdecay.a:
-	cd decay ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd decay ; make FC="$(F77local)" F77="$(F77local)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 libvirt.a:
-	cd virtuals ; make FC="$(F77)" F77="$(F77)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
+	cd virtuals ; make FC="$(F77local)" F77="$(F77local)" XFFLAGS"=$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 ifeq ("$(COMPILER)","gfortran")
@@ -190,7 +191,7 @@ XFFLAGS +=-extend-source
 endif
 
 libmodel.a:
-	cd MODEL ; make -j FC="$(F77)" F77="$(F77)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
+	cd MODEL ; make -j FC="$(F77local)" F77="$(F77local)" XFFLAGS="$(XFFLAGS)" OBJ="$(OBJ)"
 
 
 clean:
