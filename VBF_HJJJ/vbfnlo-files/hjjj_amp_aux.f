@@ -1,3 +1,116 @@
+      function theta(x)
+      implicit none
+      double precision theta,x
+      if (x.gt.0d0) then
+         theta = 1d0
+      else
+         theta = 0d0
+      endif
+      end
+
+
+c     imaginary part of a/b
+c     IF a/b > 0 then returns 0
+c     IF a/b < 0 then
+c        if a < 0 then return +1
+c        else return -1
+      function im_part(a,b)
+      implicit none
+      double precision a,b,im_part
+      if ((a/b).gt.0d0) then
+         im_part = 0d0
+      else
+         if (a.lt.0d0) then
+            im_part = +1d0
+         else
+            im_part = -1d0
+         endif
+      endif
+
+      end
+
+
+c    ***********   D01m_fin(s,t,m4sq,musq)   *************
+c
+c Scalar box with MASSLESS PROPAGATORS and with external kinematics:
+c
+c                     k
+c     p1 ->-----------<-------------<-- p4
+c             |                 |
+c             |                 |
+c             |                 |
+c     p2 ->-------------------------<-- p3
+c
+c
+c    s = (p1+p2)^2
+c    t = (p2+p3)^2
+c    p1^2 = 0, p2^2 = 0, p3^2 = 0, p4^2 = m4sq <>0
+c    musq = mu^2 = reference dimensional scale
+c
+c  int d^dk/(2 pi)^d 1/(k^2)/(k+p1)^2/(k+p1+p2)^2/(k+p1+p2+p3)^2 =
+c          N_ep * D01m_fin(s,t,m3sq,m4sq,musq);
+c          N_ep = i/(4 pi)^2 (4 pi)^ep Gamma(1+ep) (musq)^(-ep)
+
+      function D01m_fin(s,t,m4sq,musq)
+      implicit none
+      double complex D01m_fin
+      double precision s,t,m4sq,musq
+      double precision ms,mt,mm4sq
+      double complex lnms,lnmt,lnmm4sq,lnsot
+      double complex li2arg1,li2arg2
+      double precision arg1,arg2
+      double complex ipi
+      parameter (ipi=(0d0,3.14159265358979323846264338328d0))
+      double precision pi,pi2, pi2o3t2
+      parameter (pi=3.14159265358979323846264338328d0,
+     -     pi2 = 9.86960440108935861883449099988d0,
+     -   pi2o3t2= 6.57973626739290574588966066658410076d0 )
+
+      double complex ris
+      double precision prefactor, theta, dilog, im_part
+      external theta,im_part,dilog
+
+
+      if (musq.lt.0d0) then
+         write(*,*)
+     -        'POSSIBLE ERROR IN D01m_fin: SCALE MUSQ LESS THAN ZERO!!'
+      endif
+
+      prefactor = 1d0/(s*t)
+      ms = -s/musq
+      mt = -t/musq
+      mm4sq = - m4sq/musq
+
+      lnms = log(abs(ms)) - ipi*theta(-ms)
+      lnmt = log(abs(mt)) - ipi*theta(-mt)
+      lnmm4sq = log(abs(mm4sq)) - ipi*theta(-mm4sq)
+      lnsot = log(abs(s/t)) + ipi * im_part(s,t)
+
+      arg1 = 1-m4sq/s
+      arg2 = 1-m4sq/t
+
+c     (m4sq/s.lt.0d0)
+      if (arg1.gt.1d0) then
+         li2arg1 = -dilog(1d0/arg1) - log(arg1)**2/2+pi2/3
+     -        - ipi*log(arg1)*im_part(m4sq,s)
+      else
+         li2arg1 = dilog(arg1)
+      endif
+
+c     (m4sq/t.lt.0d0)
+      if (arg2.gt.1d0)  then
+         li2arg2 = -dilog(1d0/arg2) - log(arg2)**2/2+pi2/3
+     -        - ipi*log(arg2)*im_part(m4sq,t)
+      else
+         li2arg2 = dilog(arg2)
+      endif
+
+      ris = -lnmm4sq**2+lnms**2+lnmt**2-lnsot**2-2d0*(li2arg1+li2arg2)
+     -   -pi2o3t2
+
+      D01m_fin = prefactor * ris
+      end
+
 c
 c---------------- BCD_fill_v(k1,k2,q1,q2) -------------------------------
 c
@@ -33,7 +146,7 @@ c results are stored in Dijv(*,*,ID) etc. i.e.
 c
 c     renormalization scale
 c
-      include "scales.inc"
+c     #include "VBFNLO/utilities/scales.inc"
 c
 Common block for the output
       complex*16 D0v(3), Dijv(3,13,3), Teps1(2), Teps2(2), Tborn(2,2),
@@ -48,13 +161,15 @@ c local variables, external functions etc.
       complex*16 Cij123(2,4), Cij124(2,4), 
      1           Cij134(2,4), Cij234(2,4)
       complex*16 B0a(3), B0aq1, B0aq2, B0at, B0as,B0au
-      complex*16 B0t, C0t, D0t1m
-      external B0t, C0t, D0t1m
+      complex*16 B0t, C0t, D01m_fin
+      external B0t, C0t, D01m_fin
       double precision tmq2i,umq2i
       double precision dot0p, psumsq
       external dot0p, psumsq
       double precision pi,pi2o3
       parameter (pi=3.14159 26535 89793d0,pi2o3=pi**2/3d0)
+
+      include 'scales.inc'
 
 c
       s = -2*dot0p(k1,k2)
@@ -69,9 +184,9 @@ c
 c now determine the required B0, C0 and D0 functions
 c D0v(1) = D0t(s,t,0,q2sq,musq) = D0t(s,t,q2sq,0,musq)
 c D0v(2) = D0t(s,u,0,q2sq,musq) = D0t(s,u,q2sq,0,musq)
-      D0v(1) = D0t1m(s,t,q2sq,musq)
-      D0v(2) = D0t1m(s,u,q2sq,musq)
-      D0v(3) = D0t1m(t,u,q2sq,musq)
+      D0v(1) = D01m_fin(s,t,q2sq,musq)
+      D0v(2) = D01m_fin(s,u,q2sq,musq)
+      D0v(3) = D01m_fin(t,u,q2sq,musq)
 c ID=1
 c C0123 = C0(0,q2sq,t), C0124 = C0(0,s,0), C0134 = C0(t,0,0),
 c C0234 = C0(0,q2sq,s)
@@ -207,9 +322,9 @@ c     check these formulas
 c
       Tborn(1,1) =  ( 2*q2sq*(B0at-b0aq2) + t*B0at
      &     -q2sq*b0aq2 )*tmq2i - 2*q2sq*C0123(1)
-     &     +2*B0at !-5d0 + pi2o3  
+     &     +2*B0at -5d0 +pi2o3 !-5d0 + pi2o3  
 c
-
+c      print*,'C0123-c0123=',C0123(1)-C0123(1)
       Teps1(2) = (2*B0au+1)/u
       Teps2(2) = ( (B0au-b0aq2)*(2*u+3*q2sq)*umq2i
      &     +2*b0aq2+1-2*q2sq*C0134(2) ) * umq2i
@@ -217,232 +332,30 @@ c
       Tg2(2) = (B0au-B0aq2)*umq2i
       Tborn(2,1) =  ( 2*q2sq*(B0au-b0aq2) + u*B0au
      &     -q2sq*b0aq2 )*umq2i - 2*q2sq*C0134(2)
-     &     +2*B0au !-5d0 + pi2o3 
+     &     +2*B0au -5d0 + pi2o3 !-5d0 + pi2o3 
 c 
 c     5-pi2o3 + cvirt = -3 see expression for div piece  
 c     
       Tborn(1,2) = -2*(t*C0134(1)+1) +( 2*q2sq*(B0at-b0aq2) + t*B0at
      &     -q2sq*b0aq2 )*tmq2i - 2*q2sq*C0123(1)
-     &     + B0at !-5d0 + pi2o3 
+     &     + B0at -5d0 + pi2o3 !-5d0 + pi2o3 
 c
       Tborn(2,2) = -2*(u*C0123(2)+1) +( 2*q2sq*(B0au-b0aq2) + u*B0au
      &     -q2sq*b0aq2 )*umq2i - 2*q2sq*C0134(2)
-     &     + B0au !-5d0 + pi2o3
+     &     + B0au -5d0 + pi2o3 !-5d0 + pi2o3
+c      print*,'bcd_fill'
+c      print*,'Teps1=',Teps1
+c      print*,'Teps2=',Teps2
+c      print*,'Tg1=',Tg1
+c      print*,'Tg2=',Tg2
+c      print*,'Tborn(1,1)=',Tborn(1,1)
+c      print*,'Tborn(2,1)=',Tborn(2,1)
+c      print*,'Tborn(1,2)=',Tborn(1,2)
+c      print*,'Tborn(2,2)=',Tborn(2,2)
       return
       end
-c
-c------------- D0(s,t,q1sq,q2sq)  massless 4-point function -----------
-c
-      complex*16 function D0t2m(s,t,q1sq,q2sq)
-      implicit none
-      double precision s, t, q1sq, q2sq,musq
-      double precision sl, tl, q1sql, q2sql,qsql
-      double precision p1sq, p2sq, p3sq, p1p2, p1p3, p2p3
 
-c evaluate the finite part of the scalar 4-point function for zero mass
-c propagators 
-c  
-c  D0 = 1/(i*pi^2) * Int d^dk [-k^2-i0]^-1 [-(k+p1)^2-i0]^-1 
-c                      [-(k+p1+p2)^2-i0]^-1 [-(k+p1+p2+p3)^2-i0]^-1
-c
-c       = pi^-eps Gamma(1+eps) (-s)^-eps [IR + D0t(s,t,q1sq,q2sq)]
-c
-c where p1^2 = 0 = (p1+p2+p3)^2 is assumed. The arguments of D0t are
-c 
-c   s = (p2+p3)^2, t = (p1+p2)^2, q1sq = p3^3 and q2sq = p2^2
-c
-c IR represents the divergent terms and is given by
-c 
-c  IR = 1/(s*t)*[1/eps**2 + 1/eps (log(q1sq/t)+log(q2sq/t)) ]
-C
-c For the 1 mass box:
-c D0 = 1/(i*pi^2) * Int d^dk [-k^2-i0]^-1 [-(k+p1)^2-i0]^-1 
-c                      [-(k+p1+p2)^2-i0]^-1 [-(k+p1+p2+p3)^2-i0]^-1
-c
-c       = pi^-eps Gamma(1+eps) (musq)^-eps [IR + D0t(s,t,q1sq,musq)]
-c divergent terms:
-c
-c  IR = 2/(s*t)*[1/eps**2 + 1/eps (log(qsq/t)+log(-musq/s)]
-c
-c Alternatively, arguments as in the call of tens4 can be used, i.e.
-c
-c  D0t(s,t,q1sq,q2sq) = D0t4(p1sq, p2sq, p3sq, p1p2, p1p3, p2p3) 
-c
-c This code agrees with the one written by Carlo. Checked 10/15/2002
-c       Dieter Zeppenfeld, <dieter@pheno.physics.wisc.edu>
-c	Initial version:  2002 October 5
-c	Last modified:    2005 June 27 by Terrance Figy
-c
-c       needs to checked numerically
-c  
-      complex*16 ipi, ieps, z1, z2, zlog, vli2, D0t4,D0t1m
-      complex*16 zlog1
-      complex*16 zslog,ztlog,zqsqlog
-      parameter (ipi=(0d0,3.14159 26535 89793d0),ieps=(0d0,1d-16))
-      external vli2
-      double precision pi,pi2o2,pi2o6,tpi2o3
-      parameter (pi=3.14159 26535 89793d0,pi2o2=pi**2/2d0)
-      parameter (pi2o6=pi**2/6d0,tpi2o3=2d0*pi**2/3d0)
-      logical ldebug
-      parameter (ldebug=.false.)
-      double precision rlog, rz1, rz2,rz,rlog1
-      double precision rslog,rtlog,rqsqlog,rsomu,rtomu,rqsqomu
-c     new variables
-      integer ioption
-c
       
-      sl = s
-      tl = t
-      q1sql = q1sq
-      q2sql = q2sq
-      ioption = 2
-      goto 10
-      entry D0t1m(s,t,q1sq,musq)
-      sl=s
-      tl=t
-      qsql = q1sq
-      ioption=1
-      goto 10
-c
-c$$$*      entry D0t4(p1sq, p2sq, p3sq, p1p2, p1p3, p2p3)
-c$$$      if (p1sq.ne.0d0 .or. 
-c$$$     1    abs(2*(p1p2+p2p3+p1p3)/(p2sq+p3sq)+1).gt.1d-12) then
-c$$$         print*,' Dont use D0t4 for for less than 2 massless momenta '
-c$$$         print*,' (p1p2+p2p3+p1p3)/(p2sq+p3sq) = ',
-c$$$     1           (p1p2+p2p3+p1p3)/(p2sq+p3sq)
-c$$$         stop
-c$$$      endif
-c$$$      sl = p2sq+2*p2p3+p3sq
-c$$$      tl = p2sq+2*p1p2
-c$$$      q1sql = p3sq
-c$$$      q2sql = p2sq
- 10   continue
-
-      if(ioption.eq.2) then ! 2 mass opposite box
-         rz1 = tl/q1sql
-         rz2 = tl/q2sql
-         rlog = -log( abs(rz1*rz2) )
-         zlog = rlog
-         if (rz1.gt.0) then
-            z1 = 1-rz1
-         elseif (tl.lt.0d0) then !   t<0, q1sq>0
-            z1 = 1-rz1-ieps
-            zlog = zlog - ipi
-         else                   !   t>0, q1sq<0
-            z1 = 1-rz1+ieps
-            zlog = zlog + ipi
-         endif
-         if (rz2.gt.0) then
-            z2 = 1-rz2
-         elseif (tl.lt.0d0) then !   t<0, q2sq>0
-            z2 = 1-rz2-ieps
-            zlog = zlog - ipi
-         else                   !   t>0, q2sq<0
-            z2 = 1-rz2+ieps
-            zlog = zlog + ipi
-         endif
-         D0t2m = (0.5d0*zlog**2 + 2*(vli2(z1)+vli2(z2)) - pi2o6)/(sl*tl)
-      elseif(ioption.eq.1) then ! 1-mass box
-         if(musq.lt.0d0) then
-            print*,'musq is less than 0'
-            print*,'D0 is set to 1'
-            D0t1m = 0d0
-            return
-         endif
-         rz = tl/sl
-         rz1 = qsql/sl
-         rz2 = qsql/tl
-         rsomu = -sl/musq
-         rtomu = -tl/musq
-         rqsqomu = -qsql/musq
-c
-         rlog = log(abs(rz))
-         rlog1 = log(abs(rz1))
-         zlog = rlog
-         zlog1 = rlog1
-
-         rslog = log(abs(rsomu))
-         rtlog = log(abs(rtomu))
-         rqsqlog = log(abs(rqsqomu))
-
-         zslog =  rslog
-         ztlog =  rtlog
-         zqsqlog =  rqsqlog
-
-         if(rsomu.lt.0d0) then
-            zslog = zslog -ipi
-         endif
-         if(rtomu.lt.0d0) then
-            ztlog = ztlog -ipi
-         endif
-         if(rqsqomu.lt.0d0) then
-            zqsqlog = zqsqlog -ipi
-         endif
-         
-         if(rz2.gt.0) then      
-            z2 = 1-rz2
-         elseif(tl.lt.0d0) then !q2sq >0,t<0
-            z2=1-rz2 +ieps
-         else                   !q2sq<0,t>0
-            z2=1-rz2 -ieps
-         endif
-         if(rz1.gt.0) then      
-            z1 = 1-rz1            
-         elseif(sl.lt.0d0) then !q2sq >0,s<0
-            zlog1 = zlog1 - ipi
-            z1=1-rz1 +ieps
-         else                   !q2sq<0,s>0
-            zlog1 = zlog1 + ipi
-            z1=1-rz1 -ieps
-         endif
-         if(rz.lt.0d0) then
-            if(tl.gt.0d0) then       !s >0,t<0
-               zlog = zlog - ipi
-            else                !s<0,t>0
-               zlog = zlog + ipi 
-            endif
-         endif
-         if(ldebug) then
-            D0t1m = (zlog**2 + zlog - zlog1**2 -2*vli2(z1)-
-     1           2*vli2(z2)-tpi2o3)/(sl*tl)
-            print*,'-----------------------'
-            print*,'musq=',musq
-            print*,'D0t1m with musq = -s fixed'
-            print*,D0t1m 
-         endif
-         D0t1m = (zlog + zslog**2 + ztlog**2 - zqsqlog**2 
-     1        - 2*Vli2(z1)-2*Vli2(z2)-tpi2o3)/(sl*tl)
-         if(ldebug) then
-            print*,'D0t1m with musq arbitrary'
-            print*,D0t1m 
-            print*,'-----------------------'
-         endif
-c
-c     check this formula: it is vital
-      else
-         print*,'invalid selection in D0'
-         stop
-      endif
-c
-c      if (ldebug) then
-c         print('(a,2g14.4,a,g14.4)'), 
-c     1         ' t/qsq ratios: ',rz1, rz2,' t = ',tl
-c         print('(a,f8.4,a,f8.4)'),
-c     1         ' zlog = ',dreal(zlog),'+ i pi * ',dimag(zlog)/pi
-c         z1 = 0.5d0*zlog**2
-c         rz1 = (dreal(z1)-0.5d0*rlog**2)/pi**2
-c         if (rlog.ne.0d0) then
-c            rz2 = dimag(z1)/pi/rlog
-c         else
-c            rz2 = 0d0
-c         endif
-c         print('(2a,f8.4,a,f8.4,a)'),' extra terms from log: ',
-c     1   ' pi**2*(',rz1,')+ i pi rlog *(',rz2,')' 
-c         print*,' D0t = ',d0t
-c      endif
-      return 
-      end
-c$$$c
 c$$$c-------------  spence function  vli2(z) ------------------------
 c
          complex*16 function vli2(zin)

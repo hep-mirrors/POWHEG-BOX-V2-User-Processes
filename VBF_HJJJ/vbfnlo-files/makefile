@@ -26,8 +26,9 @@ OBJECTS_PH =./dotproducts.o \
           ./qqhqqj-born.o  \
           ./qqhqqj-virt.o  \
           ./coeff.o \
-          ./hjjj_amp_aux.o \
+          ./hjjj_amp_aux_test.o \
           ./loops_aux.o \
+          ./dilog.o \
           ./qqhqqjj.o  \
           ./qqhqqQQ.o  \
           ./mg_qqqqggh_nc.o  \
