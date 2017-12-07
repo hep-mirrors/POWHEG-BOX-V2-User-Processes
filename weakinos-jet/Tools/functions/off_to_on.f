@@ -572,10 +572,16 @@ c rescaled by this correction factor
         !input variables
         double precision shat,mi,mj,mk,ml,mkl,mij,sij,skl
         double precision denom
+        double precision sklm, sklp, sklmos, sklpos
         ! external functions
         double precision kaellenSqrt
         external kaellenSqrt
-        
+
+        sklm = (mk+ml)**2
+        sklp = (dsqrt(shat)-dsqrt(sij))**2
+        sklmos = (mk+ml)**2
+        sklpos = (dsqrt(shat)-mij)**2
+
         denom = mij**2*mkl**2*kaellenSqrt(shat,sij,skl)
      &          *kaellenSqrt(sij,mi**2,mj**2)
      &          *kaellenSqrt(skl,mk**2,ml**2)
@@ -585,6 +591,11 @@ c rescaled by this correction factor
      &                    *kaellenSqrt(mij**2,mi**2,mj**2)
      &                    *kaellenSqrt(mkl**2,mk**2,ml**2))
      &                    /denom
+          ! additional rescale factor which comes from the nested 
+          ! four particle phase space.
+          ! Note that this factor must be choosen such that it fits
+          ! to the on-shell phase-space integration.
+          corrfac_ijkl = corrfac_ijkl*(sklpos-sklmos)/(sklp-sklm)
         else
           corrfac_ijkl = 0D0
         endif
@@ -602,9 +613,15 @@ c rescaled by this correction factor
         double precision shat,mi,mj,mk,ml,mijk,mij
         double precision sijk,sij
         double precision denom
+        double precision  sijm, sijp, sijmos, sijpos
         ! external functions
         double precision kaellenSqrt
         external kaellenSqrt
+
+        sijm = (mi+mj)**2
+        sijp = (dsqrt(sijk)-mk)**2
+        sijmos = (mi+mj)**2
+        sijpos = (mijk-mk)**2
         
         denom = mijk**2*mij**2*kaellenSqrt(shat,sijk,ml**2)
      &          *kaellenSqrt(sijk,sij,mk**2)
@@ -615,6 +632,11 @@ c rescaled by this correction factor
      &                   *kaellenSqrt(mijk**2,mij**2,mk**2)
      &                   *kaellenSqrt(mij**2,mi**2,mj**2))
      &                   /denom
+          ! additional rescale factor which comes from the nested 
+          ! four particle phase space
+          ! Note that this factor must be choosen such that it fits
+          ! to the on-shell phase-space integration.
+         corrfac_ijk = corrfac_ijk*(sijpos-sijmos)/(sijp-sijm)
         else
           corrfac_ijk = 0D0
         endif
