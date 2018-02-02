@@ -1,5 +1,7 @@
 #!/bin/sh
-# calls the configuration scripts
+# Copyright (C) Matthias Kesenheimer - All Rights Reserved
+# Written by Matthias Kesenheimer <m.kesenheimer@gmx.net>, 2017
+# calls the LoopTools and SLHAlib configure scripts
 
 WORKINGDIR=$(pwd)
 LT=$WORKINGDIR/Tools/LoopTools-2.12
