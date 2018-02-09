@@ -74,6 +74,13 @@ c      call bookupeqbins('dr2',0.1d0,0d0,3.2d0)
       call bookupeqbins('a6',1d0,0d0,100d0)
       call bookupeqbins('a7',1d0,0d0,100d0)
 
+      call bookupeqbins('ptgamma_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgamma_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_cut',0.2d0,-7d0,3d0)
+
       end
      
       subroutine analysis(dsig)
@@ -125,6 +132,8 @@ c spin correlation observables
       real*8 pt_nu,pt_nu_max
       real*8 pt_lep,pt_lep_max
       real*8 pt_gamma,pt_gamma_max
+      real*8 logptgamma,logptgammamax,logptrel,tmpptrel
+      integer tmp,ntmp,ngammaup
       logical ini
       data ini/.true./
       save ini
@@ -151,35 +160,36 @@ c spin correlation observables
       pnu= (/0,0,0,0/)
       nphot = 0
 
+      nlep=0
+      nnu=0
+      ngamma= 0
+      do i=1,maxnumlep
+         lepvec(i) = 0
+         nuvec(i) = 0
+      enddo
+      maxnumg=maxphot
+      do i=1,maxnumg
+         gammavec(i) = 0
+      enddo
+c     
       IF(WHCPRG.ne.'PYTHIA') then
          do ihep=1,nhep
 c     p_W = p_l + p_nu
             if( idhep(ihep).eq.vdecaytemp  ) then
-               if (phep(4,ihep).gt.pl(4)) pl = phep(1:4,ihep)
-            endif
-            if( idhep(ihep).eq.vdecay2temp ) then
-               if (phep(4,ihep).gt.pnu(4)) pnu = phep(1:4,ihep)
-            endif
-            pw = pl + pnu
-            if( idhep(ihep).eq.22 ) then 
-               if (phep(4,ihep).gt.10d0)then
-                  nphot = nphot + 1
-                  pg(1:4,nphot) = phep(1:4,ihep)
-               endif
+c     with neutrino
+               nnu=nnu+1
+               nuvec(nnu)= ihep
+            elseif( idhep(ihep).eq.vdecay2temp ) then
+c     with a lepton
+               nlep=nlep+1
+               lepvec(nlep)=ihep
+            elseif( idhep(ihep).eq.22 ) then
+c               if (phep(4,ihep).gt.10d0)then
+               ngamma=ngamma+1
+               gammavec(ngamma)=ihep
             endif
          enddo
       ELSE
-         nlep=0
-         nnu=0
-         ngamma=0
-         do i=1,maxnumlep
-            lepvec(i) = 0
-            nuvec(i) = 0
-         enddo
-         maxnumg=maxphot
-         do i=1,maxphot
-            gammavec(i) = 0
-         enddo
          do ihep=1,nhep
             if(isthep(ihep).eq.1) then
 C     Scan over final state particle and record the entries
@@ -193,64 +203,79 @@ c     with a lepton
                   lepvec(nlep)=ihep
                elseif(idhep(ihep).eq.22) then
 C     with a gamma
-                  ngamma=ngamma+1
-                  gammavec(ngamma)=ihep
+                  ntmp= 0
+                  tmp= ihep
+                  if(jmohep(1,tmp).le.0) then
+                     print*,'jmohep(1,tmp)= ',jmohep(1,tmp)
+                  endif
+c
+c this is to avoid photons from meson and baryon  decays
+c
+                  if(abs(idhep(jmohep(1,tmp))).gt.100) then
+c                     print*,'decay from ',idhep(jmohep(1,tmp))
+                     goto 1221
+                  endif
+ 1220             if(tmp.gt.0) then
+                     if(abs(idhep(jmohep(1,tmp))).eq.24.and.
+     +                  jmohep(1,tmp).lt.7) then
+                        ntmp= ntmp+1
+                     elseif(abs(idhep(jmohep(1,tmp))).lt.6) then
+                        ntmp= ntmp+1
+                     else
+                        tmp= jmohep(1,tmp)
+                        go to 1220
+                     endif
+                     if(ntmp.gt.0) then
+                        ngamma=ngamma+1
+                        gammavec(ngamma)=ihep
+                     endif
+                  endif
+ 1221             continue
                endif
             endif
          enddo
-         if(nlep.eq.0.and.nnu.eq.0) then
-c            write(*,*)" not enough leptons or gamma! drop event"
-c            call exit(1)
-            return
-         endif
-c hardest neutrino
-         pt_nu_max=0d0
-         jnu=0
-         do nu=1,nnu
-            inu=nuvec(nu)
-            pt_nu=sqrt(phep(1,inu)**2 + phep(2,inu)**2)
-            if (pt_nu.gt.pt_nu_max) then
-               jnu = inu
-               pt_nu_max = pt_nu
-            endif
-         enddo
-c hardest lepton
-         pt_lep_max=0d0
-         jl=0
-         do lep=1,nlep
-            il=lepvec(lep)
-            pt_lep=sqrt(phep(1,il)**2 + phep(2,il)**2)
-            if (pt_lep.gt.pt_lep_max) then
-               jl = il
-               pt_lep_max = pt_lep
-            endif
-         enddo
-         pt_gamma_max= 0.d0
-         jgam=0
-         do gam=1,ngamma
-            igam=gammavec(gam)
-            pt_gamma=sqrt(phep(1,il)**2 + phep(2,il)**2)
-            if (pt_gamma.gt.pt_gamma_max) then
-               jgam = igam
-               pt_gamma_max = pt_gamma
-            endif
-         enddo
-         pl = phep(1:4,jl)
-         pnu = phep(1:4,jnu)
-         pw = pl + pnu
-c            if( idhep(ihep).eq.22.and.isthep(ihep).eq.1) then 
-c               if (phep(4,ihep).gt.10d0)then
-c                  nphot = nphot + 1
-c                  pg(1:4,nphot) = phep(1:4,ihep)
-c               endif
-c            p_gamma(0)=phep(4,igam)
-c            do mu=1,3
-c               p_gamma(mu)=phep(mu,igam)
-c            enddo
-c            endif
-c         enddo
       ENDIF
 
+      if(nlep.eq.0.and.nnu.eq.0) then
+c            write(*,*)" not enough leptons or gamma! drop event"
+c            call exit(1)
+         return
+      endif
+c hardest neutrino
+      pt_nu_max=0d0
+      jnu=0
+      do nu=1,nnu
+         inu=nuvec(nu)
+         pt_nu=sqrt(phep(1,inu)**2 + phep(2,inu)**2)
+         if (pt_nu.gt.pt_nu_max) then
+            jnu = inu
+            pt_nu_max = pt_nu
+         endif
+      enddo
+c hardest lepton
+      pt_lep_max=0d0
+      jl=0
+      do lep=1,nlep
+         il=lepvec(lep)
+         pt_lep=sqrt(phep(1,il)**2 + phep(2,il)**2)
+         if (pt_lep.gt.pt_lep_max) then
+            jl = il
+            pt_lep_max = pt_lep
+         endif
+      enddo
+      pt_gamma_max= 0.d0
+      jgam=0
+      do gam=1,ngamma
+         igam=gammavec(gam)
+         pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+         if (pt_gamma.gt.pt_gamma_max) then
+            jgam = igam
+            pt_gamma_max = pt_gamma
+         endif
+      enddo
+      pl = phep(1:4,jl)
+      pnu = phep(1:4,jnu)
+      pw = pl + pnu
 
       pl03(0)=pl(4)
       pl03(1:3)=pl(1:3)
@@ -271,6 +296,25 @@ c         enddo
       phistar = phistar_report(pnu,pl)   !pl2 is the negatively charged lepton
 
       call filld('total',0d0,dsig)
+
+      if(ngamma.gt.0) then
+         do gam=1,ngamma
+            igam=gammavec(gam)
+            pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+            logptgamma= log(pt_gamma)/log(10.d0)
+c     call filld('ptgamma',logptgamma,dsig)
+            call filld('ptgamma_nocut',logptgamma,dsig)
+c     FSR ptrel
+            p_gamma(1:3)=phep(1:3,igam)
+            p_gamma(0)=phep(4,igam)
+            call get_ptrelFSR(p_gamma,pl03,tmpptrel)
+            logptrel= log(tmpptrel)/log(10.d0)
+            call filld('ptrel_gamma-lep_nocut',logptrel,dsig)
+         enddo
+         logptgammamax= log(pt_gamma_max)/log(10.d0)
+         call filld('ptgammamax_nocut',logptgammamax,dsig)
+      endif
+
       if(getpt(pl).gt.25.and.abs(geteta(pl))<2.5d0.and.
      1   getpt(pnu).gt.25.and.
      2   m.gt.1) then
@@ -313,6 +357,24 @@ c     transverse mass of the lepton-neutrino system
             call filld('forward', m, dsig)
          endif
          call filld('phistar_report',phistar,dsig)
+
+         if(ngamma.gt.0) then
+            do gam=1,ngamma
+               igam=gammavec(gam)
+               pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+               logptgamma= log(pt_gamma)/log(10.d0)
+               call filld('ptgamma_cut',logptgamma,dsig)
+c     FSR ptrel
+               p_gamma(1:3)=phep(1:3,igam)
+               p_gamma(0)=phep(4,igam)
+               call get_ptrelFSR(p_gamma,pl03,tmpptrel)
+               logptrel= log(tmpptrel)/log(10.d0)
+               call filld('ptrel_gamma-lep_cut',logptrel,dsig)
+            enddo
+            logptgammamax= log(pt_gamma_max)/log(10.d0)
+            call filld('ptgammamax_cut',logptgammamax,dsig)
+         endif
+
       endif
 
       end
