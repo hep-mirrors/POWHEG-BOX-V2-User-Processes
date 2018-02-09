@@ -108,6 +108,9 @@ c$$$      end
       integer sig,tau
       complex*16 self,vert,box 
 
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+
       real*8 pq(0:3),pqb(0:3),pl(0:3),plb(0:3)
       real*8 ptmpu(0:3),ptmpt(0:3),ptmps(0:3)
       real*8 mqbig2
@@ -183,7 +186,11 @@ c$$$      end
           enddo
       enddo
 *
-      call deltaself(s,self)
+      if(flg_QEDonly) then
+         self= (0.d0,0.d0)
+      else
+         call deltaself(s,self)
+      endif
 
       call deltavert(s,mqbig2,vert)
 
@@ -412,6 +419,9 @@ c$$$      end
       logical calculatec0
       common/ifc0/calculatec0
 *
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+*
       if (ifirst.eq.0) then
           ifirst = 1
 
@@ -422,24 +432,23 @@ c$$$      end
           call sigmawtp(dble(mw2)*cone,swtpmw2)
           call sigmazzt(dble(mz2)*cone,szztmz2)
           call sigmazztp(dble(mz2)*cone,szztpmz2)
-
-*
+*     
 * eq. (3.28) of Dittmaier-Huber 0911.2329
 *
           delza =   2d0/mz2*sazt0
 
           if (complexmasses) then
-              delaz = -2d0/dble(mz2)*saztmz2+(mz2/dble(mz2)-cone)*delza
+             delaz= -2d0/dble(mz2)*saztmz2+(mz2/dble(mz2)-cone)*delza
           else
-              delaz = (- 2d0/mz2*saztmz2)
+             delaz = (- 2d0/mz2*saztmz2)
           endif
 
           delaa = - saatp0
 
           if (complexmasses) then
-              delzz = - szztpmz2
+             delzz = - szztpmz2
           else
-              delzz = - szztpmz2
+             delzz = - szztpmz2
           endif
 *
 ** delze according to eq. (3.32) of ArXiv:0709.1075 (Denner Fortschritte)
@@ -449,14 +458,14 @@ c$$$      end
 * eq. (4.29) of ArXiv:0505042
 *
           if (complexmasses) then
-              deltamw2 = swtmw2 + ii*dimag(mw2)*swtpmw2
-     +                          - ii*dimag(mw2)*alsu4pi*4.d0
+             deltamw2 = swtmw2 + ii*dimag(mw2)*swtpmw2
+     +                         - ii*dimag(mw2)*alsu4pi*4.d0
 
-              deltamz2 = szztmz2 + ii*dimag(mz2)*szztpmz2
+             deltamz2 = szztmz2 + ii*dimag(mz2)*szztpmz2
           else
-              deltamw2 = swtmw2
+             deltamw2 = swtmw2
 
-              deltamz2 = szztmz2
+             deltamz2 = szztmz2
           endif
 
 *
@@ -464,9 +473,9 @@ c$$$      end
 * and eq. (4.13) of ArXiv:0505042
 *
           if (complexmasses) then
-              delswow = -0.5d0*cw2/sw2*( deltamw2/mw2 - deltamz2/mz2 )
+             delswow = -0.5d0*cw2/sw2*( deltamw2/mw2 - deltamz2/mz2 )
           else
-              delswow = -0.5d0*cw2/sw2*dble(deltamw2/mw2 - deltamz2/mz2)
+             delswow=-0.5d0*cw2/sw2*dble(deltamw2/mw2 - deltamz2/mz2)
           endif
 *
 * eq. (3.32) of Dittmaier-Huber 
@@ -500,114 +509,182 @@ c$$$      end
           call deltazfr(qd*cone,gd(0),gd(1),zero,zero,delzdd(1))
 
           if (iftopinloop) then
-              call deltazfl(qd*cone,gd(0),gd(1),zero,mqbig2*cone,
-     +                      delzbb(0))
-              call deltazfr(qd*cone,gd(0),gd(1),zero,mqbig2*cone,
-     +                      delzbb(1))
+             call deltazfl(qd*cone,gd(0),gd(1),zero,mqbig2*cone,
+     +                     delzbb(0))
+             call deltazfr(qd*cone,gd(0),gd(1),zero,mqbig2*cone,
+     +                     delzbb(1))
           endif
 
           call deltazfl(ql*cone,gl(0),gl(1),mlep2*cone,zero,delzll(0))
           call deltazfr(ql*cone,gl(0),gl(1),mlep2*cone,zero,delzll(1))
 
           if (scheme.eq.0) then
-              delta = zero
+             delta = zero
           elseif (scheme.eq.1) then
-              call sigmaaat(dble(mz2)*cone,saatmz2notop,.false.)
-              call sigmaaatp(zero,saatp0notop,.false.)
-              delta = 0.5d0 * (saatp0notop - saatmz2notop/mz2)
+             call sigmaaat(dble(mz2)*cone,saatmz2notop,.false.)
+             call sigmaaatp(zero,saatp0notop,.false.)
+             delta = 0.5d0 * (saatp0notop - saatmz2notop/mz2)
           else
-              delta = 0.5d0 * getdeltar()
+             delta = 0.5d0 * getdeltar()
           endif
 *
 ** eq. (3.31) of Dittmaier-Huber 
-* 
+*
+          if(flg_QEDonly) then
 * l+ (gamma)
-          delll_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzll(1)
-     +                         - 0.5d0*gl(1)/ql*delza
-          delll_ct_g(1) = delll_ct_g_alpha0(1) - delta
+             delll_ct_g_alpha0(1) = delzll(1)
+             delll_ct_g(1) = delll_ct_g_alpha0(1)
 
 * l- (gamma)
-          delll_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzll(0)
-     +                         - 0.5d0*gl(0)/ql*delza
-          delll_ct_g(0) = delll_ct_g_alpha0(0) - delta
+             delll_ct_g_alpha0(0) = delzll(0)
+             delll_ct_g(0) = delll_ct_g_alpha0(0)
 
 * l+ (Z)
-          delll_ct_z_alpha0(1) = delgll(1)/gl(1) + 0.5d0*delzz 
-     +                         + delzll(1) - 0.5d0*ql/gl(1)*delaz
-          delll_ct_z(1) = delll_ct_z_alpha0(1) - delta
+             delll_ct_z_alpha0(1) = delzll(1)
+             delll_ct_z(1) = delll_ct_z_alpha0(1)
 
 * l- (Z)
-          delll_ct_z_alpha0(0) = delgll(0)/gl(0) + 0.5d0*delzz 
-     +                         + delzll(0) - 0.5d0*ql/gl(0)*delaz
-          delll_ct_z(0) = delll_ct_z_alpha0(0) - delta
+             delll_ct_z_alpha0(0) = delzll(0)
+             delll_ct_z(0) = delll_ct_z_alpha0(0)
 
 
 
 * u+ (gamma)
-          deluu_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzuu(1)
-     +                         - 0.5d0*gu(1)/qu*delza
-          deluu_ct_g(1) = deluu_ct_g_alpha0(1) - delta
+             deluu_ct_g_alpha0(1) = delzuu(1)
+             deluu_ct_g(1) = deluu_ct_g_alpha0(1)
 
 * u- (gamma)
-          deluu_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzuu(0)
-     +                         - 0.5d0*gu(0)/qu*delza
-          deluu_ct_g(0) = deluu_ct_g_alpha0(0) - delta
+             deluu_ct_g_alpha0(0) = delzuu(0)
+             deluu_ct_g(0) = deluu_ct_g_alpha0(0)
 
 * u+ (Z)
-          deluu_ct_z_alpha0(1) = delguu(1)/gu(1) + 0.5d0*delzz 
-     +                         + delzuu(1) - 0.5d0*qu/gu(1)*delaz
-          deluu_ct_z(1) = deluu_ct_z_alpha0(1) - delta
+             deluu_ct_z_alpha0(1) = delzuu(1)
+             deluu_ct_z(1) = deluu_ct_z_alpha0(1)
 
 * u- (Z)
-          deluu_ct_z_alpha0(0) = delguu(0)/gu(0) + 0.5d0*delzz 
-     +                         + delzuu(0) - 0.5d0*qu/gu(0)*delaz
-          deluu_ct_z(0) = deluu_ct_z_alpha0(0) - delta
+             deluu_ct_z_alpha0(0) = delzuu(0)
+             deluu_ct_z(0) = deluu_ct_z_alpha0(0)
+
+
+* d+ (gamma)
+             deldd_ct_g_alpha0(1) = delzdd(1)
+             deldd_ct_g(1) = deldd_ct_g_alpha0(1)
+
+* d- (gamma)
+             deldd_ct_g_alpha0(0) = delzdd(0)
+             deldd_ct_g(0) = deldd_ct_g_alpha0(0)
+
+* d+ (Z)
+             deldd_ct_z_alpha0(1) = delzdd(1)
+             deldd_ct_z(1) = deldd_ct_z_alpha0(1)
+
+* d- (Z)
+             deldd_ct_z_alpha0(0) = delzdd(0)
+             deldd_ct_z(0) = deldd_ct_z_alpha0(0)
+
+             if (iftopinloop) then
+* b+ (gamma)
+                delbb_ct_g_alpha0(1) = delzbb(1)
+                delbb_ct_g(1) = delbb_ct_g_alpha0(1)
+
+* b- (gamma)
+                delbb_ct_g_alpha0(0) = delzbb(0)
+                delbb_ct_g(0) = delbb_ct_g_alpha0(0)
+
+* b+ (Z)
+                delbb_ct_z_alpha0(1) = delzbb(1)
+                delbb_ct_z(1) = delbb_ct_z_alpha0(1)
+* b- (Z)
+                delbb_ct_z_alpha0(0) = delzbb(0)
+                delbb_ct_z(0) = delbb_ct_z_alpha0(0)
+             endif
+          else
+* l+ (gamma)
+             delll_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzll(1)
+     +                            - 0.5d0*gl(1)/ql*delza
+             delll_ct_g(1) = delll_ct_g_alpha0(1) - delta
+
+* l- (gamma)
+             delll_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzll(0)
+     +                            - 0.5d0*gl(0)/ql*delza
+             delll_ct_g(0) = delll_ct_g_alpha0(0) - delta
+
+* l+ (Z)
+             delll_ct_z_alpha0(1) = delgll(1)/gl(1) + 0.5d0*delzz 
+     +                            + delzll(1) - 0.5d0*ql/gl(1)*delaz
+             delll_ct_z(1) = delll_ct_z_alpha0(1) - delta
+
+* l- (Z)
+             delll_ct_z_alpha0(0) = delgll(0)/gl(0) + 0.5d0*delzz 
+     +                            + delzll(0) - 0.5d0*ql/gl(0)*delaz
+             delll_ct_z(0) = delll_ct_z_alpha0(0) - delta
+
+
+
+* u+ (gamma)
+             deluu_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzuu(1)
+     +                            - 0.5d0*gu(1)/qu*delza
+             deluu_ct_g(1) = deluu_ct_g_alpha0(1) - delta
+
+* u- (gamma)
+             deluu_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzuu(0)
+     +                            - 0.5d0*gu(0)/qu*delza
+             deluu_ct_g(0) = deluu_ct_g_alpha0(0) - delta
+
+* u+ (Z)
+             deluu_ct_z_alpha0(1) = delguu(1)/gu(1) + 0.5d0*delzz 
+     +                            + delzuu(1) - 0.5d0*qu/gu(1)*delaz
+             deluu_ct_z(1) = deluu_ct_z_alpha0(1) - delta
+
+* u- (Z)
+             deluu_ct_z_alpha0(0) = delguu(0)/gu(0) + 0.5d0*delzz 
+     +                            + delzuu(0) - 0.5d0*qu/gu(0)*delaz
+             deluu_ct_z(0) = deluu_ct_z_alpha0(0) - delta
 
 
 
 * d+ (gamma)
-          deldd_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzdd(1)
-     +                         - 0.5d0*gd(1)/qd*delza
-          deldd_ct_g(1) = deldd_ct_g_alpha0(1) - delta
+             deldd_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzdd(1)
+     +                            - 0.5d0*gd(1)/qd*delza
+             deldd_ct_g(1) = deldd_ct_g_alpha0(1) - delta
 
 * d- (gamma)
-          deldd_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzdd(0)
-     +                         - 0.5d0*gd(0)/qd*delza
-          deldd_ct_g(0) = deldd_ct_g_alpha0(0) - delta
+             deldd_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzdd(0)
+     +                            - 0.5d0*gd(0)/qd*delza
+             deldd_ct_g(0) = deldd_ct_g_alpha0(0) - delta
 
 * d+ (Z)
-          deldd_ct_z_alpha0(1) = delgdd(1)/gd(1) + 0.5d0*delzz 
-     +                         + delzdd(1) - 0.5d0*qd/gd(1)*delaz
-          deldd_ct_z(1) = deldd_ct_z_alpha0(1) - delta
+             deldd_ct_z_alpha0(1) = delgdd(1)/gd(1) + 0.5d0*delzz 
+     +                            + delzdd(1) - 0.5d0*qd/gd(1)*delaz
+             deldd_ct_z(1) = deldd_ct_z_alpha0(1) - delta
 
 * d- (Z)
-          deldd_ct_z_alpha0(0) = delgdd(0)/gd(0) + 0.5d0*delzz 
-     +                         + delzdd(0) - 0.5d0*qd/gd(0)*delaz
-          deldd_ct_z(0) = deldd_ct_z_alpha0(0) - delta
+             deldd_ct_z_alpha0(0) = delgdd(0)/gd(0) + 0.5d0*delzz 
+     +                            + delzdd(0) - 0.5d0*qd/gd(0)*delaz
+             deldd_ct_z(0) = deldd_ct_z_alpha0(0) - delta
 
-          if (iftopinloop) then
+             if (iftopinloop) then
 * b+ (gamma)
-              delbb_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzbb(1)
-     +                             - 0.5d0*gd(1)/qd*delza
-              delbb_ct_g(1) = delbb_ct_g_alpha0(1) - delta
+                delbb_ct_g_alpha0(1) = delze + 0.5d0*delaa + delzbb(1)
+     +                               - 0.5d0*gd(1)/qd*delza
+                delbb_ct_g(1) = delbb_ct_g_alpha0(1) - delta
 
 * b- (gamma)
-              delbb_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzbb(0)
-     +                             - 0.5d0*gd(0)/qd*delza
-              delbb_ct_g(0) = delbb_ct_g_alpha0(0) - delta
+                delbb_ct_g_alpha0(0) = delze + 0.5d0*delaa + delzbb(0)
+     +                               - 0.5d0*gd(0)/qd*delza
+                delbb_ct_g(0) = delbb_ct_g_alpha0(0) - delta
 
 * b+ (Z)
-              delbb_ct_z_alpha0(1) = delgbb(1)/gd(1) + 0.5d0*delzz 
-     +                             + delzbb(1) - 0.5d0*qd/gd(1)*delaz
-              delbb_ct_z(1) = delbb_ct_z_alpha0(1) - delta
+                delbb_ct_z_alpha0(1) = delgbb(1)/gd(1) + 0.5d0*delzz 
+     +                               + delzbb(1) - 0.5d0*qd/gd(1)*delaz
+                delbb_ct_z(1) = delbb_ct_z_alpha0(1) - delta
 
 * b- (Z)
-              delbb_ct_z_alpha0(0) = delgbb(0)/gd(0) + 0.5d0*delzz 
-     +                             + delzbb(0) - 0.5d0*qd/gd(0)*delaz
-              delbb_ct_z(0) = delbb_ct_z_alpha0(0) - delta
+                delbb_ct_z_alpha0(0) = delgbb(0)/gd(0) + 0.5d0*delzz 
+     +                               + delzbb(0) - 0.5d0*qd/gd(0)*delaz
+                delbb_ct_z(0) = delbb_ct_z_alpha0(0) - delta
+             endif
           endif
-
-
       endif
 *
       if (qq.gt.0d0) then
@@ -653,14 +730,23 @@ c$$$      end
 *
 ** Eq. (3.30) of Dittmaier-Huber - ArXiv:0911.2329
 *
-      fzqqw =  fzqqw + delqq_ct_z
+      if(flg_QEDonly) then
+         fzqqw =  delqq_ct_z
 
-      fgqqw =  fgqqw + delqq_ct_g
+         fgqqw =  delqq_ct_g
 
-      fzllw =  fzllw + delll_ct_z
+         fzllw =  delll_ct_z
 
-      fgllw =  fgllw + delll_ct_g
+         fgllw =  delll_ct_g
+      else
+         fzqqw =  fzqqw + delqq_ct_z
 
+         fgqqw =  fgqqw + delqq_ct_g
+
+         fzllw =  fzllw + delll_ct_z
+
+         fgllw =  fgllw + delll_ct_g
+      endif
 *
 ** Eq. (3.29) of Dittmaier-Huber - ArXiv:0911.2329
 *
@@ -1069,128 +1155,198 @@ c$$$      end
       complex*16 tzz(0:1,0:1),tww(0:1,0:1),tgg(0:1,0:1),tzg(0:1,0:1)
       complex*16 uzz(0:1,0:1),uww(0:1,0:1),ugg(0:1,0:1),uzg(0:1,0:1)
       complex*16 fzz(0:1,0:1),fww(0:1,0:1),fgg(0:1,0:1),fzg(0:1,0:1)
-
+*
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+*
       integer sig,tau
 *
-*
-** ZZ
-*
-      calculated0=.true.
-      call btpp(s*cone,t*cone,u*cone,mz2,mz2,zero,tzz(1,1))
-      tzz(0,0) = tzz(1,1) 
-
-      calculated0=.false.
-      call btpm(s*cone,t*cone,u*cone,mz2,mz2,zero,tzz(1,0))
-      tzz(0,1) = tzz(1,0) 
-
-      calculated0=.true.
-      call bupm(s*cone,t*cone,u*cone,mz2,mz2,zero,uzz(1,0))
-      uzz(0,1) = uzz(1,0) 
-
-      calculated0=.false.
-      call bupp(s*cone,t*cone,u*cone,mz2,mz2,zero,uzz(1,1))
-      uzz(0,0) = uzz(1,1) 
-*
-** WW
-*
-
-      tww(1,1) = zero
-      tww(0,1) = zero
-      tww(1,0) = zero
-
-      calculated0=.true.
-      if (qq.lt.0d0) then
-          call btpp(s*cone,t*cone,u*cone,mw2,mw2,mqbig2*cone,tww(0,0))
-      else
-          call bupp(s*cone,t*cone,u*cone,mw2,mw2,mqbig2*cone,uww(0,0))
-      endif
-
+      if(flg_QEDonly) then
 *
 ** gg
 *
+         calculated0=.true.
+         call btpmg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,0))
+         calculated0=.false.
+         call btppg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,1))
 
-      calculated0=.true.
-      call btpmg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,0))
-      calculated0=.false.
-      call btppg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,1))
+         tgg(0,1) = tgg(1,0) 
+         tgg(0,0) = tgg(1,1) 
 
-      tgg(0,1) = tgg(1,0) 
-      tgg(0,0) = tgg(1,1) 
+         calculated0=.true.
+         call buppg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,1))
+         calculated0=.false.
+         call bupmg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,0))
 
-      calculated0=.true.
-      call buppg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,1))
-      calculated0=.false.
-      call bupmg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,0))
-
-      ugg(0,1) = ugg(1,0) 
-      ugg(0,0) = ugg(1,1) 
+         ugg(0,1) = ugg(1,0) 
+         ugg(0,0) = ugg(1,1) 
 
 *
 ** zg
 *
+         calculated0=.true.
+         call btpmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,0))
+         calculated0=.false.
+         call btppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,1))
 
-      calculated0=.true.
-      call btpmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,0))
-      calculated0=.false.
-      call btppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,1))
+         tzg(0,1) = tzg(1,0) 
+         tzg(0,0) = tzg(1,1) 
 
-      tzg(0,1) = tzg(1,0) 
-      tzg(0,0) = tzg(1,1) 
+         calculated0=.true.
+         call buppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,1))
+         calculated0=.false.
+         call bupmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,0))
 
-      calculated0=.true.
-      call buppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,1))
-      calculated0=.false.
-      call bupmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,0))
-
-      uzg(0,1) = uzg(1,0) 
-      uzg(0,0) = uzg(1,1) 
+         uzg(0,1) = uzg(1,0) 
+         uzg(0,0) = uzg(1,1) 
 *
 **
 *
-      fww(1,1) = zero
-      fww(0,1) = zero
-      fww(1,0) = zero
+         do sig=0,1
+            do tau=0,1
+               fgg(sig,tau) = (qq*ql)**2*( tgg(sig,tau) + ugg(sig,tau) )
+               fzg(sig,tau) = 2d0*qq*ql*gq(sig)*gl(tau)
+     +                      * ( tzg(sig,tau) + uzg(sig,tau) )
+            enddo
+         enddo
 
-      if (qq.lt.0d0) then
-          fww(0,0) = tww(0,0)/4d0/sw4
-      else                    
-          fww(0,0) = uww(0,0)/4d0/sw4
+         box = zero
+
+         do sig=0,1
+            do tau=0,1
+               if (complexmasses) then
+                  box = box + 
+     +                 alpha*ph_alphaem*( 
+     +                 + fgg(sig,tau) + fzg(sig,tau) ) 
+     +                 *a(sig,tau)
+     +                 *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+               else
+                  box = box + 
+     +                 alpha*ph_alphaem*( 
+     +                 + fgg(sig,tau) + fzg(sig,tau) ) 
+     +                 *a(sig,tau)
+     +                 *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+               endif
+            enddo
+         enddo
+      else
+*
+** ZZ
+*
+         calculated0=.true.
+         call btpp(s*cone,t*cone,u*cone,mz2,mz2,zero,tzz(1,1))
+         tzz(0,0) = tzz(1,1) 
+
+         calculated0=.false.
+         call btpm(s*cone,t*cone,u*cone,mz2,mz2,zero,tzz(1,0))
+         tzz(0,1) = tzz(1,0) 
+
+         calculated0=.true.
+         call bupm(s*cone,t*cone,u*cone,mz2,mz2,zero,uzz(1,0))
+         uzz(0,1) = uzz(1,0) 
+
+         calculated0=.false.
+         call bupp(s*cone,t*cone,u*cone,mz2,mz2,zero,uzz(1,1))
+         uzz(0,0) = uzz(1,1) 
+*
+** WW
+*
+         tww(1,1) = zero
+         tww(0,1) = zero
+         tww(1,0) = zero
+
+         calculated0=.true.
+         if (qq.lt.0d0) then
+            call btpp(s*cone,t*cone,u*cone,mw2,mw2,mqbig2*cone,tww(0,0))
+         else
+            call bupp(s*cone,t*cone,u*cone,mw2,mw2,mqbig2*cone,uww(0,0))
+         endif
+
+*
+** gg
+*
+         calculated0=.true.
+         call btpmg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,0))
+         calculated0=.false.
+         call btppg(s*cone,t*cone,u*cone,mlep2*cone,zero,tgg(1,1))
+
+         tgg(0,1) = tgg(1,0) 
+         tgg(0,0) = tgg(1,1) 
+
+         calculated0=.true.
+         call buppg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,1))
+         calculated0=.false.
+         call bupmg(s*cone,t*cone,u*cone,mlep2*cone,zero,ugg(1,0))
+
+         ugg(0,1) = ugg(1,0) 
+         ugg(0,0) = ugg(1,1) 
+
+*
+** zg
+*
+         calculated0=.true.
+         call btpmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,0))
+         calculated0=.false.
+         call btppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,tzg(1,1))
+
+         tzg(0,1) = tzg(1,0) 
+         tzg(0,0) = tzg(1,1) 
+
+         calculated0=.true.
+         call buppgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,1))
+         calculated0=.false.
+         call bupmgz(s*cone,t*cone,u*cone,mz2,mlep2*cone,zero,uzg(1,0))
+
+         uzg(0,1) = uzg(1,0) 
+         uzg(0,0) = uzg(1,1) 
+*
+**
+*
+         fww(1,1) = zero
+         fww(0,1) = zero
+         fww(1,0) = zero
+
+         if (qq.lt.0d0) then
+            fww(0,0) = tww(0,0)/4d0/sw4
+         else                    
+            fww(0,0) = uww(0,0)/4d0/sw4
+         endif
+*
+**
+*
+         do sig=0,1
+            do tau=0,1
+               fzz(sig,tau) = (gq(sig)*gl(tau))**2
+     +                      * ( tzz(sig,tau) + uzz(sig,tau) )
+               fgg(sig,tau) = (qq*ql)**2*( tgg(sig,tau) + ugg(sig,tau) )
+
+               fzg(sig,tau) = 2d0*qq*ql*gq(sig)*gl(tau)
+     +                      * ( tzg(sig,tau) + uzg(sig,tau) )
+            enddo
+         enddo
+
+         box = zero
+
+         do sig=0,1
+            do tau=0,1
+               if (complexmasses) then
+                  box = box + 
+     +                 alpha*ph_alphaem*( 
+     +                 + fww(sig,tau) + fzz(sig,tau) 
+     +                 + fgg(sig,tau) + fzg(sig,tau) ) 
+     +                 *a(sig,tau)
+     +                 *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+               else
+                  box = box + 
+     +                 alpha*ph_alphaem*( 
+     +                 + fww(sig,tau) + fzz(sig,tau) 
+     +                 + fgg(sig,tau) + fzg(sig,tau) ) 
+     +                 *a(sig,tau)
+     +                 *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+               endif
+            enddo
+         enddo
       endif
-*
-**
-*
-      do sig=0,1
-          do tau=0,1
-              fzz(sig,tau) = (gq(sig)*gl(tau))**2
-     +                                 *( tzz(sig,tau) + uzz(sig,tau) )
-              fgg(sig,tau) = (qq*ql)**2*( tgg(sig,tau) + ugg(sig,tau) )
-
-              fzg(sig,tau) = 2d0*qq*ql*gq(sig)*gl(tau)
-     +                                 *( tzg(sig,tau) + uzg(sig,tau) )
-          enddo
-      enddo
-
-      box = zero
-
-      do sig=0,1
-          do tau=0,1
-          if (complexmasses) then
-              box = box + 
-     +                    alpha*ph_alphaem*( 
-     +                      + fww(sig,tau) + fzz(sig,tau) 
-     +                      + fgg(sig,tau) + fzg(sig,tau) ) 
-     +                    *a(sig,tau)
-     +                    *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
-          else
-              box = box + 
-     +                    alpha*ph_alphaem*( 
-     +                      + fww(sig,tau) + fzz(sig,tau) 
-     +                      + fgg(sig,tau) + fzg(sig,tau) ) 
-     +                    *a(sig,tau)
-     +                    *conjg(a(sig,tau))*conjg(bornamp(sig,tau))
-          endif
-          enddo
-      enddo
 
       end subroutine deltabox
 *
@@ -1552,6 +1708,9 @@ c$$$      end
 *
       complex*16 b1dsmfmg,b1dsmfmz,b1dsmfmh,b1dsmfpmw
 *
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+*
       if(abs(qf).lt.epsilon) then
 
           b1dsmfmg = zero
@@ -1568,12 +1727,17 @@ c$$$      end
 
       sch= 1.d0
       if(abs(mf2).lt.1.d-30) sch= 0.d0
-      sfrout  = - alsu4pi * (  
+
+      if(flg_QEDonly) then
+         sfrout  = - alsu4pi * ( qf**2 * (2.d0*b1dsmfmg + cone*sch) )
+      else
+         sfrout  = - alsu4pi * (  
      +               qf**2 * (2.d0*b1dsmfmg + cone*sch) 
      +             + gfp**2 * (2.d0*b1dsmfmz + cone)
      +             + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
      +             + 0.5d0/sw2*sqrt(mf2)*sqrt(mfp2)/mw2*b1dsmfpmw  
-     +          )
+     +           )
+      endif
 
       end subroutine sigmafr
 *
@@ -1591,6 +1755,9 @@ c$$$      end
 *
       complex*16 b1dsmfmg,b1dsmfmz,b1dsmfmh,b1dsmfpmw
 *
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+*
       if(abs(qf).lt.epsilon) then
       ! terms only multiplied by qf
           b1dsmfmg = zero
@@ -1607,12 +1774,17 @@ c$$$      end
 
       sch= 1.d0
       if(abs(mf2).lt.1.d-30) sch= 0.d0
-      sflout  = - alsu4pi * (   
+
+      if(flg_QEDonly) then
+         sflout  = - alsu4pi * ( qf**2 * (2.d0*b1dsmfmg + cone*sch) )
+      else
+         sflout  = - alsu4pi * (   
      +               qf**2 * (2.d0*b1dsmfmg + cone*sch) 
      +             + gfm**2 * (2.d0*b1dsmfmz + cone)
      +             + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
      +             + 0.5d0/sw2*((2.d0*cone+mfp2/mw2)*b1dsmfpmw+cone)  
-     +            )
+     +           )
+      endif
 
       end subroutine sigmafl
 *
@@ -1630,8 +1802,10 @@ c$$$      end
       complex*16 qf,gfm,gfp,mf2,mfp2,s
       complex*16 sflpout
 *
-
       complex*16 b1pdsmfmg,b1pdsmfmz,b1pdsmfmh,b1pdsmfpmw
+*
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
 *
       if (abs(qf).lt.epsilon) then
       ! terms only multiplied by qf
@@ -1647,12 +1821,16 @@ c$$$      end
       call b1preg(s*cone,mf2*cone,mh2,b1pdsmfmh)
       call b1preg(s*cone,mfp2*cone,mw2,b1pdsmfpmw)
 
-      sflpout  = - alsu4pi * ( 
+      if(flg_QEDonly) then
+         sflpout  = - alsu4pi * ( qf**2  * (2.d0*b1pdsmfmg) )
+      else
+         sflpout  = - alsu4pi * ( 
      +                qf**2  * (2.d0*b1pdsmfmg) 
      +              + gfm**2 * (2.d0*b1pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b1pdsmfmz + b1pdsmfmh)
      +              + 0.5d0/sw2*(2.d0*cone+mfp2/mw2)*b1pdsmfpmw 
      +            )
+      endif
 
       end subroutine sigmaflp
 *
@@ -1668,8 +1846,10 @@ c$$$      end
       complex*16 qf,gfm,gfp,mf2,mfp2,s
       complex*16 sfrpout
 *      
-
       complex*16 b1pdsmfmg,b1pdsmfmz,b1pdsmfmh,b1pdsmfpmw
+*
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
 *
       if (abs(qf).lt.epsilon) then
       ! terms only multiplied by qf
@@ -1685,12 +1865,16 @@ c$$$      end
       call b1preg(s*cone,mf2*cone,mh2,b1pdsmfmh)
       call b1preg(s*cone,mfp2*cone,mw2,b1pdsmfpmw)
 
-      sfrpout  = - alsu4pi * (
+      if(flg_QEDonly) then
+         sfrpout  = - alsu4pi * ( qf**2 * (2.d0*b1pdsmfmg) )
+      else
+         sfrpout  = - alsu4pi * (
      +                qf**2 * (2.d0*b1pdsmfmg) 
      +              + gfp**2 * (2.d0*b1pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b1pdsmfmz + b1pdsmfmh)
      +              + 0.5d0/sw2*mfp2/mw2*b1pdsmfpmw 
-     +         )
+     +            )
+      endif
 
       end subroutine sigmafrp
 *
@@ -1708,6 +1892,9 @@ c$$$      end
 *
       complex*16 b0pdsmfmg,b0pdsmfmz,b0pdsmfmh,b0pdsmfpmw
 *
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
+*
       if (abs(qf).lt.epsilon) then
       ! terms only multiplied by qf
           b0pdsmfmg   = zero
@@ -1722,12 +1909,16 @@ c$$$      end
       call b0preg(s*cone,mf2*cone,mh2,b0pdsmfmh)
       call b0preg(s*cone,mfp2*cone,mw2,b0pdsmfpmw)
 
-      sfspout  = - alsu4pi * ( 
+      if(flg_QEDonly) then
+         sfspout  = - alsu4pi * ( qf**2 * 4.d0*b0pdsmfmg )
+      else
+         sfspout  = - alsu4pi * ( 
      +                qf**2 * 4.d0*b0pdsmfmg 
      +              + gfp*gfm * (4.d0*b0pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b0pdsmfmz - b0pdsmfmh)
      +              + 0.5d0/sw2*mfp2/mw2*b0pdsmfpmw 
-     +      )
+     +            )
+      endif
 
       end subroutine sigmafsp
 *

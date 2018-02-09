@@ -25,6 +25,8 @@ c     lepton masses
       common/showerqed/kt2minqed
       logical ifphotoninduced
       integer phind
+      logical flg_QEDonly,flg_weakonly
+      common/split_ew/flg_QEDonly,flg_weakonly
 
 c Must include photon!
       pdf_nparton = 22
@@ -33,6 +35,16 @@ c Must include photon!
          flg_with_em = .false.
       else
          flg_with_em = .true.
+         if(powheginput("#QED-only").eq.1) then
+            flg_QEDonly = .true.
+         else
+            flg_QEDonly = .false.
+         endif
+         if(powheginput("#weak-only").eq.1) then
+            flg_weakonly = .true.
+         else
+            flg_weakonly = .false.
+         endif
       endif
 
       if(powheginput("#no_strong").eq.1) then
