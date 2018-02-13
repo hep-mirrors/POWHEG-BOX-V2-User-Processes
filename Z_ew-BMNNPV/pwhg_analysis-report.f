@@ -73,7 +73,12 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
       call bookupeqbins('a6',1d0,0d0,100d0)
       call bookupeqbins('a7',1d0,0d0,100d0)
 
-
+      call bookupeqbins('ptgamma_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgamma_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_cut',0.2d0,-7d0,3d0)
       end
      
       subroutine analysis(dsig)
@@ -93,6 +98,7 @@ c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
       data WHCPRG/'PYTHIA'/
+c      data WHCPRG/'NLO   '/
       real * 8 pz(4),pl1(4),pl2(4)
       real * 8 pl103(0:3),pl203(0:3)
       real * 8 y1,eta1,ptl1,m1
@@ -113,13 +119,16 @@ c     we need to tell to this analysis file which program is running it
       external cstar,phistar_report
       logical pwhg_isfinite
       external pwhg_isfinite
-      integer nlep,nl2,ngamma
+      integer nl1,nl2,ngamma
       integer mu,nu,jl2,il2,igam,jgam,gam,il1,jl1,lep
-      real*8 lep1vec(maxnumlep),lep2vec(maxnumlep),gammavec(maxphot)
+      integer lep1vec(maxnumlep),lep2vec(maxnumlep),gammavec(maxphot)
       real*8 p_gamma(0:3)
       real*8 pt_lep2,pt_lep2_max
       real*8 pt_lep1,pt_lep_max
       real*8 pt_gamma,pt_gamma_max
+      real*8 logptgamma,logptgammamax
+      real*8 logptrel,tmpptrel,tmp1ptrel,tmp2ptrel
+      integer tmp,ntmp,ngammaup
 c spin correlation observables
       real * 8 aspincor(0:7),lcos,genphi
       logical ini
@@ -142,106 +151,122 @@ c spin correlation observables
 
       vdecaytemp=lprup(1)-10000 ! Z decay product, with positive id
 
+      nl1=0
+      nl2=0
+      ngamma= 0
+      do i=1,maxnumlep
+         lep1vec(i) = 0
+         lep2vec(i) = 0
+      enddo
+      maxnumg=maxphot
+      do i=1,maxnumg
+         gammavec(i) = 0
+      enddo
+
+*
       IF(WHCPRG.ne.'PYTHIA') then
          do ihep=1,nhep
 c p_Z = p_l1 + p_l2
-            if( idhep(ihep).eq.vdecaytemp  ) then
-               if (phep(4,ihep).gt.pl1(4)) pl1 = phep(1:4,ihep)
+            if(idhep(ihep).eq.-vdecaytemp) then
+C     with a antilepton
+               nl2=nl2+1
+               lep2vec(nl2)=ihep
+            elseif(idhep(ihep).eq.vdecaytemp) then
+c     with a lepton
+               nl1=nl1+1
+               lep1vec(nl1)=ihep
+            elseif( idhep(ihep).eq.22 ) then
+               ngamma=ngamma+1
+               gammavec(ngamma)=ihep
             endif
-            if( idhep(ihep).eq.-vdecaytemp ) then
-               if (phep(4,ihep).gt.pl2(4)) pl2 = phep(1:4,ihep)
-            endif
-            pz = pl1 + pl2
-c            if( idhep(ihep).eq.22 ) then 
-c               if (phep(4,ihep).gt.10d0)then
-c                  nphot = nphot + 1
-c                  pg(1:4,nphot) = phep(1:4,ihep)
-c               endif
-c            endif
          enddo
       ELSE
-         nlep=0
-         nl2=0
-         ngamma=0
-         do i=1,maxnumlep
-            lep1vec(i) = 0
-            lep2vec(i) = 0
-         enddo
-         maxnumg=maxphot
-         do i=1,maxphot
-            gammavec(i) = 0
-         enddo
          do ihep=1,nhep
             if(isthep(ihep).eq.1) then
 C     Scan over final state particle and record the entries
-                 if(idhep(ihep).eq.-vdecaytemp) then
-C     with a neutrino
+               if(idhep(ihep).eq.-vdecaytemp) then
+C     with an antilepton
                   nl2=nl2+1
                   lep2vec(nl2)=ihep
                elseif(idhep(ihep).eq.vdecaytemp) then
 c     with a lepton
-                  nlep=nlep+1
-                  lep1vec(nlep)=ihep
+                  nl1=nl1+1
+                  lep1vec(nl1)=ihep
                elseif(idhep(ihep).eq.22) then
 C     with a gamma
-                  ngamma=ngamma+1
-                  gammavec(ngamma)=ihep
+                  ntmp= 0
+                  tmp= ihep
+                  if(jmohep(1,tmp).le.0) then
+                     print*,'jmohep(1,tmp)= ',jmohep(1,tmp)
+                  endif
+c
+c this is to avoid photons from meson and baryon  decays
+c
+                  if(abs(idhep(jmohep(1,tmp))).gt.100) then
+                     goto 1221
+                  endif
+ 1220             if(tmp.gt.0) then
+                     if(idhep(jmohep(1,tmp)).eq.23.and.
+     +                  jmohep(1,tmp).lt.7) then
+                        ntmp= ntmp+1
+                     elseif(abs(idhep(jmohep(1,tmp))).lt.6) then
+                        ntmp= ntmp+1
+                     else
+                        tmp= jmohep(1,tmp)
+                        go to 1220
+                     endif
+                     if(ntmp.gt.0) then
+                        ngamma=ngamma+1
+                        gammavec(ngamma)=ihep
+                     endif
+                  endif
+ 1221             continue
                endif
             endif
          enddo
+      ENDIF
 
-         if(nlep.eq.0.or.nl2.eq.0) then
+      if(nl1.eq.0.or.nl2.eq.0) then
 c            write(*,*)" not enough leptons or gamma! drop event"
 c            call exit(1)
-            return
+         return
+      endif
+
+c hardest antilepton
+      pt_lep2_max=0d0
+      jl2=0
+      do nu=1,nl2
+         il2=lep2vec(nu)
+         pt_lep2=sqrt(phep(1,il2)**2 + phep(2,il2)**2)
+         if (pt_lep2.gt.pt_lep2_max) then
+            jl2 = il2
+            pt_lep2_max = pt_lep2
          endif
-c hardest neutrino
-         pt_lep2_max=0d0
-         jl2=0
-         do nu=1,nl2
-            il2=lep2vec(nu)
-            pt_lep2=sqrt(phep(1,il2)**2 + phep(2,il2)**2)
-            if (pt_lep2.gt.pt_lep2_max) then
-               jl2 = il2
-               pt_lep2_max = pt_lep2
-            endif
-         enddo
+      enddo
 c hardest lepton
-         pt_lep_max=0d0
-         jl1=0
-         do lep=1,nlep
-            il1=lep1vec(lep)
-            pt_lep1=sqrt(phep(1,il1)**2 + phep(2,il1)**2)
-            if (pt_lep1.gt.pt_lep_max) then
-               jl1 = il1
-               pt_lep_max = pt_lep1
-            endif
-         enddo
-         pt_gamma_max= 0.d0
-         jgam=0
-         do gam=1,ngamma
-            igam=gammavec(gam)
-            pt_gamma=sqrt(phep(1,il1)**2 + phep(2,il1)**2)
-            if (pt_gamma.gt.pt_gamma_max) then
-               jgam = igam
-               pt_gamma_max = pt_gamma
-            endif
-         enddo
-         pl1 = phep(1:4,jl1)
-         pl2 = phep(1:4,jl2)
-         pz = pl1 + pl2
-c            if( idhep(ihep).eq.22.and.isthep(ihep).eq.1) then 
-c               if (phep(4,ihep).gt.10d0)then
-c                  nphot = nphot + 1
-c                  pg(1:4,nphot) = phep(1:4,ihep)
-c               endif
-c            p_gamma(0)=phep(4,igam)
-c            do mu=1,3
-c               p_gamma(mu)=phep(mu,igam)
-c            enddo
-c            endif
-c         enddo
-      ENDIF
+      pt_lep_max=0d0
+      jl1=0
+      do lep=1,nl1
+         il1=lep1vec(lep)
+         pt_lep1=sqrt(phep(1,il1)**2 + phep(2,il1)**2)
+         if (pt_lep1.gt.pt_lep_max) then
+            jl1 = il1
+            pt_lep_max = pt_lep1
+         endif
+      enddo
+      pt_gamma_max= 0.d0
+      jgam=0
+      do gam=1,ngamma
+         igam=gammavec(gam)
+         pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+         if (pt_gamma.gt.pt_gamma_max) then
+            jgam = igam
+            pt_gamma_max = pt_gamma
+         endif
+      enddo
+      pl1 = phep(1:4,jl1)
+      pl2 = phep(1:4,jl2)
+      pz = pl1 + pl2
 
       pl103(0)=pl1(4)
       pl103(1:3)=pl1(1:3)
@@ -261,19 +286,32 @@ c         enddo
       cs = cstar(pl1,pl2)
 
       phistar = phistar_report(pl2,pl1)   !pl2 is the negatively charged lepton
-c      print*,'dsig= ',dsig
 
       call filld('total',0d0,dsig)
 
+      if(ngamma.gt.0) then
+         do gam=1,ngamma
+            igam=gammavec(gam)
+            pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+            logptgamma= log(pt_gamma)/log(10.d0)
+            call filld('ptgamma_nocut',logptgamma,dsig)
+c     FSR ptrel (minimum pt between photon and leptpons)
+            p_gamma(1:3)=phep(1:3,igam)
+            p_gamma(0)=phep(4,igam)
+            call get_ptrelFSR(p_gamma,pl103,tmp1ptrel)
+            call get_ptrelFSR(p_gamma,pl203,tmp2ptrel)
+            tmpptrel= min(tmp1ptrel,tmp2ptrel)
+            logptrel= log(tmpptrel)/log(10.d0)
+            call filld('ptrel_gamma-lep_nocut',logptrel,dsig)
+         enddo
+         logptgammamax= log(pt_gamma_max)/log(10.d0)
+         call filld('ptgammamax_nocut',logptgammamax,dsig)
+      endif
+      
       if(getpt(pl1).gt.25.and.abs(geteta(pl1))<2.5d0.and.
      1   getpt(pl2).gt.25.and.abs(geteta(pl2))<2.5d0.and.
      2   m.gt.50) then
          call filld('totalcut',0d0,dsig)
-c         print*,'dsigcut= ',dsig
-
-
-c      call filld('Nphot',dble(nphot),dsig)
-
 c lepton 1
          call filld('l1_y',    y1, dsig)
          call filld('l1_eta',eta1, dsig)
@@ -309,7 +347,24 @@ c transverse mass of the lep1-lep2 system
          endif
          call filld('phistar_report',phistar,dsig)
 
-c      print*,'mtv= ',mtv,'    dsig= ',dsig
+         if(ngamma.gt.0) then
+            do gam=1,ngamma
+               igam=gammavec(gam)
+               pt_gamma=sqrt(phep(1,igam)**2 + phep(2,igam)**2)
+               logptgamma= log(pt_gamma)/log(10.d0)
+               call filld('ptgamma_cut',logptgamma,dsig)
+c     FSR ptrel (minimum pt between photon and leptons)
+               p_gamma(1:3)=phep(1:3,igam)
+               p_gamma(0)=phep(4,igam)
+               call get_ptrelFSR(p_gamma,pl103,tmp1ptrel)
+               call get_ptrelFSR(p_gamma,pl203,tmp2ptrel)
+               tmpptrel= min(tmp1ptrel,tmp2ptrel)
+               logptrel= log(tmpptrel)/log(10.d0)
+               call filld('ptrel_gamma-lep_cut',logptrel,dsig)
+            enddo
+            logptgammamax= log(pt_gamma_max)/log(10.d0)
+            call filld('ptgammamax_cut',logptgammamax,dsig)
+         endif
       endif
 
 
