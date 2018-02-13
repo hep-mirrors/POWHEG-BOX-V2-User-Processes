@@ -157,7 +157,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	pwhg_analysis_driver.o checkmomzero.o		\
 	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
 	sigcollsoft.o sigvirtual.o reshufflemoms.o \
-        setlocalscales.o validflav.o mint_upb.o  \
+        setlocalscales.o validflav.o mint_upb.o scalupveto.o \
 	pwhgreweight.o opencount.o ubprojections.o lhefread.o pwhg_io_interface.o \
 	rwl_weightlists.o rwl_setup_param_weights.o $(PDFPACK) $(USER) $(FPEOBJ) 
 
