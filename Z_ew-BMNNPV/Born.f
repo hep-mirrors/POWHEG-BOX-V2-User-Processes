@@ -3,6 +3,9 @@
       include 'pwhg_math.h'
       include 'nlegborn.h'
       include 'pwhg_flst.h'
+      include 'pwhg_flg.h'
+      include 'strongcorr.h'
+      include 'pwhg_st.h'
       integer nlegs
       parameter (nlegs=nlegborn)
       real * 8 p(0:3,nlegs),bornjk(nlegs,nlegs)
@@ -10,8 +13,11 @@
       real * 8 bmunu(0:3,0:3,nlegs),bbmunu(0:3,0:3),born,colcf
       integer j,k,mu,nu
 c Colour factors for colour-correlated Born amplitudes;
-c Rule from 2.98 in FNO2007, leads to B_i j=B* C_i
-
+c     Rule from 2.98 in FNO2007, leads to B_i j=B* C_i
+      real*8 virtual
+      logical dyqedonly,dyweakonly
+      common/split_ew/dyqedonly,dyweakonly
+      
       call compborn(p,bflav,born,bbmunu)
 
       do j=1,nlegs
@@ -37,6 +43,12 @@ c Rule from 2.98 in FNO2007, leads to B_i j=B* C_i
             bornjk(k,j)=bornjk(j,k)
          enddo
       enddo
+
+      if(flg_LOevents.and.dyweakonly.and..not.strongcorr) then ! add the weak virtual directly to the LO
+         call setvirtual(p,bflav,virtual) ! the factor( 4 Pi )^eps/Gamma(1-eps) here is irrelevant
+         ! since it does not multiply any pole in 1/eps
+         born=born+virtual*st_alpha/(2d0*pi) ! remove  the normalization of the NLO machinery
+      endif
       end
 
 

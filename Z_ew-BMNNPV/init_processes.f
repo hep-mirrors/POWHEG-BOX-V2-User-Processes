@@ -25,8 +25,8 @@ c     lepton masses
       common/showerqed/kt2minqed
       logical ifphotoninduced
       integer phind
-      logical flg_QEDonly,flg_weakonly
-      common/split_ew/flg_QEDonly,flg_weakonly
+      logical dyqedonly,dyweakonly
+      common/split_ew/dyqedonly,dyweakonly
 
 c Must include photon!
       pdf_nparton = 22
@@ -36,15 +36,21 @@ c Must include photon!
       else
          flg_with_em = .true.
          if(powheginput("#QED-only").eq.1) then
-            flg_QEDonly = .true.
+            dyqedonly = .true.
          else
-            flg_QEDonly = .false.
+            dyqedonly = .false.
          endif
          if(powheginput("#weak-only").eq.1) then
-            flg_weakonly = .true.
+            dyweakonly = .true.
+            flg_with_em = .false.
          else
-            flg_weakonly = .false.
+            dyweakonly = .false.
          endif
+      endif
+
+      if(dyweakonly.and.dyqedonly) then
+         write(*,*)'dyweakonly.and.dyqedonly both .true. not allowed'
+         stop
       endif
 
       if(powheginput("#no_strong").eq.1) then
@@ -53,6 +59,15 @@ c Must include photon!
          strongcorr = .true.
       endif
 
+      if(dyweakonly.and..not.strongcorr) then
+         if(.not.flg_LOevents) then
+            write(*,*)'if you ask for the virtual weak '//
+     +           ' corrections only (without QCD) please'//
+     +           ' use the flag LOevents'
+            stop
+         endif
+      endif
+      
 c******************************************************
 c     Choose the process to be implemented
 c******************************************************
