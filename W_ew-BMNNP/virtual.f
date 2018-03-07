@@ -102,10 +102,7 @@ c$$$      end
 *
       real*8 dotp
       external dotp
-
-      real * 8 chargeofparticle
-      external chargeofparticle
-*
+*     
       real*8 s,t,u
       complex*16 delww  
       complex*16 delwdu 

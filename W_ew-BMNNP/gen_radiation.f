@@ -23,6 +23,8 @@
       integer lh_seed,lh_n1,lh_n2
       common/lhseeds/lh_seed,lh_n1,lh_n2
       logical notfinite_kin
+      real *8 kt2minqed
+      common/showerqed/kt2minqed
 c.....the double rad variables should be set here otherwise
 c.....they are wrong in remnant events
       real*8 mc_tmaxisr,mc_tmaxfsr
@@ -127,7 +129,13 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          call add_azimuth
          if(iret.eq.1) then
 c     set st_muren2 equal to pt2 for scalup value
-            rad_pt2max=max(rad_ptsqmin,pwhg_pt2())
+c.....mauro-fixed-for DY
+            if(flst_emitter(rad_realalr).le.2) then ! use the qcd/isr ptmin
+               rad_pt2max=max(rad_ptsqmin,pwhg_pt2())
+            else
+               rad_pt2max=max(kt2minqed,pwhg_pt2()) ! in DY this is only QED
+            endif
+c.....mauro-fixed-for DY                        
             call set_rad_scales(rad_pt2max)
             call gen_leshouches
 c     rad_type=2 for remnants
