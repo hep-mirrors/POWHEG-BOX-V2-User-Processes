@@ -27,8 +27,8 @@ c.....mauro-pair e
       real*16 dotp16
       external dotp16
       
-      real*8 chargeofparticle
-      external chargeofparticle
+      real*8 chargeofparticle_local
+      external chargeofparticle_local
 
       complex*32 e32_
       external e32_
@@ -60,8 +60,8 @@ c.....mauro-pair e
       ml2 = mlep2*1.q0
       ml4 = ml2*ml2
 
-      qq = chargeofparticle(fermion_flav(1))
-      ql = chargeofparticle(fermion_flav(3))
+      qq = chargeofparticle_local(fermion_flav(1))
+      ql = chargeofparticle_local(fermion_flav(3))
 
       qq2 = qq**2*1.q0
       ql2 = ql**2*1.q0

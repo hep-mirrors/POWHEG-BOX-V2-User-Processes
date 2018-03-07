@@ -7,7 +7,7 @@ CXX=g++
 # Choose PDF: native,lhapdf
 # LHAPDF package has to be installed separately
 #PDF = lhapdf
-PDF = native
+PDF = lhapdf
 # Choose Analysis: none, default
 # default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=default
@@ -104,7 +104,8 @@ FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
 ifeq ("$(PDF)","lhapdf")
-LHAPDF_CONFIG=lhapdf-config
+#LHAPDF_CONFIG=lhapdf-config
+LHAPDF_CONFIG=/home/fulvio/mauro/miopdf/bin/lhapdf-config
 PDFPACK=lhapdf6if.o lhapdf6ifcc.o
 FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF -lstdc++
@@ -166,7 +167,7 @@ LIBS+=-lz
 # Main POWHEG target
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
-     real.o real16.o $(PWHGANAL)
+     real.o real16.o local.o $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
@@ -186,7 +187,7 @@ pwhg_main:$(PWHG)
 
 
 # Target to analyze LHEF events
-LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
+LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	scalupveto.o	\
      opencount.o powheginput.o $(PWHGANAL)	\
      lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o bra_ket_subroutines.o  $(FPEOBJ)
 lhef_analysis:$(LHEF)

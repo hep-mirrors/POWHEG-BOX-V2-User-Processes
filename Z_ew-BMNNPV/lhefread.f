@@ -1,5 +1,5 @@
 c...lhefheader(nlf)
-c...reads initialization information from a les houches events file on unit nlf. 
+c...reads initialization information from a les houches events file on unit nlf.
       subroutine lhefreadhdr(nlf)
       implicit none
       integer nlf
@@ -41,14 +41,14 @@ c     one. The old handling is only supported by the pwhgreweight.f routines.
  999  end
 
 
-c...reads event information from a les houches events file on unit nlf. 
+c...reads event information from a les houches events file on unit nlf.
       subroutine lhefreadev(nlf)
       implicit none
       integer nlf
       character * 200 string
       include 'LesHouches.h'
       integer i,j,iret
-      
+
  1    continue
       string=' '
       call pwhg_io_read(nlf,string,iret)
@@ -91,7 +91,7 @@ c no event found:
       return
  998  continue
       print *,"read </LesHouchesEvents>"
-      nup=0      
+      nup=0
  999  end
 
 
@@ -113,8 +113,8 @@ c no event found:
       real * 8 value
       logical lhweights
 c.....mauro
-      character*1 tag1,reftag1
-      parameter(reftag1='#')
+      character*9 tag1,reftag1
+      parameter(reftag1='#matching')
       real *8 kt2minqed
       common/showerqed/kt2minqed
       real*8 tmp_isr_scale,tmp_fsr_scale
@@ -130,7 +130,7 @@ c.....mauro
      +     mc_csiisr,mc_yisr,mc_aziisr,
      +     mc_csifsr,mc_yfsr,mc_azifsr,
      +     mc_dlberad
-c.....mauro      
+c.....mauro
       iret = 0
       weights_num = 0
  1    continue
@@ -138,18 +138,18 @@ c.....mauro
       call pwhg_io_read(nlf,string,iret)
       if(iret /= 0) goto 998
       string = adjustl(string)
+c     EB: moved outside, to support LHEF with multiple weights;
+c     See lhefread.f and comments therein.
+c.....mauro-mod
+      if(string(1:9).eq.'#matching') then
+         mc_dlberad=.false.
+         if(nup.eq.7) mc_dlberad=.true.
+         read(string,*)tag1,mc_isr_scale,mc_fsr_scale
+      endif
+c.....mauro-mod
       if(string(1:5).eq.'#rwgt') then
          read(string(6:),*) rwl_type,
      $        rwl_index,rwl_weight,rwl_seed,rwl_n1,rwl_n2
-c.....mauro-mod
-         mc_dlberad=.false.
-         if(nup.eq.7) mc_dlberad=.true.
-         string=' '
-         call pwhg_io_read(nlf,string,iret)
-         if(iret /=0 ) goto 998
-         read(string,*)tag1,mc_isr_scale,mc_fsr_scale
-
-c.....mauro-mod         
       endif
       if(string(1:6).eq.'<rwgt>' .or. string(1:9).eq.'<weights>') then
 c     this routine is reached only if flg_rwl_add is true, from the main program,
@@ -157,7 +157,7 @@ c     or from the analysis routines. Thus we only enforce the new weight info
 c     apparatus. The old apparatus is used only in lhefreadevlhrwgt.
          call pwhg_io_backspace(nlf)
          call rwl_loadweights(nlf,iret)
-c on a return with iret != 0 the event will be skipped 
+c on a return with iret != 0 the event will be skipped
          if(iret.ne.0) return
          goto 1
       endif
@@ -165,7 +165,7 @@ c on a return with iret != 0 the event will be skipped
          call pwhg_io_backspace(nlf)
          return
       endif
-c Look for old new weight format:
+c     Look for old new weight format:
       if(string(1:11).eq.'#new weight') then
          if(weights_num.eq.weights_max) then
             write(*,*) ' too many weights!'
@@ -277,7 +277,7 @@ c$$$c      write(*,*) string
          return
       else
          lhrwgt_nheader = lhrwgt_nheader + 1
-         lhrwgt_header(lhrwgt_nheader) = string         
+         lhrwgt_header(lhrwgt_nheader) = string
          read(iun,'(a)') string
          goto 2
       endif
@@ -300,7 +300,7 @@ c$$$
 c should read in the weight information in the Les Houches file header
 c should add the group with the NNLOPS reweighting
       include 'pwhg_lhrwgt.h'
-c Go through the header, fill the 
+c Go through the header, fill the
 c group with no name must be there
       lhrwgt_ngroups = 1
       lhrwgt_nids = 0
@@ -315,7 +315,7 @@ c group with no name must be there
 c should read in the weight information in the Les Houches file header
 c should add the group with the NNLOPS reweighting
       include 'pwhg_lhrwgt.h'
-c Go through the header, fill the 
+c Go through the header, fill the
       integer jgroup
       character * 100 values(2),token,string
       logical ini_next_header_token
@@ -391,7 +391,7 @@ c get string up to </weight>
 
 
 
-     
+
       subroutine get_values_from_words(words,values)
       implicit none
       character *(*) words, values(*)

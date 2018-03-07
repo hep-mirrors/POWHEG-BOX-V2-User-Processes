@@ -1,5 +1,5 @@
 c...lhefheader(nlf)
-c...writes initialization information to a les houches events file on unit nlf. 
+c...writes initialization information to a les houches events file on unit nlf.
       subroutine lhefwritehdr(nlf)
       implicit none
       include 'nlegborn.h'
@@ -71,7 +71,7 @@ c useful for debugging
       end
 
 c...lhefeader(nlf)
-c...writes event information to a les houches events file on unit nlf. 
+c...writes event information to a les houches events file on unit nlf.
       subroutine lhefwritev(nlf)
       implicit none
       integer nlf
@@ -112,6 +112,12 @@ c      write(nlf,'(a)')'<event>'
      & vtimup(i),spinup(i)
          call  pwhg_io_write(nlf,trim(buffer))
  200  continue
+c     EB: moved _before_ the reweight block to avoid issues
+c     when multiple weights are present
+c.....mauro ! noe moved to io_write
+      write(buffer,230)'#matching ', mc_isr_scale,mc_fsr_scale   !sqrt(mc_tmaxfsr)
+      call  pwhg_io_write(nlf,trim(buffer))
+c.....mauro
       if(flg_reweight) then
          call lhefwriteevrw(nlf)
          if(flg_rwl) then
@@ -126,19 +132,15 @@ c            write(nlf,'(a)')'</rwgt>'
       endif
       if(flg_pdfreweight) call lhefwritepdfrw(nlf)
       if(flg_debug) call lhefwritextra(nlf)
-c.....mauro ! noe moved to io_write
-      write(buffer,230)'#', mc_isr_scale,mc_fsr_scale   !sqrt(mc_tmaxfsr)
-      call  pwhg_io_write(nlf,trim(buffer))
-c.....mauro
       call  pwhg_io_write(nlf,'</event>')
 c      write(nlf,'(a)')'</event>'
  210  format(1p,2(1x,i6),4(1x,e12.5))
  220  format(1p,i8,5(1x,i5),5(1x,e16.9),1x,e12.5,1x,e10.3)
- 230  format(A1,e16.9,e16.9)
+ 230  format(A10,e16.9,e16.9)
       end
 
 c...lheftrailer(nlf)
-c...writes trailer to a les houches events file on unit nlf. 
+c...writes trailer to a les houches events file on unit nlf.
       subroutine lhefwritetrailer(nlf)
       implicit none
       integer nlf,iran,n1ran,n2ran,iret

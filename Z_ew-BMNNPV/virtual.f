@@ -98,8 +98,8 @@ c$$$      end
       complex*16 flo
       external flo
 
-      real*8 chargeofparticle
-      external chargeofparticle
+      real*8 chargeofparticle_local
+      external chargeofparticle_local
 *
       real*8 mlep2
       common/leptmass/mlep2
@@ -129,7 +129,7 @@ c$$$      end
       save is_ew_ho
       complex*16 ewho
       
-      qq = chargeofparticle(flav(1))
+      qq = chargeofparticle_local(flav(1))
 
       if (qq.gt.0d0) then
           gq(1) = gu(1)
@@ -6263,8 +6263,8 @@ c.....mauro-h.o. b
       include 'pwhg_physpar.h'
       include 'pwhg_math.h'
       include 'PhysPars.h'
-      real*8 chargeofparticle
-      external chargeofparticle
+      real*8 chargeofparticle_local
+      external chargeofparticle_local
       integer flav(nlegborn)
       integer i1,i2
       complex*16 yu(0:1),yd(0:1),yl(0:1)
@@ -6354,7 +6354,7 @@ c               write(*,*)'bqld',bqld
          ini=1
       endif
 
-      qq = chargeofparticle(flav(1))
+      qq = chargeofparticle_local(flav(1))
 
       if (qq.gt.0d0) then
          do i1=0,1
