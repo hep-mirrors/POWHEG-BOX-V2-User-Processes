@@ -40,7 +40,7 @@ C
       sqrts = sqrt(kn_sbeams)
       
 c First determine virtualities of lepton pairs
-      smin=0d0
+      smin=0.001d0
       smax= sqrts**2
       z=xborn(1)
       xjac=1d0
