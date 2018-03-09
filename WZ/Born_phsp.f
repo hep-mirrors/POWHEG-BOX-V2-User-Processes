@@ -74,7 +74,7 @@ c wt is the Jacobian from z to s; we do ds/(2 pi), so provide
 c 2 pi
       xjac=xjac*wt/(2*pi)
       m56=sqrt(s)
-      smin=0
+      smin=0.001
       smax=(sqrts-m56)**2
       z=xborn(2)**4
       xjac=xjac*4*xborn(2)**3
