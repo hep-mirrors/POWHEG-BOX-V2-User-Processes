@@ -1,5 +1,6 @@
 module     p1_dg_hhd_abbrevd1h3
    use p1_dg_hhd_config, only: ki
+   use p1_dg_hhd_kinematics, only: epstensor
    use p1_dg_hhd_globalsh3
    implicit none
    private
@@ -21,7 +22,7 @@ contains
       abb1(3)=sqrt2**(-1)
       abb1(4)=es51**(-1)
       abb1(5)=spak1k2**(-1)
-      abb1(6)=abb1(1)*gHT*abb1(4)*abb1(3)*abb1(2)*i_*TR*c1*gHHH
+      abb1(6)=i_*gHT*gHHH*c1*TR*abb1(1)*abb1(2)*abb1(3)*abb1(4)
       abb1(7)=4.0_ki*spak1k5*spbk5k2**2*abb1(6)
       abb1(6)=16.0_ki*abb1(5)*abb1(6)
       R2d1=0.0_ki

@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d4h3l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity3d4h3l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity3d4h3l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -26,25 +26,27 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(8) :: acd4
+      complex(ki), dimension(9) :: acd4
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
       ninjaP1 = ninjaP(1)
       ninjaP2 = ninjaP(2)
-      acd4(1)=dotproduct(k1,ninjaE3)
+      acd4(1)=dotproduct(k2,ninjaE3)
       acd4(2)=dotproduct(ninjaE3,spvak2k5)
-      acd4(3)=abb4(9)
-      acd4(4)=dotproduct(k2,ninjaE3)
-      acd4(5)=dotproduct(ninjaE3,spvak2k1)
-      acd4(6)=abb4(7)
-      acd4(7)=acd4(1)-acd4(4)
-      acd4(7)=acd4(7)*acd4(3)
-      acd4(8)=acd4(6)*acd4(5)
-      acd4(7)=acd4(8)+acd4(7)
-      acd4(7)=acd4(2)*acd4(7)
+      acd4(3)=abb4(14)
+      acd4(4)=dotproduct(ninjaE3,spvak2k1)
+      acd4(5)=abb4(7)
+      acd4(6)=dotproduct(ninjaE3,spvak1k5)
+      acd4(7)=abb4(8)
+      acd4(8)=acd4(5)*acd4(2)
+      acd4(9)=acd4(7)*acd4(6)
+      acd4(8)=acd4(9)+acd4(8)
+      acd4(8)=acd4(4)*acd4(8)
+      acd4(9)=acd4(3)*acd4(1)*acd4(2)
+      acd4(8)=acd4(9)+acd4(8)
       brack(ninjaidxt2x0mu0)=0.0_ki
-      brack(ninjaidxt1x0mu0)=acd4(7)
+      brack(ninjaidxt1x0mu0)=acd4(8)
       brack(ninjaidxt1x1mu0)=0.0_ki
    end subroutine brack_21
 !---#] subroutine brack_21:
@@ -58,48 +60,51 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(22) :: acd4
+      complex(ki), dimension(25) :: acd4
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
       ninjaP1 = ninjaP(1)
       ninjaP2 = ninjaP(2)
-      acd4(1)=dotproduct(k1,ninjaA1)
+      acd4(1)=dotproduct(k2,ninjaA1)
       acd4(2)=dotproduct(ninjaE3,spvak2k5)
-      acd4(3)=abb4(9)
-      acd4(4)=dotproduct(k1,ninjaE3)
+      acd4(3)=abb4(14)
+      acd4(4)=dotproduct(k2,ninjaE3)
       acd4(5)=dotproduct(ninjaA1,spvak2k5)
-      acd4(6)=dotproduct(k2,ninjaA1)
-      acd4(7)=dotproduct(k2,ninjaE3)
-      acd4(8)=dotproduct(ninjaA1,spvak2k1)
-      acd4(9)=abb4(7)
+      acd4(6)=dotproduct(ninjaA1,spvak2k1)
+      acd4(7)=abb4(7)
+      acd4(8)=dotproduct(ninjaE3,spvak1k5)
+      acd4(9)=abb4(8)
       acd4(10)=dotproduct(ninjaE3,spvak2k1)
-      acd4(11)=dotproduct(k1,ninjaA0)
-      acd4(12)=dotproduct(ninjaA0,spvak2k5)
-      acd4(13)=dotproduct(k2,ninjaA0)
+      acd4(11)=dotproduct(ninjaA1,spvak1k5)
+      acd4(12)=dotproduct(k2,ninjaA0)
+      acd4(13)=dotproduct(ninjaA0,spvak2k5)
       acd4(14)=dotproduct(ninjaA0,ninjaE3)
-      acd4(15)=abb4(12)
+      acd4(15)=abb4(11)
       acd4(16)=dotproduct(ninjaA0,spvak2k1)
-      acd4(17)=-acd4(6)+acd4(1)
-      acd4(18)=acd4(2)*acd4(3)
-      acd4(17)=acd4(18)*acd4(17)
-      acd4(19)=acd4(4)-acd4(7)
-      acd4(19)=acd4(3)*acd4(19)
-      acd4(20)=acd4(10)*acd4(9)
-      acd4(19)=acd4(19)+acd4(20)
-      acd4(20)=acd4(5)*acd4(19)
-      acd4(21)=acd4(9)*acd4(2)
-      acd4(22)=acd4(8)*acd4(21)
-      acd4(17)=acd4(22)+acd4(20)+acd4(17)
-      acd4(20)=-acd4(13)+acd4(11)
-      acd4(18)=acd4(18)*acd4(20)
-      acd4(19)=acd4(12)*acd4(19)
-      acd4(20)=acd4(15)*acd4(14)
-      acd4(21)=acd4(16)*acd4(21)
-      acd4(18)=acd4(21)+2.0_ki*acd4(20)+acd4(19)+acd4(18)
+      acd4(17)=dotproduct(ninjaA0,spvak1k5)
+      acd4(18)=acd4(7)*acd4(2)
+      acd4(19)=acd4(8)*acd4(9)
+      acd4(18)=acd4(18)+acd4(19)
+      acd4(19)=acd4(6)*acd4(18)
+      acd4(20)=acd4(10)*acd4(7)
+      acd4(21)=acd4(4)*acd4(3)
+      acd4(20)=acd4(20)+acd4(21)
+      acd4(21)=acd4(5)*acd4(20)
+      acd4(22)=acd4(3)*acd4(2)
+      acd4(23)=acd4(1)*acd4(22)
+      acd4(24)=acd4(10)*acd4(9)
+      acd4(25)=acd4(11)*acd4(24)
+      acd4(19)=acd4(25)+acd4(23)+acd4(21)+acd4(19)
+      acd4(20)=acd4(13)*acd4(20)
+      acd4(18)=acd4(16)*acd4(18)
+      acd4(21)=acd4(12)*acd4(22)
+      acd4(22)=acd4(15)*acd4(14)
+      acd4(23)=acd4(17)*acd4(24)
+      acd4(18)=acd4(23)-2.0_ki*acd4(22)+acd4(21)+acd4(20)+acd4(18)
       brack(ninjaidxt0x0mu0)=acd4(18)
       brack(ninjaidxt0x0mu2)=0.0_ki
-      brack(ninjaidxt0x1mu0)=acd4(17)
+      brack(ninjaidxt0x1mu0)=acd4(19)
       brack(ninjaidxt0x2mu0)=0.0_ki
    end subroutine brack_22
 !---#] subroutine brack_22:

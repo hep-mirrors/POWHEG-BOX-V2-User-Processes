@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d33h0l1d
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity0d33h0l1d.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity0d33h0l1d.f90
    ! generator: buildfortran_d.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond, d => metric_tensor
@@ -13,7 +13,7 @@ module     p0_gg_hhg_d33h0l1d
    integer, private :: iv3
    integer, private :: iv4
    real(ki), dimension(4), private :: qshift
-   public :: derivative , reconstruct_d33
+   public :: derivative
 contains
 !---#[ function brack_1:
    pure function brack_1(Q, mu2) result(brack)
@@ -24,27 +24,18 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(15) :: acd33
+      complex(ki), dimension(8) :: acd33
       complex(ki) :: brack
-      acd33(1)=dotproduct(k1,qshift)
+      acd33(1)=dotproduct(qshift,qshift)
       acd33(2)=dotproduct(qshift,spvak2k5)
-      acd33(3)=abb33(12)
-      acd33(4)=dotproduct(qshift,qshift)
-      acd33(5)=abb33(11)
-      acd33(6)=dotproduct(qshift,spvak1k2)
-      acd33(7)=abb33(7)
-      acd33(8)=abb33(9)
-      acd33(9)=dotproduct(qshift,spvak1k5)
-      acd33(10)=abb33(16)
-      acd33(11)=abb33(10)
-      acd33(12)=-acd33(2)*acd33(7)
-      acd33(12)=acd33(12)+acd33(8)
-      acd33(12)=acd33(6)*acd33(12)
-      acd33(13)=acd33(9)*acd33(10)
-      acd33(14)=-acd33(4)*acd33(5)
-      acd33(15)=acd33(1)*acd33(3)
-      acd33(12)=acd33(15)+acd33(14)-acd33(11)+acd33(13)+acd33(12)
-      brack=acd33(12)*acd33(2)
+      acd33(3)=abb33(9)
+      acd33(4)=dotproduct(qshift,spvak1k2)
+      acd33(5)=abb33(7)
+      acd33(6)=abb33(8)
+      acd33(7)=-acd33(1)*acd33(3)
+      acd33(8)=-acd33(2)*acd33(4)*acd33(5)
+      acd33(7)=acd33(8)-acd33(6)+acd33(7)
+      brack=acd33(7)*acd33(2)
    end function brack_1
 !---#] function brack_1:
 !---#[ function brack_2:
@@ -56,41 +47,27 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(21) :: acd33
+      complex(ki), dimension(11) :: acd33
       complex(ki) :: brack
-      acd33(1)=k1(iv1)
+      acd33(1)=qshift(iv1)
       acd33(2)=dotproduct(qshift,spvak2k5)
-      acd33(3)=abb33(12)
-      acd33(4)=qshift(iv1)
-      acd33(5)=abb33(11)
-      acd33(6)=spvak2k5(iv1)
-      acd33(7)=dotproduct(k1,qshift)
-      acd33(8)=dotproduct(qshift,qshift)
-      acd33(9)=dotproduct(qshift,spvak1k2)
-      acd33(10)=abb33(7)
-      acd33(11)=abb33(9)
-      acd33(12)=dotproduct(qshift,spvak1k5)
-      acd33(13)=abb33(16)
-      acd33(14)=abb33(10)
-      acd33(15)=spvak1k2(iv1)
-      acd33(16)=spvak1k5(iv1)
-      acd33(17)=acd33(6)*acd33(9)
-      acd33(18)=-acd33(2)*acd33(15)
-      acd33(17)=acd33(18)-2.0_ki*acd33(17)
-      acd33(17)=acd33(10)*acd33(17)
-      acd33(18)=acd33(13)*acd33(16)
-      acd33(19)=acd33(11)*acd33(15)
-      acd33(20)=acd33(5)*acd33(4)
-      acd33(21)=acd33(3)*acd33(1)
-      acd33(17)=acd33(21)-2.0_ki*acd33(20)+acd33(18)+acd33(19)+acd33(17)
-      acd33(17)=acd33(2)*acd33(17)
-      acd33(18)=acd33(13)*acd33(12)
-      acd33(19)=acd33(9)*acd33(11)
-      acd33(20)=-acd33(5)*acd33(8)
-      acd33(21)=acd33(3)*acd33(7)
-      acd33(18)=acd33(21)+acd33(20)+acd33(19)-acd33(14)+acd33(18)
-      acd33(18)=acd33(6)*acd33(18)
-      brack=acd33(17)+acd33(18)
+      acd33(3)=abb33(9)
+      acd33(4)=spvak2k5(iv1)
+      acd33(5)=dotproduct(qshift,qshift)
+      acd33(6)=dotproduct(qshift,spvak1k2)
+      acd33(7)=abb33(7)
+      acd33(8)=abb33(8)
+      acd33(9)=spvak1k2(iv1)
+      acd33(10)=-acd33(3)*acd33(1)
+      acd33(11)=-acd33(4)*acd33(7)*acd33(6)
+      acd33(10)=acd33(10)+acd33(11)
+      acd33(11)=-acd33(2)*acd33(7)*acd33(9)
+      acd33(10)=2.0_ki*acd33(10)+acd33(11)
+      acd33(10)=acd33(2)*acd33(10)
+      acd33(11)=-acd33(3)*acd33(5)
+      acd33(11)=-acd33(8)+acd33(11)
+      acd33(11)=acd33(4)*acd33(11)
+      brack=acd33(10)+acd33(11)
    end function brack_2
 !---#] function brack_2:
 !---#[ function brack_3:
@@ -102,47 +79,33 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(24) :: acd33
+      complex(ki), dimension(14) :: acd33
       complex(ki) :: brack
       acd33(1)=d(iv1,iv2)
       acd33(2)=dotproduct(qshift,spvak2k5)
-      acd33(3)=abb33(11)
-      acd33(4)=k1(iv1)
+      acd33(3)=abb33(9)
+      acd33(4)=qshift(iv1)
       acd33(5)=spvak2k5(iv2)
-      acd33(6)=abb33(12)
-      acd33(7)=k1(iv2)
-      acd33(8)=spvak2k5(iv1)
-      acd33(9)=qshift(iv1)
-      acd33(10)=qshift(iv2)
-      acd33(11)=dotproduct(qshift,spvak1k2)
-      acd33(12)=abb33(7)
-      acd33(13)=spvak1k2(iv2)
-      acd33(14)=abb33(9)
-      acd33(15)=spvak1k5(iv2)
-      acd33(16)=abb33(16)
-      acd33(17)=spvak1k2(iv1)
-      acd33(18)=spvak1k5(iv1)
-      acd33(19)=acd33(7)*acd33(6)
-      acd33(20)=2.0_ki*acd33(3)
-      acd33(21)=-acd33(10)*acd33(20)
-      acd33(22)=2.0_ki*acd33(12)
-      acd33(23)=-acd33(11)*acd33(5)*acd33(22)
-      acd33(24)=acd33(15)*acd33(16)
-      acd33(19)=acd33(24)+acd33(23)+acd33(21)+acd33(19)
-      acd33(19)=acd33(8)*acd33(19)
-      acd33(21)=acd33(4)*acd33(6)
-      acd33(23)=-acd33(9)*acd33(20)
-      acd33(24)=acd33(18)*acd33(16)
-      acd33(21)=acd33(24)+acd33(23)+acd33(21)
-      acd33(21)=acd33(5)*acd33(21)
-      acd33(23)=-acd33(13)*acd33(8)
-      acd33(24)=-acd33(17)*acd33(5)
-      acd33(23)=acd33(24)+acd33(23)
-      acd33(22)=acd33(22)*acd33(2)
-      acd33(22)=acd33(22)-acd33(14)
-      acd33(22)=acd33(22)*acd33(23)
-      acd33(20)=-acd33(1)*acd33(2)*acd33(20)
-      brack=acd33(19)+acd33(20)+acd33(21)+acd33(22)
+      acd33(6)=qshift(iv2)
+      acd33(7)=spvak2k5(iv1)
+      acd33(8)=dotproduct(qshift,spvak1k2)
+      acd33(9)=abb33(7)
+      acd33(10)=spvak1k2(iv2)
+      acd33(11)=spvak1k2(iv1)
+      acd33(12)=-acd33(1)*acd33(2)
+      acd33(13)=-acd33(4)*acd33(5)
+      acd33(14)=-acd33(6)*acd33(7)
+      acd33(12)=acd33(14)+acd33(12)+acd33(13)
+      acd33(12)=acd33(3)*acd33(12)
+      acd33(13)=-acd33(8)*acd33(5)
+      acd33(14)=-acd33(10)*acd33(2)
+      acd33(13)=acd33(14)+acd33(13)
+      acd33(13)=acd33(13)*acd33(7)
+      acd33(14)=-acd33(11)*acd33(2)*acd33(5)
+      acd33(13)=acd33(14)+acd33(13)
+      acd33(13)=acd33(9)*acd33(13)
+      acd33(12)=acd33(12)+acd33(13)
+      brack=2.0_ki*acd33(12)
    end function brack_3
 !---#] function brack_3:
 !---#[ function brack_4:
@@ -158,7 +121,7 @@ contains
       complex(ki) :: brack
       acd33(1)=d(iv1,iv2)
       acd33(2)=spvak2k5(iv3)
-      acd33(3)=abb33(11)
+      acd33(3)=abb33(9)
       acd33(4)=d(iv1,iv3)
       acd33(5)=spvak2k5(iv2)
       acd33(6)=d(iv2,iv3)
@@ -264,87 +227,4 @@ contains
       end if
    end function derivative
 !---#] function derivative:
-!---#[ subroutine reconstruct_d33:
-   subroutine     reconstruct_d33(coeffs)
-      use p0_gg_hhg_groups, only: tensrec_info_group10
-      implicit none
-      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
-      type(tensrec_info_group10), intent(out) :: coeffs
-      ! rank 4 case :
-      !---[# reconstruct coeffs%coeffs_33:
-      coeffs%coeffs_33%c0 = derivative(czip)
-      coeffs%coeffs_33%c1(1,1) = derivative(czip,1)
-      coeffs%coeffs_33%c1(1,2) = derivative(czip,1,1)/2.0_ki
-      coeffs%coeffs_33%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
-      coeffs%coeffs_33%c1(1,4) = derivative(czip,1,1,1,1)/24.0_ki
-      coeffs%coeffs_33%c1(2,1) = -derivative(czip,2)
-      coeffs%coeffs_33%c1(2,2) = derivative(czip,2,2)/2.0_ki
-      coeffs%coeffs_33%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
-      coeffs%coeffs_33%c1(2,4) = derivative(czip,2,2,2,2)/24.0_ki
-      coeffs%coeffs_33%c1(3,1) = -derivative(czip,3)
-      coeffs%coeffs_33%c1(3,2) = derivative(czip,3,3)/2.0_ki
-      coeffs%coeffs_33%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
-      coeffs%coeffs_33%c1(3,4) = derivative(czip,3,3,3,3)/24.0_ki
-      coeffs%coeffs_33%c1(4,1) = -derivative(czip,4)
-      coeffs%coeffs_33%c1(4,2) = derivative(czip,4,4)/2.0_ki
-      coeffs%coeffs_33%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
-      coeffs%coeffs_33%c1(4,4) = derivative(czip,4,4,4,4)/24.0_ki
-      coeffs%coeffs_33%c2(1,1) = -derivative(czip,1,2)
-      coeffs%coeffs_33%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
-      coeffs%coeffs_33%c2(1,3) = -derivative(czip,1,2,2,2)/6.0_ki
-      coeffs%coeffs_33%c2(1,4) = -derivative(czip,1,1,2)/2.0_ki
-      coeffs%coeffs_33%c2(1,5) = derivative(czip,1,1,2,2)/4.0_ki
-      coeffs%coeffs_33%c2(1,6) = -derivative(czip,1,1,1,2)/6.0_ki
-      coeffs%coeffs_33%c2(2,1) = -derivative(czip,1,3)
-      coeffs%coeffs_33%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
-      coeffs%coeffs_33%c2(2,3) = -derivative(czip,1,3,3,3)/6.0_ki
-      coeffs%coeffs_33%c2(2,4) = -derivative(czip,1,1,3)/2.0_ki
-      coeffs%coeffs_33%c2(2,5) = derivative(czip,1,1,3,3)/4.0_ki
-      coeffs%coeffs_33%c2(2,6) = -derivative(czip,1,1,1,3)/6.0_ki
-      coeffs%coeffs_33%c2(3,1) = -derivative(czip,1,4)
-      coeffs%coeffs_33%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
-      coeffs%coeffs_33%c2(3,3) = -derivative(czip,1,4,4,4)/6.0_ki
-      coeffs%coeffs_33%c2(3,4) = -derivative(czip,1,1,4)/2.0_ki
-      coeffs%coeffs_33%c2(3,5) = derivative(czip,1,1,4,4)/4.0_ki
-      coeffs%coeffs_33%c2(3,6) = -derivative(czip,1,1,1,4)/6.0_ki
-      coeffs%coeffs_33%c2(4,1) = derivative(czip,2,3)
-      coeffs%coeffs_33%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
-      coeffs%coeffs_33%c2(4,3) = derivative(czip,2,3,3,3)/6.0_ki
-      coeffs%coeffs_33%c2(4,4) = -derivative(czip,2,2,3)/2.0_ki
-      coeffs%coeffs_33%c2(4,5) = derivative(czip,2,2,3,3)/4.0_ki
-      coeffs%coeffs_33%c2(4,6) = derivative(czip,2,2,2,3)/6.0_ki
-      coeffs%coeffs_33%c2(5,1) = derivative(czip,2,4)
-      coeffs%coeffs_33%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
-      coeffs%coeffs_33%c2(5,3) = derivative(czip,2,4,4,4)/6.0_ki
-      coeffs%coeffs_33%c2(5,4) = -derivative(czip,2,2,4)/2.0_ki
-      coeffs%coeffs_33%c2(5,5) = derivative(czip,2,2,4,4)/4.0_ki
-      coeffs%coeffs_33%c2(5,6) = derivative(czip,2,2,2,4)/6.0_ki
-      coeffs%coeffs_33%c2(6,1) = derivative(czip,3,4)
-      coeffs%coeffs_33%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
-      coeffs%coeffs_33%c2(6,3) = derivative(czip,3,4,4,4)/6.0_ki
-      coeffs%coeffs_33%c2(6,4) = -derivative(czip,3,3,4)/2.0_ki
-      coeffs%coeffs_33%c2(6,5) = derivative(czip,3,3,4,4)/4.0_ki
-      coeffs%coeffs_33%c2(6,6) = derivative(czip,3,3,3,4)/6.0_ki
-      coeffs%coeffs_33%c3(1,1) = derivative(czip,1,2,3)
-      coeffs%coeffs_33%c3(1,2) = -derivative(czip,1,2,3,3)/2.0_ki
-      coeffs%coeffs_33%c3(1,3) = -derivative(czip,1,2,2,3)/2.0_ki
-      coeffs%coeffs_33%c3(1,4) = derivative(czip,1,1,2,3)/2.0_ki
-      coeffs%coeffs_33%c3(2,1) = derivative(czip,1,2,4)
-      coeffs%coeffs_33%c3(2,2) = -derivative(czip,1,2,4,4)/2.0_ki
-      coeffs%coeffs_33%c3(2,3) = -derivative(czip,1,2,2,4)/2.0_ki
-      coeffs%coeffs_33%c3(2,4) = derivative(czip,1,1,2,4)/2.0_ki
-      coeffs%coeffs_33%c3(3,1) = derivative(czip,1,3,4)
-      coeffs%coeffs_33%c3(3,2) = -derivative(czip,1,3,4,4)/2.0_ki
-      coeffs%coeffs_33%c3(3,3) = -derivative(czip,1,3,3,4)/2.0_ki
-      coeffs%coeffs_33%c3(3,4) = derivative(czip,1,1,3,4)/2.0_ki
-      coeffs%coeffs_33%c3(4,1) = -derivative(czip,2,3,4)
-      coeffs%coeffs_33%c3(4,2) = derivative(czip,2,3,4,4)/2.0_ki
-      coeffs%coeffs_33%c3(4,3) = derivative(czip,2,3,3,4)/2.0_ki
-      coeffs%coeffs_33%c3(4,4) = derivative(czip,2,2,3,4)/2.0_ki
-      coeffs%coeffs_33%c4(1,1) = -derivative(czip,1,2,3,4)
-      !---#] reconstruct coeffs%coeffs_33:
-   end subroutine reconstruct_d33
-!---#] subroutine reconstruct_d33:
 end module     p0_gg_hhg_d33h0l1d

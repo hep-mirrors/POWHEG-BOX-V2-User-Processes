@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d33h0l131
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity0d33h0l131.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity0d33h0l131.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -43,63 +43,45 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: ninjaA, ninjaE3, ninjaE4
       complex(ki), intent(in) :: ninjaP
-      complex(ki), dimension(28) :: acd33
+      complex(ki), dimension(18) :: acd33
       complex(ki), dimension (0:*), intent(inout) :: brack
       acd33(1)=dotproduct(ninjaE3,spvak1k2)
       acd33(2)=dotproduct(ninjaE3,spvak2k5)
       acd33(3)=dotproduct(ninjaE4,spvak2k5)
       acd33(4)=abb33(7)
       acd33(5)=dotproduct(ninjaE4,spvak1k2)
-      acd33(6)=abb33(11)
-      acd33(7)=dotproduct(k1,ninjaE3)
-      acd33(8)=abb33(12)
-      acd33(9)=dotproduct(ninjaA,ninjaE3)
-      acd33(10)=dotproduct(ninjaA,spvak1k2)
-      acd33(11)=dotproduct(ninjaA,spvak2k5)
-      acd33(12)=abb33(9)
-      acd33(13)=dotproduct(ninjaE3,spvak1k5)
-      acd33(14)=abb33(16)
-      acd33(15)=dotproduct(k1,ninjaA)
-      acd33(16)=dotproduct(ninjaA,ninjaA)
-      acd33(17)=dotproduct(ninjaA,spvak1k5)
-      acd33(18)=abb33(10)
-      acd33(19)=acd33(2)*acd33(4)
-      acd33(20)=acd33(19)*acd33(5)
-      acd33(21)=acd33(4)*acd33(1)
-      acd33(22)=2.0_ki*acd33(21)
-      acd33(23)=acd33(3)*acd33(22)
-      acd33(23)=acd33(20)+acd33(6)+acd33(23)
-      acd33(23)=acd33(2)*acd33(23)
-      acd33(24)=acd33(14)*acd33(13)
-      acd33(25)=acd33(8)*acd33(7)
-      acd33(26)=acd33(6)*acd33(9)
-      acd33(27)=acd33(1)*acd33(12)
-      acd33(24)=acd33(27)+2.0_ki*acd33(26)+acd33(24)+acd33(25)
-      acd33(22)=acd33(11)*acd33(22)
-      acd33(19)=acd33(10)*acd33(19)
-      acd33(19)=acd33(19)+acd33(22)+acd33(24)
-      acd33(19)=acd33(2)*acd33(19)
-      acd33(22)=ninjaP*acd33(1)*acd33(3)
-      acd33(25)=acd33(11)*acd33(10)
-      acd33(22)=acd33(22)+acd33(25)
-      acd33(25)=2.0_ki*acd33(4)
-      acd33(22)=acd33(22)*acd33(25)
-      acd33(25)=acd33(14)*acd33(17)
-      acd33(26)=acd33(10)*acd33(12)
-      acd33(27)=acd33(8)*acd33(15)
-      acd33(28)=acd33(16)+ninjaP
-      acd33(28)=acd33(6)*acd33(28)
-      acd33(20)=ninjaP*acd33(20)
-      acd33(20)=acd33(20)+acd33(22)+acd33(28)+acd33(27)+acd33(26)+acd33(18)+acd&
-      &33(25)
-      acd33(20)=acd33(2)*acd33(20)
-      acd33(22)=acd33(11)*acd33(24)
-      acd33(21)=acd33(11)**2*acd33(21)
-      acd33(20)=acd33(20)+acd33(22)+acd33(21)
-      brack(ninjaidxt1mu0)=acd33(19)
+      acd33(6)=abb33(9)
+      acd33(7)=dotproduct(ninjaA,ninjaE3)
+      acd33(8)=dotproduct(ninjaA,spvak1k2)
+      acd33(9)=dotproduct(ninjaA,spvak2k5)
+      acd33(10)=dotproduct(ninjaA,ninjaA)
+      acd33(11)=abb33(8)
+      acd33(12)=2.0_ki*acd33(2)
+      acd33(13)=acd33(1)*acd33(4)
+      acd33(12)=acd33(3)*acd33(12)*acd33(13)
+      acd33(14)=acd33(4)*acd33(2)**2
+      acd33(15)=acd33(5)*acd33(14)
+      acd33(16)=acd33(6)*acd33(2)
+      acd33(12)=acd33(12)+acd33(15)+acd33(16)
+      acd33(15)=acd33(9)*acd33(2)*acd33(13)
+      acd33(17)=acd33(7)*acd33(16)
+      acd33(15)=acd33(15)+acd33(17)
+      acd33(14)=acd33(8)*acd33(14)
+      acd33(14)=2.0_ki*acd33(15)+acd33(14)
+      acd33(15)=ninjaP*acd33(12)
+      acd33(17)=acd33(7)*acd33(6)
+      acd33(18)=acd33(2)*acd33(8)*acd33(4)
+      acd33(17)=acd33(17)+acd33(18)
+      acd33(17)=2.0_ki*acd33(17)
+      acd33(17)=acd33(9)*acd33(17)
+      acd33(13)=acd33(9)**2*acd33(13)
+      acd33(16)=acd33(10)*acd33(16)
+      acd33(18)=acd33(11)*acd33(2)
+      acd33(13)=acd33(18)+acd33(16)+acd33(13)+acd33(15)+acd33(17)
+      brack(ninjaidxt1mu0)=acd33(14)
       brack(ninjaidxt1mu2)=0.0_ki
-      brack(ninjaidxt0mu0)=acd33(20)
-      brack(ninjaidxt0mu2)=acd33(23)
+      brack(ninjaidxt0mu0)=acd33(13)
+      brack(ninjaidxt0mu2)=acd33(12)
    end subroutine brack_32
 !---#] subroutine brack_32:
 !---#[ subroutine numerator_t3:

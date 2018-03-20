@@ -13,16 +13,8 @@ symmetries=family,generation
 qgraf.options=onshell,notadpole,nosnail
 qgraf.verbatim=true=iprop[D,U,C,S,B,0,0];
 
-#filter.nlo=filter_withb
-#filter.module=filter.py
 
 nlo_prefactors=0
 polvec=explicit
-reduction_programs=ninja, golem95
-extensions=olp_badpts
-
-#PSP_check=True
-#PSP_verbosity=1
-#PSP_chk_threshold1=4
-#PSP_chk_threshold2=4
-#PSP_chk_kfactor=-1
+extensions=quadruple,better_num,olp_badpts
+reduction_programs=ninja

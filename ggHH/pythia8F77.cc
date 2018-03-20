@@ -239,7 +239,7 @@ extern "C" {
       //ptrHepMC = new HepMC::IO_GenEvent(std::cout);
       ascii_io.open(outfile);
       ptrHepMC = new HepMC::IO_GenEvent(ascii_io);
-      toHepMC.set_crash_on_problem();
+      //toHepMC.set_crash_on_problem();
     }
 
     pythia.setLHAupPtr(&LHAinstance);

@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d15h3l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity3d15h3l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity3d15h3l121.f90
    ! generator: buildfortran_n3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -20,21 +20,20 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0
       complex(ki), dimension(10) :: acd15
       complex(ki), dimension (0:*), intent(inout) :: brack
-      acd15(1)=dotproduct(k1,ninjaA0)
+      acd15(1)=dotproduct(k2,ninjaA0)
       acd15(2)=dotproduct(ninjaA0,ninjaA0)
       acd15(3)=dotproduct(ninjaA0,spvak2k5)
-      acd15(4)=abb15(80)
-      acd15(5)=dotproduct(k2,ninjaA0)
-      acd15(6)=abb15(14)
-      acd15(7)=dotproduct(ninjaA0,spvak2k1)
-      acd15(8)=abb15(34)
-      acd15(9)=acd15(7)*acd15(8)
-      acd15(10)=-acd15(5)+acd15(1)
-      acd15(10)=acd15(4)*acd15(10)
-      acd15(9)=acd15(9)+acd15(10)
-      acd15(9)=acd15(3)*acd15(9)
-      acd15(10)=acd15(2)*acd15(6)
-      acd15(9)=acd15(9)+acd15(10)
+      acd15(4)=abb15(40)
+      acd15(5)=dotproduct(ninjaA0,spvak2k1)
+      acd15(6)=abb15(13)
+      acd15(7)=dotproduct(ninjaA0,spvak1k5)
+      acd15(8)=abb15(51)
+      acd15(9)=acd15(6)*acd15(3)
+      acd15(10)=-acd15(8)*acd15(7)
+      acd15(9)=acd15(10)+acd15(9)
+      acd15(9)=acd15(9)*acd15(5)
+      acd15(10)=acd15(4)*acd15(1)*acd15(3)
+      acd15(9)=acd15(10)+acd15(9)
       acd15(9)=acd15(2)*acd15(9)
       brack(ninjaidxt0)=acd15(9)
    end subroutine brack_0

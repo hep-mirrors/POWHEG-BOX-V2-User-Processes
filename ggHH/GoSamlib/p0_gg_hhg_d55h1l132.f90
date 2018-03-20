@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d55h1l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d55h1l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d55h1l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -47,64 +47,44 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(36) :: acd55
+      complex(ki), dimension(21) :: acd55
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
       ninjaP1 = ninjaP(1)
       ninjaP2 = ninjaP(2)
       acd55(1)=dotproduct(k1,ninjaE3)
-      acd55(2)=dotproduct(ninjaE3,spvak2k1)
+      acd55(2)=dotproduct(ninjaE3,spvak2l3)
       acd55(3)=dotproduct(ninjaE3,spvak2k5)
-      acd55(4)=abb55(35)
-      acd55(5)=dotproduct(ninjaE3,spvak2l3)
-      acd55(6)=abb55(69)
-      acd55(7)=abb55(59)
-      acd55(8)=dotproduct(k2,ninjaE3)
-      acd55(9)=abb55(31)
-      acd55(10)=dotproduct(l3,ninjaE3)
-      acd55(11)=abb55(24)
-      acd55(12)=dotproduct(l4,ninjaE3)
-      acd55(13)=abb55(17)
-      acd55(14)=dotproduct(ninjaA0,ninjaE3)
-      acd55(15)=abb55(22)
-      acd55(16)=abb55(65)
-      acd55(17)=abb55(48)
-      acd55(18)=dotproduct(ninjaE3,spvak2l4)
-      acd55(19)=abb55(66)
-      acd55(20)=abb55(12)
-      acd55(21)=abb55(32)
-      acd55(22)=abb55(19)
-      acd55(23)=dotproduct(ninjaE3,spval3k5)
-      acd55(24)=abb55(21)
-      acd55(25)=dotproduct(ninjaE3,spval4k5)
-      acd55(26)=abb55(37)
-      acd55(27)=acd55(25)*acd55(26)
-      acd55(28)=acd55(23)*acd55(24)
-      acd55(29)=acd55(12)*acd55(13)
-      acd55(30)=acd55(10)*acd55(11)
-      acd55(31)=acd55(8)*acd55(9)
-      acd55(32)=acd55(18)*acd55(22)
-      acd55(33)=acd55(5)*acd55(20)
-      acd55(34)=acd55(1)*acd55(4)
-      acd55(35)=2.0_ki*acd55(14)
-      acd55(36)=acd55(15)*acd55(35)
-      acd55(27)=acd55(36)+acd55(34)+acd55(33)+acd55(32)+acd55(31)+acd55(30)+acd&
-      &55(29)+acd55(27)+acd55(28)
-      acd55(27)=acd55(2)*acd55(27)
-      acd55(28)=acd55(1)*acd55(7)
-      acd55(29)=acd55(17)*acd55(35)
-      acd55(30)=acd55(2)*acd55(21)
-      acd55(28)=acd55(30)+acd55(28)+acd55(29)
-      acd55(28)=acd55(3)*acd55(28)
-      acd55(29)=acd55(18)*acd55(19)
-      acd55(30)=acd55(5)*acd55(16)
-      acd55(29)=acd55(29)+acd55(30)
-      acd55(29)=acd55(29)*acd55(35)
-      acd55(30)=acd55(1)*acd55(5)*acd55(6)
-      acd55(27)=acd55(28)+acd55(27)+acd55(30)+acd55(29)
-      acd55(27)=acd55(3)*acd55(27)
-      brack(ninjaidxt0x0mu0)=acd55(27)
+      acd55(4)=abb55(37)
+      acd55(5)=dotproduct(ninjaA0,ninjaE3)
+      acd55(6)=abb55(41)
+      acd55(7)=dotproduct(ninjaE3,spvak2l4)
+      acd55(8)=abb55(45)
+      acd55(9)=dotproduct(ninjaE3,spvak2k1)
+      acd55(10)=abb55(10)
+      acd55(11)=abb55(13)
+      acd55(12)=abb55(18)
+      acd55(13)=dotproduct(ninjaE3,spval4k1)
+      acd55(14)=abb55(28)
+      acd55(15)=dotproduct(ninjaE3,spval3k1)
+      acd55(16)=abb55(47)
+      acd55(17)=acd55(13)*acd55(14)
+      acd55(18)=acd55(1)*acd55(4)
+      acd55(19)=2.0_ki*acd55(5)
+      acd55(20)=-acd55(6)*acd55(19)
+      acd55(21)=acd55(9)*acd55(10)
+      acd55(17)=acd55(21)+acd55(20)+acd55(17)+acd55(18)
+      acd55(17)=acd55(2)*acd55(17)
+      acd55(18)=acd55(15)*acd55(16)
+      acd55(19)=acd55(8)*acd55(19)
+      acd55(20)=acd55(9)*acd55(12)
+      acd55(18)=acd55(20)+acd55(18)+acd55(19)
+      acd55(18)=acd55(7)*acd55(18)
+      acd55(19)=acd55(3)*acd55(9)*acd55(11)
+      acd55(17)=acd55(19)+acd55(18)+acd55(17)
+      acd55(17)=acd55(3)*acd55(17)
+      brack(ninjaidxt0x0mu0)=acd55(17)
       brack(ninjaidxt0x0mu2)=0.0_ki
       brack(ninjaidxt0x1mu0)=0.0_ki
       brack(ninjaidxt0x2mu0)=0.0_ki

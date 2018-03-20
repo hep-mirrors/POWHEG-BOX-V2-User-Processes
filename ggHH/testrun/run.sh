@@ -15,8 +15,6 @@ then
     echo "./run 1 : run in Born improved HEFT              "
     echo "./run 2 : run in approx. full theory (FTapp)     "
     echo "./run 3 : run in full theory (grids for virtual) "
-    echo "./run 4 : test  Born Glover/Bij vs Born from GoSam"
-    echo "./run 5 : test  Born Glover/Bij vs Born from Grid"
     echo "*************************************************"
     exit
 else
@@ -26,46 +24,23 @@ fi
 function runthem {
     for i in $(seq 1 $ncores)
     do
-	if [ "$1" = "3" ] || [ "$1" = "5" ]
+	if [ "$1" = "3" ]
 	then
 	    if [ ! -f events.cdf ]
 	    then
-		ln -s ../events.cdf events.cdf
+		ln -s ../Virtual/events.cdf events.cdf
 	    fi
-	    if [ ! -f grid.py ]
+	    if [ ! -f creategrid.py ]
 	    then
-		ln -s ../grid.py grid.py
+		ln -s ../Virtual/creategrid.py creategrid.py
 	    fi
-	    if [ ! -f grid.in ]
+	    if [ ! -f Virt_full.grid ]
 	    then
-	       if [ "$1" = "3" ]
-	       then
-		# THIS NEEDS TO BE CHANGED TO THE FULL THEORY!!!  - GL -
-		ln -s ../Virt_EFT.grid grid.in
-	       fi
-	       if [ "$1" = "5" ]
-	       then
-		ln -s ../Born.grid grid.in
-	       fi
+		ln -s ../Virtual/Virt_full.grid Virt_full.grid
 	    fi
-	    # launch python script and wait for it to initialise
-	    inputseed=$i #$(sed "${i}q;d" pwgseeds.dat)
-	    readyfile=pyReadySignal-$(printf %04d $i)
-	    pyinputpipe=pyInputPipe-$(printf %04d $i)
-	    rm -f $readyfile
-	    echo "USING SEED ON LINE $inputseed AND READYFILE $readyfile"
-	    python grid.py --seed="$inputseed" &
-	    while [ ! -f $readyfile ]
-	    do
-		sleep 10
-	    done
-
-	    # launch powheg
-	    ( (echo $i | $prg > $logfile-$i.log 2>&1) ; (echo "exit" > $pyinputpipe) ) &
-	    #(echo $i | $prg > $logfile-$i.log 2>&1 && echo "exit" > $pyinputpipe) &
-	else
-	    echo $i | $prg > $logfile-$i.log 2>&1 &
 	fi
+	# launch powheg
+	echo $i | $prg > $logfile-$i.log 2>&1 &
     done
 }
 

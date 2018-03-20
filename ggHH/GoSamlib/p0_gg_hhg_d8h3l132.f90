@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d8h3l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity3d8h3l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity3d8h3l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -26,7 +26,7 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(5) :: acd8
+      complex(ki), dimension(8) :: acd8
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
@@ -35,11 +35,14 @@ contains
       acd8(1)=dotproduct(k2,ninjaE3)
       acd8(2)=dotproduct(ninjaE3,spvak2k1)
       acd8(3)=abb8(9)
-      acd8(4)=dotproduct(k5,ninjaE3)
-      acd8(5)=-acd8(1)-acd8(4)
-      acd8(5)=acd8(5)*acd8(3)*acd8(2)
+      acd8(4)=dotproduct(ninjaE3,spvak2k5)
+      acd8(5)=dotproduct(ninjaE3,spvak5k1)
+      acd8(6)=abb8(10)
+      acd8(7)=acd8(3)*acd8(2)*acd8(1)
+      acd8(8)=acd8(6)*acd8(5)*acd8(4)
+      acd8(7)=acd8(7)+acd8(8)
       brack(ninjaidxt2x0mu0)=0.0_ki
-      brack(ninjaidxt1x0mu0)=acd8(5)
+      brack(ninjaidxt1x0mu0)=acd8(7)
       brack(ninjaidxt1x1mu0)=0.0_ki
    end subroutine brack_21
 !---#] subroutine brack_21:
@@ -53,7 +56,7 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(16) :: acd8
+      complex(ki), dimension(24) :: acd8
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
@@ -64,28 +67,35 @@ contains
       acd8(3)=abb8(9)
       acd8(4)=dotproduct(k2,ninjaE3)
       acd8(5)=dotproduct(ninjaA1,spvak2k1)
-      acd8(6)=dotproduct(k5,ninjaA1)
-      acd8(7)=dotproduct(k5,ninjaE3)
-      acd8(8)=dotproduct(k2,ninjaA0)
-      acd8(9)=dotproduct(ninjaA0,spvak2k1)
-      acd8(10)=dotproduct(k5,ninjaA0)
-      acd8(11)=dotproduct(ninjaA0,ninjaE3)
-      acd8(12)=abb8(8)
-      acd8(13)=-acd8(6)-acd8(1)
-      acd8(14)=acd8(2)*acd8(3)
-      acd8(13)=acd8(14)*acd8(13)
-      acd8(15)=acd8(4)+acd8(7)
-      acd8(15)=acd8(3)*acd8(15)
-      acd8(16)=-acd8(5)*acd8(15)
-      acd8(13)=acd8(13)+acd8(16)
-      acd8(16)=-acd8(10)-acd8(8)
-      acd8(14)=acd8(14)*acd8(16)
-      acd8(15)=-acd8(9)*acd8(15)
-      acd8(16)=acd8(12)*acd8(11)
-      acd8(14)=2.0_ki*acd8(16)+acd8(15)+acd8(14)
-      brack(ninjaidxt0x0mu0)=acd8(14)
+      acd8(6)=dotproduct(ninjaA1,spvak2k5)
+      acd8(7)=dotproduct(ninjaE3,spvak5k1)
+      acd8(8)=abb8(10)
+      acd8(9)=dotproduct(ninjaA1,spvak5k1)
+      acd8(10)=dotproduct(ninjaE3,spvak2k5)
+      acd8(11)=dotproduct(k2,ninjaA0)
+      acd8(12)=dotproduct(ninjaA0,spvak2k1)
+      acd8(13)=dotproduct(ninjaA0,ninjaE3)
+      acd8(14)=abb8(8)
+      acd8(15)=dotproduct(ninjaA0,spvak2k5)
+      acd8(16)=dotproduct(ninjaA0,spvak5k1)
+      acd8(17)=acd8(2)*acd8(3)
+      acd8(18)=acd8(1)*acd8(17)
+      acd8(19)=acd8(4)*acd8(3)
+      acd8(20)=acd8(5)*acd8(19)
+      acd8(21)=acd8(7)*acd8(8)
+      acd8(22)=acd8(6)*acd8(21)
+      acd8(23)=acd8(10)*acd8(8)
+      acd8(24)=acd8(9)*acd8(23)
+      acd8(18)=acd8(24)+acd8(22)+acd8(18)+acd8(20)
+      acd8(17)=acd8(11)*acd8(17)
+      acd8(19)=acd8(12)*acd8(19)
+      acd8(20)=acd8(14)*acd8(13)
+      acd8(21)=acd8(15)*acd8(21)
+      acd8(22)=acd8(16)*acd8(23)
+      acd8(17)=acd8(22)+acd8(21)+2.0_ki*acd8(20)+acd8(17)+acd8(19)
+      brack(ninjaidxt0x0mu0)=acd8(17)
       brack(ninjaidxt0x0mu2)=0.0_ki
-      brack(ninjaidxt0x1mu0)=acd8(13)
+      brack(ninjaidxt0x1mu0)=acd8(18)
       brack(ninjaidxt0x2mu0)=0.0_ki
    end subroutine brack_22
 !---#] subroutine brack_22:

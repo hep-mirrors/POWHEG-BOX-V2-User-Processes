@@ -11,36 +11,20 @@
       real * 8 p(0:3,nlegs), p_amp(0:3,nlegs)
       integer rflav(nlegs)
       real * 8 amp2,amp21,amp22
-      integer i,j
+      integer i,j, nu
       integer mtdep
       common/cmtdep/mtdep
-      logical ini,rescue,always_quad
+      logical ini,rescue
       data ini/.true./
-      save ini,rescue,always_quad
-      real * 8 maxabsweight
-      save maxabsweight
-c      real * 8 ptHHcut
-c      save ptHHcut
-      logical inquadprec
-      common/cquad/inquadprec
+      save ini,rescue
       real *8 powheginput
       external powheginput
 
       if (ini) then
-         maxabsweight = 0d0
          rescue=powheginput("#rescue_reals").ne.0d0
-c        always_quad=powheginput("#always_quad").eq.1d0
-         always_quad=.true.
-c         ptHHcut=powheginput("#ptHHcut")
-c         if (ptHHcut.lt.0d0) then
-c             write(*,*) 'For stable results ptHHcut has been set'//
-c     $                  'to 0.001 for full mass dependence results'
-c             ptHHcut=0.001d0
-c         endif
          ini=.false.
       endif
 
-      inquadprec = .false.
       amp2 = 0d0
 
 c******************************************************
@@ -52,45 +36,18 @@ c     mtdep = 3: full theory
 c     mtdep = 4,5: checks
 c******************************************************
 
-C     Check first if kinematic is fine:
-c      if (0.5d0*sqrt(kn_sreal*(1d0-kn_y**2))*kn_csi.lt.
-c     $     ptHHcut) then
-c         call increasecnt('Real discarded ptHH below cut')
-c         amp2 = 0d0
-c         return
-c      endif
-
 C--  Real Cross section in the large top mass limit
       if((mtdep.eq.0).or.(mtdep.eq.1)) then
          call compreal_htl(p,rflav,amp2)
 
 C--  Real Cross section with finite top mass
       else if((mtdep.eq.2).or.(mtdep.eq.3)) then
-
-C     Compute real:
-         if (always_quad) then
-            call compreal_top(p,rflav,amp2,.true.,.false.)
-         else
-            call compreal_top(p,rflav,amp2,.false.,rescue)
-C     If this is the largest weight so far and it was not already
-C     calculated in quad precision, recompute in quad precision
-            if (abs(amp2).gt.maxabsweight) then
-               if (.not.inquadprec) then
-                  call increasecnt('Real in quad prec for largest wgt')
-                  call compreal_top(p,rflav,amp2,.true.,.false.)
-               endif
-               maxabsweight=max(abs(amp2),maxabsweight)
-            endif
-         endif
+         call compreal_top(p,rflav,amp2)
 
 C--  Testing purposes
       else if(mtdep.eq.4) then
          call compreal_htl(p,rflav,amp21)
-         if (always_quad) then
-            call compreal_top(p,rflav,amp22,.true.,.false.)
-         else
-            call compreal_top(p,rflav,amp22,.false.,rescue)
-         endif
+         call compreal_top(p,rflav,amp22)
          write(*,*) "--> Real: should be one:", amp22/amp21
          amp2=amp22
 c         pause
@@ -98,7 +55,6 @@ c         pause
          write(*,*) "Unknown value of 'largemtlim' for real, abort!"
          call exit(1)
       endif
-
       end
 
       subroutine compreal_htl(p,rflav,amp2)
@@ -153,7 +109,7 @@ c     Cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
       end subroutine compreal_htl
 
 
-      subroutine compreal_top(p,rflav,amp2,quad_prec,rescue)
+      subroutine compreal_top(p,rflav,amp2)
       implicit none
       include 'nlegborn.h'
       include 'pwhg_flst.h'
@@ -165,7 +121,6 @@ c     Cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
 c     input
       real * 8 p(0:3,nlegs)
       integer rflav(nlegs)
-      logical quad_prec,rescue
 c     output
       real * 8 amp2
 c     additional variables
@@ -176,12 +131,6 @@ c     additional variables
       parameter (dim_mom_array=50)
       real * 8 pgosam(dim_mom_array)
       real * 8 params(10),muren,res(4)
-      real * 16 p_qp(0:3,nlegs)
-      real * 16 pgosam_qp(dim_mom_array)
-      real * 16 params_qp(10),muren_qp,res_qp(4)
-      real * 8 scales2(2)
-      data scales2/0d0,15625d0/
-      save scales2
       data(rflav_gosam(i,    0),i=1,nlegs)/
      $      0,
      $      0,
@@ -246,52 +195,11 @@ c     transfer the flavor list into a list with only down quark or antiquark
       write(*,*) 'PROGRAM ABORT'
       call exit(1)
 
- 222  if(quad_prec) then
-         call refine_momenta_to_qp(5,p,p_qp,2,scales2)
-         call gosam_momenta_r_qp(p_qp,pgosam_qp)
-         muren_qp=sqrt(st_muren2)
-         params_qp(1)=1q0
-         call OLP_EvalSubProcess_qp(processid,pgosam_qp,
-     $        muren_qp,params_qp,res_qp)
-         amp2=res_qp(3)
-      else
-         if(rescue) then
-            call gosam_momenta_r(p,pgosam)
-            muren=sqrt(st_muren2)
-            params(1)=1d0
-            call increasecnt('real in doub prec')
-            call OLP_EvalSubProcess(processid,pgosam,muren,params,res)
-            amp2=res(3)
-
-C-- Single pole check:
-            if (abs(res(2)).gt.1E-12) then
-c               print *, "single pole dp=", res(2)
-               call refine_momenta_to_qp(5,p,p_qp,2,scales2)
-c               print *, p_qp(:,1)
-c               print *, p_qp(:,2)
-c               print *, p_qp(:,3)
-c               print *, p_qp(:,4)
-c               print *, p_qp(:,5)
-               call gosam_momenta_r_qp(p_qp,pgosam_qp)
-               muren_qp=sqrt(st_muren2)
-               params_qp(1)=1q0
-               call increasecnt('real unstable - switch to quad prec')
-               call OLP_EvalSubProcess_qp(processid,pgosam_qp,
-     $              muren_qp,params_qp,res_qp)
-               amp2=res_qp(3)
-c               print *, "s.pole in quad prec=", res_qp(2)
-c               print *, "result in quad prec=", amp2
-c               pause
-            endif
-         else
-            call gosam_momenta_r(p,pgosam)
-            muren=sqrt(st_muren2)
-            params(1)=1d0
-            call increasecnt('real in doub prec')
-            call OLP_EvalSubProcess(processid,pgosam,muren,params,res)
-            amp2=res(3)
-         endif
-      endif
+ 222  call gosam_momenta_r(p,pgosam)
+      muren=sqrt(st_muren2)
+      params(1)=1d0
+      call OLP_EvalSubProcess(processid,pgosam,muren,params,res)
+      amp2=res(3)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     GOSAM returns this result with NO gs factor ==>
@@ -341,37 +249,6 @@ c         write(*,*) i,p(0,i)**2-p(1,i)**2-p(2,i)**2-p(3,i)**2
          pgosam(5+5*(i-1))=kn_masses(i)
       enddo
       end
-
-      subroutine gosam_momenta_r_qp(p,pgosam)
-      implicit none
-      include 'nlegborn.h'
-      include 'pwhg_flst.h'
-      include 'pwhg_kn.h'
-      real * 16 p(0:3,nlegreal)
-c     In GoSam the array of the momenta has dimension 50.
-c     It accounts for 10 particles at most
-      integer dim_mom_array
-      parameter (dim_mom_array=50)
-      real * 16 pgosam(dim_mom_array)
-      integer i
-
-      if (nlegborn*5 .gt. dim_mom_array) then
-         write(*,*) 'The dimension of the pgosam array in the '//
-     $        'pwhg_gosam.f file NEEDS to be increased'
-         write(*,*) 'PROGRAM ABORT'
-         call exit(1)
-      endif
-
-      do i=1,nlegreal
-         pgosam(1+5*(i-1))=p(0,i)
-         pgosam(2+5*(i-1))=p(1,i)
-         pgosam(3+5*(i-1))=p(2,i)
-         pgosam(4+5*(i-1))=p(3,i)
-c         write(*,*) i,p(0,i)**2-p(1,i)**2-p(2,i)**2-p(3,i)**2
-         pgosam(5+5*(i-1))=kn_masses(i)
-      enddo
-      end
-
 
       subroutine ME2realgg_htl(p, aopi, ME2)
       implicit none

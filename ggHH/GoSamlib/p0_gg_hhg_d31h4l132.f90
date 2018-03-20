@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d31h4l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity4d31h4l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity4d31h4l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -35,7 +35,7 @@ contains
       acd31(1)=dotproduct(ninjaE3,spvak1k2)
       acd31(2)=dotproduct(ninjaE3,spvak2k5)
       acd31(3)=dotproduct(ninjaE3,spvak5k2)
-      acd31(4)=abb31(6)
+      acd31(4)=abb31(9)
       acd31(5)=acd31(4)*acd31(3)*acd31(2)*acd31(1)
       brack(ninjaidxt2x0mu0)=0.0_ki
       brack(ninjaidxt1x0mu0)=acd31(5)
@@ -52,44 +52,62 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(18) :: acd31
+      complex(ki), dimension(28) :: acd31
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
       ninjaP1 = ninjaP(1)
       ninjaP2 = ninjaP(2)
-      acd31(1)=dotproduct(ninjaA1,spvak1k2)
-      acd31(2)=dotproduct(ninjaE3,spvak2k5)
-      acd31(3)=dotproduct(ninjaE3,spvak5k2)
-      acd31(4)=abb31(6)
-      acd31(5)=dotproduct(ninjaA1,spvak2k5)
-      acd31(6)=dotproduct(ninjaE3,spvak1k2)
-      acd31(7)=dotproduct(ninjaA1,spvak5k2)
-      acd31(8)=dotproduct(ninjaA0,ninjaE3)
-      acd31(9)=abb31(11)
-      acd31(10)=dotproduct(ninjaA0,spvak1k2)
-      acd31(11)=dotproduct(ninjaA0,spvak2k5)
-      acd31(12)=dotproduct(ninjaA0,spvak5k2)
-      acd31(13)=abb31(13)
-      acd31(14)=acd31(5)*acd31(3)
-      acd31(15)=acd31(7)*acd31(2)
-      acd31(14)=acd31(15)+acd31(14)
-      acd31(15)=acd31(6)*acd31(4)
-      acd31(14)=acd31(15)*acd31(14)
-      acd31(16)=acd31(2)*acd31(3)*acd31(4)
-      acd31(17)=acd31(1)*acd31(16)
-      acd31(14)=acd31(17)+acd31(14)
-      acd31(17)=acd31(11)*acd31(3)
-      acd31(18)=acd31(12)*acd31(2)
-      acd31(17)=acd31(18)+acd31(17)
-      acd31(15)=acd31(15)*acd31(17)
-      acd31(17)=acd31(9)*acd31(8)*acd31(3)
-      acd31(16)=acd31(10)*acd31(16)
-      acd31(18)=acd31(13)*acd31(6)*acd31(2)
-      acd31(15)=acd31(18)+2.0_ki*acd31(17)+acd31(16)+acd31(15)
-      brack(ninjaidxt0x0mu0)=acd31(15)
+      acd31(1)=dotproduct(ninjaA1,spvak5k2)
+      acd31(2)=dotproduct(ninjaE3,spvak1k2)
+      acd31(3)=dotproduct(ninjaE3,spvak2k5)
+      acd31(4)=abb31(9)
+      acd31(5)=dotproduct(ninjaA1,spvak1k2)
+      acd31(6)=dotproduct(ninjaE3,spvak5k2)
+      acd31(7)=dotproduct(ninjaA1,spvak2k5)
+      acd31(8)=dotproduct(k2,ninjaE3)
+      acd31(9)=abb31(19)
+      acd31(10)=dotproduct(k5,ninjaE3)
+      acd31(11)=dotproduct(ninjaE3,spvak1k5)
+      acd31(12)=abb31(6)
+      acd31(13)=abb31(8)
+      acd31(14)=abb31(16)
+      acd31(15)=dotproduct(ninjaA0,ninjaE3)
+      acd31(16)=dotproduct(ninjaA0,spvak5k2)
+      acd31(17)=dotproduct(ninjaA0,spvak1k2)
+      acd31(18)=dotproduct(ninjaA0,spvak2k5)
+      acd31(19)=abb31(15)
+      acd31(20)=dotproduct(ninjaE3,spvak2k1)
+      acd31(21)=abb31(12)
+      acd31(22)=acd31(4)*acd31(3)
+      acd31(23)=acd31(5)*acd31(22)
+      acd31(24)=acd31(2)*acd31(4)
+      acd31(25)=acd31(7)*acd31(24)
+      acd31(23)=acd31(23)+acd31(25)
+      acd31(23)=acd31(6)*acd31(23)
+      acd31(25)=acd31(2)*acd31(1)*acd31(22)
+      acd31(23)=acd31(25)+acd31(23)
+      acd31(25)=acd31(8)+acd31(10)
+      acd31(26)=2.0_ki*acd31(15)-acd31(25)
+      acd31(26)=acd31(13)*acd31(26)
+      acd31(27)=acd31(11)*acd31(19)
+      acd31(28)=acd31(17)*acd31(22)
+      acd31(24)=acd31(18)*acd31(24)
+      acd31(24)=acd31(24)+acd31(28)+acd31(27)+acd31(26)
+      acd31(24)=acd31(6)*acd31(24)
+      acd31(26)=acd31(20)*acd31(21)
+      acd31(27)=acd31(8)*acd31(14)
+      acd31(22)=acd31(16)*acd31(22)
+      acd31(22)=acd31(22)+acd31(26)+acd31(27)
+      acd31(22)=acd31(2)*acd31(22)
+      acd31(25)=-acd31(9)*acd31(25)
+      acd31(26)=acd31(11)*acd31(12)
+      acd31(25)=acd31(26)+acd31(25)
+      acd31(25)=acd31(8)*acd31(25)
+      acd31(22)=acd31(24)+acd31(25)+acd31(22)
+      brack(ninjaidxt0x0mu0)=acd31(22)
       brack(ninjaidxt0x0mu2)=0.0_ki
-      brack(ninjaidxt0x1mu0)=acd31(14)
+      brack(ninjaidxt0x1mu0)=acd31(23)
       brack(ninjaidxt0x2mu0)=0.0_ki
    end subroutine brack_22
 !---#] subroutine brack_22:

@@ -51,7 +51,7 @@ module     pb_gg_hh_config
 
    ! Flag to decide if results should be converted to CDR
    ! if they are not already in that scheme
-   logical :: convert_to_cdr = .true.
+   logical :: convert_to_cdr = .false.
 
    integer :: logfile = 19
 
@@ -125,10 +125,10 @@ module     pb_gg_hh_config
    real(ki) :: PSP_chk_kfactor = 1000.0_ki
    
    ! used instead:
-   integer :: PSP_chk_li1 = 10
+   integer :: PSP_chk_li1 = 16
    integer :: PSP_chk_li2 = 7
    integer :: PSP_chk_li3 = 6
-   integer :: PSP_chk_li4 = 10
+   integer :: PSP_chk_li4 = 19
 
 
 end module pb_gg_hh_config

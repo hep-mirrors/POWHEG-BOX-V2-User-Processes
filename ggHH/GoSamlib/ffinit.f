@@ -775,7 +775,7 @@
 *	open(ifile,file=fullname,status='OLD',READONLY,err=100)
 *
 * This has been modified to work with autoconf
-        path='GoSamlib'
+        path='/home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/GoSamStuff/GoSam-contrib-2.0/share'
         fullname = path(1:index(path,' ')-1)
      +            //'/gosam-contrib/'
      +            //name

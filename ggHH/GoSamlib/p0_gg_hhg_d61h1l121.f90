@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d61h1l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d61h1l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d61h1l121.f90
    ! generator: buildfortran_n3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -23,7 +23,7 @@ contains
       acd61(1)=dotproduct(ninjaA0,ninjaA0)
       acd61(2)=dotproduct(ninjaA0,spvak2k1)
       acd61(3)=dotproduct(ninjaA0,spvak2k5)
-      acd61(4)=abb61(65)
+      acd61(4)=abb61(35)
       acd61(5)=acd61(4)*acd61(2)*acd61(1)*acd61(3)**2
       brack(ninjaidxt0)=acd61(5)
    end subroutine brack_0

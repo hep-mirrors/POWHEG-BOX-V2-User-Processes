@@ -18,14 +18,15 @@ MODDIR=mod-$(COMPILER)
 
 ifeq ("$(COMPILER)","gfortran")
 FORTCOMP=gfortran
-FF= $(FORTCOMP) -cpp -fno-automatic -ffixed-line-length-132
+FC=$(FORTCOMP)
+FF=$(FORTCOMP) -cpp -fno-automatic -ffixed-line-length-132
 # Additional flags for Mac OS X
 UNAME_S := $(shell uname -s)
 ifeq ("$(UNAME_S)","Darwin")
 FF+= -lc++
 endif
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
-CC=g++
+CC=gcc
 CXX=g++
 ## of boolean in gfortran.
 #FFLAGS= -Wall -Wimplicit-interface -fbounds-check
@@ -39,10 +40,12 @@ MOD= -J $(MODDIR)
 endif
 
 ifeq ("$(COMPILER)","ifort")
-FF = ifort -save -cpp -extend_source -assume bscc
-CC = icpc
-CXX = icpc
-LIBS = -limf
+FORTCOMP=ifort
+FC=$(FORTCOMP)
+FF=$(FORTCOMP) -save -cpp -extend_source -assume bscc
+CC=icpc
+CXX=icpc
+LIBS=-limf
 #FFLAGS =  -check
 ## For floating point exception trapping  uncomment the following
 #FPE = -fpe0
@@ -52,41 +55,22 @@ OPT = -O3 #-fast
 MOD = -module $(MODDIR)
 endif
 
-GOSAMLIBS=$(shell cd GoSamlib ; echo *.f *.f90 ' ' | sed 's/qlonshellcutoff.f// ; s/qlconstants.f// ; s/.f /.o /g ; s/.f90 /.o /g ; ' | tee GoSamlib.txt)
-GOSAMLIBS+=$(shell cd GoSamlib ; echo *.cc *.F90 ' ' | sed 's/.cc /.o /g ; s/.F90 /.o /g ; ' | tee GoSamlib.txt)
-
-GOSAMLIBS_qp=$(shell cd GoSamlib_qp ; echo *.f *.f90 ' ' | sed 's/qlonshellcutoff.f// ; s/qlconstants.f// ; s/.f /.o /g ; s/.f90 /.o /g ; ' | tee GoSamlib_qp.txt)
-GOSAMLIBS_qp+=$(shell cd GoSamlib_qp ; echo *.cc *.F90 ' ' | sed 's/.cc /.o /g ; s/.F90 /.o /g ; ' | tee GoSamlib_qp.txt)
-
+GOSAMLIBS=$(shell cd GoSamlib ; echo *.f *.f90 ' ' | sed 's/qlonshellcutoff.f// ; s/qlconstants.f// ; s/.f /.o /g ; s/.f90 /.o /g ; ')
+GOSAMLIBS+=$(shell cd GoSamlib ; echo *.cpp *.cc *.F90 ' ' | sed 's/.cc /.o /g ; s/.F90 /.o /g ; ')
+GOSAMLIBS+=$(shell cd GoSamlib/quadsources ; echo *.cc *.F90 ' ' | sed 's/.cc /.o /g ; s/.F90 /.o /g ; ')
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= ./:../:$(OBJDIR):./GoSamlib/:./GoSamlib_qp/
+VPATH= ./:../:$(OBJDIR):./GoSamlib/:./Gosamlib/quadsources/:./Virtual/
 
 INCLUDE0=$(PWD)
 INCLUDE1=$(shell dirname $(PWD))/include
-FF+= $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1)
+INCLUDE2=$(PWD)/GoSamlib
+INCLUDE3=$(PWD)/Virtual
+FF+= $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
 LIBS+=-lz -lquadmath
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
-
-ifeq ("$(PDF)","lhapdf5")
-LHAPDF_CONFIG=lhapdf-config
-PDFPACK=lhapdfif.o
-LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
-ifeq  ("$(STATIC)","-static")
-## If LHAPDF has been compiled with gfortran and you want to link it statically, you have to include
-## libgfortran as well. The same holds for libstdc++.
-## One possible solution is to use fastjet, since $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-## does perform this inclusion. The path has to be set by the user.
-# LIBGFORTRANPATH= # adapt to your need "/usr/lib/gcc/x86_64-redhat-linux/4.1.2"
-# LIBSTDCPP= # adapt to your need "/lib64"
-# LIBSLHAPDF+=  -L$(LIBGFORTRANPATH)  -lgfortranbegin -lgfortran -L$(LIBSTDCPP) -lstdc++
-endif
-LIBS+=$(LIBSLHAPDF)
-else
-PDFPACK=mlmpdfif.o hvqpdfpho.o
-endif
 
 ifeq ("$(PDF)","lhapdf6")
 LHAPDF_CONFIG=lhapdf-config
@@ -121,41 +105,53 @@ endif
 
 all: pwhg_main
 
-NINJAFLAGS=-DHAVE_CONFIG_H -I./GoSamlib -I./GoSamlib/ninja -O2 #-fcx-limited-range
-NINJAFLAGSQP=-DHAVE_CONFIG_H -I./GoSamlib_qp -I./GoSamlib_qp/ninja -O2 #-fcx-limited-range
+NINJAFLAGS=-DHAVE_CONFIG_H -I./GoSamlib  -O2
+NINJAFLAGSQP=-DHAVE_CONFIG_H -I./GoSamlib -I./Gosamlib/quadsources -O2
+
+# VirtualGrids
+#LIBS+=-l:$(shell python2.7-config --prefix)/lib/libpython2.7.so # $(shell python2.7-config --ldflags)
+LIBS+=-L:$(shell python2.7-config --prefix)/lib -lpython2.7  # $(shell python2.7-config --ldflags)
+CCFLAGS+=-I$(shell python2.7-config --prefix)/include
+CCFLAGS+=$(shell python2.7-config --cflags)
 
 pwhg_cpHTO_reweight.o: pwhg_cpHTO_reweight.f $(INCLUDE)
+	$(FF) -c $(MOD) -o $(OBJDIR)/$@ $<
+
+%.o: %.F $(INCLUDE)  | $(OBJDIR) $(MODDIR)
 	$(FF) -c $(MOD) -o $(OBJDIR)/$@ $<
 
 %.o: %.f $(INCLUDE)  | $(OBJDIR) $(MODDIR)
 	$(FF) -c $(MOD) -o $(OBJDIR)/$@ $<
 
 %.o: %.f90 $(INCLUDE) | $(OBJDIR)
-	$(FF) -c $(MOD) -o $(OBJ)/$@ $<
+	$(FF) -c $(MOD) -o $(OBJDIR)/$@ $<
 
 %.o: %.F90 $(INCLUDE) | $(OBJDIR)
-	$(FF) -DHAVE_CONFIG_H -c $(MOD) -o $(OBJ)/$@ $<
+	$(FF) -DHAVE_CONFIG_H -c $(MOD) -o $(OBJDIR)/$@ $<
+
+%.o: quadsources/%.F90 $(INCLUDE) | $(OBJDIR)
+	$(FF) -DHAVE_CONFIG_H -c $(MOD) -o $(OBJDIR)/$@ $<
 
 %.o: %.c
-	$(CC) $(DEBUG) -c -o $(OBJDIR)/$@ $^
+	$(CC) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(CCFLAGS)
 
 %.o: %.cpp
-	$(CC) $(DEBUG) -c -o $(OBJDIR)/$@ $^
-
-%_qp.o: %_qp.cc
-	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGSQP) $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^
 
 %.o: %.cc
 	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGS) $(FJCXXFLAGS)
 
+%.o: quadsources/%.cc
+	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGSQP) $(FJCXXFLAGS)
+
 # PYTHIA 8
 PYTHIA8LOCATION=$(shell pythia8-config --prefix)
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PYTHIA8LOCATION)/include/Pythia8 -I$(PYTHIA8LOCATION)/include/Pythia8Plugins
-LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/ -lpythia8  -lstdc++ -ldl -lz #-llhapdfdummy
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/ -lpythia8  -lstdc++ -ldl -lz
 LIBHEPMC=$(shell pythia8-config --hepmc)
 
-USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o MEborn.o \
-        real.o btilde_gghh.o pt2maxreg.o LesHouchesreg.o pwhg_cpHTO_reweight.o \
+USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o MEborn.o grids.o \
+        real.o btilde_gghh.o pt2maxreg.o LesHouchesreg.o pwhg_cpHTO_reweight.o hhgrid.o \
 	$(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o lhefwrite.o LesHouches.o phi3m.o  \
@@ -172,14 +168,12 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o lhefwrite.o LesHouches.o phi3m.o  \
 	refine_momenta.o $(PDFPACK) $(USER) $(FPEOBJ)
 
 # target to generate LHEF output
-pwhg_main:gosamlib.a gosamlib_qp.a $(PWHG)
-	$(FF) $(patsubst %,$(OBJDIR)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC)  $(OBJ)/gosamlib.a $(OBJ)/gosamlib_qp.a -o $@ -lstdc++
+pwhg_main:gosamlib.a $(PWHG)
+	$(FF) $(patsubst %,$(OBJDIR)/%,$(PWHG)) $(LIBS) $(LIBSFASTJET) $(STATIC)  $(OBJ)/gosamlib.a -o $@ -lstdc++
+
 
 gosamlib.a: $(GOSAMLIBS)
 	\rm $(OBJ)/gosamlib.a ; $(PWD)/GoSamlib/compile_gosamlib.sh $(PWD)/$(OBJ) $(PWD)/$(MODDIR)
-
-gosamlib_qp.a: $(GOSAMLIBS_qp)
-	\rm $(OBJ)/gosamlib_qp.a ; $(PWD)/GoSamlib_qp/compile_gosamlib.sh $(PWD)/$(OBJ) $(PWD)/$(MODDIR)
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		     \
      opencount.o powheginput.o pwhg_bookhist-multi-new.o $(PWHGANAL) \
@@ -205,7 +199,7 @@ main-PYTHIA8-lhef: $(PYTHIA8)
 PYTHIA6=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o    \
 	$(PWHGANAL) lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o \
 	pwhg_analysis_driver.o random.o cernroutines.o opencount.o             \
-	pwhg_bookhist-multi-new.o $(FPEOBJ) 
+	pwhg_bookhist-multi-new.o $(FPEOBJ)
 
 main-PYTHIA6-lhef: $(PYTHIA6)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA6)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
@@ -236,7 +230,6 @@ veryclean:
 ##########################################################################
 
 include GoSamlib/Makefile.virt.dep
-include GoSamlib_qp/Makefile.virt.dep
 
 MEborn.o:  precision_golem.o parametre.o matrice_s.o form_factor_type.o form_factor_4p.o form_factor_3p.o cache.o constante.o array.o spinor.o
 
@@ -247,7 +240,3 @@ btilde_gghh.f: btilde.f
 
 sigremnants_gghh.f: sigremnants.f
 	bash generate_files.sh sigremnants
-
-
-#sigreal_gghh.f: sigreal.f
-#	cat $< | perl -pe 's/if \(.not.pwhg_isfinite\(out0\).or..not.pwhg_isfinite\(out1\)\) then/if\(.not.pwhg_isfinite\(out0\).or..not.pwhg_isfinite\(out1\).or.\n     1        \(\(0.5d0*sqrt\(kn_sborn*\(1d0-kn_y**2\)\)*kn_csi\).lt.ptHHcut\)\)\n     2        then/' > $@

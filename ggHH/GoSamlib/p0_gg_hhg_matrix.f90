@@ -1,6 +1,7 @@
 module     p0_gg_hhg_matrix
    use p0_gg_hhg_util, only: square
-   use p0_gg_hhg_config, only: ki, &
+   use p0_gg_hhg_util_qp, only: square_qp => square
+   use p0_gg_hhg_config, only: ki, ki_qp, &
      & include_helicity_avg_factor, include_color_avg_factor, &
      & debug_lo_diagrams, debug_nlo_diagrams, &
      & include_symmetry_factor, &
@@ -12,17 +13,31 @@ module     p0_gg_hhg_matrix
        in_helicities, symmetry_factor, num_legs, &
        lo_qcd_couplings, corrections_are_qcd, num_light_quarks, num_gluons
    use p0_gg_hhg_model, only: Nf, NC, sqrt2, init_functions
+   use p0_gg_hhg_model_qp, only: Nf_qp => Nf, NC_qp => NC, sqrt2_qp => sqrt2, &
+     & init_functions_qp => init_functions
    use p0_gg_hhg_color, only: TR, CA, CF, numcs, &
      & incolors, init_color
+   use p0_gg_hhg_color_qp, only: TR_qp => TR, CA_qp => CA, CF_qp => CF, &
+     & incolors_qp => incolors, init_color_qp => init_color
    use p0_gg_hhg_amplitudeh0, only: samplitudeh0l1 => samplitude, &
-        &   finite_renormalisation0 => finite_renormalisation
+     &   finite_renormalisation0 => finite_renormalisation
+   use p0_gg_hhg_amplitudeh0_qp, only: samplitudeh0l1_qp => samplitude, &
+     &   finite_renormalisation0_qp => finite_renormalisation
    use p0_gg_hhg_amplitudeh1, only: samplitudeh1l1 => samplitude, &
-        &   finite_renormalisation1 => finite_renormalisation
+     &   finite_renormalisation1 => finite_renormalisation
+   use p0_gg_hhg_amplitudeh1_qp, only: samplitudeh1l1_qp => samplitude, &
+     &   finite_renormalisation1_qp => finite_renormalisation
    use p0_gg_hhg_amplitudeh3, only: samplitudeh3l1 => samplitude, &
-        &   finite_renormalisation3 => finite_renormalisation
+     &   finite_renormalisation3 => finite_renormalisation
+   use p0_gg_hhg_amplitudeh3_qp, only: samplitudeh3l1_qp => samplitude, &
+     &   finite_renormalisation3_qp => finite_renormalisation
    use p0_gg_hhg_amplitudeh4, only: samplitudeh4l1 => samplitude, &
-        &   finite_renormalisation4 => finite_renormalisation
+     &   finite_renormalisation4 => finite_renormalisation
+   use p0_gg_hhg_amplitudeh4_qp, only: samplitudeh4l1_qp => samplitude, &
+     &   finite_renormalisation4_qp => finite_renormalisation
    use p0_gg_hhg_dipoles, only: insertion_operator, insertion_operator_qed
+   use p0_gg_hhg_dipoles_qp, only: insertion_operator_qp => insertion_operator, &
+     & insertion_operator_qed_qp => insertion_operator_qed
 
    implicit none
    save
@@ -35,6 +50,10 @@ module     p0_gg_hhg_matrix
    public :: samplitudel0, samplitudel1
    public :: ir_subtraction, color_correlated_lo2, spin_correlated_lo2
    public :: OLP_color_correlated, OLP_spin_correlated_lo2
+
+
+
+
 contains
    !---#[ subroutine banner:
    subroutine     banner()
@@ -48,14 +67,14 @@ contains
       write(banner_ch,'(A74)') "|   __   __   ___   __   __  __                   GoSam                  |"
       write(banner_ch,'(A74)') "|  / _) /  \ / __) (  ) (  \/  )          An Automated One-Loop          |"
       write(banner_ch,'(A74)') "| ( (/\( () )\__ \ /__\  )    (          Matrix Element Generator        |"
-      write(banner_ch,'(A74)') "|  \__/ \__/ (___/(_)(_)(_/\/\_)          Version 2.0.2 Rev: 865         |"
+      write(banner_ch,'(A74)') "|  \__/ \__/ (___/(_)(_)(_/\/\_)        Version 2.0.4 Rev: 81d1f9f       |"
       write(banner_ch,'(A74)') "|                                                                        |"
-      write(banner_ch,'(A74)') "|                                 (c) The GoSam Collaboration 2011-2015  |"
+      write(banner_ch,'(A74)') "|                                 (c) The GoSam Collaboration 2011-2016  |"
       write(banner_ch,'(A74)') "|                                                                        |"
       write(banner_ch,'(A74)') "|  AUTHORS:                                                              |"
-      write(banner_ch,'(A74)') "|  * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>             |"
       write(banner_ch,'(A74)') "|  * Nicolas Greiner                   <greiner@mpp.mpg.de>              |"
       write(banner_ch,'(A74)') "|  * Gudrun Heinrich                   <gudrun@mpp.mpg.de>               |"
+      write(banner_ch,'(A74)') "|  * Stephan Jahn                      <sjahn@mpp.mpg.de>                |"
       write(banner_ch,'(A74)') "|  * Gionata Luisoni                   <luisonig@mpp.mpg.de>             |"
       write(banner_ch,'(A74)') "|  * Pierpaolo Mastrolia               <Pierpaolo.Mastrolia@cern.ch>     |"
       write(banner_ch,'(A74)') "|  * Giovanni Ossola                   <gossola@citytech.cuny.edu>       |"
@@ -66,6 +85,7 @@ contains
       write(banner_ch,'(A74)') "|                                                                        |"
       write(banner_ch,'(A74)') "|  FORMER AUTHORS:                                                       |"
       write(banner_ch,'(A74)') "|  * Gavin Cullen                      <gavin.cullen@desy.de>            |"
+      write(banner_ch,'(A74)') "|  * Hans van Deurzen                  <hdeurzen@mpp.mpg.de>             |"
       write(banner_ch,'(A74)') "|  * Edoardo Mirabella                 <mirabell@mpp.mpg.de>             |"
       write(banner_ch,'(A74)') "|  * Joscha Reichel                    <joscha@mpp.mpg.de>               |"
       write(banner_ch,'(A74)') "|  * Thomas Reiter                     <reiterth@mpp.mpg.de>             |"
@@ -113,12 +133,13 @@ contains
       else
          init_third_party = .true.
       end if
-      if (init_third_party) then
-      ! call our banner
-      call banner()
+
       if(.not. corrections_are_qcd) then
          PSP_check = .false.
       end if
+      if (init_third_party) then
+      ! call our banner
+      call banner()
       if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
          inquire(file=dir_name, exist=dir_exists)
          if(.not. dir_exists) then
@@ -156,11 +177,13 @@ contains
       call init_functions()
       call init_color()
 
+      call init_functions_qp()
+      call init_color_qp()
+
    end subroutine initgolem
    !---#] subroutine initgolem :
    !---#[ subroutine exitgolem :
    subroutine     exitgolem(is_last)
-      use p0_gg_hhg_groups, only: tear_down_golem95
       implicit none
       logical, optional, intent(in) :: is_last
 
@@ -172,7 +195,6 @@ contains
          exit_third_party = .true.
       end if
       if (exit_third_party) then
-         call tear_down_golem95()
          if(PSP_check.and.PSP_rescue.and.PSP_verbosity) then
             write(42,'(A6)')  "</run>"
             close(unit=42)
@@ -183,11 +205,19 @@ contains
 
    !---#[ subroutine samplitude :
    subroutine     samplitude(vecs, scale2, amp, prec, ok, h)
+      use p0_gg_hhg_kinematics, only: adjust_kinematics, dotproduct
+      use p0_gg_hhg_kinematics_qp, only: adjust_kinematics_qp => adjust_kinematics
+      use p0_gg_hhg_model
       implicit none
       real(ki), dimension(5, 4), intent(in) :: vecs
+      real(ki_qp), dimension(5, 4) :: vecs_qp
       real(ki), dimension(5, 4) :: vecsrot
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
+      real(ki_qp), dimension(1:4) :: amp_qp
+      real(ki_qp), dimension(2:3) :: irp_qp
+      real(ki_qp) :: scale2_qp, rat2_qp
+      real(ki), dimension(0:2) :: scales2
       real(ki), dimension(1:4) :: ampdef, amprot, ampres, ampresrot
       real(ki) :: rat2, kfac, zero, angle
       real(ki), dimension(2:3) :: irp
@@ -202,59 +232,58 @@ contains
       ampresrot=0.0_ki
       icheck = 1
       angle = 1.234_ki
+      spprec1 = 18
+      spprec2 = 18
       fpprec1 = 18
       fpprec2 = 18
-      if(reduction_interoperation.eq.reduction_interoperation_rescue) &
-           & PSP_rescue=.false.
+      scales2(:) = (/0.0_ki, &
+     &              mH, &
+     &              mH/)
       tmp_red_int = reduction_interoperation
-      call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
-      amp = ampdef
+      if(reduction_interoperation.eq.4) then
+         PSP_check=.true.
+         PSP_rescue=.true.
+         icheck = 3
+      else
+         call samplitudel01(vecs, scale2, ampdef, rat2, ok, h)
+         amp = ampdef
+      endif
       ! RESCUE SYSTEM
       if(PSP_check) then
-         ! poles should be zero for loop-induced processes
-         if(ampdef(2) .ne. 0.0_ki) then
-            spprec1 = -int(log10(abs((ampdef(3)/ampdef(2)))))
+         ! CHECK ON ROTATED AMPLITUDE
+         do irot = 1,5
+            vecsrot(irot,1) = vecs(irot,1)
+            vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
+            vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+            vecsrot(irot,4) = vecs(irot,4)
+         enddo
+         call adjust_kinematics(vecsrot)
+         call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
+         if((ampresrot(2)-ampdef(2)) .ne. 0.0_ki) then
+            fpprec1 = -int(log10(abs((ampresrot(2)-ampdef(2))/((ampresrot(2)+ampdef(2))/2.0_ki))))
          else
-            spprec1 = 16
+            fpprec1 = 16
          endif
          kfac = 0.0_ki
-         if(spprec1.lt.PSP_chk_li1.and.spprec1.ge.PSP_chk_li2) then
-            call increasecnt('gg->HHg: do rotation with Ninja')
-            icheck=2 ! ROTATION
-         end if
-         if(spprec1.lt.PSP_chk_li2) then                                       ! RESCUE
+         if(fpprec1.lt.PSP_chk_li2) then      ! RESCUE
             icheck=3
             fpprec1=-10        ! Set -10 as finite part precision
-         end if
-         if(icheck.eq.2) then
-            do irot = 1,5
-               vecsrot(irot,1) = vecs(irot,1)
-               vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-               vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-               vecsrot(irot,4) = vecs(irot,4)
-            enddo
-            call samplitudel01(vecsrot, scale2, amprot, rat2, ok, h)
-            if((amprot(2)-amp(2)) .ne. 0.0_ki) then
-               fpprec1 = -int(log10(abs((amprot(2)-amp(2))/((amprot(2)+amp(2))/2.0_ki))))
-            else
-               fpprec1 = 16
-            endif
-            if(fpprec1.ge.PSP_chk_li3) icheck=1                            ! ACCEPTED
-            if(fpprec1.lt.PSP_chk_li3) then                                ! RESCUE
-               icheck=3
-               call increasecnt('gg->HHg: rotation unsuccessful, switch to golem95')
-            endif
          endif
          prec = min(spprec1,fpprec1)
-
          if(icheck.eq.3.and.PSP_rescue) then
-            icheck=1
-            call increasecnt('gg->HHg: switch to golem95')
+            icheck = 1
             reduction_interoperation = reduction_interoperation_rescue
-            call samplitudel01(vecs, scale2, ampres, rat2, ok, h)
+            scale2_qp = real(scale2,ki_qp)
+            vecs_qp = vecs
+            ! call refine_momenta_to_qp(5,vecs,vecs_qp,2+1,scales2)
+            call adjust_kinematics_qp(vecs_qp)
+            call samplitudel01_qp(vecs_qp, scale2_qp, amp_qp, rat2_qp, ok, h)
+            !call ir_subtraction_qp(vecs_qp, scale2_qp, irp_qp, h)
+            ampres = real(amp_qp,ki)
+            !irp = real(irp_qp,ki)
             amp=ampres
             ! poles should be zero for loop-induced processes
-            if(ampres(2) .ne. 0.0_ki) then
+            if(ampres(2) .ne. 0.0_ki .and. ampres(3) .ne. 0.0_ki) then
                spprec2 = -int(log10(abs(ampres(3)/ampres(2))))
             else
                spprec2 = 16
@@ -264,23 +293,23 @@ contains
                icheck=3
                fpprec2=-10        ! Set -10 as finite part precision
             endif
-            if(icheck.eq.2) then
-               do irot = 1,5
-                  vecsrot(irot,1) = vecs(irot,1)
-                  vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
-                  vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
-                  vecsrot(irot,4) = vecs(irot,4)
-               enddo
-               ! call adjust_kinematics(vecsrot)
-               call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
-               if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
-                  fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
-               else
-                  fpprec2 = 16
-               endif
-               if(fpprec2.ge.PSP_chk_li3) icheck=1                         ! ACCEPTED
-               if(fpprec2.lt.PSP_chk_li3) icheck=3                         ! DISCARD
-            endif
+            ! if(icheck.eq.2) then
+            !    do irot = 1,5
+            !       vecsrot(irot,1) = vecs(irot,1)
+            !       vecsrot(irot,2) = vecs(irot,2)*Cos(angle)-vecs(irot,3)*Sin(angle)
+            !       vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
+            !       vecsrot(irot,4) = vecs(irot,4)
+            !    enddo
+            !    ! call adjust_kinematics(vecsrot)
+            !    call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
+            !    if((ampresrot(2)-ampres(2)) .ne. 0.0_ki) then
+            !       fpprec2 = -int(log10(abs((ampresrot(2)-ampres(2))/((ampresrot(2)+ampres(2))/2.0_ki))))
+            !    else
+            !       fpprec2 = 16
+            !    endif
+            !    if(fpprec2.ge.PSP_chk_li3) icheck=1                         ! ACCEPTED
+            !    if(fpprec2.lt.PSP_chk_li3) icheck=3                         ! DISCARD
+            ! endif
             reduction_interoperation = tmp_red_int
             prec = min(spprec2,fpprec2)
          endif
@@ -333,7 +362,7 @@ contains
       use p0_gg_hhg_config, only: &
          & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
          & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
-         & renorm_logs, renorm_mqse, nlo_prefactors
+         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
       use p0_gg_hhg_kinematics, only: &
          & inspect_kinematics, init_event
       use p0_gg_hhg_model
@@ -363,14 +392,13 @@ contains
          nlo_coupling = 1.0_ki
       end if
 
-      call init_event(vecs)
-
       if(debug_lo_diagrams .or. debug_nlo_diagrams) then
+         call init_event(vecs)
          write(logfile,'(A7)') "<event>"
          call inspect_kinematics(logfile)
       end if
 
-      
+
       amp(1)   = 0.0_ki
       select case (renormalisation)
       case (0)
@@ -394,9 +422,9 @@ contains
       end select
 
       if (present(h)) then
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling
       else
-         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling
+         amp((/4,3,2/)) = samplitudel1(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling
       end if
       select case (renormalisation)
       case (0)
@@ -495,16 +523,16 @@ contains
       logical, dimension(0:7) :: eval_heli
       real(ki) :: fr, rational2
 
+      amp(:) = 0.0_ki
+      rat2 = 0.0_ki
+      ok = .true.
+
       if (present(h)) then
          eval_heli(:) = .false.
          eval_heli(h) = .true.
       else
          eval_heli(:) = .true.
       end if
-
-      amp(:) = 0.0_ki
-      rat2 = 0.0_ki
-      ok = .true.
       if (eval_heli(0)) then
          if(debug_nlo_diagrams) then
             write(logfile,*) "<helicity index='0'>"
@@ -975,8 +1003,6 @@ contains
          eval_heli(:) = .true.
       end if
 
-      call init_event(vecs)
-
       if(corrections_are_qcd) then
          nlo_coupling = 1.0_ki
       else
@@ -999,6 +1025,676 @@ contains
       end select
    end subroutine ir_subtraction
    !---#] subroutine ir_subtraction :
+   !---#[ subroutine samplitudel01_qp :
+   subroutine     samplitudel01_qp(vecs, scale2, amp, rat2, ok, h)
+      use p0_gg_hhg_config, only: &
+         & debug_lo_diagrams, debug_nlo_diagrams, logfile, deltaOS, &
+         & renormalisation, renorm_beta, renorm_mqwf, renorm_decoupling, &
+         & renorm_logs, renorm_mqse, renorm_yukawa, nlo_prefactors
+      use p0_gg_hhg_kinematics_qp, only: &
+         & inspect_kinematics, init_event
+      use p0_gg_hhg_model_qp
+      use p0_gg_hhg_dipoles_qp, only: pi
+      implicit none
+      real(ki_qp), dimension(5, 4), intent(in) :: vecs
+      real(ki_qp), intent(in) :: scale2
+      real(ki_qp), dimension(4), intent(out) :: amp
+      real(ki_qp), intent(out) :: rat2
+      logical, intent(out), optional :: ok
+      integer, intent(in), optional :: h
+      real(ki_qp) :: nlo_coupling
+
+      complex(ki_qp), parameter :: i_ = (0.0_ki_qp, 1.0_ki_qp)
+
+      ! Number of heavy quark flavours in loops.
+      real(ki_qp), parameter :: NFh_qp = 0.0_ki_qp
+
+      logical :: my_ok
+
+      ! used for m=0 QCD renormalisation
+      real(ki_qp) :: beta0
+
+      if(corrections_are_qcd) then
+         nlo_coupling = 1.0_ki_qp
+      else
+         nlo_coupling = 1.0_ki_qp
+      end if
+
+      if(debug_lo_diagrams .or. debug_nlo_diagrams) then
+         call init_event(vecs)
+         write(logfile,'(A7)') "<event>"
+         call inspect_kinematics(logfile)
+      end if
+
+      
+      amp(1)   = 0.0_ki_qp
+      select case (renormalisation)
+      case (0)
+         ! no renormalisation
+         deltaOS = 0.0_ki_qp
+      case (1)
+         ! fully renormalized
+         if(renorm_mqse) then
+            deltaOS = 1.0_ki_qp
+         else
+            deltaOS = 0.0_ki_qp
+         end if
+      case (2)
+         ! massive quark counterterms only
+         deltaOS = 1.0_ki_qp
+      case default
+         ! not implemented
+         print*, "In p0_gg_hhg_matrix:"
+         print*, "  invalid value for renormalisation=", renormalisation
+         stop
+      end select
+
+      if (present(h)) then
+         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2, h)/nlo_coupling/nlo_coupling
+      else
+         amp((/4,3,2/)) = samplitudel1_qp(vecs, scale2, my_ok, rat2)/nlo_coupling/nlo_coupling
+      end if
+      select case (renormalisation)
+      case (0)
+         ! no renormalisation
+      case (1)
+         ! fully renormalized
+         ! No tree level present
+      case (2)
+         ! massive quark counterterms only
+      case default
+         ! not implemented
+         print*, "In p0_gg_hhg_matrix:"
+         print*, "  invalid value for renormalisation=", renormalisation
+         stop
+      end select
+      if (convert_to_cdr) then
+         ! Scheme conversion for infrared structure
+         ! Reference:
+         ! S. Catani, M. H. Seymour, Z. Trocsanyi,
+         ! ``Regularisation scheme independence and unitarity
+         !   in QCD cross-sections,''
+         ! Phys.Rev. D 55 (1997) 6819
+         ! arXiv:hep-ph/9610553
+         amp(2) = amp(2) - amp(1) * (&
+           &          num_light_quarks * 0.5_ki_qp * CF_qp &
+           &        + num_gluons * 1.0_ki_qp/6.0_ki_qp * CA_qp)
+      end if
+      if (present(ok)) ok = my_ok
+
+      if(debug_lo_diagrams .or. debug_nlo_diagrams) then
+         write(logfile,'(A25,E24.16,A3)') &
+            & "<result kind='lo' value='", amp(1), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-finite' value='", amp(2), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-single' value='", amp(3), "'/>"
+         write(logfile,'(A33,E24.16,A3)') &
+            & "<result kind='nlo-double' value='", amp(4), "'/>"
+         if(my_ok) then
+            write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+         else
+            write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+         end if
+         write(logfile,'(A8)') "</event>"
+      end if
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * nlo_coupling * nlo_coupling
+      case(2)
+         ! loop-induced
+         amp(2:4) = amp(2:4) * (nlo_coupling / 8.0_ki_qp / pi / pi)**2
+      end select
+   end subroutine samplitudel01_qp
+   !---#] subroutine samplitudel01_qp :
+   !---#[ function samplitudel0_qp :
+   function     samplitudel0_qp(vecs, h) result(amp)
+      use p0_gg_hhg_config, only: logfile
+      use p0_gg_hhg_kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension(5, 4), intent(in) :: vecs
+      integer, optional, intent(in) :: h
+      real(ki_qp) :: amp, heli_amp
+      complex(ki_qp), dimension(numcs) :: color_vector
+      logical, dimension(0:7) :: eval_heli
+      real(ki_qp), dimension(5, 4) :: pvecs
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
+
+      amp = 0.0_ki_qp
+   end function samplitudel0_qp
+   !---#] function samplitudel0_qp :
+   !---#[ function samplitudel1_qp :
+   function     samplitudel1_qp(vecs,scale2,ok,rat2,h) result(amp)
+      use p0_gg_hhg_config, only: &
+         & debug_nlo_diagrams, logfile, renorm_gamma5
+      use p0_gg_hhg_kinematics_qp, only: init_event
+      implicit none
+      real(ki_qp), dimension(5, 4), intent(in) :: vecs
+      logical, intent(out) :: ok
+      real(ki_qp), intent(in) :: scale2
+      real(ki_qp), intent(out) :: rat2
+      integer, optional, intent(in) :: h
+      real(ki_qp), dimension(5, 4) :: pvecs
+      real(ki_qp), dimension(-2:0) :: amp, heli_amp
+      complex(ki_qp), dimension(numcs,-2:0) :: colorvec
+      integer :: c
+      logical :: my_ok
+      logical, dimension(0:7) :: eval_heli
+      real(ki_qp) :: fr, rational2
+
+      amp(:) = 0.0_ki_qp
+      rat2 = 0.0_ki_qp
+      ok = .true.
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
+
+
+      if (eval_heli(0)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='0'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = vecs(2,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = vecs(5,:)
+         call init_event(pvecs, -1, -1, -1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh0l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = vecs(2,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = vecs(5,:)
+            call init_event(pvecs, -1, -1, -1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation0_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(1)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='1'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = vecs(2,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = vecs(5,:)
+         call init_event(pvecs, +1, -1, -1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh1l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = vecs(2,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = vecs(5,:)
+            call init_event(pvecs, +1, -1, -1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation1_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(2)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='2'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(2,:)
+         pvecs(2,:) = vecs(1,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = vecs(5,:)
+         call init_event(pvecs, -1, +1, -1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh1l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(2,:)
+            pvecs(2,:) = vecs(1,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = vecs(5,:)
+            call init_event(pvecs, -1, +1, -1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation1_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(3)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='3'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = vecs(2,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = vecs(5,:)
+         call init_event(pvecs, +1, +1, -1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh3l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = vecs(2,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = vecs(5,:)
+            call init_event(pvecs, +1, +1, -1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation3_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(4)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='4'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = vecs(2,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = vecs(5,:)
+         call init_event(pvecs, -1, -1, +1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh4l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = vecs(2,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = vecs(5,:)
+            call init_event(pvecs, -1, -1, +1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation4_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(5)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='5'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = -vecs(5,:)
+         pvecs(2,:) = vecs(2,:)
+         pvecs(3,:) = vecs(4,:)
+         pvecs(4,:) = vecs(3,:)
+         pvecs(5,:) = -vecs(1,:)
+         call init_event(pvecs, +1, -1, +1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh0l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = -vecs(5,:)
+            pvecs(2,:) = vecs(2,:)
+            pvecs(3,:) = vecs(4,:)
+            pvecs(4,:) = vecs(3,:)
+            pvecs(5,:) = -vecs(1,:)
+            call init_event(pvecs, +1, -1, +1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation0_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(6)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='6'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = -vecs(5,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = -vecs(2,:)
+         call init_event(pvecs, -1, +1, +1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh0l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = -vecs(5,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = -vecs(2,:)
+            call init_event(pvecs, -1, +1, +1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation0_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (eval_heli(7)) then
+         if(debug_nlo_diagrams) then
+            write(logfile,*) "<helicity index='7'>"
+         end if
+         !---#[ reinitialize kinematics:
+         pvecs(1,:) = vecs(1,:)
+         pvecs(2,:) = -vecs(5,:)
+         pvecs(3,:) = vecs(3,:)
+         pvecs(4,:) = vecs(4,:)
+         pvecs(5,:) = -vecs(2,:)
+         call init_event(pvecs, +1, +1, +1)
+            !---#] reinitialize kinematics:
+         do c=1,numcs
+            colorvec(c,:) = samplitudeh1l1_qp(real(scale2,ki_qp),my_ok,rational2,c)
+         end do
+         heli_amp( 0) = square_qp(colorvec(:, 0))
+         heli_amp(-1) = square_qp(colorvec(:,-1))
+         heli_amp(-2) = square_qp(colorvec(:,-2))
+      
+         if (corrections_are_qcd .and. renorm_gamma5) then
+            !---#[ reinitialize kinematics:
+            pvecs(1,:) = vecs(1,:)
+            pvecs(2,:) = -vecs(5,:)
+            pvecs(3,:) = vecs(3,:)
+            pvecs(4,:) = vecs(4,:)
+            pvecs(5,:) = -vecs(2,:)
+            call init_event(pvecs, +1, +1, +1)
+            !---#] reinitialize kinematics:
+            fr = finite_renormalisation1_qp(real(scale2,ki_qp))
+            heli_amp(0) = heli_amp(0) + fr
+         end if
+         ok = ok .and. my_ok
+         amp = amp + heli_amp
+         rat2 = rat2 + rational2
+
+         if(debug_nlo_diagrams) then
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-finite' value='", heli_amp(0), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-single' value='", heli_amp(-1), "'/>"
+            write(logfile,'(A33,E24.16,A3)') &
+                & "<result kind='nlo-double' value='", heli_amp(-2), "'/>"
+            if (corrections_are_qcd .and. renorm_gamma5) then
+               write(logfile,'(A30,E24.16,A3)') &
+                   & "<result kind='fin-ren' value='", fr, "'/>"
+            end if
+            if(my_ok) then
+               write(logfile,'(A30)') "<flag name='ok' status='yes'/>"
+            else
+               write(logfile,'(A29)') "<flag name='ok' status='no'/>"
+            end if
+            write(logfile,*) "</helicity>"
+         end if
+      end if
+      if (include_helicity_avg_factor) then
+         amp = amp / real(in_helicities, ki_qp)
+      end if
+      if (include_color_avg_factor) then
+         amp = amp / incolors
+      end if
+      if (include_symmetry_factor) then
+         amp = amp / real(symmetry_factor, ki_qp)
+      end if
+   end function samplitudel1_qp
+   !---#] function samplitudel1_qp :
+   !---#[ subroutine ir_subtraction_qp :
+   subroutine     ir_subtraction_qp(vecs,scale2,amp,h)
+      use p0_gg_hhg_config, only: &
+         & nlo_prefactors
+      use p0_gg_hhg_dipoles_qp, only: pi
+      use p0_gg_hhg_kinematics_qp, only: &
+         & init_event, corrections_are_qcd
+      use p0_gg_hhg_model_qp
+      implicit none
+      real(ki_qp), dimension(5, 4), intent(in) :: vecs
+      real(ki_qp), intent(in) :: scale2
+      integer, optional, intent(in) :: h
+      real(ki_qp), dimension(2), intent(out) :: amp
+      real(ki_qp), dimension(2) :: heli_amp
+      real(ki_qp), dimension(5, 4) :: pvecs
+      complex(ki_qp), dimension(numcs,numcs,2) :: oper
+      complex(ki_qp), dimension(numcs) :: color_vectorl0, pcolor
+      logical, dimension(0:7) :: eval_heli
+      real(ki_qp) :: nlo_coupling
+
+      if (present(h)) then
+         eval_heli(:) = .false.
+         eval_heli(h) = .true.
+      else
+         eval_heli(:) = .true.
+      end if
+
+      if(corrections_are_qcd) then
+         nlo_coupling = 1.0_ki_qp
+      else
+         nlo_coupling = 1.0_ki_qp
+      end if
+
+      if (corrections_are_qcd) then
+        oper = insertion_operator_qp(real(scale2,ki_qp), vecs)
+      else
+        oper = insertion_operator_qed_qp(real(scale2,ki_qp), vecs)
+      endif
+      amp(:) = 0.0_ki_qp
+      select case(nlo_prefactors)
+      case(0)
+         ! The result is already in its desired form
+      case(1)
+         amp(:) = amp(:) * nlo_coupling
+      case(2)
+         amp(:) = amp(:) * nlo_coupling / 8.0_ki_qp / pi / pi
+      end select
+   end subroutine ir_subtraction_qp
+   !---#] subroutine ir_subtraction_qp :
    !---#[ color correlated ME :
    pure subroutine color_correlated_lo(color_vector,res)
       use p0_gg_hhg_color, only: T1T1, &
@@ -1064,8 +1760,157 @@ contains
       real(ki), dimension(num_legs*(num_legs-1)/2) :: ampcc_heli
       real(ki), dimension(num_legs, 4) :: pvecs
       complex(ki), dimension(numcs) :: color_vector
+      complex(ki), dimension(numcs,-2:0) :: colorvec
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2
       ampcc(:) = 0.0_ki
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, -1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
 
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, +1, -1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(2,:)
+      pvecs(2,:) = vecs(1,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, +1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, +1, +1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh3l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, -1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh4l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = -vecs(5,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(4,:)
+      pvecs(4,:) = vecs(3,:)
+      pvecs(5,:) = -vecs(1,:)
+      call init_event(pvecs, +1, -1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = -vecs(5,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = -vecs(2,:)
+      call init_event(pvecs, -1, +1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = -vecs(5,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = -vecs(2,:)
+      call init_event(pvecs, +1, +1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      color_vector = colorvec(:,0)
+      call OLP_color_correlated_lo(color_vector,ampcc_heli)
+
+      ampcc(:) = ampcc(:) + ampcc_heli(:)
+      
+      if (include_helicity_avg_factor) then
+         ampcc = ampcc / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         ampcc = ampcc / incolors
+      end if
+      if (include_symmetry_factor) then
+         ampcc = ampcc / real(symmetry_factor, ki)
+      end if
 
    end subroutine OLP_color_correlated
 
@@ -1096,9 +1941,229 @@ contains
       real(ki), dimension(num_legs, 4) :: pvecs
       integer :: i
       complex(ki) :: pm, mp
+      complex(ki), dimension(numcs) :: heli_amp0
+      complex(ki), dimension(numcs) :: heli_amp1
+      complex(ki), dimension(numcs) :: heli_amp2
+      complex(ki), dimension(numcs) :: heli_amp3
+      complex(ki), dimension(numcs) :: heli_amp4
+      complex(ki), dimension(numcs) :: heli_amp5
+      complex(ki), dimension(numcs) :: heli_amp6
+      complex(ki), dimension(numcs) :: heli_amp7
+      complex(ki), dimension(4) :: eps1
+      complex(ki), dimension(4) :: eps2
+      complex(ki), dimension(4) :: eps5
+      complex(ki), dimension(numcs,-2:0) :: colorvec
+      integer :: c
+      logical :: my_ok
+      real(ki) :: rational2, scale2
 
       ampsc(:) = 0.0_ki
       !---#[ Initialize helicity amplitudes :
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, -1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp0 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, +1, -1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp1 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(2,:)
+      pvecs(2,:) = vecs(1,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, +1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp2 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, +1, +1, -1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh3l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp3 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = vecs(5,:)
+      call init_event(pvecs, -1, -1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh4l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp4 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = -vecs(5,:)
+      pvecs(2,:) = vecs(2,:)
+      pvecs(3,:) = vecs(4,:)
+      pvecs(4,:) = vecs(3,:)
+      pvecs(5,:) = -vecs(1,:)
+      call init_event(pvecs, +1, -1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp5 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = -vecs(5,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = -vecs(2,:)
+      call init_event(pvecs, -1, +1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh0l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp6 = colorvec(:, 0)
+      !---#[ reinitialize kinematics:
+      pvecs(1,:) = vecs(1,:)
+      pvecs(2,:) = -vecs(5,:)
+      pvecs(3,:) = vecs(3,:)
+      pvecs(4,:) = vecs(4,:)
+      pvecs(5,:) = -vecs(2,:)
+      call init_event(pvecs, +1, +1, +1)
+      !---#] reinitialize kinematics:
+      ! For loop induced diagrams the scale should not matter
+      scale2 = 100.0_ki
+      do c=1,numcs
+         colorvec(c,:) = samplitudeh1l1(real(scale2,ki),my_ok,rational2,c)
+      end do
+      heli_amp7 = colorvec(:, 0)
+      !---#] Initialize helicity amplitudes :
+
+       
+      !---#[ pair 12 :
+
+      mp  = 0.0_ki &
+      &          + square_1_2_sc(heli_amp0,heli_amp1) &
+      &          + square_1_2_sc(heli_amp2,heli_amp3) &
+      &          + square_1_2_sc(heli_amp4,heli_amp5) &
+      &          + square_1_2_sc(heli_amp6,heli_amp7)
+
+      ampsc(2*(1-1)+2*(2-1)*num_legs+1)   = ampsc(2*(1-1)+2*(2-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(1-1)+2*(2-1)*num_legs+2) = ampsc(2*(1-1)+2*(2-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 12 :
+      
+      !---#[ pair 15 :
+
+      mp  = 0.0_ki &
+      &          + square_1_5_sc(heli_amp0,heli_amp1) &
+      &          + square_1_5_sc(heli_amp2,heli_amp3) &
+      &          + square_1_5_sc(heli_amp4,heli_amp5) &
+      &          + square_1_5_sc(heli_amp6,heli_amp7)
+
+      ampsc(2*(1-1)+2*(5-1)*num_legs+1)   = ampsc(2*(1-1)+2*(5-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(1-1)+2*(5-1)*num_legs+2) = ampsc(2*(1-1)+2*(5-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 15 :
+      
+      !---#[ pair 21 :
+
+      mp  = 0.0_ki &
+      &          + square_2_1_sc(heli_amp0,heli_amp2) &
+      &          + square_2_1_sc(heli_amp1,heli_amp3) &
+      &          + square_2_1_sc(heli_amp4,heli_amp6) &
+      &          + square_2_1_sc(heli_amp5,heli_amp7)
+
+      ampsc(2*(2-1)+2*(1-1)*num_legs+1)   = ampsc(2*(2-1)+2*(1-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(2-1)+2*(1-1)*num_legs+2) = ampsc(2*(2-1)+2*(1-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 21 :
+       
+      !---#[ pair 25 :
+
+      mp  = 0.0_ki &
+      &          + square_2_5_sc(heli_amp0,heli_amp2) &
+      &          + square_2_5_sc(heli_amp1,heli_amp3) &
+      &          + square_2_5_sc(heli_amp4,heli_amp6) &
+      &          + square_2_5_sc(heli_amp5,heli_amp7)
+
+      ampsc(2*(2-1)+2*(5-1)*num_legs+1)   = ampsc(2*(2-1)+2*(5-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(2-1)+2*(5-1)*num_legs+2) = ampsc(2*(2-1)+2*(5-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 25 :
+      
+      !---#[ pair 51 :
+
+      mp  = 0.0_ki &
+      &          + square_5_1_sc(heli_amp0,heli_amp4) &
+      &          + square_5_1_sc(heli_amp1,heli_amp5) &
+      &          + square_5_1_sc(heli_amp2,heli_amp6) &
+      &          + square_5_1_sc(heli_amp3,heli_amp7)
+
+      ampsc(2*(5-1)+2*(1-1)*num_legs+1)   = ampsc(2*(5-1)+2*(1-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(5-1)+2*(1-1)*num_legs+2) = ampsc(2*(5-1)+2*(1-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 51 :
+      
+      !---#[ pair 52 :
+
+      mp  = 0.0_ki &
+      &          + square_5_2_sc(heli_amp0,heli_amp4) &
+      &          + square_5_2_sc(heli_amp1,heli_amp5) &
+      &          + square_5_2_sc(heli_amp2,heli_amp6) &
+      &          + square_5_2_sc(heli_amp3,heli_amp7)
+
+      ampsc(2*(5-1)+2*(2-1)*num_legs+1)   = ampsc(2*(5-1)+2*(2-1)*num_legs +1) + real(mp, ki)
+      ampsc(2*(5-1)+2*(2-1)*num_legs+2) = ampsc(2*(5-1)+2*(2-1)*num_legs + 2)  + real(aimag(mp),ki)
+
+      !---#] pair 52 :
+       
+
+      
+
+      if (include_helicity_avg_factor) then
+         ampsc = ampsc / real(in_helicities, ki)
+      end if
+      if (include_color_avg_factor) then
+         ampsc = ampsc / incolors
+      end if
+      if (include_symmetry_factor) then
+         ampsc = ampsc / real(symmetry_factor, ki)
+      end if
    end subroutine OLP_spin_correlated_lo2
    !---#] spin correlated ME :
 
@@ -1211,5 +2276,9 @@ contains
       amp = sum(v1(:) * v2(:))
    end function  square_5_2_sc
        
+
+   
+
+   
 
 end module p0_gg_hhg_matrix

@@ -1,7 +1,7 @@
 ! Interface of ninja for Gosam
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 module ninjavholo

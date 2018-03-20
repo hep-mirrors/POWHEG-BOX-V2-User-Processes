@@ -1,102 +1,105 @@
 module     p0_gg_hhg_color
-   ! file:      /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/G
-   ! oSam_POWHEG/Virtual/p0_gg_hhg/common/color.f90
-   ! generator: haggies (1.1)
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/GoSam_POWHEG/Virtual/p0_gg_hhg/common/color.f90 
+   ! generator: buildcolor.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_model, only: NC, Nf
    implicit none
+   private
    save
 
-   private :: ki, NC, Nf
+   public :: init_color
 
-   real(ki), parameter :: TR = 0.5_ki
+   real(ki), parameter, public :: TR = 0.5_ki
 
-   complex(ki), parameter, private :: i_ = (0.0_ki, 1.0_ki)
-   real(ki), parameter, private :: pi = &
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+   real(ki), parameter :: pi = &
    & 3.1415926535897932384626433832795028841971693993751058209749445920_ki
-   real(ki), parameter, private :: pi6 = pi*pi/6.0_ki
+   real(ki), parameter :: pi6 = pi*pi/6.0_ki
 
-   integer, parameter :: numcs = 2
-   complex(ki), dimension(numcs, numcs) :: CC
-   complex(ki), dimension(numcs, numcs) :: T1T1
-   complex(ki), dimension(numcs, numcs) :: T1T2
-   complex(ki), dimension(numcs, numcs) :: T1T5
-   complex(ki), dimension(numcs, numcs) :: T2T2
-   complex(ki), dimension(numcs, numcs) :: T2T5
-   complex(ki), dimension(numcs, numcs) :: T5T5
-   real(ki) :: incolors
+   integer, parameter, public :: numcs = 2
+   complex(ki), dimension(numcs,numcs), public :: T1T1
+   complex(ki), dimension(numcs,numcs), public :: T1T2
+   complex(ki), dimension(numcs,numcs), public :: T1T5
+   complex(ki), dimension(numcs,numcs), public :: T2T2
+   complex(ki), dimension(numcs,numcs), public :: T2T5
+   complex(ki), dimension(numcs,numcs), public :: T5T5
+   complex(ki), dimension(numcs,numcs), public :: CC
+   real(ki), public :: incolors
 
-   real(ki) :: CA, CF, KA, KF, gammaA, gammaF
+   real(ki), public :: CA, CF, KA, KF, gammaA, gammaF
+
+   real(ki) :: NA
+   real(ki), dimension(8) :: cabb
 
    ! Basis vectors
-   real(ki), dimension(numcs), parameter :: c1 = &
-      & (/1.0_ki, 0.0_ki/)
-   real(ki), dimension(numcs), parameter :: c2 = &
-      & (/0.0_ki, 1.0_ki/)
+   real(ki), dimension(numcs), parameter, public :: c1 = &
+      & (/         1.0_ki         , 0.0_ki/)
+   real(ki), dimension(numcs), parameter, public :: c2 = &
+      & (/         0.0_ki,          1.0_ki/)
 contains
    subroutine     init_color()
       implicit none
-      real(ki) :: NA
-      real(ki) :: t1
-      real(ki) :: t2
-      real(ki) :: t3
-      real(ki) :: t4
-      real(ki) :: t5
-      
-      t1 = NC*NC
-      NA = (t1-1.0_ki)
-      incolors = (NA*NA)
-      t2 = t1-3.0_ki
-      t3 = TR*TR
-      t4 = (2.0_ki/NC+t2*NC)*t3*TR
-      CC(1, 1) = t4
-      CC(1, 1) = t4
-      CC(1, 2) = (2.0_ki*(1.0_ki/NC-NC)*t3*TR)
-      CC(2, 1) = (2.0_ki*(1.0_ki/NC-NC)*t3*TR)
-      CC(2, 2) = t4
-      CC(2, 2) = t4
-      t2 = (2.0_ki+t1*t2)*t3*TR
-      T1T1(1, 1) = t2
-      T1T1(1, 1) = t2
-      t4 = 2.0_ki*t1
-      t5 = (2.0_ki-t4)*t3*TR
-      T1T1(1, 2) = t5
-      T1T1(2, 1) = t5
-      T1T1(2, 2) = t2
-      T1T1(2, 2) = t2
-      t3 = t3*t3
-      t1 = ((3.0_ki-t1)*t1-2.0_ki)*t3
-      T1T2(1, 1) = t1
-      T1T2(1, 1) = t1
-      t3 = (t4-2.0_ki)*t3
-      T1T2(1, 2) = t3
-      T1T2(2, 1) = t3
-      T1T2(2, 2) = t1
-      T1T2(2, 2) = t1
-      T1T5(1, 1) = t1
-      T1T5(1, 1) = t1
-      T1T5(1, 2) = t3
-      T1T5(2, 1) = t3
-      T1T5(2, 2) = t1
-      T1T5(2, 2) = t1
-      T2T2(1, 1) = t2
-      T2T2(1, 1) = t2
-      T2T2(1, 2) = t5
-      T2T2(2, 1) = t5
-      T2T2(2, 2) = t2
-      T2T2(2, 2) = t2
-      T2T5(1, 1) = t1
-      T2T5(1, 1) = t1
-      T2T5(1, 2) = t3
-      T2T5(2, 1) = t3
-      T2T5(2, 2) = t1
-      T2T5(2, 2) = t1
-      T5T5(1, 1) = t2
-      T5T5(1, 1) = t2
-      T5T5(1, 2) = t5
-      T5T5(2, 1) = t5
-      T5T5(2, 2) = t2
-      T5T5(2, 2) = t2
+      NA=NC*NC-1.0_ki
+      incolors=1.0_ki*NA*NA
+      cabb(1)=NC**(-1)
+      cabb(2)=NC**2
+      cabb(3)=cabb(2)-3.0_ki
+      cabb(4)=cabb(3)*NC
+      cabb(4)=cabb(4)+2.0_ki*cabb(1)
+      cabb(5)=TR**3
+      cabb(4)=cabb(4)*cabb(5)
+      cabb(6)=2.0_ki*cabb(5)
+      cabb(7)=NC-cabb(1)
+      cabb(7)=cabb(6)*cabb(7)
+      cabb(3)=cabb(3)*cabb(2)
+      cabb(3)=cabb(3)+2.0_ki
+      cabb(5)=cabb(3)*cabb(5)
+      cabb(2)=cabb(2)-1.0_ki
+      cabb(6)=cabb(6)*cabb(2)
+      cabb(8)=TR**4
+      cabb(3)=cabb(3)*cabb(8)
+      cabb(8)=2.0_ki*cabb(8)
+      cabb(2)=cabb(8)*cabb(2)
+      T1T1(1,1)=cabb(5)
+      T1T1(1,2)=-cabb(6)
+      T1T1(2,1)=-cabb(6)
+      T1T1(2,1)=-cabb(6)
+      T1T1(1,2)=-cabb(6)
+      T1T1(2,2)=cabb(5)
+      T1T2(1,1)=-cabb(3)
+      T1T2(1,2)=cabb(2)
+      T1T2(2,1)=cabb(2)
+      T1T2(2,1)=cabb(2)
+      T1T2(1,2)=cabb(2)
+      T1T2(2,2)=-cabb(3)
+      T1T5(1,1)=-cabb(3)
+      T1T5(1,2)=cabb(2)
+      T1T5(2,1)=cabb(2)
+      T1T5(2,1)=cabb(2)
+      T1T5(1,2)=cabb(2)
+      T1T5(2,2)=-cabb(3)
+      T2T2(1,1)=cabb(5)
+      T2T2(1,2)=-cabb(6)
+      T2T2(2,1)=-cabb(6)
+      T2T2(2,1)=-cabb(6)
+      T2T2(1,2)=-cabb(6)
+      T2T2(2,2)=cabb(5)
+      T2T5(1,1)=-cabb(3)
+      T2T5(1,2)=cabb(2)
+      T2T5(2,1)=cabb(2)
+      T2T5(2,1)=cabb(2)
+      T2T5(1,2)=cabb(2)
+      T2T5(2,2)=-cabb(3)
+      T5T5(1,1)=cabb(5)
+      T5T5(1,2)=-cabb(6)
+      T5T5(2,1)=-cabb(6)
+      T5T5(2,1)=-cabb(6)
+      T5T5(1,2)=-cabb(6)
+      T5T5(2,2)=cabb(5)
+      CC(1,1)=cabb(4)
+      CC(1,2)=-cabb(7)
+      CC(2,1)=-cabb(7)
+      CC(2,2)=cabb(4)
 
       CA = NC
       CF = TR * NA / NC
@@ -109,7 +112,7 @@ contains
       gammaA = 11.0_ki/6.0_ki * CA - 2.0_ki/3.0_ki * TR * Nf
       ! gammaF = \gamma_q in (C.11) [Catani,Seymour]
       gammaF = 1.5_ki * CF
-   end subroutine init_color
+   end subroutine ! end of "init_color"
    subroutine     inspect_color(unit)
       implicit none
       integer, intent(in) :: unit

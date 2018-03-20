@@ -1,6 +1,6 @@
 module     p1_dg_hhd_d1h0l131
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p1_dg_hhd/helicity0d1h0l131.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p1_dg_hhd/helicity0d1h0l131.f90
    ! generator: buildfortran_tn3.py
    use p1_dg_hhd_config, only: ki
    use p1_dg_hhd_util, only: cond_t, d => metric_tensor

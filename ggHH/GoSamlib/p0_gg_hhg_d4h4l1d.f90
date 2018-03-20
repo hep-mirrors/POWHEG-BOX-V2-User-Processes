@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d4h4l1d
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity4d4h4l1d.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity4d4h4l1d.f90
    ! generator: buildfortran_d.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond, d => metric_tensor
@@ -12,7 +12,7 @@ module     p0_gg_hhg_d4h4l1d
    integer, private :: iv2
    integer, private :: iv3
    real(ki), dimension(4), private :: qshift
-   public :: derivative , reconstruct_d4
+   public :: derivative
 contains
 !---#[ function brack_1:
    pure function brack_1(Q, mu2) result(brack)
@@ -23,24 +23,25 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(11) :: acd4
+      complex(ki), dimension(13) :: acd4
       complex(ki) :: brack
-      acd4(1)=dotproduct(k1,qshift)
+      acd4(1)=dotproduct(k2,qshift)
       acd4(2)=dotproduct(qshift,spvak5k2)
-      acd4(3)=abb4(9)
-      acd4(4)=dotproduct(k2,qshift)
-      acd4(5)=dotproduct(qshift,qshift)
-      acd4(6)=abb4(12)
-      acd4(7)=dotproduct(qshift,spvak1k2)
-      acd4(8)=abb4(7)
-      acd4(9)=abb4(10)
-      acd4(10)=acd4(1)-acd4(4)
-      acd4(10)=acd4(10)*acd4(3)
-      acd4(11)=acd4(8)*acd4(7)
-      acd4(10)=acd4(11)+acd4(10)
-      acd4(10)=acd4(2)*acd4(10)
-      acd4(11)=acd4(6)*acd4(5)
-      brack=acd4(9)+acd4(10)+acd4(11)
+      acd4(3)=abb4(14)
+      acd4(4)=dotproduct(qshift,qshift)
+      acd4(5)=abb4(11)
+      acd4(6)=dotproduct(qshift,spvak1k2)
+      acd4(7)=abb4(7)
+      acd4(8)=dotproduct(qshift,spvak5k1)
+      acd4(9)=abb4(8)
+      acd4(10)=abb4(13)
+      acd4(11)=acd4(7)*acd4(2)
+      acd4(12)=acd4(9)*acd4(8)
+      acd4(11)=acd4(12)+acd4(11)
+      acd4(11)=acd4(6)*acd4(11)
+      acd4(12)=acd4(3)*acd4(1)*acd4(2)
+      acd4(13)=-acd4(5)*acd4(4)
+      brack=acd4(10)+acd4(11)+acd4(12)+acd4(13)
    end function brack_1
 !---#] function brack_1:
 !---#[ function brack_2:
@@ -52,32 +53,35 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(15) :: acd4
+      complex(ki), dimension(17) :: acd4
       complex(ki) :: brack
-      acd4(1)=k1(iv1)
+      acd4(1)=k2(iv1)
       acd4(2)=dotproduct(qshift,spvak5k2)
-      acd4(3)=abb4(9)
-      acd4(4)=k2(iv1)
-      acd4(5)=qshift(iv1)
-      acd4(6)=abb4(12)
-      acd4(7)=spvak5k2(iv1)
-      acd4(8)=dotproduct(k1,qshift)
-      acd4(9)=dotproduct(k2,qshift)
-      acd4(10)=dotproduct(qshift,spvak1k2)
-      acd4(11)=abb4(7)
-      acd4(12)=spvak1k2(iv1)
-      acd4(13)=acd4(9)-acd4(8)
-      acd4(13)=acd4(13)*acd4(7)
-      acd4(14)=-acd4(1)+acd4(4)
-      acd4(14)=acd4(14)*acd4(2)
-      acd4(13)=acd4(14)+acd4(13)
-      acd4(13)=acd4(3)*acd4(13)
-      acd4(14)=-acd4(10)*acd4(7)
-      acd4(15)=-acd4(12)*acd4(2)
+      acd4(3)=abb4(14)
+      acd4(4)=qshift(iv1)
+      acd4(5)=abb4(11)
+      acd4(6)=spvak5k2(iv1)
+      acd4(7)=dotproduct(k2,qshift)
+      acd4(8)=dotproduct(qshift,spvak1k2)
+      acd4(9)=abb4(7)
+      acd4(10)=spvak1k2(iv1)
+      acd4(11)=dotproduct(qshift,spvak5k1)
+      acd4(12)=abb4(8)
+      acd4(13)=spvak5k1(iv1)
+      acd4(14)=-acd4(1)*acd4(2)
+      acd4(15)=-acd4(7)*acd4(6)
       acd4(14)=acd4(15)+acd4(14)
-      acd4(14)=acd4(11)*acd4(14)
-      acd4(15)=acd4(6)*acd4(5)
-      brack=acd4(13)+acd4(14)-2.0_ki*acd4(15)
+      acd4(14)=acd4(3)*acd4(14)
+      acd4(15)=-acd4(8)*acd4(6)
+      acd4(16)=-acd4(10)*acd4(2)
+      acd4(15)=acd4(15)+acd4(16)
+      acd4(15)=acd4(9)*acd4(15)
+      acd4(16)=-acd4(11)*acd4(10)
+      acd4(17)=-acd4(13)*acd4(8)
+      acd4(16)=acd4(17)+acd4(16)
+      acd4(16)=acd4(12)*acd4(16)
+      acd4(17)=acd4(5)*acd4(4)
+      brack=acd4(14)+acd4(15)+acd4(16)+2.0_ki*acd4(17)
    end function brack_2
 !---#] function brack_2:
 !---#[ function brack_3:
@@ -89,32 +93,35 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(15) :: acd4
+      complex(ki), dimension(17) :: acd4
       complex(ki) :: brack
       acd4(1)=d(iv1,iv2)
-      acd4(2)=abb4(12)
-      acd4(3)=k1(iv1)
+      acd4(2)=abb4(11)
+      acd4(3)=k2(iv1)
       acd4(4)=spvak5k2(iv2)
-      acd4(5)=abb4(9)
-      acd4(6)=k1(iv2)
+      acd4(5)=abb4(14)
+      acd4(6)=k2(iv2)
       acd4(7)=spvak5k2(iv1)
-      acd4(8)=k2(iv1)
-      acd4(9)=k2(iv2)
-      acd4(10)=spvak1k2(iv2)
-      acd4(11)=abb4(7)
-      acd4(12)=spvak1k2(iv1)
-      acd4(13)=-acd4(9)+acd4(6)
-      acd4(13)=acd4(13)*acd4(7)
-      acd4(14)=-acd4(8)+acd4(3)
-      acd4(14)=acd4(14)*acd4(4)
-      acd4(13)=acd4(14)+acd4(13)
-      acd4(13)=acd4(5)*acd4(13)
-      acd4(14)=acd4(10)*acd4(7)
-      acd4(15)=acd4(12)*acd4(4)
+      acd4(8)=spvak1k2(iv2)
+      acd4(9)=abb4(7)
+      acd4(10)=spvak1k2(iv1)
+      acd4(11)=spvak5k1(iv2)
+      acd4(12)=abb4(8)
+      acd4(13)=spvak5k1(iv1)
+      acd4(14)=acd4(3)*acd4(4)
+      acd4(15)=acd4(6)*acd4(7)
       acd4(14)=acd4(15)+acd4(14)
-      acd4(14)=acd4(11)*acd4(14)
-      acd4(15)=acd4(2)*acd4(1)
-      brack=acd4(13)+acd4(14)+2.0_ki*acd4(15)
+      acd4(14)=acd4(5)*acd4(14)
+      acd4(15)=acd4(8)*acd4(7)
+      acd4(16)=acd4(10)*acd4(4)
+      acd4(15)=acd4(15)+acd4(16)
+      acd4(15)=acd4(9)*acd4(15)
+      acd4(16)=acd4(11)*acd4(10)
+      acd4(17)=acd4(13)*acd4(8)
+      acd4(16)=acd4(17)+acd4(16)
+      acd4(16)=acd4(12)*acd4(16)
+      acd4(17)=acd4(2)*acd4(1)
+      brack=acd4(14)+acd4(15)+acd4(16)-2.0_ki*acd4(17)
    end function brack_3
 !---#] function brack_3:
 !---#[ function brack_4:
@@ -187,52 +194,4 @@ contains
       end if
    end function derivative
 !---#] function derivative:
-!---#[ subroutine reconstruct_d4:
-   subroutine     reconstruct_d4(coeffs)
-      use p0_gg_hhg_groups, only: tensrec_info_group4
-      implicit none
-      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
-      type(tensrec_info_group4), intent(out) :: coeffs
-      ! rank 3 case :
-      !---[# reconstruct coeffs%coeffs_4:
-      coeffs%coeffs_4%c0 = derivative(czip)
-      coeffs%coeffs_4%c1(1,1) = derivative(czip,1)
-      coeffs%coeffs_4%c1(1,2) = derivative(czip,1,1)/2.0_ki
-      coeffs%coeffs_4%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
-      coeffs%coeffs_4%c1(2,1) = -derivative(czip,2)
-      coeffs%coeffs_4%c1(2,2) = derivative(czip,2,2)/2.0_ki
-      coeffs%coeffs_4%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
-      coeffs%coeffs_4%c1(3,1) = -derivative(czip,3)
-      coeffs%coeffs_4%c1(3,2) = derivative(czip,3,3)/2.0_ki
-      coeffs%coeffs_4%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
-      coeffs%coeffs_4%c1(4,1) = -derivative(czip,4)
-      coeffs%coeffs_4%c1(4,2) = derivative(czip,4,4)/2.0_ki
-      coeffs%coeffs_4%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
-      coeffs%coeffs_4%c2(1,1) = -derivative(czip,1,2)
-      coeffs%coeffs_4%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
-      coeffs%coeffs_4%c2(1,3) = -derivative(czip,1,1,2)/2.0_ki
-      coeffs%coeffs_4%c2(2,1) = -derivative(czip,1,3)
-      coeffs%coeffs_4%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
-      coeffs%coeffs_4%c2(2,3) = -derivative(czip,1,1,3)/2.0_ki
-      coeffs%coeffs_4%c2(3,1) = -derivative(czip,1,4)
-      coeffs%coeffs_4%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
-      coeffs%coeffs_4%c2(3,3) = -derivative(czip,1,1,4)/2.0_ki
-      coeffs%coeffs_4%c2(4,1) = derivative(czip,2,3)
-      coeffs%coeffs_4%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
-      coeffs%coeffs_4%c2(4,3) = -derivative(czip,2,2,3)/2.0_ki
-      coeffs%coeffs_4%c2(5,1) = derivative(czip,2,4)
-      coeffs%coeffs_4%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
-      coeffs%coeffs_4%c2(5,3) = -derivative(czip,2,2,4)/2.0_ki
-      coeffs%coeffs_4%c2(6,1) = derivative(czip,3,4)
-      coeffs%coeffs_4%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
-      coeffs%coeffs_4%c2(6,3) = -derivative(czip,3,3,4)/2.0_ki
-      coeffs%coeffs_4%c3(1,1) = derivative(czip,1,2,3)
-      coeffs%coeffs_4%c3(2,1) = derivative(czip,1,2,4)
-      coeffs%coeffs_4%c3(3,1) = derivative(czip,1,3,4)
-      coeffs%coeffs_4%c3(4,1) = -derivative(czip,2,3,4)
-      !---#] reconstruct coeffs%coeffs_4:
-   end subroutine reconstruct_d4
-!---#] subroutine reconstruct_d4:
 end module     p0_gg_hhg_d4h4l1d

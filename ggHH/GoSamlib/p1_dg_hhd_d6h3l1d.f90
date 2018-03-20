@@ -1,6 +1,6 @@
 module     p1_dg_hhd_d6h3l1d
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p1_dg_hhd/helicity3d6h3l1d.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p1_dg_hhd/helicity3d6h3l1d.f90
    ! generator: buildfortran_d.py
    use p1_dg_hhd_config, only: ki
    use p1_dg_hhd_util, only: cond, d => metric_tensor
@@ -13,7 +13,7 @@ module     p1_dg_hhd_d6h3l1d
    integer, private :: iv3
    integer, private :: iv4
    real(ki), dimension(4), private :: qshift
-   public :: derivative , reconstruct_d6
+   public :: derivative
 contains
 !---#[ function brack_1:
    pure function brack_1(Q, mu2) result(brack)
@@ -26,7 +26,7 @@ contains
       complex(ki), intent(in) :: mu2
       complex(ki), dimension(1) :: acd6
       complex(ki) :: brack
-      acd6(1)=abb6(18)
+      acd6(1)=abb6(11)
       brack=acd6(1)
    end function brack_1
 !---#] function brack_1:
@@ -42,17 +42,17 @@ contains
       complex(ki), dimension(18) :: acd6
       complex(ki) :: brack
       acd6(1)=k2(iv1)
-      acd6(2)=abb6(15)
-      acd6(3)=l3(iv1)
-      acd6(4)=abb6(27)
-      acd6(5)=l4(iv1)
-      acd6(6)=abb6(28)
-      acd6(7)=spvak1k2(iv1)
-      acd6(8)=abb6(20)
-      acd6(9)=spvak1l4(iv1)
-      acd6(10)=abb6(23)
-      acd6(11)=spvak1k5(iv1)
-      acd6(12)=abb6(29)
+      acd6(2)=abb6(24)
+      acd6(3)=spvak1k2(iv1)
+      acd6(4)=abb6(18)
+      acd6(5)=spvak1l3(iv1)
+      acd6(6)=abb6(29)
+      acd6(7)=spvak1l4(iv1)
+      acd6(8)=abb6(30)
+      acd6(9)=spvak1k5(iv1)
+      acd6(10)=abb6(15)
+      acd6(11)=spval3k2(iv1)
+      acd6(12)=abb6(26)
       acd6(13)=-acd6(2)*acd6(1)
       acd6(14)=-acd6(4)*acd6(3)
       acd6(15)=-acd6(6)*acd6(5)
@@ -71,67 +71,52 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(42) :: acd6
+      complex(ki), dimension(25) :: acd6
       complex(ki) :: brack
       acd6(1)=d(iv1,iv2)
-      acd6(2)=abb6(9)
+      acd6(2)=abb6(12)
       acd6(3)=k2(iv1)
       acd6(4)=spvak1k2(iv2)
-      acd6(5)=abb6(34)
-      acd6(6)=k2(iv2)
-      acd6(7)=spvak1k2(iv1)
-      acd6(8)=l3(iv1)
-      acd6(9)=abb6(38)
-      acd6(10)=l3(iv2)
-      acd6(11)=l4(iv1)
-      acd6(12)=abb6(35)
-      acd6(13)=l4(iv2)
+      acd6(5)=abb6(22)
+      acd6(6)=spvak1k5(iv2)
+      acd6(7)=abb6(23)
+      acd6(8)=k2(iv2)
+      acd6(9)=spvak1k2(iv1)
+      acd6(10)=spvak1k5(iv1)
+      acd6(11)=abb6(13)
+      acd6(12)=abb6(16)
+      acd6(13)=spvak1l3(iv2)
       acd6(14)=abb6(10)
-      acd6(15)=spvak1l3(iv2)
-      acd6(16)=abb6(14)
-      acd6(17)=spvak1l4(iv2)
-      acd6(18)=abb6(31)
-      acd6(19)=spvak1k5(iv2)
-      acd6(20)=abb6(19)
-      acd6(21)=spvak2k5(iv2)
-      acd6(22)=abb6(11)
-      acd6(23)=spval3k5(iv2)
-      acd6(24)=abb6(13)
-      acd6(25)=spval4k5(iv2)
-      acd6(26)=abb6(24)
-      acd6(27)=spvak1l3(iv1)
-      acd6(28)=spvak1l4(iv1)
-      acd6(29)=spvak1k5(iv1)
-      acd6(30)=spvak2k5(iv1)
-      acd6(31)=spval3k5(iv1)
-      acd6(32)=spval4k5(iv1)
-      acd6(33)=acd6(6)*acd6(5)
-      acd6(34)=acd6(10)*acd6(9)
-      acd6(35)=acd6(13)*acd6(12)
-      acd6(36)=acd6(14)*acd6(4)
-      acd6(37)=acd6(15)*acd6(16)
-      acd6(38)=acd6(17)*acd6(18)
-      acd6(39)=acd6(19)*acd6(20)
-      acd6(40)=acd6(21)*acd6(22)
-      acd6(41)=acd6(23)*acd6(24)
-      acd6(42)=acd6(25)*acd6(26)
-      acd6(33)=acd6(42)+acd6(41)+acd6(40)+acd6(39)+acd6(38)+acd6(37)+2.0_ki*acd&
-      &6(36)+acd6(35)+acd6(34)+acd6(33)
-      acd6(33)=acd6(7)*acd6(33)
-      acd6(34)=acd6(3)*acd6(5)
-      acd6(35)=acd6(8)*acd6(9)
-      acd6(36)=acd6(11)*acd6(12)
-      acd6(37)=acd6(27)*acd6(16)
-      acd6(38)=acd6(28)*acd6(18)
-      acd6(39)=acd6(29)*acd6(20)
-      acd6(40)=acd6(30)*acd6(22)
-      acd6(41)=acd6(31)*acd6(24)
-      acd6(42)=acd6(32)*acd6(26)
-      acd6(34)=acd6(42)+acd6(41)+acd6(40)+acd6(39)+acd6(38)+acd6(37)+acd6(36)+a&
-      &cd6(35)+acd6(34)
-      acd6(34)=acd6(4)*acd6(34)
-      acd6(35)=acd6(2)*acd6(1)
-      brack=acd6(33)+acd6(34)+2.0_ki*acd6(35)
+      acd6(15)=spvak1l3(iv1)
+      acd6(16)=spval3k2(iv2)
+      acd6(17)=abb6(17)
+      acd6(18)=spval3k2(iv1)
+      acd6(19)=abb6(21)
+      acd6(20)=acd6(14)*acd6(15)
+      acd6(21)=acd6(3)*acd6(5)
+      acd6(22)=acd6(10)*acd6(12)
+      acd6(23)=acd6(9)*acd6(11)
+      acd6(20)=2.0_ki*acd6(23)+acd6(22)+acd6(20)+acd6(21)
+      acd6(20)=acd6(4)*acd6(20)
+      acd6(21)=acd6(13)*acd6(14)
+      acd6(22)=acd6(5)*acd6(8)
+      acd6(23)=acd6(6)*acd6(12)
+      acd6(21)=acd6(23)+acd6(21)+acd6(22)
+      acd6(21)=acd6(9)*acd6(21)
+      acd6(22)=-acd6(15)*acd6(16)
+      acd6(23)=-acd6(13)*acd6(18)
+      acd6(22)=acd6(23)+acd6(22)
+      acd6(22)=acd6(19)*acd6(22)
+      acd6(23)=acd6(16)*acd6(17)
+      acd6(24)=acd6(7)*acd6(8)
+      acd6(23)=acd6(23)+acd6(24)
+      acd6(23)=acd6(10)*acd6(23)
+      acd6(24)=acd6(17)*acd6(18)
+      acd6(25)=acd6(3)*acd6(7)
+      acd6(24)=acd6(24)+acd6(25)
+      acd6(24)=acd6(6)*acd6(24)
+      acd6(25)=acd6(1)*acd6(2)
+      brack=acd6(20)+acd6(21)+acd6(22)+acd6(23)+acd6(24)+2.0_ki*acd6(25)
    end function brack_3
 !---#] function brack_3:
 !---#[ function brack_4:
@@ -143,70 +128,97 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(29) :: acd6
+      complex(ki), dimension(36) :: acd6
       complex(ki) :: brack
       acd6(1)=d(iv1,iv2)
       acd6(2)=spvak1k2(iv3)
-      acd6(3)=abb6(32)
-      acd6(4)=spvak1l4(iv3)
-      acd6(5)=abb6(22)
-      acd6(6)=spvak1k5(iv3)
-      acd6(7)=abb6(26)
-      acd6(8)=d(iv1,iv3)
-      acd6(9)=spvak1k2(iv2)
-      acd6(10)=spvak1l4(iv2)
-      acd6(11)=spvak1k5(iv2)
-      acd6(12)=d(iv2,iv3)
-      acd6(13)=spvak1k2(iv1)
-      acd6(14)=spvak1l4(iv1)
-      acd6(15)=spvak1k5(iv1)
-      acd6(16)=k2(iv1)
-      acd6(17)=abb6(25)
-      acd6(18)=k2(iv2)
-      acd6(19)=k2(iv3)
-      acd6(20)=l3(iv1)
-      acd6(21)=abb6(21)
-      acd6(22)=l3(iv2)
-      acd6(23)=l3(iv3)
-      acd6(24)=acd6(9)*acd6(6)
-      acd6(25)=acd6(11)*acd6(2)
-      acd6(24)=acd6(24)+acd6(25)
-      acd6(25)=-acd6(16)*acd6(24)
-      acd6(26)=acd6(13)*acd6(6)
-      acd6(27)=acd6(15)*acd6(2)
-      acd6(26)=acd6(26)+acd6(27)
-      acd6(27)=-acd6(18)*acd6(26)
-      acd6(28)=acd6(13)*acd6(11)
-      acd6(29)=acd6(15)*acd6(9)
-      acd6(28)=acd6(28)+acd6(29)
-      acd6(29)=-acd6(19)*acd6(28)
-      acd6(25)=acd6(29)+acd6(27)+acd6(25)
-      acd6(25)=acd6(17)*acd6(25)
-      acd6(24)=-acd6(20)*acd6(24)
-      acd6(26)=-acd6(22)*acd6(26)
-      acd6(27)=-acd6(23)*acd6(28)
-      acd6(24)=acd6(27)+acd6(26)+acd6(24)
-      acd6(24)=acd6(21)*acd6(24)
-      acd6(26)=-acd6(3)*acd6(2)
-      acd6(27)=-acd6(7)*acd6(6)
-      acd6(26)=acd6(26)+acd6(27)
-      acd6(26)=acd6(1)*acd6(26)
-      acd6(27)=-acd6(3)*acd6(9)
-      acd6(28)=-acd6(7)*acd6(11)
-      acd6(27)=acd6(27)+acd6(28)
-      acd6(27)=acd6(8)*acd6(27)
-      acd6(28)=-acd6(3)*acd6(13)
-      acd6(29)=-acd6(7)*acd6(15)
-      acd6(28)=acd6(28)+acd6(29)
-      acd6(28)=acd6(12)*acd6(28)
-      acd6(26)=acd6(28)+acd6(27)+acd6(26)
-      acd6(27)=-acd6(4)*acd6(1)
-      acd6(28)=-acd6(10)*acd6(8)
-      acd6(29)=-acd6(14)*acd6(12)
-      acd6(27)=acd6(29)+acd6(28)+acd6(27)
-      acd6(28)=2.0_ki*acd6(5)
-      acd6(27)=acd6(28)*acd6(27)
-      brack=acd6(24)+acd6(25)+2.0_ki*acd6(26)+acd6(27)
+      acd6(3)=abb6(20)
+      acd6(4)=spvak1k5(iv3)
+      acd6(5)=abb6(9)
+      acd6(6)=d(iv1,iv3)
+      acd6(7)=spvak1k2(iv2)
+      acd6(8)=spvak1k5(iv2)
+      acd6(9)=d(iv2,iv3)
+      acd6(10)=spvak1k2(iv1)
+      acd6(11)=spvak1k5(iv1)
+      acd6(12)=k2(iv1)
+      acd6(13)=abb6(25)
+      acd6(14)=k2(iv2)
+      acd6(15)=k2(iv3)
+      acd6(16)=spvak2k5(iv3)
+      acd6(17)=abb6(14)
+      acd6(18)=spvak2k5(iv2)
+      acd6(19)=spvak1l3(iv2)
+      acd6(20)=spval3k5(iv3)
+      acd6(21)=abb6(28)
+      acd6(22)=spvak1l3(iv3)
+      acd6(23)=spval3k5(iv2)
+      acd6(24)=spvak2k5(iv1)
+      acd6(25)=spvak1l3(iv1)
+      acd6(26)=spval3k5(iv1)
+      acd6(27)=spval3k2(iv3)
+      acd6(28)=spval3k2(iv2)
+      acd6(29)=spval3k2(iv1)
+      acd6(30)=-acd6(22)*acd6(28)
+      acd6(31)=-acd6(19)*acd6(27)
+      acd6(30)=acd6(30)+acd6(31)
+      acd6(30)=acd6(11)*acd6(30)
+      acd6(31)=-acd6(25)*acd6(27)
+      acd6(32)=-acd6(22)*acd6(29)
+      acd6(31)=acd6(31)+acd6(32)
+      acd6(31)=acd6(8)*acd6(31)
+      acd6(32)=-acd6(25)*acd6(28)
+      acd6(33)=-acd6(19)*acd6(29)
+      acd6(32)=acd6(32)+acd6(33)
+      acd6(32)=acd6(4)*acd6(32)
+      acd6(33)=-acd6(22)*acd6(23)
+      acd6(34)=-acd6(19)*acd6(20)
+      acd6(33)=acd6(33)+acd6(34)
+      acd6(33)=acd6(10)*acd6(33)
+      acd6(34)=-acd6(25)*acd6(20)
+      acd6(35)=-acd6(22)*acd6(26)
+      acd6(34)=acd6(34)+acd6(35)
+      acd6(34)=acd6(7)*acd6(34)
+      acd6(35)=-acd6(25)*acd6(23)
+      acd6(36)=-acd6(19)*acd6(26)
+      acd6(35)=acd6(35)+acd6(36)
+      acd6(35)=acd6(2)*acd6(35)
+      acd6(30)=acd6(35)+acd6(34)+acd6(33)+acd6(32)+acd6(30)+acd6(31)
+      acd6(30)=acd6(21)*acd6(30)
+      acd6(31)=-acd6(11)*acd6(9)
+      acd6(32)=-acd6(8)*acd6(6)
+      acd6(33)=-acd6(4)*acd6(1)
+      acd6(31)=acd6(33)+acd6(31)+acd6(32)
+      acd6(31)=acd6(5)*acd6(31)
+      acd6(32)=-acd6(11)*acd6(15)
+      acd6(33)=-acd6(4)*acd6(12)
+      acd6(32)=acd6(32)+acd6(33)
+      acd6(32)=acd6(13)*acd6(32)
+      acd6(33)=2.0_ki*acd6(3)
+      acd6(34)=-acd6(6)*acd6(33)
+      acd6(35)=2.0_ki*acd6(17)
+      acd6(36)=-acd6(10)*acd6(16)*acd6(35)
+      acd6(32)=acd6(36)+acd6(34)+acd6(32)
+      acd6(32)=acd6(7)*acd6(32)
+      acd6(34)=-acd6(10)*acd6(18)
+      acd6(36)=-acd6(7)*acd6(24)
+      acd6(34)=acd6(36)+acd6(34)
+      acd6(34)=acd6(35)*acd6(34)
+      acd6(35)=-acd6(11)*acd6(14)
+      acd6(36)=-acd6(8)*acd6(12)
+      acd6(35)=acd6(35)+acd6(36)
+      acd6(35)=acd6(13)*acd6(35)
+      acd6(36)=-acd6(1)*acd6(33)
+      acd6(34)=acd6(36)+acd6(35)+acd6(34)
+      acd6(34)=acd6(2)*acd6(34)
+      acd6(35)=-acd6(8)*acd6(15)
+      acd6(36)=-acd6(4)*acd6(14)
+      acd6(35)=acd6(35)+acd6(36)
+      acd6(35)=acd6(13)*acd6(35)
+      acd6(33)=-acd6(9)*acd6(33)
+      acd6(33)=acd6(33)+acd6(35)
+      acd6(33)=acd6(10)*acd6(33)
+      brack=acd6(30)+2.0_ki*acd6(31)+acd6(32)+acd6(33)+acd6(34)
    end function brack_4
 !---#] function brack_4:
 !---#[ function brack_5:
@@ -223,7 +235,7 @@ contains
       acd6(1)=d(iv1,iv2)
       acd6(2)=spvak1k2(iv3)
       acd6(3)=spvak1k5(iv4)
-      acd6(4)=abb6(17)
+      acd6(4)=abb6(27)
       acd6(5)=spvak1k2(iv4)
       acd6(6)=spvak1k5(iv3)
       acd6(7)=d(iv1,iv3)
@@ -328,87 +340,4 @@ contains
       end if
    end function derivative
 !---#] function derivative:
-!---#[ subroutine reconstruct_d6:
-   subroutine     reconstruct_d6(coeffs)
-      use p1_dg_hhd_groups, only: tensrec_info_group1
-      implicit none
-      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
-      type(tensrec_info_group1), intent(out) :: coeffs
-      ! rank 4 case :
-      !---[# reconstruct coeffs%coeffs_6:
-      coeffs%coeffs_6%c0 = derivative(czip)
-      coeffs%coeffs_6%c1(1,1) = derivative(czip,1)
-      coeffs%coeffs_6%c1(1,2) = derivative(czip,1,1)/2.0_ki
-      coeffs%coeffs_6%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
-      coeffs%coeffs_6%c1(1,4) = derivative(czip,1,1,1,1)/24.0_ki
-      coeffs%coeffs_6%c1(2,1) = -derivative(czip,2)
-      coeffs%coeffs_6%c1(2,2) = derivative(czip,2,2)/2.0_ki
-      coeffs%coeffs_6%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
-      coeffs%coeffs_6%c1(2,4) = derivative(czip,2,2,2,2)/24.0_ki
-      coeffs%coeffs_6%c1(3,1) = -derivative(czip,3)
-      coeffs%coeffs_6%c1(3,2) = derivative(czip,3,3)/2.0_ki
-      coeffs%coeffs_6%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
-      coeffs%coeffs_6%c1(3,4) = derivative(czip,3,3,3,3)/24.0_ki
-      coeffs%coeffs_6%c1(4,1) = -derivative(czip,4)
-      coeffs%coeffs_6%c1(4,2) = derivative(czip,4,4)/2.0_ki
-      coeffs%coeffs_6%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
-      coeffs%coeffs_6%c1(4,4) = derivative(czip,4,4,4,4)/24.0_ki
-      coeffs%coeffs_6%c2(1,1) = -derivative(czip,1,2)
-      coeffs%coeffs_6%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
-      coeffs%coeffs_6%c2(1,3) = -derivative(czip,1,2,2,2)/6.0_ki
-      coeffs%coeffs_6%c2(1,4) = -derivative(czip,1,1,2)/2.0_ki
-      coeffs%coeffs_6%c2(1,5) = derivative(czip,1,1,2,2)/4.0_ki
-      coeffs%coeffs_6%c2(1,6) = -derivative(czip,1,1,1,2)/6.0_ki
-      coeffs%coeffs_6%c2(2,1) = -derivative(czip,1,3)
-      coeffs%coeffs_6%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
-      coeffs%coeffs_6%c2(2,3) = -derivative(czip,1,3,3,3)/6.0_ki
-      coeffs%coeffs_6%c2(2,4) = -derivative(czip,1,1,3)/2.0_ki
-      coeffs%coeffs_6%c2(2,5) = derivative(czip,1,1,3,3)/4.0_ki
-      coeffs%coeffs_6%c2(2,6) = -derivative(czip,1,1,1,3)/6.0_ki
-      coeffs%coeffs_6%c2(3,1) = -derivative(czip,1,4)
-      coeffs%coeffs_6%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
-      coeffs%coeffs_6%c2(3,3) = -derivative(czip,1,4,4,4)/6.0_ki
-      coeffs%coeffs_6%c2(3,4) = -derivative(czip,1,1,4)/2.0_ki
-      coeffs%coeffs_6%c2(3,5) = derivative(czip,1,1,4,4)/4.0_ki
-      coeffs%coeffs_6%c2(3,6) = -derivative(czip,1,1,1,4)/6.0_ki
-      coeffs%coeffs_6%c2(4,1) = derivative(czip,2,3)
-      coeffs%coeffs_6%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
-      coeffs%coeffs_6%c2(4,3) = derivative(czip,2,3,3,3)/6.0_ki
-      coeffs%coeffs_6%c2(4,4) = -derivative(czip,2,2,3)/2.0_ki
-      coeffs%coeffs_6%c2(4,5) = derivative(czip,2,2,3,3)/4.0_ki
-      coeffs%coeffs_6%c2(4,6) = derivative(czip,2,2,2,3)/6.0_ki
-      coeffs%coeffs_6%c2(5,1) = derivative(czip,2,4)
-      coeffs%coeffs_6%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
-      coeffs%coeffs_6%c2(5,3) = derivative(czip,2,4,4,4)/6.0_ki
-      coeffs%coeffs_6%c2(5,4) = -derivative(czip,2,2,4)/2.0_ki
-      coeffs%coeffs_6%c2(5,5) = derivative(czip,2,2,4,4)/4.0_ki
-      coeffs%coeffs_6%c2(5,6) = derivative(czip,2,2,2,4)/6.0_ki
-      coeffs%coeffs_6%c2(6,1) = derivative(czip,3,4)
-      coeffs%coeffs_6%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
-      coeffs%coeffs_6%c2(6,3) = derivative(czip,3,4,4,4)/6.0_ki
-      coeffs%coeffs_6%c2(6,4) = -derivative(czip,3,3,4)/2.0_ki
-      coeffs%coeffs_6%c2(6,5) = derivative(czip,3,3,4,4)/4.0_ki
-      coeffs%coeffs_6%c2(6,6) = derivative(czip,3,3,3,4)/6.0_ki
-      coeffs%coeffs_6%c3(1,1) = derivative(czip,1,2,3)
-      coeffs%coeffs_6%c3(1,2) = -derivative(czip,1,2,3,3)/2.0_ki
-      coeffs%coeffs_6%c3(1,3) = -derivative(czip,1,2,2,3)/2.0_ki
-      coeffs%coeffs_6%c3(1,4) = derivative(czip,1,1,2,3)/2.0_ki
-      coeffs%coeffs_6%c3(2,1) = derivative(czip,1,2,4)
-      coeffs%coeffs_6%c3(2,2) = -derivative(czip,1,2,4,4)/2.0_ki
-      coeffs%coeffs_6%c3(2,3) = -derivative(czip,1,2,2,4)/2.0_ki
-      coeffs%coeffs_6%c3(2,4) = derivative(czip,1,1,2,4)/2.0_ki
-      coeffs%coeffs_6%c3(3,1) = derivative(czip,1,3,4)
-      coeffs%coeffs_6%c3(3,2) = -derivative(czip,1,3,4,4)/2.0_ki
-      coeffs%coeffs_6%c3(3,3) = -derivative(czip,1,3,3,4)/2.0_ki
-      coeffs%coeffs_6%c3(3,4) = derivative(czip,1,1,3,4)/2.0_ki
-      coeffs%coeffs_6%c3(4,1) = -derivative(czip,2,3,4)
-      coeffs%coeffs_6%c3(4,2) = derivative(czip,2,3,4,4)/2.0_ki
-      coeffs%coeffs_6%c3(4,3) = derivative(czip,2,3,3,4)/2.0_ki
-      coeffs%coeffs_6%c3(4,4) = derivative(czip,2,2,3,4)/2.0_ki
-      coeffs%coeffs_6%c4(1,1) = -derivative(czip,1,2,3,4)
-      !---#] reconstruct coeffs%coeffs_6:
-   end subroutine reconstruct_d6
-!---#] subroutine reconstruct_d6:
 end module     p1_dg_hhd_d6h3l1d

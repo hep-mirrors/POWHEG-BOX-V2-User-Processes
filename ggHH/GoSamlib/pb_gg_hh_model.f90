@@ -15,7 +15,7 @@ module     pb_gg_hh_model
    real(ki), parameter :: sqrt3 = &
       &1.732050807568877293527446341505872366&
       &9428052538103806280558069795_ki
-   real(ki) :: GF
+   
    real(ki) :: alpha =        0.007297352537600_ki
    complex(ki) :: gauge1z = (       0.000000000000000_ki,        0.0000000000000&
    &00_ki)
@@ -47,8 +47,8 @@ module     pb_gg_hh_model
    real(ki) :: wphi =        0.000000000000000_ki
    real(ki), parameter :: wT =        0.000000000000000_ki
    real(ki) :: wtau =        0.000000000000000_ki
-   real(ki) :: wW =        0.000000000000_ki
-   real(ki) :: wZ =        0.000000000000_ki
+   real(ki) :: wW =        2.124000000000000_ki
+   real(ki) :: wZ =        2.495200000000000_ki
    complex(ki) :: gUa
    complex(ki) :: gWWZZ
    complex(ki) :: gBa
@@ -174,7 +174,7 @@ module     pb_gg_hh_model
 
    integer, parameter, private :: line_length = 80
    integer, parameter, private :: name_length = max(7,24)
-   character(len=name_length), dimension(21) :: names = (/&
+   character(len=name_length), dimension(20) :: names = (/&
       & "alpha  ", &
       & "gauge1z", &
       & "gauge2z", &
@@ -194,8 +194,7 @@ module     pb_gg_hh_model
       & "wphi   ", &
       & "wtau   ", &
       & "wW     ", &
-      & "wZ     ", &
-      & "GF     "/)
+      & "wZ     "/)
    character(len=1), dimension(3) :: cc = (/'#', '!', ';'/)
 
 
@@ -699,8 +698,6 @@ contains
             wW = re
          case(20)
             wZ = re
-         case(21)
-            GF = re
          end select
       elseif (name(1:5).eq."mass(") then
          idx = scan(name, ')', .false.)
@@ -1056,7 +1053,7 @@ contains
       logical :: must_be_real
       must_be_real = .false.
       ierr = 1 ! OK
-      if (name.eq."Gf") then
+if (name.eq."Gf") then
          call set_parameter("GF",re,im,ierr)
          return
       elseif (name.eq."sw2") then
@@ -1248,9 +1245,6 @@ contains
             must_be_real=.true.
          case(20)
             wZ = re
-            must_be_real=.true.
-         case(21)
-            GF = re
             must_be_real=.true.
          end select
      else

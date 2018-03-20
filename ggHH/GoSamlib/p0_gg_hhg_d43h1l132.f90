@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d43h1l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d43h1l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d43h1l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -47,7 +47,7 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(45) :: acd43
+      complex(ki), dimension(19) :: acd43
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
@@ -55,77 +55,34 @@ contains
       ninjaP2 = ninjaP(2)
       acd43(1)=dotproduct(k1,ninjaE3)
       acd43(2)=dotproduct(ninjaE3,spvak2k5)
-      acd43(3)=abb43(52)
-      acd43(4)=dotproduct(ninjaE3,spvak2l4)
-      acd43(5)=abb43(63)
-      acd43(6)=dotproduct(k2,ninjaE3)
+      acd43(3)=dotproduct(ninjaE3,spvak2l4)
+      acd43(4)=abb43(32)
+      acd43(5)=dotproduct(ninjaA0,ninjaE3)
+      acd43(6)=abb43(18)
       acd43(7)=dotproduct(ninjaE3,spvak2k1)
-      acd43(8)=abb43(17)
-      acd43(9)=dotproduct(ninjaE3,spvak2l3)
-      acd43(10)=abb43(66)
-      acd43(11)=abb43(62)
-      acd43(12)=dotproduct(l3,ninjaE3)
-      acd43(13)=abb43(19)
-      acd43(14)=abb43(61)
-      acd43(15)=dotproduct(l4,ninjaE3)
-      acd43(16)=abb43(10)
-      acd43(17)=abb43(47)
-      acd43(18)=abb43(67)
-      acd43(19)=dotproduct(ninjaA0,ninjaE3)
-      acd43(20)=abb43(21)
-      acd43(21)=abb43(54)
-      acd43(22)=abb43(42)
-      acd43(23)=abb43(12)
-      acd43(24)=abb43(20)
-      acd43(25)=abb43(16)
-      acd43(26)=dotproduct(ninjaE3,spval4k5)
-      acd43(27)=abb43(24)
-      acd43(28)=abb43(26)
-      acd43(29)=dotproduct(ninjaE3,spvak1k5)
-      acd43(30)=abb43(43)
-      acd43(31)=abb43(50)
-      acd43(32)=dotproduct(ninjaE3,spval4k1)
-      acd43(33)=abb43(56)
-      acd43(34)=dotproduct(ninjaE3,spval3k1)
-      acd43(35)=abb43(57)
-      acd43(36)=acd43(26)*acd43(27)
-      acd43(37)=-acd43(21)*acd43(29)
-      acd43(38)=2.0_ki*acd43(19)
-      acd43(39)=acd43(20)*acd43(38)
-      acd43(40)=acd43(15)*acd43(16)
-      acd43(41)=acd43(12)*acd43(13)
-      acd43(42)=acd43(6)*acd43(8)
-      acd43(43)=acd43(9)*acd43(25)
-      acd43(44)=acd43(4)*acd43(28)
-      acd43(45)=acd43(7)*acd43(23)
-      acd43(36)=acd43(45)+acd43(44)+acd43(43)+acd43(42)+acd43(41)+acd43(40)+acd&
-      &43(39)+acd43(36)+acd43(37)
-      acd43(36)=acd43(7)*acd43(36)
-      acd43(37)=acd43(12)+acd43(1)
-      acd43(37)=acd43(3)*acd43(37)
-      acd43(39)=acd43(34)*acd43(35)
-      acd43(40)=acd43(32)*acd43(33)
-      acd43(41)=-acd43(21)*acd43(38)
-      acd43(42)=acd43(15)*acd43(17)
-      acd43(43)=acd43(9)*acd43(30)
-      acd43(44)=acd43(4)*acd43(31)
-      acd43(45)=acd43(7)*acd43(24)
-      acd43(37)=acd43(45)+acd43(44)+acd43(43)+acd43(42)+acd43(41)+acd43(39)+acd&
-      &43(40)+acd43(37)
-      acd43(37)=acd43(2)*acd43(37)
-      acd43(39)=acd43(1)*acd43(5)
-      acd43(38)=acd43(22)*acd43(38)
-      acd43(40)=acd43(12)*acd43(14)
-      acd43(41)=acd43(6)*acd43(11)
-      acd43(38)=acd43(41)+acd43(40)+acd43(39)+acd43(38)
-      acd43(38)=acd43(4)*acd43(38)
-      acd43(39)=acd43(15)*acd43(18)
-      acd43(40)=acd43(6)*acd43(10)
-      acd43(39)=acd43(39)+acd43(40)
-      acd43(39)=acd43(9)*acd43(39)
-      acd43(36)=acd43(37)+acd43(36)+acd43(39)+acd43(38)
-      acd43(36)=acd43(2)*acd43(36)
-      brack(ninjaidxt0x0mu0)=acd43(36)
+      acd43(8)=dotproduct(ninjaE3,spvak2l3)
+      acd43(9)=abb43(10)
+      acd43(10)=dotproduct(ninjaE3,spval4k5)
+      acd43(11)=abb43(15)
+      acd43(12)=abb43(13)
+      acd43(13)=abb43(20)
+      acd43(14)=dotproduct(ninjaE3,spval3k1)
+      acd43(15)=abb43(30)
+      acd43(16)=acd43(4)*acd43(1)
+      acd43(17)=acd43(6)*acd43(5)
+      acd43(18)=acd43(13)*acd43(7)
+      acd43(19)=acd43(15)*acd43(14)
+      acd43(16)=acd43(19)+acd43(18)+acd43(16)+2.0_ki*acd43(17)
+      acd43(16)=acd43(16)*acd43(3)*acd43(2)
+      acd43(17)=acd43(9)*acd43(2)
+      acd43(18)=acd43(11)*acd43(10)
+      acd43(17)=acd43(18)+acd43(17)
+      acd43(17)=acd43(17)*acd43(8)
+      acd43(18)=acd43(12)*acd43(2)**2
+      acd43(17)=acd43(18)+acd43(17)
+      acd43(17)=acd43(7)*acd43(17)
+      acd43(16)=acd43(16)+acd43(17)
+      brack(ninjaidxt0x0mu0)=acd43(16)
       brack(ninjaidxt0x0mu2)=0.0_ki
       brack(ninjaidxt0x1mu0)=0.0_ki
       brack(ninjaidxt0x2mu0)=0.0_ki

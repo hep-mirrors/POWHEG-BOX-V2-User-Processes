@@ -96,8 +96,8 @@ C     Parameter definition
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
 c$$$      param = 'GF='
 c$$$      write(value,'(F20.10)') ph_GF
@@ -112,40 +112,40 @@ c$$$      call check_gosam_err(param,ierr)
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
       param = 'mZ='
       write(value,'(F20.10)') ph_Zmass
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
       param = 'mW='
       write(value,'(F20.10)') ph_Wmass
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
       param = 'mH='
       write(value,'(F20.10)') ph_Hmass
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
       param = 'mT='
       write(value,'(F20.10)') ph_topmass
       line = trim(param)//trim(adjustl(value))
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
-      call OLP_Option_qp(line,ierr)
-      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
 
 c$$$      param = 'wZ='
 c$$$      write(value,'(F20.10)') ph_Zwidth
@@ -166,8 +166,8 @@ C     Initialize virtual code
 
       call OLP_Start(path,ioerr,parallelstage,rndiwhichseed)
       call check_gosam_err('olp_start routine',ierr)
-      call OLP_Start_qp(path,ioerr,parallelstage,rndiwhichseed)
-      call check_gosam_err('olp_start routine',ierr)
+c      call OLP_Start_qp(path,ioerr,parallelstage,rndiwhichseed)
+c      call check_gosam_err('olp_start routine',ierr)
       end
 
 

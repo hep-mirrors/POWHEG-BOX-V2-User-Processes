@@ -1,6 +1,6 @@
 module     p1_dg_hhd_d8h2l1d
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p1_dg_hhd/helicity2d8h2l1d.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p1_dg_hhd/helicity2d8h2l1d.f90
    ! generator: buildfortran_d.py
    use p1_dg_hhd_config, only: ki
    use p1_dg_hhd_util, only: cond, d => metric_tensor
@@ -13,7 +13,7 @@ module     p1_dg_hhd_d8h2l1d
    integer, private :: iv3
    integer, private :: iv4
    real(ki), dimension(4), private :: qshift
-   public :: derivative , reconstruct_d8
+   public :: derivative
 contains
 !---#[ function brack_1:
    pure function brack_1(Q, mu2) result(brack)
@@ -26,7 +26,7 @@ contains
       complex(ki), intent(in) :: mu2
       complex(ki), dimension(1) :: acd8
       complex(ki) :: brack
-      acd8(1)=abb8(21)
+      acd8(1)=abb8(13)
       brack=acd8(1)
    end function brack_1
 !---#] function brack_1:
@@ -39,34 +39,40 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(24) :: acd8
+      complex(ki), dimension(30) :: acd8
       complex(ki) :: brack
       acd8(1)=k1(iv1)
-      acd8(2)=abb8(41)
+      acd8(2)=abb8(28)
       acd8(3)=k2(iv1)
-      acd8(4)=abb8(14)
-      acd8(5)=l3(iv1)
-      acd8(6)=abb8(15)
-      acd8(7)=l4(iv1)
-      acd8(8)=abb8(36)
-      acd8(9)=spvak1l3(iv1)
-      acd8(10)=abb8(32)
-      acd8(11)=spvak2k1(iv1)
-      acd8(12)=abb8(17)
+      acd8(4)=abb8(21)
+      acd8(5)=spvak1l4(iv1)
+      acd8(6)=abb8(23)
+      acd8(7)=spvak2k1(iv1)
+      acd8(8)=abb8(22)
+      acd8(9)=spvak2l3(iv1)
+      acd8(10)=abb8(20)
+      acd8(11)=spvak2l4(iv1)
+      acd8(12)=abb8(16)
       acd8(13)=spvak2k5(iv1)
-      acd8(14)=abb8(10)
-      acd8(15)=spval3k5(iv1)
-      acd8(16)=abb8(16)
-      acd8(17)=-acd8(2)*acd8(1)
-      acd8(18)=-acd8(4)*acd8(3)
-      acd8(19)=-acd8(6)*acd8(5)
-      acd8(20)=-acd8(8)*acd8(7)
-      acd8(21)=-acd8(10)*acd8(9)
-      acd8(22)=-acd8(12)*acd8(11)
-      acd8(23)=-acd8(14)*acd8(13)
-      acd8(24)=-acd8(16)*acd8(15)
-      brack=acd8(17)+acd8(18)+acd8(19)+acd8(20)+acd8(21)+acd8(22)+acd8(23)+acd8&
-      &(24)
+      acd8(14)=abb8(40)
+      acd8(15)=spval3k1(iv1)
+      acd8(16)=abb8(37)
+      acd8(17)=spval4k1(iv1)
+      acd8(18)=abb8(36)
+      acd8(19)=spval4k5(iv1)
+      acd8(20)=abb8(15)
+      acd8(21)=-acd8(2)*acd8(1)
+      acd8(22)=-acd8(4)*acd8(3)
+      acd8(23)=-acd8(6)*acd8(5)
+      acd8(24)=-acd8(8)*acd8(7)
+      acd8(25)=-acd8(10)*acd8(9)
+      acd8(26)=-acd8(12)*acd8(11)
+      acd8(27)=-acd8(14)*acd8(13)
+      acd8(28)=-acd8(16)*acd8(15)
+      acd8(29)=-acd8(18)*acd8(17)
+      acd8(30)=-acd8(20)*acd8(19)
+      brack=acd8(21)+acd8(22)+acd8(23)+acd8(24)+acd8(25)+acd8(26)+acd8(27)+acd8&
+      &(28)+acd8(29)+acd8(30)
    end function brack_2
 !---#] function brack_2:
 !---#[ function brack_3:
@@ -78,77 +84,62 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(47) :: acd8
+      complex(ki), dimension(32) :: acd8
       complex(ki) :: brack
       acd8(1)=d(iv1,iv2)
-      acd8(2)=abb8(18)
-      acd8(3)=k2(iv1)
+      acd8(2)=abb8(35)
+      acd8(3)=k1(iv1)
       acd8(4)=k2(iv2)
-      acd8(5)=abb8(33)
-      acd8(6)=l4(iv2)
-      acd8(7)=abb8(12)
-      acd8(8)=spvak2k1(iv2)
-      acd8(9)=abb8(39)
-      acd8(10)=l4(iv1)
-      acd8(11)=spvak2k1(iv1)
-      acd8(12)=l3(iv1)
-      acd8(13)=abb8(43)
-      acd8(14)=l3(iv2)
-      acd8(15)=abb8(37)
-      acd8(16)=spvak1k2(iv2)
-      acd8(17)=abb8(19)
-      acd8(18)=spvak1l3(iv2)
-      acd8(19)=abb8(29)
-      acd8(20)=spvak1l4(iv2)
-      acd8(21)=abb8(34)
-      acd8(22)=spvak1k5(iv2)
-      acd8(23)=abb8(22)
-      acd8(24)=spvak2k5(iv2)
-      acd8(25)=abb8(26)
-      acd8(26)=spval3k5(iv2)
-      acd8(27)=abb8(42)
-      acd8(28)=spval4k5(iv2)
-      acd8(29)=abb8(28)
-      acd8(30)=spvak1k2(iv1)
-      acd8(31)=spvak1l3(iv1)
-      acd8(32)=spvak1l4(iv1)
-      acd8(33)=spvak1k5(iv1)
-      acd8(34)=spvak2k5(iv1)
-      acd8(35)=spval3k5(iv1)
-      acd8(36)=spval4k5(iv1)
-      acd8(37)=acd8(29)*acd8(28)
-      acd8(38)=acd8(27)*acd8(26)
-      acd8(39)=acd8(25)*acd8(24)
-      acd8(40)=acd8(23)*acd8(22)
-      acd8(41)=acd8(21)*acd8(20)
-      acd8(42)=acd8(19)*acd8(18)
-      acd8(43)=acd8(17)*acd8(16)
-      acd8(44)=acd8(13)*acd8(14)
-      acd8(45)=acd8(6)*acd8(15)
-      acd8(46)=acd8(4)*acd8(9)
-      acd8(37)=acd8(46)+acd8(45)+acd8(44)+acd8(43)+acd8(42)+acd8(41)+acd8(40)+a&
-      &cd8(39)+acd8(37)+acd8(38)
-      acd8(37)=acd8(11)*acd8(37)
-      acd8(38)=acd8(29)*acd8(36)
-      acd8(39)=acd8(27)*acd8(35)
-      acd8(40)=acd8(25)*acd8(34)
-      acd8(41)=acd8(23)*acd8(33)
-      acd8(42)=acd8(21)*acd8(32)
-      acd8(43)=acd8(19)*acd8(31)
-      acd8(44)=acd8(17)*acd8(30)
-      acd8(45)=acd8(13)*acd8(12)
-      acd8(46)=acd8(10)*acd8(15)
-      acd8(47)=acd8(3)*acd8(9)
-      acd8(38)=acd8(47)+acd8(46)+acd8(45)+acd8(44)+acd8(43)+acd8(42)+acd8(41)+a&
-      &cd8(40)+acd8(38)+acd8(39)
-      acd8(38)=acd8(8)*acd8(38)
-      acd8(39)=acd8(6)*acd8(7)
-      acd8(40)=acd8(4)*acd8(5)
-      acd8(39)=acd8(39)+2.0_ki*acd8(40)
-      acd8(39)=acd8(3)*acd8(39)
-      acd8(40)=acd8(1)*acd8(2)
-      acd8(41)=acd8(4)*acd8(7)*acd8(10)
-      brack=acd8(37)+acd8(38)+acd8(39)+2.0_ki*acd8(40)+acd8(41)
+      acd8(5)=abb8(19)
+      acd8(6)=spvak2l4(iv2)
+      acd8(7)=abb8(14)
+      acd8(8)=k1(iv2)
+      acd8(9)=k2(iv1)
+      acd8(10)=spvak2l4(iv1)
+      acd8(11)=spvak2k5(iv2)
+      acd8(12)=abb8(41)
+      acd8(13)=spvak2k5(iv1)
+      acd8(14)=spval4k5(iv2)
+      acd8(15)=abb8(27)
+      acd8(16)=spval4k5(iv1)
+      acd8(17)=spvak2k1(iv2)
+      acd8(18)=abb8(25)
+      acd8(19)=spval4k1(iv2)
+      acd8(20)=abb8(12)
+      acd8(21)=spvak2k1(iv1)
+      acd8(22)=spval4k1(iv1)
+      acd8(23)=spvak1k5(iv1)
+      acd8(24)=abb8(30)
+      acd8(25)=spvak1k5(iv2)
+      acd8(26)=acd8(20)*acd8(19)
+      acd8(27)=acd8(17)*acd8(18)
+      acd8(28)=acd8(4)*acd8(12)
+      acd8(26)=acd8(28)+acd8(26)+acd8(27)
+      acd8(26)=acd8(13)*acd8(26)
+      acd8(27)=acd8(20)*acd8(22)
+      acd8(28)=acd8(18)*acd8(21)
+      acd8(29)=acd8(9)*acd8(12)
+      acd8(27)=acd8(29)+acd8(27)+acd8(28)
+      acd8(27)=acd8(11)*acd8(27)
+      acd8(28)=acd8(21)*acd8(25)
+      acd8(29)=acd8(17)*acd8(23)
+      acd8(28)=acd8(29)+acd8(28)
+      acd8(28)=acd8(24)*acd8(28)
+      acd8(29)=acd8(10)*acd8(14)
+      acd8(30)=acd8(6)*acd8(16)
+      acd8(29)=acd8(30)+acd8(29)
+      acd8(29)=acd8(15)*acd8(29)
+      acd8(30)=acd8(7)*acd8(10)
+      acd8(31)=acd8(5)*acd8(9)
+      acd8(30)=acd8(31)+acd8(30)
+      acd8(30)=acd8(8)*acd8(30)
+      acd8(31)=acd8(6)*acd8(7)
+      acd8(32)=acd8(4)*acd8(5)
+      acd8(31)=acd8(31)+acd8(32)
+      acd8(31)=acd8(3)*acd8(31)
+      acd8(32)=acd8(1)*acd8(2)
+      brack=acd8(26)+acd8(27)+acd8(28)+acd8(29)+acd8(30)+acd8(31)+2.0_ki*acd8(3&
+      &2)
    end function brack_3
 !---#] function brack_3:
 !---#[ function brack_4:
@@ -160,110 +151,110 @@ contains
       implicit none
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
-      complex(ki), dimension(51) :: acd8
+      complex(ki), dimension(44) :: acd8
       complex(ki) :: brack
       acd8(1)=d(iv1,iv2)
       acd8(2)=k1(iv3)
-      acd8(3)=abb8(40)
-      acd8(4)=k2(iv3)
-      acd8(5)=abb8(24)
-      acd8(6)=l3(iv3)
-      acd8(7)=abb8(9)
-      acd8(8)=l4(iv3)
-      acd8(9)=abb8(12)
-      acd8(10)=spvak1l3(iv3)
-      acd8(11)=abb8(38)
-      acd8(12)=spvak2k1(iv3)
-      acd8(13)=abb8(25)
-      acd8(14)=spvak2k5(iv3)
-      acd8(15)=abb8(30)
-      acd8(16)=spval3k5(iv3)
-      acd8(17)=abb8(35)
-      acd8(18)=d(iv1,iv3)
-      acd8(19)=k1(iv2)
-      acd8(20)=k2(iv2)
-      acd8(21)=l3(iv2)
-      acd8(22)=l4(iv2)
-      acd8(23)=spvak1l3(iv2)
-      acd8(24)=spvak2k1(iv2)
-      acd8(25)=spvak2k5(iv2)
-      acd8(26)=spval3k5(iv2)
-      acd8(27)=d(iv2,iv3)
-      acd8(28)=k1(iv1)
-      acd8(29)=k2(iv1)
-      acd8(30)=l3(iv1)
-      acd8(31)=l4(iv1)
-      acd8(32)=spvak1l3(iv1)
-      acd8(33)=spvak2k1(iv1)
-      acd8(34)=spvak2k5(iv1)
-      acd8(35)=spval3k5(iv1)
-      acd8(36)=spvak1k5(iv3)
-      acd8(37)=abb8(23)
-      acd8(38)=spvak1k5(iv2)
-      acd8(39)=spvak1k5(iv1)
-      acd8(40)=abb8(11)
-      acd8(41)=-acd8(5)*acd8(4)
-      acd8(42)=-acd8(9)*acd8(8)
-      acd8(43)=acd8(2)*acd8(3)
-      acd8(44)=-acd8(6)*acd8(7)
-      acd8(45)=-acd8(10)*acd8(11)
-      acd8(46)=-acd8(14)*acd8(15)
-      acd8(47)=-acd8(16)*acd8(17)
-      acd8(41)=acd8(47)+acd8(46)+acd8(45)+acd8(44)+acd8(43)+acd8(42)+acd8(41)
-      acd8(42)=2.0_ki*acd8(1)
-      acd8(41)=acd8(42)*acd8(41)
-      acd8(42)=acd8(28)*acd8(3)
-      acd8(43)=-acd8(30)*acd8(7)
-      acd8(44)=-acd8(32)*acd8(11)
-      acd8(45)=-acd8(34)*acd8(15)
-      acd8(46)=-acd8(35)*acd8(17)
-      acd8(42)=acd8(46)+acd8(45)+acd8(44)+acd8(43)+acd8(42)
-      acd8(43)=2.0_ki*acd8(27)
-      acd8(42)=acd8(43)*acd8(42)
-      acd8(44)=acd8(19)*acd8(3)
-      acd8(45)=-acd8(21)*acd8(7)
-      acd8(46)=-acd8(23)*acd8(11)
-      acd8(47)=-acd8(25)*acd8(15)
-      acd8(48)=-acd8(26)*acd8(17)
-      acd8(44)=acd8(48)+acd8(47)+acd8(46)+acd8(45)+acd8(44)
-      acd8(45)=2.0_ki*acd8(18)
-      acd8(44)=acd8(45)*acd8(44)
-      acd8(46)=-acd8(4)*acd8(37)
-      acd8(47)=-acd8(8)*acd8(40)
-      acd8(46)=acd8(47)+acd8(46)
-      acd8(47)=acd8(38)*acd8(33)
-      acd8(48)=acd8(39)*acd8(24)
-      acd8(47)=acd8(47)+acd8(48)
-      acd8(46)=acd8(47)*acd8(46)
-      acd8(47)=-acd8(12)*acd8(1)
-      acd8(48)=-acd8(24)*acd8(18)
-      acd8(49)=-acd8(33)*acd8(27)
-      acd8(47)=acd8(49)+acd8(47)+acd8(48)
-      acd8(47)=acd8(13)*acd8(47)
-      acd8(48)=acd8(36)*acd8(33)
-      acd8(49)=acd8(39)*acd8(12)
-      acd8(48)=acd8(48)+acd8(49)
-      acd8(49)=-acd8(37)*acd8(48)
-      acd8(50)=-acd8(5)*acd8(45)
-      acd8(49)=acd8(50)+acd8(49)
-      acd8(49)=acd8(20)*acd8(49)
-      acd8(48)=-acd8(40)*acd8(48)
-      acd8(45)=-acd8(9)*acd8(45)
-      acd8(45)=acd8(45)+acd8(48)
-      acd8(45)=acd8(22)*acd8(45)
-      acd8(48)=acd8(36)*acd8(24)
-      acd8(50)=acd8(38)*acd8(12)
-      acd8(48)=acd8(48)+acd8(50)
-      acd8(50)=-acd8(37)*acd8(48)
-      acd8(51)=-acd8(5)*acd8(43)
-      acd8(50)=acd8(51)+acd8(50)
-      acd8(50)=acd8(29)*acd8(50)
-      acd8(48)=-acd8(40)*acd8(48)
-      acd8(43)=-acd8(9)*acd8(43)
-      acd8(43)=acd8(43)+acd8(48)
-      acd8(43)=acd8(31)*acd8(43)
-      brack=acd8(41)+acd8(42)+acd8(43)+acd8(44)+acd8(45)+acd8(46)+2.0_ki*acd8(4&
-      &7)+acd8(49)+acd8(50)
+      acd8(3)=abb8(18)
+      acd8(4)=spvak2k5(iv3)
+      acd8(5)=abb8(38)
+      acd8(6)=d(iv1,iv3)
+      acd8(7)=k1(iv2)
+      acd8(8)=spvak2k5(iv2)
+      acd8(9)=d(iv2,iv3)
+      acd8(10)=k1(iv1)
+      acd8(11)=spvak2k5(iv1)
+      acd8(12)=k2(iv2)
+      acd8(13)=abb8(10)
+      acd8(14)=k2(iv3)
+      acd8(15)=spvak2l4(iv2)
+      acd8(16)=spval4k5(iv3)
+      acd8(17)=abb8(32)
+      acd8(18)=spvak2l4(iv3)
+      acd8(19)=spval4k5(iv2)
+      acd8(20)=k2(iv1)
+      acd8(21)=spvak2l4(iv1)
+      acd8(22)=spval4k5(iv1)
+      acd8(23)=spvak1k2(iv2)
+      acd8(24)=spvak2k1(iv3)
+      acd8(25)=abb8(17)
+      acd8(26)=spvak1k2(iv3)
+      acd8(27)=spvak2k1(iv2)
+      acd8(28)=spvak1l4(iv2)
+      acd8(29)=spval4k1(iv3)
+      acd8(30)=abb8(24)
+      acd8(31)=spvak1l4(iv3)
+      acd8(32)=spval4k1(iv2)
+      acd8(33)=spvak1k2(iv1)
+      acd8(34)=spvak2k1(iv1)
+      acd8(35)=spvak1l4(iv1)
+      acd8(36)=spval4k1(iv1)
+      acd8(37)=-acd8(18)*acd8(19)
+      acd8(38)=-acd8(15)*acd8(16)
+      acd8(37)=acd8(37)+acd8(38)
+      acd8(37)=acd8(10)*acd8(37)
+      acd8(38)=-acd8(18)*acd8(22)
+      acd8(39)=-acd8(16)*acd8(21)
+      acd8(38)=acd8(38)+acd8(39)
+      acd8(38)=acd8(7)*acd8(38)
+      acd8(39)=-acd8(19)*acd8(21)
+      acd8(40)=-acd8(15)*acd8(22)
+      acd8(39)=acd8(39)+acd8(40)
+      acd8(39)=acd8(2)*acd8(39)
+      acd8(37)=acd8(39)+acd8(37)+acd8(38)
+      acd8(37)=acd8(17)*acd8(37)
+      acd8(38)=-acd8(31)*acd8(32)
+      acd8(39)=-acd8(28)*acd8(29)
+      acd8(38)=acd8(38)+acd8(39)
+      acd8(38)=acd8(30)*acd8(38)
+      acd8(39)=-acd8(26)*acd8(27)
+      acd8(40)=-acd8(23)*acd8(24)
+      acd8(39)=acd8(39)+acd8(40)
+      acd8(39)=acd8(25)*acd8(39)
+      acd8(40)=-acd8(7)*acd8(14)
+      acd8(41)=-acd8(2)*acd8(12)
+      acd8(40)=acd8(40)+acd8(41)
+      acd8(40)=acd8(13)*acd8(40)
+      acd8(41)=2.0_ki*acd8(5)
+      acd8(42)=-acd8(9)*acd8(41)
+      acd8(38)=acd8(40)+acd8(39)+acd8(42)+acd8(38)
+      acd8(38)=acd8(11)*acd8(38)
+      acd8(39)=-acd8(31)*acd8(36)
+      acd8(40)=-acd8(29)*acd8(35)
+      acd8(39)=acd8(39)+acd8(40)
+      acd8(39)=acd8(30)*acd8(39)
+      acd8(40)=-acd8(26)*acd8(34)
+      acd8(42)=-acd8(24)*acd8(33)
+      acd8(40)=acd8(40)+acd8(42)
+      acd8(40)=acd8(25)*acd8(40)
+      acd8(42)=-acd8(10)*acd8(14)
+      acd8(43)=-acd8(2)*acd8(20)
+      acd8(42)=acd8(42)+acd8(43)
+      acd8(42)=acd8(13)*acd8(42)
+      acd8(43)=-acd8(6)*acd8(41)
+      acd8(39)=acd8(42)+acd8(40)+acd8(43)+acd8(39)
+      acd8(39)=acd8(8)*acd8(39)
+      acd8(40)=-acd8(32)*acd8(35)
+      acd8(42)=-acd8(28)*acd8(36)
+      acd8(40)=acd8(40)+acd8(42)
+      acd8(40)=acd8(30)*acd8(40)
+      acd8(42)=-acd8(27)*acd8(33)
+      acd8(43)=-acd8(23)*acd8(34)
+      acd8(42)=acd8(42)+acd8(43)
+      acd8(42)=acd8(25)*acd8(42)
+      acd8(43)=-acd8(10)*acd8(12)
+      acd8(44)=-acd8(7)*acd8(20)
+      acd8(43)=acd8(43)+acd8(44)
+      acd8(43)=acd8(13)*acd8(43)
+      acd8(41)=-acd8(1)*acd8(41)
+      acd8(40)=acd8(43)+acd8(42)+acd8(41)+acd8(40)
+      acd8(40)=acd8(4)*acd8(40)
+      acd8(41)=-acd8(10)*acd8(9)
+      acd8(42)=-acd8(7)*acd8(6)
+      acd8(43)=-acd8(2)*acd8(1)
+      acd8(41)=acd8(43)+acd8(41)+acd8(42)
+      acd8(41)=acd8(3)*acd8(41)
+      brack=acd8(37)+acd8(38)+acd8(39)+acd8(40)+2.0_ki*acd8(41)
    end function brack_4
 !---#] function brack_4:
 !---#[ function brack_5:
@@ -282,7 +273,7 @@ contains
       acd8(3)=abb8(9)
       acd8(4)=spvak1k5(iv3)
       acd8(5)=spvak2k1(iv4)
-      acd8(6)=abb8(20)
+      acd8(6)=abb8(32)
       acd8(7)=spvak1k5(iv4)
       acd8(8)=spvak2k1(iv3)
       acd8(9)=d(iv1,iv3)
@@ -395,87 +386,4 @@ contains
       end if
    end function derivative
 !---#] function derivative:
-!---#[ subroutine reconstruct_d8:
-   subroutine     reconstruct_d8(coeffs)
-      use p1_dg_hhd_groups, only: tensrec_info_group2
-      implicit none
-      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
-      type(tensrec_info_group2), intent(out) :: coeffs
-      ! rank 4 case :
-      !---[# reconstruct coeffs%coeffs_8:
-      coeffs%coeffs_8%c0 = derivative(czip)
-      coeffs%coeffs_8%c1(1,1) = derivative(czip,1)
-      coeffs%coeffs_8%c1(1,2) = derivative(czip,1,1)/2.0_ki
-      coeffs%coeffs_8%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
-      coeffs%coeffs_8%c1(1,4) = derivative(czip,1,1,1,1)/24.0_ki
-      coeffs%coeffs_8%c1(2,1) = -derivative(czip,2)
-      coeffs%coeffs_8%c1(2,2) = derivative(czip,2,2)/2.0_ki
-      coeffs%coeffs_8%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
-      coeffs%coeffs_8%c1(2,4) = derivative(czip,2,2,2,2)/24.0_ki
-      coeffs%coeffs_8%c1(3,1) = -derivative(czip,3)
-      coeffs%coeffs_8%c1(3,2) = derivative(czip,3,3)/2.0_ki
-      coeffs%coeffs_8%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
-      coeffs%coeffs_8%c1(3,4) = derivative(czip,3,3,3,3)/24.0_ki
-      coeffs%coeffs_8%c1(4,1) = -derivative(czip,4)
-      coeffs%coeffs_8%c1(4,2) = derivative(czip,4,4)/2.0_ki
-      coeffs%coeffs_8%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
-      coeffs%coeffs_8%c1(4,4) = derivative(czip,4,4,4,4)/24.0_ki
-      coeffs%coeffs_8%c2(1,1) = -derivative(czip,1,2)
-      coeffs%coeffs_8%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
-      coeffs%coeffs_8%c2(1,3) = -derivative(czip,1,2,2,2)/6.0_ki
-      coeffs%coeffs_8%c2(1,4) = -derivative(czip,1,1,2)/2.0_ki
-      coeffs%coeffs_8%c2(1,5) = derivative(czip,1,1,2,2)/4.0_ki
-      coeffs%coeffs_8%c2(1,6) = -derivative(czip,1,1,1,2)/6.0_ki
-      coeffs%coeffs_8%c2(2,1) = -derivative(czip,1,3)
-      coeffs%coeffs_8%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
-      coeffs%coeffs_8%c2(2,3) = -derivative(czip,1,3,3,3)/6.0_ki
-      coeffs%coeffs_8%c2(2,4) = -derivative(czip,1,1,3)/2.0_ki
-      coeffs%coeffs_8%c2(2,5) = derivative(czip,1,1,3,3)/4.0_ki
-      coeffs%coeffs_8%c2(2,6) = -derivative(czip,1,1,1,3)/6.0_ki
-      coeffs%coeffs_8%c2(3,1) = -derivative(czip,1,4)
-      coeffs%coeffs_8%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
-      coeffs%coeffs_8%c2(3,3) = -derivative(czip,1,4,4,4)/6.0_ki
-      coeffs%coeffs_8%c2(3,4) = -derivative(czip,1,1,4)/2.0_ki
-      coeffs%coeffs_8%c2(3,5) = derivative(czip,1,1,4,4)/4.0_ki
-      coeffs%coeffs_8%c2(3,6) = -derivative(czip,1,1,1,4)/6.0_ki
-      coeffs%coeffs_8%c2(4,1) = derivative(czip,2,3)
-      coeffs%coeffs_8%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
-      coeffs%coeffs_8%c2(4,3) = derivative(czip,2,3,3,3)/6.0_ki
-      coeffs%coeffs_8%c2(4,4) = -derivative(czip,2,2,3)/2.0_ki
-      coeffs%coeffs_8%c2(4,5) = derivative(czip,2,2,3,3)/4.0_ki
-      coeffs%coeffs_8%c2(4,6) = derivative(czip,2,2,2,3)/6.0_ki
-      coeffs%coeffs_8%c2(5,1) = derivative(czip,2,4)
-      coeffs%coeffs_8%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
-      coeffs%coeffs_8%c2(5,3) = derivative(czip,2,4,4,4)/6.0_ki
-      coeffs%coeffs_8%c2(5,4) = -derivative(czip,2,2,4)/2.0_ki
-      coeffs%coeffs_8%c2(5,5) = derivative(czip,2,2,4,4)/4.0_ki
-      coeffs%coeffs_8%c2(5,6) = derivative(czip,2,2,2,4)/6.0_ki
-      coeffs%coeffs_8%c2(6,1) = derivative(czip,3,4)
-      coeffs%coeffs_8%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
-      coeffs%coeffs_8%c2(6,3) = derivative(czip,3,4,4,4)/6.0_ki
-      coeffs%coeffs_8%c2(6,4) = -derivative(czip,3,3,4)/2.0_ki
-      coeffs%coeffs_8%c2(6,5) = derivative(czip,3,3,4,4)/4.0_ki
-      coeffs%coeffs_8%c2(6,6) = derivative(czip,3,3,3,4)/6.0_ki
-      coeffs%coeffs_8%c3(1,1) = derivative(czip,1,2,3)
-      coeffs%coeffs_8%c3(1,2) = -derivative(czip,1,2,3,3)/2.0_ki
-      coeffs%coeffs_8%c3(1,3) = -derivative(czip,1,2,2,3)/2.0_ki
-      coeffs%coeffs_8%c3(1,4) = derivative(czip,1,1,2,3)/2.0_ki
-      coeffs%coeffs_8%c3(2,1) = derivative(czip,1,2,4)
-      coeffs%coeffs_8%c3(2,2) = -derivative(czip,1,2,4,4)/2.0_ki
-      coeffs%coeffs_8%c3(2,3) = -derivative(czip,1,2,2,4)/2.0_ki
-      coeffs%coeffs_8%c3(2,4) = derivative(czip,1,1,2,4)/2.0_ki
-      coeffs%coeffs_8%c3(3,1) = derivative(czip,1,3,4)
-      coeffs%coeffs_8%c3(3,2) = -derivative(czip,1,3,4,4)/2.0_ki
-      coeffs%coeffs_8%c3(3,3) = -derivative(czip,1,3,3,4)/2.0_ki
-      coeffs%coeffs_8%c3(3,4) = derivative(czip,1,1,3,4)/2.0_ki
-      coeffs%coeffs_8%c3(4,1) = -derivative(czip,2,3,4)
-      coeffs%coeffs_8%c3(4,2) = derivative(czip,2,3,4,4)/2.0_ki
-      coeffs%coeffs_8%c3(4,3) = derivative(czip,2,3,3,4)/2.0_ki
-      coeffs%coeffs_8%c3(4,4) = derivative(czip,2,2,3,4)/2.0_ki
-      coeffs%coeffs_8%c4(1,1) = -derivative(czip,1,2,3,4)
-      !---#] reconstruct coeffs%coeffs_8:
-   end subroutine reconstruct_d8
-!---#] subroutine reconstruct_d8:
 end module     p1_dg_hhd_d8h2l1d

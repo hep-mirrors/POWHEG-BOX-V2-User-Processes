@@ -139,48 +139,11 @@ kinematic invariants $\hat{s}$ and
 $\hat{t}$~\cite{Heinrich:2017kxx}. Please note that the numerical
 values $m_H=125$\,GeV and $m_t=173$\,GeV are {\bf hardcoded} in this
 grid and therefore should not be changed in the {\tt mtdep=3} mode.
-The grid is generated using a python code and is interfaced to the
-\POWHEGBOX{} code via {\tt fifo} files. When starting a run with {\tt
-  mtdep=3} the grid will be initialized and the {\tt fifo} file
-created. When running parallel jobs this procedure has to be done
-independently for each seed. In order to do this, it is necessary to
-create static links (or make a copy) of the three grid specific files
-{\tt events.cdf, grid.py, Virt\_full.grid} in the folder of the run:
-\begin{description}
-\item{\tt ln -s ../events.cdf events.cdf}
-\item{\tt ln -s ../grid.py grid.py}
-\item{\tt ln -s ../Virt\_full.grid grid.in}
-\end{description}
-Note that the code creating the grid at the beginning of the run is
-looking for a file {\tt grid.in}, therefore the grid for the virtual
-2-loop amplitude {\tt Virt\_full.grid} in the process folder needs to
-be symlinked to {\tt grid.in} in the folder of the run. Now, before
-starting the \POWHEG{}  run, the grid initialization can be performed in
-the background via the command:
-\begin{description}
-\item{\tt python grid.py --seed=YOURSEED \&}
-\end{description}
-where {\tt YOURSEED} is an integer number. After a few seconds
-(usually around 10 seconds) an output of this form appears:
-\begin{center}
-  {\tt
-    == Ready to evaluate function ==\\
-    Input Pipe:  pyInputPipe-YOURSEED\\
-    Output Pipe:  pyOutputPipe-YOURSEED\\
-    Ready Signal:  pyReadySignal-YOURSEED\\
-  }
-\end{center}
-telling that the grid is ready and the \POWHEG{} run can be started in
-the normal way. When the run is finished the program for the virtual
-amplitude evaluation can be stopped with the
-\begin{center}
-  {\tt echo "exit" > pyInputPipe-YOURSEED}
-\end{center}
-command. All these steps are done automatically by the {\tt run.sh}
-script. By default the script sends 8 different runs in parallel on 8
-different cores, but this can be changed by adapting the {\tt ncores}
-variable at the top of the script.
-
+The grid is generated using a python code and, in the newest version
+(after revision number 3507), the code is directly interfaced to the
+\POWHEGBOX{} fortran code directly. Thus the procedure for the
+computation with full top quark mass dependence is similar to the one
+for the other running modes.
 
 \section{Physical input parameters}
 

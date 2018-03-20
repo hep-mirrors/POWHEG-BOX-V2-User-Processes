@@ -1,5 +1,6 @@
 module     p0_gg_hhg_abbrevd29h0
    use p0_gg_hhg_config, only: ki
+   use p0_gg_hhg_kinematics, only: epstensor
    use p0_gg_hhg_globalsh0
    implicit none
    private

@@ -1,5 +1,6 @@
 module     p0_gg_hhg_abbrevd33h1
    use p0_gg_hhg_config, only: ki
+   use p0_gg_hhg_kinematics, only: epstensor
    use p0_gg_hhg_globalsh1
    implicit none
    private
@@ -22,10 +23,10 @@ contains
       abb33(4)=spbk5k2**(-1)
       abb33(5)=spak1k2**(-1)
       abb33(6)=spak2k5**(-1)
-      abb33(7)=c1-c2
-      abb33(7)=gHT*i_*gHHH*abb33(4)*abb33(3)*abb33(7)*abb33(2)*abb33(1)
-      abb33(8)=-2.0_ki*spbk5k1**2*abb33(7)
-      abb33(7)=8.0_ki*abb33(6)*abb33(5)*abb33(7)
+      abb33(7)=c2-c1
+      abb33(7)=i_*abb33(7)*gHT*gHHH*abb33(1)*abb33(2)*abb33(3)*abb33(4)
+      abb33(8)=2.0_ki*spbk5k1**2*abb33(7)
+      abb33(7)=-8.0_ki*abb33(5)*abb33(6)*abb33(7)
       R2d33=0.0_ki
       rat2 = rat2 + R2d33
       if (debug_nlo_diagrams) then

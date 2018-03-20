@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d47h1l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d47h1l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d47h1l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -47,7 +47,7 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(41) :: acd47
+      complex(ki), dimension(19) :: acd47
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
@@ -55,63 +55,34 @@ contains
       ninjaP2 = ninjaP(2)
       acd47(1)=dotproduct(k1,ninjaE3)
       acd47(2)=dotproduct(ninjaE3,spvak2k5)
-      acd47(3)=abb47(42)
-      acd47(4)=dotproduct(ninjaE3,spvak2l3)
-      acd47(5)=abb47(60)
-      acd47(6)=dotproduct(k2,ninjaE3)
+      acd47(3)=dotproduct(ninjaE3,spvak2l3)
+      acd47(4)=abb47(34)
+      acd47(5)=dotproduct(ninjaA0,ninjaE3)
+      acd47(6)=abb47(19)
       acd47(7)=dotproduct(ninjaE3,spvak2k1)
-      acd47(8)=abb47(30)
-      acd47(9)=dotproduct(ninjaE3,spvak2l4)
-      acd47(10)=abb47(33)
-      acd47(11)=dotproduct(l3,ninjaE3)
-      acd47(12)=abb47(24)
-      acd47(13)=dotproduct(l4,ninjaE3)
-      acd47(14)=abb47(16)
-      acd47(15)=dotproduct(ninjaA0,ninjaE3)
-      acd47(16)=abb47(51)
-      acd47(17)=abb47(43)
-      acd47(18)=abb47(61)
-      acd47(19)=abb47(18)
-      acd47(20)=abb47(11)
-      acd47(21)=abb47(13)
-      acd47(22)=abb47(21)
-      acd47(23)=dotproduct(ninjaE3,spval3k5)
-      acd47(24)=abb47(27)
-      acd47(25)=dotproduct(ninjaE3,spval4k5)
-      acd47(26)=abb47(41)
-      acd47(27)=dotproduct(ninjaE3,spvak1k5)
-      acd47(28)=abb47(46)
-      acd47(29)=dotproduct(ninjaE3,spval3k1)
-      acd47(30)=abb47(44)
-      acd47(31)=acd47(25)*acd47(26)
-      acd47(32)=acd47(23)*acd47(24)
-      acd47(33)=acd47(13)*acd47(14)
-      acd47(34)=acd47(11)*acd47(12)
-      acd47(35)=-acd47(17)*acd47(27)
-      acd47(36)=acd47(6)*acd47(8)
-      acd47(37)=2.0_ki*acd47(15)
-      acd47(38)=acd47(16)*acd47(37)
-      acd47(39)=acd47(9)*acd47(21)
-      acd47(40)=acd47(4)*acd47(22)
-      acd47(41)=acd47(7)*acd47(19)
-      acd47(31)=acd47(41)+acd47(40)+acd47(39)+acd47(38)+acd47(36)+acd47(35)+acd&
-      &47(34)+acd47(33)+acd47(31)+acd47(32)
-      acd47(31)=acd47(7)*acd47(31)
-      acd47(32)=acd47(29)*acd47(30)
-      acd47(33)=acd47(1)*acd47(3)
-      acd47(34)=-acd47(17)*acd47(37)
-      acd47(35)=acd47(9)*acd47(28)
-      acd47(36)=acd47(7)*acd47(20)
-      acd47(32)=acd47(36)+acd47(35)+acd47(34)+acd47(32)+acd47(33)
-      acd47(32)=acd47(2)*acd47(32)
-      acd47(33)=acd47(1)*acd47(5)
-      acd47(34)=acd47(18)*acd47(37)
-      acd47(33)=acd47(33)+acd47(34)
-      acd47(33)=acd47(4)*acd47(33)
-      acd47(34)=acd47(9)*acd47(6)*acd47(10)
-      acd47(31)=acd47(32)+acd47(31)+acd47(34)+acd47(33)
-      acd47(31)=acd47(2)*acd47(31)
-      brack(ninjaidxt0x0mu0)=acd47(31)
+      acd47(8)=dotproduct(ninjaE3,spvak2l4)
+      acd47(9)=dotproduct(ninjaE3,spval3k5)
+      acd47(10)=abb47(10)
+      acd47(11)=abb47(11)
+      acd47(12)=abb47(14)
+      acd47(13)=abb47(15)
+      acd47(14)=dotproduct(ninjaE3,spval4k1)
+      acd47(15)=abb47(33)
+      acd47(16)=acd47(4)*acd47(1)
+      acd47(17)=acd47(6)*acd47(5)
+      acd47(18)=acd47(13)*acd47(7)
+      acd47(19)=acd47(15)*acd47(14)
+      acd47(16)=acd47(19)+acd47(18)+acd47(16)+2.0_ki*acd47(17)
+      acd47(16)=acd47(16)*acd47(3)*acd47(2)
+      acd47(17)=acd47(10)*acd47(9)
+      acd47(18)=acd47(11)*acd47(2)
+      acd47(17)=acd47(18)+acd47(17)
+      acd47(17)=acd47(17)*acd47(8)
+      acd47(18)=acd47(12)*acd47(2)**2
+      acd47(17)=acd47(18)+acd47(17)
+      acd47(17)=acd47(7)*acd47(17)
+      acd47(16)=acd47(16)+acd47(17)
+      brack(ninjaidxt0x0mu0)=acd47(16)
       brack(ninjaidxt0x0mu2)=0.0_ki
       brack(ninjaidxt0x1mu0)=0.0_ki
       brack(ninjaidxt0x2mu0)=0.0_ki

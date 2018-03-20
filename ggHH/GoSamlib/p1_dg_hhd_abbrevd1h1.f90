@@ -1,5 +1,6 @@
 module     p1_dg_hhd_abbrevd1h1
    use p1_dg_hhd_config, only: ki
+   use p1_dg_hhd_kinematics, only: epstensor
    use p1_dg_hhd_globalsh1
    implicit none
    private

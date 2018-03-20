@@ -59,6 +59,4 @@ veryclean: clean
 	rm -f pwgevents*.lhe
 	rm -f pwgfullgrid*.dat
 	rm -f testbnd*.top
-	rm -f pyInputPipe*
-	rm -f pyOutputPipe*
-	rm -f pyReadySignal*
+	rm -f mint_*.top 

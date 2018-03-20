@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d27h1l1d
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d27h1l1d.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d27h1l1d.f90
    ! generator: buildfortran_d.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond, d => metric_tensor
@@ -13,7 +13,7 @@ module     p0_gg_hhg_d27h1l1d
    integer, private :: iv3
    integer, private :: iv4
    real(ki), dimension(4), private :: qshift
-   public :: derivative , reconstruct_d27
+   public :: derivative
 contains
 !---#[ function brack_1:
    pure function brack_1(Q, mu2) result(brack)
@@ -152,87 +152,4 @@ contains
       end if
    end function derivative
 !---#] function derivative:
-!---#[ subroutine reconstruct_d27:
-   subroutine     reconstruct_d27(coeffs)
-      use p0_gg_hhg_groups, only: tensrec_info_group6
-      implicit none
-      complex(ki), parameter :: czip = (0.0_ki, 0.0_ki)
-      complex(ki), parameter :: cone = (1.0_ki, 0.0_ki)
-      complex(ki), parameter :: ctwo = (2.0_ki, 0.0_ki)
-      type(tensrec_info_group6), intent(out) :: coeffs
-      ! rank 4 case :
-      !---[# reconstruct coeffs%coeffs_27:
-      coeffs%coeffs_27%c0 = derivative(czip)
-      coeffs%coeffs_27%c1(1,1) = derivative(czip,1)
-      coeffs%coeffs_27%c1(1,2) = derivative(czip,1,1)/2.0_ki
-      coeffs%coeffs_27%c1(1,3) = derivative(czip,1,1,1)/6.0_ki
-      coeffs%coeffs_27%c1(1,4) = derivative(czip,1,1,1,1)/24.0_ki
-      coeffs%coeffs_27%c1(2,1) = -derivative(czip,2)
-      coeffs%coeffs_27%c1(2,2) = derivative(czip,2,2)/2.0_ki
-      coeffs%coeffs_27%c1(2,3) = -derivative(czip,2,2,2)/6.0_ki
-      coeffs%coeffs_27%c1(2,4) = derivative(czip,2,2,2,2)/24.0_ki
-      coeffs%coeffs_27%c1(3,1) = -derivative(czip,3)
-      coeffs%coeffs_27%c1(3,2) = derivative(czip,3,3)/2.0_ki
-      coeffs%coeffs_27%c1(3,3) = -derivative(czip,3,3,3)/6.0_ki
-      coeffs%coeffs_27%c1(3,4) = derivative(czip,3,3,3,3)/24.0_ki
-      coeffs%coeffs_27%c1(4,1) = -derivative(czip,4)
-      coeffs%coeffs_27%c1(4,2) = derivative(czip,4,4)/2.0_ki
-      coeffs%coeffs_27%c1(4,3) = -derivative(czip,4,4,4)/6.0_ki
-      coeffs%coeffs_27%c1(4,4) = derivative(czip,4,4,4,4)/24.0_ki
-      coeffs%coeffs_27%c2(1,1) = -derivative(czip,1,2)
-      coeffs%coeffs_27%c2(1,2) = derivative(czip,1,2,2)/2.0_ki
-      coeffs%coeffs_27%c2(1,3) = -derivative(czip,1,2,2,2)/6.0_ki
-      coeffs%coeffs_27%c2(1,4) = -derivative(czip,1,1,2)/2.0_ki
-      coeffs%coeffs_27%c2(1,5) = derivative(czip,1,1,2,2)/4.0_ki
-      coeffs%coeffs_27%c2(1,6) = -derivative(czip,1,1,1,2)/6.0_ki
-      coeffs%coeffs_27%c2(2,1) = -derivative(czip,1,3)
-      coeffs%coeffs_27%c2(2,2) = derivative(czip,1,3,3)/2.0_ki
-      coeffs%coeffs_27%c2(2,3) = -derivative(czip,1,3,3,3)/6.0_ki
-      coeffs%coeffs_27%c2(2,4) = -derivative(czip,1,1,3)/2.0_ki
-      coeffs%coeffs_27%c2(2,5) = derivative(czip,1,1,3,3)/4.0_ki
-      coeffs%coeffs_27%c2(2,6) = -derivative(czip,1,1,1,3)/6.0_ki
-      coeffs%coeffs_27%c2(3,1) = -derivative(czip,1,4)
-      coeffs%coeffs_27%c2(3,2) = derivative(czip,1,4,4)/2.0_ki
-      coeffs%coeffs_27%c2(3,3) = -derivative(czip,1,4,4,4)/6.0_ki
-      coeffs%coeffs_27%c2(3,4) = -derivative(czip,1,1,4)/2.0_ki
-      coeffs%coeffs_27%c2(3,5) = derivative(czip,1,1,4,4)/4.0_ki
-      coeffs%coeffs_27%c2(3,6) = -derivative(czip,1,1,1,4)/6.0_ki
-      coeffs%coeffs_27%c2(4,1) = derivative(czip,2,3)
-      coeffs%coeffs_27%c2(4,2) = -derivative(czip,2,3,3)/2.0_ki
-      coeffs%coeffs_27%c2(4,3) = derivative(czip,2,3,3,3)/6.0_ki
-      coeffs%coeffs_27%c2(4,4) = -derivative(czip,2,2,3)/2.0_ki
-      coeffs%coeffs_27%c2(4,5) = derivative(czip,2,2,3,3)/4.0_ki
-      coeffs%coeffs_27%c2(4,6) = derivative(czip,2,2,2,3)/6.0_ki
-      coeffs%coeffs_27%c2(5,1) = derivative(czip,2,4)
-      coeffs%coeffs_27%c2(5,2) = -derivative(czip,2,4,4)/2.0_ki
-      coeffs%coeffs_27%c2(5,3) = derivative(czip,2,4,4,4)/6.0_ki
-      coeffs%coeffs_27%c2(5,4) = -derivative(czip,2,2,4)/2.0_ki
-      coeffs%coeffs_27%c2(5,5) = derivative(czip,2,2,4,4)/4.0_ki
-      coeffs%coeffs_27%c2(5,6) = derivative(czip,2,2,2,4)/6.0_ki
-      coeffs%coeffs_27%c2(6,1) = derivative(czip,3,4)
-      coeffs%coeffs_27%c2(6,2) = -derivative(czip,3,4,4)/2.0_ki
-      coeffs%coeffs_27%c2(6,3) = derivative(czip,3,4,4,4)/6.0_ki
-      coeffs%coeffs_27%c2(6,4) = -derivative(czip,3,3,4)/2.0_ki
-      coeffs%coeffs_27%c2(6,5) = derivative(czip,3,3,4,4)/4.0_ki
-      coeffs%coeffs_27%c2(6,6) = derivative(czip,3,3,3,4)/6.0_ki
-      coeffs%coeffs_27%c3(1,1) = derivative(czip,1,2,3)
-      coeffs%coeffs_27%c3(1,2) = -derivative(czip,1,2,3,3)/2.0_ki
-      coeffs%coeffs_27%c3(1,3) = -derivative(czip,1,2,2,3)/2.0_ki
-      coeffs%coeffs_27%c3(1,4) = derivative(czip,1,1,2,3)/2.0_ki
-      coeffs%coeffs_27%c3(2,1) = derivative(czip,1,2,4)
-      coeffs%coeffs_27%c3(2,2) = -derivative(czip,1,2,4,4)/2.0_ki
-      coeffs%coeffs_27%c3(2,3) = -derivative(czip,1,2,2,4)/2.0_ki
-      coeffs%coeffs_27%c3(2,4) = derivative(czip,1,1,2,4)/2.0_ki
-      coeffs%coeffs_27%c3(3,1) = derivative(czip,1,3,4)
-      coeffs%coeffs_27%c3(3,2) = -derivative(czip,1,3,4,4)/2.0_ki
-      coeffs%coeffs_27%c3(3,3) = -derivative(czip,1,3,3,4)/2.0_ki
-      coeffs%coeffs_27%c3(3,4) = derivative(czip,1,1,3,4)/2.0_ki
-      coeffs%coeffs_27%c3(4,1) = -derivative(czip,2,3,4)
-      coeffs%coeffs_27%c3(4,2) = derivative(czip,2,3,4,4)/2.0_ki
-      coeffs%coeffs_27%c3(4,3) = derivative(czip,2,3,3,4)/2.0_ki
-      coeffs%coeffs_27%c3(4,4) = derivative(czip,2,2,3,4)/2.0_ki
-      coeffs%coeffs_27%c4(1,1) = -derivative(czip,1,2,3,4)
-      !---#] reconstruct coeffs%coeffs_27:
-   end subroutine reconstruct_d27
-!---#] subroutine reconstruct_d27:
 end module     p0_gg_hhg_d27h1l1d

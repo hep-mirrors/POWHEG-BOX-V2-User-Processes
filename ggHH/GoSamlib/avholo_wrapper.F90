@@ -1,7 +1,7 @@
 ! Wrapper of avh_olo routines with C bindings
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 !!quadninja!!#define NINJA_QUADRUPLE 1

@@ -1,12 +1,12 @@
 # vim: syntax=olp
-#@OLP GoSam 2.0.2
+#@OLP GoSam 2.0.4
 #@IgnoreUnknown True
 #@IgnoreCase False
 #@SyntaxExtensions 
 MatrixElementSquareType CHaveraged | OK
 CorrectionType QCD | OK
 IRregularisation CDR | OK
-AlphasPower 1 | OK
+AlphasPower 3 | OK
 AlphaPower 2 | OK
 SubdivideSubprocess no | OK
 AmplitudeType LoopInduced | OK

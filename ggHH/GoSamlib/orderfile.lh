@@ -5,7 +5,7 @@
  MatrixElementSquareType CHaveraged
  CorrectionType          QCD
  IRregularisation        CDR
- AlphasPower             1
+ AlphasPower             3
  AlphaPower              2
  SubdivideSubprocess     no
 

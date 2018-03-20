@@ -3,7 +3,7 @@ module     p0_gg_hhg_config
 
    integer, parameter :: dbl = kind(1.0d0)
    ! QUADRUPLE PRECISION (ki=16):
-   ! integer, parameter :: ki = selected_real_kind(33, 4931)
+   integer, parameter :: ki_qp = selected_real_kind(33, 4931)
    ! INTERMEDIATE PRECISION (ki=10):
    ! integer, parameter :: ki = selected_real_kind(18, 4931)
    ! DOUBLE PRECISION (ki=8):
@@ -11,16 +11,16 @@ module     p0_gg_hhg_config
 
    ! Options to control the interoperation between different
    ! Reduction libraries:
-   integer, parameter :: SAMURAI = 0
-   integer, parameter :: GOLEM95 = 1
-   integer, parameter :: NINJA   = 2
-   integer, parameter :: PJFRY   = 3 ! experimental
+   integer, parameter :: SAMURAI   = 0
+   integer, parameter :: GOLEM95   = 1
+   integer, parameter :: NINJA     = 2
+   integer, parameter :: PJFRY     = 3 ! experimental
+   integer, parameter :: QUADNINJA = 4 ! experimental
    ! Reduction methods
    integer :: reduction_interoperation = NINJA
    ! Rescue reduction method. The rescue system is disabled
    ! if it is equal to reduction_interoperation
-   !integer :: reduction_interoperation_rescue = GOLEM95
-   integer :: reduction_interoperation_rescue = GOLEM95
+   integer :: reduction_interoperation_rescue = QUADNINJA
 
    ! Debugging settings
    logical :: debug_lo_diagrams  = .false.
@@ -77,6 +77,9 @@ module     p0_gg_hhg_config
    ! include finite renormalisation of gamma_5
    logical :: renorm_gamma5 = .true.
 
+   ! include renormalization of yukawa couplings
+   logical :: renorm_yukawa = .true.
+
    ! Switch mass counter terms for massive quarks on or off
    ! deltaOS = 1.0_ki --> on
    ! deltaOS = 0.0_ki --> off
@@ -108,17 +111,19 @@ module     p0_gg_hhg_config
    !
    ! Note, however, that the factor of 1/Gamma(1-eps) is not included
    ! in any of the cases.
-   integer :: nlo_prefactors = 0
+   integer :: nlo_prefactors = 2
 
    ! Determines the maximum allowed difference among the abs of the
    ! single pole evaluations obtained with the amplitude vs the one
    ! obtained through the IR subroutine relative to the leading order.
-   !
-   ! Note: at the moment it only works for virtual corrections
-   ! to Tree level processes.
+   ! Alternatively, the rescue system can be modified to compute all
+   ! phase space points twice to asses their stability.
+
    logical :: PSP_check = .true.
    logical :: PSP_verbosity = .false.
    logical :: PSP_rescue = .true.
+
+   ! Number of good digits in virtual amplitude:
    ! not used (tree-level not available):
    integer :: PSP_chk_th1 = 8
    integer :: PSP_chk_th2 = 3
@@ -126,10 +131,10 @@ module     p0_gg_hhg_config
    real(ki) :: PSP_chk_kfactor = 1000.0_ki
    
    ! used instead:
-   integer :: PSP_chk_li1 = 25
-   integer :: PSP_chk_li2 = 25
-   integer :: PSP_chk_li3 = 25
-   integer :: PSP_chk_li4 = 25
+   integer :: PSP_chk_li1 = 16 ! not used
+   integer :: PSP_chk_li2 = 5  ! precision of rotation
+   integer :: PSP_chk_li3 = 2  ! precision to set to infinity in OLP
+   integer :: PSP_chk_li4 = 19 ! precision of pole in quad
 
 
 end module p0_gg_hhg_config

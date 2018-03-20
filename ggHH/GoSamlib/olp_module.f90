@@ -3,7 +3,8 @@ module     olp_module
    implicit none
    private
    public :: OLP_Start, OLP_EvalSubProcess, OLP_Finalize, OLP_Option
-   public :: OLP_SetParameter, OLP_Info
+   public :: OLP_EvalSubProcess2, OLP_Polvec, OLP_SetParameter, OLP_Info
+   public :: OLP_PrintParameter
 
 contains
 
@@ -20,16 +21,16 @@ contains
       use p0_gg_hhg_matrix, only: p0_gg_hhg_initgolem => initgolem
       use p0_gg_hhg_config, only: p0_gg_hhg_PSP_rescue => PSP_rescue, &
            & p0_gg_hhg_PSP_verbosity => PSP_verbosity, &
-           & p0_gg_hhg_PSP_chk_th1 => PSP_chk_th1, &
-           & p0_gg_hhg_PSP_chk_th2 => PSP_chk_th2, &
-           & p0_gg_hhg_PSP_chk_th3 => PSP_chk_th3, &
+           & p0_gg_hhg_PSP_chk_li1 => PSP_chk_li1, &
+           & p0_gg_hhg_PSP_chk_li2 => PSP_chk_li2, &
+           & p0_gg_hhg_PSP_chk_li3 => PSP_chk_li3, &
            & p0_gg_hhg_PSP_chk_kfactor => PSP_chk_kfactor
       use p1_dg_hhd_matrix, only: p1_dg_hhd_initgolem => initgolem
       use p1_dg_hhd_config, only: p1_dg_hhd_PSP_rescue => PSP_rescue, &
            & p1_dg_hhd_PSP_verbosity => PSP_verbosity, &
-           & p1_dg_hhd_PSP_chk_th1 => PSP_chk_th1, &
-           & p1_dg_hhd_PSP_chk_th2 => PSP_chk_th2, &
-           & p1_dg_hhd_PSP_chk_th3 => PSP_chk_th3, &
+           & p1_dg_hhd_PSP_chk_li1 => PSP_chk_li1, &
+           & p1_dg_hhd_PSP_chk_li2 => PSP_chk_li2, &
+           & p1_dg_hhd_PSP_chk_li3 => PSP_chk_li3, &
            & p1_dg_hhd_PSP_chk_kfactor => PSP_chk_kfactor
       implicit none
       character(kind=c_char,len=1), intent(in) :: contract_file_name
@@ -82,9 +83,9 @@ contains
 
       close(unit=21)
 
-      ! if (ierr .eq. 1) then
-      !    call read_slha_file(line_buf(1:l))
-      ! end if
+      if (ierr .eq. 1) then
+         call read_slha_file(line_buf(1:l))
+      end if
 
       ! Uncomment to change rescue system setting on all suprocesses
       ! PSP_rescue = .true.
@@ -101,15 +102,15 @@ contains
       ! pb_gg_hh_PSP_chk_kfactor = PSP_chk_kfactor
       ! p0_gg_hhg_PSP_rescue = PSP_rescue
       ! p0_gg_hhg_PSP_verbosity =  PSP_verbosity
-      ! p0_gg_hhg_PSP_chk_th1 = PSP_chk_th1
-      ! p0_gg_hhg_PSP_chk_th2 = PSP_chk_th2
-      ! p0_gg_hhg_PSP_chk_th3 = PSP_chk_th3
+      ! p0_gg_hhg_PSP_chk_th1 = PSP_chk_li1
+      ! p0_gg_hhg_PSP_chk_th2 = PSP_chk_li2
+      ! p0_gg_hhg_PSP_chk_th3 = PSP_chk_li3
       ! p0_gg_hhg_PSP_chk_kfactor = PSP_chk_kfactor
       ! p1_dg_hhd_PSP_rescue = PSP_rescue
       ! p1_dg_hhd_PSP_verbosity =  PSP_verbosity
-      ! p1_dg_hhd_PSP_chk_th1 = PSP_chk_th1
-      ! p1_dg_hhd_PSP_chk_th2 = PSP_chk_th2
-      ! p1_dg_hhd_PSP_chk_th3 = PSP_chk_th3
+      ! p1_dg_hhd_PSP_chk_th1 = PSP_chk_li1
+      ! p1_dg_hhd_PSP_chk_th2 = PSP_chk_li2
+      ! p1_dg_hhd_PSP_chk_th3 = PSP_chk_li3
       ! p1_dg_hhd_PSP_chk_kfactor = PSP_chk_kfactor
       if(stage.lt.0) then
          call pb_gg_hh_initgolem(.true.)
@@ -129,11 +130,11 @@ contains
    use p0_gg_hhg_version, only: gosamversion, gosamrevision
 
    implicit none
-   character(kind=c_char), intent(inout), dimension(15)  :: olp_name
-   character(kind=c_char), intent(inout), dimension(15)  :: olp_version
+   character(kind=c_char), intent(inout), dimension(20)  :: olp_name
+   character(kind=c_char), intent(inout), dimension(20)  :: olp_version
    character(kind=c_char), intent(inout), dimension(255) :: message
    character(len=254) :: msg
-   character(len=6)   :: rev
+   character(len=7)   :: rev
    character(len=1)   :: ver1, ver2
 
    interface
@@ -147,7 +148,7 @@ contains
 
    write(ver1,'(I1)') gosamversion(1)
    write(ver2,'(I1)') gosamversion(2)
-   write(rev,'(I6)')  gosamrevision
+   write(rev,'(Z7)')  gosamrevision
 
    msg = new_line('C')//'Please cite the following references when using this program:'//&
         &new_line('C')//'Peraro:2014cba, Mastrolia:2012bu, '//&
@@ -156,8 +157,8 @@ contains
    call strncpy(olp_name, c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR, &
         len(c_char_'GoSam-'//ver1//'.'//ver2//C_NULL_CHAR,kind=c_size_t))
 
-   call strncpy(olp_version, c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
-        len(c_char_'svn rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
+   call strncpy(olp_version, c_char_'git rev-'//trim(adjustl(rev))//C_NULL_CHAR, &
+        len(c_char_'git rev-'//trim(adjustl(rev))//C_NULL_CHAR,kind=c_size_t))
 
    call strncpy(message, c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR, &
         len(c_char_'GoSam:'//trim(adjustl(msg))//C_NULL_CHAR,kind=c_size_t))
@@ -250,6 +251,43 @@ contains
 
    end subroutine OLP_EvalSubProcess
 
+   ! BLHA2 interface
+   subroutine     OLP_EvalSubProcess2(label, momenta, mu, res, acc) &
+   & bind(C,name="olp_evalsubprocess2_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=c_int), intent(in) :: label
+      real(kind=c_double), intent(in) :: mu
+      real(kind=c_double), dimension(50), intent(in) :: momenta
+      real(kind=c_double), dimension(60), intent(out) :: res
+      real(kind=c_double), intent(out) :: acc
+
+      real(kind=c_double), dimension(10) :: parameters
+
+      real(kind=c_double), parameter :: one_over_2pi = 0.15915494309189533577d0
+
+      select case(label)
+      case(0)
+              call eval0(momenta(1:25), mu, parameters, res, acc)
+      case(1)
+              call eval1(momenta(1:25), mu, parameters, res, acc)
+      case(2)
+              call eval2(momenta(1:25), mu, parameters, res, acc)
+      case(3)
+              call eval3(momenta(1:25), mu, parameters, res, acc)
+      case(4)
+              call eval4(momenta(1:25), mu, parameters, res, acc)
+      case(5)
+              call eval5(momenta(1:25), mu, parameters, res, acc)
+      case(6)
+              call eval6(momenta(1:25), mu, parameters, res, acc)
+      case(7)
+              call eval7(momenta(1:25), mu, parameters, res, acc)
+      case default
+         res(:) = 0.0d0
+      end select
+   end subroutine OLP_EvalSubProcess2
+
    subroutine     OLP_Finalize() &
    & bind(C,name="olp_finalize_")
       use, intrinsic :: iso_c_binding
@@ -267,7 +305,9 @@ contains
       use, intrinsic :: iso_c_binding
       use pb_gg_hh_model, only: pb_gg_hh_parseline => parseline
       use p0_gg_hhg_model, only: p0_gg_hhg_parseline => parseline
+      use p0_gg_hhg_model_qp, only: p0_gg_hhg_parseline_qp => parseline
       use p1_dg_hhd_model, only: p1_dg_hhd_parseline => parseline
+      use p1_dg_hhd_model_qp, only: p1_dg_hhd_parseline_qp => parseline
       implicit none
       character(kind=c_char,len=1), intent(in) :: line
       integer(kind=c_int), intent(out) :: stat
@@ -289,11 +329,13 @@ contains
          return
       end if
       call p0_gg_hhg_parseline(line(1:l),ios)
+      call p0_gg_hhg_parseline_qp(line(1:l),ios)
       if (ios .ne. 0) then
          stat = 0
          return
       end if
       call p1_dg_hhd_parseline(line(1:l),ios)
+      call p1_dg_hhd_parseline_qp(line(1:l),ios)
       if (ios .ne. 0) then
          stat = 0
          return
@@ -322,8 +364,7 @@ contains
       use p0_gg_hhg_model, only: parseline
       use p0_gg_hhg_kinematics, only: boost_to_cms
       use p0_gg_hhg_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p0_gg_hhg_groups, only: tear_down_golem95
-      use p0_gg_hhg_groups, only: ninja_exit
+      use p0_gg_hhg_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -357,8 +398,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -368,9 +409,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            !zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -398,8 +439,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p1_dg_hhd_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -433,8 +473,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -444,9 +484,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -474,8 +514,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p2_gd_hhd_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -509,8 +548,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -520,9 +559,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -550,8 +589,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p3_dbarg_hhdbar_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -585,8 +623,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -596,9 +634,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -626,8 +664,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p4_gdbar_hhdbar_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -661,8 +698,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -672,9 +709,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -702,8 +739,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p5_ddbar_hhg_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -737,8 +773,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -748,9 +784,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(2)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -778,8 +814,7 @@ contains
       use p1_dg_hhd_model, only: parseline
       use p1_dg_hhd_kinematics, only: boost_to_cms
       use p5_ddbar_hhg_matrix, only: samplitude, OLP_spin_correlated_lo2, OLP_color_correlated
-      use p1_dg_hhd_groups, only: tear_down_golem95
-      use p1_dg_hhd_groups, only: ninja_exit
+      use p1_dg_hhd_groups, only: ninja_exit, quadninja_exit
 
       implicit none
       real(kind=c_double), dimension(25), intent(in) :: momenta
@@ -819,8 +854,8 @@ contains
       call boost_to_cms(vecs)
 
       call samplitude(vecs, real(mu,ki)*real(mu,ki), amp, prec, ok)
-      call tear_down_golem95()
       call ninja_exit()
+      call quadninja_exit()
       if (ok) then
          !
       else
@@ -830,9 +865,9 @@ contains
          acc=10.0_ki**(-prec) ! point accuracy
       else
          if(prec.lt.PSP_chk_li3 .and. PSP_check) then
-            ! Give back a single pole equal to one, so that point is recomputed in quad precision
-            ! zero = log(1.0_ki)
-            amp(3)= 1.0_ki !/zero
+            ! Give back a Nan so that point is discarded
+            zero = log(1.0_ki)
+            amp(2)= 1.0_ki/zero
         end if
         ! Cannot be assigned if present(acc)=F --> commented out!
         ! acc=1E5_ki ! dummy accuracy which is not used
@@ -935,86 +970,85 @@ contains
 
    end subroutine eval7
    !---#] subroutine eval7 :
+   !---#[ OLP Polarization vector:
+   subroutine OLP_Polvec(p,q,eps) &
+       & bind(C,name="olp_polvec_")
+      use, intrinsic :: iso_c_binding
+      use p0_gg_hhg_config , only:ki
+      use p0_gg_hhg_model
+      use p0_gg_hhg_kinematics, only: Spab3, Spaa   
+      implicit none
+      real(kind=c_double), dimension(0:3), intent(in) :: p,q
+      real(kind=c_double), dimension(0:7), intent(out) :: eps
+      complex(kind=ki), dimension(4) :: eps_complex
+      complex(kind=ki), dimension(0:3) :: Sp
 
+      Sp=Spab3(real(q,ki), real(p,ki))
 
+      eps_complex(:)=Sp(:)/Spaa(real(q,ki),real(p,ki))/sqrt2
+      eps(0)=real(eps_complex(1),c_double)
+      eps(1)=real(aimag(eps_complex(1)),c_double)
+      eps(2)=real(eps_complex(2),c_double)
+      eps(3)=real(aimag(eps_complex(2)),c_double)
+      eps(4)=real(eps_complex(3),c_double)
+      eps(5)=real(aimag(eps_complex(3)),c_double)
+      eps(6)=real(eps_complex(4),c_double)
+      eps(7)=real(aimag(eps_complex(4)),c_double)
 
-   ! !---#[ OLP Polarization vector:
-   ! subroutine OLP_Polvec(p,q,eps) &
-   !     & bind(C,name="olp_polvec_")
-   !    use, intrinsic :: iso_c_binding
-   !    use p0_gg_hhg_config , only:ki
-   !    use p0_gg_hhg_model
-   !    use p0_gg_hhg_kinematics, only: Spab3, Spaa
-   !    implicit none
-   !    real(kind=c_double), dimension(0:3), intent(in) :: p,q
-   !    real(kind=c_double), dimension(0:7), intent(out) :: eps
-   !    complex(kind=ki), dimension(4) :: eps_complex
-   !    complex(kind=ki), dimension(0:3) :: Sp
+   end subroutine OLP_Polvec
+   !---#] OLP Polarization vector:
 
-   !    Sp=Spab3(real(q,ki), real(p,ki))
+   !---#[ OLP_PrintParameter
+   subroutine OLP_PrintParameter(filename) &
+       & bind(C,name="olp_printparameter_")
 
-   !    eps_complex(:)=Sp(:)/Spaa(real(q,ki),real(p,ki))/sqrt2
-   !    eps(0)=real(eps_complex(1),c_double)
-   !    eps(1)=real(aimag(eps_complex(1)),c_double)
-   !    eps(2)=real(eps_complex(2),c_double)
-   !    eps(3)=real(aimag(eps_complex(2)),c_double)
-   !    eps(4)=real(eps_complex(3),c_double)
-   !    eps(5)=real(aimag(eps_complex(3)),c_double)
-   !    eps(6)=real(eps_complex(4),c_double)
-   !    eps(7)=real(aimag(eps_complex(4)),c_double)
+      use, intrinsic :: iso_c_binding
+      use p0_gg_hhg_model, only: p0_gg_hhg_print_parameter => print_parameter
+      use p1_dg_hhd_model, only: p1_dg_hhd_print_parameter => print_parameter
+      implicit none
+      character(kind=c_char,len=1), intent(in) :: filename
+      integer :: ierr, l
+      logical :: exists
 
-   ! end subroutine OLP_Polvec
-   ! !---#] OLP Polarization vector:
+      interface
+         function strlen(s) bind(C,name='strlen')
+            use, intrinsic :: iso_c_binding
+            implicit none
+            character(kind=c_char,len=1), intent(in) :: s
+            integer(kind=c_int) :: strlen
+         end function strlen
+      end interface
 
-   ! !---#[ OLP_PrintParameter
-   ! subroutine OLP_PrintParameter(filename) &
-   !     & bind(C,name="olp_printparameter_")
+      l = strlen(filename)
 
-   !    use, intrinsic :: iso_c_binding
-   !    use p0_gg_hhg_model, only: p0_gg_hhg_print_parameter => print_parameter
-   !    use p1_dg_hhd_model, only: p1_dg_hhd_print_parameter => print_parameter
-   !    implicit none
-   !    character(kind=c_char,len=1), intent(in) :: filename
-   !    integer :: ierr, l
-   !    logical :: exists
+      inquire(file=filename(1:l), exist=exists)
+      if (exists) then
+         open(unit=27,file=filename(1:l),status="old", position="append", action="write",iostat=ierr)
+      else
+         open(unit=27,file=filename(1:l),status="new",iostat=ierr)
+      end if
+      if (ierr .ne. 0) then
+         write(7,*) "OLP_PrintParameter: Could not open/create:", filename(1:l), "!"
+         ierr = -1
+      end if
+      write (27, "(A)") "####### Setup of SubProcess p0_gg_hhg #######"
+      call p0_gg_hhg_print_parameter(.true.,27)
+      write (27, *)
+      write (27, "(A)") "####### Setup of SubProcess p1_dg_hhd #######"
+      call p1_dg_hhd_print_parameter(.true.,27)
+      write (27, *)
 
-   !    interface
-   !       function strlen(s) bind(C,name='strlen')
-   !          use, intrinsic :: iso_c_binding
-   !          implicit none
-   !          character(kind=c_char,len=1), intent(in) :: s
-   !          integer(kind=c_int) :: strlen
-   !       end function strlen
-   !    end interface
+      close(27)
 
-   !    l = strlen(filename)
-
-   !    inquire(file=filename(1:l), exist=exists)
-   !    if (exists) then
-   !       open(unit=27,file=filename(1:l),status="old", position="append", action="write",iostat=ierr)
-   !    else
-   !       open(unit=27,file=filename(1:l),status="new",iostat=ierr)
-   !    end if
-   !    if (ierr .ne. 0) then
-   !       write(7,*) "OLP_PrintParameter: Could not open/create:", filename(1:l), "!"
-   !       ierr = -1
-   !    end if
-   !    write (27, "(A)") "####### Setup of SubProcess p0_gg_hhg #######"
-   !    call p0_gg_hhg_print_parameter(.true.,27)
-   !    write (27, *)
-   !    write (27, "(A)") "####### Setup of SubProcess p1_dg_hhd #######"
-   !    call p1_dg_hhd_print_parameter(.true.,27)
-   !    write (27, *)
-
-   !    close(27)
-
-   ! end subroutine OLP_PrintParameter
-   ! !---#] OLP_PrintParameter
+   end subroutine OLP_PrintParameter
+   !---#] OLP_PrintParameter
 
    subroutine     read_slha_file(line)
       use pb_gg_hh_model, only: pb_gg_hh_read_slha => read_slha
       use p0_gg_hhg_model, only: p0_gg_hhg_read_slha => read_slha
+      use p0_gg_hhg_model_qp, only: p0_gg_hhg_read_slha_qp => read_slha
       use p1_dg_hhd_model, only: p1_dg_hhd_read_slha => read_slha
+      use p1_dg_hhd_model_qp, only: p1_dg_hhd_read_slha_qp => read_slha
       implicit none
       character(len=*), intent(in) :: line
       character(len=512) :: file_name
@@ -1026,8 +1060,10 @@ contains
          print*, "Could not find SLHA model file"
       else
          call p0_gg_hhg_read_slha(27)
+         call p0_gg_hhg_read_slha_qp(27)
          rewind(unit=27)
          call p1_dg_hhd_read_slha(27)
+         call p1_dg_hhd_read_slha_qp(27)
          close(27)
       end if
    end subroutine read_slha_file

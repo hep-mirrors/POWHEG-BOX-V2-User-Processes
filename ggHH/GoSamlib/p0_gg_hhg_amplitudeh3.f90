@@ -3,8 +3,6 @@ module    p0_gg_hhg_amplitudeh3
        & reduction_interoperation
    use p0_gg_hhg_color, only: numcs
    use p0_gg_hhg_groups
-   use precision_golem, only: ki_gol => ki
-   use p0_gg_hhg_golem95h3
    use ninjago_module, only: ki_nin
    use p0_gg_hhg_ninjah3
    
@@ -167,17 +165,11 @@ subroutine     evaluate_group0(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group0
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group0), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -186,14 +178,6 @@ subroutine     evaluate_group0(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -203,8 +187,7 @@ subroutine     evaluate_group0(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -231,17 +214,11 @@ subroutine     evaluate_group1(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group1
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group1), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -250,14 +227,6 @@ subroutine     evaluate_group1(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -267,8 +236,7 @@ subroutine     evaluate_group1(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -295,17 +263,11 @@ subroutine     evaluate_group2(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group2
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group2), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -314,14 +276,6 @@ subroutine     evaluate_group2(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -331,8 +285,7 @@ subroutine     evaluate_group2(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -359,17 +312,11 @@ subroutine     evaluate_group3(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group3
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group3), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -378,14 +325,6 @@ subroutine     evaluate_group3(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -395,8 +334,7 @@ subroutine     evaluate_group3(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -423,17 +361,11 @@ subroutine     evaluate_group4(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group4
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group4), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -442,14 +374,6 @@ subroutine     evaluate_group4(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -459,8 +383,7 @@ subroutine     evaluate_group4(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -487,17 +410,11 @@ subroutine     evaluate_group5(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group5
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group5), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -506,14 +423,6 @@ subroutine     evaluate_group5(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -523,8 +432,7 @@ subroutine     evaluate_group5(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -551,17 +459,11 @@ subroutine     evaluate_group6(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group6
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group6), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -570,14 +472,6 @@ subroutine     evaluate_group6(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -587,8 +481,7 @@ subroutine     evaluate_group6(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -615,17 +508,11 @@ subroutine     evaluate_group7(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group7
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group7), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -634,14 +521,6 @@ subroutine     evaluate_group7(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -651,8 +530,7 @@ subroutine     evaluate_group7(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -679,17 +557,11 @@ subroutine     evaluate_group8(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group8
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group8), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -698,14 +570,6 @@ subroutine     evaluate_group8(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -715,8 +579,7 @@ subroutine     evaluate_group8(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -743,17 +606,11 @@ subroutine     evaluate_group9(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group9
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group9), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -762,14 +619,6 @@ subroutine     evaluate_group9(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -779,8 +628,7 @@ subroutine     evaluate_group9(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -807,17 +655,11 @@ subroutine     evaluate_group10(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group10
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group10), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -826,14 +668,6 @@ subroutine     evaluate_group10(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -843,8 +677,7 @@ subroutine     evaluate_group10(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then
@@ -871,17 +704,11 @@ subroutine     evaluate_group11(scale2,samplitude,ok)
    use p0_gg_hhg_config, only: &
       & logfile, debug_nlo_diagrams
    use p0_gg_hhg_globalsl1, only: epspow
-   use parametre, only: mu2_scale_par
-   use form_factor_type, only: form_factor
-   use p0_gg_hhg_golem95h3, only: reconstruct_golem95 => reconstruct_group
-   use p0_gg_hhg_groups, only: contract_golem95
    use p0_gg_hhg_ninjah3, only: ninja_reduce => ninja_reduce_group11
    implicit none
    real(ki), intent(in) :: scale2
    logical, intent(out) :: ok
    complex(ki), dimension(-2:0), intent(out) :: samplitude
-   type(tensrec_info_group11), target :: coeffs
-   type(form_factor) :: gres
    complex(ki_nin), dimension(-2:0) :: tot
    complex(ki_nin) :: totr
 
@@ -890,14 +717,6 @@ subroutine     evaluate_group11(scale2,samplitude,ok)
       write(logfile,*) "<param name='epspow' value='", epspow, "'/>"
    end if
    select case(reduction_interoperation)
-   case(1) ! use Golem95 only
-      call reconstruct_golem95(coeffs)
-      mu2_scale_par = real(scale2, ki_gol)
-      gres = contract_golem95(coeffs)
-      samplitude(-2) = cmplx(real(gres%A, ki_gol), aimag(gres%A), ki)
-      samplitude(-1) = cmplx(real(gres%B, ki_gol), aimag(gres%B), ki)
-      samplitude( 0) = cmplx(real(gres%C, ki_gol), aimag(gres%C), ki)
-      ok = .true.
    case(2) ! use Ninja only
       call ninja_reduce(real(scale2, ki_nin), tot, totr, ok)
       samplitude(:) = cmplx(real(tot(:), ki_nin), aimag(tot(:)), ki)
@@ -907,8 +726,7 @@ subroutine     evaluate_group11(scale2,samplitude,ok)
       print*, "This choice is not valid for your current setup."
       print*, "* This code was generated without support for Samurai."
       print*, "* This code was generated with support for Ninja."
-      print*, "* This code was generated with support for Golem95."
-      print*, "* This code was generated without support for PJFry."
+      print*, "* This code was generated without support for Golem95."
    end select
 
    if(debug_nlo_diagrams) then

@@ -91,12 +91,7 @@ C--   Born Cross section with finite top mass
       else if(mtdep.eq.4) then
 C--   Test full Born Glover/Bij expressions with GoSam:
          call ME2born_full(p,born1,mpol)
-         call ME2born_top(p,born2,.false.)
-         write(*,*) "--> Born Glover/Bij:", born1
-         write(*,*) "--> Born GoSam     :", born2
-         write(*,*) "--> Born: should be one:", born2/born1
-         write(*,*) "=== QUAD ==="
-         call ME2born_top(p,born2,.true.)
+         call ME2born_top(p,born2)
          write(*,*) "--> Born Glover/Bij:", born1
          write(*,*) "--> Born GoSam     :", born2
          write(*,*) "--> Born: should be one:", born2/born1
@@ -431,7 +426,7 @@ c     Parse result of python grid
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      subroutine ME2born_top(p, amp2, quad_prec)
+      subroutine ME2born_top(p, amp2)
       implicit none
       include 'nlegborn.h'
       include 'pwhg_st.h'
@@ -442,7 +437,6 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     input:
       real * 8 p(0:3,nlegs)
       real * 8 ao2pi
-      logical quad_prec
 c     output:
       real * 8 amp2
 c     additional variables
@@ -450,43 +444,15 @@ c     additional variables
       parameter (dim_mom_array=50)
       real * 8 pgosam(dim_mom_array)
       real * 8 params(10),muren,res(4)
-      real * 16 p_qp(0:3,nlegs)
-      real * 16 pgosam_qp(dim_mom_array)
-      real * 16 params_qp(10),muren_qp,res_qp(4)
-      real * 8 scales2(2)
-      data scales2/0d0,15625d0/
-      save scales2
       logical print_momenta
 
-      print_momenta=.false.
       processid=7
-
-      if(quad_prec) then
-         call refine_momenta_to_qp(4,p,p_qp,2,scales2)
-         call gosam_momenta_qp(p_qp,pgosam_qp)
-         muren_qp=sqrt(st_muren2)
-         params_qp(1)=1q0
-         if (print_momenta) then
-            write(*,*) p(:,1)
-            write(*,*) p(:,2)
-            write(*,*) p(:,3)
-            write(*,*) p(:,4)
-            write(*,*) p_qp(:,1)
-            write(*,*) p_qp(:,2)
-            write(*,*) p_qp(:,3)
-            write(*,*) p_qp(:,4)
-         endif
-         call OLP_EvalSubProcess_qp(processid,pgosam_qp,
-     $        muren_qp,params_qp,res_qp)
-         amp2=res_qp(3)
-
-      else
-         call gosam_momenta(p,pgosam)
-         muren=sqrt(st_muren2)
-         params(1)=1d0
-         call OLP_EvalSubProcess(processid,pgosam,muren,params,res)
-         amp2=res(3)
-      endif
+      
+      call gosam_momenta(p,pgosam)
+      muren=sqrt(st_muren2)
+      params(1)=1d0
+      call OLP_EvalSubProcess(processid,pgosam,muren,params,res)
+      amp2=res(3)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C     GOSAM returns this result with NO gs factor ==>
@@ -534,36 +500,6 @@ c     It accounts for 10 particles at most
       integer dim_mom_array
       parameter (dim_mom_array=50)
       real * 8 pgosam(dim_mom_array)
-      integer i
-
-      if (nlegborn*5 .gt. dim_mom_array) then
-         write(*,*) 'The dimension of the pgosam array in the '//
-     $        'pwhg_gosam.f file NEEDS to be increased'
-         write(*,*) 'PROGRAM ABORT'
-         call exit(1)
-      endif
-
-      do i=1,nlegborn
-         pgosam(1+5*(i-1))=p(0,i)
-         pgosam(2+5*(i-1))=p(1,i)
-         pgosam(3+5*(i-1))=p(2,i)
-         pgosam(4+5*(i-1))=p(3,i)
-c         write(*,*) i,p(0,i)**2-p(1,i)**2-p(2,i)**2-p(3,i)**2
-         pgosam(5+5*(i-1))=kn_masses(i)
-      enddo
-      end
-
-      subroutine gosam_momenta_qp(p,pgosam)
-      implicit none
-      include 'nlegborn.h'
-      include 'pwhg_flst.h'
-      include 'pwhg_kn.h'
-      real * 16 p(0:3,nlegborn)
-c     In GoSam the array of the momenta has dimension 50.
-c     It accounts for 10 particles at most
-      integer dim_mom_array
-      parameter (dim_mom_array=50)
-      real * 16 pgosam(dim_mom_array)
       integer i
 
       if (nlegborn*5 .gt. dim_mom_array) then

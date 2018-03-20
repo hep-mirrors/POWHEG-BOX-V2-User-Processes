@@ -1,57 +1,56 @@
 module     p0_gg_hhg_model
-   ! Model parameters for the model: /home/luisonig/Documents/Lavoro/GoSamPowheg
-   ! /POWHEG-BOX-V2/ggHH/GoSam_POWHEG/Virtual/model/model
+   ! Model parameters for the model: /home/pcl305a/luisonig/Documents/GoSamPowh &
+   ! &eg/POWHEG-BOX-V2/ggHH_new/GoSam_POWHEG/Virtual/model/model
    use p0_gg_hhg_config, only: ki, &
-   & renormalisation, reduction_interoperation, deltaOS, &
+   & renormalisation, reduction_interoperation, &
+   & reduction_interoperation_rescue, deltaOS, &
    & nlo_prefactors, convert_to_cdr
    implicit none
-
    private :: ki
-   private :: renormalisation, reduction_interoperation, deltaOS
-   private :: nlo_prefactors
-
+   private :: renormalisation, reduction_interoperation
+   private :: reduction_interoperation_rescue
+   private :: deltaOS, nlo_prefactors
    real(ki), parameter :: sqrt2 = &
       &1.414213562373095048801688724209698078&
       &5696718753769480731766797379_ki
    real(ki), parameter :: sqrt3 = &
       &1.732050807568877293527446341505872366&
       &9428052538103806280558069795_ki
-   real(ki) :: GF
    real(ki) :: alpha =        0.007297352537600_ki
-   complex(ki) :: gauge1z = (       0.000000000000000_ki,        0.0000000000000&
-   &00_ki)
-   complex(ki) :: gauge2z = (       0.000000000000000_ki,        0.0000000000000&
-   &00_ki)
-   complex(ki) :: gauge5z = (       0.000000000000000_ki,        0.0000000000000&
-   &00_ki)
-   real(ki), parameter :: gs =        1.000000000000000_ki
-   real(ki), parameter :: mB =        0.000000000000000_ki
+   complex(ki) :: gauge1z = (       0.000000000000000_ki,        0.000000000000&
+   &000_ki)
+   complex(ki) :: gauge2z = (       0.000000000000000_ki,        0.000000000000&
+   &000_ki)
+   complex(ki) :: gauge5z = (       0.000000000000000_ki,        0.000000000000&
+   &000_ki)
+   real(ki),parameter :: gs =        1.000000000000000_ki
+   real(ki),parameter :: mB =        0.000000000000000_ki
    real(ki) :: mBMS =        4.200000000000000_ki
-   real(ki), parameter :: mC =        0.000000000000000_ki
-   real(ki), parameter :: mD =        0.000000000000000_ki
-   real(ki), parameter :: me =        0.000000000000000_ki
+   real(ki),parameter :: mC =        0.000000000000000_ki
+   real(ki),parameter :: mD =        0.000000000000000_ki
+   real(ki),parameter :: me =        0.000000000000000_ki
    real(ki) :: mH =      125.000000000000000_ki
-   real(ki), parameter :: mmu =        0.000000000000000_ki
-   real(ki), parameter :: mS =        0.000000000000000_ki
+   real(ki),parameter :: mmu =        0.000000000000000_ki
+   real(ki),parameter :: mS =        0.000000000000000_ki
    real(ki) :: mT =      171.199999999999989_ki
-   real(ki), parameter :: mtau =        0.000000000000000_ki
-   real(ki), parameter :: mU =        0.000000000000000_ki
+   real(ki),parameter :: mtau =        0.000000000000000_ki
+   real(ki),parameter :: mU =        0.000000000000000_ki
    real(ki) :: mW =       80.376000000000005_ki
    real(ki) :: mZ =       91.187600000000003_ki
    real(ki) :: NC =        3.000000000000000_ki
    real(ki) :: Nf =        5.000000000000000_ki
    real(ki) :: Nfgen =       -1.000000000000000_ki
-   real(ki), parameter :: wB =        0.000000000000000_ki
+   real(ki),parameter :: wB =        0.000000000000000_ki
    real(ki) :: wchi =        0.000000000000000_ki
    real(ki) :: wghWm =        0.000000000000000_ki
    real(ki) :: wghWp =        0.000000000000000_ki
    real(ki) :: wghZ =        0.000000000000000_ki
    real(ki) :: wH =        0.000000000000000_ki
    real(ki) :: wphi =        0.000000000000000_ki
-   real(ki), parameter :: wT =        0.000000000000000_ki
+   real(ki),parameter :: wT =        0.000000000000000_ki
    real(ki) :: wtau =        0.000000000000000_ki
-   real(ki) :: wW =        0.000000000000_ki
-   real(ki) :: wZ =        0.000000000000_ki
+   real(ki) :: wW =        2.124000000000000_ki
+   real(ki) :: wZ =        2.495200000000000_ki
    complex(ki) :: gUa
    complex(ki) :: gWWZZ
    complex(ki) :: gBa
@@ -174,10 +173,9 @@ module     p0_gg_hhg_model
    complex(ki) :: gPU
    complex(ki) :: gWPX
    complex(ki) :: gPS
-
    integer, parameter, private :: line_length = 80
    integer, parameter, private :: name_length = max(7,24)
-   character(len=name_length), dimension(22) :: names = (/&
+   character(len=name_length), dimension(21) :: names = (/&
       & "alpha  ", &
       & "gauge1z", &
       & "gauge2z", &
@@ -198,17 +196,10 @@ module     p0_gg_hhg_model
       & "wphi   ", &
       & "wtau   ", &
       & "wW     ", &
-      & "wZ     ", &
-      & "GF     "/)
-   character(len=1), dimension(3) :: cc = (/'#', '!', ';'/)
-
-
-
+      & "wZ     "/)
+   character(len=1), dimension(3) :: cc = (/ '#', '!', ';'/)
    private :: digit, parsereal, names, cc
-
 contains
-
-
 !---#[ print_parameter:
    ! Print current parameters / setup to stdout or output_unit
    subroutine   print_parameter(verbose,output_unit)
@@ -217,20 +208,16 @@ contains
       integer, intent(in), optional :: output_unit
       logical :: is_verbose
       integer :: unit
-
       real(ki), parameter :: pi = 3.14159265358979323846264&
      &3383279502884197169399375105820974944592307816406286209_ki
       is_verbose = .false.
       if(present(verbose)) then
           is_verbose = verbose
       end if
-
       unit = 6 ! stdout
       if(present(output_unit)) then
           unit = output_unit
       end if
-
-
    write(unit,'(A1,1x,A26)') "#", "--------- SETUP ---------"
    write(unit,'(A1,1x,A18,I2)') "#", "renormalisation = ", renormalisation
    if(convert_to_cdr) then
@@ -244,6 +231,19 @@ contains
       write(unit,'(A1,1x,A15,A7)') "#", "reduction with ", "GOLEM95"
    else if(reduction_interoperation.eq.2) then
       write(unit,'(A1,1x,A15,A15)') "#", "reduction with ", "NINJA"
+   else if(reduction_interoperation.eq.3) then
+      write(unit,'(A1,1x,A15,A5)') "#", "reduction with ", "PJFRY"
+   end if
+   if(reduction_interoperation_rescue.ne.reduction_interoperation) then
+      if(reduction_interoperation_rescue.eq.0) then
+         write(unit,'(A1,1x,A15,A7)') "#", "    --> rescue ", "SAMURAI"
+      else if(reduction_interoperation_rescue.eq.1) then
+         write(unit,'(A1,1x,A15,A7)') "#", "    --> rescue ", "GOLEM95"
+      else if(reduction_interoperation_rescue.eq.2) then
+         write(unit,'(A1,1x,A15,A15)') "#", "    --> rescue ", "NINJA"
+      else if(reduction_interoperation_rescue.eq.3) then
+         write(unit,'(A1,1x,A15,A5)') "#", "    --> rescue ", "PJFRY"
+      end if
    end if
    write(unit,'(A1,1x,A27)') "#", "--- PARAMETERS Overview ---"
    write(unit,'(A1,1x,A22)') "#", "Boson masses & widths:"
@@ -310,16 +310,15 @@ contains
    write(unit,'(A1,1x,A11,G23.16)') "#", "wW   = ", wW
    write(unit,'(A1,1x,A11,G23.16)') "#", "wZ   = ", wZ
    if(is_verbose) then
-
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gUa  = ", gUa
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWZZ= ", gWWZ&
-   &Z
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWZZ= ", gWW&
+   &ZZ
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gBa  = ", gBa
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtauv= ", gtau&
-   &v
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtauv= ", gta&
+   &uv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWZ = ", gWWZ
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaur= ", gtau&
-   &r
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaur= ", gta&
+   &ur
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gUl  = ", gUl
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gBv  = ", gBv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gUr  = ", gUr
@@ -327,19 +326,19 @@ contains
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gUv  = ", gUv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHZZ = ", gHZZ
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gSa  = ", gSa
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaua= ", gtau&
-   &a
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaua= ", gta&
+   &ua
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gW   = ", gW
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHH = ", gHHH
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaur= ", gnt&
-   &aur
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntauv= ", gnt&
-   &auv
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaur= ", gn&
+   &taur
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntauv= ", gn&
+   &tauv
    write(unit,'(A1,1x,A11,G23.16,"calc.")') "#", "gAPP = ", gAPP
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaul= ", gnt&
-   &aul
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaua= ", gnt&
-   &aua
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaul= ", gn&
+   &taul
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gntaua= ", gn&
+   &taua
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGWX = ", gGWX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gBl  = ", gBl
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gH   = ", gH
@@ -353,84 +352,84 @@ contains
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gCr  = ", gCr
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gCv  = ", gCv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gel  = ", gel
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaul= ", gtau&
-   &l
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gtaul= ", gta&
+   &ul
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPWZ = ", gPWZ
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gDl  = ", gDl
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZPP= ", gZZP&
-   &P
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHHH= ", gHHH&
-   &H
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZHH= ", gZZH&
-   &H
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGZWP= ", gGZW&
-   &P
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZPP= ", gZZ&
+   &PP
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHHH= ", gHH&
+   &HH
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZHH= ", gZZ&
+   &HH
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGZWP= ", gGZ&
+   &WP
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHXX = ", gHXX
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWPP= ", gWWP&
-   &P
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWPP= ", gWW&
+   &PP
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gDr  = ", gDr
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gDv  = ", gDv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGZH = ", gGZH
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gDa  = ", gDa
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWAPX= ", gWAP&
-   &X
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWAPX= ", gWA&
+   &PX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHWW = ", gHWW
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWXX= ", gWWX&
-   &X
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWXX= ", gWW&
+   &XX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gTa  = ", gTa
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gTl  = ", gTl
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gTr  = ", gTr
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gTv  = ", gTv
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPtau= ", gPta&
-   &u
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPtau= ", gPt&
+   &au
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHPP = ", gHPP
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWAZ= ", gWWA&
-   &Z
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWAA= ", gWWA&
-   &A
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmul= ", gnmu&
-   &l
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gAAPP= ", gAAP&
-   &P
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHtau= ", gHta&
-   &u
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWAZ= ", gWW&
+   &AZ
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWAA= ", gWW&
+   &AA
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmul= ", gnm&
+   &ul
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gAAPP= ", gAA&
+   &PP
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHtau= ", gHt&
+   &au
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZ   = ", gZ
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXmu = ", gXmu
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHPP= ", gHHP&
-   &P
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHPP= ", gHH&
+   &PP
    write(unit,'(A1,1x,A11,G23.16,"calc.")') "#", "Nfrat= ", Nfrat
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "cw   = ", cw
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGWZP= ", gGWZ&
-   &P
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmua= ", gnmu&
-   &a
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gGWZP= ", gGW&
+   &ZP
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmua= ", gnm&
+   &ua
    write(unit,'(A1,1x,A11,G23.16,"calc.")') "#", "NA   = ", NA
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gner = ", gner
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gSv  = ", gSv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnev = ", gnev
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmuv= ", gnmu&
-   &v
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmuv= ", gnm&
+   &uv
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZXH = ", gZXH
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmur= ", gnmu&
-   &r
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnmur= ", gnm&
+   &ur
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnel = ", gnel
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHmu = ", gHmu
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPPPP= ", gPPP&
-   &P
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPPPP= ", gPP&
+   &PP
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gnea = ", gnea
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXtau= ", gXta&
-   &u
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWHH= ", gWWH&
-   &H
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWWW= ", gWWW&
-   &W
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWZPH= ", gWZP&
-   &H
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXtau= ", gXt&
+   &au
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWHH= ", gWW&
+   &HH
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWWWW= ", gWW&
+   &WW
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWZPH= ", gWZ&
+   &PH
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHe  = ", gHe
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWZPX= ", gWZP&
-   &X
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHXX= ", gHHX&
-   &X
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWZPX= ", gWZ&
+   &PX
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHHXX= ", gHH&
+   &XX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXD  = ", gXD
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gmur = ", gmur
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gSr  = ", gSr
@@ -449,25 +448,25 @@ contains
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHS  = ", gHS
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPWA = ", gPWA
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHD  = ", gHD
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZXX= ", gZZX&
-   &X
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZZXX= ", gZZ&
+   &XX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gHB  = ", gHB
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPmu = ", gPmu
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gZPP = ", gZPP
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXe  = ", gXe
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPe  = ", gPe
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWAPH= ", gWAP&
-   &H
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXXXX= ", gXXX&
-   &X
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWAPH= ", gWA&
+   &PH
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXXXX= ", gXX&
+   &XX
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPD  = ", gPD
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "sw   = ", sw
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPB  = ", gPB
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPC  = ", gPC
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXXPP= ", gXXP&
-   &P
-   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gAZPP= ", gAZP&
-   &P
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gXXPP= ", gXX&
+   &PP
+   write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gAZPP= ", gAZ&
+   &PP
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPT  = ", gPT
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gPU  = ", gPU
    write(unit,'(A1,1x,A11,"(",G23.16,G23.16,")"," calc.")') "#", "gWPX = ", gWPX
@@ -477,7 +476,6 @@ contains
    write(unit,'(A1,1x,A25)') "#", "-------------------------"
    end subroutine
 !---#] print_parameter:
-
    function     digit(ch, lnr) result(d)
       implicit none
       character(len=1), intent(in) :: ch
@@ -509,7 +507,6 @@ contains
             write(*,'(A21,1x,I5)') 'invalid digit in line', lnr
          end select
    end function digit
-
    function     parsereal(str, ierr, lnr) result(num)
       implicit none
       character(len=*), intent(in) :: str
@@ -578,24 +575,20 @@ contains
       num = s1 * num * 10.0_ki**(ofs + s2 * expo)
       ierr = 0
    end function parsereal
-
    subroutine     parseline(line,stat,line_number)
       implicit none
       character(len=*), intent(in) :: line
       integer, intent(out) :: stat
       integer, intent(in), optional :: line_number
-
       character(len=line_length) :: rvalue, ivalue, value
       character(len=name_length) :: name
       real(ki) :: re, im
       integer :: idx, icomma, idx1, idx2, lnr, nidx, ierr, pdg
-
       if(present(line_number)) then
          lnr = line_number
       else
          lnr = 0
       end if
-
       idx = scan(line, '=', .false.)
       if (idx .eq. 0) then
          if(present(line_number)) then
@@ -609,7 +602,6 @@ contains
       name = adjustl(line(1:idx-1))
       value = adjustl(line(idx+1:len(line)))
       idx = scan(value, ',', .false.)
-
       if (name .eq. "renormalisation") then
          re = parsereal(value, ierr, lnr)
          if (ierr .ne. 0) then
@@ -706,8 +698,6 @@ contains
             wW = re
          case(21)
             wZ = re
-         case(22)
-            GF = re
          end select
       elseif (name(1:5).eq."mass(") then
          idx = scan(name, ')', .false.)
@@ -863,7 +853,6 @@ contains
       end if
       stat = 0
    end subroutine parseline
-
    subroutine     parse(aunit)
       implicit none
       integer, intent(in) :: aunit
@@ -877,7 +866,6 @@ contains
          line = adjustl(line)
          if (line .eq. '') cycle loop1
          if (any(cc .eq. line(1:1))) cycle loop1
-
          call parseline(line,ios,lnr)
          if(ios .ne. 0) then
             write(*,'(A44,I2,A1)') &
@@ -890,35 +878,27 @@ contains
       implicit none
       integer, intent(in) :: ch
       integer, intent(out), optional :: ierr
-
       integer :: lnr, i, l, ofs, ios
       character(len=255) :: line
-
       integer :: block
-
       ofs = iachar('A') - iachar('a')
-
       lnr = 0
       loop1: do
          read(unit=ch,fmt='(A80)',iostat=ios) line
          if(ios .ne. 0) exit
          lnr = lnr + 1
-
          i = scan(line, '#', .false.)
          if (i .eq. 0) then
             l = len_trim(line)
          else
             l = i - 1
          end if
-
          if (l .eq. 0) cycle loop1
-
          ucase: do i = 1, l
             if (line(i:i) >= 'a' .and. line(i:i) <= 'z') then
                line(i:i) = achar(iachar(line(i:i))+ofs)
             end if
          end do ucase
-
          if (line(1:1) .eq. 'B') then
             if (line(1:5) .eq. 'BLOCK') then
                line = adjustl(line(6:l))
@@ -926,9 +906,9 @@ contains
                  if (line(i:i) <= ' ') exit
                end do
                l = i
-               if ("MASS" .eq. line(1:l)) then
+           if ("MASS" .eq. line(1:l)) then
                   block = 0
-               elseif ("DECAY" .eq. line(1:l)) then
+           else           if ("DECAY" .eq. line(1:l)) then
                   block = 1
                else
                   block = -1
@@ -980,7 +960,6 @@ contains
       integer, intent(out), optional :: ierr
       integer :: idx1,ioerr
       real(ki) :: value
-
       read(line,*,iostat=ioerr) idx1, value
       if (ioerr .ne. 0) then
          if (present(ierr)) ierr = 1
@@ -1019,7 +998,6 @@ contains
       integer, intent(out), optional :: ierr
       integer :: idx1,ioerr
       real(ki) :: value
-
       read(line,*,iostat=ioerr) idx1, value
       if (ioerr .ne. 0) then
          if (present(ierr)) ierr = 1
@@ -1056,14 +1034,12 @@ contains
       character(len=*), intent(in) :: name
       real(ki), intent(in) :: re, im
       integer, intent(out) :: ierr
-
       integer :: err, pdg, nidx, idx
       complex(ki) :: tmp
-
       logical :: must_be_real
       must_be_real = .false.
       ierr = 1 ! OK
-      if (name.eq."Gf") then
+     if (name.eq."Gf") then
          call set_parameter("GF",re,im,ierr)
          return
       elseif (name.eq."sw2") then
@@ -1169,25 +1145,25 @@ contains
      elseif (name .eq. "DECAY&&251") then
                must_be_real = .true.
                wphi = re
-     elseif (name .eq. "renormalisation") then
+      elseif (name .eq. "renormalisation") then
           if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
              renormalisation = int(re)
           else
              ierr=0 !FAIL
           end if
-     elseif (name .eq. "nlo_prefactors") then
+      elseif (name .eq. "nlo_prefactors") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             nlo_prefactors = int(re)
          else
             ierr=0 !FAIL
          end if
-     elseif (name .eq. "deltaOS") then
+      elseif (name .eq. "deltaOS") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             deltaOS = int(re)
          else
             ierr=0 !FAIL
          end if
-     elseif (name .eq. "reduction_interoperation") then
+      elseif (name .eq. "reduction_interoperation") then
          if ( real(int(re),ki) == re .and. im == 0.0_ki ) then
             reduction_interoperation = int(re)
          else
@@ -1258,9 +1234,6 @@ contains
          case(21)
             wZ = re
             must_be_real=.true.
-         case(22)
-            GF = re
-            must_be_real=.true.
          end select
      else
          if (name(1:3) /= "mdl") then
@@ -1272,8 +1245,6 @@ contains
      if (must_be_real .and. im /= 0.0_ki .and. ierr.eq.1) then
         ierr = 0 ! FAIL
      end if
-
-
      call init_functions()
       ! TODO init_color
    end subroutine
@@ -1284,219 +1255,159 @@ contains
       complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
       real(ki), parameter :: pi = 3.14159265358979323846264&
      &3383279502884197169399375105820974944592307816406286209_ki
-      complex(ki) :: reg1
-      complex(ki) :: reg2
-      complex(ki) :: reg3
-      complex(ki) :: reg4
-      complex(ki) :: reg5
-      complex(ki) :: reg6
-      complex(ki) :: reg7
-      complex(ki) :: reg8
-      complex(ki) :: reg9
-      complex(ki) :: reg10
-      complex(ki) :: reg11
-      complex(ki) :: reg12
-      complex(ki) :: reg13
-      complex(ki) :: reg14
-      complex(ki) :: reg15
-      complex(ki) :: reg16
-      complex(ki) :: reg17
-      complex(ki) :: reg18
-      complex(ki) :: reg19
-      real(ki) :: reg20
-      gAPP = (-1.0_ki)
-      gWWAA = (-1.0_ki)
-      gAAPP = (2.0_ki)
-      Nfrat = (ifpos(Nfgen, (Nf/Nfgen), (1.0_ki)))
-      reg1 = mW*mW-i_*mW*wW
-      reg2 = sqrt(reg1)
-      reg3 = mZ*mZ-i_*mZ*wZ
-      cw = (reg2/(sqrt(reg3)))
-      NA = (NC*NC-(1.0_ki))
-      gWZPH = (-1.0_ki/2.0_ki)/cw
-      gWZPX = (-1.0_ki/2.0_ki)/cw*i_
-      gPWA = -(reg2)
-      sw = (sqrt(((1.0_ki)-reg1/reg3)))
-      reg3 = cw*cw
-      reg4 = sw*sw
-      gWWZZ = (-1.0_ki)*reg3/reg4
-      reg5 = cw/sw
-      gWWZ = -(reg5)
-      reg6 = reg2/(reg3*sw)
-      gHZZ = reg6
-      gW = (1.0_ki)/(sqrt2*sw)
-      reg20 = mH*mH
-      reg7 = reg2*sw
-      reg8 = reg20/reg7
-      gHHH = (-3.0_ki/2.0_ki)*reg8
-      gGWX = (-1.0_ki/2.0_ki)*reg2*i_/sw
-      gH = ((1.0_ki/24.0_ki)/(reg7*pi*pi))
-      reg9 = reg2*sqrt2*sw
-      gPmu = (mmu/reg9)
-      reg10 = reg2/sw
-      gGWH = (-1.0_ki/2.0_ki)*reg10
-      reg11 = (1.0_ki/2.0_ki)/reg4
-      gWWXX = reg11
-      reg12 = cw*sw
-      reg13 = (reg3-reg4)/reg12
-      gZZPP = reg13
-      reg1 = reg20/(reg1*reg4)
-      reg14 = (1.0_ki/4.0_ki)*reg1
-      gHHPP = -(reg14)
-      reg15 = (1.0_ki/2.0_ki)/(reg12*reg12)
-      gZZHH = reg15
-      gGZWP = ((1.0_ki/2.0_ki)/reg12*reg2)
-      reg8 = (1.0_ki/2.0_ki)*reg8
-      gHXX = -(reg8)
-      gWWPP = reg11
-      gGZH = (-1.0_ki/2.0_ki)*reg6
-      reg6 = (1.0_ki/2.0_ki)*i_/sw
-      gWAPX = -(reg6)
-      gHWW = reg10
-      gPtau = (mtau/reg9)
-      gHPP = -(reg8)
-      reg8 = (1.0_ki/2.0_ki)/reg7*mBMS
-      gHB = -(reg8)
-      gWWAZ = reg5
-      reg5 = (1.0_ki/2.0_ki)/reg7*mtau
-      gHtau = -(reg5)
-      gZ = (1.0_ki)/reg12
-      reg10 = (1.0_ki/4.0_ki)*gZ
-      gUa = reg10
-      gBa = -(reg10)
-      reg16 = ((1.0_ki/4.0_ki)-reg4)*gZ
-      gtauv = -(reg16)
-      reg17 = ((1.0_ki/4.0_ki)-(2.0_ki/3.0_ki)*reg4)*gZ
-      gUv = reg17
-      gUl = (gUa+gUv)
-      gUr = (gUv-gUa)
-      gtaua = -(reg10)
-      gtaur = (gtauv-gtaua)
-      gtaul = (gtaua+gtauv)
-      gntauv = reg10
-      gntaua = reg10
-      gntaur = (gntauv-gntaua)
-      gntaul = (gntaua+gntauv)
-      gCa = reg10
-      gev = -(reg16)
-      gea = -(reg10)
-      ger = (gev-gea)
-      gCv = reg17
-      gCl = (gCa+gCv)
-      gCr = (gCv-gCa)
-      gel = (gea+gev)
-      reg18 = ((1.0_ki/4.0_ki)-(1.0_ki/3.0_ki)*reg4)*gZ
-      gBv = -(reg18)
-      gBr = (gBv-gBa)
-      gBl = (gBa+gBv)
-      gDv = -(reg18)
-      gDa = -(reg10)
-      gDr = (gDv-gDa)
-      gDl = (gDa+gDv)
-      gTa = reg10
-      gTv = reg17
-      gTl = (gTa+gTv)
-      gTr = (gTv-gTa)
-      reg17 = (1.0_ki/2.0_ki)/reg7*mmu
-      gXmu = reg17
-      reg19 = (3.0_ki/4.0_ki)*reg1
-      gHHHH = -(reg19)
-      reg3 = -(reg4+reg3)
-      gGWZP = ((1.0_ki/2.0_ki)/reg12*reg2*reg3)
-      gnmua = reg10
-      reg2 = (1.0_ki/2.0_ki)/reg7*mC
-      gXC = -(reg2)
-      gnev = reg10
-      gnmuv = reg10
-      gnmul = (gnmua+gnmuv)
-      gZXH = (-1.0_ki/2.0_ki)/reg12*i_
-      gnmur = (gnmuv-gnmua)
-      gHmu = -(reg17)
-      reg17 = (1.0_ki/2.0_ki)/reg7*mT
-      gXT = -(reg17)
-      gPPPP = (-1.0_ki/2.0_ki)*reg1
-      gnea = reg10
-      gner = (gnev-gnea)
-      gnel = (gnea+gnev)
-      gXtau = reg5
-      gWWHH = reg11
-      gWWWW = (1.0_ki)/reg4
-      reg1 = (1.0_ki/2.0_ki)/reg7*mU
-      gXU = -(reg1)
-      gHHXX = -(reg14)
-      reg4 = (1.0_ki/2.0_ki)/reg7*mD
-      gXD = reg4
-      gmuv = -(reg16)
-      gXB = reg8
-      gSv = -(reg18)
-      gSa = -(reg10)
-      gSr = (gSv-gSa)
-      reg5 = (1.0_ki/2.0_ki)/reg7*me
-      gHe = -(reg5)
-      gmua = -(reg10)
-      gmur = (gmuv-gmua)
-      gPB = (mBMS/reg9)
-      reg8 = (1.0_ki/2.0_ki)/reg7*mS
-      gXS = reg8
-      gSl = (gSa+gSv)
-      gmul = (gmua+gmuv)
-      gHT = -(reg17)
-      gHU = -(reg1)
-      gHS = -(reg8)
-      gHD = -(reg4)
-      gZZXX = reg15
-      gPWZ = (-1.0_ki)*reg7/cw
-      gHC = -(reg2)
-      gZPP = ((1.0_ki/2.0_ki)*reg13)
-      gXe = reg5
-      gPe = (me/reg9)
-      reg1 = (1.0_ki/2.0_ki)/sw
-      gWAPH = -(reg1)
-      gXXXX = -(reg19)
-      gPD = (mD/reg9)
-      gWPH = -(reg1)
-      gPC = (mC/reg9)
-      gXXPP = -(reg14)
-      gAZPP = (reg3/reg12)
-      gPT = (mT/reg9)
-      gPU = (mU/reg9)
-      gWPX = -(reg6)
-      gPS = (mS/reg9)
-   end subroutine init_functions
+      gAPP=-1.0_ki
+      gWWAA=-1.0_ki
+      gAAPP=2.0_ki
+      Nfrat=ifpos(Nfgen,Nf*Nfgen**(-1),1.0_ki)
+      cw=1.0_ki/(sqrt(mZ**2-i_*mZ*wZ))*sqrt(mW**2-i_*mW*wW)
+      NA=-1.0_ki+NC**2
+      gWZPH=-1.0_ki/2.0_ki*cw**(-1)
+      gWZPX=-1.0_ki/2.0_ki*i_*cw**(-1)
+      gPWA=-sqrt(mW**2-i_*mW*wW)
+      sw=sqrt(1.0_ki-1.0_ki/(mZ**2-i_*mZ*wZ)*mW**2+1.0_ki/(mZ**2-i_*mZ*wZ)*i_*m&
+      &W*wW)
+      gWWZZ=-cw**2*sw**(-2)
+      gWWZ=-cw*sw**(-1)
+      gHZZ=sqrt(mW**2-i_*mW*wW)*cw**(-2)*sw**(-1)
+      gW=sqrt2**(-1)*sw**(-1)
+      gHHH=-3.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mH**2
+      gGWX=-1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*i_*sw**(-1)
+      gH=1.0_ki/24.0_ki/(sqrt(mW**2-i_*mW*wW)*pi**2)*sw**(-1)
+      gPmu=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mmu
+      gGWH=-1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*sw**(-1)
+      gWWXX=1.0_ki/2.0_ki*sw**(-2)
+      gZZPP=-1.0_ki+1.0_ki/2.0_ki*cw**(-2)*sw**2+1.0_ki/2.0_ki*cw**2*sw**(-2)
+      gHHPP=-1.0_ki/4.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gZZHH=1.0_ki/2.0_ki*cw**(-2)*sw**(-2)
+      gGZWP=1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*cw**(-1)*sw**(-1)
+      gHXX=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mH**2
+      gWWPP=1.0_ki/2.0_ki*sw**(-2)
+      gGZH=-1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*cw**(-2)*sw**(-1)
+      gWAPX=-1.0_ki/2.0_ki*i_*sw**(-1)
+      gHWW=sqrt(mW**2-i_*mW*wW)*sw**(-1)
+      gPtau=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mtau
+      gHPP=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mH**2
+      gHB=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mBMS
+      gWWAZ=cw*sw**(-1)
+      gHtau=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mtau
+      gZ=cw**(-1)*sw**(-1)
+      gUa=1.0_ki/4.0_ki*gZ
+      gBa=-1.0_ki/4.0_ki*gZ
+      gtauv=-1.0_ki/4.0_ki*gZ+sw**2*gZ
+      gUv=1.0_ki/4.0_ki*gZ-2.0_ki/3.0_ki*sw**2*gZ
+      gUl=gUv+gUa
+      gUr=gUv-gUa
+      gtaua=-1.0_ki/4.0_ki*gZ
+      gtaur=-gtaua+gtauv
+      gtaul=gtaua+gtauv
+      gntauv=1.0_ki/4.0_ki*gZ
+      gntaua=1.0_ki/4.0_ki*gZ
+      gntaur=-gntaua+gntauv
+      gntaul=gntaua+gntauv
+      gCa=1.0_ki/4.0_ki*gZ
+      gev=-1.0_ki/4.0_ki*gZ+sw**2*gZ
+      gea=-1.0_ki/4.0_ki*gZ
+      ger=-gea+gev
+      gCv=1.0_ki/4.0_ki*gZ-2.0_ki/3.0_ki*sw**2*gZ
+      gCl=gCv+gCa
+      gCr=gCv-gCa
+      gel=gea+gev
+      gBv=-1.0_ki/4.0_ki*gZ+1.0_ki/3.0_ki*sw**2*gZ
+      gBr=gBv-gBa
+      gBl=gBv+gBa
+      gDv=-1.0_ki/4.0_ki*gZ+1.0_ki/3.0_ki*sw**2*gZ
+      gDa=-1.0_ki/4.0_ki*gZ
+      gDr=-gDa+gDv
+      gDl=gDa+gDv
+      gTa=1.0_ki/4.0_ki*gZ
+      gTv=1.0_ki/4.0_ki*gZ-2.0_ki/3.0_ki*sw**2*gZ
+      gTl=gTv+gTa
+      gTr=gTv-gTa
+      gXmu=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mmu
+      gHHHH=-3.0_ki/4.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gGWZP=-1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*cw**(-1)*sw-1.0_ki/2.0_ki*sqrt(&
+      &mW**2-i_*mW*wW)*cw*sw**(-1)
+      gnmua=1.0_ki/4.0_ki*gZ
+      gXC=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mC
+      gnev=1.0_ki/4.0_ki*gZ
+      gnmuv=1.0_ki/4.0_ki*gZ
+      gnmul=gnmuv+gnmua
+      gZXH=-1.0_ki/2.0_ki*i_*cw**(-1)*sw**(-1)
+      gnmur=gnmuv-gnmua
+      gHmu=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mmu
+      gXT=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mT
+      gPPPP=-1.0_ki/2.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gnea=1.0_ki/4.0_ki*gZ
+      gner=-gnea+gnev
+      gnel=gnea+gnev
+      gXtau=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mtau
+      gWWHH=1.0_ki/2.0_ki*sw**(-2)
+      gWWWW=sw**(-2)
+      gXU=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mU
+      gHHXX=-1.0_ki/4.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gXD=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mD
+      gmuv=-1.0_ki/4.0_ki*gZ+sw**2*gZ
+      gXB=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mBMS
+      gSv=-1.0_ki/4.0_ki*gZ+1.0_ki/3.0_ki*sw**2*gZ
+      gSa=-1.0_ki/4.0_ki*gZ
+      gSr=-gSa+gSv
+      gHe=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*me
+      gmua=-1.0_ki/4.0_ki*gZ
+      gmur=-gmua+gmuv
+      gPB=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mBMS
+      gXS=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mS
+      gSl=gSa+gSv
+      gmul=gmua+gmuv
+      gHT=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mT
+      gHU=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mU
+      gHS=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mS
+      gHD=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mD
+      gZZXX=1.0_ki/2.0_ki*cw**(-2)*sw**(-2)
+      gPWZ=-sqrt(mW**2-i_*mW*wW)*cw**(-1)*sw
+      gHC=-1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mC
+      gZPP=-1.0_ki/2.0_ki*cw**(-1)*sw+1.0_ki/2.0_ki*cw*sw**(-1)
+      gXe=1.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*me
+      gPe=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*me
+      gWAPH=-1.0_ki/2.0_ki*sw**(-1)
+      gXXXX=-3.0_ki/4.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gPD=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mD
+      gWPH=-1.0_ki/2.0_ki*sw**(-1)
+      gPC=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mC
+      gXXPP=-1.0_ki/4.0_ki/(mW**2-i_*mW*wW)*sw**(-2)*mH**2
+      gAZPP=-cw**(-1)*sw-cw*sw**(-1)
+      gPT=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mT
+      gPU=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mU
+      gWPX=-1.0_ki/2.0_ki*i_*sw**(-1)
+      gPS=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mS
+end subroutine init_functions
 !---#] subroutine init_functions:
 !---#[ utility functions for model initialization:
    pure function ifpos(x0, x1, x2)
       implicit none
       real(ki), intent(in) :: x0, x1, x2
       real(ki) :: ifpos
-
       if (x0 > 0.0_ki) then
          ifpos = x1
       else
          ifpos = x2
       endif
    end  function ifpos
-
    pure function sort4(m1, m2, m3, m4, n)
       implicit none
       real(ki), intent(in) :: m1, m2, m3, m4
       integer, intent(in) :: n
       real(ki) :: sort4
-
       real(ki), dimension(4) :: m
       logical :: f
       integer :: i
       real(ki) :: tmp
-
       m(1) = m1
       m(2) = m2
       m(3) = m3
       m(4) = m4
-
       ! Bubble Sort
       do
          f = .false.
-
          do i=1,3
             if (abs(m(i)) .gt. abs(m(i+1))) then
                tmp = m(i)
@@ -1505,17 +1416,9 @@ contains
                f = .true.
             end if
          end do
-
          if (.not. f) exit
       end do
-
       sort4 = m(n)
    end  function sort4
 !---#] utility functions for model initialization:
-
-
-!---#[ EW scheme choice:
-!---#] EW scheme choice:
-
-
 end module p0_gg_hhg_model

@@ -1,13 +1,12 @@
 module     p0_gg_hhg_d6h0l1
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity0d6h0l1.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity0d6h0l1.f90
    ! generator: buildfortran.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond
    implicit none
    private
    complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-   public :: numerator_golem95
    public :: numerator_ninja
 contains
 !---#[ function brack_1:
@@ -20,18 +19,18 @@ contains
       complex(ki), dimension(4), intent(in) :: Q
       complex(ki), intent(in) :: mu2
       complex(ki) :: brack
-      complex(ki) :: acc6(12)
+      complex(ki) :: acc6(13)
       complex(ki) :: Qspvak1k2
-      complex(ki) :: Qspk1
       complex(ki) :: Qspk5
       complex(ki) :: Qspvak2k5
       complex(ki) :: QspQ
+      complex(ki) :: Qspvak2k1
       complex(ki) :: Qspvak1k5
       Qspvak1k2 = dotproduct(Q,spvak1k2)
-      Qspk1 = dotproduct(Q,k1)
       Qspk5 = dotproduct(Q,k5)
       Qspvak2k5 = dotproduct(Q,spvak2k5)
       QspQ = dotproduct(Q,Q)
+      Qspvak2k1 = dotproduct(Q,spvak2k1)
       Qspvak1k5 = dotproduct(Q,spvak1k5)
       acc6(1)=abb6(8)
       acc6(2)=abb6(9)
@@ -41,41 +40,21 @@ contains
       acc6(6)=abb6(16)
       acc6(7)=abb6(18)
       acc6(8)=abb6(19)
-      acc6(9)=acc6(1)*Qspvak1k2
-      acc6(10)=Qspk1+Qspk5
-      acc6(10)=acc6(3)*acc6(10)
-      acc6(11)=Qspvak2k5*acc6(8)
-      acc6(9)=acc6(11)+acc6(10)+acc6(7)+acc6(9)
-      acc6(9)=Qspvak2k5*acc6(9)
-      acc6(10)=acc6(5)*QspQ
-      acc6(11)=acc6(2)*Qspvak1k5
+      acc6(9)=abb6(20)
+      acc6(10)=acc6(1)*Qspvak1k2
+      acc6(11)=Qspk5*acc6(8)
+      acc6(12)=Qspvak2k5*acc6(9)
+      acc6(10)=acc6(12)+acc6(11)+acc6(7)+acc6(10)
+      acc6(10)=Qspvak2k5*acc6(10)
+      acc6(11)=acc6(5)*QspQ
       acc6(12)=Qspk5*acc6(6)
-      brack=acc6(4)+acc6(9)+acc6(10)+acc6(11)+acc6(12)
+      acc6(13)=acc6(3)*Qspvak2k1
+      acc6(13)=acc6(13)+acc6(2)
+      acc6(13)=Qspvak1k5*acc6(13)
+      brack=acc6(4)+acc6(10)+acc6(11)+acc6(12)+acc6(13)
    end  function brack_1
 !---#] function brack_1:
 !---#[ numerator interfaces:
-   !------#[ function numerator_golem95:
-   function numerator_golem95(Q_ext, mu2_ext) result(numerator)
-      use precision_golem, only: ki_gol => ki
-      use p0_gg_hhg_globalsl1, only: epspow
-      use p0_gg_hhg_kinematics
-      use p0_gg_hhg_abbrevd6h0
-      implicit none
-      real(ki_gol), dimension(0:3), intent(in) :: Q_ext
-      real(ki_gol), intent(in) :: mu2_ext
-      complex(ki_gol) :: numerator
-      complex(ki) :: d6
-      ! The Q that goes into the diagram
-      complex(ki), dimension(4) :: Q
-      complex(ki) :: mu2
-      real(ki), dimension(4) :: qshift
-      qshift = -k2
-      Q(:)  =cmplx(real(-Q_ext(:)  -qshift(:),  ki_gol), 0.0_ki_gol, ki)
-      d6 = 0.0_ki
-      d6 = (cond(epspow.eq.0,brack_1,Q,mu2))
-      numerator = cmplx(real(d6, ki), aimag(d6), ki_gol)
-   end function numerator_golem95
-   !------#] function numerator_golem95:
    !------#[ subroutine numerator_ninja:
    subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &
    & bind(c, name="p0_gg_hhg_d6h0l1_ninja")

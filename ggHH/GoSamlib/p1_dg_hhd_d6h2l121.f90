@@ -1,6 +1,6 @@
 module     p1_dg_hhd_d6h2l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p1_dg_hhd/helicity2d6h2l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p1_dg_hhd/helicity2d6h2l121.f90
    ! generator: buildfortran_n3.py
    use p1_dg_hhd_config, only: ki
    use p1_dg_hhd_util, only: cond_t, d => metric_tensor
@@ -24,7 +24,7 @@ contains
       acd6(2)=abb6(9)
       acd6(3)=dotproduct(ninjaA0,spvak1k5)
       acd6(4)=dotproduct(ninjaA0,spvak2k1)
-      acd6(5)=abb6(20)
+      acd6(5)=abb6(32)
       acd6(6)=acd6(3)*acd6(4)*acd6(5)
       acd6(7)=acd6(1)*acd6(2)
       acd6(6)=acd6(6)+acd6(7)

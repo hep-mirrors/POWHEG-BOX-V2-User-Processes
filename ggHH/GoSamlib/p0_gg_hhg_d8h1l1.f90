@@ -1,13 +1,12 @@
 module     p0_gg_hhg_d8h1l1
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d8h1l1.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d8h1l1.f90
    ! generator: buildfortran.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond
    implicit none
    private
    complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
-   public :: numerator_golem95
    public :: numerator_ninja
 contains
 !---#[ function brack_1:
@@ -25,28 +24,6 @@ contains
    end  function brack_1
 !---#] function brack_1:
 !---#[ numerator interfaces:
-   !------#[ function numerator_golem95:
-   function numerator_golem95(Q_ext, mu2_ext) result(numerator)
-      use precision_golem, only: ki_gol => ki
-      use p0_gg_hhg_globalsl1, only: epspow
-      use p0_gg_hhg_kinematics
-      use p0_gg_hhg_abbrevd8h1
-      implicit none
-      real(ki_gol), dimension(0:3), intent(in) :: Q_ext
-      real(ki_gol), intent(in) :: mu2_ext
-      complex(ki_gol) :: numerator
-      complex(ki) :: d8
-      ! The Q that goes into the diagram
-      complex(ki), dimension(4) :: Q
-      complex(ki) :: mu2
-      real(ki), dimension(4) :: qshift
-      qshift = k2-k5
-      Q(:)  =cmplx(real(+Q_ext(:)  -qshift(:),  ki_gol), 0.0_ki_gol, ki)
-      d8 = 0.0_ki
-      d8 = (cond(epspow.eq.0,brack_1,Q,mu2))
-      numerator = cmplx(real(d8, ki), aimag(d8), ki_gol)
-   end function numerator_golem95
-   !------#] function numerator_golem95:
    !------#[ subroutine numerator_ninja:
    subroutine numerator_ninja(ncut, Q_ext, mu2_ext, numerator) &
    & bind(c, name="p0_gg_hhg_d8h1l1_ninja")

@@ -64,15 +64,22 @@ c     pwhgfill  :  fills the histograms with data
       call bookupeqbins('H1-H2-dphi'//cptmin(i),pi/20,0d0,pi)
       call bookupeqbins('H1-H2-dr'//cptmin(i),dr,0d0,10d0)
       call bookupeqbins('H1-H2-dr-a'//cptmin(i),dra,0d0,10d0)
-c     call bookupeqbins('log10(pi-phi)'//cptmin(i),0.1d0,-4d0 ,1d0)
       call bookupeqbins('j1-pt'//cptmin(i),dpt,0d0,1000d0)
       call bookupeqbins('j1-pt-a'//cptmin(i),dpta,0d0,1000d0)
       call bookupeqbins('j1-y'//cptmin(i),dy,-4d0,4d0)
+      call bookupeqbins('j2-pt'//cptmin(i),dpt,0d0,1000d0)
+      call bookupeqbins('j2-pt-a'//cptmin(i),dpta,0d0,1000d0)
+      call bookupeqbins('j2-y'//cptmin(i),dy,-4d0,4d0)
       call bookupeqbins('H1-j1-dy'//cptmin(i),dy,-4d0,4d0)
       call bookupeqbins('H1-j1-deta'//cptmin(i),dy,-4d0,4d0)
       call bookupeqbins('H1-j1-dphi'//cptmin(i),pi/20,0d0,pi)
       call bookupeqbins('H1-j1-dr'//cptmin(i),dr,0d0,10d0)
       call bookupeqbins('H1-j1-dr-a'//cptmin(i),dra,0d0,10d0)
+      call bookupeqbins('HH-pt-resum1'//cptmin(i),5d0,0d0,400d0)
+      call bookupeqbins('HH-pt-resum2'//cptmin(i),2d0,0d0,100d0)
+      call bookupeqbins('HH-pt-mHH1'//cptmin(i),dpta,0d0,1000d0)
+      call bookupeqbins('HH-pt-mHH2'//cptmin(i),dpta,0d0,1000d0)
+      call bookupeqbins('HH-pt-mHH3'//cptmin(i),dpta,0d0,1000d0)
       enddo
 
       end
@@ -251,6 +258,10 @@ c.....now we have the jets
                endif
             enddo
          endif
+	 
+c HACK
+c	 if(numjets.eq.0) return
+c HACK end
 
          call filld('sigtot'//cptmin(i),1d0,dsig)
          call filld('Nevents'//cptmin(i),abs(dsig),1d0)
@@ -304,6 +315,19 @@ c     Double Higgs system:
          call filld('HH-y-paper'//cptmin(i), y, dsig)
          call filld('HH-m-paper'//cptmin(i), m, dsig)
 
+         if (m.le.500d0) then
+            call filld('HH-pt-mHH1'//cptmin(i), pt, dsig)
+         else if ((m.gt.500d0).and.(m.lt.800d0)) then
+            call filld('HH-pt-mHH2'//cptmin(i), pt, dsig)
+         else
+            call filld('HH-pt-mHH3'//cptmin(i), pt, dsig)
+         endif
+
+         if ((m.gt.300d0).and.(m.lt.500d0)) then
+            call filld('HH-pt-resum1'//cptmin(i), pt, dsig)
+            call filld('HH-pt-resum2'//cptmin(i), pt, dsig)
+         endif
+
          call deltaplot(ph1,ph2,dsig,'H1-H2',cptmin(i))
 
          if(numjets.gt.0) then
@@ -312,6 +336,13 @@ c     Double Higgs system:
             call filld('j1-pt'//cptmin(i), pt, dsig)
             call filld('j1-pt-a'//cptmin(i), pt, dsig)
             call deltaplot(ph1,pjet(:,1),dsig,'H1-j1',cptmin(i))
+         endif
+
+         if(numjets.gt.1) then
+            call getyetaptmass(pjet(:,2),y,eta,pt,m)
+            call filld('j2-y'//cptmin(i), y, dsig)
+            call filld('j2-pt'//cptmin(i), pt, dsig)
+            call filld('j2-pt-a'//cptmin(i), pt, dsig)
          endif
 
       enddo

@@ -1,6 +1,6 @@
 module     p1_dg_hhd_d8h3l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p1_dg_hhd/helicity3d8h3l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p1_dg_hhd/helicity3d8h3l121.f90
    ! generator: buildfortran_n3.py
    use p1_dg_hhd_config, only: ki
    use p1_dg_hhd_util, only: cond_t, d => metric_tensor
@@ -23,7 +23,7 @@ contains
       acd8(1)=dotproduct(ninjaA0,ninjaA0)
       acd8(2)=dotproduct(ninjaA0,spvak1k2)
       acd8(3)=dotproduct(ninjaA0,spvak1k5)
-      acd8(4)=abb8(21)
+      acd8(4)=abb8(27)
       acd8(5)=acd8(4)*acd8(3)*acd8(2)*acd8(1)
       brack(ninjaidxt0)=acd8(5)
    end subroutine brack_0

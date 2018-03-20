@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d57h4l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity4d57h4l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity4d57h4l121.f90
    ! generator: buildfortran_n3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -22,9 +22,9 @@ contains
       complex(ki), dimension (0:*), intent(inout) :: brack
       acd57(1)=dotproduct(ninjaA0,ninjaA0)
       acd57(2)=dotproduct(ninjaA0,spvak1k2)
-      acd57(3)=abb57(31)
+      acd57(3)=abb57(24)
       acd57(4)=dotproduct(ninjaA0,spvak5k2)
-      acd57(5)=abb57(56)
+      acd57(5)=abb57(51)
       acd57(6)=acd57(3)*acd57(2)
       acd57(7)=acd57(5)*acd57(4)
       acd57(6)=acd57(6)+acd57(7)

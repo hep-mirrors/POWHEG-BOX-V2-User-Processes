@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d19h1l132
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity1d19h1l132.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity1d19h1l132.f90
    ! generator: buildfortran_tn3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -47,52 +47,46 @@ contains
       complex(ki), dimension(4), intent(in) :: ninjaA0, ninjaA1, ninjaE3, ninja&
       &E4
       complex(ki), dimension(0:2), intent(in) :: ninjaP
-      complex(ki), dimension(29) :: acd19
+      complex(ki), dimension(21) :: acd19
       complex(ki), dimension (0:*), intent(inout) :: brack
       complex(ki) :: ninjaP0, ninjaP1, ninjaP2
       ninjaP0 = ninjaP(0)
       ninjaP1 = ninjaP(1)
       ninjaP2 = ninjaP(2)
-      acd19(1)=dotproduct(k2,ninjaE3)
-      acd19(2)=dotproduct(ninjaE3,spvak2k5)
-      acd19(3)=abb19(18)
-      acd19(4)=dotproduct(ninjaE3,spvak2k1)
-      acd19(5)=abb19(29)
-      acd19(6)=dotproduct(ninjaA0,ninjaE3)
-      acd19(7)=dotproduct(ninjaE3,spvak2l4)
-      acd19(8)=abb19(23)
-      acd19(9)=abb19(20)
-      acd19(10)=dotproduct(ninjaE3,spvak2l3)
-      acd19(11)=abb19(12)
-      acd19(12)=abb19(27)
-      acd19(13)=abb19(11)
-      acd19(14)=abb19(17)
-      acd19(15)=abb19(14)
-      acd19(16)=abb19(13)
-      acd19(17)=dotproduct(ninjaE3,spval3l4)
-      acd19(18)=abb19(15)
-      acd19(19)=dotproduct(ninjaE3,spval4l3)
-      acd19(20)=abb19(21)
-      acd19(21)=acd19(19)*acd19(20)
-      acd19(22)=acd19(17)*acd19(18)
-      acd19(23)=acd19(10)*acd19(15)
-      acd19(24)=acd19(7)*acd19(13)
-      acd19(25)=acd19(1)*acd19(3)
-      acd19(26)=acd19(4)*acd19(16)
-      acd19(27)=2.0_ki*acd19(6)
-      acd19(28)=acd19(9)*acd19(27)
-      acd19(29)=acd19(2)*acd19(14)
-      acd19(21)=acd19(29)+acd19(28)+acd19(26)+acd19(25)+acd19(24)+acd19(23)+acd&
-      &19(21)+acd19(22)
-      acd19(21)=acd19(2)*acd19(21)
-      acd19(22)=acd19(10)*acd19(11)
-      acd19(23)=acd19(7)*acd19(8)
-      acd19(24)=acd19(4)*acd19(12)
-      acd19(22)=acd19(24)+acd19(22)+acd19(23)
-      acd19(22)=acd19(22)*acd19(27)
-      acd19(23)=acd19(4)*acd19(1)*acd19(5)
-      acd19(21)=acd19(21)+acd19(23)+acd19(22)
-      brack(ninjaidxt0x0mu0)=acd19(21)
+      acd19(1)=dotproduct(ninjaA0,ninjaE3)
+      acd19(2)=dotproduct(ninjaE3,spvak2l3)
+      acd19(3)=abb19(11)
+      acd19(4)=dotproduct(ninjaE3,spvak2l4)
+      acd19(5)=abb19(30)
+      acd19(6)=dotproduct(ninjaE3,spvak2k5)
+      acd19(7)=abb19(16)
+      acd19(8)=dotproduct(ninjaE3,spval4k5)
+      acd19(9)=abb19(14)
+      acd19(10)=dotproduct(ninjaE3,spvak2k1)
+      acd19(11)=abb19(15)
+      acd19(12)=abb19(13)
+      acd19(13)=abb19(19)
+      acd19(14)=abb19(27)
+      acd19(15)=dotproduct(ninjaE3,spval3k5)
+      acd19(16)=abb19(21)
+      acd19(17)=acd19(8)*acd19(9)
+      acd19(18)=acd19(10)*acd19(11)
+      acd19(19)=2.0_ki*acd19(1)
+      acd19(20)=acd19(3)*acd19(19)
+      acd19(21)=acd19(6)*acd19(7)
+      acd19(17)=acd19(21)+acd19(20)+acd19(17)+acd19(18)
+      acd19(17)=acd19(2)*acd19(17)
+      acd19(18)=acd19(10)*acd19(13)
+      acd19(20)=acd19(4)*acd19(14)
+      acd19(21)=acd19(6)*acd19(12)
+      acd19(18)=acd19(21)+acd19(18)+acd19(20)
+      acd19(18)=acd19(6)*acd19(18)
+      acd19(20)=acd19(15)*acd19(16)
+      acd19(19)=-acd19(5)*acd19(19)
+      acd19(19)=acd19(20)+acd19(19)
+      acd19(19)=acd19(4)*acd19(19)
+      acd19(17)=acd19(17)+acd19(19)+acd19(18)
+      brack(ninjaidxt0x0mu0)=acd19(17)
       brack(ninjaidxt0x0mu2)=0.0_ki
       brack(ninjaidxt0x1mu0)=0.0_ki
       brack(ninjaidxt0x2mu0)=0.0_ki

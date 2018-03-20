@@ -1,6 +1,6 @@
 module     p0_gg_hhg_d21h0l121
-   ! file: /home/luisonig/Documents/Lavoro/GoSamPowheg/POWHEG-BOX-V2/ggHH/GoSam &
-   ! &_POWHEG/Virtual/p0_gg_hhg/helicity0d21h0l121.f90
+   ! file: /home/pcl305a/luisonig/Documents/GoSamPowheg/POWHEG-BOX-V2/ggHH_new/ &
+   ! &GoSam_POWHEG/Virtual/p0_gg_hhg/helicity0d21h0l121.f90
    ! generator: buildfortran_n3.py
    use p0_gg_hhg_config, only: ki
    use p0_gg_hhg_util, only: cond_t, d => metric_tensor
@@ -18,27 +18,29 @@ contains
       use p0_gg_hhg_abbrevd21h0
       implicit none
       complex(ki), dimension(4), intent(in) :: ninjaA0
-      complex(ki), dimension(12) :: acd21
+      complex(ki), dimension(14) :: acd21
       complex(ki), dimension (0:*), intent(inout) :: brack
-      acd21(1)=dotproduct(k1,ninjaA0)
+      acd21(1)=dotproduct(k5,ninjaA0)
       acd21(2)=dotproduct(ninjaA0,ninjaA0)
       acd21(3)=dotproduct(ninjaA0,spvak2k5)
-      acd21(4)=abb21(67)
-      acd21(5)=dotproduct(k5,ninjaA0)
-      acd21(6)=abb21(41)
+      acd21(4)=abb21(31)
+      acd21(5)=abb21(18)
+      acd21(6)=abb21(13)
       acd21(7)=dotproduct(ninjaA0,spvak1k2)
-      acd21(8)=abb21(47)
-      acd21(9)=abb21(50)
-      acd21(10)=acd21(7)*acd21(8)
-      acd21(11)=-acd21(5)-acd21(1)
-      acd21(11)=acd21(4)*acd21(11)
-      acd21(12)=acd21(3)*acd21(9)
-      acd21(10)=acd21(12)+acd21(10)+acd21(11)
-      acd21(10)=acd21(3)*acd21(10)
-      acd21(11)=-acd21(2)*acd21(6)
-      acd21(10)=acd21(10)+acd21(11)
-      acd21(10)=acd21(2)*acd21(10)
-      brack(ninjaidxt0)=acd21(10)
+      acd21(8)=abb21(41)
+      acd21(9)=dotproduct(ninjaA0,spvak1k5)
+      acd21(10)=dotproduct(ninjaA0,spvak2k1)
+      acd21(11)=abb21(38)
+      acd21(12)=acd21(7)*acd21(8)
+      acd21(13)=acd21(1)*acd21(4)
+      acd21(14)=acd21(3)*acd21(6)
+      acd21(12)=acd21(14)+acd21(12)+acd21(13)
+      acd21(12)=acd21(3)*acd21(12)
+      acd21(13)=acd21(9)*acd21(10)*acd21(11)
+      acd21(14)=acd21(2)*acd21(5)
+      acd21(12)=acd21(14)+acd21(13)+acd21(12)
+      acd21(12)=acd21(2)*acd21(12)
+      brack(ninjaidxt0)=acd21(12)
    end subroutine brack_0
 !---#] subroutine brack_0:
 !---#[ subroutine numerator_tmu:

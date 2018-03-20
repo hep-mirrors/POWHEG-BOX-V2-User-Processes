@@ -1,5 +1,6 @@
 module     p0_gg_hhg_abbrevd8h4
    use p0_gg_hhg_config, only: ki
+   use p0_gg_hhg_kinematics, only: epstensor
    use p0_gg_hhg_globalsh4
    implicit none
    private
@@ -34,10 +35,10 @@ contains
       abb8(13)=es12+abb8(13)
       abb8(8)=4.0_ki*abb8(8)
       abb8(7)=abb8(8)*abb8(13)*abb8(7)*abb8(10)
-      abb8(8)=4.0_ki*abb8(11)
-      abb8(10)=abb8(6)**2
-      abb8(10)=16.0_ki*abb8(10)
-      abb8(9)=abb8(10)*abb8(9)
+      abb8(8)=-4.0_ki*abb8(11)
+      abb8(9)=abb8(9)*abb8(6)**2
+      abb8(10)=-8.0_ki*abb8(9)
+      abb8(9)=-16.0_ki*abb8(9)
       R2d8=abb8(12)
       rat2 = rat2 + R2d8
       if (debug_nlo_diagrams) then
