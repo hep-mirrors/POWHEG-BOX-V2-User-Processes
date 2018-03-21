@@ -141,9 +141,21 @@ values $m_H=125$\,GeV and $m_t=173$\,GeV are {\bf hardcoded} in this
 grid and therefore should not be changed in the {\tt mtdep=3} mode.
 The grid is generated using a python code and, in the newest version
 (after revision number 3507), the code is directly interfaced to the
-\POWHEGBOX{} fortran code directly. Thus the procedure for the
-computation with full top quark mass dependence is similar to the one
-for the other running modes.
+\POWHEGBOX{} fortran code. The procedure for the computation with full
+top quark mass dependence is similar to the one for the other running
+modes. However, in order for the grid to be found by the code, three
+files ({\tt events.cdf, createdgrid.py, Virt\_full.grid}) from the
+folder {\tt Virtual} need to be copied into the local folder where the
+code is run. Instead of copying the files, we suggest to create a
+symbolic link of the needed files. Assuming the code is run from a
+subfolder of the process folder, the link can be created as follows:
+\begin{description}
+\item{\tt ln -s ../Virtual/events.cdf events.cdf}
+\item{\tt ln -s ../Virtual/creategrid.py creategrid.py}
+\item{\tt ln -s ../virtual/Virt\_full.grid Virt\_full.grid}
+\end{description}
+Once the links are in place, the code can be run with {\tt mtdep=3} as
+usual.
 
 \section{Physical input parameters}
 
