@@ -1,5 +1,5 @@
 ! ggHH production parameters:
-mtdep 2              ! 0: Higgs effective field theory (HEFT)
+mtdep 3              ! 0: Higgs effective field theory (HEFT)
 !                      1: Born improved HEFT
 !                      2: approximated full theory (FTapprox)
 !                      3: full theory
@@ -42,7 +42,7 @@ itmx2       3        ! number of iterations for computing the integral and findi
 foldcsi     1        ! number of folds on csi integration
 foldy       1        ! number of folds on  y  integration
 foldphi     1        ! number of folds on phi integration
-nubound  5000        ! number of bbarra calls to setup norm of upper bounding function
+nubound 10000        ! number of bbarra calls to setup norm of upper bounding function
 # icsimax   1        ! <= 100, number of csi subdivision when computing the upper bounds
 # iymax     1        ! <= 100, number of y subdivision when computing the upper bounds
 # xupbound 2d0       ! increase upper bound for radiation generation
@@ -66,9 +66,7 @@ softtest          0  ! no check of the soft limit in the real
 colltest          0  ! no check of the collinear limit in the real
 
 ! PARAMETERS needed for ggHH
-ptHHcut     0.001d0
-ptHHcut_CT  0.001d0
-#hdamp          150
+hdamp           250
 
 ! PARAMETERS for parallel runnning
 ! -- non parallel (for testing purposes only)
@@ -89,23 +87,11 @@ xgriditeration 1
 maxseeds    1000
 
 ! PARAMETERS for reweighting
-rwl_file 'reweight_setup.xml'
+#rwl_file 'reweight_setup.xml'
 
 
 ! PARAMETERS for Pythia8
 #py8tune  xxx
 #py8hepmc 1
-py8nohad 1
-py8nompi 1
-
-
-! Other stuff (to be checked if it's needed!!)
-always_quad     1    ! (dafault 0) compute always usig quadruple precision
-#ptsupp       0d0    ! (default 0d0)  mass param for Born suppression factor (generation cut) If < 0 suppfact = 1
-#smartsig       0    ! (default 1) remember equal amplitudes (0 do not remember)
-#withsubtr      0    ! (default 1) subtract real counterterms (0 do not subtract)
-#ptsqmin      0.8    ! (default 0.8 GeV) minimum pt for generation of radiation
-#charmthr     1.5    ! (default 1.5 GeV) charm treshold for gluon splitting 
-#bottomthr    5.0    ! (default 5.0 GeV) bottom treshold for gluon splitting
-#charmthrpdf  1.5    ! (default 1.5 GeV) pdf charm treshold
-#bottomthrpdf 5.0    ! (default 5.0 GeV) pdf bottom treshold
+#py8nohad 1
+#py8nompi 1

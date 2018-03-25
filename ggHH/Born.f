@@ -52,14 +52,13 @@
       save gtens
       integer mtdep
       common/cmtdep/mtdep
-      logical ini,always_quad
+      logical ini
       data ini/.true./
-      save ini,always_quad
+      save ini
       real *8 powheginput
       external powheginput
 
       if (ini) then
-         always_quad=powheginput("#always_quad").eq.1d0
          ini=.false.
       endif
 
@@ -110,7 +109,6 @@ c$$$      else if(mtdep.eq.4) then
 c$$$C--   Test full GoSam expressions with large top mass limit:
 c$$$         call ME2born_htl(p,born1)
 c$$$         call ME2born_full(p,born,mpol)
-c$$$         call ME2born_top(p,born2,always_quad)
 c$$$         write(*,*) "--> Born: should be one (Full/HEFT):", born2/born1
 c$$$         write(*,*) "--> Born: should be one (GS/G.vd.B):", born2/born
       else
