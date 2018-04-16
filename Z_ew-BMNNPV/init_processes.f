@@ -27,6 +27,8 @@ c     lepton masses
       integer phind
       logical dyqedonly,dyweakonly
       common/split_ew/dyqedonly,dyweakonly
+      logical dyqedonly_noIF
+      common/qed_noIF/dyqedonly_noIF
 
 c Must include photon!
       pdf_nparton = 22
@@ -37,8 +39,13 @@ c Must include photon!
          flg_with_em = .true.
          if(powheginput("#QED-only").eq.1) then
             dyqedonly = .true.
+            dyqedonly_noIF= .false.
+            if(powheginput("#noQEDIF").eq.1) then
+               dyqedonly_noIF= .true.
+            endif
          else
             dyqedonly = .false.
+            dyqedonly_noIF= .false.
          endif
          if(powheginput("#weak-only").eq.1) then
             dyweakonly = .true.

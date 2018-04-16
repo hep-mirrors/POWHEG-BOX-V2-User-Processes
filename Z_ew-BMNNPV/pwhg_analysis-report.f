@@ -28,8 +28,8 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
       call bookupeqbins('V_m',1.d0,60d0,120d0)
       call bookupeqbins('V_m_report',1d0,50d0,200d0)
 
-      call bookupeqbins('forward',2.4d0,60d0,120d0)
-      call bookupeqbins('backward',2.4d0,60d0,120d0)
+      call bookupeqbins('forward',1.d0,60d0,120d0)
+      call bookupeqbins('backward',1.d0,60d0,120d0)
 
       call bookupeqbins('X_m_report',0.006d0,0.6d0,1.2d0)
       call bookupeqbins('X_p_report',0.008d0,0.4d0,1.2d0)

@@ -1209,8 +1209,16 @@ c     write(*,*)'bornm2',bornm2
 *
       integer sig,tau
 *
+      logical dyqedonly_noIF
+      common/qed_noIF/dyqedonly_noIF
+*
       if(dyqedonly) then
 *
+         if(dyqedonly_noIF) then
+            box= zero
+            return
+         endif
+*     
 ** gg
 *
          calculated0=.true.
@@ -1228,7 +1236,6 @@ c     write(*,*)'bornm2',bornm2
 
          ugg(0,1) = ugg(1,0) 
          ugg(0,0) = ugg(1,1) 
-
 *
 ** zg
 *
@@ -1309,7 +1316,6 @@ c     write(*,*)'bornm2',bornm2
          else
             call bupp(s*cone,t*cone,u*cone,mw2,mw2,mqbig2*cone,uww(0,0))
          endif
-
 *
 **
 *
