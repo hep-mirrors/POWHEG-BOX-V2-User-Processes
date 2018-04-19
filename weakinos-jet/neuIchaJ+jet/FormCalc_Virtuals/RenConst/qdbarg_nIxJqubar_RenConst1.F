@@ -16,8 +16,8 @@
         implicit none
 
         ! decide if finite terms should be taken into account
-        RealType xz0, xm0
-        parameter (xz0=0D0, xm0=0D0)
+        RealType xz0, xm0, xg0
+        parameter (xz0=0D0, xm0=0D0, xg0=0D0)
 
         ! Regularize 1/MD Terms
         RealType MR, MR2
@@ -133,6 +133,10 @@
 #endif
 
         dZgs1 = dZgg3 - 3/2.D0*dZGG1UV
+
+        ! MK: add large logarithms to the counterterm
+        ! of the strong coupling constant
+        call add_logs(dZgs1)
 
 #if DEBUG >= 4
         DEB("RenConst1:dZgs1", dZgs1)
