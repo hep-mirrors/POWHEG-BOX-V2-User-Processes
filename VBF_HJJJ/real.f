@@ -1,3 +1,7 @@
+c     BJ : start from original file real.f
+c     (public POWHEG-BOX-V2 version March 2018)
+c     and implement improved VBFNLO real-emission contributions
+c     (version VBFNLO-3.0.0beta5)
 c     
       subroutine setreal(p,rflav,amp2)
       implicit none
@@ -48,6 +52,10 @@ c
       init_real = .false.
       endif
 
+c test only:
+c      if (.not.rflav(6).eq.0) return
+c      if (rflav(1)*rflav(2).ne.0) return
+c      print*,'flav=',rflav
 
       call calc_als
       call ctrans(1)  ! SETS GG to the right value!!! Argument not needed for 2nd etc call
@@ -117,7 +125,29 @@ c identify as CC or NC type sub-process:
       integer hww,hzz
 c
       logical need_cross
-       
+
+      logical new_vbfnlo
+      parameter (new_vbfnlo=.true.)
+      logical test_amps
+      parameter (test_amps=.false.)
+
+      real*8 NCmatrix_r(0:1,0:1,0:6),CCmatrix_r(0:1,0:6)
+      real*8 resc(6)
+      real*8 uucc,uuss,ddcc,ddss,udsc,ducs
+      real*8 res_vbf(6),res_pwg
+c     Set up a cache
+      integer ncache, icache, cache
+      parameter (ncache = 4)    ! Number of old points to store
+      integer physToDiag_cache(5,ncache)
+      real * 8 res_vbf_cache(6,ncache)
+      data icache/1/
+      save icache, physToDiag_cache, res_vbf_cache
+      logical use_old, cache_on
+      parameter (cache_on = .true.)
+      integer ncall
+      data ncall/0/
+      save ncall
+
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
@@ -140,6 +170,9 @@ c average on color and spin, and symmetry factor for identical particles
       endif   
       need_cross = .false.
 c
+c iinit:
+      fsign(:)=0
+      
 c ini:
       gen(:) = 0
       ftype(:) = 0
@@ -151,6 +184,8 @@ c ini:
          pbar(mu,:) = 0d0
          qbar(mu,:) = 0d0
       enddo
+
+c      print*,'init qbar:',qbar(0,:)
 
       do mu = 0,3
 
@@ -627,7 +662,11 @@ ccccccccccccccc
 
       elseif (bflav(6).eq.0) then ! g2 incoming, g1 outgoing
 
+c        print*,'incoming g2:'
+
       if (bflav(1).eq.0.and.bflav(2).gt.0.and.bflav(4).gt.0) then
+
+c         print*,'g q ---> q q qb g'
          
 c*******************  g q ---> q q qb g H   **********************
 
@@ -659,6 +698,8 @@ c up- or down-type quark:
       endif !nc/cc  
 
       elseif (bflav(1).eq.0.and.bflav(2).gt.0.and.bflav(4).lt.0) then
+
+c         print*,'g q ---> qb q q g '
          
 c*******************  g q ---> qb q q g H   **********************
 c
@@ -691,6 +732,8 @@ c up- or down-type quark:
 
       elseif (bflav(1).gt.0.and.bflav(2).eq.0.
      &    and.bflav(4).gt.0.and.bflav(5).gt.0) then
+
+c         print*,'q g ---> q q qb g '
       
 C*******************  q g ---> q q qb g H   **********************
       
@@ -724,6 +767,8 @@ c up- or down-type quark:
       elseif (bflav(1).gt.0.and.bflav(2).eq.0.and.
      &        bflav(4).gt.0.and.bflav(5).lt.0) then
       
+c         print*,'q g ---> q qb q g '
+
 C*******************  q g ---> q qb q g H   **********************
 
       physToDiag(1)=1  
@@ -754,6 +799,8 @@ c up- or down-type quark:
       endif !nc/cc  
 
       elseif (bflav(1).eq.0.and.bflav(2).lt.0.and.bflav(4).gt.0) then
+
+c         print*,'g qbar ---> q qb qb g '
         
 C*******************  g qbar ---> q qb qb g H  **********************
 
@@ -786,6 +833,7 @@ c up- or down-type quark:
 
       elseif (bflav(1).eq.0.and.bflav(2).lt.0.and.bflav(4).lt.0) then
 
+c         print*,' g qbar ---> qb qb q g '
         
 C*******************  g qbar ---> qb qb q g H  **********************
 
@@ -817,6 +865,8 @@ c up- or down-type quark:
       endif !nc/cc  
 
       elseif (bflav(1).lt.0.and.bflav(2).eq.0.and.bflav(5).lt.0) then
+
+c         print*,' qbar2 g ---> qbar1 qb3 q4 g'
  
 C*******************  qbar2 g ---> qbar1 qb3 q4 g H   **********************
 c
@@ -848,6 +898,8 @@ c up- or down-type quark:
       endif !nc/cc  
 
       elseif (bflav(1).lt.0.and.bflav(2).eq.0.and.bflav(5).gt.0) then
+
+c         print*,'qbar2 g ---> qbar1 q4 q3bar g'
  
 C*******************  qbar2 g ---> qbar1 q4 q3bar g H ****************
 c
@@ -1234,14 +1286,75 @@ c Higgs:
          stop 'something went wrong'
       endif   
 
-      call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res)
+c original version:      
+      if (.not.new_vbfnlo) call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res,resc)
 
+c     new VBFNLO:
+      if(ncall.le.2*maxprocreal) ncall = ncall + 1
+
+c     new VBFNLO:
+      use_old = .false.
+      if (new_vbfnlo) then 
+         do i=1,ncache
+            if(cache_on.and.ncall.gt.2*maxprocreal.and.
+     $           all(physToDiag(:).eq.physToDiag_cache(:,i))) then
+               use_old = .true.
+               cache = i
+               exit
+            endif
+         enddo
+         if(use_old) then
+            res_vbf(:) = res_vbf_cache(:,cache) ! use old result
+         else                   ! recompute
+            call qqh2q2g(pbar,fsign,qbar,gsign,NCmatrix_r,CCmatrix_r)
+            
+            res_vbf(1)=ncmatrix_r(0,0,0)
+            res_vbf(2)=ncmatrix_r(0,1,0)
+            res_vbf(3)=ncmatrix_r(1,0,0)
+            res_vbf(4)=ncmatrix_r(1,1,0)
+            res_vbf(5)=ccmatrix_r(0,0)
+            res_vbf(6)=ccmatrix_r(1,0)
+            
+            res_vbf_cache(:,icache) = res_vbf(:)
+            physToDiag_cache(:,icache) = physToDiag(:)
+            
+            if(icache.eq.ncache) then
+               icache = 1       ! Return to first index of cache
+            elseif(icache.lt.ncache) then
+               icache = icache + 1
+            else
+               print*, 'Cache in under/overflow....', icache, ncache
+               stop
+            endif
+         endif
+         
+         res = res_vbf(k)
+         
+         if (test_amps) then 
+            call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res_pwg,resc) 
+            
+c     call qqhqqgg_mg(pbar,fsign,qbar,gsign,
+c     $            uucc,uuss,ddcc,ddss,udsc,ducs)
+            
+            print*,'old pwg res =',res_pwg
+            print*,'new nCmatrix=',res_vbf
+            print*,'ratio pwg/nc=',res_pwg/res_vbf(k)
+            if (abs(1d0-res_pwg/res_vbf(k)).gt.1d-4) then 
+               print*,'check 1-rat, rat',
+     &              abs(1d0-res_pwg/res_vbf(k)),res_pwg/res_vbf(k)
+               print*,'gsign=',gsign
+               print*,'fsign=',fsign
+            endif
+            print*,'###############'
+         endif                  !test_amps
+         
+      endif                     !new vbfnlo   
 
       amp2 = res*polcol
 
 c identical quarks in gg->qqqbqbH:
       if (need_cross) then ! need qqqb(6)qb(7)+qqqb(7)qb(6)
-         
+        
       physToDiag(1)=3          
       physToDiag(2)=2           
       physToDiag(3)=1           
@@ -1273,13 +1386,58 @@ c Higgs:
       do mu = 0,3
          pbar(mu,5) = pin(mu,3)
       enddo
-      call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res_cross)
-      amp2_cross = res_cross*polcol
-      amp2 = amp2 + amp2_cross
+      if (.not.new_vbfnlo) then 
+        call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res_cross,resc)
+        amp2_cross = res_cross*polcol
+        amp2 = amp2 + amp2_cross
+      endif
+
+c     new VBFNLO:
+      if (new_vbfnlo) then 
+
+         call qqh2q2g(pbar,fsign,qbar,gsign,NCmatrix_r,CCmatrix_r)
+
+          res_vbf(1)=ncmatrix_r(0,0,0)
+          res_vbf(2)=ncmatrix_r(0,1,0)
+          res_vbf(3)=ncmatrix_r(1,0,0)
+          res_vbf(4)=ncmatrix_r(1,1,0)
+          res_vbf(5)=ccmatrix_r(0,0)
+          res_vbf(6)=ccmatrix_r(1,0)
+          
+          res_cross = res_vbf(k)
+
+          if (test_amps) then 
+
+             call qqHqqjj_channel(pbar,fsign,qbar,gsign,k,res_pwg,resc)
+             
+c             call qqhqqgg_mg(pbar,fsign,qbar,gsign,
+c     $            uucc,uuss,ddcc,ddss,udsc,ducs)
+             
+             write(*,*) "crossed Hjjj 2q2g Comparison:"
+            
+             print*,'k=',k
+
+             print*,'old pwg res =',res_pwg
+             print*,'new nCmatrix=',res_vbf(k)
+             print*,'ratio pwg/Nc=',res_pwg/res_vbf(k)
+             
+             if (abs(1d0-res_pwg/res_vbf(k)).gt.1d-4) then
+                print*,'check 1-rat, rat',
+     &               abs(1d0-res_pwg/res_vbf(k)),res_pwg/res_vbf(k)
+                print*,'gsign=',gsign
+                print*,'fsign=',fsign
+                print*,'need_cross =',need_cross
+             endif
+             print*,'###############'
+             
+             endif !test_amps
+
+             amp2_cross = res_cross*polcol
+             amp2 = amp2 + amp2_cross
+
+          endif  !new_vbfnlo
 
       endif !need_cross
-
-
 
 c symmetry factor:
 c      amp2 = amp2*wsymfact

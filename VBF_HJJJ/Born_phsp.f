@@ -839,8 +839,9 @@ c expon. damping (c.f. trijets, arXiv:1402.4001):
       real * 8 powheginput
       external powheginput
       real * 8 muf,mur, muref,renscfact,facscfact
-      logical runningscales, ptsumscale, htscale, ethscale
-      real*8 ptj1, ptj2, ptj3, ptj4, eth
+      logical runningscales, ptsumscale, htscale, ethscale,
+     & mthscale
+      real*8 ptj1, ptj2, ptj3, ptj4, eth, rth
       
       logical ini
       data ini/.true./
@@ -852,29 +853,41 @@ c expon. damping (c.f. trijets, arXiv:1402.4001):
             ptsumscale=.true.
             htscale=.false.
             ethscale=.false.
+            mthscale=.false.
          elseif(powheginput('#runningscales').eq.2) then
             runningscales=.true.
             ptsumscale=.false.
             htscale=.true.
             ethscale=.false.
+            mthscale=.false.
          elseif(powheginput('#runningscales').eq.3) then
             runningscales=.true.
             ptsumscale=.false.
             htscale=.false.
-            ethscale=.true.            
+            ethscale=.true. 
+            mthscale=.false.     
+         elseif(powheginput('#runningscales').eq.4) then
+            runningscales=.true.
+            ptsumscale=.false.
+            htscale=.false.
+            ethscale=.false.
+            mthscale=.true.
          else
             runningscales=.false.
             ptsumscale=.false.
             htscale=.false.
             ethscale=.false.
+            mthscale=.false.
             muref=ph_Hmass
          endif   
       endif
+
 
       renscfact=powheginput("#renscfact")
       facscfact=powheginput("#facscfact")
       if (renscfact .eq. 0d0) stop 'renscale = 0 not allowed'
       if (facscfact .eq. 0d0) stop 'facscale = 0 not allowed'
+      
       if(runningscales) then
        if (htscale) then
          if (ini) then
@@ -992,7 +1005,45 @@ c default is Born kinematics:
          
             muref = eth
          endif       
-       endif   
+      
+       elseif (mthscale) then
+         if (ini) then
+            write(*,*) '*************************************'
+            write(*,*) 'Factorization and renormalization '
+            write(*,*) 'scales (mur, muf) set to '
+            write(*,*) 'MH/2 * sqrt[(MH/2)^2+ptH^2] '
+            if (renscfact .gt. 0d0) 
+     &        write(*,*) 'Renormalization scale rescaled by', renscfact
+            if (facscfact .gt. 0d0) 
+     &        write(*,*) 'Factorization scale rescaled by  ', facscfact
+            write(*,*) '***********************************************'
+            ini=.false.
+         endif
+         
+c     default is Born kinematics:
+         rth = sqrt(0.25d0*ph_Hmass**2+(kn_pborn(1,3))**2 
+     &           +                     (kn_pborn(2,3))**2)
+         
+         muref = ph_Hmass*0.5d0*rth
+         muref = dsqrt(muref)
+         
+         if(flg_btildepart.eq.'c') then  
+         rth = sqrt(0.25d0*ph_Hmass**2+(kn_pborn(1,3))**2 
+     &           +                     (kn_pborn(2,3))**2)
+                  
+         muref = ph_Hmass*0.5d0*rth
+         muref = dsqrt(muref)
+         endif
+         if(flg_btildepart.eq.'r') then
+         rth = sqrt(0.25d0*ph_Hmass**2+(kn_preal(1,3))**2 
+     &           +                     (kn_preal(2,3))**2)
+         
+         muref = ph_Hmass*0.5d0*rth
+         muref = dsqrt(muref)
+
+         endif       
+      endif
+      
       else
        if (ini) then
        muref=ph_Hmass/2d0
@@ -1005,11 +1056,14 @@ c default is Born kinematics:
          write(*,*) 'alfa_s =        ', st_alpha !pwhg_alphas(muf**2,st_lambda5MSB,st_nlight)
          write(*,*) '**********************************'
          ini=.false.
-       endif      
       endif
+
+      
       muref=ph_Hmass/2d0
       muf=muref
       mur=muref
+      
+      endif     
 
 c make sure muf never falls below min. cutoff value:
       muf = max(muf,dsqrt(2d0))       

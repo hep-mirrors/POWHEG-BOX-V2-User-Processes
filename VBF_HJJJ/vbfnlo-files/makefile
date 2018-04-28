@@ -29,12 +29,22 @@ OBJECTS_PH =./dotproducts.o \
           ./hjjj_amp_aux.o \
           ./loops_aux.o \
           ./dilog.o \
-          ./qqhqqjj.o  \
+          ./qqhqqjj_col.o  \
           ./qqhqqQQ.o  \
           ./mg_qqqqggh_nc.o  \
           ./mg_qqqqggh_cc.o  \
           ./mg_qqqqqqh_nc.o  \
-          ./mg_qqqqqqh_cc.o 
+          ./mg_qqqqqqh_cc.o  \
+          ./new-vbfnlo/qqh4q_mg_new.o  \
+          ./new-vbfnlo/dc_usbbh.o  \
+          ./new-vbfnlo/us_usuuh.o  \
+          ./new-vbfnlo/us_usbbh.o  \
+          ./new-vbfnlo/qqh4q_me_new.o  \
+          ./new-vbfnlo/qqh2q2g_me_new.o  \
+          ./new-vbfnlo/qqhqqgg_mg_new.o  \
+          ./new-vbfnlo/qqhqqgg_mgfast_new.o  \
+          ./new-vbfnlo/qqhqqgg_cc_new.o  \
+          ./new-vbfnlo/brakets_new.o 
 TARGETS_PH = libvbfnlo.a
 
 # ----------------------------------------------------------------------------

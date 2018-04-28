@@ -48,6 +48,27 @@ c
       logical need_cross
       logical pair71,pair72
 c
+      
+      logical new_vbfnlo
+      parameter (new_vbfnlo=.true.)
+      logical test_amps
+      parameter (test_amps=.false.)
+
+      
+      real*8 uucc,uuss,ddcc,ddss,udsc,ducs
+      real*8 res_vbf,res_pwg,res_mg
+      real*8  uuccuu,uussuu,ddccuu,ddssuu,
+     $      uuccdd,uussdd,ddccdd,ddssdd 
+
+      
+      double precision NCmatrix_r(0:1,0:1,0:1,1:2,0:1)
+      double precision CCmatrix_r(0:1,0:1,0:1,1:4,0:1)
+      
+      logical lsymmcontrib, linterference
+      parameter (lsymmcontrib = .true.)
+      parameter (linterference = .false.)
+c
+
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c average on color and spin, and symmetry factor for identical particles
@@ -502,17 +523,130 @@ c Higgs:
       endif   
       
 c      print*, col_del, 'ist coldel in hqqqq'
-      
+
       if (k.le.4) then    
 c k-ordering (1:8) is: uucc,uuss,ddcc,ddss (+tt for 1:4,+bb for 5:8)
          kl = k+4*ftype(7)-4
-         call qqHqqQQ_nc_channel(pbar_cc,fsign,kl,res)
+
+         if (.not.new_vbfnlo)
+     &        call qqHqqQQ_nc_channel(pbar_cc,fsign,kl,res)
+
+            res_pwg = res
+
+         if (new_vbfnlo) then
+            call qqh4q(pbar_cc,fsign,NCmatrix_r,CCmatrix_r,lsymmcontrib)
+            
+           if (kl.eq.1) then 
+               res_vbf = NCmatrix_r(0,0,0,1,0)+NCmatrix_r(0,0,0,2,0) !uuccuu
+            elseif (kl.eq.2) then 
+               res_vbf = NCmatrix_r(0,1,0,1,0)+NCmatrix_r(0,1,0,2,0) !uussuu
+            elseif (kl.eq.3) then
+               res_vbf = NCmatrix_r(1,0,0,1,0)+NCmatrix_r(1,0,0,2,0) !ddccuu
+            elseif (kl.eq.4) then
+               res_vbf = NCmatrix_r(1,1,0,1,0)+NCmatrix_r(1,1,0,2,0) !ddssuu
+            elseif (kl.eq.5) then
+               res_vbf = NCmatrix_r(0,0,1,1,0)+NCmatrix_r(0,0,1,2,0) !uuccdd
+            elseif (kl.eq.6) then
+               res_vbf = NCmatrix_r(0,1,1,1,0)+NCmatrix_r(0,1,1,2,0) !uussdd
+            elseif (kl.eq.7) then
+               res_vbf = NCmatrix_r(1,0,1,1,0)+NCmatrix_r(1,0,1,2,0) !ddccdd
+            elseif (kl.eq.8) then
+               res_vbf = NCmatrix_r(1,1,1,1,0)+NCmatrix_r(1,1,1,2,0) !ddssdd               
+            endif
+            
+            res = res_vbf
+
+         if (test_amps) then 
+
+            call qqHqqQQ_nc_channel(pbar_cc,fsign,kl,res_pwg)
+
+            res_mg = 0d0
+            
+            call qqh4qnc_mg(pbar_cc,fsign,
+     $           uuccuu,uussuu,ddccuu,ddssuu,
+     $           uuccdd,uussdd,ddccdd,ddssdd)
+
+            if (kl.eq.1) then 
+               res_mg = uuccuu
+            elseif (kl.eq.2) then 
+               res_mg = uussuu
+            elseif (kl.eq.3) then
+               res_mg = ddccuu
+            elseif (kl.eq.4) then
+               res_mg =ddssuu
+            elseif (kl.eq.5) then
+               res_mg = uuccdd
+            elseif (kl.eq.6) then
+               res_mg = uussdd
+            elseif (kl.eq.7) then
+               res_mg =ddccdd
+            elseif (kl.eq.8) then
+               res_mg = ddssdd               
+            endif 
+            
+            
+               write(*,*) "Hjjj 4q NC Comparison: kl=",kl
+               
+               print*,'old pwg=',res_pwg
+               print*,'mg vbfnlo=',res_mg
+               print*,'new vbfnlo=',res_vbf
+               print*,'pwg/vbf=',res_pwg/res_vbf
+               print*,'pwg/mg=',res_pwg/res_mg
+c
+               if (abs(1d0-res_pwg/res_vbf).gt.1d-4) then
+                  print*,'check 1-rat, rat',
+     &                 abs(1d0-res_pwg/res_vbf),res_pwg/res_vbf
+                  print*,'fsig=',fsign(5:6)
+                  print*,'coldel=',col_del
+               else
+                  print*,'good point col=',col_del
+               Endif
+               print*,'###############'
+               
+            endif    !test_amps
+
+            endif !new_vbfnlo
+
       else 
 c k-ordering (5:6) is: udsc,ducs
          kl = k-4
          fsign(5) = qsign(1)
          fsign(6) = qsign(2)
-         call qqHqqQQ_cc_channel(pbar_cc,fsign,kl,res)
+
+         if (.not.new_vbfnlo) 
+     &         call qqHqqQQ_cc_channel(pbar_cc,fsign,kl,res)
+
+         if (new_vbfnlo) then
+            call qqh4q(pbar_cc,fsign,NCmatrix_r,CCmatrix_r,lsymmcontrib)
+
+            if (k.eq.5) then  
+              res_vbf=CCmatrix_r(0,1,0,1,0)+CCmatrix_r(0,1,0,2,0)
+            elseif (k.eq.6)then
+              res_vbf=CCmatrix_r(1,0,0,1,0)+CCmatrix_r(1,0,0,2,0)
+            endif
+        
+            res = res_vbf
+
+            if (test_amps) then
+               call qqHqqQQ_cc_channel(pbar_cc,fsign,kl,res_pwg)
+
+c               call qqh4qcc_mg(pbar_cc,fsign,udsc,ducs)
+
+               write(*,*) "Hjjj 4q CC Comparison:"
+               
+               print*,'old pwg=',res_pwg
+               print*,'new vbfnlo=',res_vbf
+               print*,'pwg/vbf=',res_pwg/res_vbf
+
+               if (abs(1d0-res_pwg/res_vbf).gt.1d-4) then 
+                  print*,'check 1-rat, rat',
+     &                 abs(1d0-res_pwg/res_vbf),res_pwg/res_vbf
+               endif
+               print*,'###############'
+            endif !test_amps
+            
+         endif !new_vbfnlo
+         
       endif   
 
       amp2 = res*polcol
