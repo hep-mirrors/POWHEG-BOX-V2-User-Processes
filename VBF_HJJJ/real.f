@@ -143,7 +143,7 @@ c     Set up a cache
       data icache/1/
       save icache, physToDiag_cache, res_vbf_cache
       logical use_old, cache_on
-      parameter (cache_on = .true.)
+      parameter (cache_on = .false.)
       integer ncall
       data ncall/0/
       save ncall
