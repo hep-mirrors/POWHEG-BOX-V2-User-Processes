@@ -125,8 +125,8 @@ c$$$      end
       real * 8 resc_em_alpha
       save ini,resc_em_alpha
 
-      real*8 is_ew_ho
-      save is_ew_ho
+      real*8 is_ew_ho,ew_ho_only
+      save is_ew_ho,ew_ho_only
       complex*16 ewho
       
       qq = chargeofparticle_local(flav(1))
@@ -194,35 +194,56 @@ c$$$      end
           enddo
       enddo
 *
-      if(dyqedonly) then
-         self= (0.d0,0.d0)
-      else
-         call deltaself(s,self)
-      endif
-
-      call deltavert(s,mqbig2,vert)
-
-      call deltabox (s,t,u,mqbig2,box)
-*
-* eq. (2.10) of Dittmaier-Kraemer PRD65 073007
-*
-      virtual = self + vert + box
       
       if(ini) then
          ini = .false.
          resc_em_alpha = powheginput("#resc_em_alpha")
 
+         
 c.....mauro-h.o. b
          is_ew_ho=powheginput("#ew_ho")
-         if((is_ew_ho.gt.0d0.and.dyqedonly).or.(is_ew_ho.gt.0d0.and.dyweakonly)) then
-            write(*,*)'is_ew_ho  ',is_ew_ho
-            write(*,*)'dyqedonly ',dyqedonly
-            write(*,*)'dyweakonly',dyweakonly
-            write(*,*)'h.o. allowed only if the full ew NLO is computed'
-            stop
+         ew_ho_only=powheginput("#ew_ho_only")
+
+         write(*,*)'is_ew_ho  ',is_ew_ho
+         write(*,*)'dyqedonly ',dyqedonly
+        write(*,*)'dyweakonly',dyweakonly
+
+         
+         if(ew_ho_only.le.0d0) then
+            if((is_ew_ho.gt.0d0.and.dyqedonly).or.
+     +           (is_ew_ho.gt.0d0.and.dyweakonly)) then
+               write(*,*)'is_ew_ho  ',is_ew_ho
+               write(*,*)'dyqedonly ',dyqedonly
+               write(*,*)'dyweakonly',dyweakonly
+               write(*,*)'h.o. allowed only if the full'//
+     +              ' ew NLO is computed'
+               stop
+            endif
          endif
 c.....mauro-h.o. e      
       endif
+
+
+      virtual=0d0
+      
+      if(ew_ho_only.le.0d0) then
+         
+         if(dyqedonly) then
+            self= (0.d0,0.d0)
+         else
+            call deltaself(s,self)
+         endif
+         
+         call deltavert(s,mqbig2,vert)
+         
+         call deltabox (s,t,u,mqbig2,box)
+*     
+*     eq. (2.10) of Dittmaier-Kraemer PRD65 073007
+*     
+         virtual = self + vert + box
+      endif
+
+      
 
 c.....mauro-h.o. b
          if(is_ew_ho.gt.0d0) then
@@ -2808,6 +2829,104 @@ c     write(*,*)'bornm2',bornm2
       saatout = - alsu4pi * saatout
  
       end subroutine sigmaaat
+
+
+      subroutine sigmaaat_ferm(s,saatout,ifheavy)
+      implicit none
+      include'mathx.h'
+      include'pwhg_math.h'
+      include'pwhg_physpar.h'
+*
+      complex*16 s
+      complex*16 saatout
+      logical ifheavy
+*
+      complex*16 b0dsmeme,b0dsmmmm,b0dsmtlmtl
+      complex*16 b0d0meme,b0d0mmmm,b0d0mtlmtl
+
+      complex*16 b0dsmumu,b0dsmcmc,b0dsmtmt
+      complex*16 b0d0mumu,b0d0mcmc,b0d0mtmt
+
+      complex*16 b0dsmdmd,b0dsmsms,b0dsmbmb
+      complex*16 b0d0mdmd,b0d0msms,b0d0mbmb
+
+      complex*16 b0dsmwmw
+      complex*16 b0d0mwmw
+*
+      integer ifirst
+      data ifirst/0/
+      save ifirst
+      save b0d0meme,b0d0mmmm,b0d0mtlmtl
+      save b0d0mumu,b0d0mcmc,b0d0mtmt
+      save b0d0mdmd,b0d0msms,b0d0mbmb
+      save b0d0mwmw
+*
+      if (ifirst.eq.0) then
+          ifirst = 1
+
+          call b0p0mm(me2*cone,b0d0meme)
+          call b0p0mm(mm2*cone,b0d0mmmm)
+          call b0p0mm(mtl2*cone,b0d0mtlmtl)
+
+          call b0p0mm(mu2*cone,b0d0mumu)
+          call b0p0mm(mc2*cone,b0d0mcmc)
+          call b0p0mm(mt2*cone,b0d0mtmt)
+
+          call b0p0mm(md2*cone,b0d0mdmd)
+          call b0p0mm(ms2*cone,b0d0msms)
+          call b0p0mm(mb2*cone,b0d0mbmb)
+
+          call b0p0mm(mw2,b0d0mwmw)
+      endif
+
+      call b0reg(s,me2*cone,me2*cone,b0dsmeme)
+      call b0reg(s,mm2*cone,mm2*cone,b0dsmmmm)
+      call b0reg(s,mtl2*cone,mtl2*cone,b0dsmtlmtl)
+
+      call b0reg(s,mu2*cone,mu2*cone,b0dsmumu)
+      call b0reg(s,mc2*cone,mc2*cone,b0dsmcmc)
+      call b0reg(s,mt2*cone,mt2*cone,b0dsmtmt)
+
+      call b0reg(s,md2*cone,md2*cone,b0dsmdmd)
+      call b0reg(s,ms2*cone,ms2*cone,b0dsmsms)
+      call b0reg(s,mb2*cone,mb2*cone,b0dsmbmb)
+
+*
+      saatout = 2.d0/3.d0*(
+* sum over three charged leptons
+     +             2.d0*ql**2*( - (s+2.d0*me2*cone)*b0dsmeme
+     +                          + 2.d0*me2*b0d0meme + s/3.d0
+     +                          - (s+2.d0*mm2*cone)*b0dsmmmm
+     +                          + 2.d0*mm2*b0d0mmmm + s/3.d0
+     +                          - (s+2.d0*mtl2*cone)*b0dsmtlmtl
+     +                          + 2.d0*mtl2*b0d0mtlmtl + s/3.d0)
+* sum over quarks
+     +  + 3.d0*(   2.d0*qu**2*( - (s+2.d0*mu2*cone)*b0dsmumu
+     +                          + 2.d0*mu2*b0d0mumu + s/3.d0
+     +                          - (s+2.d0*mc2*cone)*b0dsmcmc
+     +                          + 2.d0*mc2*b0d0mcmc + s/3.d0)
+     +           + 2.d0*qd**2*( - (s+2.d0*md2*cone)*b0dsmdmd
+     +                          + 2.d0*md2*b0d0mdmd + s/3.d0
+     +                          - (s+2.d0*ms2*cone)*b0dsmsms
+     +                          + 2.d0*ms2*b0d0msms + s/3.d0
+     +                          - (s+2.d0*mb2*cone)*b0dsmbmb
+     +                          + 2.d0*mb2*b0d0mbmb + s/3.d0)
+     +         ) 
+     +         )
+
+      if (ifheavy) 
+     +    saatout = saatout + 2d0/3d0 * 
+     +              3d0*2d0*qu**2*(
+     +                 - (s+2.d0*mt2*cone)*b0dsmtmt
+     +                 + 2.d0*mt2*b0d0mtmt + s/3.d0
+     +              )
+
+
+      saatout = - alsu4pi * saatout
+ 
+      end subroutine sigmaaat_ferm
+
+      
 ******************************************************************
 *
 * derivative (w.r.t. p^2 (s)) of eq. (B.1) of ArXiv:0709.1075 
@@ -6303,7 +6422,34 @@ c.....mauro-h.o. b
       integer ini
       data ini/0/
       save ini
+
+
+c      logical realtest
+c      parameter(realtest=.false.)!.true.)
+      logical rtest
+      common/crtest/rtest
+      save /crtest/
+      
+      real*8 bornm2
+      integer sig,tau
+      complex*16 flo
+      external flo
+      real*8 rsw2,rcw2,rsw4,rcw4
+      save rsw2,rcw2,rsw4,rcw4
+
+      logical constantscale
+      common/cconstantscale/constantscale
+      save /cconstantscale/
+      
+      real * 8 powheginput
+      
       if (ini.eq.0) then
+
+         rtest=powheginput("#real_ho").gt.0d0
+
+
+         constantscale=powheginput("#constant-dda-scale").gt.0d0
+         
          old_qq=0d0
          old_drho=0d0
          old_dda=0d0
@@ -6326,25 +6472,46 @@ c     0=left, 1=right
 c         write(*,*)'yu',yu
 c         write(*,*)'yd',yd
 c         write(*,*)'yl',yl
-         
-         do i1=0,1
-            do i2=0,1
-               aqlu(i1,i2)=yu(i1)*yl(i2)/4d0/cw2 -
-     +              cw2*iwu(i1)*iwl(i2)/sw4
-               aqld(i1,i2)=yd(i1)*yl(i2)/4d0/cw2 -
-     +              cw2*iwd(i1)*iwl(i2)/sw4
-               
-               bqlu(i1,i2)=yu(i1)*yl(i2)/4d0/cw2 +
-     +              cw4*iwu(i1)*iwl(i2)/sw4/sw2
-               bqld(i1,i2)=yd(i1)*yl(i2)/4d0/cw2 +
-     +              cw4*iwd(i1)*iwl(i2)/sw4/sw2               
-            enddo
-         enddo
 
-c               write(*,*)'aqlu',aqlu
-c               write(*,*)'aqld',aqld
-c               write(*,*)'bqlu',bqlu
-c               write(*,*)'bqld',bqld
+         if(.not.rtest) then
+         
+            do i1=0,1
+               do i2=0,1
+                  aqlu(i1,i2)=yu(i1)*yl(i2)/4d0/cw2 -
+     +                 cw2*iwu(i1)*iwl(i2)/sw4
+                  aqld(i1,i2)=yd(i1)*yl(i2)/4d0/cw2 -
+     +                 cw2*iwd(i1)*iwl(i2)/sw4
+                  
+                  bqlu(i1,i2)=yu(i1)*yl(i2)/4d0/cw2 +
+     +                 cw4*iwu(i1)*iwl(i2)/sw4/sw2
+                  bqld(i1,i2)=yd(i1)*yl(i2)/4d0/cw2 +
+     +                 cw4*iwd(i1)*iwl(i2)/sw4/sw2               
+               enddo
+            enddo
+         else
+            rcw2=ph_wmass2/ph_zmass2
+            rsw2=1d0-rcw2
+            rcw4=rcw2**2
+            rsw4=rsw2**2
+            do i1=0,1
+               do i2=0,1
+                  aqlu(i1,i2)=yu(i1)*yl(i2)/4d0/rcw2 -
+     +                 rcw2*iwu(i1)*iwl(i2)/rsw4
+                  aqld(i1,i2)=yd(i1)*yl(i2)/4d0/rcw2 -
+     +                 rcw2*iwd(i1)*iwl(i2)/rsw4
+                  
+                  bqlu(i1,i2)=yu(i1)*yl(i2)/4d0/rcw2 +
+     +                 rcw4*iwu(i1)*iwl(i2)/rsw4/rsw2
+                  bqld(i1,i2)=yd(i1)*yl(i2)/4d0/rcw2 +
+     +                 rcw4*iwd(i1)*iwl(i2)/rsw4/rsw2               
+               enddo
+            enddo
+         endif
+            
+c         write(*,*)'aqlu',aqlu,conjg(aqlu)
+c         write(*,*)'aqld',aqld,conjg(aqld)
+c         write(*,*)'bqlu',bqlu,conjg(bqlu)
+c         write(*,*)'bqld',bqld,conjg(bqld)
          
          call rho1(drho1)
          cdrho1=conjg(drho1)
@@ -6355,7 +6522,12 @@ c               write(*,*)'bqld',bqld
          else
             si=ph_zmass2
          endif
-         cs2=cw2/sw2
+         
+         if(.not.rtest) then
+            cs2=cw2/sw2
+         else
+            cs2=cone*rcw2/rsw2
+         endif
          ccs2=conjg(cs2)
          ini=1
       endif
@@ -6390,13 +6562,24 @@ c               write(*,*)'bqld',bqld
       if(s.eq.old_s) then
          dda=old_dda
       else
-         call dalpha(si,s,dda)
+c     call dalpha(si,s,dda)
+         if(constantscale) then
+c below was used  for the test on 24/04/2018 and for comparison  with Dittmaier-Huber        
+            call dalpha(si,ph_zmass2,dda)
+         else
+            call dalpha(si,s,dda)
+         endif
       endif
 
+      if(.not.complexmasses) dda=realpart(dda)
+      
 c      write(*,*)'si,s',si,s
 c      write(*,*)' dda  ',dda
 c      write(*,*)' drho ',drho
 c      write(*,*)' drho1',drho1
+
+      if(rtest) dda=realpart(dda)*cone
+      
       cdda  =conjg(dda)
       cdrho =conjg(drho )
 
@@ -6562,7 +6745,7 @@ c     (a**2 q**2 q**2 /  a**2 q q g g / a**2 q q g~ g~ /a**2 g g g~ g`)
       enddo
 
 c     this will be added to the 1-loop virtual
-c     there is  a coeff 1/12 messing, that is added in setvirtual
+c     there is  a coeff 1/12 missing, that is added in setvirtual
 c     but there there is also 2 re()
 c     here I am removing  that factor 2
       out=out/2d0
@@ -6663,15 +6846,26 @@ c         stop
       include 'pwhg_math.h'
       include 'pwhg_physpar.h'
       complex*16 out
-      
+      logical rtest
+      common/crtest/rtest
 
-      
-      if(    scheme.eq.0) then
-         out= ph_alphaem/4d0/pi  * 3d0*ph_mtop**2/4d0/ph_sthw2/mw2
-      elseif(scheme.eq.1) then
-         out= ph_alpha_mz/4d0/pi * 3d0*ph_mtop**2/4d0/ph_sthw2/mw2
+
+      if(.not.rtest) then
+         if(    scheme.eq.0) then
+            out= ph_alphaem/4d0/pi  * 3d0*ph_mtop**2/4d0/ph_sthw2/mw2
+         elseif(scheme.eq.1) then
+            out= ph_alpha_mz/4d0/pi * 3d0*ph_mtop**2/4d0/ph_sthw2/mw2
+         else
+            out= 3d0*sqrt(2d0)*ph_gmu*ph_mtop**2/16d0/pi/pi
+         endif
       else
-         out= 3d0*sqrt(2d0)*ph_gmu*ph_mtop**2/16d0/pi/pi
+         if(    scheme.eq.0) then
+            out= ph_alphaem/4d0/pi  * 3d0*ph_mtop**2/4d0/(1d0-ph_wmass2/ph_zmass2)/ph_wmass2 !ph_sthw2/mw2
+         elseif(scheme.eq.1) then
+            out= ph_alpha_mz/4d0/pi * 3d0*ph_mtop**2/4d0/(1d0-ph_wmass2/ph_zmass2)/ph_wmass2 !ph_sthw2/mw2
+         else
+            out= 3d0*sqrt(2d0)*ph_gmu*ph_mtop**2/16d0/pi/pi
+         endif
       endif
 
       end subroutine rho1
@@ -6814,14 +7008,51 @@ c         write(*,*)'r1,r2',r1,r2
 
       subroutine dalpha(si,sf,out)
       implicit none
+      include 'pwhg_math.h'
       include 'mathx.h'
+      include 'PhysPars.h'
+      include 'pwhg_physpar.h'
       real*8 si,sf
       complex*16 outi,outf,out
-c 
-      call sigmaaatp_ferm(si*cone,outi,.false.)
-      call sigmaaatp_ferm(sf*cone,outf,.false.)
-c d_a = -d sigma AA / d s (s=0)      
-      out= (-outf)-(-outi)
+      logical includetop
+      logical logevolve
+      parameter (logevolve=.false.)!.true.)
+c     changed as follows:
+c     if the original scheme is alpha_0, use log expression for the running
+c     else alpha can be computed from sigma(s)/s s>0d0
+
+      if(scheme.eq.0) then
+         includetop=si.gt.4d0*mt2
+         call sigmaaatp_ferm(si*cone,outi,includetop)
+         call sigmaaat_ferm( sf*cone,outf,includetop)
+         out= (-outf/sf)-(-outi)
+         if(logevolve) then
+            write(*,*)'evoulution 1',out
+            out=  3d0*qu**2*(log(dble(mz2)/mu2)-5d0/3d0)
+     +           +3d0*qd**2*(log(dble(mz2)/md2)-5d0/3d0)
+     +           +3d0*qu**2*(log(dble(mz2)/mc2)-5d0/3d0)
+     +           +3d0*qd**2*(log(dble(mz2)/ms2)-5d0/3d0)
+     +           +3d0*qd**2*(log(dble(mz2)/mb2)-5d0/3d0)
+            out=out*alpha/3d0/pi
+            write(*,*)'log',out
+            stop
+         endif
+      else ! the starting scale is not 0
+         includetop=si.gt.4d0*mt2
+         if(si.lt.1d-10) then
+            write(*,*)'something wrong in dalpha'
+            stop
+         endif
+         call sigmaaat_ferm(si*cone,outi,includetop)
+         call sigmaaat_ferm(sf*cone,outf,includetop)
+         out= (-outf/sf)-(-outi/si)
+      endif
+c      write(*,*)'old',out
+c      write(*,*)'ini',si,outi
+c      write(*,*)'der',sf,outf
+c     d_a = -d sigma AA / d s (s=0)
+
+
       end subroutine dalpha
       
   !*****************************************************************************80
