@@ -450,6 +450,7 @@ c Assign color to the parton i in the new block as it was in the original block
 c returns true if all photos generated photons have relative pt 
 c (with respect to the emitting lepton) less than scalup
       implicit none
+      include "pwhg_rwl.h"
       include "LesHouches.h"
       include "PhotosHep.h"
       logical ok
@@ -548,9 +549,13 @@ c The ptmin should be the relative pt between the photon and the lepton that rad
 c (this is done for cases where there are two leptons, like the Z)
 
 c The following is the important veto:
-c The routine vetoes the photons added by Photos if the relative pt is greater than mc_fsr_scale
-        if (ptmin.gt.vetoscale_qed) return 
- 
+c     The routine vetoes the photons added by Photos if the relative pt is greater than mc_fsr_scale
+c
+c modified fulvio 12/01/2018
+        if(rwl_type.eq.1) then
+           if (ptmin.gt.vetoscale_qed) return
+        endif
+c modified fulvio 12/01/2018
       enddo
        
       ok = .true.
