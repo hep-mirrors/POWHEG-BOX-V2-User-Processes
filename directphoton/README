@@ -1,7 +1,17 @@
+Authors:
+T. Jezo, M. Klasen, C. Klein-Bösing, F. Koenig, H. Poppenborg
+
+Please cite the following papers:
+DOI: 10.1007/JHEP03(2018)081 ... Prompt photon production and photon-jet correlations at the LHC 
+  by M. Klasen, C. Klein-Bösing and H. Poppenborg
+DOI: 10.1007/JHEP11(2016)033 ... Prompt photon production and photon-hadron jet correlations with POWHEG 
+  by T. Jezo, M. Klasen and F. Koenig
+
+Prerequisites: 
 There are two programs required for this powheg process: LHAPDF and LoopTools.
 You need to point the Makefile to these dependencies.
 
-In order to run powheg-directphoton, we advise you to use the example directory 'testrun-lhc'.
-There is a README and a script to help you with the generation of POWHEG level events (LHEF files).
+In order to run the directphoton code, we advise you to use the example directory 'testrun-lhc'.
+There is a README.mb and a script to help you with the generation of POWHEG level events (LHEF files).
 A second directory 'pythia_example' provides an example on how to apply the Pythia8 parton shower
 on the LHEF files.
