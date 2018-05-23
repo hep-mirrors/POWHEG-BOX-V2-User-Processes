@@ -1,0 +1,7 @@
+There are two programs required for this powheg process: LHAPDF and LoopTools.
+You need to point the Makefile to these dependencies.
+
+In order to run powheg-directphoton, we advise you to use the example directory 'testrun-lhc'.
+There is a README and a script to help you with the generation of POWHEG level events (LHEF files).
+A second directory 'pythia_example' provides an example on how to apply the Pythia8 parton shower
+on the LHEF files.
