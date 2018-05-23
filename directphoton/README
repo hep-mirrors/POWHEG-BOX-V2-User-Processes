@@ -9,7 +9,7 @@ DOI: 10.1007/JHEP11(2016)033 ... Prompt photon production and photon-hadron jet 
 
 Prerequisites: 
 There are two programs required for this powheg process: LHAPDF and LoopTools.
-You need to point the Makefile to these dependencies.
+The path to LoopTools needs to be explicitly set in the Makefile.
 
 In order to run the directphoton code, we advise you to use the example directory 'testrun-lhc'.
 There is a README.mb and a script to help you with the generation of POWHEG level events (LHEF files).

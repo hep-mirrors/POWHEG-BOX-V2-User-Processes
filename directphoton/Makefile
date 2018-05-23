@@ -27,7 +27,11 @@ FFLAGS= -ffixed-line-length-132 -cpp
 OPT=-O2
 ## For debugging uncomment the following
 #DEBUG= -ggdb -pg
-DEBUG= -g
+ifdef DEBUG
+OPT=-O0
+#FPE=-ffpe-trap=invalid,zero,overflow
+#,underflow
+endif
 endif
 
 
@@ -66,7 +70,7 @@ endif
 
 
 ## LoopTools
-LT=$(HOME)/tools/LoopTools/2.14
+LT=PathToLoopTools
 LTFLAGS=-I$(LT)/include -L$(LT)/lib64 -looptools
 LIBS+= -L$(LT)/lib64 -looptools
 
@@ -123,13 +127,13 @@ endif
 vpath
 VPATH=./:../:$(OBJ)/
 
-%.o: %.f $(INCLUDE)
+%.o: %.f $(INCLUDE) | $(OBJ)
 	$(FF) -c -o $(OBJ)/$@ $<
 
-%.o: %.c
+%.o: %.c | $(OBJ)
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^ 
 
-%.o: %.cc
+%.o: %.cc | $(OBJ)
 	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
@@ -185,3 +189,6 @@ main-PYTHIA-lhef: $(PYTHIA)
 clean:
 	rm -f $(OBJ)/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
 	main-PYTHIA-lhef 
+
+$(OBJ):
+	mkdir -p $(OBJ)
