@@ -64,9 +64,9 @@ C     set filenames
             write(mufstr,'(f4.2)') muf 
             write(*,*) 'murstr,mufstr',murstr,mufstr
             NNLO_phiB(i) =
-     C           'WW_MATRIX/MATRIX-NNLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
+     C           '../WW_MATRIX/MATRIX-NNLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
             MINLO_phiB(i)=
-     C           'WW_MINLO/MINLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
+     C           '../WW_MINLO/MINLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
             write(*,*) 'NNLO_phiB(i)',trim(NNLO_phiB(i))
             write(*,*) 'MINLO_phiB(i)',trim(MINLO_phiB(i))
          else
