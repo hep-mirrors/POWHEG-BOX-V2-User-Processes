@@ -1,0 +1,240 @@
+module     p12_sbars_epnemumnmubarg_abbrevd971h1
+   use p12_sbars_epnemumnmubarg_config, only: ki
+   use p12_sbars_epnemumnmubarg_globalsh1
+   implicit none
+   private
+   complex(ki), dimension(40), public :: abb971
+   complex(ki), public :: R2d971
+   public :: init_abbrev
+   complex(ki), parameter :: i_ = (0.0_ki, 1.0_ki)
+contains
+   subroutine     init_abbrev()
+      use p12_sbars_epnemumnmubarg_config, only: deltaOS, &
+     &    logfile, debug_nlo_diagrams
+      use p12_sbars_epnemumnmubarg_kinematics
+      use p12_sbars_epnemumnmubarg_model
+      use p12_sbars_epnemumnmubarg_color, only: TR
+      use p12_sbars_epnemumnmubarg_globalsl1, only: epspow
+      implicit none
+      abb971(1)=1.0_ki/(-mW**2+es56+i_*mW*wW)
+      abb971(2)=1.0_ki/(-mW**2+es34+i_*mW*wW)
+      abb971(3)=1.0_ki/(es34+es567-es12-es234)
+      abb971(4)=1.0_ki/(es71+es34+es56-es712-es234)
+      abb971(5)=NC**(-1)
+      abb971(6)=sqrt2**(-1)
+      abb971(7)=spak2k7**(-1)
+      abb971(8)=spak2k5*spbk7k2
+      abb971(9)=abb971(8)*spak1k2
+      abb971(10)=spak5k6*spbk7k6
+      abb971(11)=abb971(10)*spak1k2
+      abb971(9)=abb971(9)+abb971(11)
+      abb971(9)=abb971(9)*spbk3k1
+      abb971(12)=abb971(8)*spak2k4
+      abb971(13)=abb971(10)*spak2k4
+      abb971(12)=abb971(12)+abb971(13)
+      abb971(12)=abb971(12)*spbk4k3
+      abb971(9)=abb971(9)-abb971(12)
+      abb971(12)=-spbk6k2*abb971(5)*abb971(9)
+      abb971(14)=NC*spbk6k2
+      abb971(9)=abb971(9)*abb971(14)
+      abb971(15)=abb971(12)+abb971(9)
+      abb971(16)=i_*c1*TR
+      abb971(17)=abb971(7)*abb971(16)
+      abb971(18)=abb971(17)*spak1k4
+      abb971(19)=abb971(3)*gW**4*abb971(1)*abb971(2)*abb971(4)*abb971(6)
+      abb971(20)=abb971(18)*abb971(19)
+      abb971(21)=4.0_ki*abb971(20)
+      abb971(22)=-abb971(15)*abb971(21)
+      abb971(23)=spbk7k3*spak2k3
+      abb971(24)=abb971(23)*abb971(10)
+      abb971(25)=spbk7k4*abb971(13)
+      abb971(25)=abb971(25)+abb971(24)
+      abb971(26)=2.0_ki*spak1k7
+      abb971(25)=abb971(26)*abb971(25)
+      abb971(27)=es56-es567
+      abb971(28)=-abb971(27)-es12+es71+es712
+      abb971(29)=-abb971(28)*abb971(11)
+      abb971(30)=spak2k4*spbk7k4
+      abb971(31)=abb971(30)+abb971(23)
+      abb971(26)=abb971(26)*abb971(31)
+      abb971(28)=-spak1k2*abb971(28)
+      abb971(26)=abb971(28)+abb971(26)
+      abb971(26)=abb971(26)*abb971(8)
+      abb971(25)=abb971(26)+abb971(29)+abb971(25)
+      abb971(25)=spbk3k1*abb971(25)
+      abb971(26)=es123-es456
+      abb971(28)=es71-es712
+      abb971(29)=abb971(28)+es12
+      abb971(26)=abb971(27)-abb971(29)+2.0_ki*abb971(26)
+      abb971(13)=abb971(26)*abb971(13)
+      abb971(26)=spak2k4*abb971(26)
+      abb971(27)=spak1k2*spbk7k1
+      abb971(23)=abb971(27)+abb971(23)
+      abb971(27)=spak4k7*abb971(23)
+      abb971(26)=2.0_ki*abb971(27)+abb971(26)
+      abb971(26)=spak2k5*spbk7k2*abb971(26)
+      abb971(11)=spbk7k1*abb971(11)
+      abb971(11)=abb971(24)+abb971(11)
+      abb971(11)=spak4k7*abb971(11)
+      abb971(11)=abb971(26)+2.0_ki*abb971(11)+abb971(13)
+      abb971(11)=spbk4k3*abb971(11)
+      abb971(11)=abb971(25)+abb971(11)
+      abb971(11)=abb971(11)*abb971(14)*abb971(21)
+      abb971(12)=2.0_ki*abb971(12)-abb971(9)
+      abb971(13)=8.0_ki*abb971(20)
+      abb971(12)=abb971(12)*abb971(13)
+      abb971(21)=spbk7k1*spak1k5
+      abb971(24)=spbk7k4*spak4k5
+      abb971(25)=spbk7k3*spak3k5
+      abb971(21)=-abb971(25)+abb971(21)-abb971(24)
+      abb971(24)=spbk3k1*spak1k2
+      abb971(25)=spbk4k3*spak2k4
+      abb971(24)=abb971(24)-abb971(25)
+      abb971(21)=abb971(24)*abb971(21)
+      abb971(25)=es123-es23
+      abb971(26)=abb971(25)+es34
+      abb971(27)=abb971(26)-es12
+      abb971(31)=abb971(27)*spak2k5
+      abb971(32)=spbk7k3*abb971(31)
+      abb971(32)=abb971(21)-abb971(32)
+      abb971(33)=-abb971(32)*abb971(14)*abb971(17)
+      abb971(34)=spbk3k1*spak2k5
+      abb971(35)=abb971(34)*spbk7k4
+      abb971(36)=spbk4k3*spak2k5
+      abb971(37)=abb971(36)*spbk7k1
+      abb971(35)=abb971(35)+abb971(37)
+      abb971(37)=abb971(14)*abb971(18)
+      abb971(38)=abb971(35)*abb971(37)
+      abb971(33)=abb971(33)-abb971(38)
+      abb971(38)=8.0_ki*abb971(19)
+      abb971(38)=abb971(38)*spak1k4
+      abb971(33)=abb971(33)*abb971(38)
+      abb971(9)=abb971(9)*abb971(13)
+      abb971(15)=abb971(15)*abb971(13)
+      abb971(21)=spbk5k2*abb971(21)
+      abb971(28)=abb971(28)-es234
+      abb971(25)=abb971(25)*abb971(28)
+      abb971(26)=abb971(26)+abb971(28)
+      abb971(26)=es34*abb971(26)
+      abb971(28)=abb971(28)+es34
+      abb971(39)=-es12*abb971(28)
+      abb971(25)=abb971(39)+abb971(26)+abb971(25)
+      abb971(25)=spbk7k3*abb971(25)
+      abb971(26)=spbk7k1*spak1k6
+      abb971(39)=spbk7k4*spak4k6
+      abb971(40)=spbk7k3*spak3k6
+      abb971(26)=-abb971(40)+abb971(26)-abb971(39)
+      abb971(39)=abb971(24)*spbk6k2
+      abb971(26)=abb971(26)*abb971(39)
+      abb971(21)=abb971(26)+abb971(25)+abb971(21)
+      abb971(25)=abb971(17)*NC
+      abb971(21)=abb971(21)*abb971(25)
+      abb971(26)=spbk3k1*spbk7k4
+      abb971(40)=-spbk4k3*spbk7k1
+      abb971(26)=-abb971(26)+abb971(40)
+      abb971(18)=abb971(18)*NC
+      abb971(26)=abb971(18)*abb971(28)*abb971(26)
+      abb971(21)=abb971(21)+abb971(26)
+      abb971(19)=abb971(19)*spak1k4
+      abb971(19)=4.0_ki*abb971(19)
+      abb971(21)=abb971(21)*abb971(19)
+      abb971(26)=spbk6k5*abb971(32)
+      abb971(23)=abb971(23)+abb971(30)
+      abb971(23)=-spbk6k2*abb971(23)*abb971(24)
+      abb971(23)=abb971(23)+abb971(26)
+      abb971(23)=abb971(23)*abb971(25)
+      abb971(18)=abb971(18)*spbk6k5*abb971(35)
+      abb971(18)=abb971(23)+abb971(18)
+      abb971(18)=abb971(18)*abb971(19)
+      abb971(23)=spak2k5*abb971(29)*abb971(7)
+      abb971(23)=abb971(23)+abb971(10)
+      abb971(16)=abb971(23)*abb971(38)*abb971(16)
+      abb971(23)=spbk4k3*abb971(5)
+      abb971(24)=abb971(23)*spbk6k2
+      abb971(25)=-abb971(24)*abb971(16)
+      abb971(26)=spbk3k1*spak1k7
+      abb971(28)=spbk4k3*spak4k7
+      abb971(26)=abb971(26)+abb971(28)
+      abb971(8)=abb971(8)+abb971(10)
+      abb971(10)=spbk6k2*abb971(26)*abb971(5)*abb971(8)
+      abb971(8)=abb971(8)*abb971(26)
+      abb971(26)=-spak5k6*spbk6k3*abb971(27)
+      abb971(27)=spbk3k2*abb971(31)
+      abb971(8)=abb971(26)+abb971(27)+2.0_ki*abb971(8)
+      abb971(8)=abb971(8)*abb971(14)
+      abb971(8)=2.0_ki*abb971(10)+abb971(8)
+      abb971(8)=abb971(8)*abb971(17)
+      abb971(10)=spak5k6*spbk6k4
+      abb971(17)=-spak2k5*spbk4k2
+      abb971(10)=abb971(10)+abb971(17)
+      abb971(10)=spbk3k1*abb971(10)
+      abb971(17)=spak5k6*spbk6k1
+      abb971(26)=spak2k5*spbk2k1
+      abb971(17)=abb971(17)+abb971(26)
+      abb971(17)=spbk4k3*abb971(17)
+      abb971(10)=abb971(10)+abb971(17)
+      abb971(10)=abb971(10)*abb971(37)
+      abb971(8)=abb971(8)+abb971(10)
+      abb971(8)=abb971(8)*abb971(19)
+      abb971(10)=abb971(23)*spak4k5
+      abb971(17)=spbk3k1*abb971(5)
+      abb971(19)=abb971(17)*spak1k5
+      abb971(10)=abb971(10)+abb971(19)
+      abb971(19)=abb971(10)*spbk6k2
+      abb971(26)=spbk3k1*spak1k5
+      abb971(27)=spbk4k3*spak4k5
+      abb971(26)=abb971(26)+abb971(27)
+      abb971(27)=abb971(26)*abb971(14)
+      abb971(19)=abb971(19)+abb971(27)
+      abb971(27)=32.0_ki*abb971(20)
+      abb971(19)=abb971(19)*abb971(27)
+      abb971(27)=spbk5k2*abb971(26)
+      abb971(28)=spbk3k1*spak1k6
+      abb971(29)=spbk4k3*spak4k6
+      abb971(28)=abb971(28)+abb971(29)
+      abb971(28)=spbk6k2*abb971(28)
+      abb971(27)=abb971(28)+abb971(27)
+      abb971(27)=NC*abb971(27)
+      abb971(28)=spbk5k2*abb971(10)
+      abb971(29)=spak1k6*abb971(17)
+      abb971(30)=spak4k6*abb971(23)
+      abb971(29)=abb971(29)+abb971(30)
+      abb971(29)=spbk6k2*abb971(29)
+      abb971(27)=abb971(27)+abb971(29)+abb971(28)
+      abb971(20)=16.0_ki*abb971(20)
+      abb971(27)=abb971(27)*abb971(20)
+      abb971(26)=spbk6k5*abb971(26)
+      abb971(26)=-abb971(39)+abb971(26)
+      abb971(26)=NC*abb971(26)
+      abb971(10)=spbk6k5*abb971(10)
+      abb971(28)=-spak1k2*abb971(17)
+      abb971(23)=spak2k4*abb971(23)
+      abb971(23)=abb971(28)+abb971(23)
+      abb971(23)=spbk6k2*abb971(23)
+      abb971(10)=abb971(26)+abb971(23)+abb971(10)
+      abb971(10)=abb971(10)*abb971(20)
+      abb971(20)=abb971(13)*spak5k6
+      abb971(23)=-spbk4k3*abb971(14)
+      abb971(23)=-abb971(24)+abb971(23)
+      abb971(23)=abb971(23)*abb971(20)
+      abb971(26)=-abb971(14)*abb971(36)
+      abb971(24)=-spak2k5*abb971(24)
+      abb971(24)=abb971(24)+abb971(26)
+      abb971(24)=abb971(24)*abb971(13)
+      abb971(17)=abb971(17)*spbk6k2
+      abb971(16)=-abb971(17)*abb971(16)
+      abb971(26)=-spbk3k1*abb971(14)
+      abb971(26)=-abb971(17)+abb971(26)
+      abb971(20)=abb971(26)*abb971(20)
+      abb971(14)=-abb971(14)*abb971(34)
+      abb971(17)=-spak2k5*abb971(17)
+      abb971(14)=abb971(17)+abb971(14)
+      abb971(13)=abb971(14)*abb971(13)
+      R2d971=abb971(22)
+      rat2 = rat2 + R2d971
+      if (debug_nlo_diagrams) then
+          write (logfile,*) "<result name='r2' index='971' value='", &
+          & R2d971, "'/>"
+      end if
+   end subroutine
+end module p12_sbars_epnemumnmubarg_abbrevd971h1

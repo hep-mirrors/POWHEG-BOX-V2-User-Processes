@@ -1,0 +1,6 @@
+paths:
+  analysis: /afs/cern.ch/work/z/zanderi/POWHEG-BOX-V2/WWJ_emu/lhef_analysis
+  eosroot: /eos/theory/user/z/zanderi/POWHEG-BOX-V2
+  main: /afs/cern.ch/work/z/zanderi/POWHEG-BOX-V2/WWJ_emu/pwhg_main
+  pythia6: /afs/cern.ch/work/z/zanderi/POWHEG-BOX-V2/WWJ_emu/main-PYTHIA-lhef
+  pythia8: /afs/cern.ch/work/z/zanderi/POWHEG-BOX-V2/WWJ_emu/main-PYTHIA8-lhef

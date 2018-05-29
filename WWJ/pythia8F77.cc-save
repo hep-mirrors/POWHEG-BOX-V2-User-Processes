@@ -1,0 +1,112 @@
+#include "Pythia.h"
+
+// to run without expliciting specifying name of LHE file
+//#include "LHAFortran.h"
+//#include <sstream>
+
+using namespace Pythia8; 
+
+// to run without expliciting specifying name of LHE file
+// class myLHAupFortran : public LHAupFortran {
+// protected:
+//   // User-written routine that does the intialization and fills heprup.
+//   virtual bool fillHepRup() {return true;}
+
+//   // User-written routine that does the event generation and fills hepeup.
+//   virtual bool fillHepEup() {return true;}
+// };
+// myLHAupFortran* LHAinstance=new myLHAupFortran();
+
+
+Pythia pythia;
+//MyUserHooks* MyHook=new MyUserHooks();
+
+
+
+extern "C" {
+  // F77 interface to pythia8
+  void pythia_init_(char* LHEfile) {
+    //void pythia_init_() {
+    // Generator. Process selection. LHC initialization. Histogram.
+
+    // uncommet to check that scalup is changed on an event-by-event basis, if
+    // the changescalup flag is activated in the input file.
+    //pythia.setUserHooksPtr(MyHook); 
+
+
+    pythia.readString("Tune:pp = 14"); // Monash2013 tune
+    //    pythia.readString("Tune:pp = 5"); // Default
+
+    pythia.readString("SpaceShower:QEDshowerByQ = off"); // From quarks.        
+    pythia.readString("SpaceShower:QEDshowerByL = off"); // From Leptons.       
+    pythia.readString("TimeShower:QEDshowerByQ = off"); // From quarks.         
+    pythia.readString("TimeShower:QEDshowerByL = off"); // From Leptons.
+
+    pythia.readString("PartonLevel:MPI = off"); 
+    //pythia.readString("PartonLevel:ISR = off"); 
+    //pythia.readString("PartonLevel:FSR = off"); 
+
+    pythia.readString("HadronLevel:all = off"); 
+    pythia.readString("BeamRemnants:primordialKT = off");
+
+
+    //make pi0 stable
+    pythia.readString("111:mayDecay = off");
+
+    // ER: leave the following commented
+    //pythia.readString("SpaceShower:pTmaxMatch = 0");
+    //pythia.readString("TimeShower:pTmaxMatch = 0");
+
+    pythia.readString("Beams:frameType = 4");  //!ER:
+
+    // either this...    
+    pythia.readString("Beams:LHEF = "+string(LHEfile));
+    // or this!
+    //pythia.setLHAupPtr(LHAinstance); 
+    //LHAinstance->setInit();  
+    //
+
+    pythia.init();
+  }
+
+  void pythia_next_(int & iret){
+    // Begin event loop. Generate event. Skip if error. List first one.
+    iret = pythia.next();
+    // prints each event out 
+    //pythia.event.list(); 
+  }
+
+  void pythia_to_hepevt_(const int &nmxhep, int & nhep, int * isthep,
+			 int * idhep,
+			 int  (*jmohep)[2], int (*jdahep)[2],
+			 double (*phep)[5], double (*vhep)[4]) {
+    nhep = pythia.event.size();
+    if(nhep>nmxhep) {cout << "too many particles!" ; exit(-1); }
+    for (int i = 0; i < pythia.event.size(); ++i) {
+      //*(isthep+i) = pythia.event.statusHepMC(i);
+      *(isthep+i) = pythia.event[i].status();
+      *(idhep+i) = pythia.event[i].id();
+      // All pointers should be increased by 1, since here we follow
+      // the c/c++ convention of indeces from 0 to n-1, but i fortran
+      // they are from 1 to n.
+      (*(jmohep+i))[0] = pythia.event[i].mother1() + 1;
+      (*(jmohep+i))[1] = pythia.event[i].mother2() + 1;
+      (*(jdahep+i))[0] = pythia.event[i].daughter1() + 1;
+      (*(jdahep+i))[1] = pythia.event[i].daughter2() + 1;
+      (*(phep+i))[0] = pythia.event[i].px();
+      (*(phep+i))[1] = pythia.event[i].py();
+      (*(phep+i))[2] = pythia.event[i].pz();
+      (*(phep+i))[3] = pythia.event[i].e();
+      (*(phep+i))[4] = pythia.event[i].m();
+    }
+    // override mother of very first event, set to 0
+    *(jmohep)[0] = 0 ;
+    *(jmohep)[1] = 0 ;
+  }
+
+  void pythia_stat_() {
+    pythia.stat(); 
+  }
+
+
+}
