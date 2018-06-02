@@ -14,6 +14,16 @@ c.....mauro-pair b
       real*8 saveaem0
       common/csaveaem0/saveaem0
 c.....mauro-pair e      
+
+c.....added for scheme 3 b
+      include 'pwhg_physpar.h'
+      include 'PhysPars.h'
+      include 'mathx.h'
+      real*8 q2
+      logical includetop
+      complex*16 outi,outf
+      real*8 ddaa
+c.....added for scheme 3 e      
       
       call set_fac_ren_scales(muf,mur)
       st_mufact2= muf**2*st_facfact**2
@@ -29,6 +39,29 @@ c with it prevents it.
 c.....mauro-pair e            
       em_alpha=saveaem0
 c.....mauro-pair b      
+
+
+c.....added for scheme 3 b
+      if(scheme.eq.3) then
+         call set_scales_qed(q2)
+c     here we start from alpha_0 and run to the value of q2
+c     only fermionic terms are included and resummed
+c     alpha always appears in  combunation alpha conjg(alpha)
+c     and we can assume it is real
+
+         includetop=q2.gt.4d0*mt2
+         call sigmaaatp_ferm(zero   ,outi,includetop)
+         call sigmaaat_ferm( q2*cone,outf,includetop)
+         ddaa=realpart((-outf/q2)-(-outi))
+c     here we must use ph_alphaem instead of em_alpha (both of them are alpha_0)
+c     since em_alpha is set to 0 if no ew corrections are computed
+         alpha     = ph_alphaem/(1d0-ddaa)
+         el2_scheme=4d0*pi*alpha
+         
+         
+
+      endif
+c.....added for scheme 3 e     
       
       end
 

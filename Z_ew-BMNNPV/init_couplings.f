@@ -28,6 +28,9 @@ c     renormalization scheme
 c     0 -> alpha(0)
 c     1 -> alpha(mz)
 c     2 -> gmu
+c.....added for scheme 3 b
+c     3 -> alpha(partonic_s)=alpha(0)/(1-delta alpha (partonic_s))
+c.....added for scheme 3 e      
       integer cmpmass
       integer iftoptmp
       real * 8 cmass, bmass
@@ -244,6 +247,11 @@ c Alpha Thomson for radiation
       elseif (scheme.eq.1) then
           alpha   = dcmplx(ph_alpha_mz)
           el2_scheme = alpha*4d0*pi
+c.....added for scheme 3 b          
+       elseif (scheme.eq.3) then ! just to initialize it
+          alpha   = dcmplx(ph_alpha_mz)
+          el2_scheme = alpha*4d0*pi
+c.....added for scheme 3 e             
       else
           el2_scheme = ph_gmu * 8d0/sqrt(2d0) * mw2 * sw2
           alpha   = el2_scheme/4d0/pi

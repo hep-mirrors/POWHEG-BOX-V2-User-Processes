@@ -30,6 +30,7 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
 
       call bookupeqbins('forward',1.d0,60d0,120d0)
       call bookupeqbins('backward',1.d0,60d0,120d0)
+      call bookupeqbins('F-B',1.d0,60d0,120d0)
 
       call bookupeqbins('X_m_report',0.006d0,0.6d0,1.2d0)
       call bookupeqbins('X_p_report',0.008d0,0.4d0,1.2d0)
@@ -97,8 +98,8 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
 c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
-      data WHCPRG/'PYTHIA'/
-c      data WHCPRG/'NLO   '/
+c      data WHCPRG/'PYTHIA'/
+      data WHCPRG/'NLO   '/
       real * 8 pz(4),pl1(4),pl2(4)
       real * 8 pl103(0:3),pl203(0:3)
       real * 8 y1,eta1,ptl1,m1
@@ -122,6 +123,7 @@ c      data WHCPRG/'NLO   '/
       integer nl1,nl2,ngamma
       integer mu,nu,jl2,il2,igam,jgam,gam,il1,jl1,lep
       integer lep1vec(maxnumlep),lep2vec(maxnumlep),gammavec(maxphot)
+      real*8 dsigfmb
       real*8 p_gamma(0:3)
       real*8 pt_lep2,pt_lep2_max
       real*8 pt_lep1,pt_lep_max
@@ -342,11 +344,13 @@ c transverse mass of the lep1-lep2 system
 
          if (cs.lt.0d0) then
             call filld('backward', m, dsig)
+            dsigfmb= -dsig
          else
             call filld('forward', m, dsig)
+            dsigfmb= dsig
          endif
+         call filld('F-B', m, dsigfmb)
          call filld('phistar_report',phistar,dsig)
-
          if(ngamma.gt.0) then
             do gam=1,ngamma
                igam=gammavec(gam)

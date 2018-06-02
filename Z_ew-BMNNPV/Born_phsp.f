@@ -285,7 +285,7 @@ c         endif
       mur=muref
       mudim2=em_muren2
       end
-      
+
 
       function lambda(x,y,z)
       real*8 lambda
@@ -293,3 +293,30 @@ c         endif
       lambda = x**2+y**2+z**2 - 2.d0*x*y - 2.d0*x*z - 2.d0*y*z
       return
       end
+
+c.....added for scheme 3
+      subroutine set_scales_qed(q2)
+      implicit none
+      include 'nlegborn.h'
+      include 'pwhg_kn.h'
+
+      real * 8 q2
+      logical ini
+      data ini/.true./
+      real *8 dotp
+      external dotp
+      if(ini) then
+            write(*,*) '******WARNING*****************************'
+            write(*,*) '*   the value of alpha in born/virt/real *'
+            write(*,*) '*   is computed at                       *'
+            write(*,*) '*   q2=2*(kn_porn(:,1),kn_porn(:,2))   *'
+            write(*,*) '******WARNING*****************************'
+            ini=.false.
+      endif
+
+      q2=2d0*dotp(kn_pborn(0,1),kn_pborn(0,2))
+
+      end
+      
+      
+

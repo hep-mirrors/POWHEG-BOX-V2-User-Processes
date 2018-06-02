@@ -194,7 +194,6 @@ c$$$      end
           enddo
       enddo
 *
-      
       if(ini) then
          ini = .false.
          resc_em_alpha = powheginput("#resc_em_alpha")
@@ -206,7 +205,7 @@ c.....mauro-h.o. b
 
          write(*,*)'is_ew_ho  ',is_ew_ho
          write(*,*)'dyqedonly ',dyqedonly
-        write(*,*)'dyweakonly',dyweakonly
+         write(*,*)'dyweakonly',dyweakonly
 
          
          if(ew_ho_only.le.0d0) then
@@ -246,16 +245,16 @@ c.....mauro-h.o. e
       
 
 c.....mauro-h.o. b
-         if(is_ew_ho.gt.0d0) then
-            call ew_ho(flav,s,ewho)
-            virtual=virtual+dble(ewho)
-         endif
+      if(is_ew_ho.gt.0d0) then
+         call ew_ho(flav,s,ewho)
+         virtual=virtual+dble(ewho)
+      endif
 c.....mauro-h.o. e      
       
       if(resc_em_alpha.gt.0) then
          virtual = virtual * resc_em_alpha
       endif
-
+      
       end subroutine virtual_ew
 *
 ** Born amplitude
@@ -470,6 +469,13 @@ c.....mauro-h.o. e
       logical dyqedonly,dyweakonly
       common/split_ew/dyqedonly,dyweakonly
 *
+c.....added for scheme 3 b
+      logical includetop
+      complex*16 outi,outf
+      real*8 ddaa
+c.....added for scheme 3 e      
+
+      
       if (ifirst.eq.0) then
           ifirst = 1
 
@@ -571,7 +577,13 @@ c.....mauro-h.o. e
           elseif (scheme.eq.1) then
              call sigmaaat(dble(mz2)*cone,saatmz2notop,.false.)
              call sigmaaatp(zero,saatp0notop,.false.)
-             delta = 0.5d0 * (saatp0notop - saatmz2notop/mz2)
+c mauro bug?             
+c             delta = 0.5d0 * (saatp0notop - saatmz2notop/mz2)
+             delta = 0.5d0 * (saatp0notop - saatmz2notop/realpart(mz2))
+c.....added for scheme 3 b it has to be computed point by point
+          elseif(scheme.eq.3) then
+             delta = zero
+c.....added for scheme 3 e             
           else
              delta = 0.5d0 * getdeltar()
           endif
@@ -787,13 +799,29 @@ c     standard running mode: .not.dyqedonly.and..not.dyweakonly
 *     * Eq. (3.30) of Dittmaier-Huber - ArXiv:0911.2329
 *
 
-         fzqqw =  fzqqw + delqq_ct_z
+c     if we run qed only self energies are NOT included,
+c     this means that there is no effective running in the
+c     one loop calculation and no subtraction is needed
+c.....added for scheme 3 b
+c     delta should have been set to zero, subtract just the overall running at this stage
+         ddaa=0d0
+         if(scheme.eq.3)then
+c     virt~alpha**2 -> 2 * ( -0.5 delta alpha )
+            includetop=s.gt.4d0*mt2
+            call sigmaaatp_ferm(zero   ,outi,includetop)
+            call sigmaaat_ferm( s*cone,outf,includetop)
+            ddaa=realpart((-outf/s)-(-outi))
+         endif
+c.....added for scheme 3 e         
 
-         fgqqw =  fgqqw + delqq_ct_g
+         fzqqw =  fzqqw + delqq_ct_z - ddaa/2d0
 
-         fzllw =  fzllw + delll_ct_z
+         fgqqw =  fgqqw + delqq_ct_g - ddaa/2d0
 
-         fgllw =  fgllw + delll_ct_g
+         fzllw =  fzllw + delll_ct_z - ddaa/2d0
+
+         fgllw =  fgllw + delll_ct_g - ddaa/2d0
+
          
       else                      ! running with dyqedonly
          fzqqw =  delqq_ct_z
@@ -847,10 +875,13 @@ c     standard running mode: .not.dyqedonly.and..not.dyweakonly
             enddo
          enddo
 *
+
+         
 c     write(*,*)'bornm2',bornm2
          
          
          vert = vert + ( qq**2*fzqqg + ql**2*fzllg ) * bornm2
+         
       endif
          
       end subroutine deltavert
@@ -6404,17 +6435,17 @@ c.....mauro-h.o. b
       complex*16 bql(0:1,0:1),cbql(0:1,0:1)
       real*8 s,si
       complex*16 out
-      complex*16 drho1,drho,dda
-      complex*16 cdrho1,cdrho,cdda
+      complex*16 drho1,drho,dda1,dda2
+      complex*16 cdrho1,cdrho,cdda1,cdda2
       save drho1,cdrho1,si
       complex*16 coeff1(0:1,0:1)
       complex*16 coeff2(0:1,0:1)
       complex*16 coeff3(0:1,0:1)
       complex*16 coeff4(0:1,0:1)
       save coeff1,coeff2,coeff3,coeff4
-      complex*16 old_drho,old_dda
+      complex*16 old_drho,old_dda1,old_dda2
       real*8 old_s,old_qq
-      save old_drho,old_dda,old_s,old_qq
+      save old_drho,old_dda1,old_dda2,old_s,old_qq
       complex*16 cs2,ccs2
       save cs2,ccs2
       logical lotest
@@ -6452,7 +6483,8 @@ c      parameter(realtest=.false.)!.true.)
          
          old_qq=0d0
          old_drho=0d0
-         old_dda=0d0
+         old_dda1=0d0
+         old_dda2=0d0
          old_s=10d10
 c     0=left, 1=right
          iwu(0)=+0.5d0*cone
@@ -6518,7 +6550,9 @@ c         write(*,*)'bqld',bqld,conjg(bqld)
          if(scheme.eq.0) then
             si=0d0
          elseif(scheme.eq.1) then
-            si=ph_zmass2 ! mz2
+            si=ph_zmass2        ! mz2
+         elseif(scheme.eq.3) then
+            si=s ! there should be no running in this case   
          else
             si=ph_zmass2
          endif
@@ -6560,27 +6594,37 @@ c         write(*,*)'bqld',bqld,conjg(bqld)
       call rho(drho)
 
       if(s.eq.old_s) then
-         dda=old_dda
+         dda2=old_dda2
+         dda1=old_dda1 ! if scheme.ne.3 it is constant, if scheme.eq.3 depends on s like dda2
       else
 c     call dalpha(si,s,dda)
          if(constantscale) then
 c below was used  for the test on 24/04/2018 and for comparison  with Dittmaier-Huber        
-            call dalpha(si,ph_zmass2,dda)
+            call dalpha(si,ph_zmass2,dda1,dda2)
          else
-            call dalpha(si,s,dda)
+            call dalpha(si,s,dda1,dda2)
          endif
       endif
 
-      if(.not.complexmasses) dda=realpart(dda)
+c      if(.not.complexmasses) dda1=realpart(dda1)
+c      if(.not.complexmasses) dda2=realpart(dda2)
+
+c     we can assume that delta_alpha is real, the complex part in alpha_gf will come from sw2 in a_mz *sw2
+      
+      dda1=realpart(dda1)
+      dda2=realpart(dda2)
+      
       
 c      write(*,*)'si,s',si,s
 c      write(*,*)' dda  ',dda
 c      write(*,*)' drho ',drho
 c      write(*,*)' drho1',drho1
 
-      if(rtest) dda=realpart(dda)*cone
+      if(rtest) dda1=realpart(dda1)*cone
+      if(rtest) dda2=realpart(dda2)*cone
       
-      cdda  =conjg(dda)
+      cdda1  =conjg(dda1)
+      cdda2  =conjg(dda2)
       cdrho =conjg(drho )
 
 c      write(*,*)'cdda  ',cdda
@@ -6597,35 +6641,44 @@ c     otherwise compute all of them
          coeff3=zero
          coeff4=zero
          
-         if(scheme.eq.0.or.scheme.eq.1) then
+         if(scheme.eq.0.or.scheme.eq.1.or.scheme.eq.3) then
             do i1=0,1
                do i2=0,1
                   coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
-     1                 (dda**2 + cdda**2 + dda*cdda)
+     1                 (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
+
+
+c                  write(*,*)'dda1',dda1
+c                  write(*,*)'dda2',dda2
+c                  write(*,*)'coeff',(3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
+c                  stop
+                  
                   coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
-     1                 gq(i1)*gl(i2)*(dda**2 + cdda**2 + dda*cdda)
+     1                 gq(i1)*gl(i2)*(3d0*dda2**2 - 4d0*dda1*dda2 + dda1**2)
      2                 +aql(i1,i2)*(drho-drho1)
      3                 +bql(i1,i2)*drho**2
-     4                 +drho*aql(i1,i2)*(dda+cdda)
+     4                 +drho*aql(i1,i2)*2d0*(dda2-dda1)
      5                 )
+
+                                    
                   coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
      1                 conjg(gq(i1))*conjg(gl(i2))*(
-     2                 dda**2 + cdda**2 + dda*cdda )
+     2                 3d0*dda2**2 -4d0*dda1*dda2 +dda1**2 )
      3                 +caql(i1,i2)*(cdrho-cdrho1)
      4                 +cbql(i1,i2)*cdrho**2
-     5                 +cdrho*caql(i1,i2)*(dda+cdda)
+     5                 +cdrho*caql(i1,i2)*2d0*(dda2-dda1)
      6                 )
                   coeff4(i1,i2)=alpha*conjg(alpha)*(
      1                 gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
-     2                 (dda**2 + cdda**2 + dda*cdda)
+     2                 (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
      3                 +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
      4                 +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)
      5                 +bql(i1,i2)*drho**2*conjg(gq(i1))*conjg(gl(i2))
      6                 +cbql(i1,i2)*cdrho**2*gq(i1)*gl(i2)
      7                 +aql(i1,i2)*caql(i1,i2)*drho*cdrho
      8                 +aql(i1,i2)*drho*conjg(gq(i1))*conjg(gl(i2))*
-     9                 (dda+cdda)
-     1                 +caql(i1,i2)*cdrho*gq(i1)*gl(i2)*   (dda+cdda)
+     9                 2d0*(dda2-dda1)
+     1                 +caql(i1,i2)*cdrho*gq(i1)*gl(i2)* 2d0*(dda2-dda1)
      2                 )
                   
                enddo
@@ -6635,34 +6688,34 @@ c     else gmu scheme a_gmu~a(z)*sw2
             do i1=0,1
                do i2=0,1
                   coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
-     1              (dda**2 + cdda**2 + dda*cdda
+     1              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
      2              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     3              +cs2 * drho*(dda + cdda)  
-     4              +ccs2*cdrho*(dda + cdda)
+     3              +cs2 * drho*2d0*(dda2-dda1)  
+     4              +ccs2*cdrho*2d0*(dda2-dda1)
      5              +cs2*drho*ccs2*cdrho )
                
                   coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
      1              gq(i1)*gl(i2)*
-     2              (dda**2 + cdda**2 + dda*cdda
+     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
      3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*(dda + cdda)  
-     5              +ccs2*cdrho*(dda + cdda)
+     4              +cs2 * drho*2d0*(dda2-dda1)  
+     5              +ccs2*cdrho*2d0*(dda2-dda1)
      6              +cs2*drho*ccs2*cdrho )
      7              +aql(i1,i2)*(drho-drho1)          
-     8              +aql(i1,i2)*drho*(dda+cdda)
+     8              +aql(i1,i2)*drho*2d0*(dda2-dda1)
      9              +aql(i1,i2)*drho*(drho*cs2+cdrho*ccs2)
      1              +bql(i1,i2)*drho**2               
      2              )
 
                   coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
      1              conjg(gq(i1))*conjg(gl(i2))*
-     2              (dda**2 + cdda**2 + dda*cdda
+     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
      3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*(dda + cdda)  
-     5              +ccs2*cdrho*(dda + cdda)
+     4              +cs2 * drho*2d0*(dda2-dda1)  
+     5              +ccs2*cdrho*2d0*(dda2-dda1)
      6              +cs2*drho*ccs2*cdrho )
      7              +caql(i1,i2)*(cdrho-cdrho1)          
-     8              +caql(i1,i2)*cdrho*(dda+cdda)
+     8              +caql(i1,i2)*cdrho*2d0*(dda2-dda1)
      9              +caql(i1,i2)*cdrho*(drho*cs2+cdrho*ccs2)
      1              +cbql(i1,i2)*cdrho**2               
      2              )
@@ -6670,19 +6723,19 @@ c     else gmu scheme a_gmu~a(z)*sw2
                
                   coeff4(i1,i2)=alpha*conjg(alpha)*(
      1              gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
-     2              (dda**2 + cdda**2 + dda*cdda
+     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
      3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*(dda + cdda)  
-     5              +ccs2*cdrho*(dda + cdda)
+     4              +cs2 * drho*2d0*(dda2-dda1)  
+     5              +ccs2*cdrho*2d0*(dda2-dda1)
      6              +cs2*drho*ccs2*cdrho )
      7              +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)          
      8              +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
      9              +aql(i1,i2)*drho*caql(i1,i2)*cdrho
      1              +bql(i1,i2)*drho**2 *conjg(gq(i1))*conjg(gl(i2))
      2              +cbql(i1,i2)*cdrho**2 *gq(i1)*gl(i2)
-     3              +aql(i1,i2)*drho*(dda+cdda)*
+     3              +aql(i1,i2)*drho*2d0*(dda2-dda1)*
      +              conjg(gq(i1))*conjg(gl(i2))
-     4              +caql(i1,i2)*cdrho*(dda+cdda)*gq(i1)*gl(i2)
+     4              +caql(i1,i2)*cdrho*2d0*(dda2-dda1)*gq(i1)*gl(i2)
      5              +aql(i1,i2)*drho*(cs2*drho+ccs2*cdrho)*
      +              conjg(gq(i1))*conjg(gl(i2))
      6              +caql(i1,i2)*cdrho*(cs2*drho+ccs2*cdrho)*
@@ -6757,11 +6810,13 @@ c      write(*,*)'coeff4',coeff4
 
 c save parameters for next phsp point
       old_s   =s
-      old_dda =dda
+      old_dda1=dda1
+      old_dda2=dda2
       old_drho=drho
       old_qq  =qq
 
 c      write(*,*)'out',out
+c      stop
       
       end subroutine ew_ho
       subroutine gval(a,out)
@@ -7006,51 +7061,55 @@ c         write(*,*)'r1,r2',r1,r2
       end subroutine sigmaaatp_ferm
 
 
-      subroutine dalpha(si,sf,out)
+      subroutine dalpha(s1,s2,out1,out2)
       implicit none
       include 'pwhg_math.h'
       include 'mathx.h'
       include 'PhysPars.h'
       include 'pwhg_physpar.h'
-      real*8 si,sf
-      complex*16 outi,outf,out
+      real*8 s1,s2
+      complex*16 outi,outf,out1,out2
       logical includetop
       logical logevolve
       parameter (logevolve=.false.)!.true.)
 c     changed as follows:
-c     if the original scheme is alpha_0, use log expression for the running
-c     else alpha can be computed from sigma(s)/s s>0d0
+c     computes delta_alpha from 0 to si
+c     and from 0 to sf
+c     in the coefficients we will take the 2 loop expansion
+c     of a2**2=a1**2((1-da1)/(1-da2))**2
 
-      if(scheme.eq.0) then
-         includetop=si.gt.4d0*mt2
-         call sigmaaatp_ferm(si*cone,outi,includetop)
-         call sigmaaat_ferm( sf*cone,outf,includetop)
-         out= (-outf/sf)-(-outi)
+      if(s1.lt.1d-2) then       ! if it is scheme=0
+         out1=0d0
+      else
+         includetop=s1.gt.4d0*mt2
+         call sigmaaatp_ferm(zero   ,outi,includetop)
+         call sigmaaat_ferm( s1*cone,outf,includetop)
+         out1= (-outf/s1)-(-outi)
          if(logevolve) then
-            write(*,*)'evoulution 1',out
-            out=  3d0*qu**2*(log(dble(mz2)/mu2)-5d0/3d0)
+            write(*,*)'evoulution 1',out1
+            out1=  3d0*qu**2*(log(dble(mz2)/mu2)-5d0/3d0)
      +           +3d0*qd**2*(log(dble(mz2)/md2)-5d0/3d0)
      +           +3d0*qu**2*(log(dble(mz2)/mc2)-5d0/3d0)
      +           +3d0*qd**2*(log(dble(mz2)/ms2)-5d0/3d0)
      +           +3d0*qd**2*(log(dble(mz2)/mb2)-5d0/3d0)
-            out=out*alpha/3d0/pi
-            write(*,*)'log',out
+     +           +          (log(dble(mz2)/me2)-5d0/3d0)
+     +           +          (log(dble(mz2)/mm2)-5d0/3d0)
+     +           +          (log(dble(mz2)/mtl2)-5d0/3d0)                        
+            out1=out1*alpha/3d0/pi
+            write(*,*)'log',out1
             stop
          endif
-      else ! the starting scale is not 0
-         includetop=si.gt.4d0*mt2
-         if(si.lt.1d-10) then
-            write(*,*)'something wrong in dalpha'
-            stop
-         endif
-         call sigmaaat_ferm(si*cone,outi,includetop)
-         call sigmaaat_ferm(sf*cone,outf,includetop)
-         out= (-outf/sf)-(-outi/si)
       endif
+
+      includetop=s2.gt.4d0*mt2
+      call sigmaaatp_ferm(zero   ,outi,includetop)
+      call sigmaaat_ferm( s2*cone,outf,includetop)
+      out2= (-outf/s2)-(-outi)
+
+      
 c      write(*,*)'old',out
 c      write(*,*)'ini',si,outi
 c      write(*,*)'der',sf,outf
-c     d_a = -d sigma AA / d s (s=0)
 
 
       end subroutine dalpha
