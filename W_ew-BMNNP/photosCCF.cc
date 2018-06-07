@@ -62,13 +62,14 @@ extern "C" {
     Photos::iniInfo();
     
     // Print explicit values of other flags
-    // phokey_.interf        (interference weight)               : on by default
+    // phokey.interf        (interference weight)               : on by default
+    // phokey.xx is replaced with phokey.xx in v 3.61
     // std::cout << "**** SI: Other PHOTOS set: " << std::endl;
-    // std::cout << "**** SI: phokey_.interf  (interference weight)             : " << phokey_.interf << std::endl;
-    // phokey_.isec          (double photon)                     : off by default
-    // std::cout << "**** SI: phokey_.isec (double photon)                      : " << phokey_.isec << std::endl;
-    // phokey_.ifw           (correction weight in decay of W)   : on by default
-    // std::cout << "**** SI: phokey_.ifw (correction weight in decay of W)     : " << phokey_.ifw << std::endl;
+    // std::cout << "**** SI: phokey.interf  (interference weight)             : " << phokey.interf << std::endl;
+    // phokey.isec          (double photon)                     : off by default
+    // std::cout << "**** SI: phokey.isec (double photon)                      : " << phokey.isec << std::endl;
+    // phokey.ifw           (correction weight in decay of W)   : on by default
+    // std::cout << "**** SI: phokey.ifw (correction weight in decay of W)     : " << phokey.ifw << std::endl;
     // meCorrectionWtForW    (ME correction in decay of W)       : off by default
     // std::cout << "**** SI: (meCorrectionWtForW) ME correction in decay of W  : " << Photos::meCorrectionWtForW << std::endl;
 
