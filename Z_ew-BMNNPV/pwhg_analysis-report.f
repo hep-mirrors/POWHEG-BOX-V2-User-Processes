@@ -99,7 +99,8 @@ c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
 c      data WHCPRG/'PYTHIA'/
-      data WHCPRG/'NLO   '/
+c      data WHCPRG/'NLO   '/
+      data WHCPRG/'PHOTOS'/
       real * 8 pz(4),pl1(4),pl2(4)
       real * 8 pl103(0:3),pl203(0:3)
       real * 8 y1,eta1,ptl1,m1
