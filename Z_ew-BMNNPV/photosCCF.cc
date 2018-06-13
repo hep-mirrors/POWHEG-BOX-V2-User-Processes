@@ -52,6 +52,13 @@ extern "C" {
     // Initialize PHOTOS   
     Photos::initialize();
 
+    // LHEF is in GEV, should not matter except for pair-emissions
+    Photos::setMomentumUnit(Photos::GEV);
+         // fixes for lepton mass
+    Photos::forceMassFrom4Vector(true);
+    Photos::forceMassFromEventRecord(13);
+    Photos::forceMassFromEventRecord(15);
+    Photos::forceMass(11, 5.109989280E-04); //LHEF value, unit GeV
     // Other flags
     //Photos::setMeCorrectionWtForW(true); 
     //Photos::setDoubleBrem(true);
