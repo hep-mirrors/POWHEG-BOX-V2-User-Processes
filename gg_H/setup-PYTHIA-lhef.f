@@ -26,6 +26,8 @@ c     multiple interactions
       parameter (mult_inter=.true.)
       integer maxev
       common/mcmaxev/maxev
+      integer iun
+      common/copencount/iun
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c     multiple interactions
 c     (MI can increase a lot the execution time)
@@ -87,9 +89,11 @@ C--- Opens input file and counts number of events, setting MAXEV;
       integer hdecaymode,i      
       integer maxev
       common/mcmaxev/maxev
+      integer iun
+      common/copencount/iun
       nevhep=0
 c read the header first, so lprup is set
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun)
 
 c     Make PI0 stable as in herwig default
       mdcy(pycomp(111),1)=0
@@ -131,7 +135,9 @@ c     choose Higgs decay channel
 
       subroutine UPEVNT
       implicit none
-      call lhefreadev(97)
+      integer iun
+      common/copencount/iun
+      call lhefreadev(iun)
       end
  
 
@@ -147,11 +153,8 @@ c pythia routine to abort event
       character * 20 pwgprefix
       integer lprefix
       common/cpwgprefix/pwgprefix,lprefix
-      open(unit=99,file=pwgprefix(1:lprefix)//'POWHEG+PYTHIA-output.top'
-     #     ,status='unknown')
       call pwhgsetout
-      call pwhgtopout
-      close(99)
+      call pwhgtopout('POWHEG+PYTHIA-output')
       end
 
 
