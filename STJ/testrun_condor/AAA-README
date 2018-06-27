@@ -1,0 +1,166 @@
+-----------------------------------------------
+- Some guidance for running this Condor stuff -
+-----------------------------------------------
+
+*******************************************************************
+*                                                                 *
+* Alternative, equivalent, advice is available in the comments of *
+* the sub.dag condor submission DAG file.                         *
+*                                                                 *
+*******************************************************************
+
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+o                                                                 o
+o Following these quick steps, skipping the optional steps 5 & 6, o
+o will generate for you 1M STJ events in this directory in about  o
+o 48 hours on a cluster where you can run _up_to_ 500 jobs in     o
+o parallel.                                                       o
+o                                                                 o
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+~~~~~~~~~~~~~~~~~~
+
+1) Build the pwhg_main executable in the directory above.
+
+~~~~~~~~~~~~~~~~~~
+
+2) Copy the pwhg_main executable into this directory.
+
+~~~~~~~~~~~~~~~~~~
+
+3) Copy this whole directory *** with pwhg_main in it *** to some other
+   convenient name and/or place, e.g. SomePrefix-`date +%d-%m-%y` . If,
+   as is the default option in these condor files, you intend for all
+   outputs to be sent back from cluster nodes and accumulated/stored at
+   this same location, make sure it has enough disk space: a run-through
+   generating up to 1M compressed LHE events + all integration grids +
+   logs etc will fit in <2 GB. To have the output go to some other place
+   than the location of these input and condor files see step 6 below.
+
+~~~~~~~~~~~~~~~~~~
+
+4) Go into that copy of this directory with pwhg_main in it.
+
+~~~~~~~~~~~~~~~~~~
+
+ooooooooooooooooooooooo
+o CAN BE SKIPPED ---> o
+ooooooooooooooooooooooo
+
+5) Make changes to powheg.input-save if desired:
+
+       * single top or anti-top : ttype 1 or -1
+
+       * number of events per LHE file: numevts 
+
+       * beam types : ih1 and ih2
+
+       * beam energies : ebeam1 and ebeam2
+
+       * PDFs : lhans1 and lhans2 for LHAPDF indexing
+  
+   Other parameters in the default event file are mainly obscure and technical
+   and are probably better left alone/changed carefully. 
+
+   N.B. If changing numevts be sure to scale the "+MaxRuntime  = 86000"
+        setting at the end of sub_st4.condor accordingly! See step 6.
+
+~~~~~~~~~~~~~~~~~~
+
+ooooooooooooooooooooooo
+o CAN BE SKIPPED ---> o
+ooooooooooooooooooooooo
+
+6) Make changes to sub_*.condor files *** if desired ***.
+   From most to least relevant/important these might be:
+
+       * Number of jobs for each given stage : "N" variable
+
+       * Set output directory location variable, "OutDir = ",
+         e.g. CERN EOS space 
+         /eos/user/SomeInitial/SomeUsername/
+
+         IMPORTANT :
+         ~~~~~~~~~~~
+
+             a) if you reset OutDir be sure to set OutDir
+                to the same value (i.e. location) in _ALL_
+                sub_*.condor files in this directory.
+
+             b) if you reset OutDir in the sub_*.condor
+                files in this directory you must also edit
+                the DAG file sub.dag s.t. all lines of the
+                form,
+                    SCRIPT POST XXX post_YYY.sh 
+                by adding the explicit OutDir value, like so,
+                for the case of the example location above,
+                    SCRIPT POST XXX post_YYY.sh /eos/user/SomeInitial/SomeUsername/
+                The sub.dag file comments give, again,
+                these specifics in the comments therein.
+
+       * For CERN-LXPLUS users : if doing a large run on
+         lxplus you may well want/need to put the corresponding
+         large output on the EOS file system. However, condor
+         jobs cannot be submitted from the EOS system. So, one
+         must do the step above, of setting the output 
+         directory (EOS) different to where the job is submitted
+         from & the scripts live (i.e. here, probably on AFS).
+
+       * Set email address for notification when progressing
+         between one phase of event generation and the next
+         one by gving a value to the "Email" variable. Leave
+         it blank instead if you don't want any (it's only a
+         handful) emails from the cluster.
+
+       * Scale "+MaxRuntime" setting if not enough runtime
+         /too much has been allocated, and/or if you have
+         adjusted the relevant statistics afforded to a given
+         step; e.g. if you have modified
+
+            - ncall1 in powheg.input-save relevant for
+              parallelstage 1 (*_xg?.* files)
+
+            - ncall2 or folding numbers in powheg.input-save
+              relevant for parallelstage 2 (*_st2.* files)
+
+            - nubound in powheg.input-save relevant for
+              parallelstage 3 (*_st3.* files)
+
+            - numevts in powheg.input-save relevant for 
+              parallelstage 4 (*_st4.*)
+
+~~~~~~~~~~~~~~~~~~
+
+7) If you're not an expert/too-busy just do a) here and go straight
+   to step 8) below.
+
+    a) Submit the jumbo fire-and-forget condor DAG file which handles
+       all job interdependencies (parent-child relations):
+
+           condor_submit_dag sub.dag
+
+    b) Submit each stage yourself one at a time, waiting for each
+       stage to finish before submitting the next one:
+
+           condor_submit sub_xg1.condor
+           ./post_xg1.sh <output-dir-path>
+           ...
+           condor_submit sub_st4.condor
+           ./post_st4.sh <output-dir-path>
+
+    c) Some combination of the above which you might arrive at by
+       poking around and editing the very short and obvious sub.dag
+       file.
+
+       This option might also be useful if you want to redo a step
+       or restart things from some given, if something went wrong
+       along the way, rather than go back to the very beginning.
+
+~~~~~~~~~~~~~~~~~~
+
+8) Wait/Take a holiday. Initially a lot of essential auxiliary stuff
+   will accumulate in subdirectory "essential-outputs" inside whatever
+   OutDir was set to, e.g. integration grids,  followed by upper bound
+   envelopes, and so on. Finally when parallel stage 4 (*_st4.*) is
+   underway LH event files will start accumulating (.tar.gz'ed) under
+   subdirectory event-files.

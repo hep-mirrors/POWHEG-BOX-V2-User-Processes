@@ -1,0 +1,53 @@
+#
+# The number of parallelstage 1, xgriditeration 2 jobs (= seeds) to run.
+# About 50 is recommended for default ncall1 200000 in powheg.input-save.
+#
+N                       = 50
+#
+# Directory where the job shell script can find things e.g. powheg
+# executable(s) and input files. Default is to use the current
+# directory ($ENV(PWD) in Condor).
+#
+InitDir                 = $ENV(PWD)
+#
+# Directory where the job shell script can send back it's outputs:
+# integration grids, plots, event files etc ... Default is to use
+# the same directory as for the job inputs, but more generally one
+# can imagine wanting to send these outputs somewhere else.
+#
+OutDir                  = $ENV(PWD)
+#
+# Enter your email address here and you will receive an email when the
+# first and last of the N jobs start executing on the cluster, and
+# further emails when the first and last of the N jobs finish. Otherwise
+# leave RHS after "=" below blank to get no emails!
+#
+Email                   = 
+#
+# Script to run powheg executable for N jobs (= seeds) for parallelstage
+# 1 and xgriditeration 2, i.e. the 2ND integration grid optimization
+# stage.
+#
+executable              = $(InitDir)/sub_xg2.sh
+arguments               = $(ProcId) $(N) $(InitDir) $(OutDir) $(Email)
+#
+# Where obligatory boring Condor log, error, and output files will go.
+#
+output                  = $(InitDir)/out/xg2/xg2.$(ClusterId).$(ProcId).out
+error                   = $(InitDir)/err/xg2/xg2.$(ClusterId).$(ProcId).err
+log                     = $(InitDir)/log/xg2/xg2.$(ClusterId).$(ProcId).log
+#
+# Port the environment vars in the current shell to the node where the
+# jobs will execute.
+#
+getenv                  = True
+#
+# By far most xg2 jobs with ncall1 200000 will finish comfortably in 3
+# hours so the following 5 hour limit allows for odd jobs on a go-slow.
+#
++MaxRuntime             = 18000
+#
+# Bombs away again ...
+#
+queue $(N)
+

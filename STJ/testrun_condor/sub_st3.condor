@@ -1,0 +1,53 @@
+#
+# The number of parallelstage 3, jobs (= seeds) to run. Between 50-100 is
+# recommended for default nubound 100000 in powheg.input-save.
+#
+N                       = 100
+#
+# Directory where the job shell script can find things e.g. powheg
+# executable(s) and input files. Default is to use the current
+# directory ($ENV(PWD) in Condor).
+#
+InitDir                 = $ENV(PWD)
+#
+# Directory where the job shell script can send back it's outputs:
+# integration grids, plots, event files etc ... Default is to use
+# the same directory as for the job inputs, but more generally one
+# can imagine wanting to send these outputs somewhere else.
+#
+OutDir                  = $ENV(PWD)
+#
+# Enter your email address here and you will receive an email when the
+# first and last of the N jobs start executing on the cluster, and
+# further emails when the first and last of the N jobs finish. Otherwise
+# leave RHS after "=" below blank to get no emails!
+#
+Email                   = 
+#
+# Script to run powheg executable for N jobs (= seeds) for parallelstage
+# 3, i.e. the R/B Powheg Sudakov exponent upper bound determination stage.
+#
+#
+executable              = $(InitDir)/sub_st3.sh
+arguments               = $(ProcId) $(N) $(InitDir) $(OutDir) $(Email)
+#
+# Where obligatory boring Condor log, error, and output files will go.
+#
+output                  = $(InitDir)/out/st3/st3.$(ClusterId).$(ProcId).out
+error                   = $(InitDir)/err/st3/st3.$(ClusterId).$(ProcId).err
+log                     = $(InitDir)/log/st3/st3.$(ClusterId).$(ProcId).log
+#
+# Port the environment vars in the current shell to the node where the
+# jobs will execute.
+#
+getenv                  = True
+# 
+# By far most st3 jobs with nubound 100000 will finish comfortably in 2
+# hours so the following 5 hour limit allows for odd jobs on a go-slow.
+#
++MaxRuntime             = 18000
+#
+# Bombs away again ...
+# 
+queue $(N)
+

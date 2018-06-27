@@ -1,0 +1,117 @@
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+o                                                                     o
+o Running on an interactive cluster / multi-core machine              o
+o                                                                     o
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+
+o Preliminary consideration on timing / computing resource
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Due to the complex nature of the process generating large
+  numbers of events is time-consuming. In particular, in the
+  final step of the process, parallelstage 4, when unweighted
+  events are being generated: it takes about 24 hours on a 
+  single CPU to generate 2000 events. Thus, with a 50-core
+  interactive machine, after generating all necessary auxiliary
+  integration grids once and for all, (~36 hours with 50 cores),
+  one could produce 500K LH events in around 5 days.
+
+[The next item bulleted "o" below can be skipped, if desired]
+
+o Parallelizing Powheg runs with many random seeds at each stage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Running the code proceeds in distinct stages. These stages and
+  the possibility to parallelize them is discussed in section 5
+  ("Parallel runs") of V2-paper.pdf in the POWHEG-BOX-V2/Docs/
+  directory. We give a lightning summary here, which can be
+  skipped at will.
+
+  ~ parallelstage 1 : importance sampling integration
+    grids are generated. This stage can be iterated to refine
+    the grids. The appropriate flag in the input file related
+    to that iteration is "xgriditeration". When running in a 
+    parallel mode, one or two such iterations is sufficient.
+    Files pertaining to the output of these stages carry 
+    either "xg1", for the first xgriditeration, or "xg2"
+    for the second xgriditeration in the name.
+
+  ~ parallelstage 2 : importance sampling grids from the parallel
+    runs in parallelstage 1 are first combined to yield a single
+    optimised sampling grid. Then an upper bound for the so-called
+    POWHEG Btilde function is searched for. This is needed
+    as the initial "underlying Born" kinematics are generated
+    according to this function. Files pertaining to the 
+    output of this stage generally carry an "st2" in the name.
+
+  ~ parallelstage 3 : output from parallelstage 2 is combined
+    to give an optimal upper bound for the Btilde function. Then
+    an upper bound is found for the POWHEG Sudakov form factor
+    ("Real/Born"). Related output files carry "st3" in the name.
+ 
+  ~ parallelstage 4 : events are generated and output in
+    .lhe event files. Also, depending on the nature of the
+    input file, additional weights will accompany each event
+    corresponding to e.g. scale variations. The default input
+    file in the current directory is set up so that a 7 point
+    renormalization and factorization scale variation is 
+    performed. The formatting of these weights and their 
+    meaning is obvious from looking at the end of the powheg
+    input file / header of the LHE event files.
+
+  ~ rw : event files can be OPTIONALLY reweighted using the
+    rw executable (make rw) so as to use the `tuned' MiNLO
+    prime Sudakov form factor, which results in this NLO
+    single-top+jet code giving results for inclusive single-top
+    production quantities agreeing with NLO predictions for
+    inclusive single-top production, at around the 1-2% level,
+    provided the events are generated with input parameters not
+    TOO FAR from those used in determining the tune (in general
+    the tune is considered highly robust against changes e.g.
+    using it on 8 TeV event vs 13 TeV ones yields as good
+    results as if one had two distinct dedicated tunes at each
+    COM energy).
+
+o Simple example shell script for parallelized runs: runpar.sh
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  A very simple shell script, assuming an interactive machine with
+  48 cores, automating all of these steps, with proper sequencing
+  between them, is contained in this directory: runpar.sh . If
+  left untouched, using the default powheg.input-save, also in this
+  directory, this script will produce 96,000 LHE events in about
+  60 hours on a machine with 48 cores. Each additional 96,000
+  events would take a further 24 hours, approximately, on the 48
+  cores.
+
+  The script is run by first building the pwhg_main executable
+  in the directory above this one and then entering:
+
+  nohup ./runpar.sh > runpar.log &
+
+  To get a quick feel for how the script runs/works try changing
+  the "48"'s in the runpar.sh to 4, and simultaneously decreasing
+  the ncall1, ncall2, nubound and numevts parameters in the
+  powheg.input-save down by a factor of 100. Then run with the
+  above command.
+
+  .............................................................
+  . Note the purpose of this script is as much to serve as an .
+  . illustration / set of instructions for how the code works .
+  . as it is a helper-script in its own right.                .
+  .............................................................
+
+o Timings assuming the default powheg.input-save inputs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  For integration statistics settings in the default powheg.input-save
+  file, 90% of parallelstage 1 jobs should finish in close to 2 hours, 
+  (and up to 3 or 4 hours in some odd cases), for each of the two
+  xgriditerations. For the same default input file, the integration
+  statistics and folding numbers associated to parallelstage 2 should
+  have 90% of those jobs finish in 12 hours, with a few odd jobbs taking
+  up to 15 hours. For parallelstage 3 one can similarly expect an 
+  average job completion time of 2-3 hours, and up to 4 hours in odd
+  cases. For parallelstage 4 (event generation) each job generating
+  2000 events should take around 24 hours.

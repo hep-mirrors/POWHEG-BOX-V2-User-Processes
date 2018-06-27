@@ -1,0 +1,104 @@
+######################################################################################
+# Physics parameters: top/anti-top, pp/ppbar, PDFs, beam energy.                     #
+######################################################################################
+#
+ttype    1        ! Set ttype = 1 for single-top and -1 for single-anti-top
+numevts  2000     ! events to be generated --> max time for 2000 is under 32 hours
+ih1      1        ! hadron 1 (1 for protons, -1 for antiprotons)
+ih2      1        ! hadron 2 (1 for protons, -1 for antiprotons)
+lhans1   261000   ! pdf set for hadron 1 (LHA numbering)
+lhans2   261000   ! pdf set for hadron 2 (LHA numbering)
+ebeam1   6500d0   ! energy of beam 1
+ebeam2   6500d0   ! energy of beam 2
+#
+#
+######################################################################################
+# Integration statistics and folding numbers for reduction/optimisation of negative  #
+# weight fraction.                                                                   #
+######################################################################################
+#
+# Recommend 50 jobs with ncall1 200000, itmx1 1, for two xgrid iterations, i.e. do
+# parallelstage 1 with xgriditeration 1 and xgriditeration 2, 50 jobs per iteration
+# --> max time = 4 hrs/job
+#
+ncall1   200000   ! calls for initializing integration grid
+itmx1    1        ! iterations for initializing integration grid
+#
+# Recommend 50-100 jobs with ncall2 100000, itmx2=1, 2,5,1 folding with parallelstage 2
+# --> max time = 15 hrs/job
+#
+ncall2   100000   ! calls for integral and finding upper bound
+itmx2    3        ! iterations for integral and finding upper bound
+foldcsi  2        ! folds on csi integration
+foldy    5        ! folds on  y  integration
+foldphi  1        ! folds on phi integration
+#
+# Recommend 50-100 jobs with nubound 100000 with parallelstage 3
+# --> max time: 5 hrs/job
+#
+nubound  100000   ! bbarra calls to setup norm of upper bounding function
+#
+#
+######################################################################################
+# Start strict technical parameters block: do not touch.                             #
+######################################################################################
+#
+bornktmin 0.3d0   ! Generation cut; minimmum kt in underlying born
+#
+use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
+icsimax  1        ! <= 100, number of csi subdivision when computing the upper bounds
+iymax    1        ! <= 100, number of y subdivision when computing the upper bounds
+xupbound 2d0      ! increase upper bound for radiation generation
+#
+check_bad_st2 1d0 ! Experimental function testing for outliers
+#
+minlo 1           ! Use MiNLO
+#
+withdamp  1       ! Use Born zero damping
+#
+bornonly  0       ! (default 0) if 1 do Born only
+#
+#testplots 1       ! Make POWHEG internal "NLO" plots in st2
+#
+smartsig 1        ! Cache results for speed
+#
+maxseeds 9999     ! Need to set this or else program simply immediately stops if using seed >200 seeds ...
+#
+withnegweights 1  ! Keep the negative weights! Keep this set to 1!
+#
+#iseed     12      ! initialize random number sequence
+#rand1      3      ! initialize random number sequence
+#rand2     -1      ! initialize random number sequence
+#
+storemintupb   1
+#
+storeinfo_rwgt 1
+#
+#
+######################################################################################
+# End strict technical parameters block: do not touch.                               #
+######################################################################################
+#
+#
+######################################################################################
+# Settings to do parallel runs using many different random seeds on a cluster, as    #
+# well as a block used to generate scale variations during the event generation step #
+# (st4).                                                                             #
+######################################################################################
+#
+manyseeds      1
+parallelstage  1
+xgriditeration 1
+#
+rwl_file '-'
+<initrwgt>
+<weightgroup name='ScaleVars'  combine='envelope'>
+<weight id='11'> renscfact=1.0 facscfact=1.0 </weight>
+<weight id='HH'> renscfact=0.5 facscfact=0.5 </weight>
+<weight id='1H'> renscfact=1.0 facscfact=0.5 </weight>
+<weight id='H1'> renscfact=0.5 facscfact=1.0 </weight>
+<weight id='12'> renscfact=1.0 facscfact=2.0 </weight>
+<weight id='21'> renscfact=2.0 facscfact=1.0 </weight>
+<weight id='22'> renscfact=2.0 facscfact=2.0 </weight>
+</initrwgt>

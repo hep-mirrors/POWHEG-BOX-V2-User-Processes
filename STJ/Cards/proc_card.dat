@@ -1,0 +1,75 @@
+#*********************************************************************
+#                        MadGraph/MadEvent                           *
+#                   http://madgraph.hep.uiuc.edu                     *
+#                                                                    *
+#                          proc_card.dat                             *
+#                                                                    *
+# This file is used to generate the code for a specific process.     *
+# Some notation/conventions:                                         *
+#                                                                    *
+# 0. Do not modify the TAGS and their order.                         *
+# 1. hash/pound is a comment.                                        *
+# 2. The number after the @ is used as an identifier for the class   *
+#    of processes. It can be any positive integer.                   *
+# 3. The number of lines for the max couplings depends on how many   *
+#    different classes of couplings are present in the model         *
+#    In the SM these are just two: QED (which include EW) and QCD    *
+# 4. Write "end_coup" after  the couplings list,                     *
+#    to tell MG that the couplings input is over.                    *
+# 5. Write "done" after the proc list to                             *
+#    to tell MG that the proc input is over.                         *
+# 6. Some model names available at present are:                      *
+#    sm     =  Standard Model                                        *
+#    smckm =  Standard Model with Cabibbo matrix                     *
+#    mssm   =  Minimal Supersymmetric Standard Model                 *
+#    2hdm   =  Generic Two Higgs Doublet model                       *
+#    heft   =  Higgs EFT (+Standard Model)                           *
+#    usrmod =  User Model                                            *
+# 7. Don't leave spaces between the particles name in the            *
+#    definition of the multiparticles.                               *
+#*********************************************************************
+#*********************************************************************
+# Process(es) requested : mg2 input                                  *
+#*********************************************************************
+# Begin PROCESS # This is TAG. Do not modify this line
+
+p1 p1 > t j1 j2 j2  $ w+ w-
+QCD=2             # Max QCD couplings
+QED=2
+end_coup           # End the couplings input
+
+p1 p2 > t j1 j1 j2  $ w+ w-   
+QCD=2             # Max QCD couplings
+QED=2
+end_coup           # End the couplings input
+
+p2 p1 > t j1 j1 j2 $ w+ w-
+QCD=2             # Max QCD couplings
+QED=2
+end_coup           # End the couplings input
+
+p2 p2 > t j1 j1 j1 $ w+ w-
+QCD=2             # Max QCD couplings
+QED=2
+end_coup           # End the couplings input
+
+done               # this tells MG there are no more procs
+
+# End PROCESS  # This is TAG. Do not modify this line
+#*********************************************************************
+# Model information                                                  *
+#*********************************************************************
+# Begin MODEL  # This is TAG. Do not modify this line
+sm_no_b_mass
+# End   MODEL  # This is TAG. Do not modify this line
+#*********************************************************************
+# Start multiparticle definitions                                    *
+# P dd~uu~cc~ss~bb~g
+# J dd~uu~cc~ss~bb~g
+#*********************************************************************
+# Begin MULTIPARTICLES # This is TAG. Do not modify this line
+P1 d1d1~u1u1~s1s1~c1c1~b1b1~g
+J1 d1d1~u1u1~s1s1~c1c1~b1b1~g
+P2 d2d2~u2u2~s2s2~c2c2~b2b2~g
+J2 d2d2~u2u2~s2s2~c2c2~b2b2~g
+# End  MULTIPARTICLES # This is TAG. Do not modify this line
