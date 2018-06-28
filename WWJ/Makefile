@@ -201,7 +201,7 @@ gosamlib.a: $(GOSAMLIBS)
 
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	utils.o	\
      opencount.o powheginput.o $(PWHGANAL) 	\
-     lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o $(FPEOBJ)
+     lhefread.o pwhg_io_interface.o newunit.o pwhg_analysis_driver.o $(FPEOBJ) rwl_weightlists.o rwl_procdep.o nnlopsreweight.o
 
 
 # target to analyze LHEF output
@@ -231,9 +231,10 @@ main-PYTHIA-lhef: $(PYTHIA)
 
 # target to read event file, shower events with PYTHIA8 + analysis
 PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
-	$(PWHGANAL) opencount.o lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o \
+	$(PWHGANAL) opencount.o lhefread.o pwhg_io_interface.o newunit.o pdfdummies.o \
 	random.o cernroutines.o bra_ket_subroutines.o utils.o \
-	$(FPEOBJ) $(LIBZDUMMY)
+	$(FPEOBJ) $(LIBZDUMMY) \
+	rwl_weightlists.o rwl_procdep.o nnlopsreweight.o
 
 
 main-PYTHIA8-lhef: $(PYTHIA8)

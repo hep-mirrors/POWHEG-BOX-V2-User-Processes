@@ -40,6 +40,8 @@ flg_debug 1        ! store extra event info for debugging
 factsc2min 2       ! value the factorization scale is frozen (needed with minlo)
 sudscalevar 1      ! (default 1) scale variation also in Sudakov form factors in minlo
 
+alphas_from_lhapdf 1
+
 # the following is for parallel runs (see manual in POWHEG-BOX-V2/Docs/)
 manyseeds 1
 parallelstage STAGE

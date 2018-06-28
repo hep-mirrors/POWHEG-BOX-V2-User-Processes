@@ -256,7 +256,25 @@ C     make sure that leptons do not come from intermediate photon
 
 c=====--- Find jets (outgoing partons):
 c------> first case: NLO or LHE:
-      if(whcprg.eq.'NLO   ' .or. whcprg.eq.'LHE   ') then
+      if(whcprg.eq.'NLO   ') then
+         nn=nhep                !-- at parton level (st2) there are no
+                                !-- entries with intermediate vector
+                                !-- bosons, so nn is the same as nhep
+         if(nhep.eq.7) then
+            ihep=7
+            p_jet1(1:4) = phep(1:4,ihep)
+            p_jet2(1:4) = 0d0
+         elseif(nhep.eq.8) then
+            ihep=7
+            p_jet1(1:4) = phep(1:4,ihep)
+            ihep=8
+            p_jet2(1:4) = phep(1:4,ihep)
+         else
+            stop 'pwhg_analysis_wrapper (NLO): nhep /=9 or 10'
+         endif
+      elseif(whcprg.eq.'LHE   ') then
+         nn=nhep-2 !-- pwhg event contains entry with 2 vector bosons as
+                   !-- well as both leptons (so remove two resonances)
          if(nhep.eq.9) then
             ihep=9
             p_jet1(1:4) = phep(1:4,ihep)
@@ -267,11 +285,8 @@ c------> first case: NLO or LHE:
             ihep=10
             p_jet2(1:4) = phep(1:4,ihep)
          else
-               stop 'pwhg_analysis_wrapper: nhep /=9 or 10' 
+            stop 'pwhg_analysis_wrapper (LHE): nhep /=9 or 10' 
          endif
-         nn=nhep-2   !-- pwhg event contains entry with 2 vector bosons as well as both leptons (so remove two resonances) 
-
-
 c------> second case: PYTHIA shower:
       else
          p_jet1(1:4) = 0d0 !-- just pass dummy argument for 'makeplots'
