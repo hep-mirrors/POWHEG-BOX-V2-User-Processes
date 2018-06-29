@@ -16,6 +16,16 @@
       real * 8 aswopi, pwhg_alphas
       logical using_default
 
+c     stop the code if nnlops is on, but minlo is off.
+c     In principle this should be done in pwhg_init.f, but since it was not
+c     coded like that, we do it here
+      if(flg_minlo.eq..false. .and. flg_nnlops.eq..true.) then
+         write(*,*) 'ERROR: flg_minlo is ',flg_minlo
+         write(*,*) 'ERROR: flg_nnlops is ',flg_nnlops
+         write(*,*) 'If you want to run with nnlops, minlo MUST be on'
+         call exit(-1)
+      endif
+      
       ! set the bornzerodamp flag to true by default
       flg_bornzerodamp = .true.
       flg_withdamp     = .true.
