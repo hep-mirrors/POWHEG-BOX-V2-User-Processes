@@ -306,13 +306,6 @@ c     fact=...
             write(*,*) '****************************************'
             write(*,*) '****************************************'
             write(*,*) '**  Factorization and renormalization **'
-            write(*,*) '**  Scales mur=muf=M(WW)              **'
-            write(*,*) '****************************************'
-            write(*,*) '****************************************'
-         elseif (runningscales.eq.3) then
-            write(*,*) '****************************************'
-            write(*,*) '****************************************'
-            write(*,*) '**  Factorization and renormalization **'
             write(*,*) '**  Scales mur=muf=MT_Wp+MT_Wm        **'
             write(*,*) '****************************************'
             write(*,*) '****************************************'
@@ -331,7 +324,7 @@ c     fact=...
      $       + kn_pborn(:,5)+kn_pborn(:,6)
          muf = sqrt(pww(0)**2-pww(1)**2-pww(2)**2-pww(3)**2)
          mur=muf
-      elseif (runningscales.eq.3) then
+      elseif (runningscales.eq.2) then
          pwp = kn_pborn(:,3)+kn_pborn(:,4)
          pwm = kn_pborn(:,5)+kn_pborn(:,6)
          
