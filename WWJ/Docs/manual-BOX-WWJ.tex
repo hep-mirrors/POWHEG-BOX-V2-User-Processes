@@ -76,11 +76,11 @@ with \tmtexttt{PYTHIA}:\\~\\
 However, because the program is numerically intensive, we do not
 recommend to run it without the \tmtexttt{POWHEG} parallel-feature
 version switched on, as described in detail in ref.~\cite{POWHEG}.  A
-template input card can be found in the
-\tmtexttt{testrun-wwj-parallel} directory. In the
-\tmtexttt{testrun-minlo-parallel} directory, instead, we provide a
-template input card to perform a run with the \MINLO{} option
-activated.
+template input card can be found in the \tmtexttt{testrun-lhc}
+directory. In the \tmtexttt{testrun-nnlops} directory, instead, we
+provide a template input card to perform a runs in parallel with the
+\MINLO{} option and the \NNLOPS{} activated and to obtain events with
+multiple (scale variation) weights.
 
 \section{Input parameters}
 
@@ -117,6 +117,34 @@ energy, one might want to generate new \MINLO{} and NNLO reweighting
 tables. Note however that the reweighing factor should be relatively
 insensitive to input parameters.
 
+Note that, if one runs in \NNLOPS{} mode then the directory where the
+run is performed should contain the file \tmtexttt{binvalues-WW.top}
+and the directories \tmtexttt{WW-MATRIX} and \tmtexttt{WW-MINLO}.
+
+It is possible to obtain directly events with multiple weights
+associated to scale variation without the need to reweight a
+posteriori. For instance, if the \tmtexttt{powheg.input} file contains
+the following lines:
+
+\tmtexttt{
+rwl\_file '-'\\
+<initrwgt>\\
+<weightgroup name='First-Weights'>\\
+<weight id='11'> renscfact=1.0 facscfact=1.0 </weight>\\
+<weight id='12'> renscfact=1.0 facscfact=2.0 </weight>\\
+<weight id='21'> renscfact=2.0 facscfact=1.0 </weight>\\
+<weight id='22'> renscfact=2.0 facscfact=2.0 </weight>\\
+<weight id='1H'> renscfact=1.0 facscfact=0.5 </weight>\\
+<weight id='H1'> renscfact=0.5 facscfact=1.0 </weight>\\
+<weight id='HH'> renscfact=0.5 facscfact=0.5 </weight>\\
+</initrwgt>
+}
+
+then the usual 7-point scale variation weights are produced. On top of
+this, if the \NNLOPS{} option is on, the weights are doubled and the
+last 7 weights are the \NNLOPS{} ones.
+
+
 
 %!OLD
 %!\noindent
@@ -143,8 +171,8 @@ insensitive to input parameters.
 %and renormalization scales are fixed at $M_W$. Otherwise, a dynamic scale of
 %the mass of the $W$-boson pair will be used.
 
-\noindent Several decay modes can be selected by an appropriate flag in the
-\tmtexttt{powheg.input} file:\\~\\
+\noindent Several decay modes can be selected by an appropriate flag
+in the \tmtexttt{powheg.input} file:\\~\\
 \begin{tabular}{lll}
 %\tmtexttt{semileptonic 1 ! one W goes to hadrons, one goes to leptons}\\
 \tmtexttt{e+e- 1} &\tmtexttt{!}& \tmtexttt{only electrons}\\
