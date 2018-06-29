@@ -14,6 +14,7 @@ C     The virtual amplitude is generated using GoSam.
       include 'pwhg_st.h'
       include 'pwhg_flst.h'
       include 'pwhg_math.h'
+      include 'pwhg_flg.h'
       real * 8 p(0:3,nlegborn)
       integer vflav(nlegborn)
       real * 8 virtual      
@@ -237,6 +238,7 @@ C     real * 8 pgosam(5*nlegborn)
 
 
 cccccccccccccccccccccccccccccccccccccc      
+      if(flg_minlo) then
 c     Don't compute virtuals if rescfac from minlo is zero.  In this
 c     case, the bbar function is eventually set to zero ("infinite
 c     Sudakov suppression"). Notice that very likely these are the
@@ -255,6 +257,7 @@ c     is however not used at the end.
       if(rescfac.eq.0d0) then
          virtual=0d0
          return
+      endif
       endif
 ccccccccccccccccccccccccccccccccccccccc
       
