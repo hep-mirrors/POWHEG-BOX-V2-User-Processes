@@ -4,9 +4,7 @@
       include 'reweighting_common.h' 
       include 'pwhg_rwl.h'
       include 'wwproj_parameters.h'
-
-
-      real *8 nnlops_resc(rwl_num_weights)    
+      real *8 nnlops_resc(rwl_num_weights)
       integer i 
       logical, save :: ini = .true. 
       character(1000) :: NNLO_phiB(rwl_num_weights),MINLO_phiB(rwl_num_weights)
@@ -18,11 +16,11 @@
       real *8 Kfact_dyWW(28,maxdist,maxdist)
       common/ckfactdyww/Kfact_dyWW
       character(4) :: murstr,mufstr 
-      real *8 mur,muf 
-      logical rwl_keypresent 
+      real *8 mur,muf
+      logical rwl_keypresent
 
 
-      write(*,*) '-------> compute_nnlops_weights', rwl_num_weights  
+c      write(*,*) '-------> compute_nnlops_weights', rwl_num_weights  
       if (ini) then 
 
          if (maxdist < rwl_num_weights) then 
@@ -133,7 +131,9 @@ c-----> finally set our rescaling
       do i=1,rwl_num_weights
          nnlops_resc(i) = resc(i,i,1)
       enddo
-      write(*,*) 'NNLO_resc', nnlops_resc
+      
+c      write(*,*) 'NNLO_resc', nnlops_resc
+
       end
 
 
@@ -728,9 +728,11 @@ c-----> assign momenta and analyse them:
       p_nu(1:4)  = pup(1:4,5)  !  12 -> nu  (is always in position 5 in event file) 
       p_lm(1:4)  = pup(1:4,7)  !  11 -> e-  (is always in position 7 in event file) 
       p_nub(1:4) = pup(1:4,8)  ! -12 -> nub (is always in position 8 in event file) 
-      do i=4,8
-         write(*,*) 'pup',i,pup(:4,i)
-      enddo
+
+c      do i=4,8
+c         write(*,*) 'pup',i,pup(:4,i)
+c      enddo
+      
 C     find CS angles and 3D variables 
       call get_WWCSkinematics(p_lm,p_nub,p_lp,p_nu,thCSm,phiCSm,thCSp,phiCSp,
      C     y_ww,dy_WW,pt_wm,m_ww,pt_wp)
@@ -962,7 +964,8 @@ C     this is the standard thing
                endif
 
                resc_noCS(j,k,n) = h_pt*( num_noCS/den_noCS ) + (1d0 - h_pt)
-               write(*,*) 'resc', j,k,n,resc(j,k,n), resc_noCS(j,k,n), maxrescaling
+
+c               write(*,*) 'resc', j,k,n,resc(j,k,n), resc_noCS(j,k,n), maxrescaling
 
 
 
