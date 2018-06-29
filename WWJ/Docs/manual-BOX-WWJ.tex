@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{paper}
 \usepackage[english]{babel}
 \usepackage{amsmath,hyperref}
 
@@ -11,10 +11,11 @@
 \newcommand{\tmverbatim}[1]{{\ttfamily{#1}}}
 \newcommand{\noun}[1]{\textsc{#1}}
 
-
 \newcommand{\WWJMINLO}{\noun{WWj-Minlo}}
+\newcommand{\WW}{\noun{WW}}
 \newcommand{\WWJ}{\noun{WWj}}
 \newcommand{\MINLO}{\noun{Minlo}}
+\newcommand{\NNLOPS}{\noun{NNLOPS}}
 
 %%%%%%%%%% End TeXmacs macros
 
@@ -27,30 +28,35 @@
 
 \section{Introduction}
 
-The POWHEG-BOX \WWJ{} program {\cite{Hamilton:2016bfu}} can be used to generate the
-QCD production of $W^+ W^-$ + 1~jets events in hadronic collisions,
-with the $W$-bosons decaying into leptons or hadrons, to NLO accuracy
-in QCD, in such a way that matching with a shower program is
-possible. In case of decays into hadrons, NLO corrections to the decay
-processes are not included. This is unlikely to be necessary: most
-shower Monte Carlo already do a good job in dressing the $W$ decay
-with QCD radiation, since $W$ hadronic decays have been fit to LEP2
-data. The effect of off-shell singly resonant graphs is fully
-included. The CKM matrix is by default the Cabibbo matrix. The
-calculation is performed in the four-flavour scheme. Therefore it's
-mandatory to use a four-flavour PDF, as reminded in the template input
-cards.
+The POWHEG-BOX \WWJ{} program {\cite{Hamilton:2016bfu}} can be used to
+generate the QCD production of $W^+ W^-$ + 1~jets events in hadronic
+collisions, with the $W$-bosons decaying into leptons or hadrons, to
+NLO accuracy in QCD, in such a way that matching with a shower program
+is possible. As in the \WW{} process, in the case of decays into
+hadrons, NLO corrections to the decay processes are not included. This
+is unlikely to be necessary: most shower Monte Carlo already do a good
+job in dressing the $W$ decay with QCD radiation, since $W$ hadronic
+decays have been fit to LEP2 data. The effect of off-shell singly
+resonant graphs is fully included. The CKM matrix is by default the
+Cabibbo matrix. The calculation is performed in the four-flavour
+scheme. Therefore it is mandatory to use a four-flavour PDF, as
+reminded in the template input cards.
 
-If the $W$-bosons decay into leptons of the same flavour (e.g. $e^+ e^- \nu_e
-\bar{\nu}_e$), then the $\tmop{ZZJ}$ production of this signal should be
-considered separately. Interference between
-these two processes is negligible (see ref.~\cite{Melia:2011tj}, where the same interference is considered without the extra jet) and is not included. \
-This document describes the input parameters that are specific to this
-implementation. The parameters that are common to all \tmtexttt{POWHEG BOX}
-implementation are given in the \tmtexttt{POWHEG-BOX-V2/Docs} directory. 
+If the $W$-bosons decay into leptons of the same flavour (e.g. $e^+
+e^- \nu_e \bar{\nu}_e$), then the $\tmop{ZZJ}$ production of this
+signal should be considered separately. Interference between these two
+processes is negligible (see ref.~\cite{Melia:2011tj}, where the same
+interference is considered without the extra jet) and is not
+included. \ This document describes the input parameters that are
+specific to this implementation. The parameters that are common to all
+\tmtexttt{POWHEG BOX} implementation are given in the
+\tmtexttt{POWHEG-BOX-V2/Docs} directory.
 
 When the \MINLO{} option is switched on, the \WWJ{} generator becomes
-NLO accurate also for inclusive $W^+ W^-$ production. 
+NLO accurate also for inclusive $W^+ W^-$ production. Furthermore,
+when the \NNLOPS{} option is also switched one, a on-the-flight
+reweighting to NNLO (fully differential in the Born phase space) is
+performed.
 
 
 \section{Generation of events}
@@ -79,16 +85,38 @@ activated.
 \section{Input parameters}
 
 Parameters in \tmtexttt{powheg.input} that are specific to $W W$ pair
-production in association with one jet:\\~
+production in association with one jet are listed in the following:\\~
 
 \begin{tabular}{lll}
 %\tmtexttt{bornsuppfact 0 } & \tmtexttt{!}  & \tmtexttt{(default 0), if 1 include a born}\\
 %& \tmtexttt{!} & \tmtexttt{suppression factor}\\
-\hspace{-0.5cm}\tmtexttt{runningscale 0 } & \tmtexttt{!} & \tmtexttt{(default 0), 0 = fixed scale} \\
+  \hspace{-0.5cm}\tmtexttt{runningscale 0 } & \tmtexttt{!} & \tmtexttt{(default 0), 0 = fixed scale 2$M_W$,} \\
+  & \tmtexttt{!} &  \tmtexttt{1 == $M(WW)$, 2 == $M_{T, W^+}+M_{T, W^-}$ } \\
 \hspace{-0.5cm}\tmtexttt{minlo 0 } &\tmtexttt{!}  & \tmtexttt{(default 0) if 1 turn on the \MINLO{} option} \\~\\
 %\tmtexttt{ph\_Wmass2low 20 } & \tmtexttt{!}  & \tmtexttt{(default 20) minimal  mass of each $W$ system}  \\
 %\tmtexttt{ph\_Wmass2high 200 } & \tmtexttt{!}  & \tmtexttt{(default 200) maximal  mass of each $W$ system } \\
+\hspace{-0.5cm}\tmtexttt{nnlops 0 } &\tmtexttt{!}  & \tmtexttt{(default 0) if 1 turn on the \NNLOPS{} option} \\~\\
 \end{tabular}
+
+Note that, \MINLO{} overwrites any other running scale choice. The
+\NNLOPS{} works only if the \MINLO{} option is on. Finally, if
+\MINLO{} is off one needs a Born suppression factor. Alternatively,
+once could implement cuts in the phase-space generation to make the
+cross-section finite.
+
+The \NNLOPS{} option is new in the \WWJ{} code and it allows to
+reweight to the NNLO result on the flight. This option is not yet
+present in other \NNLOPS{} codes (Higgs, Drell Yan, associated Higgs
+production). The on-the-flight reweighting to the NNLO \WW{} is
+performed using precomputed NNLO tables obtained with the MATRIX
+code~\cite{Grazzini:2017mhc} and with
+\WWJ-MINLO{}~\cite{Hamilton:2016bfu}. The setup of the NNLO and
+\MINLO{} is described in detail in ref.~\cite{Re:2018vac}. If one
+wishes to reweight using a different PDF set, or a different collider
+energy, one might want to generate new \MINLO{} and NNLO reweighting
+tables. Note however that the reweighing factor should be relatively
+insensitive to input parameters.
+
 
 %!OLD
 %!\noindent
@@ -115,7 +143,7 @@ production in association with one jet:\\~
 %and renormalization scales are fixed at $M_W$. Otherwise, a dynamic scale of
 %the mass of the $W$-boson pair will be used.
 
-\noindent Several decay modes can be selected by an approriate flag in the
+\noindent Several decay modes can be selected by an appropriate flag in the
 \tmtexttt{powheg.input} file:\\~\\
 \begin{tabular}{lll}
 %\tmtexttt{semileptonic 1 ! one W goes to hadrons, one goes to leptons}\\
@@ -136,9 +164,6 @@ More conditions can be easily added, by editing the
 file. If no condition is specified in the input card, the default
 decay channel is assumed, namely \tmtexttt{e+mu-}.
 
-In the case of leptonic final states, we release a template analysis
-\tmtexttt{pwhg\_analysis-WW-template.f} with a set of differential
-distributions.
 
 As a final remark, we note that in ref.~\cite{Hamilton:2016bfu} we
 found that closed fermion loops slow down the calculation
@@ -169,7 +194,25 @@ and recompiling the code from scratch.
   %171 citations counted in INSPIRE as of 17 Jun 2016
   
 \bibitem{POWHEG}
-POWHEG-BOX-V2/Docs/V2-paper.pdf
+  POWHEG-BOX-V2/Docs/V2-paper.pdf
+
+%\cite{Re:2018vac}
+\bibitem{Re:2018vac}
+  E.~Re, M.~Wiesemann and G.~Zanderighi,
+  %``NNLOPS accurate predictions for $W^+W^-$ production,''
+  arXiv:1805.09857 [hep-ph].
+  %%CITATION = ARXIV:1805.09857;%%
+  %1 citations counted in INSPIRE as of 29 Jun 2018
+
+%\cite{Grazzini:2017mhc}
+\bibitem{Grazzini:2017mhc}
+  M.~Grazzini, S.~Kallweit and M.~Wiesemann,
+  %``Fully differential NNLO computations with MATRIX,''
+  arXiv:1711.06631 [hep-ph].
+  %%CITATION = ARXIV:1711.06631;%%
+  %14 citations counted in INSPIRE as of 29 Jun 2018
+
+  
 \end{thebibliography}
 
 \end{document}
