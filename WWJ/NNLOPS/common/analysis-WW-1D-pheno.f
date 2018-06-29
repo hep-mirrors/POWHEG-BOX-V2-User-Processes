@@ -118,7 +118,7 @@ c=== BOOKING ===========================================================
          call inihists
 c---------- common arrays for binning:
 C     file with reweighting bins (both positive and negative dy bins) 
-         filename='binvalues-WW-alldy.top'
+         filename='binvalues-WW.top'
          call read_array(ii_yWW,  nbin_yww,  arr_yWW,  filename )
          call read_array(ii_dyWW, nbin_dyWW, arr_dyWW, filename )
          call read_array(ii_ptWm, nbin_ptWm, arr_ptWm, filename )

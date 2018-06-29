@@ -87,7 +87,7 @@ c=== BOOKING ===========================================================
       if(book) then
          call inihists
 c---------- common arrays for binning:
-         filename='binvalues-WW-alldy.top'
+         filename='binvalues-WW.top'
          call read_array(ii_yWW,  nbin_yww,  arr_yWW,  filename )
          call read_array(ii_dyWW, nbin_dyWW, arr_dyWW, filename )
          call read_array(ii_ptWm, nbin_ptWm, arr_ptWm, filename )
