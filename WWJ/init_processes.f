@@ -19,10 +19,12 @@
 c     stop the code if nnlops is on, but minlo is off.
 c     In principle this should be done in pwhg_init.f, but since it was not
 c     coded like that, we do it here
-      if(flg_minlo.eq..false. .and. flg_nnlops.eq..true.) then
+      if((.not.flg_minlo).and.flg_nnlops) then
+         write(*,*) '=================================='
          write(*,*) 'ERROR: flg_minlo is ',flg_minlo
          write(*,*) 'ERROR: flg_nnlops is ',flg_nnlops
          write(*,*) 'If you want to run with nnlops, minlo MUST be on'
+         write(*,*) '=================================='
          call exit(-1)
       endif
       
