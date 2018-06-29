@@ -1,1 +1,1 @@
-Xcuts.o Xninja.o avholo_interface.o basis.o coefficient_level_subs.o cuts.o cuts_utils.o gosam_interface.o integral_library.o looptools_interface.o ninja.o rambo.o spinors.o avholo_wrapper.o ninjago.o  
+avholo_interface.o basis.o coefficient_level_subs.o cuts.o cuts_utils.o gosam_interface.o integral_library.o looptools_interface.o ninja.o rambo.o spinors.o Xcuts.o Xninja.o avholo_wrapper.o ninjago.o  

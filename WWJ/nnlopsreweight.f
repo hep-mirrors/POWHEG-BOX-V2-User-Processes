@@ -31,7 +31,7 @@ c      write(*,*) '-------> compute_nnlops_weights', rwl_num_weights
          
 
 c-----> load arrays for rebinning:
-         filename='../binvalues-WW.top'
+         filename='binvalues-WW.top'
          call read_array(ii_yWW,  nbin_yww,  arr_yWW,  filename )
          call read_array(ii_dyWW, nbin_dyWW, arr_dyWW, filename )
          call read_array(ii_ptWm, nbin_ptWm, arr_ptWm, filename )
@@ -61,9 +61,9 @@ C     set filenames
             write(mufstr,'(f4.2)') muf 
             write(*,*) 'murstr,mufstr',murstr,mufstr
             NNLO_phiB(i) =
-     C           '../WW_MATRIX/MATRIX-NNLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
+     C           'WW_MATRIX/MATRIX-NNLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
             MINLO_phiB(i)=
-     C           '../WW_MINLO/MINLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
+     C           'WW_MINLO/MINLO-mur'//trim(murstr)//'-muf'//trim(mufstr)//'.top' 
             write(*,*) 'NNLO_phiB(i)',trim(NNLO_phiB(i))
             write(*,*) 'MINLO_phiB(i)',trim(MINLO_phiB(i))
          else
