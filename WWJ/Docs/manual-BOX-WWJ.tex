@@ -54,10 +54,9 @@ specific to this implementation. The parameters that are common to all
 
 When the \MINLO{} option is switched on, the \WWJ{} generator becomes
 NLO accurate also for inclusive $W^+ W^-$ production. Furthermore,
-when the \NNLOPS{} option is also switched one, a on-the-flight
+when the \NNLOPS{} option is also switched on, an on-the-fly
 reweighting to NNLO (fully differential in the Born phase space) is
 performed.
-
 
 \section{Generation of events}
 
@@ -77,10 +76,13 @@ However, because the program is numerically intensive, we do not
 recommend to run it without the \tmtexttt{POWHEG} parallel-feature
 version switched on, as described in detail in ref.~\cite{POWHEG}.  A
 template input card can be found in the \tmtexttt{testrun-lhc}
-directory. In the \tmtexttt{testrun-nnlops} directory, instead, we
-provide a template input card to perform a runs in parallel with the
-\MINLO{} option and the \NNLOPS{} activated and to obtain events with
-multiple (scale variation) weights.
+directory.
+
+In the \tmtexttt{testrun-nnlops} directory, instead, we provide a
+template input card to perform runs in parallel with the \MINLO{} (and
+the \NNLOPS{}) option activated, and to obtain events with multiple
+(scale variation) weights without the need of performing a reweighting
+on a pre-existing event file.
 
 \section{Input parameters}
 
@@ -98,33 +100,35 @@ production in association with one jet are listed in the following:\\~
 \hspace{-0.5cm}\tmtexttt{nnlops 0 } &\tmtexttt{!}  & \tmtexttt{(default 0) if 1 turn on the \NNLOPS{} option} \\~\\
 \end{tabular}
 
-Note that, \MINLO{} overwrites any other running scale choice. The
-\NNLOPS{} works only if the \MINLO{} option is on. Finally, if
-\MINLO{} is off one needs a Born suppression factor. Alternatively,
-once could implement cuts in the phase-space generation to make the
-cross-section finite.
+Note that \MINLO{} overwrites any other running scale choice.  The
+\NNLOPS{} works only if the \MINLO{} option is on.  Finally, if
+\MINLO{} is switched off, one needs to use a Born suppression factor,
+or, alternatively, a cut in the phase-space generation, in order to
+make the cross-section finite. The latter cut can be set through the
+token \tmtexttt{bornktmin}.
 
 The \NNLOPS{} option is new in the \WWJ{} code and it allows to
-reweight to the NNLO result on the flight. This option is not yet
-present in other \NNLOPS{} codes (Higgs, Drell Yan, associated Higgs
-production). The on-the-flight reweighting to the NNLO \WW{} is
-performed using precomputed NNLO tables obtained with the MATRIX
+reweight to the NNLO result on the fly. This option is not yet present
+in other \NNLOPS{} codes (Higgs, Drell Yan, associated Higgs
+production). The on-the-fly reweighting to the \WW{} NNLO computation
+is performed using precomputed NNLO tables obtained with the MATRIX
 code~\cite{Grazzini:2017mhc} and with
-\WWJ-MINLO{}~\cite{Hamilton:2016bfu}. The setup of the NNLO and
-\MINLO{} is described in detail in ref.~\cite{Re:2018vac}. If one
-wishes to reweight using a different PDF set, or a different collider
-energy, one might want to generate new \MINLO{} and NNLO reweighting
-tables. Note however that the reweighing factor should be relatively
-insensitive to input parameters.
+\WWJ-\MINLO{}~\cite{Hamilton:2016bfu}. The setup used to generate
+these (NNLO and \MINLO{}) tables is described in detail in
+ref.~\cite{Re:2018vac}. If one wishes to reweight using a different
+PDF set, or a different collider energy, one might want to generate
+new \MINLO{} and NNLO reweighting tables. Note however that the
+reweighing factor should be relatively insensitive to input
+parameters.
 
-Note that, if one runs in \NNLOPS{} mode then the directory where the
+Note that, if one runs in \NNLOPS{} mode, then the directory where the
 run is performed should contain the file \tmtexttt{binvalues-WW.top}
 and the directories \tmtexttt{WW-MATRIX} and \tmtexttt{WW-MINLO}.
 
 It is possible to obtain directly events with multiple weights
 associated to scale variation without the need to reweight a
 posteriori. For instance, if the \tmtexttt{powheg.input} file contains
-the following lines:
+the following lines:\\~
 
 \tmtexttt{
 rwl\_file '-'\\
@@ -138,12 +142,11 @@ rwl\_file '-'\\
 <weight id='H1'> renscfact=0.5 facscfact=1.0 </weight>\\
 <weight id='HH'> renscfact=0.5 facscfact=0.5 </weight>\\
 </initrwgt>
-}
+}\\~
 
 then the usual 7-point scale variation weights are produced. On top of
 this, if the \NNLOPS{} option is on, the weights are doubled and the
 last 7 weights are the \NNLOPS{} ones.
-
 
 
 %!OLD
@@ -171,7 +174,8 @@ last 7 weights are the \NNLOPS{} ones.
 %and renormalization scales are fixed at $M_W$. Otherwise, a dynamic scale of
 %the mass of the $W$-boson pair will be used.
 
-\noindent Several decay modes can be selected by an appropriate flag
+~\\
+Several decay modes can be selected by an appropriate flag
 in the \tmtexttt{powheg.input} file:\\~\\
 \begin{tabular}{lll}
 %\tmtexttt{semileptonic 1 ! one W goes to hadrons, one goes to leptons}\\
