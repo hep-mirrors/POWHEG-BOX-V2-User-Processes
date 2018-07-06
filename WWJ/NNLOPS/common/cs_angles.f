@@ -92,3 +92,91 @@ c---------- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 
       end subroutine
 
+c=======================================================================
+c=======================================================================
+c===--- Additional functions:
+c=======================================================================
+c=======================================================================
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      function getcosth(pp)
+      real*8 pp(4), getcosth
+
+      getcosth=pp(3)
+     $     /sqrt(pp(1)**2 + pp(2)**2 + pp(3)**2)
+
+      return
+      end function
+
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      function dot3_product(aa,bb)
+      real*8 aa(3), bb(3)
+      real*8 dot3_product
+
+      dot3_product = aa(1)*bb(1) + aa(2)*bb(2) + aa(3)*bb(3)
+
+      end function
+
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      function norm3(aa)
+      real*8 aa(3)
+      real*8 norm3
+
+      norm3 = aa(1)**2 + aa(2)**2 + aa(3)**2
+
+      end function
+
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      subroutine lab_to_CM(CM,p1,p_out) !CM is the CM frame                                                                                                                                                                     
+      real * 8 CM(4),p1(4),beta(3),beta2, gamma, dummy(4),p_out(4)
+      integer i,j
+      
+      beta2=0.0 
+      do i=1, 3
+         beta(i)=CM(i)/CM(4)  !Relatvistisc beta
+         beta2=beta2+beta(i)**2 !Beta squared 
+
+      end do
+      gamma=1/sqrt(1-beta2)     !Gamma factor
+!     !Here we boost to the CM frame
+      dummy(4)=gamma*p1(4)
+      do i=1,3
+         dummy(4)=dummy(4)-gamma*beta(i)*p1(i)
+         dummy(i)=p1(i)-gamma*beta(i)*p1(4)
+      end do
+      do i=1,3
+         do j=1,3
+            dummy(i)=dummy(i)+(gamma-1)*beta(i)*beta(j)*p1(j)/beta2
+         end do
+      end do
+      do i=1, 4
+         p_out(i)=dummy(i)
+      end do
+      end
+
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      subroutine getyetaptmass(p,y,eta,pt,mass)
+      implicit none
+      real * 8 p(4),y,eta,pt,mass,pv
+      real *8 tiny
+      parameter (tiny=1.d-5)
+      !y=0.5d0*log((p(4)+p(3))/(p(4)-p(3)))
+      call pwhg_getrapidity(p,y)
+      pt=sqrt(p(1)**2+p(2)**2)
+      pv=sqrt(pt**2+p(3)**2)
+      if(pt.lt.tiny)then
+         eta=sign(1.d0,p(3))*1.d8
+      else
+         eta=0.5d0*log((pv+p(3))/(pv-p(3)))
+      endif
+      mass=sqrt(abs(p(4)**2-pv**2))
+      end
+
+c----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+      function absvec(vv)
+
+      real*8 absvec,vv(3)
+
+      absvec=sqrt(vv(1)*vv(1) + vv(2)*vv(2) + vv(3)*vv(3))
+
+      end function
+

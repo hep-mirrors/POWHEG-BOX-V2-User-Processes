@@ -62,7 +62,7 @@ GOSAMLIBS+=$(shell cd $(GOSAMDIR) ; echo *.cc *.F90 ' ' | sed 's/.cc /.o /g ; s/
 
 PWD=$(shell pwd)
 WDNAME=$(shell basename $(PWD))
-VPATH= rwgt-patches/:NNLOPS/pwhg-patches/:NNLOPS/common:./:../:$(OBJDIR):./$(GOSAMDIR)/
+VPATH= NNLOPS/pwhg-patches/:NNLOPS/common:./:../:$(OBJDIR):./$(GOSAMDIR)/
 
 INCLUDE1=$(PWD)
 INCLUDE2=$(shell dirname $(PWD))/include
