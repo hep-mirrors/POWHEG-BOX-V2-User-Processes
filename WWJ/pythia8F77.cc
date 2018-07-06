@@ -36,48 +36,23 @@ protected:
 
 
 
-//class MyUserHooks : public UserHooks {
-//
-//public:
-//
-//  MyUserHooks() {cout << "Setting up Hook";}
-//
-//  // Destructor deletes anti-kT jet finder.
-//  ~MyUserHooks() {;}
-//
-//  // Allow process cross section to be modified..
-//
-//  virtual bool canSetResonanceScale() {
-//    cout<< "called cansetresonancescale" <<endl;
-//    cout<< "can veto resonances? 1=true, 0=false: "<<resonancevetos_.canveto<<endl;
-//    if(resonancevetos_.canveto == 1) return true;
-//    else return false; }
-//
-//  virtual double scaleResonance( const int iRes, const Event& event) {
-////     cout << "in scaleResonance: resonance "; cout << event[iRes].id();
-////     cout << " " <<resonancevetos_.vetoscaletp << " " <<resonancevetos_.vetoscaletm;
-////     cout << "\n";
-//    switch(event[iRes].id())
-//      {
-//      case 6  : return  resonancevetos_.vetoscaletp;
-//      case -6 : return  resonancevetos_.vetoscaletm;
-//      case 24 : return  resonancevetos_.vetoscalewp;
-//      case -24: return  resonancevetos_.vetoscalewm;
-//      }
-//  }    
-//
-//private:
-//
-//
-//};
+class MyUserHooks : public UserHooks {
 
+public:
 
+  MyUserHooks() {cout << "Setting up Hook";}
 
+  // Destructor deletes anti-kT jet finder.
+  ~MyUserHooks() {;}
+
+  // Allow process cross section to be modified..
+private:
+
+};
 
 Pythia pythia;
 myLHAupFortran* LHAinstance=new myLHAupFortran();
 //MyUserHooks* MyHook=new MyUserHooks();
-
 
 
 extern "C" {
@@ -87,13 +62,13 @@ extern "C" {
   }
 
   void pythia_init_() {
-  // Generator. Process selection. LHC initialization. Histogram.
+    // Generator. Process selection. LHC initialization. Histogram.
     //  pythia.readString("Beams:eCM = 8000.");    
     //  pythia.readString("HardQCD:all = on");    
     //  pythia.readString("PhaseSpace:pTHatMin = 20.");
-
-		// disable the listing of the changed setting (too long)
- 	  pythia.readString("Init:showChangedParticleData = off");
+    
+    // disable the listing of the changed setting (too long)
+    pythia.readString("Init:showChangedParticleData = off");
 
     // shower vetoing
     pythia.readString("SpaceShower:pTmaxMatch = 1");
@@ -148,8 +123,6 @@ extern "C" {
     pythia.setLHAupPtr(LHAinstance); 
     LHAinstance->setInit();  
     pythia.init();
-
-   
     
   }
 

@@ -119,8 +119,13 @@ c     p_t^2 ordered shower
 
       subroutine getmaxev(maxev)
       integer maxev
+      integer iun
+      common/c_unit/iun
 C--- Opens input file and counts number of events, setting MAXEV;
-      call opencount(maxev)
+c     OLD
+c     call opencount(maxev)
+c     NEW
+      call opencountunit(maxev,iun)
       end
 
       subroutine UPINIT
@@ -138,7 +143,7 @@ C--- Opens input file and counts number of events, setting MAXEV;
       COMMON/PYDAT3/MDCY(500,3),MDME(8000,2),BRAT(8000),KFDP(8000,5)
       integer pycomp
       external pycomp
-      integer hdecaymode,i   
+      integer hdecaymode,i
       integer maxev
       common/mcmaxev/maxev
       real * 8 powheginput
@@ -147,8 +152,8 @@ C--- Opens input file and counts number of events, setting MAXEV;
       common/c_unit/iun
       nevhep=0
 c read the header first, so lprup is set
-C      call newunit(iun) 
-      call opencountunit(maxev,iun)
+C     call newunit(iun)
+c     call opencountunit(maxev,iun)
       call lhefreadhdr(iun)
 
 c     Make PI0 stable as in herwig default

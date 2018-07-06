@@ -8,8 +8,15 @@ FC=$(COMPILER)
 PDF=lhapdf
 #Choose Analysis: dummy, process specific
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
+
+# default analysis (matches the one used for WWJ minlo paper)
+ANALYSIS=WWJ-refined
+
+# WW@NNLOPS paper
+#ANALYSIS=WW-NNLOPS-1D-pheno
 #ANALYSIS=WW-NNLOPS-3D
-ANALYSIS=WW-NNLOPS-1D-pheno
+
+
 # For static linking uncomment the following
 #STATIC= -static
 #
@@ -82,48 +89,61 @@ else
 PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
-ifeq ("$(ANALYSIS)","WW-NNLOPS-1D")
-FASTJET_CONFIG=$(shell which fastjet-config)
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-1D.o cs_angles.o  rebinning_routines.o 
-PWHGANAL+=  fastjetfortran.o
-endif
-
-ifeq ("$(ANALYSIS)","WW-NNLOPS-1D-pheno")
-FASTJET_CONFIG=$(shell which fastjet-config)
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-1D-pheno.o cs_angles.o  rebinning_routines.o 
-PWHGANAL+=  fastjetfortran.o
-else
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-dummy.o
-WHGANAL=pwhg_bookhist-new.o pwhg_analysis-dummy.o
-endif
-
 ifeq ("$(ANALYSIS)","WWJ-refined")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-WWall-refined.o
+PWHGANAL=pwhg_bookhist-multi-new.o pwhg_analysis-WWall-refined.o observables.o
 ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
 PWHGANAL+=  fastjetfortran.o
 endif
 
-
-ifeq ("$(ANALYSIS)","WW-NNLOPS-3D")
-##To include Fastjet configuration uncomment the following lines.                                                   FASTJET_CONFIG=$(shell which fastjet-config)
+# used for WW@NNLOPS paper 
+ifeq ("$(ANALYSIS)","WW-NNLOPS-1D-pheno")
+FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-3D.o cs_angles.o rebinning_routines.o 
-## Also add required Fastjet drivers to PWHGANAL (examples are reported)                                            #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o                                                   PWHGANAL+=  fastjetfortran.o
+PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-1D-pheno.o
+PWHGANAL+=  fastjetfortran.o
 endif
 
-NINJAFLAGS=-DHAVE_CONFIG_H -I./$(GOSAMDIR) -I./$(GOSAMDIR)/ninja -O2 #-fcx-limited-range
 
+# used to extract reweighting tables
+# ifeq ("$(ANALYSIS)","WW-NNLOPS-3D")
+# FASTJET_CONFIG=$(shell which fastjet-config)
+# LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+# FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+# PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-3D.o
+# ## Also add required Fastjet drivers to PWHGANAL (examples are reported)                                            #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o                                                   PWHGANAL+=  fastjetfortran.o
+# endif
+
+
+# old analysis
+# ifeq ("$(ANALYSIS)","WW-NNLOPS-1D")
+# FASTJET_CONFIG=$(shell which fastjet-config)
+# LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+# FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+# PWHGANAL=pwhg_bookhist-1d.o pwhg_bookhist-3d.o observables.o pwhg_analysis-wrapper-WW.o analysis-WW-1D.o
+# PWHGANAL+=  fastjetfortran.o
+# endif
+
+# ifeq ("$(ANALYSIS)","WWJ-refined")
+# ##To include Fastjet configuration uncomment the following lines. 
+# FASTJET_CONFIG=$(shell which fastjet-config)
+# LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+# FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+# PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-WWall-refined.o
+# ## Also add required Fastjet drivers to PWHGANAL (examples are reported)
+# #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+# #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetfortran.o
+# PWHGANAL+=  fastjetfortran.o
+# endif
+
+
+NINJAFLAGS=-DHAVE_CONFIG_H -I./$(GOSAMDIR) -I./$(GOSAMDIR)/ninja -O2 #-fcx-limited-range
 
 # PYTHIA 8
 PYTHIA_CONFIG=$(shell which pythia8-config)
@@ -132,7 +152,7 @@ FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8Plugins
 
-LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -L$(shell $(PYTHIA_CONFIG) --libdir)/archive -lpythia8 -ldl -lstdc++ # -lHepMC #-llhapdfdummy
+LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -ldl -lstdc++ # -lHepMC #-llhapdfdummy
 
 
 %.o: %.f $(INCLUDE) | $(OBJDIR)
@@ -175,7 +195,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	validflav.o minlo_checks.o \
 	$(PDFPACK) $(USER) $(FPEOBJ) \
 	pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o \
-	rwl_procdep.o nnlopsreweight.o 
+	rwl_procdep.o nnlopsreweight.o rebinning_routines.o cs_angles.o
 
 LIBDIRMG=$(OBJ)
 LINKMGLIBS =  -L$(LIBDIRMG)  -lmadgraph -lmodel -ldhelas3 
@@ -194,36 +214,32 @@ pwhg_main:gosamlib.a $(PWHG) $(MADLIBS)
 gosamlib.a: $(GOSAMLIBS)
 	\rm $(OBJ)/gosamlib.a ; $(PWD)/$(GOSAMDIR)/compile_gosamlib.sh $(PWD)/$(OBJ)
 
-#LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-#     opencount.o powheginput.o $(PWHGANAL)	\
-     lhefread.o newunit.o pwhg_analysis_driver.o $(FPEOBJ) \
-     pwhg_io_interface.o utils.o 
-
 LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o	utils.o	\
      opencount.o powheginput.o $(PWHGANAL) 	\
-     lhefread.o pwhg_io_interface.o newunit.o pwhg_analysis_driver.o $(FPEOBJ) rwl_weightlists.o rwl_procdep.o nnlopsreweight.o
-
+     lhefread.o pwhg_io_interface.o newunit.o pwhg_analysis_driver.o $(FPEOBJ) \
+     rwl_weightlists.o rwl_procdep.o nnlopsreweight.o rebinning_routines.o cs_angles.o
+# unfortunately the files on the last line are needed also for LHEF
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
 	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
-####	@echo "Analysis is" $(ANALYSIS)
 
 
-# target to read event file, shower events with HERWIG + analysis
-HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
-	powheginput.o $(PWHGANAL) lhefread.o	\
-	pdfdummies.o opencount.o $(FPEOBJ) 
+# # target to read event file, shower events with HERWIG + analysis
+# HERWIG=main-HERWIG.o setup-HERWIG-lhef.o herwig.o boostrot.o	\
+# 	powheginput.o $(PWHGANAL) lhefread.o	\
+# 	pdfdummies.o opencount.o $(FPEOBJ) 
 
-main-HERWIG-lhef: $(HERWIG)
-	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
+# main-HERWIG-lhef: $(HERWIG)
+# 	$(FF) $(patsubst %,$(OBJ)/%,$(HERWIG))  $(LIBSFASTJET)  $(STATIC) -o $@
 
 # target to read event file, shower events with PYTHIA + analysis
 PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o \
-	$(PWHGANAL) lhefread.o newunit.o 	\
-	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
-	pwhg_io_interface.o rwl_weightlists.o utils.o \
-	$(FPEOBJ)
+	$(PWHGANAL) opencount.o lhefread.o pwhg_io_interface.o newunit.o \
+	random.o cernroutines.o utils.o \
+	$(FPEOBJ) $(LIBZDUMMY) \
+	rwl_weightlists.o rwl_procdep.o nnlopsreweight.o rebinning_routines.o  cs_angles.o
+# unfortunately the files on the last line are needed also for PY
 
 main-PYTHIA-lhef: $(PYTHIA)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
@@ -234,8 +250,8 @@ PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(PWHGANAL) opencount.o lhefread.o pwhg_io_interface.o newunit.o pdfdummies.o \
 	random.o cernroutines.o bra_ket_subroutines.o utils.o \
 	$(FPEOBJ) $(LIBZDUMMY) \
-	rwl_weightlists.o rwl_procdep.o nnlopsreweight.o
-
+	rwl_weightlists.o rwl_procdep.o nnlopsreweight.o rebinning_routines.o  cs_angles.o
+# unfortunately the files on the last line are needed also for PY
 
 main-PYTHIA8-lhef: $(PYTHIA8)
 	@echo "compiling pythia8"
@@ -270,13 +286,13 @@ libmodel.a:
 
 
 clean:
-	rm -f $(patsubst %,$(OBJ)/%,$(USER) $(PWHG) $(LHEF) $(HERWIG) $(PYTHIA)) pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef
+	rm -f $(patsubst %,$(OBJ)/%,$(USER) $(PWHG) $(LHEF) $(HERWIG) $(PYTHIA) $(PYTHIA8)) pwhg_main lhef_analysis main-HERWIG-lhef \
+	main-PYTHIA-lhef main-PYTHIA8-lhef
 
 
 veryclean:
-	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef *.a DHELAS/*.o Madlib/*.o MODEL/*.o GoSamlib.lst
+	rm -f $(OBJ)/*.o $(OBJ)/*.mod $(OBJ)/*.a pwhg_main lhef_analysis main-HERWIG-lhef \
+	main-PYTHIA-lhef main-PYTHIA8-lhef *.a DHELAS/*.o Madlib/*.o MODEL/*.o GoSamlib.lst
 
 # target to generate object directory if it does not exist
 $(OBJDIR):

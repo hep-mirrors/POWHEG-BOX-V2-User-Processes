@@ -12,7 +12,7 @@
       external powheginput
       integer iun
       common/copencount/iun
-      integer py8tune,nohad 
+      integer py8tune,nohad
       common/cpy8tune/py8tune,nohad 
 
       if(powheginput("#changescalup").eq.1) then
