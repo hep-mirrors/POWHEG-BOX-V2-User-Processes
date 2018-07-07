@@ -1,9 +1,18 @@
 c -*- Fortran -*-
 
 c-----: Common part
+
+c     maxmulti has to be >= than the number of total weights after each
+c     event.  Setting it to an unnecessarily large value will most
+c     likely generate compilation/linking errors, as some
+c     architectures/compilers/machines can't deal with huge memory
+c     allocation...
+
+c     Notice that maxmulti also enters as dimension of 3d histograms.
+
       integer maxmulti,nmulti
-C      parameter (maxmulti=50)
-      parameter (maxmulti=70)
+C      parameter (maxmulti=50) 
+      parameter (maxmulti=14)
       common/commonpart/nmulti
 
 c-----: 1D-histograms
@@ -22,14 +31,14 @@ c-----: 1D-histograms
      $       errhistarr3(maxmulti,0:maxbins+1,nhist),
      $         yhistarr4(maxmulti,0:maxbins+1,nhist),
      $       errhistarr4(maxmulti,0:maxbins+1,nhist)
-      common/histnew/xhistarr,yhistarr,
+      common/histnew_common/xhistarr,yhistarr,
      $       yhistarr1,errhistarr1,
      $       yhistarr2,errhistarr2,
      $       yhistarr3,errhistarr3,
      $       yhistarr4,errhistarr4,
      $       nhits,nbins,jhist,ient1,
      $       stringhist
-      save /histnew/
+      save /histnew_common/
 
 c-----: 3D-histograms
       integer, parameter :: ndist = 81 ! 9 * 9 moments 

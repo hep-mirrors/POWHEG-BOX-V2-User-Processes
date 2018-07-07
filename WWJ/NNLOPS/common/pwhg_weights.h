@@ -1,5 +1,5 @@
       integer weights_max,weights_num
-      parameter (weights_max=70)
+      parameter (weights_max=21)
       real * 8 weights_val(weights_max),
      1         weights_renfac(weights_max),
      2         weights_facfac(weights_max)
