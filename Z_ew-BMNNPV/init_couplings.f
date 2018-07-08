@@ -36,6 +36,7 @@ c.....added for scheme 3 e
       real * 8 cmass, bmass
       integer j
       real*8 s2effin,mwout,tmp
+      real*8 osWmass,osWwidth,osZmass,osZwidth
       save 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
@@ -117,11 +118,15 @@ c
 c     ph_Wmass and pw_Z mass are intended to be on-shell masses (LEP style).
 c     they need to be converted to complex pole positions
 c
+      osWmass= ph_Wmass
+      osWwidth= ph_Wwidth
       ph_Wmass= ph_Wmass/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
-      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
+      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/osWmass)**2)
 
+      osZmass= ph_Zmass
+      osZwidth= ph_Zwidth
       ph_Zmass= ph_Zmass/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
-      ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
+      ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/osZmass)**2)
 
 c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
       do j=1,st_nlight         
