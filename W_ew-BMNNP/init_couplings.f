@@ -19,6 +19,7 @@
       complex*16 el2_scheme
       common/leptmass/mlep2
       real*8 complextmp
+      real*8 osWmass,osWwidth,osZmass,osZwidth
 c.....mauro-pair b
       real*8 saveaem0
       common/csaveaem0/saveaem0
@@ -93,11 +94,15 @@ c     number of light flavors
 c     ph_Wmass and pw_Z mass are intended to be on-shell masses (LEP style).
 c     they need to be converted to complex pole positions
 c
+      osWmass= ph_Wmass
+      osWwidth= ph_Wwidth
       ph_Wmass= ph_Wmass/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
-      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
+      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/osWmass)**2)
 
+      osZmass= ph_Zmass
+      osZwidth= ph_Zwidth
       ph_Zmass= ph_Zmass/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
-      ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
+      ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/osZmass)**2)
 
 c     mass window
       masswindow_low = powheginput("#masswindow_low")
