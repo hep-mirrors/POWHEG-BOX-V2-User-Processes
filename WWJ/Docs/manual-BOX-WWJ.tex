@@ -58,29 +58,41 @@ when the \NNLOPS{} option is also switched on, an on-the-fly
 reweighting to NNLO (fully differential in the Born phase space) is
 performed.
 
+If you use this code please cite ref.~\cite{Hamilton:2016bfu}. If you
+also use the \NNLOPS{} option please cite also
+refs.~\cite{Grazzini:2016ctr,Grazzini:2017mhc,Re:2018vac}.
+
+
 \section{Generation of events}
 
-In the WWJ directory do\\~\\
+To compile the code, one needs to do \\~\\
 \tmtexttt{\$ make pwhg\_main}\\~\\
-Then do (for example)\\~\\
+from the WWJ directory. 
+Then, to generate events one can for example do\\~\\
 \tmtexttt{\$ cd testrun-lhc}\\
 \tmtexttt{\$ ../pwhg\_main}\\~\\
 At the end of the run, the file \tmtexttt{pwgevents.lhe} will contain events
 for $W$-pair production in association with one jet in the Les Houches format. In order to shower them
 with \tmtexttt{PYTHIA}:\\~\\
 \tmtexttt{\$ make main-PYTHIA-lhef}\\
-\tmtexttt{\$ cd test}\\
+from the WWJ directory. Then 
+\tmtexttt{\$ cd testrun-lhc}\\
 \tmtexttt{\$ ../main-PYTHIA-lhef}\\~
 
-However, because the program is numerically intensive, we do not
-recommend to run it without the \tmtexttt{POWHEG} parallel-feature
-version switched on, as described in detail in ref.~\cite{POWHEG}.  A
-template input card can be found in the \tmtexttt{testrun-lhc}
-directory.
+With the default card given, the code will run for several hours and
+still not get very accurate results, since the program is numerically
+intensive. Therefore, we do not recommend to run it without the
+\tmtexttt{POWHEG} parallel-feature version switched on. This feature
+is described in detail in ref.~\cite{POWHEG}. It allows to parallelize
+different steps of the calculation and to recombine intermediate
+integration grids and results.  A template input card can be found in
+the \tmtexttt{testrun-parallel} directory. This can be used either
+with the \MINLO{} option or with a Born generation cut, as described
+below.
 
 In the \tmtexttt{testrun-nnlops} directory, instead, we provide a
-template input card to perform runs in parallel with the \MINLO{} (and
-the \NNLOPS{}) option activated, and to obtain events with multiple
+template input card to perform runs in parallel with the \MINLO{} and
+the \NNLOPS{} option activated, and to obtain events with multiple
 (scale variation) weights without the need of performing a reweighting
 on a pre-existing event file.
 
@@ -225,10 +237,27 @@ and recompiling the code from scratch.
   %%CITATION = doi:10.1007/JHEP11(2011)078;%%
   %171 citations counted in INSPIRE as of 17 Jun 2016
   
-\bibitem{POWHEG}
-  POWHEG-BOX-V2/Docs/V2-paper.pdf
+%\cite{Grazzini:2016ctr}
+\bibitem{Grazzini:2016ctr}
+  M.~Grazzini, S.~Kallweit, S.~Pozzorini, D.~Rathlev and M.~Wiesemann,
+  %``$W^{+}W^{−}$ production at the LHC: fiducial cross sections and distributions in NNLO QCD,''
+  JHEP {\bf 1608} (2016) 140
+  doi:10.1007/JHEP08(2016)140
+  [arXiv:1605.02716 [hep-ph]].
+  %%CITATION = doi:10.1007/JHEP08(2016)140;%%
+  %59 citations counted in INSPIRE as of 01 Aug 2018
 
-%\cite{Re:2018vac}
+    %\cite{Grazzini:2017mhc}
+\bibitem{Grazzini:2017mhc}
+  M.~Grazzini, S.~Kallweit and M.~Wiesemann,
+  %``Fully differential NNLO computations with MATRIX,''
+  Eur.\ Phys.\ J.\ C {\bf 78} (2018) no.7,  537
+  doi:10.1140/epjc/s10052-018-5771-7
+  [arXiv:1711.06631 [hep-ph]].
+  %%CITATION = doi:10.1140/epjc/s10052-018-5771-7;%%
+  %19 citations counted in INSPIRE as of 01 Aug 2018
+
+  %\cite{Re:2018vac}
 \bibitem{Re:2018vac}
   E.~Re, M.~Wiesemann and G.~Zanderighi,
   %``NNLOPS accurate predictions for $W^+W^-$ production,''
@@ -236,14 +265,13 @@ and recompiling the code from scratch.
   %%CITATION = ARXIV:1805.09857;%%
   %1 citations counted in INSPIRE as of 29 Jun 2018
 
-%\cite{Grazzini:2017mhc}
-\bibitem{Grazzini:2017mhc}
-  M.~Grazzini, S.~Kallweit and M.~Wiesemann,
-  %``Fully differential NNLO computations with MATRIX,''
-  arXiv:1711.06631 [hep-ph].
-  %%CITATION = ARXIV:1711.06631;%%
-  %14 citations counted in INSPIRE as of 29 Jun 2018
 
+
+\bibitem{POWHEG}
+  POWHEG-BOX-V2/Docs/V2-paper.pdf
+
+  
+  
   
 \end{thebibliography}
 
