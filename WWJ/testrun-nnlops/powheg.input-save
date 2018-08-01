@@ -18,13 +18,13 @@ itmx2    1      ! number of iterations for computing the integral and finding up
 foldcsi   1     ! number of folds on csi integration
 foldy     1     ! number of folds on  y  integration
 foldphi   1     ! number of folds on phi integration
-  nubound 50000  ! number of bbarra calls to setup norm of upper bounding function
+nubound 50000  ! number of bbarra calls to setup norm of upper bounding function
 icsimax  1      ! <= 100, number of csi subdivision when computing the upper bounds
 iymax    1      ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0    ! increase upper bound for radiation generation
 
 bornonly  0        ! (default 0) if 1 do Born only
-testplots 0        ! (default 0, do not) do NLO and PWHG distributions
+#testplots 1        ! (default 0, do not) do NLO and PWHG distributions
 
 bornktmin 0.26     ! Generation cut; minimmum kt in underlying born
 facscfact 1        ! default 1
@@ -35,7 +35,6 @@ runningscales 0    ! 0 = fixed scale (leave this to 0 when MiNLO is used.
 alphas_from_lhapdf 1 ! Strongly recommended to set this to 1 when using 4f PDFs and/or NNLO pdfs
 
 # MiNLO/NNLOPS flags
-withnegweights 1   ! (default 0) If 1 output negative weighted events.
 minlo 1            ! (default 0) If 1, use MiNLO
 minlo_nnll 1       ! (default 0) 
 nnlops 1           ! (default 0) If 1, activate NNLOPS
@@ -46,10 +45,9 @@ factsc2min 2       ! value the factorization scale is frozen (needed with minlo)
 manyseeds 1
 parallelstage 1
 xgriditeration 1
-maxseeds 10000 
 
 # other settings (mostly for debugging purposes)
-flg_debug 1        ! store extra event info for debugging
+#flg_debug 1        ! store extra event info for debugging
 #storemintupb 1    ! (default 0) if 1 save calls in a file
 
 storeinfo_rwgt 1   ! store info to allow for reweighting

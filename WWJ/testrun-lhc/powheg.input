@@ -23,29 +23,34 @@ icsimax  1      ! <= 100, number of csi subdivision when computing the upper bou
 iymax    1      ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0    ! increase upper bound for radiation generation
 
-bornonly   0      ! (default 0) if 1 do Born only
+bornonly  0        ! (default 0) if 1 do Born only
+#testplots 1        ! (default 0, do not) do NLO and PWHG distributions
 
-# Turn MiNLO on: uncomment / make the following replacements
-testplots 0        ! (default 0, do not) do NLO and PWHG distributions
-withnegweights 1   ! (0 default) If 1 output negative weighted events.
-minlo 0            ! default 0
+bornktmin 0.26     ! Generation cut; minimmum kt in underlying born
 facscfact 1        ! default 1
 renscfact 1        ! default 1
-bornktmin 0.26     ! Generation cut; minimmum kt in underlying born
 runningscales 0    ! 0 = fixed scale (leave this to 0 when MiNLO is used.
                    ! All scale settings is taken care of internally)
-storeinfo_rwgt 1   ! store info to allow for reweighting
-flg_debug 1        ! store extra event info for debugging
+
+alphas_from_lhapdf 1 ! Strongly recommended to set this to 1 when using 4f PDFs and/or NNLO pdfs
+
+# MiNLO flags
+#minlo 1            ! (default 0) If 1, use MiNLO
+#minlo_nnll 1       ! (default 0) 
+#sudscalevar 1      ! (default 1) scale variation also in Sudakov form factors in minlo
 factsc2min 2       ! value the factorization scale is frozen (needed with minlo)
-sudscalevar 1      ! (default 1) scale variation also in Sudakov form factors in minlo
 
 # the following is for parallel runs (see manual in POWHEG-BOX-V2/Docs/)
 #manyseeds 1
 #parallelstage 1
 #xgriditeration 1
 
-
 # other settings (mostly for debugging purposes)
+#flg_debug 1        ! store extra event info for debugging
+#storemintupb 1    ! (default 0) if 1 save calls in a file
+
+storeinfo_rwgt 1   ! store info to allow for reweighting
+
+# other parameters
 #wmasslow 10d0
 #wmasshigh 500d0
-#storemintupb 1    ! (default 0) if 1 save calls in a file
