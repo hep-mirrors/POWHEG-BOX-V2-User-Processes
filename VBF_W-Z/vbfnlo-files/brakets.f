@@ -16,8 +16,8 @@ c     SUBROUTINE KET2R( CHI,CHREAL,P,SIGMAP,K,REPS,RESULT,PMINK )
 c     SUBROUTINE KET2C( CHI,CHREAL,P,SIGMAP,K,CEPS,RESULT,PMINK )     (as ENTRY)
 c     FUNCTION   S1R( BRA,RVEC,TIMEEX,SIGMA,KET )
 c     FUNTCION   S1C( BRA,CVEC,TIMEEX,SIGMA,KET )     (as ENTRY)
-c     SUBROUTINE POLVEC(KBAR,LAMBDA,EPSCAR)
-c     SUBROUTINE HELVEC(KBAR,SIGMAK,LAMBDA,EPSHEL)    (as ENTRY)
+c     SUBROUTINE POLVECLOCAL(KBAR,LAMBDA,EPSCAR)
+c     SUBROUTINE HELVECLOCAL(KBAR,SIGMAK,LAMBDA,EPSHEL)    (as ENTRY)
 c     FUNCTION   SC3(CHII,A1,A2,A3,CHIF,ALPHA)
 c
 c***************************************************************************
@@ -858,13 +858,13 @@ ccc
 
 
 C
-C*********** polarisation vector (POLVEC) ************
-C*********** entry HELVEC ****************************
+C*********** polarisation vector (POLVECLOCAL) ************
+C*********** entry HELVECLOCAL ****************************
 C
 C   Calculates the polarisation vector eps_mu(k,lambda) as given in
 C   MAD/PH/402, Appendix A, Eqn A.12 and A.13
 C   checked on May 24, 88
-C   bug in HELVEC for KT=0 corrected Nov.4, 1993
+C   bug in HELVECLOCAL for KT=0 corrected Nov.4, 1993
 C
 C   INPUT:
 C
@@ -881,7 +881,7 @@ C            lambda      integer
 C                        rectangular polarization index as used
 C                        in Eqn A.12. Allowed values= 1,2,3.
 C                        or vector boson helicity (allowed values
-C                        -1,0,1) when entry HELVEC is used
+C                        -1,0,1) when entry HELVECLOCAL is used
 C
 C
 C   OUTPUT:
@@ -901,7 +901,7 @@ C                  only possible for MASSLESS FERMIONS. For massive
 C                  fermions the polarization vectors defined in eq.A.12
 C                  must be used!
 C
-      SUBROUTINE POLVEC(KBAR,LAMBDA,EPSCAR)
+      SUBROUTINE POLVECLOCAL(KBAR,LAMBDA,EPSCAR)
 
       implicit none
 C
@@ -957,7 +957,7 @@ C
 C
 C                  Mass = 0 not allowed for longitudinal polarization
 C
-            WRITE(*,*) "Mass = 0 for Lambda = 3 in POLVEC"
+            WRITE(*,*) "Mass = 0 for Lambda = 3 in POLVECLOCAL"
             EPSCAR(1) = 0.0d0
             EPSCAR(2) = 0.0d0
             EPSCAR(3) = 0.0d0
@@ -972,14 +972,14 @@ C
 C
 C                  Unrecognised value of Lambda
 C
-         WRITE (*,*) "Invalid Lambda in POLVEC: Lambda = ",LAMBDA
+         WRITE (*,*) "Invalid Lambda in POLVECLOCAL: Lambda = ",LAMBDA
          EPSCAR(1) = 0.0d0
          EPSCAR(2) = 0.0d0
          EPSCAR(3) = 0.0d0
       END IF
       RETURN
 C
-      ENTRY HELVEC(KBAR,SIGMAK,LAMBDA,EPSHEL)
+      ENTRY HELVECLOCAL(KBAR,SIGMAK,LAMBDA,EPSHEL)
 C
 C   code:
 C
@@ -1018,7 +1018,7 @@ C
 C
 C                  Mass = 0 not allowed for longitudinal polarization
 C
-                  WRITE(*,*) "Mass = 0 for Lambda = 0 in HELVEC"
+                  WRITE(*,*) "Mass = 0 for Lambda = 0 in HELVECLOCAL"
                   EPSHEL(1) = 0.0d0
                   EPSHEL(2) = 0.0d0
                   EPSHEL(3) = 0.0d0
@@ -1033,7 +1033,7 @@ C
 C
 C                  Unrecognised value of Lambda
 C
-            WRITE (*,*) "Invalid Lambda in HELVEC: Lambda = ",LAMBDA
+            WRITE (*,*) "Invalid Lambda in HELVECLOCAL: Lambda = ",LAMBDA
                   EPSHEL(1) = 0.0d0
                   EPSHEL(2) = 0.0d0
                   EPSHEL(3) = 0.0d0

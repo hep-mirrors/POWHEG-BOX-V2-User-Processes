@@ -109,10 +109,11 @@ LIBS+=$(LHAPDFLIB) -Lvbfnlo-files -lvbfnlo
 %.o: %.cc
 	$(CC) $(DEBUG) -c -o obj/$@ $^ $(FJCXXFLAGS)
 
+LIBS+=-lz
 
 USER=init_couplings.o init_processes.o  Born.o virtual.o  calc_invariants.o\
 	 breit.o Born_phsp2.o Born_phspfile.o boost.o \
-	convert_coup.o real.o $(PWHGANAL)
+	convert_coup.o real.o vbfnloinput.o $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o            \
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o   \
@@ -123,6 +124,9 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o            \
         pwhg_bookhist.o pwhg_analysis_driver.o checkmomzero.o         \
 	reshufflemoms.o setstrongcoupl.o integrator.o newunit.o       \
 	mwarn.o sigsoftvirt.o sigcollsoft.o sigvirtual.o              \
+        setlocalscales.o validflav.o pwhgreweight.o opencount.o       \
+        ubprojections.o utils.o lhefread.o pwhg_io_interface.o        \
+        rwl_weightlists.o rwl_setup_param_weights.o mint_upb.o     \
 	$(PDFPACK) $(USER) $(SYSOBJ)
 
 # target to generate LHEF output

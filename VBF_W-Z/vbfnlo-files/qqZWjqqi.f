@@ -447,12 +447,12 @@ c     NOTE: j(0:3,-1:1) is a 4-vector with a helicity index
          call curr(1,psi(1,-1,6),psi(1,-1,5),j65)
                                                ! <6|gam.mu|5>_isig5
       elseif (ibos.eq.1) then
-         call helvec(p65,1,-1,j65(0,-1)) ! helicity=-1
+         call helveclocal(p65,1,-1,j65(0,-1)) ! helicity=-1
          j65(0,0)=1d0
          j65(1,0)=1d0
          j65(2,0)=1d0
          j65(3,0)=1d0
-         call helvec(p65,1, 1,j65(0, 1)) ! helicity=+1
+         call helveclocal(p65,1, 1,j65(0, 1)) ! helicity=+1
 
       else    ! only left-handed fermions couple to W
          call curr(-1,psi(1,-1,6),psi(1,-1,5),j65)
@@ -479,7 +479,7 @@ c     NOTE: j(0:3,-1:1) is a 4-vector with a helicity index
       
       imax = 2
       do i = 1, 2 ! 2 gluon polarizations
-         call polvec(qbar,i,eps(0,i)) ! get gluon pol. vectors
+         call polveclocal(qbar,i,eps(0,i)) ! get gluon pol. vectors
       enddo
       
 c     In order to test gauge invariance.
