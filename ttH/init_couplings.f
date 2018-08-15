@@ -102,6 +102,28 @@ c (this value is used in matrix elements)
       hmass = powheginput('hmass')
       hwidth = powheginput('hwidth')
 
+
+cccccccccccccccccccccccccccccccccccccccccccccccc
+c check if chosen value of hmass can be handled:
+      if ((hmass.lt.100d0.or.hmass.gt.200).or.
+     &    (hwidth.gt.2d0)) then
+         print*,' ################################################'
+         print*,' this code is applicable only for ttH production '
+         print*,' with a Higgs mass in the range 100 < mH < 200 GeV, '
+         print*,' and decay width Gamma_H < 2 GeV, '
+         print*,' where Higgs decays can be treated '
+         print*,' using a narrow-width approximation '
+         print*,' and off-shell effects are small'
+         print*,''
+         print*,' you entered a Higgs mass (in GeV) of ',hmass
+         print*,' and Higgs width (in GeV) of ', hwidth
+         print*,' please change your settings'
+         print*,' ################################################'
+         stop
+      endif
+ccccccccccccccccccccccccccccccccccccccccccccccccc
+
+
 c in current code version CKM elements have no effect
 c
 c     POWHEG CKM matrix
