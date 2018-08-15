@@ -86,8 +86,10 @@ c      imsbar = 1 ! (1=MSbar;0=OnShell)
 c      imsbar = 0 ! (1=MSbar;0=OnShell)       
       if(powheginput('#msbar').eq.1) then
          print*,'MSbar renormalization used for b-quark'
+         imsbar = 1
       elseif(powheginput('#msbar').eq.0) then
          print*,'OnShell renormalization used for b-quark'
+         imsbar = 0 
       else
          stop 'check setting for renormalization scheme'
       endif   
@@ -108,6 +110,26 @@ c      imsbar = 0 ! (1=MSbar;0=OnShell)
 
       hmass = powheginput('hmass')
       hwidth = powheginput('hwidth')
+
+cccccccccccccccccccccccccccccccccccccccccccccccc
+c check if chosen value of hmass can be handled:
+      if ((hmass.lt.100d0.or.hmass.gt.200).or.
+     &    (hwidth.gt.2d0)) then
+         print*,' ################################################'
+         print*,' this code is applicable only for bbH production '
+         print*,' with a Higgs mass in the range 100 < mH < 200 GeV, '
+         print*,' and decay width Gamma_H < 2 GeV, '
+         print*,' where Higgs decays can be treated '
+         print*,' using a narrow-width approximation '
+         print*,' and off-shell effects are small'
+         print*,''
+         print*,' you entered a Higgs mass (in GeV) of ',hmass
+         print*,' and Higgs width (in GeV) of ', hwidth
+         print*,' please change your settings'
+         print*,' ################################################'
+         stop
+      endif
+ccccccccccccccccccccccccccccccccccccccccccccccccc
           
       zwidth=2.441d0
       wwidth=2.0476d0
@@ -192,7 +214,7 @@ c
       G=sqrt(st_alpha*4d0*pi)
       GG(1)=-G
       GG(2)=-G
-
+      
       if (imsbar.eq.0) then 
          mbr = bmass
          return                 !OnShell renormalization
@@ -304,7 +326,6 @@ c     It is used in the generation of the Born phase space
       ph_Hmass2low=max(0d0,ph_Hmass-masswindow*ph_Hwidth)
       ph_Hmass2low=ph_Hmass2low**2
       ph_Hmass2high=(ph_Hmass+masswindow*ph_Hwidth)**2
-
 
 c     CKM from PDG 2010 (eq. 11.27)
       ph_CKM(1,1)=Vud
