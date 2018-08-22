@@ -108,11 +108,11 @@ c      write(nlf,'(a)')'<event>'
             call  pwhg_io_write(nlf,'<rwgt>')
 c            write(nlf,'(a)')'<rwgt>'
             call printrwgtev(nlf,xwgtup)
-            call  pwhg_io_write(nlf,'</rwgt>')
-c            write(nlf,'(a)')'</rwgt>'
             if (flg_sudakov_rwgt) then
                call printrwgtsuda(nlf,sudawgt)
             endif
+            call  pwhg_io_write(nlf,'</rwgt>')
+c            write(nlf,'(a)')'</rwgt>'
          endif
       endif
       call lhefwritescalup(nlf)
