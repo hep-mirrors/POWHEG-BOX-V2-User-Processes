@@ -212,15 +212,20 @@ c called only if virtuality shower routines (PYEVNT) are used
       save vec
       real*8 p_lph(0:3,1:2),beta,get_ptrelFSR
 c     veto QED shower from leptons above the SCALUP value
+c.....mauro:randomize leptons/b
+      integer lepid
+      common/clepid/lepid
+      
 
-      ptrel = -1
-
-      if (ini) then
-c     id of the charged decay product of the W
-         vdecaytemp=lprup(1)-10000
-         ini=.false.
-      endif
-
+c lprup not reliable if gen_emutau > 1
+c$$$      if (ini) then
+c$$$c     id of the charged decay product of the W
+c$$$         vdecaytemp=lprup(1)-10000
+c$$$         ini=.false.
+c$$$      endif
+      vdecaytemp=lepid
+c.....mauro:randomize leptons/e
+      ptrel = -1      
 c     initialization
 
       jlep=-1

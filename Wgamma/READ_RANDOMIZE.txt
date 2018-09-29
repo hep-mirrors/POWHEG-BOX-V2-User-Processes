@@ -1,0 +1,44 @@
+The generation must be done with vdecaymode=+-15
+
+gen_emutau <= 1 :: standard behaviour (DEFAULT)
+gen_emutau == 2 :: the events are generated with vdecaymode = +-15
+                   the xsect /err is multiplied by 2 in lhefwrite
+		   the weights are multiplied by 2 in lhefwrite
+		   the flavours are assigned randomly (e/mu) in
+		   LesHouches AND LesHouchesreg
+gen_emutau == 3 :: the events are generated with vdecaymode = +-15
+                   the xsect /err is multiplied by 3 in lhefwrite
+		   the weights are multiplied by 3 in lhefwrite
+		   the flavours are assigned randomly (e/mu/tau) in
+		   LesHouches AND LesHouchesreg		   
+
+NB this way the pwgalone results are NOT reliable: one has to run lhef_analysis instead
+
+After the event generation (lhef_analysis and main-pythia):
+
+we cannot define vdecaymode as a constant from lprup
+
+1) in lhefreadheader reloads the gen_emutau option
+2) in lhefreadev save the true id of the lepton (common/clepid/)
+3) in the phytia/photos related files lprup -> lepid (and then computes vdecaytemp)
+4) the old analysis will still use lprup, and they will trow an error if gen_emutau>1
+5) a new "atlas" analysis is provided for gen_emutau>1
+
+PS in order to use pwhg_analysis-atlas-leptons.f without NaNs in st1-st4
+   we define lepid in analysis_driver (this routine is never called after st4,
+   so there is no conflict with the value in lhefreadev)
+
+TODO :: vdecaytemp (lprup) is used in analyses and pythia interface (e.g. vetoes)
+        MUST BE REPLACED BY THE ACTUAL LEPTON FLAVOUR (USE A COMMON VARIABLE)
+	FOR THE ANALYSES one has to specify the strategy (ASK!!)
+
+
+MEANWHILE ADDED PY82
+1) minimal modifications of pythia8f77 to have it compiling
+2) added random seed initialization in both py81 and py82
+3) added corresponding lines in Makefile
+
+
+MEANWHILE for fastjet 3
+1) added missing safe initialization in buildjets.f
+

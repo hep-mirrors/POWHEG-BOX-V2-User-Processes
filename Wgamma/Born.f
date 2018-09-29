@@ -863,4 +863,11 @@ c     change mothers of decaying particles
          vtimup(i)=vtimuptmp(i-1)
          spinup(i)=spinuptmp(i-1)     
       enddo
+
+c      do i=1,nup
+c         write(*,*)'pup4',pup(:,i)
+c      enddo
+
+
+      
       end

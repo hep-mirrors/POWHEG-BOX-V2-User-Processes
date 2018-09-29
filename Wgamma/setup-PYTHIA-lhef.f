@@ -108,8 +108,11 @@ c     tolerate 2% of killed events
 
       subroutine getmaxev(maxev)
       integer maxev
+      integer iun97
+      common/ciun97/iun97
+      save /ciun97/
 C--- Opens input file and counts number of events, setting MAXEV;
-      call opencount(maxev)
+      call opencountunit(maxev,iun97)
       end
 
       subroutine UPINIT
@@ -132,10 +135,18 @@ C--- Opens input file and counts number of events, setting MAXEV;
       integer photoscount
       common/photoscount/photoscount
 
+      integer iun97
+      common/ciun97/iun97
+
+c.....mauro:randomize leptons/b
+      real*8 gen_emutau
+      common/cgen_emutau/gen_emutau
+c.....mauro:randomize leptons/e      
+      
       photoscount=0
       nevhep=0
 c read the header first, so lprup is set
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun97)
 
 c     Reduce background from non-prompt photons
 c     Make PI0 stable as in herwig default
@@ -157,6 +168,13 @@ c     tau stable
       if (lprup(1).eq.10015)  mdcy(pycomp(15),1)=0
       if (lprup(1).eq.9985)  mdcy(pycomp(15),1)=0
 
+c.....mauro:randomize leptons/b
+      if(gen_emutau.eq.3) then
+c     tau stable
+         mdcy(pycomp(15),1)=0
+         mdcy(pycomp(15),1)=0
+      endif
+c.....mauro:randomize leptons/e      
       end
 
       subroutine UPEVNT
@@ -174,11 +192,14 @@ c     tau stable
       integer photoscount
       common/photoscount/photoscount
 
+      integer iun97
+      common/ciun97/iun97
+      
       if(use_photos) then
 c check for events killed by PYTHIA QCD shower 
 c for QED radiation with PHOTOS
          if(nevhep.ne.photoscount) then 
-            call lhefreadev(97)
+            call lhefreadev(iun97)
             photoscount=nevhep
          endif
          photoscount=photoscount+1

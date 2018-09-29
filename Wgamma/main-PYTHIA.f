@@ -33,6 +33,10 @@ c     powheg-nc/c-lo
       real * 8 powheginput
       external powheginput
 
+      integer iun97
+      common/ciun97/iun97
+
+      
       use_photos = powheginput("#use_photos") .eq. 1
 
       powheg_nc  = powheginput("#powheg-nc")  .eq. 1
@@ -65,7 +69,7 @@ c Set up initial parameter
       call PYABEG
       nevhep=0
       do iev=1,maxev
-         call lhefreadev(97)
+         call lhefreadev(iun97)
          if(nup.eq.0) then
             write(*,*) ' no event generated; skipping'
             goto 111
@@ -337,14 +341,24 @@ c (with respect to the emitting lepton) less than scalup
       save ini
       integer vdecaytemp,iv
       save vdecaytemp
-
+c.....mauro:randomize leptons/b
+      integer lepid
+      common/clepid/lepid
+c.....mauro:randomize leptons/e      
       ok = .false.
 
-      if (ini) then
-          ini=.false.
-          vdecaytemp=lprup(1)-10000
-      endif
+      
+c.....mauro:randomize leptons/b
+c     in order to allow the randomization of the leptons
+c     lprup cannot be used
+c$$$      if (ini) then
+c$$$          ini=.false.
+c$$$          vdecaytemp=lprup(1)-10000
+c$$$  endif
+      vdecaytemp=lepid
+c.....mauro:randomize leptons/e      
 
+      
 c W/Z is at 3
       iv = 3
 

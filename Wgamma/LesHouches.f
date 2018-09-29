@@ -10,6 +10,8 @@
       integer alr,em,rad,flem,flrad,coluborn(2)
       integer conj_flavour
       external conj_flavour
+      integer i1
+
       if(kn_csi.eq.0d0) then
 c it is a Born event or a LO event
 c first assign flavours and colour to the underlying Born process
@@ -24,9 +26,17 @@ c     overridden in the finalize_lh user subroutine.
             scalup=sqrt(rad_ptsqmin)
          endif
       else
-c it is an event with radiation
+c     it is an event with radiation
+c         write(*,*)'-----------------------------------------'
+c         do i1=1,nlegreal
+c            write(*,*)kn_preal(:,i1),
+c     =           sqrt(abs(kn_preal(0,i1)**2
+c     =          -kn_preal(1,i1)**2-kn_preal(2,i1)**2-kn_preal(3,i1)**2))
+c         enddo
+         
          call momenta_lh(kn_preal,nlegreal)
          call born_lh
+
          scalup=sqrt(rad_pt2max)
          nup=nlegreal
          istup(nup)=1
@@ -71,10 +81,32 @@ c conjugate their colours in the output, to make them outgoing.
          idup(em)=flem
          idup(rad)=flrad
       endif
-c if there are resonances, setup up appropriate LH pointers
+
+c.....mauro:randomize leptons/b
+c.....here we can randomize the lepton flavours if needed
+         call randomize_leptons
+c.....mauro:randomize leptons/e          
+      
+c     if there are resonances, setup up appropriate LH pointers
+
+c      do i1=1,nup
+c         write(*,*)'pup2',pup(:,i1)
+c      enddo
+      
       call lh_resonances
+
+c      write(*,*)'lh_res',idup(1:nup)
+      
+c      do i1=1,nup
+c         write(*,*)'pup3',pup(:,i1)
+c      enddo
+
+      
 c add resonances, perform decays, put particles on shell, etc.(or nothing!)
       call finalize_lh
+
+c      write(*,*)'fin_lh',idup(1:nup)
+      
       end
 
       function conj_flavour(ifl)
@@ -174,7 +206,9 @@ c     change mothers of decaying particles
          enddo
          pup(4,k)=p(0,k)
          pup(5,k)=sqrt(abs(p(0,k)**2-p(1,k)**2
-     #       -p(2,k)**2-p(3,k)**2))
+     #-p(2,k)**2-p(3,k)**2))
+c         write(*,*)'pup',pup(:,k)
+         
       enddo
       end
 
@@ -493,3 +527,70 @@ c Btilde event: pass x1 and x2, id1, id2 etc. of the current underlying Born
       if(id1.eq.0) id1=21
       if(id2.eq.0) id2=21
       end
+
+c.....mauro:randomize leptons/b
+c.....here we can randomize the lepton flavours if needed
+      subroutine randomize_leptons
+      implicit none
+      include 'LesHouches.h'
+      real*8 gen_emutau
+      common/cgen_emutau/gen_emutau
+      integer i1,i2
+      integer ini
+      data ini/0/
+      save ini
+      integer lep(3),nu(3)
+      save lep,nu
+      integer posl,posn,sl,sn
+      real * 8 random
+      external random
+      real*8 x
+
+c      integer count
+c      data count/0/
+c      save count
+
+c      count=count+1
+
+c      if(count.eq.19) write(*,*)'beg',idup(1:nup)
+      
+      if(ini.eq.0) then
+         ini=1
+         lep=(/11,13,15/)
+         nu =(/12,14,16/)
+      endif
+
+      if(gen_emutau.le.1d0) return
+      
+      posl=-1
+      posn=-1
+      do i1=1,nup
+         if(  abs(idup(i1)).eq.11.or.abs(idup(i1)).eq.13.or.
+     +        abs(idup(i1)).eq.15) posl=i1
+         if(  abs(idup(i1)).eq.12.or.abs(idup(i1)).eq.14.or.
+     +        abs(idup(i1)).eq.16) posn=i1
+      enddo
+
+      if(posl.le.0.or.posn.le.0) then
+         write(*,*)"error in randomize_leptons"
+         stop
+      endif
+      sl=1
+      if(idup(posl).lt.0) sl=-1
+      sn=1
+      if(idup(posn).lt.0) sn=-1
+
+      i2=nint(gen_emutau)
+      x =random()
+      do i1=1,i2
+         if(x.lt.i1*1d0/gen_emutau) goto 66
+      enddo
+ 66   continue
+      idup(posl)=sl*lep(i1)
+      idup(posn)=sn* nu(i1)
+
+c      if(count.eq.19) write(*,*)'end',idup(1:nup)
+c      if(count.eq.19) stop
+      
+      end subroutine randomize_leptons
+c.....mauro:randomize leptons/e                

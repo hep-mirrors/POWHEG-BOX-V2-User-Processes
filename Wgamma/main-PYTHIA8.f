@@ -29,6 +29,12 @@ c     powheg-nc/c-lo
       real * 8 powheginput
       external powheginput
       integer ios
+
+      integer iun97
+      common/ciun97/iun97
+
+
+      
       WHCPRG='PYTHIA'
 
       use_photos = powheginput("#use_photos") .eq. 1
@@ -39,6 +45,8 @@ c     matrix element corrections
 c     double bremsstrahlung generation
       double_brem = powheginput("#double_brem") .eq. 1
 
+
+      
       powheg_nc = powheginput("#powheg-nc") .eq. 1
       if(powheg_nc) use_photos = .false.
 
@@ -61,7 +69,7 @@ c py8veto=1: pythia8 routines (setResonanceScale)
 
       call getmaxev(maxev)
 
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun97)
 
       call pythia_init
 
@@ -80,7 +88,7 @@ c that pass the veto.
 
          py8trial = 0
 
-         call lhefreadev(97)
+         call lhefreadev(iun97)
 
 c     set the starting scale for QED shower from leptons to SCALUP
 c     (the default would be the resonance mass)
@@ -127,6 +135,8 @@ c$$$c DEBUG ENDS ********************************************
 
  888     continue
          do m=1,5
+
+            
 c Insist to shower this event;
             call pythia_next(iret)
             
@@ -200,8 +210,11 @@ c     check parameters
 
       subroutine getmaxev(maxev)
       integer maxev
+      integer iun97
+      common/ciun97/iun97
+      save /ciun97/
 C--- Opens input file and counts number of events, setting MAXEV;
-      call opencount(maxev)
+      call opencountunit(maxev,iun97)
       end
 
       subroutine pyaend
@@ -426,13 +439,18 @@ c (with respect to the emitting lepton) less than scalup
       integer vdecaytemp,iv
       save vdecaytemp
 
+c.....mauro:randomize leptons/b
+      integer lepid
+      common/clepid/lepid
+c      save /clepid/
+c     not constant if gen_emutau > 1
+c$$$      if (ini) then
+c$$$          ini=.false.
+c$$$          vdecaytemp=lprup(1)-10000
+c$$$      endif
+      vdecaytemp=lepid
+c.....mauro:randomize leptons/e      
       ok = .false.
-
-      if (ini) then
-          ini=.false.
-          vdecaytemp=lprup(1)-10000
-      endif
-
 c W/Z is at 3
       iv = 3
 c Photos puts its photon right after the last particle belonging to

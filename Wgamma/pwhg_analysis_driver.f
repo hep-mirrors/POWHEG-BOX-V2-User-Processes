@@ -12,6 +12,13 @@
       data testplots/.true./
       data ini/.true./
       save testplots,ini
+c.....mauro:randomize leptons/b
+c.....it used only in stage 2-4: DO NOT AFFECT lhef_analysis or main-pythia
+c.....on the other had lepid is defined only after st4, when lhefreadev is called      
+      integer lepid
+      common/clepid/lepid
+      save /clepid/
+c.....mauro:randomize leptons/e      
       if(ini) then
          if (powheginput('#testplots').eq.1d0) then
             testplots=.true.
@@ -62,6 +69,11 @@ c     We can then use the flst_born(jpart,1) of the FIRST Born
 c      do jpart=3,flst_lightpart-1
       do jpart=3,nlegborn
          idhep(jpart)=flst_born(jpart,1)
+c.....mauro:randomize leptons/b
+c.....here s just to avoid NaNs, since the analysis in stage 1-4 not reliable anyhow         
+         if(  abs(idhep(jpart)).eq.11.or.abs(idhep(jpart)).eq.13.or.
+     +        abs(idhep(jpart)).eq.15) lepid=idhep(jpart)
+c.....mauro:randomize leptons/e         
       enddo
 c     call analysis routine
       call analysis(dsig0)

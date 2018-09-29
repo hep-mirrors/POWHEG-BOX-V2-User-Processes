@@ -6,9 +6,51 @@ c...reads initialization information from a les houches events file on unit nlf.
       character * 200 string
       integer ipr,iret,nch
       include 'LesHouches.h'
-      logical ini
-      data ini/.true./
+c.....mauro:randomize leptons/b
+c     this routines are only called by lhef_analysis and main-pythia
+c     we need to reset this option
+      real*8 gen_emutau
+      common/cgen_emutau/gen_emutau
+      save /cgen_emutau/
+
+      real * 8 powheginput
+      external powheginput
+      
+      integer ini
+      data ini/0/
       save ini
+
+      if(ini.eq.0) then
+         ini=1
+         gen_emutau=powheginput("#generate_e_mu_tau")
+         if(gen_emutau.le.1d0) gen_emutau=1d0
+         if(gen_emutau.ne.1d0.and.gen_emutau.ne.2d0.and.
+     x        gen_emutau.ne.3d0) then
+            write(*,*)"gen_emutau can only be:"
+            write(*,*)"=1 :: one lepton family, DEFAULT"
+            write(*,*)"=2 :: e/mu     2 lepton families"
+            write(*,*)"=3 :: e/mu/tau 3 lepton families"
+            write(*,*)"DO NOT use this option when reweighting"
+            write(*,*)"an already existing event sample!!!!!!!"
+            STOP
+         endif
+         if(gen_emutau.gt.1d0) then
+            write(*,*)"gen_emutau can only be:"
+            write(*,*)"=1 :: one lepton family, DEFAULT"
+            write(*,*)"=2 :: e/mu     2 lepton families"
+            write(*,*)"=3 :: e/mu/tau 3 lepton families"
+            write(*,*)"---------------------------------------"
+            write(*,*)"DO NOT use this option when reweighting"
+            write(*,*)"an already existing event sample!!!!!!!"
+            write(*,*)"---------------------------------------"
+            write(*,*)"with this option the pwgalone output is"
+            write(*,*)"NOT reliable: use lhef_analysis instead"
+         endif
+      endif
+
+c.....mauro:randomize leptons/e      
+      
+      
  1    continue
 c     read(nlf,fmt='(a)',err=998,end=998) string
       call pwhg_io_read(nlf,string,iret)
@@ -55,6 +97,19 @@ c     powheg-nc/c-lo
       logical powheg_nc,powheg_c_lo
       common/wgammode/powheg_nc,powheg_c_lo
 
+      integer conta
+      data conta/0/
+      save conta
+      
+c.....mauro:randomize leptons/b
+      integer lepid
+      common/clepid/lepid
+      save /clepid/
+      
+
+
+
+      
       gam_evt=.false.
       Wgam_evt=.false.
       Wjgam_evt=.false.
@@ -71,6 +126,10 @@ c      read(nlf,fmt='(a)',err=777,end=666) string
          goto 998
       endif
       if(string(1:6).eq.'<event') then
+
+         conta=conta+1
+
+         
 c on error try next event. The error may be caused by merging
 c truncated event files. Thus we are tolerant about it.
 c Only on EOF return with no event found
@@ -83,8 +142,19 @@ c Only on EOF return with no event found
             read(string,*,err=1) idup(i),istup(i),mothup(1,i),
      &           mothup(2,i),icolup(1,i),icolup(2,i),(pup(j,i),j=1,5),
      &           vtimup(i),spinup(i)
+c.....mauro:randomize leptons/b
+            if(  abs(idup(i)).eq.11.or.abs(idup(i)).eq.13.or.
+     &           abs(idup(i)).eq.15) lepid=idup(i)
+c.....mauro:randomize leptons/e                  
          enddo
-c event selection
+c     event selection
+
+c         if(conta.eq.889) then
+c            do i=1,nup
+c               write(*,*)'id',idup(i),pup(1:4,i)
+c            enddo
+c         endif
+         
          do j=1,nup
             if(idup(j).eq.22) then
                gam_evt=.true.

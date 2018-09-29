@@ -29,6 +29,10 @@ c gluons are numbered 21 in pdg
          spinup(ireg)=9
          vtimup(ireg)=0
       enddo
+c.....mauro:randomize leptons/b
+      call randomize_leptons
+c.....mauro:randomize leptons/e                
+      
 c it is an event with radiation
       call momenta_lh(kn_preal,nup)
 

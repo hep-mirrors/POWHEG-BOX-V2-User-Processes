@@ -7,6 +7,15 @@ PDF = lhapdf
 #Choose Analysis: none, default, atlas
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
 ANALYSIS=default
+ANALYSIS=atlas-lep
+#ANALYSIS=atlas
+
+# possible pythia versions py8185 py8235
+#PYTHIAVERSION=py8185
+PYTHIAVERSION=py8235
+# possible photos versions 356 361
+#PHOTOSVERSION=ph356
+PHOTOSVERSION=ph361
 ## For static linking uncomment the following
 #STATIC= -static
 #
@@ -23,7 +32,7 @@ F77= gfortran -fno-automatic -ffixed-line-length-none
 ## Use -O2 to be on the safe side
 OPT=-O2
 ## For debugging uncomment the following
-#DEBUG= -ggdb -pg
+## DEBUG= -ggdb -pg
 ifdef DEBUG
 OPT=-O0
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow
@@ -54,16 +63,39 @@ OPT = -O3 #-fast
 endif
 
 #necessary staff for PHOTOS++ and PYTHIA8
-HEPMC_CONFIG= hepmc-config
-HEPMCLOCATION = $(shell $(HEPMC_CONFIG) --prefix)
+#HEPMC_CONFIG= hepmc-config
+#HEPMCLOCATION = $(shell $(HEPMC_CONFIG) --prefix)
+HEPMCLOCATION=/home/fulvio/mauro/rivet/local
 LIBSHEPMC += -L$(HEPMCLOCATION)/lib -lHepMC
-PHOTOSCC_CONFIG=photoscc-config
-PHOTOSCC_LOCATION= $(shell $(PHOTOSCC_CONFIG) --prefix)
+#PHOTOSCC_CONFIG=photoscc-config
+#PHOTOSCC_LOCATION= $(shell $(PHOTOSCC_CONFIG) --prefix)
+#PHOTOSCC_LOCATION=/archive/mchiesa/rivet/PHOTOS
+# uncomment the following for photos 356
+
+ifeq ("$(PHOTOSVERSION)","ph356")
+PHOTOSCC_LOCATION=/home/utente/work/rivet/PHOTOS-356
 LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotosCxxInterface -lPhotosFortran
-PYTHIA8_CONFIG=pythia8-config
-PYTHIA8LOCATION=$(shell $(PYTHIA8_CONFIG) --prefix)
+endif
+
+# uncomment the folowing for photos 361
+ifeq ("$(PHOTOSVERSION)","ph361")
+PHOTOSCC_LOCATION=/home/fulvio/mauro/rivet/PHOTOS-361
+LIBSPHOTOSCC=-L$(PHOTOSCC_LOCATION)/lib -lPhotospp -lPhotosppHEPEVT -lPhotosppHepMC -lstdc++ -ldl
+endif
+
+
+#uncomment the following for pythia 8.1
+ifeq ("$(PYTHIAVERSION)","py8185")
+PYTHIA8LOCATION=/home/fulvio/mauro/rivet/pythia8185/
 FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PHOTOSCC_LOCATION)/include
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/archive -lpythia8 -llhapdfdummy -lstdc++
+endif
+
+ifeq ("$(PYTHIAVERSION)","py8235")
+PYTHIA8LOCATION=/home/fulvio/mauro/rivet/pythia8235
+FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PHOTOSCC_LOCATION)/include
+LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib -lpythia8 -lstdc++ -ldl
+endif
 
 PWD=$(shell pwd)
 OBJ=$(PWD)/obj-$(COMPILER)
@@ -80,6 +112,9 @@ INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
 
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
+LHAPDF_CONFIG=/archive/mchiesa/lhapdf6.2.1/LHAPDF-6.2.1/local/bin/lhapdf-config
+LHAPDF_CONFIG=/home/utente/work/rivet/localLHAPDF/bin/lhapdf-config
+LHAPDF_CONFIG=/home/fulvio/mauro/miopdf/bin/lhapdf-config
 PDFPACK=lhapdf6if.o lhapdf6ifcc.o
 FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF -lstdc++
@@ -114,7 +149,8 @@ endif
 
 ifeq ("$(ANALYSIS)","atlas")
 ##To include Fastjet configuration uncomment the following lines. 
-FASTJET_CONFIG=$(shell which fastjet-config)
+#FASTJET_CONFIG=$(shell which fastjet-config)
+FASTJET_CONFIG=/home/fulvio/mauro/rivet/local/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_analysis-atlas.o pwhg_bookhist-multi.o uti.o
@@ -122,6 +158,20 @@ PWHGANAL=pwhg_analysis-atlas.o pwhg_bookhist-multi.o uti.o
 #PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
 PWHGANAL+= fastjetfortran.o buildjets.o
 endif
+
+
+ifeq ("$(ANALYSIS)","atlas-lep")
+##To include Fastjet configuration uncomment the following lines. 
+#FASTJET_CONFIG=$(shell which fastjet-config)
+FASTJET_CONFIG=/home/fulvio/mauro/fastjet/local/bin/fastjet-config
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+PWHGANAL=pwhg_analysis-atlas-leptons.o pwhg_bookhist-multi.o uti.o
+## Also add required Fastjet drivers to PWHGANAL (examples are reported)
+#PWHGANAL+= fastjetsisconewrap.o fastjetktwrap.o fastjetCDFMidPointwrap.o fastjetD0RunIIConewrap.o fastjetfortran.o
+PWHGANAL+= fastjetfortran.o buildjets.o
+endif
+
 
 %.o: %.f $(INCLUDE)
 	$(FF) -c -o $(OBJ)/$@ $<
@@ -175,7 +225,7 @@ PYTHIA=main-PYTHIA.o setup-PYTHIA-lhef.o pythia.o boostrot.o powheginput.o		\
 	reshufflemoms.o scalupveto.o scalupvetoqpy6.o photos.o $(FPEOBJ)
 
 main-PYTHIA-lhef: $(PYTHIA)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBSFASTJET)  $(STATIC) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA)) $(LIBS) $(LIBSFASTJET)  $(STATIC) -o $@
 
 PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(PWHGANAL) lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o \
@@ -183,7 +233,18 @@ PYTHIA8=main-PYTHIA8.o pythia8F77.o boostrot.o powheginput.o \
 	$(FPEOBJ)
 
 main-PYTHIA8-lhef: $(PYTHIA8)
-	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)$(LIBSLHAPDF) -o $@
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA8)) $(LIBS) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)$(LIBSLHAPDF) -o $@
+
+
+
+PYTHIA82=main-PYTHIA8.o pythia82F77.o boostrot.o powheginput.o \
+	$(PWHGANAL) lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pdfdummies.o \
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o scalupveto.o 	\
+	$(FPEOBJ)
+
+main-PYTHIA82-lhef: $(PYTHIA82)
+	$(FF) $(patsubst %,$(OBJ)/%,$(PYTHIA82)) $(LIBS) $(LIBSFASTJET) $(LIBPYTHIA8) $(LIBSHEPMC) $(LIBSPHOTOSCC) -L/usr/local/lib $(STATIC)$(LIBSLHAPDF) -o $@
+
 
 # target to cleanup
 .PHONY: clean
@@ -195,7 +256,7 @@ clean:
 .PHONY: veryclean
 veryclean:
 	rm -f $(OBJ)/*.o $(OBJ)/MCFM/*.o pwhg_main lhef_analysis main-HERWIG-lhef	\
-	main-PYTHIA-lhef main-PYTHIA8-lhef
+	main-PYTHIA-lhef main-PYTHIA8-lhef main-PYTHIA82-lhef
 
 ###################################################################
 # From here on there are targets specific to the W implementation

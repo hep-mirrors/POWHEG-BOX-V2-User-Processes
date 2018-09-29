@@ -4,7 +4,7 @@
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/LHAFortran.h"
+#include "Pythia8Plugins/LHAFortran.h"
 
 #include "Photos/Photos.h"
 #include "Photos/PhotosHEPEVTEvent.h"
@@ -64,6 +64,7 @@ extern "C" {
 
   void photos_init_()
   {
+
     // added-be :: comment to have constant seeds
 
         // Initialize two random seeds
@@ -83,7 +84,7 @@ extern "C" {
     // // matrix element corrections
     Photos::setMeCorrectionWtForW(photon_corr_.me_corr);
     // // double bremsstrahlung generation
-     Photos::setDoubleBrem(photon_corr_.double_brem);
+    Photos::setDoubleBrem(photon_corr_.double_brem);
   }
 
   void photos_process_()
@@ -708,8 +709,38 @@ private:
 
 };
 
+
+// Definition of class derived from LHAupFortran
+// (required in newer versions of PYTHIA)
+class LHAupFortran_new : public LHAupFortran {
+
+public:
+
+  LHAupFortran_new();
+  bool fillHepRup();
+  bool fillHepEup();
+
+};
+
+
+// Implementation of required functions of the derived class
+extern "C" {
+
+  LHAupFortran_new::LHAupFortran_new() {}
+
+  bool LHAupFortran_new::fillHepRup() {
+    return true;
+  }
+
+  bool LHAupFortran_new::fillHepEup() {
+    return true;
+  }
+
+}
+
 Pythia pythia("/usr/local/xmldoc");
-LHAupFortran LHAinstance;
+//LHAupFortran LHAinstance;
+LHAupFortran_new LHAinstance;
 
 extern "C" {
   void pythia_init_()
@@ -810,6 +841,9 @@ extern "C" {
 			       pThardMode, pTemtMode, emittedMode, pTdefMode, MPIvetoMode);
     pythia.setUserHooksPtr((UserHooks *) PWGHooks);
 
+
+
+    
     // tune
     if(cpy8tune_.py8tune == 14) {
       pythia.readString("Tune:pp = 14"); // Monash2013 tune
@@ -857,6 +891,8 @@ extern "C" {
     //    pythia.readString("15:mayDecay = off");
 
     
+    //    pythia.init(&LHAinstance);
+
     //added-be
     // Possibility to set the random seed 
     cout << "****  Setting random seed for PYTHIA" << endl;
@@ -869,8 +905,20 @@ extern "C" {
     pythia.readString("Random:seed = 0");
     //added-en
 
+    
+    // Set pointer to LHA interface
+    pythia.setLHAupPtr(&LHAinstance);
 
-    pythia.init(&LHAinstance);
+    // Set process (read LHE events from pointer)
+    pythia.readString("Beams:frameType = 5");
+
+    // Do the actual initialization
+    bool pythiaok = pythia.init();
+    if (!pythiaok) {
+      cout << "****  PYTHIA could not be initialized, aborting" << endl;
+      exit(1);
+    }
+    
   }
 
   void pythia_next_(int & iret)
@@ -892,7 +940,8 @@ extern "C" {
     }
     for (int i = 0; i < pythia.event.size(); ++i)
     {
-      *(isthep+i) = pythia.event.statusHepMC(i);
+      //      *(isthep+i) = pythia.event.statusHepMC(i);
+      *(isthep+i) = pythia.event[i].statusHepMC();
       *(idhep+i) = pythia.event[i].id();
       // All pointers should be increased by 1, since here we follow
       // the c/c++ convention of indeces from 0 to n-1, but i fortran
@@ -919,13 +968,13 @@ extern "C" {
 // We do nothing here; we fill the common block on the fortran side
 // before we start pythia and before we call each event.
 
-bool LHAupFortran::fillHepRup()
-{
-  return true;
-}
+// bool LHAupFortran::fillHepRup()
+// {
+//   return true;
+// }
 
-bool LHAupFortran::fillHepEup()
-{
-  return true;
-}
+// bool LHAupFortran::fillHepEup()
+// {
+//   return true;
+// }
 

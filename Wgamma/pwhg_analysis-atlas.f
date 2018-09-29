@@ -124,6 +124,15 @@ ccc-fastjet
       real*8 p_hjet(0:3),pt_hjet,Et_jet,eta_jet,p_h2jet(0:3),pt_h2jet
       integer kjet,njets,njets_cut
 ccc-fastjet
+c.....mauro:randomize leptons/b
+c     powheg-nc/c-lo
+      logical powheg_nc,powheg_c_lo
+      common/wgammode/powheg_nc,powheg_c_lo      
+c     the flag gen_emutau is only red when the lhefreadheader is called
+c     here we use a local variable since the analysis is called in stage 2-4
+c     the fixed order results have no physical meaning anyhow
+      logical use_gen_emutau
+c.....mauro:randomize leptons/e      
 
 
       strcut(1)='_1'
@@ -133,6 +142,14 @@ ccc-fastjet
       if(dsig.eq.0) return
 
       if (ini) then
+c.....mauro:randomize leptons/b
+         use_gen_emutau=powheginput("#generate_e_mu_tau").ge.2d0
+         if(use_gen_emutau) then
+            write(*,*)"if generate_e_mu_tau >= 2 use a different"
+            write(*,*)"analysis in your makefile. STOP"
+            stop
+         endif
+c.....mauro:randomize leptons/e                  
          write (*,*)
          write (*,*) '********************************************'
          if(whcprg.eq.'NLO   ') then

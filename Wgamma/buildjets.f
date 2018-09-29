@@ -118,10 +118,26 @@ C - Extract final state particles to feed to jet finder
          return
       endif
 
+      pjet=0d0
+      njets=0
+
+c.....start debug
+c$$$      write(*,*)'candidate'
+c$$$      do j=1,ntracks
+c$$$         write(*,*)ptrack(:,j)
+c$$$      enddo
+      
+      
       palg=-1d0
       r=0.4d0
       call fastjetppgenkt(ptrack,ntracks,r,palg,pjet,njets)
 
+
+c$$$      write(*,*)'recombined'
+c$$$      do j=1,njets
+c$$$         write(*,*)pjet(:,j)
+c$$$      enddo
+      
       end
 
       function ishadron(fl)
