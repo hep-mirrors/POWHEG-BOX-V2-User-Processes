@@ -460,10 +460,10 @@
 	    else
 		if ( lcroot ) then
 		   call ffcxra(cs4(167),ipi12(23),xqi,qiDqj,sdel2,2,ier)
-		   call ffcxra(cs4(169),ipi12(25),xqi,qiDqj,sdel2,3,ier)
+		   call ffcxra(cs4(169),ipi12(27),xqi,qiDqj,sdel2,3,ier)
 		else
 		   call ffxtra(cs4(167),ipi12(23),xqi,qiDqj,sdel2,2,ier)
-		   call ffxtra(cs4(169),ipi12(25),xqi,qiDqj,sdel2,3,ier)
+		   call ffxtra(cs4(169),ipi12(27),xqi,qiDqj,sdel2,3,ier)
 *		   call ffxtro(cs4(167),ipi12(23),xqi,qiDqj,sdel2,2,ier)
 *		   call ffxtro(cs4(169),ipi12(25),xqi,qiDqj,sdel2,3,ier)
 		endif
