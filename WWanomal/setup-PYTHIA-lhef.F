@@ -93,11 +93,13 @@ C--- Opens input file and counts number of events, setting MAXEV;
       COMMON/PYDAT3/MDCY(500,3),MDME(8000,2),BRAT(8000),KFDP(8000,5)
       integer pycomp
       external pycomp
+      integer iun
+      common/copencount/iun
       integer maxev
       common/mcmaxev/maxev
       nevhep=0
 c read the header first, so lprup is set
-      call lhefreadhdr(97)
+      call lhefreadhdr(iun)
 
 c     Make PI0 stable as in herwig default
       mdcy(pycomp(111),1)=0
@@ -114,7 +116,9 @@ c     Make PI0 stable as in herwig default
       logical ini
       data ini/.true./
       save ini
-      call lhefreadev(97)
+      integer iun
+      common/copencount/iun
+      call lhefreadev(iun)
       end
 
 
