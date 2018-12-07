@@ -1,0 +1,279 @@
+ Got it           2 particles_0001_v1.dat                                                 
+ Added loop options for p          56
+ Looping over           11  particles
+d d~ u u~ c c~ s s~ b b~ g   
+ Added loop options for j          57
+ Looping over           11  particles
+d d~ u u~ c c~ s s~ b b~ g   
+ Particles read from file.
+ Reading interactions from file
+ Adding new coupling QCD            1
+ Adding new coupling QED            2
+  
+  
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Found multiparticle:            4           2
+ Part Info after sort:            1          55           0 T
+ Part Info after sort:            2          54           0 T
+ Part Info after sort:            3          53           0 T
+ Part Info after sort:            4          57           0 T
+ Final part info:            1          55           0 T T
+ Final part info:            2          54           0 T T
+ Final part info:            3          53           0 T T
+ Final part info:            4          57           0 T T
+ Attempting Process: b b~ -> h w+ w- d  
+ Setting particle            1          55  to id           55
+ Setting particle            2          54  to id           54
+ Setting particle            3          53  to id           53
+ Setting particle            4          57  to id            2
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QCD  =            1
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QED  =            3
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ New Process           1
+    2   53   54   55
+
+Attempting Process: b b~ -> h w+ w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ New Process           2
+   50   53   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          20
+ Writing function B_CL_001_001 in file b_cl_001_001.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          20
+ Writing function B_CL_001_002 in file b_cl_001_002.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          20
+ Writing function B_SF_001_003 in file b_sf_001_003.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          20
+ Writing function B_SF_001_004 in file b_sf_001_004.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Found multiparticle:            4           2
+ Part Info after sort:            1          55           0 T
+ Part Info after sort:            2          54           0 T
+ Part Info after sort:            3          53           0 T
+ Part Info after sort:            4          57           0 T
+ Final part info:            1          55           0 T T
+ Final part info:            2          54           0 T T
+ Final part info:            3          53           0 T T
+ Final part info:            4          57           0 T T
+ Attempting Process: b~ b -> h w+ w- d  
+ Setting particle            1          55  to id           55
+ Setting particle            2          54  to id           54
+ Setting particle            3          53  to id           53
+ Setting particle            4          57  to id            2
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QCD  =            1
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QED  =            3
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ New Process           3
+    2   53   54   55
+
+Attempting Process: b~ b -> h w+ w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ New Process           4
+   50   53   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          20
+ Writing function B_CL_002_001 in file b_cl_002_001.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          20
+ Writing function B_CL_002_002 in file b_cl_002_002.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          20
+ Writing function B_SF_002_003 in file b_sf_002_003.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           20  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          20
+ Writing function B_SF_002_004 in file b_sf_002_004.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           3          53
+ Part Info after sort:            3           2          54
+ Part Info after sort:            4           1          55
+ Found match           5           4
+   50   53   54   55
+    0    0    0    0
+
+
+ Thank you for using MadGraph
+

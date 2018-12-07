@@ -1,0 +1,420 @@
+########################################################################
+#                          -*- Makefile -*-                            #
+########################################################################
+## Flags
+
+## Compiler and Compiler Flags
+#  use this convention:
+#  CC          C compiler command
+#  CFLAGS      C compiler flags
+#  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+#              nonstandard directory <lib dir>
+#  LIBS        libraries to pass to the linker, e.g. -l<library>
+#  CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
+#              you have headers in a nonstandard directory <include dir>
+#  CPP         C preprocessor
+#  CXX         C++ compiler command
+#  CXXFLAGS    C++ compiler flags
+#  CXXCPP      C++ preprocessor
+#  FC          Fortran compiler command
+#  FCFLAGS     Fortran compiler flags
+
+
+# Fortran compiler
+FCOMP    =  gfortran
+FFLAGS   = -fno-automatic -fno-range-check
+FFLAGS  += -ffixed-line-length-none -lgfortran -ff2c -DU77EXT=0 -DQuad=0
+CCOMP    =  gcc
+# flag only for Linux:
+CFLAGS   = -g -fomit-frame-pointer -ffast-math -Wall -m64
+# flag only for MacOS X:
+#CFLAGS  += -stdlib=libstdc++ -mmacosx-version-min=10.6 -Qunused-arguments
+#
+
+# C compiler for LoopTools
+CCOMP    =  gcc
+CFLAGS   = -g -fomit-frame-pointer -ffast-math -Wall -m64
+# flag only for Linux:
+CFLAGS  += -DNOUNDERSCORE=0 -DBIGENDIAN=0
+# flag only for MacOS X:
+#CFLAGS  += -stdlib=libstdc++ -mmacosx-version-min=10.6 -Qunused-arguments
+#
+LTSTATIC = static
+
+# C++ compiler
+CXXCOMP  =  g++
+# flag only for Linux:
+CXXFLAGS = -g -fomit-frame-pointer -ffast-math -Wall -m64
+# flag only for MacOS X:
+#CXXFLAGS = -stdlib=libstdc++ -mmacosx-version-min=10.6 -Qunused-arguments
+
+# for DHELAS
+# wheter to link precompiled DHELAS library statically or compile it from source (static, none)
+DHELASSTATIC = none
+
+## PDF
+## choose PDF: native,lhapdf
+## LHAPDF package has to be installed separately
+## wheter to link precompiled LHAPDF library statically or compile it 
+## from source (static, none)
+PDF = lhapdf
+PDFSTATIC = none
+
+# choose analysis: none, default
+# default+all: requires FASTJET package, has to be installed separately (see below)
+# all: requires MT2 code by Cheng and Han, has to be downloaded to MT2DIR (see below)
+ANALYSIS = default
+
+## warning for type-conversions-> basically useless, as those occur in too many places
+#WARN = -Wconversion
+## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
+## of boolean in gfortran.
+#FFLAGS = -fbounds-check
+#FFLAGS = -Wall -Wtabs -Wall -Wimplicit-interface
+## gfortran 4.4.1 optimized with -O3 yields erroneous results
+## Use -O2 to be on the safe side
+OPT = -O2
+
+## For debugging uncomment the following
+#DEBUG = -ggdb -pg -D DEBUG
+## For more verbose debugging uncomment the following
+#DEBUG = -ggdb -pg -D DEBUG -D DEBUGV
+#DEBUG = -ggdb -pg -D DEBUGV
+## If you wish to show all possible debug output
+#DEBUG = -ggdb -pg -D DEBUG -D DEBUGV -D DEBUGQ -D CHECK
+# Preprocessor
+PREPRO = -cpp
+
+## Additional Flags,
+#Add Higgs coupling to bottom induced processes in MadGraph: -D MAD_HIGGS
+#Check UV finiteness in FormCalc Virtuals: -D CHECKUV
+#FLAGS = -D CHECKUV
+
+
+### generate directory obj, if not yet existing
+$(shell mkdir -p build)
+$(shell mkdir -p run)
+
+
+
+########################################################################
+## Paths
+
+WORKINGDIR = $(shell pwd)
+PWHGDIR    = $(WORKINGDIR)/..
+
+#Linux
+#LIBGFORTRANPATH = /usr/lib/gcc/x86_64-linux-gnu/4.8
+#LIBSTDCPPPATH   = /usr/lib/gcc/x86_64-linux-gnu/4.8
+LIBGFORTRANPATH = /usr/lib/gcc/x86_64-redhat-linux/4.8.3
+LIBSTDCPPPATH   = /usr/lib/gcc/x86_64-redhat-linux/4.8.3
+#Mac OSX
+#LIBGFORTRANPATH = /usr/local/lib
+#LIBSTDCPPPATH   = /usr/local/lib
+
+# directories
+TOOLS   = $(WORKINGDIR)/tools
+VIRT    = $(WORKINGDIR)/virtuals
+REAL    = $(WORKINGDIR)/reals
+VIRTSUB = $(VIRT)/bbbar_squaredme
+REALSUB = $(REAL)/SubProcesses
+
+#LT    = $(TOOLS)/Looptools_212
+LT    = /home/tu/tu_tu/tu_ptiju01/LoopTools-2.12/src
+MADMODEL  = $(REAL)/Source/MODEL
+MADDHELAS = $(REAL)/Source/DHELAS
+FJ        = $(TOOLS)/fastjet
+PY        = $(TOOLS)/pythia
+HER       = $(TOOLS)/herwig
+
+# include directories
+UINCLUDE  = $(WORKINGDIR)/include
+PINCLUDE  = $(PWHGDIR)/include
+VINCLUDE  = $(VIRT)/include
+MDINCLUDE = $(REAL)/include
+LTINCLUDE = $(LT)/include
+
+########################################################################
+## search for the files and set paths
+
+vpath %.f $(PWHGDIR) $(WORKINGDIR) $(TOOLS)/FormCalcTools $(TOOLS)/functions $(PY) $(HER)
+vpath %.F $(WORKINGDIR) $(TOOLS)/FormCalcTools
+vpath &.F $(LT)/A $(LT)/B $(LT)/C $(LT)/D $(LT)/E $(LT)/util 
+vpath %.F $(VIRT)/RenConsts $(VIRTSUB)
+vpath %.F $(MADMODEL) $(MADDHELAS) $(REALSUB)
+vpath %.f $(MADMODEL) $(MADDHELAS) $(REALSUB)
+vpath %.c $(LT)/util
+vpath %.cc $(FJ)
+vpath %.o $(WORKINGDIR)/build
+
+########################################################################
+## Includes
+
+FF  = $(FCOMP) $(FFLAGS) $(OPT) $(WARN) $(DEBUG) $(FLAGS) $(PREPRO) -I$(UINCLUDE) 
+FF += -I$(PINCLUDE) -I$(LTINCLUDE) -I$(WORKINGDIR) -I$(VINCLUDE)
+FF += -I$(MDINCLUDE)
+CC = $(CCOMP) $(CFLAGS) $(OPT) -I$(LTINCLUDE)
+CXX = $(CXXCOMP) $(CXXFLAGS) $(OPT)
+INCLUDE  = $(wildcard *.h $(UINCLUDE)/*.h  $(PINCLUDE)/*.h $(VINCLUDE)/*.h)
+INCLUDE += $(wildcard *.h $(UINCLUDE)/*.inc  $(LTINCLUDE))
+INCLUDE += $(wildcard *.h $(MDINCLUDE)/*.h)
+INCLUDE += $(wildcard *.inc $(MDINCLUDE)/*.inc)
+
+
+########################################################################
+## Libraries
+
+# include if LT needs to be linked statically:
+#LIBS  += $(LIBGFORTRANPATH)/libgfortran.a
+#LIBS  += $(LIBSTDCPPPATH)/libstdc++.a
+
+### LoopTools in Tools/Looptools_212 ###
+ifeq ("$(LTSTATIC)","static")
+  ## If Looptools has been compiled with gfortran
+  ## and if you want to link it statically, you have to include
+  ## libgfortran as well. The same holds for libstdc++.
+  LIBS  += $(TOOLS)/libooptools.a
+else
+  LTOBJ = Aget.o      ffca0.o     ffxa0.o              \
+          Bcoeff.o    BcoeffAD.o  BcoeffFF.o           \
+          Bget.o      ffcb0.o     ffcb1.o    ffcb2p.o  \
+          ffcdb0.o    ffcel2.o    ffdel2.o   ffxb0.o   \
+          ffxb1.o     ffxb2p.o    ffxdb0.o   ffxdb1.o  \
+          C0func.o    C0funcC.o   Cget.o     ffcc0.o   \
+          ffcc0p.o    ffcel3.o    ffdel3.o   ffdxc0.o  \
+          ffxc0.o     ffxc0i.o    ffxc0p.o   ffxc0p0.o \
+          D0func.o    D0funcC.o   Dget.o     ffd0c.o   \
+          ffdcc0.o    ffdel4.o    ffRn.o     ffS2.o    \
+          ffS3n.o     ffT13.o     ffTn.o     ffxd0.o   \
+          ffxd0h.o    ffxd0i.o    ffxd0m0.o  ffxd0p.o  \
+          ffxd0tra.o  ffxdbd.o                         \
+          E0func.o    Ecoeffa.o   Ecoeffb.o  Eget.o    \
+          ffdel5.o    ffxe0.o                          \
+          auxCD.o     cache.o     Dump.o     ff2dl2.o  \
+          ffabcd.o    ffbndc.o    ffcli2.o   ffcrr.o   \
+          ffcxr.o     ffcxs3.o    ffcxs4.o   ffcxyz.o  \
+          ffdcxs.o    ffinit.o    fftran.o   ffxli2.o  \
+          ffxxyz.o    ini.o       Li2.o      Li2omx.o  \
+          solve.o
+endif
+
+### DHELAS in $(MADDHELAS) ###
+ifeq ("$(DHELASSTATIC)","static")
+  LIBS  += $(TOOLS)/libdhelas3.a
+else
+  MADDHELASOBJ = httsxx.o hstlxx.o hvvshx.o vvvtlx.o jvvtlx.o uvvvlx.o \
+	usslxx.o hvvhxx.o hvvvxx.o httaxx.o vvsshx.o jvsshx.o ttssxx.o \
+	utssxx.o ttsaxx.o jvvsxx.o vvvsxx.o jvshxx.o utsaxx.o vvshxx.o \
+	jvtaxx.o vvtaxx.o uvvaxx.o momntx.o mom2cx.o boostx.o rotxxx.o \
+	ixxxxx.o oxxxxx.o vxxxxx.o sxxxxx.o iovxxx.o fvixxx.o fvoxxx.o \
+	jioxxx.o j3xxxx.o iosxxx.o fsixxx.o fsoxxx.o hioxxx.o vvvxxx.o \
+	jvvxxx.o gggxxx.o jggxxx.o vvsxxx.o jvsxxx.o hvvxxx.o vssxxx.o \
+	jssxxx.o hvsxxx.o sssxxx.o hssxxx.o wwwwxx.o jwwwxx.o w3w3xx.o \
+	jw3wxx.o ggggxx.o jgggxx.o vvssxx.o jvssxx.o hvvsxx.o ssssxx.o \
+	hsssxx.o eaixxx.o eaoxxx.o jeexxx.o ioscxx.o fsicxx.o fsocxx.o \
+	hiocxx.o iovcxx.o fvicxx.o fvocxx.o jiocxx.o iovgox.o fvigox.o \
+	fvogox.o jiogox.o iovdmx.o fvidmx.o fvodmx.o jiodmx.o txxxxx.o \
+	txxxx2.o iotxkk.o iovtkk.o vvtxkk.o ftixkk.o ftoxkk.o iovkxx.o \
+	vvvkxx.o jiokxx.o jvvkxx.o sstxxx.o hstxxx.o ussxxx.o iotxxx.o \
+	ftixxx.o ftoxxx.o uioxxx.o vvtxxx.o uvvxxx.o jvtxxx.o iovtxx.o \
+	fvtixx.o fvtoxx.o jiotxx.o uiovxx.o vvvtxx.o jvvtxx.o uvvvxx.o \
+	ggggtx.o jgggtx.o uggggx.o w3w3nx.o jw3wnx.o jwwwnx.o wwwwnx.o \
+	irxxxx.o orxxxx.o iorsxx.o fsorxx.o hiorxx.o irosxx.o fsirxx.o \
+	hiroxx.o iorvxx.o fvorxx.o jiorxx.o irovxx.o fvirxx.o jiroxx.o \
+	iorvsx.o fvsorx.o jsiorx.o hviorx.o irovsx.o fvsirx.o jsirox.o \
+	hvirox.o iorvvx.o fvvorx.o jviorx.o irovvx.o fvvirx.o jvirox.o \
+	iorsgx.o irosgx.o fsorgx.o fsirgx.o hiorgx.o hirogx.o iorvgx.o \
+	fvorgx.o jiorgx.o irovgx.o fvirgx.o jirogx.o iorvvg.o fvvorg.o \
+	jviorg.o irovvg.o fvvirg.o jvirog.o iorscx.o fsorcx.o hiorcx.o \
+	iroscx.o fsircx.o hirocx.o iorvcx.o fvorcx.o jiorcx.o irovcx.o \
+	fvircx.o jirocx.o iorvsc.o fvsorc.o jsiorc.o hviorc.o irovsc.o \
+	fvsirc.o jsiroc.o hviroc.o iorvvc.o fvvorc.o jviorc.o irovvc.o \
+	fvvirc.o jviroc.o sstlxx.o
+endif
+
+########################################################################
+## Linker files
+
+### USER Files ###
+USER = Born.o Born_phsp.o Reals.o Virtuals.o \
+       init_processes.o init_couplings.o
+
+### Functions in tools/functions/
+FUNC = funcbasic.o funcprocess.o Print.o
+
+
+### MadGraph_POWHEG for born and real amplitudes
+# Libs: -lmadgraph -lmodel (MadGraph_POWHEG/my_proc/Source) -ldhelas3 (MadGraph_POWHEG/my_proc/SubProcesses)
+MADSUBOBJ = b_cl_001_001.o b_sf_001_003.o realmtrx_001.o sborn_cl_001.o \
+	    b_cl_001_002.o b_sf_001_004.o realmtrx_002.o sborn_cl_002.o \
+	    b_cl_002_001.o b_sf_002_003.o sborn_sf_001.o sborn_proc.o   \
+	    b_cl_002_002.o b_sf_002_004.o sborn_sf_002.o sreal_proc.o   \
+            nexper.o \
+            realmtrx_003.o realmtrx_004.o realmtrx_005.o realmtrx_006.o
+
+MADMODELOBJ = couplings.o printout.o
+
+MADOBJ = $(MADSUBOBJ) $(MADDHELASOBJ) $(MADMODELOBJ)
+
+### PDFs ###
+ifeq ("$(PDF)","lhapdf")
+  LHAPDF_CONFIG = /home/tu/tu_tu/tu_ptiju01/lhapdf6/bin/lhapdf-config
+  PDFPACK-LO    = lhapdfif-LO.o
+  PDFPACK       = lhapdfif.o
+  LIBSLHAPDF    = -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  \
+                  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF
+ifeq  ("$(STATIC)","-static")
+  ## If LHAPDF has been compiled with gfortran and if you want to link it statically, you have to include
+  ## libgfortran as well. The same holds for libstdc++. 
+  ## One possible solution is to use fastjet, since $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+  ## does perform this inclusion. The path has to be set by the user. 
+  #LIBGFORTRANPATH = /usr/lib/gcc/x86_64-redhat-linux/4.4
+  #LIBSTDCPP       = /usr/lib/gcc/i386-redhat-linux/4.3.0/
+  #LIBSLHAPDF     += -L$(LIBGFORTRANPATH) -lgfortranbegin -lgfortran -L$(LIBSTDCPP) -lstdc++
+  LIBSLHAPDF += /opt/lib/libLHAPDF.a
+endif
+  LIBS += $(LIBSLHAPDF) 
+else
+  PDFPACK = mlmpdfif.o hvqpdfpho.o
+endif
+
+### ANALYSIS ###
+ifeq ("$(ANALYSIS)","default")
+  USE_FASTJET=yes
+  PWHGANALYSIS = Analysis.o pwhg_bookhist-multi.o
+endif
+ifeq ("$(ANALYSIS)","none")
+  PWHGANALYSIS = Analysis-dummy.o pwhg_bookhist.o
+endif
+
+### Fastjet ###
+ifdef USE_FASTJET
+#  FASTJET_CONFIG=$(shell which fastjet-config)
+  FASTJET_CONFIG=/home/tu/tu_tu/tu_ptiju01/fastjet/bin/fastjet-config
+  ifeq ($(FASTJET_CONFIG),)
+    $(error cannot find fastjet-config (did you install fastjet?))
+  endif
+  LIBS += $(shell $(FASTJET_CONFIG) --libs --plugins ) -lstdc++
+  FJCXXFLAGS  += $(shell $(FASTJET_CONFIG) --cxxflags)
+  PWHGANALYSIS+= fastjetfortran.o
+  # fastjetsisconewrap.o fastjetktwrap.o
+endif
+
+### Formcalc Files in tools/FormcalcTools/###
+FORMCALC = VecSet.o
+
+## Virtual Amplitudes in virtuals/ ###
+VIRTUALS = CalcRenConst.o bbbar_abbr0angle.o bbbar_abbr0hel.o bbbar_abbr0s.o    \
+          bbbar_abbr1angle.o bbbar_abbr1hel.o bbbar_abbr1s.o                    \
+          bbbar_born.o bbbar_box.o bbbar_self.o bbbar_vert.o bbbar_SquaredME.o
+
+### PWHG FILES in ../ ###
+PWHG1 = pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o utils.o    \
+	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
+	test_Sudakov.o pt2maxreg.o sigborn.o gen_real_phsp.o maxrat.o	\
+	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
+	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
+	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
+	pwhg_analysis_driver.o checkmomzero.o		                \
+	integrator.o newunit.o mwarn.o sigsoftvirt.o	\
+	sigcollsoft.o sigvirtual.o validflav.o decidemerging.o          \
+        loadstorenlo.o setlocalscales.o ubprojections.o                 \
+        mint_upb.o pwhgreweight.o reshufflemoms.o opencount.o
+
+PWHG-LO = $(PWHG1) setstrongcoupl-LO.o
+PWHG = $(PWHG1) setstrongcoupl.o
+
+### LHEF ###
+# analyze LHEF output
+LHEF = lhef_analysis.o boostrot.o random.o cernroutines.o		\
+     opencount.o powheginput.o  			                \
+     lhefread.o newunit.o pwhg_analysis_driver.o 			\
+     funcprocess.o init_couplings.o Print.o				\
+     bra_ket_subroutines.o funcbasic.o
+
+
+### PYTHIA ###
+# target to read event file, shower events with PYTHIA + analysis
+PYTHIA = main-PYTHIA.o setup-PYTHIA-lhef.o pythia6428.o	                \
+	boostrot.o powheginput.o init_couplings.o funcprocess.o 	\
+	lhefread.o newunit.o pdfdummies.o		                \
+	pwhg_analysis_driver.o random.o cernroutines.o opencount.o	\
+	bra_ket_subroutines.o funcbasic.o Print.o
+
+### HERWIG ###
+# this is work in progress
+HERWIG = main-HERWIG.o setup-HERWIG-lhef.o herwig6510.o boostrot.o 	\
+     opencount.o powheginput.o pwhg_bookhist-multi.o random.o		\
+     lhefread.o newunit.o pwhg_analysis_driver.o 			\
+     funcprocess.o init_couplings.o cernroutines.o			\
+     bra_ket_subroutines.o off_to_on.o funcbasic.o
+
+########################################################################
+## Generate objects
+./build/%.o: %.f $(INCLUDE)
+	$(FF) -c -o $@ $<
+
+./build/%.o: %.F $(INCLUDE)
+	$(FF) -c -o $@ $<
+
+./build/%.o: %.cc
+	$(CXX) -c -o $@ $^ $(FJCXXFLAGS)
+
+./build/%.o: %.c $(INCLUDE)
+	$(CC) -c -o $@ $<
+
+########################################################################
+## Rules
+## type make -j4 [rule] to speed up the compilation
+
+
+BUILD = $(PWHG) $(PDFPACK) $(USER) $(PWHGANALYSIS) $(FUNC) $(VIRTUALS) \
+	$(FORMCALC) $(LTOBJ) $(MADOBJ)
+
+BUILD-LO = $(PWHG-LO) $(PDFPACK-LO) $(USER) $(PWHGANALYSIS) $(FUNC) \
+	$(VIRTUALS) $(FORMCALC) $(LTOBJ) $(MADOBJ)
+
+BUILDLHEF = $(LHEF) $(PWHGANALYSIS) $(MADOBJ)
+
+BUILDPYTHIA = $(PYTHIA) $(PWHGANALYSIS)  $(MADOBJ)
+
+pwhg_main_hzz: $(addprefix ./build/,$(BUILD))
+	$(FF) $(patsubst %,build/%,$(BUILD)) $(LDFLAGS) $(LIBS) -o $@
+
+pwhg_main_hzz-lo: $(addprefix ./build/, $(BUILD-LO))
+	$(FF) $(patsubst %,build/%,$(BUILD-LO)) $(LDFLAGS) $(LIBS) -o $@
+
+lhef_analysis: $(addprefix ./build/,$(BUILDLHEF))
+	$(FF) $(patsubst %,build/%,$(BUILDLHEF)) $(LIBS) -o $@ 
+
+main-PYTHIA-lhef: $(addprefix ./build/,$(BUILDPYTHIA))
+	$(FF) $(patsubst %,build/%,$(BUILDPYTHIA)) $(LIBS) -o $@
+
+# not implemented yet
+main-HERWIG-lhef: $(addprefix ./build/,$(BUILDHERWIG))
+	$(FF) $(patsubst %,build/%,$(BUILDHERWIG)) $(LIBS) -o $@
+
+all: pwhg_main_hzz pwhg_main_hzz-lo lhef_analysis main-PYTHIA-lhef
+
+clean:
+	rm -f build/*.o pwhg_main_hzz pwhg_main_hzz-lo lhef_analysis main-PYTHIA-lhef
+
+clean-results:
+	cd run && rm -f *.out *.dat *.top *.lhe *.eps FlavRegList \
+	bornequiv realequiv realequivregions pwhg_checklimits virtequiv
+
+do-pwhg do: pwhg_main_hzz
+	cd run && ../pwhg_main_hzz && cd ..
+
+do-pwhg-lo: pwhg_main_hzz-lo
+	cd run && ../pwhg_main_hzz-lo && cd ..
+
+do-lhef: lhef_analysis
+	cd run && ../lhef_analysis && cd ..
+
+do-pythia: main-PYTHIA-lhef
+	cd run && ../main-PYTHIA-lhef && cd ..
+
+########################################################################
+#                       -*- End of Makefile -*-                        #
+########################################################################

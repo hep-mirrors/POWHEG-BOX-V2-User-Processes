@@ -1,0 +1,197 @@
+## POWHEG-BOX-V2 Project Higgs + Vector boson pair production
+
+This README describes how to compile and run the POWHEG-BOX-V2 HVV
+project, that contains programs to generate predictions at
+next-to-leading order in QCD with a matching to parton shower in the
+5-flavor scheme, for the following processes calculated within the
+Standard Model:
+
+1/ p p --> H W+ W- (sub-directory HWW) excluding b-bbar initial states
+
+2/ p p --> H Z Z (sub-directory HZZ) excluding b-bbar initial states
+
+3/ p p --> H W+ Z and p p --> H W- Z (sub-directory HWZ), including CKM effects
+
+4/ b bbar --> H W+ W- contribution to the process 1/ (sub-directory HWW-bb)
+
+5/ g g --> H W+ W- contribution to the process 1/ (sub-directory HWW-gg), LO QCD
+
+6/ b bbar --> H Z Z contribution to the process 2/ (sub-directory HZZ-bb)
+
+7/ g g --> H Z Z contribution to the process 2/ (sub-directory HZZ-gg), LO QCD
+
+The code is based on the calculations presented in the following two
+papers:
+
+[1] "Next-To-Leading Order QCD Corrections to Associated Production of a
+SM Higgs Boson with a Pair of Weak Bosons in the POWHEG-BOX", Julien
+Baglio, Phys.Rev. D93 (2016) 054010 [arXiv:1512.05787 [hep-ph]]
+
+[2] "Gluon fusion and b-bbar corrections to H W+ W- / H Z Z production in
+the POWHEG-BOX", Julien Baglio, Phys.Lett. B764 (2017) 54-59
+[arXiv:1609.0597 [hep-ph]]
+
+If you use this code please cite Ref. [1,2].
+
+### IMPORTANT NOTE
+
+The code available was tested and developed for the POWHEG-BOX-V2
+revision 3591. If you examine unexpected behavior or if you have
+problems compiling and running the code, please rewind or update your
+POWHEG-BOX-V2 version to the one it was developed for.
+To do this, use
+
+        $ svn info
+        $ svn up -r3591
+
+in your POWHEG-BOX-V2 main directory.
+
+### Synopsis
+
+More informations about how to set up the project properly on
+http://powhegbox.mib.infn.it/.
+
+### Compiling
+
+This code works with gfortran version 5.2 minimum, or ifort. In order
+to compile the library COLLIER 1.2.2, cmake of version 2.8.7 minimum
+is required.
+
+The first thing you should do is to compile the static libraries
+
+* libdhelas3.a
+
+* libcollier.a
+
+* libooptools.a
+
+for your own operating system. To do this, call the configuration
+scripts in the main directory by simply typing
+
+        $ ./configure [compiler]
+
+where the optional parameter compiler is whether gfortran or ifort.
+
+You can compile the libraries by typing
+
+        $ make libdhelas3.a
+
+        $ make libcollier.a
+
+        $ make libooptools.a
+
+or short
+
+        $ make libs
+
+If you want to use your own libraries, copy them into ./Libraries/ or
+provide paths to the libraries in the Makefile.
+
+Then, change into a desired process directory and type
+
+        $ make -j4 all
+
+        $ make clean-results && make -j4 do
+
+to compile the virtual and real matrix elements and run the program.
+
+Important note for Mac OSX and probably for some Linux users, too: In
+order to link the object files properly with newer compiler versions
+it might be advisable to recompile all libraries using the -lstdc++
+flag.
+
+### Precompiler Flags
+
+In the current version several C preprocessor (cpp) flags are
+implemented. The preprocessor runs in traditional mode for
+gfortran. Any restrictions of the file format, especially the limits
+on line length, apply for  preprocessed output as well, so it might be
+advisable to use the
+
+        -ffree-line-length-none 
+
+or 
+
+        -ffixed-line-length-none
+
+options (activated as default). If you want to change a preprocessor
+flag it is imperative to run
+
+        $ make clean
+
+before recompiling the source code.
+
+The preprocessor flags are used in such a way that runtime is
+saved. For example it is more costly to replace all preprocessor flags
+with
+
+        if(flag) then
+          ...
+        endif
+
+statements, since the program has to check these if-query
+frequently. With the implemented flags the C preprocessor sorts out
+all unnecessary code.
+
+Please refer to the Makefile for a detailed overview.
+
+### Running
+
+        $ make do
+
+compiles the source and runs the program in ./run.
+
+        $ make clean
+
+removes all object files in ./build. This has no effect on the
+compiled program.
+
+        $ make clean-results
+
+removes the results in ./testrun.
+
+        $ make clean-all
+
+removes the results, the object files and the compiled programs.
+
+        $ make clean-libs
+
+removes the libraries in ./Libraries.
+
+Runtime variables, such as integration points, number of events to
+generate, etc. has to be specified in powheg.input. If you want to
+change the W or Z masses, W or Z widths, Higgs mass, and all other
+important input parameters, you can do it in the powheg.input
+too. Each of these input files provided in sub-processes directories
+should be self-explanatories by themselves.
+
+### Include shower effects
+
+When a pwgevents.lhe is generated by the main executables
+(pwhg_main_hXX), the user can shower this file to obtain .top
+histograms containing NLO QCD + parton shower effects.
+
+From the folders HXX go to ./run folder
+
+        $ cd ./run
+
+and then type
+
+        $ ../main-PYTHIA-lhef
+
+to shower the LHE file with PYTHIA and obtain the .top file containing
+kinematical distributions including shower effects.
+
+To combine .top distributions from different contributions (e.g. NLO
+QCD HWW + (b bbar-->HWW) + ( gg-->HWW)), the user can use the
+executable "mergedata" to be found in the folder "plot-aux". Please
+read carefully the header of the source code to understand how to use
+the mergedata program.
+
+### License
+
+This project is open source and distributed under the GNU General
+Public Licence 2.0. Please refer to the LICENSE file for a full
+overview.
+
+Version control: version 1.0 published on December 6, 2018.

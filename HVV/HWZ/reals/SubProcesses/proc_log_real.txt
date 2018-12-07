@@ -1,0 +1,4475 @@
+ Got it           2 particles_0001_v1.dat                                                 
+ Added loop options for p          56
+ Looping over            9  particles
+d d~ u u~ c c~ s s~ g   
+ Added loop options for j          57
+ Looping over            9  particles
+d d~ u u~ c c~ s s~ g   
+ Particles read from file.
+ Reading interactions from file
+ Adding new coupling QCD            1
+ Adding new coupling QED            2
+  
+  
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Found multiparticle:            4           2
+ Part Info after sort:            1          55           0 T
+ Part Info after sort:            2          52           0 T
+ Part Info after sort:            3          54           0 T
+ Part Info after sort:            4          57           0 T
+ Final part info:            1          55           0 T T
+ Final part info:            2          52           0 T T
+ Final part info:            3          54           0 T T
+ Final part info:            4          57           0 T T
+ Attempting Process: d~ d~ -> h z w+ d  
+ Setting particle            1          55  to id           55
+ Setting particle            2          52  to id           52
+ Setting particle            3          54  to id           54
+ Setting particle            4          57  to id            2
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QCD  =            1
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QED  =            3
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           1
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2           2          55          52          54           2
+
+
+
+Attempting Process: d~ d -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           2
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2           3          55          52          54          50
+
+
+
+Attempting Process: d~ u -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           3
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_001 in file realmtrx_001.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d~ c -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           4
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_002 in file realmtrx_002.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d~ s -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           5
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          11          55          52          54          50
+
+
+
+Attempting Process: d~ g -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           6
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          54           3
+
+
+
+Attempting Process: d~ g -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           7
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_003 in file realmtrx_003.f.
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d~ g -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           8
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_004 in file realmtrx_004.f.
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d~ g -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process           9
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          54          11
+
+
+
+Attempting Process: d d~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          10
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3           2          55          52          54          50
+
+
+
+Attempting Process: d u~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          11
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3           6          55          52          54          50
+
+
+
+Attempting Process: d c~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          12
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          14          55          52          54          50
+
+
+
+Attempting Process: d s~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          13
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          10          55          52          54          50
+
+
+
+Attempting Process: d g -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          14
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          54           2
+
+
+
+Attempting Process: d g -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          15
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          54           6
+
+
+
+Attempting Process: d g -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          16
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          54          14
+
+
+
+Attempting Process: d g -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          17
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          54          10
+
+
+
+Attempting Process: u~ d -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          18
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6           3          55          52          54          50
+
+
+
+Attempting Process: u~ u -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          19
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6           7          55          52          54          50
+
+
+
+Attempting Process: u~ c -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          20
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          15          55          52          54          50
+
+
+
+Attempting Process: u~ s -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          21
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          11          55          52          54          50
+
+
+
+Attempting Process: u~ g -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          22
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          54           3
+
+
+
+Attempting Process: u~ g -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          23
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          54           7
+
+
+
+Attempting Process: u~ g -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          24
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          54          15
+
+
+
+Attempting Process: u~ g -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          25
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          54          11
+
+
+
+Attempting Process: u d~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          26
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_005 in file realmtrx_005.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u u~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          27
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7           6          55          52          54          50
+
+
+
+Attempting Process: u c~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          28
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          14          55          52          54          50
+
+
+
+Attempting Process: u s~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          29
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_006 in file realmtrx_006.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u g -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          30
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_007 in file realmtrx_007.f.
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u g -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          31
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          54           6
+
+
+
+Attempting Process: u g -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          32
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          54          14
+
+
+
+Attempting Process: u g -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          33
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_008 in file realmtrx_008.f.
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c~ d -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          34
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14           3          55          52          54          50
+
+
+
+Attempting Process: c~ u -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          35
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14           7          55          52          54          50
+
+
+
+Attempting Process: c~ c -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          36
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          15          55          52          54          50
+
+
+
+Attempting Process: c~ s -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          37
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          11          55          52          54          50
+
+
+
+Attempting Process: c~ g -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          38
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          54           3
+
+
+
+Attempting Process: c~ g -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          39
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          54           7
+
+
+
+Attempting Process: c~ g -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          40
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          54          15
+
+
+
+Attempting Process: c~ g -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          41
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          54          11
+
+
+
+Attempting Process: c d~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          42
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_009 in file realmtrx_009.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c u~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          43
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15           6          55          52          54          50
+
+
+
+Attempting Process: c c~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          44
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          14          55          52          54          50
+
+
+
+Attempting Process: c s~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          45
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_010 in file realmtrx_010.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c g -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          46
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_011 in file realmtrx_011.f.
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c g -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          47
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          54           6
+
+
+
+Attempting Process: c g -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          48
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          54          14
+
+
+
+Attempting Process: c g -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          49
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_012 in file realmtrx_012.f.
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s~ d -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          50
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10           3          55          52          54          50
+
+
+
+Attempting Process: s~ u -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          51
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_013 in file realmtrx_013.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s~ c -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          52
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_014 in file realmtrx_014.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s~ s -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          53
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          11          55          52          54          50
+
+
+
+Attempting Process: s~ g -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          54
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          54           3
+
+
+
+Attempting Process: s~ g -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          55
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_015 in file realmtrx_015.f.
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s~ g -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          56
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_016 in file realmtrx_016.f.
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s~ g -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          57
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          54          11
+
+
+
+Attempting Process: s d~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          58
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11           2          55          52          54          50
+
+
+
+Attempting Process: s u~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          59
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11           6          55          52          54          50
+
+
+
+Attempting Process: s c~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          60
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          14          55          52          54          50
+
+
+
+Attempting Process: s s~ -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          61
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          10          55          52          54          50
+
+
+
+Attempting Process: s g -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          62
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          54           2
+
+
+
+Attempting Process: s g -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          63
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          54           6
+
+
+
+Attempting Process: s g -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          64
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          54          14
+
+
+
+Attempting Process: s g -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          65
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          54          10
+
+
+
+Attempting Process: g d~ -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          66
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          54           3
+
+
+
+Attempting Process: g d~ -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          67
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_017 in file realmtrx_017.f.
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g d~ -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          68
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_018 in file realmtrx_018.f.
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g d~ -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          69
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          54          11
+
+
+
+Attempting Process: g d -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          70
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          54           2
+
+
+
+Attempting Process: g d -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          71
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          54           6
+
+
+
+Attempting Process: g d -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          72
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          54          14
+
+
+
+Attempting Process: g d -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          73
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          54          10
+
+
+
+Attempting Process: g u~ -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          74
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          54           3
+
+
+
+Attempting Process: g u~ -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          75
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          54           7
+
+
+
+Attempting Process: g u~ -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          76
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          54          15
+
+
+
+Attempting Process: g u~ -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          77
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          54          11
+
+
+
+Attempting Process: g u -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          78
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_019 in file realmtrx_019.f.
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g u -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          79
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          54           6
+
+
+
+Attempting Process: g u -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          80
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          54          14
+
+
+
+Attempting Process: g u -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          81
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_020 in file realmtrx_020.f.
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g c~ -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          82
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          54           3
+
+
+
+Attempting Process: g c~ -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          83
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          54           7
+
+
+
+Attempting Process: g c~ -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          84
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          54          15
+
+
+
+Attempting Process: g c~ -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          85
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          54          11
+
+
+
+Attempting Process: g c -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          86
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_021 in file realmtrx_021.f.
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g c -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          87
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          54           6
+
+
+
+Attempting Process: g c -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          88
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          54          14
+
+
+
+Attempting Process: g c -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          89
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_022 in file realmtrx_022.f.
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g s~ -> h z w+ d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          90
+    3   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          54           3
+
+
+
+Attempting Process: g s~ -> h z w+ u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          91
+    7   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_023 in file realmtrx_023.f.
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g s~ -> h z w+ c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          92
+   15   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_024 in file realmtrx_024.f.
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g s~ -> h z w+ s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          93
+   11   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          54          11
+
+
+
+Attempting Process: g s -> h z w+ d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          94
+    2   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          54           2
+
+
+
+Attempting Process: g s -> h z w+ u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          95
+    6   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          54           6
+
+
+
+Attempting Process: g s -> h z w+ c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          96
+   14   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          54          14
+
+
+
+Attempting Process: g s -> h z w+ s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          97
+   10   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          54          10
+
+
+
+Attempting Process: g g -> h z w+ g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ New Process          98
+   50   52   54   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          54
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          50          55          52          54          50
+
+
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Found multiparticle:            4           2
+ Part Info after sort:            1          55           0 T
+ Part Info after sort:            2          52           0 T
+ Part Info after sort:            3          53           0 T
+ Part Info after sort:            4          57           0 T
+ Final part info:            1          55           0 T T
+ Final part info:            2          52           0 T T
+ Final part info:            3          53           0 T T
+ Final part info:            4          57           0 T T
+ Attempting Process: d~ d~ -> h z w- d  
+ Setting particle            1          55  to id           55
+ Setting particle            2          52  to id           52
+ Setting particle            3          53  to id           53
+ Setting particle            4          57  to id            2
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QCD  =            1
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QED  =            3
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process          99
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2           2          55          52          53           2
+
+
+
+Attempting Process: d~ d -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         100
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2           3          55          52          53          50
+
+
+
+Attempting Process: d~ u -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         101
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2           7          55          52          53          50
+
+
+
+Attempting Process: d~ c -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         102
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          15          55          52          53          50
+
+
+
+Attempting Process: d~ s -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         103
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          11          55          52          53          50
+
+
+
+Attempting Process: d~ g -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         104
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          53           3
+
+
+
+Attempting Process: d~ g -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         105
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          53           7
+
+
+
+Attempting Process: d~ g -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         106
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          53          15
+
+
+
+Attempting Process: d~ g -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         107
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           2          50          55          52          53          11
+
+
+
+Attempting Process: d d~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         108
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3           2          55          52          53          50
+
+
+
+Attempting Process: d u~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         109
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_025 in file realmtrx_025.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d c~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         110
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_026 in file realmtrx_026.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d s~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         111
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          10          55          52          53          50
+
+
+
+Attempting Process: d g -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         112
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          53           2
+
+
+
+Attempting Process: d g -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         113
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_027 in file realmtrx_027.f.
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d g -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         114
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_028 in file realmtrx_028.f.
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: d g -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         115
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           3          50          55          52          53          10
+
+
+
+Attempting Process: u~ d -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         116
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_029 in file realmtrx_029.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u~ u -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         117
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6           7          55          52          53          50
+
+
+
+Attempting Process: u~ c -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         118
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          15          55          52          53          50
+
+
+
+Attempting Process: u~ s -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         119
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_030 in file realmtrx_030.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u~ g -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         120
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_031 in file realmtrx_031.f.
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u~ g -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         121
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          53           7
+
+
+
+Attempting Process: u~ g -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         122
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           6          50          55          52          53          15
+
+
+
+Attempting Process: u~ g -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         123
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_032 in file realmtrx_032.f.
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: u d~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         124
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7           2          55          52          53          50
+
+
+
+Attempting Process: u u~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         125
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7           6          55          52          53          50
+
+
+
+Attempting Process: u c~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         126
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          14          55          52          53          50
+
+
+
+Attempting Process: u s~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         127
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          10          55          52          53          50
+
+
+
+Attempting Process: u g -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         128
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          53           2
+
+
+
+Attempting Process: u g -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         129
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          53           6
+
+
+
+Attempting Process: u g -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         130
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          53          14
+
+
+
+Attempting Process: u g -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         131
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process           7          50          55          52          53          10
+
+
+
+Attempting Process: c~ d -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         132
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_033 in file realmtrx_033.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c~ u -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         133
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14           7          55          52          53          50
+
+
+
+Attempting Process: c~ c -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         134
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          15          55          52          53          50
+
+
+
+Attempting Process: c~ s -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         135
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_034 in file realmtrx_034.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c~ g -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         136
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_035 in file realmtrx_035.f.
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c~ g -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         137
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          53           7
+
+
+
+Attempting Process: c~ g -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         138
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          14          50          55          52          53          15
+
+
+
+Attempting Process: c~ g -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         139
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_036 in file realmtrx_036.f.
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: c d~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         140
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15           2          55          52          53          50
+
+
+
+Attempting Process: c u~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         141
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15           6          55          52          53          50
+
+
+
+Attempting Process: c c~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         142
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          14          55          52          53          50
+
+
+
+Attempting Process: c s~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         143
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          10          55          52          53          50
+
+
+
+Attempting Process: c g -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         144
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          53           2
+
+
+
+Attempting Process: c g -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         145
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          53           6
+
+
+
+Attempting Process: c g -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         146
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          53          14
+
+
+
+Attempting Process: c g -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         147
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          15          50          55          52          53          10
+
+
+
+Attempting Process: s~ d -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         148
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10           3          55          52          53          50
+
+
+
+Attempting Process: s~ u -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         149
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10           7          55          52          53          50
+
+
+
+Attempting Process: s~ c -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         150
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          15          55          52          53          50
+
+
+
+Attempting Process: s~ s -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         151
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          11          55          52          53          50
+
+
+
+Attempting Process: s~ g -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         152
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          53           3
+
+
+
+Attempting Process: s~ g -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         153
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          53           7
+
+
+
+Attempting Process: s~ g -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         154
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          53          15
+
+
+
+Attempting Process: s~ g -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         155
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          10          50          55          52          53          11
+
+
+
+Attempting Process: s d~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         156
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11           2          55          52          53          50
+
+
+
+Attempting Process: s u~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         157
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_037 in file realmtrx_037.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s c~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         158
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_038 in file realmtrx_038.f.
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s s~ -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         159
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          10          55          52          53          50
+
+
+
+Attempting Process: s g -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         160
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          53           2
+
+
+
+Attempting Process: s g -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         161
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_039 in file realmtrx_039.f.
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s g -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         162
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_040 in file realmtrx_040.f.
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: s g -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         163
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          11          50          55          52          53          10
+
+
+
+Attempting Process: g d~ -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         164
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          53           3
+
+
+
+Attempting Process: g d~ -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         165
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          53           7
+
+
+
+Attempting Process: g d~ -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         166
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          53          15
+
+
+
+Attempting Process: g d~ -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         167
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           2          55          52          53          11
+
+
+
+Attempting Process: g d -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         168
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          53           2
+
+
+
+Attempting Process: g d -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         169
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_041 in file realmtrx_041.f.
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g d -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         170
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_042 in file realmtrx_042.f.
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g d -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         171
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           3          55          52          53          10
+
+
+
+Attempting Process: g u~ -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         172
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_043 in file realmtrx_043.f.
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g u~ -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         173
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          53           7
+
+
+
+Attempting Process: g u~ -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         174
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           6          55          52          53          15
+
+
+
+Attempting Process: g u~ -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         175
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_044 in file realmtrx_044.f.
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g u -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         176
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          53           2
+
+
+
+Attempting Process: g u -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         177
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          53           6
+
+
+
+Attempting Process: g u -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         178
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          53          14
+
+
+
+Attempting Process: g u -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         179
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50           7          55          52          53          10
+
+
+
+Attempting Process: g c~ -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         180
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_045 in file realmtrx_045.f.
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g c~ -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         181
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          53           7
+
+
+
+Attempting Process: g c~ -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         182
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          14          55          52          53          15
+
+
+
+Attempting Process: g c~ -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         183
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_046 in file realmtrx_046.f.
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g c -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         184
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          53           2
+
+
+
+Attempting Process: g c -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         185
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          53           6
+
+
+
+Attempting Process: g c -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         186
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          53          14
+
+
+
+Attempting Process: g c -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         187
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          15          55          52          53          10
+
+
+
+Attempting Process: g s~ -> h z w- d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         188
+    3   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          53           3
+
+
+
+Attempting Process: g s~ -> h z w- u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         189
+    7   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          53           7
+
+
+
+Attempting Process: g s~ -> h z w- c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         190
+   15   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          53          15
+
+
+
+Attempting Process: g s~ -> h z w- s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         191
+   11   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          10          55          52          53          11
+
+
+
+Attempting Process: g s -> h z w- d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         192
+    2   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          53           2
+
+
+
+Attempting Process: g s -> h z w- u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         193
+    6   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_047 in file realmtrx_047.f.
+ isym before:            1
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g s -> h z w- c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         194
+   14   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           18  graphs.
+  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          18
+ Writing function REALMTRX_048 in file realmtrx_048.f.
+ isym before:            1
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+
+
+
+Attempting Process: g s -> h z w- s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         195
+   10   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          11          55          52          53          10
+
+
+
+Attempting Process: g g -> h z w- g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ New Process         196
+   50   52   53   55
+ isym before:            1
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ isym after:            1
+  
+Progress    0% finished topology           1           0
+ No graphs for this process          50          50          55          52          53          50
+
+
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          52
+ Part Info after sort:            3           3          53
+ Part Info after sort:            4           1          55
+ Found match         197         196
+   50   52   53   55
+    0    0    0    0
+
+
+ Thank you for using MadGraph
+

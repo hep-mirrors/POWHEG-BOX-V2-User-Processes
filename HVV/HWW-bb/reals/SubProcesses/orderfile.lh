@@ -1,0 +1,14 @@
+ # orderfile.lh
+ # Created by POWHEG-BOX
+ # Date 17/10/2016; time 10:02:23
+
+ MatrixElementSquareType CHaveraged
+ CorrectionType          QCD
+ IRregularisation        CDR
+ AlphasPower             0
+ AlphaPower              3
+ SubdivideSubprocess     no
+
+ # processes  list
+   5  -5 ->  25  24 -24
+  -5   5 ->  25  24 -24

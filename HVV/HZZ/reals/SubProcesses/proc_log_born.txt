@@ -1,0 +1,3177 @@
+ Got it           2 particles_0001_v1.dat                                                 
+ Added loop options for p          56
+ Looping over           11  particles
+d d~ u u~ c c~ s s~ b b~ g   
+ Added loop options for j          57
+ Looping over           11  particles
+d d~ u u~ c c~ s s~ b b~ g   
+ Particles read from file.
+ Reading interactions from file
+ Adding new coupling QCD            1
+ Adding new coupling QED            2
+  
+  
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Found multiparticle:            4           2
+ Part Info after sort:            1          55           0 T
+ Part Info after sort:            2          51           0 T
+ Part Info after sort:            3          51           0 T
+ Part Info after sort:            4          57           0 T
+ Final part info:            1          55           0 T T
+ Final part info:            2          51           0 T T
+ Final part info:            3          51           0 T T
+ Final part info:            4          57           0 T T
+ Attempting Process: d~ d~ -> h z z d  
+ Setting particle            1          55  to id           55
+ Setting particle            2          51  to id           51
+ Setting particle            3          51  to id           51
+ Setting particle            4          57  to id            2
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QCD  =            1
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Setting QED  =            3
+Enter maximum number of vertices for eg QCD = 4 (type "end_coup" to finish)
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           1
+    2   51   51   55
+
+Attempting Process: d~ d -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           2
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_001_001 in file b_cl_001_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_001_002 in file b_cl_001_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_001_003 in file b_sf_001_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_001_004 in file b_sf_001_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: d~ u -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           3
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2           7          55          51          51
+
+
+
+Attempting Process: d~ c -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           4
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          15          55          51          51
+
+
+
+Attempting Process: d~ s -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           5
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          11          55          51          51
+
+
+
+Attempting Process: d~ b -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           6
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           2          19          55          51          51
+
+
+
+Attempting Process: d~ g -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           7
+    3   51   51   55
+
+Attempting Process: d~ g -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           8
+    7   51   51   55
+
+Attempting Process: d~ g -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process           9
+   15   51   51   55
+
+Attempting Process: d~ g -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          10
+   11   51   51   55
+
+Attempting Process: d~ g -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          11
+   19   51   51   55
+
+Attempting Process: d d~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          12
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_002_001 in file b_cl_002_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_002_002 in file b_cl_002_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_002_003 in file b_sf_002_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_002_004 in file b_sf_002_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: d u~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          13
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3           6          55          51          51
+
+
+
+Attempting Process: d c~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          14
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          14          55          51          51
+
+
+
+Attempting Process: d s~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          15
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          10          55          51          51
+
+
+
+Attempting Process: d b~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          16
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           3          18          55          51          51
+
+
+
+Attempting Process: d g -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          17
+    2   51   51   55
+
+Attempting Process: d g -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          18
+    6   51   51   55
+
+Attempting Process: d g -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          19
+   14   51   51   55
+
+Attempting Process: d g -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          20
+   10   51   51   55
+
+Attempting Process: d g -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          21
+   18   51   51   55
+
+Attempting Process: u~ d -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          22
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6           3          55          51          51
+
+
+
+Attempting Process: u~ u -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          23
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_003_001 in file b_cl_003_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_003_002 in file b_cl_003_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_003_003 in file b_sf_003_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_003_004 in file b_sf_003_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: u~ c -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          24
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          15          55          51          51
+
+
+
+Attempting Process: u~ s -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          25
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          11          55          51          51
+
+
+
+Attempting Process: u~ b -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          26
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           6          19          55          51          51
+
+
+
+Attempting Process: u~ g -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          27
+    3   51   51   55
+
+Attempting Process: u~ g -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          28
+    7   51   51   55
+
+Attempting Process: u~ g -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          29
+   15   51   51   55
+
+Attempting Process: u~ g -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          30
+   11   51   51   55
+
+Attempting Process: u~ g -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          31
+   19   51   51   55
+
+Attempting Process: u d~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          32
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7           2          55          51          51
+
+
+
+Attempting Process: u u~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          33
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_004_001 in file b_cl_004_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_004_002 in file b_cl_004_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_004_003 in file b_sf_004_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_004_004 in file b_sf_004_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: u c~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          34
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          14          55          51          51
+
+
+
+Attempting Process: u s~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          35
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          10          55          51          51
+
+
+
+Attempting Process: u b~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          36
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton           7          18          55          51          51
+
+
+
+Attempting Process: u g -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          37
+    2   51   51   55
+
+Attempting Process: u g -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          38
+    6   51   51   55
+
+Attempting Process: u g -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          39
+   14   51   51   55
+
+Attempting Process: u g -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          40
+   10   51   51   55
+
+Attempting Process: u g -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          41
+   18   51   51   55
+
+Attempting Process: c~ d -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          42
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           3          55          51          51
+
+
+
+Attempting Process: c~ u -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          43
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14           7          55          51          51
+
+
+
+Attempting Process: c~ c -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          44
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_005_001 in file b_cl_005_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_005_002 in file b_cl_005_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_005_003 in file b_sf_005_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_005_004 in file b_sf_005_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: c~ s -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          45
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          11          55          51          51
+
+
+
+Attempting Process: c~ b -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          46
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          14          19          55          51          51
+
+
+
+Attempting Process: c~ g -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          47
+    3   51   51   55
+
+Attempting Process: c~ g -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          48
+    7   51   51   55
+
+Attempting Process: c~ g -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          49
+   15   51   51   55
+
+Attempting Process: c~ g -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          50
+   11   51   51   55
+
+Attempting Process: c~ g -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          51
+   19   51   51   55
+
+Attempting Process: c d~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          52
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           2          55          51          51
+
+
+
+Attempting Process: c u~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          53
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15           6          55          51          51
+
+
+
+Attempting Process: c c~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          54
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_006_001 in file b_cl_006_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_006_002 in file b_cl_006_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_006_003 in file b_sf_006_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_006_004 in file b_sf_006_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: c s~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          55
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          10          55          51          51
+
+
+
+Attempting Process: c b~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          56
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          15          18          55          51          51
+
+
+
+Attempting Process: c g -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          57
+    2   51   51   55
+
+Attempting Process: c g -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          58
+    6   51   51   55
+
+Attempting Process: c g -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          59
+   14   51   51   55
+
+Attempting Process: c g -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          60
+   10   51   51   55
+
+Attempting Process: c g -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          61
+   18   51   51   55
+
+Attempting Process: s~ d -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          62
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           3          55          51          51
+
+
+
+Attempting Process: s~ u -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          63
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10           7          55          51          51
+
+
+
+Attempting Process: s~ c -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          64
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          15          55          51          51
+
+
+
+Attempting Process: s~ s -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          65
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_007_001 in file b_cl_007_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_007_002 in file b_cl_007_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_007_003 in file b_sf_007_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_007_004 in file b_sf_007_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: s~ b -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          66
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          19          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          10          19          55          51          51
+
+
+
+Attempting Process: s~ g -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          67
+    3   51   51   55
+
+Attempting Process: s~ g -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          68
+    7   51   51   55
+
+Attempting Process: s~ g -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          69
+   15   51   51   55
+
+Attempting Process: s~ g -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          70
+   11   51   51   55
+
+Attempting Process: s~ g -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          71
+   19   51   51   55
+
+Attempting Process: s d~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          72
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           2          55          51          51
+
+
+
+Attempting Process: s u~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          73
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11           6          55          51          51
+
+
+
+Attempting Process: s c~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          74
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          14          55          51          51
+
+
+
+Attempting Process: s s~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          75
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_008_001 in file b_cl_008_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1           4
+ Writing function B_CL_008_002 in file b_cl_008_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_008_003 in file b_sf_008_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are            4  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1           4
+ Writing function B_SF_008_004 in file b_sf_008_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: s b~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          76
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          18          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          11          18          55          51          51
+
+
+
+Attempting Process: s g -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          77
+    2   51   51   55
+
+Attempting Process: s g -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          78
+    6   51   51   55
+
+Attempting Process: s g -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          79
+   14   51   51   55
+
+Attempting Process: s g -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          80
+   10   51   51   55
+
+Attempting Process: s g -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          81
+   18   51   51   55
+
+Attempting Process: b~ d -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          82
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           3          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           3          55          51          51
+
+
+
+Attempting Process: b~ u -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          83
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           7          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18           7          55          51          51
+
+
+
+Attempting Process: b~ c -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          84
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          15          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          15          55          51          51
+
+
+
+Attempting Process: b~ s -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          85
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          11          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          18          11          55          51          51
+
+
+
+Attempting Process: b~ b -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          86
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          16
+ Writing function B_CL_009_001 in file b_cl_009_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          16
+ Writing function B_CL_009_002 in file b_cl_009_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          16
+ Writing function B_SF_009_003 in file b_sf_009_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          16
+ Writing function B_SF_009_004 in file b_sf_009_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: b~ g -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          87
+    3   51   51   55
+
+Attempting Process: b~ g -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          88
+    7   51   51   55
+
+Attempting Process: b~ g -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          89
+   15   51   51   55
+
+Attempting Process: b~ g -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          90
+   11   51   51   55
+
+Attempting Process: b~ g -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          91
+   19   51   51   55
+
+Attempting Process: b d~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          92
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           2          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           2          55          51          51
+
+
+
+Attempting Process: b u~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          93
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           6          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19           6          55          51          51
+
+
+
+Attempting Process: b c~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          94
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          14          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          14          55          51          51
+
+
+
+Attempting Process: b s~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          95
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          10          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          19          10          55          51          51
+
+
+
+Attempting Process: b b~ -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          96
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          16
+ Writing function B_CL_010_001 in file b_cl_010_001.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Reduced color matrix           1          16
+ Writing function B_CL_010_002 in file b_cl_010_002.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          16
+ Writing function B_SF_010_003 in file b_sf_010_003.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+  
+Progress    0% finished topology           1           1
+ finished topology           2           1
+ There are           16  graphs.
+  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+           1         127
+ Reduced color matrix           1          16
+ Writing function B_SF_010_004 in file b_sf_010_004.f.
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+
+
+
+Attempting Process: b g -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          97
+    2   51   51   55
+
+Attempting Process: b g -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          98
+    6   51   51   55
+
+Attempting Process: b g -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process          99
+   14   51   51   55
+
+Attempting Process: b g -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         100
+   10   51   51   55
+
+Attempting Process: b g -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         101
+   18   51   51   55
+
+Attempting Process: g d~ -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         102
+    3   51   51   55
+
+Attempting Process: g d~ -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         103
+    7   51   51   55
+
+Attempting Process: g d~ -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         104
+   15   51   51   55
+
+Attempting Process: g d~ -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         105
+   11   51   51   55
+
+Attempting Process: g d~ -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         106
+   19   51   51   55
+
+Attempting Process: g d -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         107
+    2   51   51   55
+
+Attempting Process: g d -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         108
+    6   51   51   55
+
+Attempting Process: g d -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         109
+   14   51   51   55
+
+Attempting Process: g d -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         110
+   10   51   51   55
+
+Attempting Process: g d -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         111
+   18   51   51   55
+
+Attempting Process: g u~ -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         112
+    3   51   51   55
+
+Attempting Process: g u~ -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         113
+    7   51   51   55
+
+Attempting Process: g u~ -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         114
+   15   51   51   55
+
+Attempting Process: g u~ -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         115
+   11   51   51   55
+
+Attempting Process: g u~ -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         116
+   19   51   51   55
+
+Attempting Process: g u -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         117
+    2   51   51   55
+
+Attempting Process: g u -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         118
+    6   51   51   55
+
+Attempting Process: g u -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         119
+   14   51   51   55
+
+Attempting Process: g u -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         120
+   10   51   51   55
+
+Attempting Process: g u -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         121
+   18   51   51   55
+
+Attempting Process: g c~ -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         122
+    3   51   51   55
+
+Attempting Process: g c~ -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         123
+    7   51   51   55
+
+Attempting Process: g c~ -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         124
+   15   51   51   55
+
+Attempting Process: g c~ -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         125
+   11   51   51   55
+
+Attempting Process: g c~ -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         126
+   19   51   51   55
+
+Attempting Process: g c -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         127
+    2   51   51   55
+
+Attempting Process: g c -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         128
+    6   51   51   55
+
+Attempting Process: g c -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         129
+   14   51   51   55
+
+Attempting Process: g c -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         130
+   10   51   51   55
+
+Attempting Process: g c -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         131
+   18   51   51   55
+
+Attempting Process: g s~ -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         132
+    3   51   51   55
+
+Attempting Process: g s~ -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         133
+    7   51   51   55
+
+Attempting Process: g s~ -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         134
+   15   51   51   55
+
+Attempting Process: g s~ -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         135
+   11   51   51   55
+
+Attempting Process: g s~ -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         136
+   19   51   51   55
+
+Attempting Process: g s -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         137
+    2   51   51   55
+
+Attempting Process: g s -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         138
+    6   51   51   55
+
+Attempting Process: g s -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         139
+   14   51   51   55
+
+Attempting Process: g s -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         140
+   10   51   51   55
+
+Attempting Process: g s -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         141
+   18   51   51   55
+
+Attempting Process: g b~ -> h z z d~  
+ Part Info after sort:            1           4           3
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         142
+    3   51   51   55
+
+Attempting Process: g b~ -> h z z u~  
+ Part Info after sort:            1           4           7
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         143
+    7   51   51   55
+
+Attempting Process: g b~ -> h z z c~  
+ Part Info after sort:            1           4          15
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         144
+   15   51   51   55
+
+Attempting Process: g b~ -> h z z s~  
+ Part Info after sort:            1           4          11
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         145
+   11   51   51   55
+
+Attempting Process: g b~ -> h z z b~  
+ Part Info after sort:            1           4          19
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         146
+   19   51   51   55
+
+Attempting Process: g b -> h z z d  
+ Part Info after sort:            1           4           2
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         147
+    2   51   51   55
+
+Attempting Process: g b -> h z z u  
+ Part Info after sort:            1           4           6
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         148
+    6   51   51   55
+
+Attempting Process: g b -> h z z c  
+ Part Info after sort:            1           4          14
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         149
+   14   51   51   55
+
+Attempting Process: g b -> h z z s  
+ Part Info after sort:            1           4          10
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         150
+   10   51   51   55
+
+Attempting Process: g b -> h z z b  
+ Part Info after sort:            1           4          18
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         151
+   18   51   51   55
+
+Attempting Process: g g -> h z z g  
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ New Process         152
+   50   51   51   55
+ isym before:            2
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ isym after:            2
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          50          50          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          50          50          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          50          50          55          51          51
+
+
+  
+Progress    0% finished topology           1           0
+ No dipols found for this configuraton          50          50          55          51          51
+
+
+ Standard Model particles include:
+     Quarks:   d u s c b t d~ u~ s~ c~ b~ t~
+     Leptons:  e- mu- ta- e+ mu+ ta+ ve vm vt ve~ vm~ vt~
+     Bosons:   g a z w+ w- h
+  
+ Enter process you would like calculated in the form  e+ e- -> a.
+ ("done" to exit MadGraph.)
+ Part Info after sort:            1           4          50
+ Part Info after sort:            2           2          51
+ Part Info after sort:            3           3          51
+ Part Info after sort:            4           1          55
+ Found match         153         152
+   50   51   51   55
+    0    0    0    0
+
+
+ Thank you for using MadGraph
+
