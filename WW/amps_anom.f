@@ -15,7 +15,7 @@ c--- statement function
       z2(i1,i2,i3,i4)=za(i1,i2)*zb(i2,i4)+za(i1,i3)*zb(i3,i4)
  
 c--- a6b_1 should be dressed with coupling 
-c---  (2d0+delg1_v+delk_v+lambda_v)
+c---  (2d0+delg1_v+delk_v)
       a6b_1=(za(j1,j3)*zb(j2,j4)*z2(j6,j1,j2,j5)
      .      +za(j1,j6)*zb(j2,j5)*z2(j3,j5,j6,j4))
      .      /(2d0*s(j1,j2)*s(j3,j4)*s(j5,j6))
@@ -28,7 +28,16 @@ c---  2d0*(1d0+delg1_v)
 c--- a6b_3 should be dressed with coupling 
 c---  lambda_v/wmass**2
       a6b_3=z2(j1,j3,j4,j2)*z2(j3,j1,j2,j5)*z2(j6,j1,j2,j4)
+     .     /(2d0*s(j1,j2)*s(j3,j4)*s(j5,j6))
+
+c--- a6b_4 should be dressed with coupling 
+c---  (lambda_v/wmass**2)
+      a6b_3=a6b_3+
+     .     (za(j1,j3)*zb(j2,j4)*z2(j6,j1,j2,j5)*s(j5,j6)
+     .      +za(j1,j6)*zb(j2,j5)*z2(j3,j5,j6,j4))*s(j3,j4)
      .      /(2d0*s(j1,j2)*s(j3,j4)*s(j5,j6))
+
+      
   
       return
       end
@@ -56,7 +65,7 @@ c--- statement function
       t127=s(j1,j2)+s(j1,j7)+s(j2,j7)
 
 c--- a7b_1 should be dressed with coupling 
-c---  (2d0+delg1_v+delk_v+lambda_v)
+c---  (2d0+delg1_v+delk_v)
       a7b_1=(za(j1,j3)*z2(j1,j2,j7,j4)*z2(j6,j3,j4,j5)
      .      -za(j1,j6)*z2(j1,j2,j7,j5)*z2(j3,j5,j6,j4))
      .      /(2d0*za(j1,j7)*za(j7,j2)*s(j3,j4)*s(j5,j6)*t127)
@@ -71,7 +80,13 @@ c--- a7b_3 should be dressed with coupling
 c---  lambda_v/wmass**2
       a7b_3=(z2(j1,j3,j4,j2)*za(j2,j1)+z2(j1,j3,j4,j7)*za(j7,j1))
      .      *z2(j3,j4,j6,j5)*z2(j6,j3,j5,j4)
+     .     /(2d0*za(j1,j7)*za(j7,j2)*s(j3,j4)*s(j5,j6)*t127)
+
+      a7b_3=a7b_3
+     .     +(za(j1,j3)*z2(j1,j2,j7,j4)*z2(j6,j3,j4,j5)*s(j5,j6)
+     .      -za(j1,j6)*z2(j1,j2,j7,j5)*z2(j3,j5,j6,j4)*s(j3,j4))
      .      /(2d0*za(j1,j7)*za(j7,j2)*s(j3,j4)*s(j5,j6)*t127)
+      
   
       return
       end

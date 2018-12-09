@@ -38,40 +38,40 @@ c      prop56=dcmplx(s(5,6))/dcmplx(s(5,6)-wmass**2,wmass*wwidth)
       f(1,mplus,mplus)= czip
 c     f(2,mplus,mplus)=-A7treeb(j2,j1,j3,j4,j5,j6,j7,za,zb)*propboth
       call A7treeb_anom(j2,j1,j3,j4,j5,j6,j7,za,zb,A7b_1,A7b_2,A7b_3)
-      f(2,mplus,mplus)=-(A7b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+      f(2,mplus,mplus)=-(A7b_1*(2d0+xdelg1_z+xdelk_z)
      .                 +A7b_2*(2d0*(1d0+xdelg1_z))
      .                 +A7b_3*(xlambda_z/wmass**2))*propboth
-      f(5,mplus,mplus)=-(A7b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+      f(5,mplus,mplus)=-(A7b_1*(2d0+xdelg1_g+xdelk_g)
      .                 +A7b_2*(2d0*(1d0+xdelg1_g))
      .                 +A7b_3*(xlambda_g/wmass**2))*propboth
 
       f(1,mplus,minus)=+A7treea(j1,j2,j3,j4,j5,j6,j7,za,zb)*propboth      
 c      f(2,mplus,minus)=+A7treeb(j1,j2,j3,j4,j5,j6,j7,za,zb)*propboth
       call A7treeb_anom(j1,j2,j3,j4,j5,j6,j7,za,zb,A7b_1,A7b_2,A7b_3)
-      f(2,mplus,minus)=(A7b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+      f(2,mplus,minus)=(A7b_1*(2d0+xdelg1_z+xdelk_z)
      .                 +A7b_2*(2d0*(1d0+xdelg1_z))
      .                 +A7b_3*(xlambda_z/wmass**2))*propboth
-      f(5,mplus,minus)=(A7b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+      f(5,mplus,minus)=(A7b_1*(2d0+xdelg1_g+xdelk_g)
      .                 +A7b_2*(2d0*(1d0+xdelg1_g))
      .                 +A7b_3*(xlambda_g/wmass**2))*propboth
 
       f(1,minus,mplus)= czip
 c      f(2,minus,mplus)=+A7treeb(j1,j2,j5,j6,j3,j4,j7,zb,za)*propboth
       call A7treeb_anom(j1,j2,j5,j6,j3,j4,j7,zb,za,A7b_1,A7b_2,A7b_3)
-      f(2,minus,mplus)=(A7b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+      f(2,minus,mplus)=(A7b_1*(2d0+xdelg1_z+xdelk_z)
      .                 +A7b_2*(2d0*(1d0+xdelg1_z))
      .                 +A7b_3*(xlambda_z/wmass**2))*propboth
-      f(5,minus,mplus)=(A7b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+      f(5,minus,mplus)=(A7b_1*(2d0+xdelg1_g+xdelk_g)
      .                 +A7b_2*(2d0*(1d0+xdelg1_g))
      .                 +A7b_3*(xlambda_g/wmass**2))*propboth
 
       f(1,minus,minus)=-A7treea(j2,j1,j5,j6,j3,j4,j7,zb,za)*propboth
 c      f(2,minus,minus)=-A7treeb(j2,j1,j5,j6,j3,j4,j7,zb,za)*propboth
       call A7treeb_anom(j2,j1,j5,j6,j3,j4,j7,zb,za,A7b_1,A7b_2,A7b_3)
-      f(2,minus,minus)=-(A7b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+      f(2,minus,minus)=-(A7b_1*(2d0+xdelg1_z+xdelk_z)
      .                 +A7b_2*(2d0*(1d0+xdelg1_z))
      .                 +A7b_3*(xlambda_z/wmass**2))*propboth
-      f(5,minus,minus)=-(A7b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+      f(5,minus,minus)=-(A7b_1*(2d0+xdelg1_g+xdelk_g)
      .                 +A7b_2*(2d0*(1d0+xdelg1_g))
      .                 +A7b_3*(xlambda_g/wmass**2))*propboth
 

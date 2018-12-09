@@ -125,19 +125,19 @@ c---case dbar-d and d-dbar
          Fa213456=A6treea(2,1,3,4,5,6,za,zb)
          
          call A6treeb_anom(1,2,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
-         Fb123456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+         Fb123456_z=A6b_1*(2d0+xdelg1_z+xdelk_z)
      .        +A6b_2*(2d0*(1d0+xdelg1_z))
      .        +A6b_3*(xlambda_z/wmass**2)
-         Fb123456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+         Fb123456_g=A6b_1*(2d0+xdelg1_g+xdelk_g)
      .        +A6b_2*(2d0*(1d0+xdelg1_g))
      .        +A6b_3*(xlambda_g/wmass**2)
          Fb126543_z=-Fb123456_z
          Fb126543_g=-Fb123456_g
          call A6treeb_anom(2,1,3,4,5,6,za,zb,A6b_1,A6b_2,A6b_3)
-         Fb213456_z=A6b_1*(2d0+xdelg1_z+xdelk_z+xlambda_z)
+         Fb213456_z=A6b_1*(2d0+xdelg1_z+xdelk_z)
      .        +A6b_2*(2d0*(1d0+xdelg1_z))
      .        +A6b_3*(xlambda_z/wmass**2)
-         Fb213456_g=A6b_1*(2d0+xdelg1_g+xdelk_g+xlambda_g)
+         Fb213456_g=A6b_1*(2d0+xdelg1_g+xdelk_g)
      .        +A6b_2*(2d0*(1d0+xdelg1_g))
      .        +A6b_3*(xlambda_g/wmass**2)
          Fb216543_z=-Fb213456_z
