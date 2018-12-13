@@ -1,0 +1,9 @@
+<initrwgt>
+<weight id='1'>  renscfact=1   facscfact=1   </weight>
+<weight id='2'>  renscfact=1   facscfact=2   </weight>
+<weight id='3'>  renscfact=2   facscfact=1   </weight>
+<weight id='4'>  renscfact=2   facscfact=2   </weight>
+<weight id='5'>  renscfact=1   facscfact=0.5 </weight>
+<weight id='6'>  renscfact=0.5 facscfact=1   </weight>
+<weight id='7'>  renscfact=0.5 facscfact=0.5 </weight>
+</initrwgt>

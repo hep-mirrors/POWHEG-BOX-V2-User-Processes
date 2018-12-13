@@ -1,0 +1,10 @@
+#!/bin/sh
+
+rm -f pwg-* *equiv* pwgcounters-st* run-*-*-*.log pwggrid* pwggridinfo-btl-xg* powheg.input-2 pwgNLO.top run-*-*.log powheg.input-*-* fort.7 FlavRegList pwhg_checklimits powheg.input
+rm -f pwgboundviolations-*.dat  pwgbtildeupb-*.dat pwgremnupb-*.dat pwgremnupb-*.dat pwgubound-*.dat pwgfullgrid-*.dat testbndrat.top testbnd.top pwghistnorms.top
+rm -f powheg.input-3 powheg.input-4 bornequiv realequiv* virtequiv pwgborngrid.top
+rm -f Qsub/submit_*
+rm -f Qsub/Out/*
+rm -fr BadPoints
+rm -f log-*.log
+rm -f pwgLHEF*.top

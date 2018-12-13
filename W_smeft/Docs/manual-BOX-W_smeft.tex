@@ -1,0 +1,261 @@
+\documentclass[paper]{JHEP3}
+\usepackage{amsmath,amssymb,enumerate,url}
+\bibliographystyle{JHEP}
+
+%%%%%%%%%% Start TeXmacs macros
+\newcommand{\tmtextit}[1]{{\itshape{#1}}}
+\newcommand{\tmtexttt}[1]{{\ttfamily{#1}}}
+\newenvironment{enumeratenumeric}{\begin{enumerate}[1.] }{\end{enumerate}}
+\newcommand\sss{\mathchoice%
+{\displaystyle}%
+{\scriptstyle}%
+{\scriptscriptstyle}%
+{\scriptscriptstyle}%
+}
+
+\newcommand\as{\alpha_{\sss\rm S}}
+\newcommand\POWHEG{{\tt POWHEG}}
+\newcommand\POWHEGBOX{{\tt POWHEG BOX}}
+\newcommand\HERWIG{{\tt HERWIG}}
+\newcommand\PYTHIA{{\tt PYTHIA}}
+\newcommand\MCatNLO{{\tt MC@NLO}}
+
+\newcommand\kt{k_{\sss\rm T}}
+
+\newcommand\pt{p_{\sss\rm T}}
+\newcommand\LambdaQCD{\Lambda_{\scriptscriptstyle QCD}}
+%%%%%%%%%% End TeXmacs macros
+
+
+\title{The POWHEG BOX user manual:\\
+  $\boldsymbol{W^\pm}$ production in the SM-EFT} \vfill
+\author{Simone Alioli,\\
+Universita' degli Studi di Milano-Bicocca,\\ 20126, Milano,
+  Italy\\
+E-mail: \email{simone.alioli@unimib.it}}
+\author{Wouter Dekens,\\
+Department of Physics, University of California at San Diego,\\ 
+La Jolla, CA 92093-0319, USA \\
+E-mail: \email{wdekens@ucsd.edu}}
+\author{Michael Girard, \\
+Ernest Orlando Lawrence Berkeley National Laboratory, University of California, \\
+Berkeley, CA 94720, USA\\
+E-mail: \email{michael.girard@berkeley.edu}}
+\author{Emanuele Mereghetti,\\
+Theoretical Division, Los Alamos National Laboratory,\\
+Los Alamos, NM 87545, USA \\
+E-mail: \email{emereghetti@lanl.gov}}
+
+
+
+
+\vskip -0.5truecm
+
+
+
+\abstract{This note documents the use of the package
+  \tmtexttt{POWHEG BOX} for $W^\pm$ production processes, in the presence of SM-EFT operators.
+ }
+\preprint{\today\\ \tmtexttt{POWHEG BOX} 1.0}
+
+\begin{document}
+
+
+\section{Introduction}
+
+The \tmtexttt{POWHEG BOX} program is a framework for implementing NLO
+calculations in Shower Monte Carlo programs according to the
+\POWHEG{} method. An explanation of the method and a discussion of
+how the code is organized can be found in
+refs.~\cite{Nason:2004rx,Frixione:2007vw,Alioli:2010xd}.  The code is
+distributed according to the ``MCNET GUIDELINES for Event Generator
+Authors and Users'' and can be found at the web page \\
+%
+\begin{center}
+ \url{http://powhegbox.mib.infn.it}.
+\end{center}
+%
+~\\
+%
+
+This program is an implementation of the charged-current Drell-Yan NLO cross sections
+$pp\to W^\pm \to \ell^\pm \nu_\ell$, induced by SM-EFT operators. A detailed description of the
+implementation can be found in ref.~\cite{Alioli:2018ljm}. Please cite
+the paper when you use the program. The implementation included in the 
+\tmtexttt{POWHEG-BOX/W\_smeft} subdirectory package is based on the original work of Ref.\ \cite{Alioli:2008gx}, to which we refer for more details.
+
+In order to run the \tmtexttt{POWHEG BOX} program, we recommend the
+reader to start from the \tmtexttt{POWHEG BOX} user manual, which
+contains all the information and settings that are common among
+all subprocesses. In this note we focus on  the settings and
+parameters specific to $W^\pm$ implementation.
+
+\section{Generation of events}
+
+Due to the large number of coefficients of dimension-six operators, 
+before building the executables, the user should increase the value of the parameter $\texttt{maxnum}$ in the file \\$\texttt{POWHEG-BOX-V2/include/pwhg\_pwin.h}$.
+$\texttt{maxnum} = 500$ is sufficient to run the program. 
+Build the executables\\
+\tmtexttt{\$ cd POWHEG-BOX-V2/W$\_$smeft \\
+\$ make pwhg\_main  \\
+\$ make main-PYTHIA8-lhef  \\
+}\\
+Then do (for example) \\
+\tmtexttt{\$
+cd testrun-wp-lhc-smeft-13TeV\\
+\$ ../pwhg\_main}\\
+At
+the end of the run, the file \tmtexttt{pwgevents.lhe} will contain
+100000 events for the process $W^+ \to e^+ \nu_e$  in the Les Houches format. In
+order to shower them with \PYTHIA{} do\\
+\tmtexttt{\$ cd
+testrun-wp-lhc-smeft-13TeV \\
+\$ ../main-PYTHIA8-lhef}
+
+\section{Process specific input parameters}
+
+The process inherits all the parameters of the Standard Model $W^\pm$ production POWHEG process,
+described in Ref.\ \cite{Alioli:2008gx} and in \texttt{manual-BOX-W.pdf}
+
+
+\begin{table}
+\center
+\begin{small}
+\begin{tabular}{||c|cc||c|cc||}
+\hline
+								  &  \multicolumn{2}{|c||}{Operator} 	 					&
+								  &  \multicolumn{2}{c||}{Operator} 												 \\
+\hline
+$\Gamma^u_W$ 		& \texttt{ReGUw}\_\textit{ik} & \texttt{ImGUw}\_\textit{ik}  				  		&
+$\Gamma^d_W$ 		& \texttt{ReGDw}\_\textit{jl} & \texttt{ImGDw}\_\textit{jl} 				 		\\%
+ $\Gamma^u_\gamma$   	& \texttt{ReGUe}\_\textit{ik} & \texttt{ImGUe}\_\textit{ik} 				  		& 
+ $\Gamma^d_\gamma$   	& \texttt{ReGDe}\_\textit{jl}	& \texttt{ImGDe}\_\textit{jl}   		\\
+$\Gamma^e_W$ 		& \texttt{ReGEw} & \texttt{ImGEw} 		         & 
+$\Gamma^e_\gamma$ 	& \texttt{ReGEe} & \texttt{ImGEe} 					\\
+\hline
+$c^{}_{Q\varphi,\, U}$ 	& \texttt{QphiU}\_\textit{ik}				&   $i \le k$ 	& 
+$c^{}_{Q\varphi,\, D}$ 	& \texttt{QphiD}\_\textit{jl} 				&   $j \le l$  	\\
+$\xi$          		&  \texttt{ReXi}\_{\textit{ ij}} & \texttt{ImXi}\_\textit{ij}  & & 	&\\ 
+\hline
+$C_{LQ,U}$ 		&  \texttt{QLu}\_\textit{ik} 				&   $i\le k$ 	&  
+$C_{LQ,D}$ 		&  \texttt{QLd}\_\textit{jl}				&   $j\le l$ 	\\
+$C^{(1)}_{LeQu}$ 	& \texttt{ReLeQu}\_\textit{ik} 				&   \texttt{ImLeQu}\_\textit{ik}  & 
+$C_{LedQ}$  		& \texttt{ReLedQ}\_\textit{jl} 				&  \texttt{ImLedQ}\_\textit{jl}	\\
+$C^{(3)}_{LeQu}$   	&  \texttt{ReLeQu3}\_\textit{ik}  	& \texttt{ImLeQu3}\_\textit{ik}		       	&  \\
+\hline
+\end{tabular}
+\end{small}
+\caption{Notation for the coefficients of the dimension-six operators that can be set in \POWHEG{}.
+The indices $i, k$ run over $u$-type quark flavors $\textit{i},\textit{k} \in \{\texttt{u,c,t}\}$, while $j, l$ run over $d$-type quark flavors $\textit{j},\textit{l} \in \{\texttt{d,s,b}\}$.
+With the assumptions of Ref.\ \cite{Alioli:2018ljm}, $c^{}_{Q\varphi,\, U}$, $c^{}_{Q\varphi,\, D}$, 
+$C_{LQ,U}$, and $C_{LQ,D}$ are real symmetric matrices. The notation $i \le k$ and $j \le l$ indicates that the elements $\{\texttt{uu,uc,ut,cc,ct,tt}\}$ 
+and $\{\texttt{dd,ds,db,ss,sb,bb}\}$ can be set by the user, while the remaining elements are not independent. }\label{TabA}
+\end{table}
+
+
+By default, all dimension-six corrections are switched off in the \POWHEG{} input card.
+To investigate the effect of one or more dimension-six operators, the user  needs to set the flag \texttt{dim6} to 1 and specify the values of 
+one or more coefficients of dimension-six operators in the input file. The definitions of the SM-EFT operators are given in Ref.\ \cite{Alioli:2018ljm},
+and their coefficients are defined to be dimensionless, and scale as $(v/\Lambda)^2$, where $\Lambda$ is the scale of new physics.
+
+The user can choose between two different assumptions for the flavor structures of the coefficients, as discussed in detail in Ref.\ \cite{Alioli:2018ljm}.
+
+The first possibility is a generic flavor structure. The notation for the coefficients of SM-EFT operators in this scenario is given in Table \ref{TabA},
+and the only restriction we impose is that the matrices $c^{}_{Q\varphi,\, U}$, $c^{}_{Q\varphi,\, D}$, 
+$C_{LQ,U}$, and $C_{LQ,D}$  are real symmetric matrices, instead of hermitian matrices (i.e.\ the phases of the off-diagonal 
+entries are set to zero). 
+Examples for the \texttt{powheg.input}  card in this scenario are given in the folders \texttt{testrun-wp-lhc-smeft-13TeV}
+\texttt{testrun-wm-lhc-smeft-13TeV}.
+
+
+As an alternative, the code also provides the option to assume the Minimal Flavor Violation (MFV) framework. In this scenario, the allowed forms of the couplings are constrained by 
+flavor symmetries, which significantly decrease the number of free parameters. 
+The implications for the flavor structures of the couplings are discussed in Appendix B of Ref.\ \cite{Alioli:2018ljm}.
+To choose this scenario, the user should set the flag $\texttt{mfv}$ to 1, and select some of the couplings in Table \ref{tab:mfv}.
+An example for the \texttt{powheg.input}  card in this scenario is given in the folder \texttt{testrun-wp-lhc-mfv-13TeV}.
+
+\begin{table}
+\center
+\begin{tabular}{||c|c  c|| c | c c || }
+\hline
+	Operator    & $a_i$ & $b_i$ & Operator & $a_i$ & $b_i$\\\hline
+$	c_{Q\varphi,U}$ & \texttt{A}\_\texttt{QphiU} & - &
+$	c_{Q\varphi,D}$ & \texttt{A}\_\texttt{QphiD} & \texttt{B}\_\texttt{QphiD}  \\
+$	C_{LQ,U}$   & \texttt{A}\_\texttt{QLu} &-&
+$	C_{LQ,D}$   & \texttt{A}\_\texttt{QLd}& \texttt{B}\_\texttt{QLd} \\
+\hline
+\end{tabular}
+\caption{Notation for the coefficients of the different flavor structures in the MFV framework, discussed in Appendix B of Ref.\ \cite{Alioli:2018ljm}, which can be set in \texttt{POWHEG}.}\label{tab:mfv}
+\end{table}
+
+In addition to the couplings of dimension-six operators, the user can input the elements of the CKM matrix by setting  $\texttt{CKM\_V}ij$, with $i \in \{\texttt{u,c,t}\}$ and $j \in \{ \texttt{d,s,b}\}$,
+in the input file. By default the CKM matrix is assumed to be real, and terms of $\mathcal O(\lambda^2)$, where $\lambda \sim |V_{us}|$, and higher are neglected. 
+
+The dipole, scalar and tensor operators in Table \ref{TabA} run in QCD, and therefore the user should specify the scale at which the coefficents are evaluated.
+The new physics scale $\Lambda$, at which the coefficients are defined, can be specified 
+by setting the flag $\texttt{LambdaNP}$ to the desired value. 
+The coefficients are then run from $\Lambda$ to $\mu_R$, the renormalization scale of the  process. By default, $\texttt{LambdaNP} = 1$ TeV.
+For the coefficients that do not evolve under QCD, the flag $\texttt{LambdaNP}$ is irrelevant.
+
+The contribution of dimension-six operators is most notable at large $W$ transverse mass. In the generation of events, it might then be useful to include a 
+Born suppression factor. The suppression factor can be included by setting   $\texttt{bornsuppfact}$ in the input card. 
+The value of  $\texttt{bornsuppfact}$ determines the $p_T$ used in 
+\begin{equation}
+\texttt{fact} = \left(\frac{m^2_{\ell \nu}}{m^2_{\ell \nu} + p_T^2}\right)^4.
+\end{equation}
+The functional form of the suppression factor can be changed by modifying the $\texttt{born\_suppression}$ routine in $\texttt{Born\_phsp.f}$.
+
+
+\begin{thebibliography}{10}
+
+\bibitem{Nason:2004rx}
+  P.~Nason,
+  ``A new method for combining NLO QCD with shower Monte Carlo algorithms,''
+  JHEP {\bf 0411} (2004) 040
+  [arXiv:hep-ph/0409146].
+  %%CITATION = JHEPA,0411,040;%%
+
+%\cite{Frixione:2007vw}
+\bibitem{Frixione:2007vw}
+  S.~Frixione, P.~Nason and C.~Oleari,
+``Matching NLO QCD computations with Parton Shower simulations: the POWHEG
+method,''
+  JHEP {\bf 0711} (2007) 070
+  [arXiv:0709.2092 [hep-ph]].
+  %%CITATION = JHEPA,0711,070;%%
+
+%\cite{Alioli:2010xd}
+\bibitem{Alioli:2010xd}
+  S.~Alioli, P.~Nason, C.~Oleari and E.~Re,
+``A general framework for implementing NLO calculations in shower Monte Carlo
+  programs: the POWHEG BOX,''
+  [arXiv:1002.2581 [hep-ph]].
+  %%CITATION = ARXIV:1002.2581;%%
+
+
+  
+%\cite{Alioli:2018ljm}
+\bibitem{Alioli:2018ljm} 
+  S.~Alioli, W.~Dekens, M.~Girard and E.~Mereghetti,
+  %``NLO QCD corrections to SM-EFT dilepton and electroweak Higgs boson production, matched to parton shower in POWHEG,''
+  JHEP {\bf 1808}, 205 (2018)
+  doi:10.1007/JHEP08(2018)205
+  [arXiv:1804.07407 [hep-ph]].
+  %%CITATION = doi:10.1007/JHEP08(2018)205;%%
+  %3 citations counted in INSPIRE as of 05 Oct 2018
+
+%\cite{Alioli:2008gx}
+\bibitem{Alioli:2008gx} S.~Alioli, P.~Nason, C.~Oleari and E.~Re,
+  ``NLO vector-boson production matched with shower in POWHEG,''
+  JHEP {\bf 0807}, 060 (2008)
+  [arXiv:0805.4802 [hep-ph]].
+
+
+\end{thebibliography}
+
+\end{document}
+
+
+
+
+
