@@ -261,3 +261,10 @@ c     check parameters
       call pwhgaccumup 
       end
 
+      subroutine getmaxev(maxev)
+      integer maxev
+      integer iun
+      common/c_unit/iun
+C--- Opens input file and counts number of events, setting MAXEV;
+      call opencountunit(maxev,iun)
+      end
