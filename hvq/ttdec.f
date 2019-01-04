@@ -530,6 +530,10 @@ c Factorization scale (relay on 5 being the light parton)
             ih(k)=1
          elseif(idbmup(k).eq.-2212) then
             ih(k)=-1
+         elseif(idbmup(k).eq.2112) then
+            ih(k)=2
+         elseif(idbmup(k).eq.-2112) then
+            ih(k)=-2
          else
             write(*,*) ' pdfcorr: cannot handle incoming hadrons',
      #           idbmup(1),idbmup(2)
