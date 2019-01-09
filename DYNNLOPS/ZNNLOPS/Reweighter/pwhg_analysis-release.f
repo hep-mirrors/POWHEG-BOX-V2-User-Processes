@@ -172,7 +172,8 @@ C     get Z kinematics
      $     p_boosted(3)*p_boosted(3))
       theta_t=acos(theta_t)
 
-      x=atan((mz**2-zmass**2)/(2d0*zmass*zwidth))
+c     x=atan((mz**2-zmass**2)/(2d0*zmass*zwidth)) !!WRONG!!
+      x=atan((mz**2-zmass**2)/(zmass*zwidth))
 
 C     compute damping and fill histograms 
       call get_zdamp(ptj1,damping_vec)

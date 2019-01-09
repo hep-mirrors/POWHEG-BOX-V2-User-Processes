@@ -170,7 +170,8 @@ C     get W kinematics
      $     p_boosted(3)*p_boosted(3))
       theta_t=acos(theta_t)
 
-      x=atan((mw**2-wmass**2)/(2d0*wmass*wwidth))
+c     x=atan((mw**2-wmass**2)/(2d0*wmass*wwidth))  !!WRONG!!
+      x=atan((mw**2-wmass**2)/(wmass*wwidth))
 
 C     compute damping and fill histograms 
       call get_wdamp(ptj1,damping_vec)
