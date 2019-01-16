@@ -550,10 +550,10 @@ c parton types, from pdg to generic pdf
       enddo
       r=1
       do k=1,2
-         call genericpdf(ndns(k),ih(k),mufc2,x(k),fx)
+         call genericpdf0(ndns(k),ih(k),mufc2,x(k),fx)
          if(fx(ipart(k)).ne.0) then
             r=r/fx(ipart(k))
-            call genericpdf(ndns(k),ih(k),mufc2,xc(k),fx)
+            call genericpdf0(ndns(k),ih(k),mufc2,xc(k),fx)
             r=r*fx(ipart(k))
          endif
       enddo
