@@ -4,6 +4,8 @@
 ***********************************************************
 c virtual O(alpha_s) corrections to bbbarH production
 c extracted from bbh code in June 2014, D.W.
+c October 2018: B.J. add common block for off-shellness of Higgs ad 
+c     call amplitudes with Higgs virtuality rather than Higgs mass
 ***********************************************************
       implicit none
       integer nlo
@@ -45,6 +47,11 @@ c coefficients of IR single and double poles
       real*8 sigv_irpole(2,2),sigvqq_ir(2,2),sigvgg_ir(2,2)
 c switch for qqbar and/or gluon fusion
       integer qqg
+
+
+c new common block for sqrt(p_h^2) (which can be =/= mh)
+      real*8 sph
+      common/offshell/sph
 c
 c initialization
       do i=1,2
@@ -103,8 +110,8 @@ c qqbar annihilation
          sig0(i)=0d0
       enddo
       if (qqg.eq.1.or.qqg.eq.3) then
-         sig0(1)=matb_qq(sp,t1(1),t2(1),u1(1),u2(1),mb,mh)
-         sig0(2)=matb_qq(sp,t1(2),t2(2),u1(2),u2(2),mb,mh)
+         sig0(1)=matb_qq(sp,t1(1),t2(1),u1(1),u2(1),mb,sph)
+         sig0(2)=matb_qq(sp,t1(2),t2(2),u1(2),u2(2),mb,sph)
          do i=1,2
             sig0qq(i)=o_fac*sig0(i)
          enddo
@@ -114,8 +121,8 @@ c gluon fusion
          sig0(i)=0d0
       enddo
       if (qqg.eq.2.or.qqg.eq.3) then
-         sig0(1)=matb_gg(sp,t1(1),t2(1),u1(1),u2(1),mb,mh)
-         sig0(2)=matb_gg(sp,t1(2),t2(2),u1(2),u2(2),mb,mh)
+         sig0(1)=matb_gg(sp,t1(1),t2(1),u1(1),u2(1),mb,sph)
+         sig0(2)=matb_gg(sp,t1(2),t2(2),u1(2),u2(2),mb,sph)
          do i=1,2
             sig0gg(i)=o_fac*sig0(i)
          enddo
@@ -137,9 +144,9 @@ c qqbar annihilation:
          enddo
       enddo
       if (qqg.eq.1.or.qqg.eq.3) then
-         call mvirt_qq(sp,t1(1),t2(1),u1(1),u2(1),mb,mh,sigv(1),
+         call mvirt_qq(sp,t1(1),t2(1),u1(1),u2(1),mb,sph,sigv(1),
      $        sigv_irpole(1,1),sigv_irpole(2,1))
-         call mvirt_qq(sp,t1(2),t2(2),u1(2),u2(2),mb,mh,sigv(2),
+         call mvirt_qq(sp,t1(2),t2(2),u1(2),u2(2),mb,sph,sigv(2),
      $        sigv_irpole(1,2),sigv_irpole(2,2))
 c add extra term when using the MSbar scheme for the b Yukawa coupling:
          if(imsbar.eq.1) then
@@ -165,9 +172,9 @@ c gluon fusion:
          enddo
       enddo
       if (qqg.eq.2.or.qqg.eq.3) then
-         call mvirt_gg(sp,t1(1),t2(1),u1(1),u2(1),mb,mh,sigv(1),
+         call mvirt_gg(sp,t1(1),t2(1),u1(1),u2(1),mb,sph,sigv(1),
      $        sigv_irpole(1,1),sigv_irpole(2,1))
-         call mvirt_gg(sp,t1(2),t2(2),u1(2),u2(2),mb,mh,sigv(2),
+         call mvirt_gg(sp,t1(2),t2(2),u1(2),u2(2),mb,sph,sigv(2),
      $        sigv_irpole(1,2),sigv_irpole(2,2))
          if(imsbar.eq.1) then
             sigv(1)=sigv(1)+sig0gg(1)/o_fac*
