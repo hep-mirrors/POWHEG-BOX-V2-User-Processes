@@ -113,21 +113,20 @@ c      imsbar = 0 ! (1=MSbar;0=OnShell)
 
 cccccccccccccccccccccccccccccccccccccccccccccccc
 c check if chosen value of hmass can be handled:
-      if ((hmass.lt.100d0.or.hmass.gt.200).or.
-     &    (hwidth.gt.2d0)) then
+       if ((hmass.lt.100d0.or.hmass.gt.200).or.
+     &     (hwidth.gt.2d0)) then
          print*,' ################################################'
-         print*,' this code is applicable only for bbH production '
-         print*,' with a Higgs mass in the range 100 < mH < 200 GeV, '
-         print*,' and decay width Gamma_H < 2 GeV, '
-         print*,' where Higgs decays can be treated '
-         print*,' using a narrow-width approximation '
-         print*,' and off-shell effects are small'
+         print*,' this code assumes bbH production '
+         print*,' in the framework of the Standard Model (SM)'
          print*,''
          print*,' you entered a Higgs mass (in GeV) of ',hmass
          print*,' and Higgs width (in GeV) of ', hwidth
-         print*,' please change your settings'
+         print*,' which is outside the range covered by the SM '
+         print*,''
+         print*,'be aware that the code allows for non-SM choices ' 
+         print*,'for the Higgs mass as long as the '
+         print*,'narrow-width approximation for the Higgs decay applies'
          print*,' ################################################'
-         stop
       endif
 ccccccccccccccccccccccccccccccccccccccccccccccccc
           
