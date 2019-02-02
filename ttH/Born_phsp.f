@@ -37,6 +37,10 @@ c generation cuts:
       
       real *8 powheginput
       external powheginput
+      
+c new common block for sqrt(p_h^2) (which can be =/= mh)                        
+      real*8 sph
+      common/offshell/sph
 
 
       if(ini) then
@@ -82,7 +86,8 @@ c     (disabled by default; change here if you want to use this feature):
            
 c     set the H mass to its virtuality!!
       kn_masses(3)=sqrt(m2)
-
+      sph = kn_masses(3)        ! Higgs virtuality for common block
+      
       xjac = 1d0
       kn_minmass=2*ph_tmass+kn_masses(3)
       m2=kn_minmass**2
