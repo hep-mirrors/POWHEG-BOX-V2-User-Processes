@@ -7,7 +7,7 @@ CXX=g++
 # Choose PDF: native,lhapdf
 # LHAPDF package has to be installed separately
 #PDF = lhapdf
-PDF = lhapdf
+PDF = native
 # Choose Analysis: none, default
 # default analysis may require FASTJET package, that has to be installed separately (see below)
 #ANALYSIS=default
@@ -167,7 +167,7 @@ LIBS+=-lz
 # Main POWHEG target
 
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o	\
-     real.o real16.o local.o $(PWHGANAL)
+     real.o real16.o local.o hadr5n16.o vp_knt_v3_0.o $(PWHGANAL)
 
 PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\

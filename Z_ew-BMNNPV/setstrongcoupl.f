@@ -24,6 +24,12 @@ c.....added for scheme 3 b
       complex*16 outi,outf
       real*8 ddaa
 c.....added for scheme 3 e      
+c.....mauro-had-b
+      integer da_had_from_fit,fit
+      common/cda_had/da_had_from_fit,fit
+      complex*16 oute,oute0,outt,outt0
+      real*8 ddaae,ddaat,ddaah
+c.....mauro-had-e      
       
       call set_fac_ren_scales(muf,mur)
       st_mufact2= muf**2*st_facfact**2
@@ -49,17 +55,41 @@ c     only fermionic terms are included and resummed
 c     alpha always appears in  combunation alpha conjg(alpha)
 c     and we can assume it is real
 
-         includetop=q2.gt.4d0*mt2
-         call sigmaaatp_ferm(zero   ,outi,includetop)
-         call sigmaaat_ferm( q2*cone,outf,includetop)
-         ddaa=realpart((-outf/q2)-(-outi))
+c.....mauro-had-b         
+         if(da_had_from_fit.le.0) then
+c.....mauro-had-e         
+            includetop=q2.gt.4d0*mt2
+            call sigmaaatp_ferm(zero   ,outi,includetop)
+            call sigmaaat_ferm( q2*cone,outf,includetop)
+            ddaa=realpart((-outf/q2)-(-outi))
 c     here we must use ph_alphaem instead of em_alpha (both of them are alpha_0)
 c     since em_alpha is set to 0 if no ew corrections are computed
-         alpha     = ph_alphaem/(1d0-ddaa)
-         el2_scheme=4d0*pi*alpha
-         
-         
+            alpha     = ph_alphaem/(1d0-ddaa)
+            el2_scheme=4d0*pi*alpha
+c.....mauro-had-b         
+         else
+            call part_sigmaaatp(zero   ,oute0,1)
+            call part_sigmaaat( q2*cone,oute ,1)
+            ddaae=realpart((-oute/q2)-(-oute0))
 
+            ddaat=0d0
+            if(q2.gt.4d0*mt2) then
+               call part_sigmaaatp(zero   ,outt0,3)
+               call part_sigmaaat( q2*cone,outt ,3)
+               ddaat=realpart((-outt/q2)-(-outt0))
+            endif
+            
+            call dalpha_had(q2,ddaah)
+
+            ddaa=ddaae+ddaat+ddaah
+c     here we must use ph_alphaem instead of em_alpha (both of them are alpha_0)
+c     since em_alpha is set to 0 if no ew corrections are computed
+            alpha     = ph_alphaem/(1d0-ddaa)
+            el2_scheme=4d0*pi*alpha
+            
+         endif
+c.....mauro-had-e
+c         write(*,*)'el2_scheme',el2_scheme
       endif
 c.....added for scheme 3 e     
       
@@ -353,7 +383,7 @@ c balpha b
       if(ini.eq.0) then
          ini=1
          iarun = 0
-         if(powheginput("#emalpharunnning").eq.1d0) iarun  = 1
+         if(powheginput("#emalpharunning").eq.1d0) iarun  = 1
          ame    =me
          ammu   =mm
          convfac=389379.65999999997d0
@@ -430,3 +460,87 @@ c.....below the routines for the running of alpha_elm
 
       
 c alpha e
+c.....mauro-had-b
+c     the routine below computes the hadronic vacuum
+c     polarization. This is not yet resummed.
+      subroutine dalpha_had(q2,out)
+      implicit none
+      include'mathx.h'
+      real*8 out,q2
+      complex*16 outf,outi,out1,out20,out10
+      real*8 AMODQ2,qin,st2
+      real*4 qin4,st24
+      real*4 DER4,ERRDER4,DEG4,ERRDEG4
+      real*8 DER ,ERRDER ,DEG ,ERRDEG 
+      real*8 vprehadsp, vprehadtm, vpimhad, 
+     &       dvprehadsp, dvprehadtm,  
+     &       vprelepsp, vpreleptm, vpimlep, 
+     &       vpretopsp, vpretoptm
+      integer nrflag
+
+      integer da_had_from_fit,fit
+      common/cda_had/da_had_from_fit,fit
+      
+      if(fit.le.0    ) then     ! no fit, for debug only
+         call part_sigmaaatp(zero   ,outi,2)
+         call part_sigmaaat( q2*cone,outf,2)
+         out=realpart((-outf/q2)-(-outi))
+      elseif(fit.eq.1) then     ! JEGERLEHNER, copied from babayaga
+         AMODQ2=ABS(Q2)
+c 
+         ST2=0.2322  !irrelevant for delta(alpha)
+         QIN=SQRT(AMODQ2)
+         QIN4=QIN
+         ST24=ST2
+
+         CALL HADR5n(QIN4,ST24,DER4,ERRDER4,DEG4,ERRDEG4)
+         DER=DER4
+         DEG=DEG4
+         ERRDER=ERRDER4
+         ERRDEG=ERRDEG4
+c to be discussed 3
+         out=der
+c         if(qin.ge.1d3) then
+cc     the fit goes up to 1 TeV, add the running from 1 TeV to sqrt(q2)
+cc     computed perturbatively: der+da_pert_had(q2)-da_pert_had(1TeV)
+c            call part_sigmaaatp(zero   ,outi,2)
+c            call part_sigmaaat( q2*cone,outf,2)
+c            call part_sigmaaat(1d3*cone,out1,2)
+c            out20=realpart((-outf/q2 )-(-outi))
+c            out10=realpart((-out1/1d3)-(-outi))
+c            out=out+out20-out10
+c         endif
+
+      elseif(fit.eq.2) then     ! teubner
+         if(qin.le.100.d0) then !the parameterization goes up to 100^2 GeV^2
+            nrflag= 1           !0 to exclude hadronic contributions
+                                !from narrow resonances J/psi, psi', Upsilon(1-4S)
+            call vpkntv3(qin,  
+     &           vprehadsp,dvprehadsp,vprehadtm,dvprehadtm,
+     &           vpimhad,vprelepsp,vpreleptm,vpimlep, 
+     &           vpretopsp,vpretoptm,nrflag)
+         elseif(qin.gt.100.d0) then
+            call vpkntv3(100.d0,  
+     &           vprehadsp,dvprehadsp,vprehadtm,dvprehadtm,
+     &           vpimhad,vprelepsp,vpreleptm,vpimlep, 
+     &           vpretopsp,vpretoptm,nrflag)
+            out= vprehadtm
+c     the fit goes up to 100 GeV, add the running from 100 GeV to sqrt(q2)
+c     computed perturbatively: vprehadtm+da_pert_had(q2)-da_pert_had(100^2 GeV^2)
+            call part_sigmaaatp(zero   ,outi,2)
+            call part_sigmaaat( q2*cone,outf,2)
+            call part_sigmaaat(1d4*cone,out1,2)
+            out20=realpart((-outf/q2 )-(-outi))
+            out10=realpart((-out1/1d4)-(-outi))
+            out=out+out20-out10
+         else
+            print*,'problems in q2 choice in vpkntv3'
+            stop
+         endif
+      else
+         write(*,*)'error in dalpha_had'
+         stop
+      endif
+
+      end subroutine dalpha_had
+c.....mauro-had-e      

@@ -19,18 +19,50 @@ c  pwhgfill  :  fills the histograms with data
       call bookupeqbins('totalcut',1d0,-0.5d0,0.5d0)
 
 c      call bookupeqbins('Nphot',1d0,-0.5d0,5.5d0)
+cccccccccccccccccccccc
+c nocut distributions
+cccccccccccccccccccccc
+      call bookupeqbins('V_mt_nocut',0.5d0,50d0,100d0)     !for W
+      call bookupeqbins('V_pt1_report_nocut',0.25d0,0d0,25d0)
+      call bookupeqbins('V_pt2_report_nocut',1.d0,0d0,300d0)
+c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
+      call bookupeqbins('V_m_nocut',1.d0,50d0,200d0)
+      call bookupeqbins('V_m_report_nocut',1d0,50d0,200d0)
+      call bookupeqbins('forward_nocut',1.d0,50d0,200d0)
+      call bookupeqbins('backward_nocut',1.d0,50d0,200d0)
+      call bookupeqbins('F-B_nocut',1.d0,50d0,200d0)
+      call bookupeqbins('X_m_report_nocut',0.006d0,0.6d0,1.2d0)
+      call bookupeqbins('X_p_report_nocut',0.008d0,0.4d0,1.2d0)
+      call bookupeqbins('l1_y_nocut',0.2d0,-4d0,4d0)
+      call bookupeqbins('l1_eta_nocut',0.2d0,-2.5d0,2.5d0)
+      call bookupeqbins('l1_pt_nocut',1.4d0,25d0,60d0)
+      call bookupeqbins('l1_pt_report_nocut',0.25d0,25d0,65d0)
+      call bookupeqbins('l2_y_nocut',0.2d0,-4d0,4d0)
+      call bookupeqbins('l2_eta_nocut',0.2d0,-2.5d0,2.5d0)
+      call bookupeqbins('l2_pt_nocut',1.4d0,25d0,60d0)
+      call bookupeqbins('l2_pt_report_nocut',0.25d0,25d0,65d0)
+      call bookupeqbins('delta_phi_nocut',0.1d0,0d0,3.2d0)
+      call bookupeqbins('dr1_nocut',0.1d0,0d0,3.2d0)
+      call bookupeqbins('dr2_nocut',0.1d0,0d0,3.2d0)
+      call bookupeqbins('phistar_report_nocut',0.01d0,0d0,0.4d0)
+      call bookupeqbins('ptgamma_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_nocut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_nocut',0.2d0,-7d0,3d0)
 
+cccccccccccccccccccccc
+c cut distributions
+cccccccccccccccccccccc
       call bookupeqbins('V_mt',0.5d0,50d0,100d0)     !for W
       call bookupeqbins('V_pt1_report',0.25d0,0d0,25d0)
       call bookupeqbins('V_pt2_report',1.d0,0d0,300d0)
 c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
 
-      call bookupeqbins('V_m',1.d0,60d0,120d0)
+      call bookupeqbins('V_m',1.d0,50d0,200d0)
       call bookupeqbins('V_m_report',1d0,50d0,200d0)
 
-      call bookupeqbins('forward',1.d0,60d0,120d0)
-      call bookupeqbins('backward',1.d0,60d0,120d0)
-      call bookupeqbins('F-B',1.d0,60d0,120d0)
+      call bookupeqbins('forward',1.d0,50d0,200d0)
+      call bookupeqbins('backward',1.d0,50d0,200d0)
+      call bookupeqbins('F-B',1.d0,50d0,200d0)
 
       call bookupeqbins('X_m_report',0.006d0,0.6d0,1.2d0)
       call bookupeqbins('X_p_report',0.008d0,0.4d0,1.2d0)
@@ -50,6 +82,12 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
       call bookupeqbins('dr1',0.1d0,0d0,3.2d0)
       call bookupeqbins('dr2',0.1d0,0d0,3.2d0)
       call bookupeqbins('phistar_report',0.01d0,0d0,0.4d0)
+
+      call bookupeqbins('ptgamma_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptgammamax_cut',0.2d0,-7d0,3d0)
+      call bookupeqbins('ptrel_gamma-lep_cut',0.2d0,-7d0,3d0)
+
+c end of cut distributions
 
       call bookupeqbins('nophot',1d0,-0.5d0,0.5d0)
 
@@ -74,12 +112,6 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
       call bookupeqbins('a6',1d0,0d0,100d0)
       call bookupeqbins('a7',1d0,0d0,100d0)
 
-      call bookupeqbins('ptgamma_nocut',0.2d0,-7d0,3d0)
-      call bookupeqbins('ptgamma_cut',0.2d0,-7d0,3d0)
-      call bookupeqbins('ptgammamax_nocut',0.2d0,-7d0,3d0)
-      call bookupeqbins('ptgammamax_cut',0.2d0,-7d0,3d0)
-      call bookupeqbins('ptrel_gamma-lep_nocut',0.2d0,-7d0,3d0)
-      call bookupeqbins('ptrel_gamma-lep_cut',0.2d0,-7d0,3d0)
       end
      
       subroutine analysis(dsig)
@@ -88,6 +120,8 @@ c      call bookupeqbins('V_pt2',1d0,0d0,350d0)
       include 'hepevt.h'
       include 'pwhg_math.h' 
       include  'LesHouches.h'
+      complex*16 mw,mz,mh,mh2,mw2,mz2
+      common/masses/mw,mz,mh,mw2,mz2,mh2
       integer   maxphot,nphot,maxnumg,maxnumlep
       parameter (maxphot=2048,maxnumlep=100)
       real * 8 pg(4,maxphot)
@@ -99,8 +133,8 @@ c     we need to tell to this analysis file which program is running it
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
 c      data WHCPRG/'PYTHIA'/
-c      data WHCPRG/'NLO   '/
-      data WHCPRG/'PHOTOS'/
+      data WHCPRG/'NLO   '/
+c      data WHCPRG/'PHOTOS'/
       real * 8 pz(4),pl1(4),pl2(4)
       real * 8 pl103(0:3),pl203(0:3)
       real * 8 y1,eta1,ptl1,m1
@@ -114,7 +148,6 @@ c      data WHCPRG/'NLO   '/
       external powheginput,dotp
       integer vdecaytemp
       logical accepted
-      real*8 mw,mz
       real*8 cs
       real*8 getdeta,getdr,dphi,dr1,dr2
       real*8 cstar,phistar,phistar_report
@@ -143,9 +176,6 @@ c spin correlation observables
          print*,'dsig in analysis not finite: ',dsig
          return
       endif
-
-      mw=80.385d0
-      mz=91.1876d0
 
       pz = (/0,0,0,0/)
       pl1= (/0,0,0,0/)
@@ -290,7 +320,50 @@ c hardest lepton
 
       phistar = phistar_report(pl2,pl1)   !pl2 is the negatively charged lepton
 
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c distributions without cuts
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       call filld('total',0d0,dsig)
+
+c lepton 1
+      call filld('l1_y_nocut',    y1, dsig)
+      call filld('l1_eta_nocut',eta1, dsig)
+      call filld('l1_pt_nocut', ptl1, dsig)
+      call filld('l1_pt_report_nocut', ptl1, dsig)
+c lepton 2
+      call filld('l2_y_nocut',    y2, dsig)
+      call filld('l2_eta_nocut',eta2, dsig)
+      call filld('l2_pt_nocut', ptl2, dsig)
+      call filld('l2_pt_report_nocut', ptl2, dsig)
+
+c azimuthal separation betwen lepton and neutrino
+      call filld('delta_phi_nocut',delphi,dsig)
+      call filld('dr1_nocut',dr1,dsig)
+      call filld('dr2_nocut',dr2,dsig)
+
+c W
+c      call filld('V_pt_zoom',pt, dsig)
+      call filld('V_pt1_report_nocut',pt, dsig)
+      call filld('V_pt2_report_nocut',pt, dsig)
+      call filld('V_m_nocut',  m, dsig)
+      call filld('V_m_report_nocut',  m, dsig)
+c transverse mass of the lep1-lep2 system
+      call filld('V_mt_nocut',mtv,dsig)
+
+      call filld('X_m_report_nocut',mtv/mz,dsig)
+      call filld('X_p_report_nocut',ptl1*2d0/mz,dsig)
+
+      if (cs.lt.0d0) then
+         call filld('backward_nocut', m, dsig)
+         dsigfmb= -dsig
+      else
+         call filld('forward_nocut', m, dsig)
+         dsigfmb= dsig
+      endif
+      call filld('F-B_nocut', m, dsigfmb)
+      call filld('phistar_report_nocut',phistar,dsig)
 
       if(ngamma.gt.0) then
          do gam=1,ngamma
@@ -310,9 +383,13 @@ c     FSR ptrel (minimum pt between photon and leptpons)
          logptgammamax= log(pt_gamma_max)/log(10.d0)
          call filld('ptgammamax_nocut',logptgammamax,dsig)
       endif
-      
-      if(getpt(pl1).gt.25.and.abs(geteta(pl1))<2.5d0.and.
-     1   getpt(pl2).gt.25.and.abs(geteta(pl2))<2.5d0.and.
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c distributions without cuts
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      if(getpt(pl1).gt.25.and.abs(geteta(pl1))<2.4d0.and.
+     1   getpt(pl2).gt.25.and.abs(geteta(pl2))<2.4d0.and.
      2   m.gt.50) then
          call filld('totalcut',0d0,dsig)
 c lepton 1

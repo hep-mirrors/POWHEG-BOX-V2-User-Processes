@@ -1621,7 +1621,7 @@ c
       if(ini.eq.0) then
          powhegv2opt = powheginput("#powhegv2opt")
          paircorr = 0
-         if(powheginput("#emalpharunnning").eq.1d0) paircorr  = 1
+         if(powheginput("#emalpharunning").eq.1d0) paircorr  = 1
          ini = 1
       endif
 c.....mauro-kine

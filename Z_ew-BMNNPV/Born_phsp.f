@@ -29,6 +29,12 @@
      1       phsp_Zmass2low,phsp_Zmass2high
 
       real * 8 powheginput
+
+c.....mauro-had-b
+      integer da_had_from_fit,fit
+      common/cda_had/da_had_from_fit,fit
+c.....mauro-had-e      
+      
       if(ini) then
 c     set initial- and final-state masses for Born and real
          do k=1,2
@@ -47,9 +53,21 @@ c     set initial- and final-state masses for Born and real
 
 c     mass window
          mass_low = powheginput("#mass_low")
-         if (mass_low.le.0d0) mass_low=30d0
+         if (mass_low.le.0d0) mass_low=30d0         
          mass_low = max(mass_low,2.d0*decmass)
          phsp_Zmass2low = mass_low**2
+
+c.....mauro-had-b         
+         if(da_had_from_fit.le.0.and.scheme.eq.3) then
+            if(mass_low.lt.2d0*ph_mbot) then
+               write(*,*)'with this settings for the running  '
+               write(*,*)'of alpha_em we assume that all light'
+               write(*,*)'quarks do contribute, cut too small '
+               stop
+            endif
+         endif
+c.....mauro-had-e
+         
 *
          mass_high = powheginput("#mass_high")
          if (mass_high.le.0.d0) mass_high=sqrt(kn_sbeams)
@@ -309,7 +327,7 @@ c.....added for scheme 3
             write(*,*) '******WARNING*****************************'
             write(*,*) '*   the value of alpha in born/virt/real *'
             write(*,*) '*   is computed at                       *'
-            write(*,*) '*   q2=2*(kn_porn(:,1),kn_porn(:,2))   *'
+            write(*,*) '*   q2=2*(kn_pborn(:,1),kn_pborn(:,2))   *'
             write(*,*) '******WARNING*****************************'
             ini=.false.
       endif

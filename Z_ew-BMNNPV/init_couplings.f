@@ -17,7 +17,11 @@ c.....mauro-pair b
       save  /csaveaem0/
 c.....mauro-pair e      
 
-      
+c.....mauro-had-b
+      integer da_had_from_fit,fit
+      common/cda_had/da_had_from_fit,fit
+      save /cda_had/
+c.....mauro-had-e      
       real * 8 powheginput
       external powheginput
       real *8 decmass
@@ -37,7 +41,24 @@ c.....added for scheme 3 e
       integer j
       real*8 s2effin,mwout,tmp
       real*8 osWmass,osWwidth,osZmass,osZwidth
-      save 
+      save
+
+c.....mauro-had-b
+      da_had_from_fit=nint(powheginput("#da_had_from_fit"))
+      if(da_had_from_fit.gt.0) then
+c     fit=0 only for debug, the 'perturbative' running is still used
+c     fit=1 fit by jegerlehner
+c     fit=2 fit by teubner
+         fit=nint(powheginput("#fit"))
+
+         if(fit.le.0) then
+            write(*,*)'**** WARNING ***'
+            write(*,*)' fit<=0 means that no fit is used for alpha'
+            write(*,*)' this is the same as using '
+            write(*,*)' da_had_from_fit.le.0      '
+         endif
+      endif
+c.....mauro-had-e      
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccc   INDEPENDENT QUANTITIES       
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -257,9 +278,13 @@ c.....added for scheme 3 b
           alpha   = dcmplx(ph_alpha_mz)
           el2_scheme = alpha*4d0*pi
 c.....added for scheme 3 e             
-      else
-          el2_scheme = ph_gmu * 8d0/sqrt(2d0) * mw2 * sw2
+       else
+          el2_scheme = ph_gmu * 8d0/sqrt(2d0)
+     +               * ph_Wmass**2 * (1.d0-ph_Wmass**2/ph_Zmass**2)
+c     el2_scheme = ph_gmu * 8d0/sqrt(2d0) * mw2 * sw2   !with cmplexmasses
+c                                           this changes the tree-level overall
           alpha   = el2_scheme/4d0/pi
+          endif
       endif
 *
 * couplings of vectors to fermions

@@ -35,7 +35,7 @@
 
 
 \title{The $\boldsymbol{Z/\gamma^*}$ EW NLO \& QCD production \\
-in the POWHEG-BOX-V2 user manual: svn v3376} \vfill
+in the POWHEG-BOX-V2 user manual: svn v3616} \vfill
 \author{Mauro Chiesa\\
   INFN, Sezione di Pavia, Via A. Bassi 6, 27100 Pavia, Italy\\
   E-mail: \email{Mauro.Chiesa@physik.uni-wuerzburg.de}}
@@ -98,7 +98,7 @@ This program is an implementation of the Drell-Yan NLO cross sections
 $pp\to Z/\gamma^* \to \ell^+ \ell^-$ including QCD and ElectroWeak (EW) 
 radiative corrections. 
 A detailed description of the implementation can be found in 
-Ref.~\cite{Barze:2013}. Major improvements w.r.t. svn version 3370 
+Ref.~\cite{Barze:2013}. Major improvements w.r.t. svn version 3616 
 in Ref.~\cite{CarloniCalame:2016ouw}. 
 %Please cite the paper when you use the program. \\
 In order to run the \tmtexttt{POWHEG BOX} program, we recommend the
@@ -218,7 +218,7 @@ so their values can be easily tracked down.
    Taumass\phantom{a} 1.77699 \phantom{aaaaa} ! Tau mass in GeV\\
 }
 \\
-The following parameter limits from below the virtuality of the $Z$ boson:
+The following parameters limits from below the virtuality of the $Z$ boson:
 \\
 \tmtexttt{mass\_low 20 \phantom{aaaaaaaa}! Z virtuality > mass\_low in GeV}\\
 \\
@@ -227,6 +227,13 @@ In order to avoid edge effects, the lower limit \tmtexttt{mass\_low}
 should be more inclusive w.r.t. cuts applied at the analysis level.
 Notice that, if photons are generated, the $Z$ virtuality is not
 necessarily the mass of the dilepton.
+\\
+\\
+\tmtexttt{mass\_high 1000 \phantom{aaaaaaaa}! Z virtuality < mass\_high in GeV}\\
+\\
+If absent, it is set to $\sqrt{s}$. Upper limit on the $Z$ virtuality: as explained
+before, this option can be used only if EW corrections are turned off (\tmtexttt{no\_ew}
+option, see below).
 \\
 \\
 \tmtexttt{runningscale 0 \phantom{aaaa}! choice for ren and fac scales in Bbar integration}\\
@@ -243,16 +250,22 @@ With running scale, a minimum cutoff of 5 GeV is imposed on $m(\ell^+ \ell^-)$.
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 0: Alpha(0)}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 1: Alpha(M\_Z)}\\
 \phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 2: G\_$\mu$}\\
+\phantom{pppppppppppppppppppppppppppppp} \tmtexttt{ 3: Alpha($q^2$)}\\
 \\ 
 The CKM mixing matrix is assumed diagonal in the EW NLO corrections.\\
 \\
-The EW radiative corrections can be calculated according to three 
+The EW radiative corrections can be calculated according to four 
 different schemes: the $\alpha(0)$ scheme, where the input parameters 
 are $\alpha(0)$, $M_W$ and $M_Z$; the $\alpha(M_Z^2)$ scheme, where the 
 input parameters are $\alpha(M_Z^2)$, $M_W$ and $M_Z$ (with this 
 scheme the value of the parameter \tmtexttt{alphaem\_z} should be specified); 
-the $G_\mu$ scheme, where the 
-input parameters are $G_\mu$, $M_W$ and $M_Z$. 
+the $G_\mu$ scheme, where the input parameters are $G_\mu$, $M_W$ and $M_Z$;
+a modified version of the $\alpha(M_Z^2)$ scheme, where $\alpha$ is computed
+at the scale $q^2=(p_q+p_{\bar{q}})^2$ where $p_q$ and $p_{\bar{q}}$ are the momenta
+of the incoming partons in the underlying Born kinematics (\tmtexttt{kn\_pborn}).
+Note that in scheme 1, 2, and 3 the the electroweak corrections are proportional
+to $\alpha^2 \alpha_0$ with $\alpha_0=$\tmtexttt{alphaem}.
+\\
 \\
 The EW corrections can be switched off by setting
 \\
@@ -266,6 +279,69 @@ This last option is just to check EW corrections at the NLO level (i.e.,
 the Les Houches events do not have much meaning).
 \\
 \\
+\tmtexttt{emalpharunning  1     ! default 0}
+\\
+If \tmtexttt{emalpharunning} is set to one, a running value is employed for $\alpha$
+in the POWHEG Sudakov exponent for QED radiation. The running effectively accounts
+for the radiation of undetected $e^+e^-$ and $\mu^+\mu^-$ pairs. If this option is
+used, no pair-radiation should be allowed at the Parton Shower level.\\
+\\
+\\
+\tmtexttt{complexmasses  1     ! default 0}
+\\
+If \tmtexttt{complexmasses} is set to one, the calculation is performed in the complex mass scheme.\\ 
+\\
+\\
+\tmtexttt{QED-only  1     ! default 0}
+\\
+If \tmtexttt{QED-only} is set to one, only the QED part of the $O(\alpha)$ corrections in computed
+(the purely weak part of the virtual EW corrections is not included in the calculation).\\ 
+\\
+\\
+\tmtexttt{weak-only  1     ! default 0}
+\\
+If \tmtexttt{weak-only} is set to one, only the purely weak part of the $O(\alpha)$ corrections is computed.
+When the flags \tmtexttt{weak-only}, \tmtexttt{no\_strong} and \tmtexttt{LOevents} are set to 1 at the same time, 
+POWHEG integrates the Born matrix element plus the purely weak NLO corrections.\\ 
+\\
+\\
+\tmtexttt{ew\_ho  1     ! default 0}
+\\
+If \tmtexttt{ew\_ho} is set to one, the leading part of the higher order (H.O.) purely weak corrections
+are computed and added to the NLO EW results. The corrections are written in terms of the quantities $\Delta \alpha$
+and $\Delta \rho$. We implemented a modified version of the formulas in Ref.~\cite{Dittmaier:2009cr} that takes into
+account the running of $\alpha$ up to the virtuality of the $Z$ boson (set the flag
+\tmtexttt{constantscale} to 1-default 0- to use $\Delta \alpha (M_Z^2)$ instead of $\Delta \alpha (q^2)$). \\
+\\
+\\
+\tmtexttt{ew\_ho\_only  1     ! default 0}
+\\
+If \tmtexttt{ew\_ho\_only} is set to one, only the H.O. weak corrections are computed (i.e. they are not added to the
+NLO virtual EW ones). If the flags \tmtexttt{ew\_ho\_only}, \tmtexttt{ew\_ho},
+\tmtexttt{no\_strong} and \tmtexttt{LOevents} are set to 1 at the same time, 
+POWHEG integrates the Born matrix element plus the purely weak H.O. corrections. These setting should be used only
+for fixed order studies.\\
+\\
+\\
+\tmtexttt{kt2minqed  0.000001  ! default 0.000001}
+\\
+Lower cutoff on the relative transverse momentum of the radiated photons at the LesHouches level.
+To ensure a proper matching with the parton shower, the parameters \tmtexttt{SI\_kt2minqed} and
+\tmtexttt{kt2minqed} should have the same value.\\
+\\
+\\
+\tmtexttt{da\_had\_from\_fit 1  ! default 0}
+\\
+If \tmtexttt{da\_had\_from\_fit} is set to 0 the hadronic running of $\alpha$ is computed
+perturbatively from the quark masses. It is possible to compute the hadronic running of alpha
+from the $e^+e^-\to$~hadrons data by setting the flag \tmtexttt{da\_had\_from\_fit} to 1 in combination
+with the flag \tmtexttt{fit} (default 0). In particular, if \tmtexttt{fit} is set to 1 the parametrization
+of Ref.~\cite{Eidelman:1995ny} is used, while if \tmtexttt{fit} is set to 2 the parametrization
+of Ref.~\cite{Hagiwara:2011af,Keshavarzi:2018mgv} is employed
+(if \tmtexttt{fit} is set to 0, the running is still computed perturbatively: this option was
+introduced for testing purposes only).
+
+
 \subsection{Flags used by the shower interfaces}
 
 The flags starting with \verb+SI_+ configure the behavior of the shower interfaces. The following flags are used by the interfaces \tmtexttt{main-PYTHIA81-lhef} and \tmtexttt{main-PYTHIA82-lhef}:
@@ -285,7 +361,7 @@ The flags starting with \verb+SI_+ configure the behavior of the shower interfac
 \item[]\verb+SI_no_tworadevents+, explained below.
 \end{itemize}
 
-According to the \POWHEG{} method, the radiation by the shower has to be generated from a starting scale given by the hardest $\pt$ tried at the matrix element level. Traditionally, this scale is written in the variable {\tt scalup} in the {tt LHE} event file. However, for the DY process, when both QCD and EW NLO corrections are present (Ref.~\cite{Barze:2012tt}), it is necessary to keep track in the \POWHEG{} events of two scales, one for initial state radiation ({\tt scalup-isr}) and one for final state radiation ({\tt scalup-fsr}). These two scales are used as starting points for the IS and FS showers, respectively. \PYTHIAEIGHT{} and \PHOTOSPP{} do not use {\tt scalup-fsr} for the generation of QED final state radiation from the $W$. Hence, in order to avoid double counting of QED radiation, a veto algorithm is necessary. This veto is activated unless the flag \verb+no_ew+ is activated in \tmtexttt{powheg.input}.
+According to the \POWHEG{} method, the radiation by the shower has to be generated from a starting scale given by the hardest $\pt$ tried at the matrix element level. Traditionally, this scale is written in the variable {\tt scalup} in the {tt LHE} event file. However, for the DY process, when both QCD and EW NLO corrections are present (Ref.~\cite{Barze:2013}), it is necessary to keep track in the \POWHEG{} events of two scales, one for initial state radiation ({\tt scalup-isr}) and one for final state radiation ({\tt scalup-fsr}). These two scales are used as starting points for the IS and FS showers, respectively. \PYTHIAEIGHT{} and \PHOTOSPP{} do not use {\tt scalup-fsr} for the generation of QED final state radiation from the $Z$. Hence, in order to avoid double counting of QED radiation, a veto algorithm is necessary. This veto is activated unless the flag \verb+no_ew+ is activated in \tmtexttt{powheg.input}.
 
 A general issue is the matching between the NLO calculation and the (QCD and QED) higher order corrections given by the parton shower: due to the different definitions of $p_\perp$ in \POWHEG{} and \PYTHIAEIGHT{}, some double counting or dead zone can arise. By default (flag \verb+SI_pythiamatching+ equal to~2), the interface generates all QCD/QED shower emissions up to the kinematical limit and then veto emissions harder than the \POWHEG{} scales ({\tt scalup-isr} and {\tt scalup-fsr}), computed according to the \POWHEG{} $p_\perp$ definition. The user can optionally choose an alternative scheme, where the shower starting scales are fixed and no veto's are performed. This choice can be activated by setting the flag \verb+SI_pythiamatching+ equal to~1.
 
@@ -348,6 +424,19 @@ method,''
   Eur.\ Phys.\ J.\ C {\bf 73} (2013) 2474  
   [arXiv:1302.4606[hep-ph]].
 
+
+  %\cite{Dittmaier:2009cr}
+\bibitem{Dittmaier:2009cr}
+  S.~Dittmaier and M.~Huber,
+  %``Radiative corrections to the neutral-current Drell-Yan process in the Standard Model and its minimal supersymmetric extension,''
+  JHEP {\bf 1001}, 060 (2010)
+  doi:10.1007/JHEP01(2010)060
+  [arXiv:0911.2329 [hep-ph]].
+  %%CITATION = doi:10.1007/JHEP01(2010)060;%%
+  %107 citations counted in INSPIRE as of 26 Dec 2018
+  
+
+  
 \bibitem{CarloniCalame:2016ouw}
   C.M.~Carloni Calame, M.~Chiesa, H.~Martinez, 
   G.~Montagna, O.~Nicrosini, F.~Piccinini, and A.~Vicini, 
@@ -363,6 +452,39 @@ method,''
   [hep-ph/0506026].
   %%CITATION = HEP-PH/0506026;%%
 
+  %\cite{Eidelman:1995ny}
+\bibitem{Eidelman:1995ny}
+  S.~Eidelman and F.~Jegerlehner,
+  %``Hadronic contributions to g-2 of the leptons and to the effective fine structure constant alpha (M(z)**2),''
+  Z.\ Phys.\ C {\bf 67}, 585 (1995)
+  doi:10.1007/BF01553984
+  [hep-ph/9502298].
+  %%CITATION = doi:10.1007/BF01553984;%%
+  %658 citations counted in INSPIRE as of 31 Dec 2018
+
+
+
+  %\cite{Hagiwara:2011af}
+\bibitem{Hagiwara:2011af}
+  K.~Hagiwara, R.~Liao, A.~D.~Martin, D.~Nomura and T.~Teubner,
+  %``(g-2)_mu and alpha(M_Z^2) re-evaluated using new precise data,''
+  J.\ Phys.\ G {\bf 38}, 085003 (2011)
+  doi:10.1088/0954-3899/38/8/085003
+  [arXiv:1105.3149 [hep-ph]].
+  %%CITATION = doi:10.1088/0954-3899/38/8/085003;%%
+  %630 citations counted in INSPIRE as of 31 Dec 2018
+  
+  %\cite{Keshavarzi:2018mgv}
+\bibitem{Keshavarzi:2018mgv}
+  A.~Keshavarzi, D.~Nomura and T.~Teubner,
+  %``Muon $g-2$ and $\alpha(M_Z^2)$: a new data-based analysis,''
+  Phys.\ Rev.\ D {\bf 97}, no. 11, 114025 (2018)
+  doi:10.1103/PhysRevD.97.114025
+  [arXiv:1802.02995 [hep-ph]].
+  %%CITATION = doi:10.1103/PhysRevD.97.114025;%%
+  %54 citations counted in INSPIRE as of 31 Dec 2018
+
+  
 \end{thebibliography}
 
 \end{document}

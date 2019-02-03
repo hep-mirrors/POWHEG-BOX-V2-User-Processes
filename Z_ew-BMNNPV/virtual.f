@@ -306,10 +306,11 @@ c.....mauro-h.o. e
       save deltamz2,delaa,delzz,delaz,delza
 *
       integer sig,tau
-
+      
       if (ifirst.eq.0) then
           ifirst = 1
 
+          
           call sigmazzt(dble(mz2)*cone,szztmz2)
           call sigmazztp(dble(mz2)*cone,szztpmz2)
           call sigmaazt(zero,sazt0)
@@ -322,7 +323,7 @@ c.....mauro-h.o. e
           if (complexmasses) then
               deltamz2  = szztmz2 + ii*dimag(mz2)*szztpmz2
           else
-              deltamz2  = (szztmz2)
+              deltamz2  = szztmz2 ! dble(szztmz2)
           endif
 *
 * eq. (3.28) of Dittmaier-Huber 0911.2329 and (4.9/10) of hep-ph:0505042
@@ -332,7 +333,7 @@ c.....mauro-h.o. e
           if (complexmasses) then
               delzz = - szztpmz2
           else
-              delzz = - (szztpmz2)
+              delzz = dble(- szztpmz2)
           endif
 
           delza =   2d0/mz2*sazt0
@@ -354,30 +355,31 @@ c.....mauro-h.o. e
       self = zero
 *
       do sig=0,1
-          do tau=0,1
-          if (complexmasses) then
+         do tau=0,1
+            if (complexmasses) then
               self = self 
-     +         + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
-     +                  + gq(sig)*gl(tau)/(s*cone-mz2)**2
-     +                    * (szzts-deltamz2+delzz*(s*cone-mz2))
-     +                  - (ql*gq(sig)+qq*gl(tau))/(s*(s*cone-mz2))
-     +                    * (sazts + 0.5d0*delaz*s
-     +                                  + 0.5d0*delza*(s*cone-mz2)) )
-     +          *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
-          else
-              self = self
-     +         + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
-     +                  + gq(sig)*gl(tau)
-     +                        /(s*cone-mz2)/(s*cone-mz2+ii*ph_ZmZw)
-     +                    * (szzts-deltamz2+delzz*(s*cone-mz2))
-     +                  - (ql*gq(sig)+qq*gl(tau))
-     +                      /(s*(s*cone-mz2+ii*ph_ZmZw))
-     +                    * (sazts + 0.5d0*delaz*s
-     +                                  + 0.5d0*delza*(s*cone-mz2)) ) 
-     +          *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+     +              + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
+     +              + gq(sig)*gl(tau)/(s*cone-mz2)**2
+     +              * (szzts-deltamz2+delzz*(s*cone-mz2))
+     +              - (ql*gq(sig)+qq*gl(tau))/(s*(s*cone-mz2))
+     +              * (sazts + 0.5d0*delaz*s
+     +              + 0.5d0*delza*(s*cone-mz2)) )
+     +              *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+           else
 
-          endif
-          enddo
+              self = self
+     +             + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
+     +             + gq(sig)*gl(tau)
+     +             /(s*cone-mz2)/(s*cone-mz2+ii*ph_ZmZw)
+     +             * (szzts-deltamz2+delzz*(s*cone-mz2))
+     +             - (ql*gq(sig)+qq*gl(tau))
+     +             /(s*(s*cone-mz2+ii*ph_ZmZw))
+     +             * (sazts + 0.5d0*delaz*s
+     +             + 0.5d0*delza*(s*cone-mz2+ii*ph_ZmZw)) ) 
+     +             *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
+
+           endif
+        enddo
       enddo
 *
       end subroutine deltaself
@@ -494,7 +496,7 @@ c.....added for scheme 3 e
           if (complexmasses) then
              delaz= -2d0/dble(mz2)*saztmz2+(mz2/dble(mz2)-cone)*delza
           else
-             delaz = (- 2d0/mz2*saztmz2)
+             delaz = dble(- 2d0/mz2*saztmz2)
           endif
 
           delaa = - saatp0
@@ -502,7 +504,7 @@ c.....added for scheme 3 e
           if (complexmasses) then
              delzz = - szztpmz2
           else
-             delzz = - szztpmz2
+             delzz = dble(- szztpmz2)
           endif
 *
 ** delze according to eq. (3.32) of ArXiv:0709.1075 (Denner Fortschritte)
