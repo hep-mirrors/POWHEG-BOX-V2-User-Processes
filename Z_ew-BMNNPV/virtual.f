@@ -207,18 +207,6 @@ c.....mauro-h.o. b
          write(*,*)'dyqedonly ',dyqedonly
          write(*,*)'dyweakonly',dyweakonly
 
-         
-         if(ew_ho_only.le.0d0) then
-            if((is_ew_ho.gt.0d0.and.dyqedonly).or.
-     +           (is_ew_ho.gt.0d0.and.dyweakonly)) then
-               write(*,*)'is_ew_ho  ',is_ew_ho
-               write(*,*)'dyqedonly ',dyqedonly
-               write(*,*)'dyweakonly',dyweakonly
-               write(*,*)'h.o. allowed only if the full'//
-     +              ' ew NLO is computed'
-               stop
-            endif
-         endif
 c.....mauro-h.o. e      
       endif
 
@@ -306,7 +294,15 @@ c.....mauro-h.o. e
       save deltamz2,delaa,delzz,delaz,delza
 *
       integer sig,tau
-      
+
+c.....mauro-had-b
+      integer da_had_from_fit,fit
+      common/cda_had/da_had_from_fit,fit
+      complex*16 oute,outt,outw,outq,outq0
+      real*8 ddaah
+      complex*16 AAbubble
+c.....mauro-had-e      
+
       if (ifirst.eq.0) then
           ifirst = 1
 
@@ -352,34 +348,67 @@ c.....mauro-h.o. e
 *
 * eq. (3.27) of Dittmaier-Huber 0911.2329
 *
+c.....mauro-had-b
+      if(da_had_from_fit.le.0) then
+         AAbubble=saats
+      else
+         call part_sigmaaat( s*cone,oute ,1)
+c     for the imaginari part
+         call part_sigmaaat( s*cone,outq ,2)
+c     here the top quark must always enter         
+         call part_sigmaaat( s*cone,outt ,3)
+c     here the W loop must enter as well
+         call part_sigmaaat( s*cone,outw ,4)
+c     derivative subtraction term for the light quarks
+         call part_sigmaaatp( zero,outq0 ,2)
+         
+         call dalpha_had(s,ddaah)
+
+c         write(*,*)'outq0',outq0
+         
+         AAbubble=dimag(outq)*ii
+         AAbubble=AAbubble+s*cone*(-ddaah)+s*outq0 +oute+outt+outw
+c     since saats_lq=s*(saats_lq/s-saatp0_lq)+s*saatp0_lq=-s*dalpha_had+s*saatp0_lq
+      endif
+
+c      write(*,*)'saats',saats
+c      write(*,*)'xxxxx',AAbubble
+      
+c.....mauro-had-e
+      
       self = zero
 *
       do sig=0,1
          do tau=0,1
             if (complexmasses) then
-              self = self 
-     +              + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
+               self = self
+c.....mauro-had-b               
+     +              + el2_scheme * ( qq*ql/s**2 * (AAbubble + delaa*s)
+c.....mauro-had-e               
      +              + gq(sig)*gl(tau)/(s*cone-mz2)**2
      +              * (szzts-deltamz2+delzz*(s*cone-mz2))
      +              - (ql*gq(sig)+qq*gl(tau))/(s*(s*cone-mz2))
      +              * (sazts + 0.5d0*delaz*s
      +              + 0.5d0*delza*(s*cone-mz2)) )
-     +              *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
-           else
-
-              self = self
-     +             + el2_scheme * ( qq*ql/s**2 * (saats + delaa*s)
-     +             + gq(sig)*gl(tau)
-     +             /(s*cone-mz2)/(s*cone-mz2+ii*ph_ZmZw)
-     +             * (szzts-deltamz2+delzz*(s*cone-mz2))
-     +             - (ql*gq(sig)+qq*gl(tau))
-     +             /(s*(s*cone-mz2+ii*ph_ZmZw))
-     +             * (sazts + 0.5d0*delaz*s
-     +             + 0.5d0*delza*(s*cone-mz2+ii*ph_ZmZw)) ) 
-     +             *a(sig,tau)*conjg(a(sig,tau))*conjg(bornamp(sig,tau))
-
-           endif
-        enddo
+     +              *a(sig,tau)*conjg(a(sig,tau))
+     +              *conjg(bornamp(sig,tau))
+            else
+               self = self
+c.....mauro-had-b                              
+     +              + el2_scheme * ( qq*ql/s**2 * (AAbubble + delaa*s)
+c.....mauro-had-e               
+     +              + gq(sig)*gl(tau)
+     +              /(s*cone-mz2)/(s*cone-mz2+ii*ph_ZmZw)
+     +              * (szzts-deltamz2+delzz*(s*cone-mz2))
+     +              - (ql*gq(sig)+qq*gl(tau))
+     +              /(s*(s*cone-mz2+ii*ph_ZmZw))
+     +              * (sazts + 0.5d0*delaz*s
+     +              + 0.5d0*delza*(s*cone-mz2)) ) 
+     +              *a(sig,tau)*conjg(a(sig,tau))
+     +              *conjg(bornamp(sig,tau))
+               
+            endif
+         enddo
       enddo
 *
       end subroutine deltaself
@@ -7457,3 +7486,227 @@ c      write(*,*)'der',sf,outf
       end function r8_wrap
 
 c.....mauro-h.o. e
+
+c.....mauro-h.o. e
+c.....mauro-had-b
+c     the following two subroutines are identical to sigmaaat and sigmaaatp
+c     but they return only part of the self energy/derivative according to type
+c     type=1 -> leptons; type=2 -> light quarks ; type=3 -> top; type=4 -> WW loop
+      subroutine part_sigmaaat(s,saatout,type)
+      implicit none
+      include'mathx.h'
+      include'pwhg_math.h'
+      include'pwhg_physpar.h'
+*
+      complex*16 s
+      complex*16 saatout
+      integer type
+*
+      complex*16 b0dsmeme,b0dsmmmm,b0dsmtlmtl
+      complex*16 b0d0meme,b0d0mmmm,b0d0mtlmtl
+
+      complex*16 b0dsmumu,b0dsmcmc,b0dsmtmt
+      complex*16 b0d0mumu,b0d0mcmc,b0d0mtmt
+
+      complex*16 b0dsmdmd,b0dsmsms,b0dsmbmb
+      complex*16 b0d0mdmd,b0d0msms,b0d0mbmb
+
+      complex*16 b0dsmwmw
+      complex*16 b0d0mwmw
+*
+      integer ifirst
+      data ifirst/0/
+      save ifirst
+      save b0d0meme,b0d0mmmm,b0d0mtlmtl
+      save b0d0mumu,b0d0mcmc,b0d0mtmt
+      save b0d0mdmd,b0d0msms,b0d0mbmb
+      save b0d0mwmw
+*
+      if (ifirst.eq.0) then
+          ifirst = 1
+
+          call b0p0mm(me2*cone,b0d0meme)
+          call b0p0mm(mm2*cone,b0d0mmmm)
+          call b0p0mm(mtl2*cone,b0d0mtlmtl)
+
+          call b0p0mm(mu2*cone,b0d0mumu)
+          call b0p0mm(mc2*cone,b0d0mcmc)
+          call b0p0mm(mt2*cone,b0d0mtmt)
+
+          call b0p0mm(md2*cone,b0d0mdmd)
+          call b0p0mm(ms2*cone,b0d0msms)
+          call b0p0mm(mb2*cone,b0d0mbmb)
+
+          call b0p0mm(mw2,b0d0mwmw)
+      endif
+
+      if(type.eq.1) then
+         
+         call b0reg(s,me2*cone,me2*cone,b0dsmeme)
+         call b0reg(s,mm2*cone,mm2*cone,b0dsmmmm)
+         call b0reg(s,mtl2*cone,mtl2*cone,b0dsmtlmtl)
+
+         saatout= 2.d0/3.d0*(
+* sum over three charged leptons
+     +             2.d0*ql**2*( - (s+2.d0*me2*cone)*b0dsmeme
+     +                          + 2.d0*me2*b0d0meme + s/3.d0
+     +                          - (s+2.d0*mm2*cone)*b0dsmmmm
+     +                          + 2.d0*mm2*b0d0mmmm + s/3.d0
+     +                          - (s+2.d0*mtl2*cone)*b0dsmtlmtl
+     +                          + 2.d0*mtl2*b0d0mtlmtl + s/3.d0))
+         
+      elseif(type.eq.2) then
+         call b0reg(s,mu2*cone,mu2*cone,b0dsmumu)
+         call b0reg(s,mc2*cone,mc2*cone,b0dsmcmc)
+         
+         call b0reg(s,md2*cone,md2*cone,b0dsmdmd)
+         call b0reg(s,ms2*cone,ms2*cone,b0dsmsms)
+         call b0reg(s,mb2*cone,mb2*cone,b0dsmbmb)
+
+         saatout= 2.d0/3.d0*(
+     +  + 3.d0*(   2.d0*qu**2*( - (s+2.d0*mu2*cone)*b0dsmumu
+     +                          + 2.d0*mu2*b0d0mumu + s/3.d0
+     +                          - (s+2.d0*mc2*cone)*b0dsmcmc
+     +                          + 2.d0*mc2*b0d0mcmc + s/3.d0)
+     +           + 2.d0*qd**2*( - (s+2.d0*md2*cone)*b0dsmdmd
+     +                          + 2.d0*md2*b0d0mdmd + s/3.d0
+     +                          - (s+2.d0*ms2*cone)*b0dsmsms
+     +                          + 2.d0*ms2*b0d0msms + s/3.d0
+     +                          - (s+2.d0*mb2*cone)*b0dsmbmb
+     +                          + 2.d0*mb2*b0d0mbmb + s/3.d0)
+     +         ) 
+     +         )
+
+         
+      elseif(type.eq.3) then
+         call b0reg(s,mt2*cone,mt2*cone,b0dsmtmt)
+* top quark
+         saatout = 2d0/3d0 * 
+     +              3d0*2d0*qu**2*(
+     +                 - (s+2.d0*mt2*cone)*b0dsmtmt
+     +                 + 2.d0*mt2*b0d0mtmt + s/3.d0
+     +              )
+         
+      elseif(type.eq.4) then
+         call b0reg(s,mw2*cone,mw2*cone,b0dsmwmw)
+         saatout = 
+* bosonic part
+     +      + ( 3.d0*s + 4.d0*mw2 )*b0dsmwmw - 4.d0*mw2*b0d0mwmw
+         
+      else
+         write(*,*)'error in part_sigmaaat, stop'
+         stop
+      endif
+*
+      saatout = - alsu4pi * saatout
+ 
+      end subroutine part_sigmaaat
+
+      subroutine part_sigmaaatp(s,saatpout,type)
+      implicit none
+      include'mathx.h'
+      include'pwhg_math.h'
+      include'pwhg_physpar.h'
+*
+      complex*16 s
+      complex*16 saatpout
+      integer type
+*
+      complex*16 b0dsmeme,b0pdsmeme,
+     +           b0dsmmmm,b0pdsmmmm,
+     +           b0dsmtlmtl,b0pdsmtlmtl,
+     +           b0dsmumu,b0pdsmumu,
+     +           b0dsmdmd,b0pdsmdmd, 
+     +           b0dsmcmc,b0pdsmcmc,
+     +           b0dsmsms,b0pdsmsms,
+     +           b0dsmtmt,b0pdsmtmt,
+     +           b0dsmbmb,b0pdsmbmb,
+     +           b0dsmwmw,b0pdsmwmw
+
+      if(type.eq.1) then
+*     leptons
+         call b0reg(s,me2*cone,me2*cone,b0dsmeme)
+         call b0preg(s,me2*cone,me2*cone,b0pdsmeme)
+
+         call b0reg(s,mm2*cone,mm2*cone,b0dsmmmm)
+         call b0preg(s,mm2*cone,mm2*cone,b0pdsmmmm)
+
+         call b0reg(s,mtl2*cone,mtl2*cone,b0dsmtlmtl)
+         call b0preg(s,mtl2*cone,mtl2*cone,b0pdsmtlmtl)
+
+         saatpout= 2.d0/3.d0*(
+*     sum over three charged leptons
+     +        2.d0*ql*ql*( (-1.d0)*b0dsmeme - (s+2.d0*me2*cone)*b0pdsmeme
+     +        + cone/3.d0 )
+     +        +2.d0*ql*ql*( (-1.d0)*b0dsmmmm - (s+2.d0*mm2*cone)*b0pdsmmmm
+     +        + cone/3.d0 )
+     +        +2.d0*ql*ql*( (-1.d0)*b0dsmtlmtl
+     +        -(s+2.d0*mtl2*cone)*b0pdsmtlmtl
+     +        + cone/3.d0 ))
+
+
+         
+      elseif(type.eq.2) then
+*     quarks
+         call b0reg(s,mu2*cone,mu2*cone,b0dsmumu)
+         call b0preg(s,mu2*cone,mu2*cone,b0pdsmumu)
+         
+         call b0reg(s,md2*cone,md2*cone,b0dsmdmd)
+         call b0preg(s,md2*cone,md2*cone,b0pdsmdmd)
+         
+         call b0reg(s,mc2*cone,mc2*cone,b0dsmcmc)
+         call b0preg(s,mc2*cone,mc2*cone,b0pdsmcmc)
+         
+         call b0reg(s,ms2*cone,ms2*cone,b0dsmsms)
+         call b0preg(s,ms2*cone,ms2*cone,b0pdsmsms)
+
+         call b0reg(s,mb2*cone,mb2*cone,b0dsmbmb)
+         call b0preg(s,mb2*cone,mb2*cone,b0pdsmbmb)
+
+         saatpout= 2.d0/3.d0*(
+* sum over quarks
+     +     +3.d0* 2.d0*qu*qu*( (-1.d0)*b0dsmumu 
+     +                          - (s+2.d0*mu2*cone)*b0pdsmumu
+     +                        + cone/3.d0 )
+     +     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0dsmdmd 
+     +                          - (s+2.d0*md2*cone)*b0pdsmdmd
+     +                        + cone/3.d0 )
+     +     +3.d0* 2.d0*qu*qu*( (-1.d0)*b0dsmcmc 
+     +                          - (s+2.d0*mc2*cone)*b0pdsmcmc
+     +                        + cone/3.d0 )
+     +     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0dsmsms 
+     +                          - (s+2.d0*ms2*cone)*b0pdsmsms
+     +                        + cone/3.d0 )
+     +     +3.d0* 2.d0*qd*qd*( (-1.d0)*b0dsmbmb 
+     +                          - (s+2.d0*mb2*cone)*b0pdsmbmb
+     +                        + cone/3.d0 ) )
+
+         
+      elseif(type.eq.3) then
+* top                  
+         call b0reg(s,mt2*cone,mt2*cone,b0dsmtmt)
+         call b0preg(s,mt2*cone,mt2*cone,b0pdsmtmt)
+
+          saatpout =  2d0/3d0*
+     +        3.d0*2.d0*qu*qu*( (-1.d0)*b0dsmtmt 
+     +        - (s+2.d0*mt2*cone)*b0pdsmtmt
+     +        + 1.d0/3.d0*cone )
+          
+         
+      elseif(type.eq.4) then
+*     bosons         
+         call b0reg(s,mw2,mw2,b0dsmwmw)
+         call b0preg(s,mw2,mw2,b0pdsmwmw)
+         saatpout =
+     +    +3.d0 * b0dsmwmw + (3.d0*s + 4.d0*mw2) * b0pdsmwmw
+         
+      else
+         write(*,*)'error in part_sigmaaatp, stop'
+         stop
+      endif
+***
+      saatpout  = - alsu4pi * saatpout
+
+      end subroutine part_sigmaaatp
+      
+c.....mauro-had-e      

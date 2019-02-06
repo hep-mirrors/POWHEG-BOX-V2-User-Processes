@@ -284,7 +284,6 @@ c.....added for scheme 3 e
 c     el2_scheme = ph_gmu * 8d0/sqrt(2d0) * mw2 * sw2   !with cmplexmasses
 c                                           this changes the tree-level overall
           alpha   = el2_scheme/4d0/pi
-          endif
       endif
 *
 * couplings of vectors to fermions

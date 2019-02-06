@@ -8,8 +8,8 @@ c -*- Fortran -*-
          real * 8, pointer :: pup(:,:),vtimup(:),spinup(:)
          integer rwl_type,rwl_index,rwl_seed,rwl_n1,rwl_n2
          real * 8 rwl_weight
-c        added QED ISR/FSR scales
-         real * 8 mc_isr_scale, mc_fsr_scale
+c     added QED ISR/FSR scale
+         real*8 mc_isr_scale,mc_fsr_scale
       end type rwl_lhe_block
 
       type rwl_weight_info
@@ -34,7 +34,7 @@ c        added QED ISR/FSR scales
       type(rwl_group_info) rwl_groups_array(rwl_maxgroups)
       integer rwl_type,rwl_index,rwl_seed,rwl_n1,rwl_n2
 c     if rwl_initialized /= rwl_initialized_const, it means
-c     that
+c     that 
       integer rwl_initialized
       integer, parameter :: rwl_initialized_const = 1729178316
       real * 8  rwl_weight
