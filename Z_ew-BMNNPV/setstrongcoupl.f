@@ -500,18 +500,22 @@ c
          ERRDEG=ERRDEG4
 c to be discussed 3
          out=der
+c
+c this below was used with older versions which calculated up to 1 TeV only
 c         if(qin.ge.1d3) then
 cc     the fit goes up to 1 TeV, add the running from 1 TeV to sqrt(q2)
 cc     computed perturbatively: der+da_pert_had(q2)-da_pert_had(1TeV)
 c            call part_sigmaaatp(zero   ,outi,2)
 c            call part_sigmaaat( q2*cone,outf,2)
-c            call part_sigmaaat(1d3*cone,out1,2)
+c            call part_sigmaaat(1d6*cone,out1,2)
 c            out20=realpart((-outf/q2 )-(-outi))
-c            out10=realpart((-out1/1d3)-(-outi))
+c            out10=realpart((-out1/1d6)-(-outi))
 c            out=out+out20-out10
 c         endif
 
       elseif(fit.eq.2) then     ! teubner
+         AMODQ2=ABS(Q2)
+         QIN=SQRT(AMODQ2)
          if(qin.le.100.d0) then !the parameterization goes up to 100^2 GeV^2
             nrflag= 1           !0 to exclude hadronic contributions
                                 !from narrow resonances J/psi, psi', Upsilon(1-4S)
