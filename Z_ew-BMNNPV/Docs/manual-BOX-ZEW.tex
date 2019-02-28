@@ -311,7 +311,10 @@ If \tmtexttt{ew\_ho} is set to one, the leading part of the higher order (H.O.) 
 are computed and added to the NLO EW results. The corrections are written in terms of the quantities $\Delta \alpha$
 and $\Delta \rho$. We implemented a modified version of the formulas in Ref.~\cite{Dittmaier:2009cr} that takes into
 account the running of $\alpha$ up to the virtuality of the $Z$ boson (set the flag
-\tmtexttt{constantscale} to 1-default 0- to use $\Delta \alpha (M_Z^2)$ instead of $\Delta \alpha (q^2)$). \\
+\tmtexttt{constantscale} to 1-default 0- to use $\Delta \alpha (M_Z^2)$ instead of $\Delta \alpha (q^2)$).
+When using the $G_\mu$ scheme (\tmtexttt{scheme} 2), \tmtexttt{constantscale} 1 is automatically
+set for consistency at two loops.
+\\
 \\
 \\
 \tmtexttt{ew\_ho\_only  1     ! default 0}

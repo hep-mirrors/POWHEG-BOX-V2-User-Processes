@@ -6510,7 +6510,11 @@ c      parameter(realtest=.false.)!.true.)
          rtest=powheginput("#real_ho").gt.0d0
 
 
-         constantscale=powheginput("#constant-dda-scale").gt.0d0
+         constantscale=powheginput("#constant-dda-scale").gt.0d0 ! 27/02/2019 Gmu -> alpha(mz2) in the 2 loop expression
+c                                                                  of Consoli Hollik Jegerlehner, no running of alpha in Gmu->scheme
+
+         if(scheme.eq.2) constantscale=.true.
+
          
          old_qq=0d0
          old_drho=0d0
