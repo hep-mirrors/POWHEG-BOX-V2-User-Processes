@@ -280,7 +280,7 @@ c     invariants, abbreviations:
       s14 = square_Lorentz_vector(p(:,1)-p(:,4))
       s24 = square_Lorentz_vector(p(:,2)-p(:,4))
       s34 = square_Lorentz_vector(p(:,3)+p(:,4))
-      denH = 1d0/(sHH-MH2)
+      denH = 1d0/(sHH-MH2)*ph_cHHH
 
       ME2 =  + NA*CA*TF**2 * ( 4.0d0/9.0d0*s**(-1)*t**(-1)*u**3 - 8.0d0
      $     /3.0d0*s**(-1)*t**(-1)*u**3*MH2*denH + 4.0d0*s**(-1)*t**(-1)
@@ -344,7 +344,7 @@ c     invariants, abbreviations:
       s14 = square_Lorentz_vector(p(:,1)-p(:,4))
       s24 = square_Lorentz_vector(p(:,2)-p(:,4))
       s34 = square_Lorentz_vector(p(:,3)+p(:,4))
-      denH = 1d0/(sHH-MH2)
+      denH = 1d0/(sHH-MH2)*ph_cHHH
 
       ME2 =  + NA*TF**3 * (  - 2.0d0/9.0d0*t**(-1)*u**2 + 4.0d0/3.0d0*t
      $     **(-1)*u**2*MH2*denH - 2.0d0*t**(-1)*u**2*MH2**2*denH**2 -

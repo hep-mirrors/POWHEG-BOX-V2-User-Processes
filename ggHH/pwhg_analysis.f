@@ -27,9 +27,9 @@ c     pwhgfill  :  fills the histograms with data
       call inihists
 
       dy  = 0.2d0
-      dpt = 10d0
+      dpt = 40d0
       dpta= 20d0
-      dm  = 50d0
+      dm  = 40d0
       dr  = 0.2d0
       dra = 0.4d0
 
@@ -39,16 +39,16 @@ c     pwhgfill  :  fills the histograms with data
       call bookupeqbins('Nevents'//cptmin(i),2.5d0,0,2d2)
       call bookupeqbins('HH-y'//cptmin(i),dy,-4d0,4d0)
       call bookupeqbins('HH-y-paper'//cptmin(i),0.4d0,-3.4d0,3.4d0)
-      call bookupeqbins('HH-pt'//cptmin(i),dpt,0d0,1000d0)
-      call bookupeqbins('HH-pt-a'//cptmin(i),dpta,0d0,1000d0)
+      call bookupeqbins('HH-pt'//cptmin(i),dpt,0d0,700d0)
+      call bookupeqbins('HH-pt-a'//cptmin(i),dpta,0d0,800d0)
       call bookupeqbins('HH-ptzoom'//cptmin(i),2d0,0d0,50d0)
-      call bookupeqbins('HH-m'//cptmin(i),dm,200d0,2000d0)
-      call bookupeqbins('HH-m-paper'//cptmin(i),40d0,250d0,1010d0)
+      call bookupeqbins('HH-m'//cptmin(i),dm,250d0,1010d0)
+      call bookupeqbins('HH-m-paper'//cptmin(i),25d0,250d0,1400d0)
       call bookupeqbins('H-y'//cptmin(i),dy,-4d0,4d0)
       call bookupeqbins('H-y-paper'//cptmin(i),0.4d0,-3.4d0,3.4d0)
-      call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,1000d0)
+      call bookupeqbins('H-pt'//cptmin(i),dpt,0d0,720d0)
       call bookupeqbins('H-pt-a'//cptmin(i),dpta,0d0,1000d0)
-      call bookupeqbins('H-pt-paper'//cptmin(i),40d0,0d0,520d0)
+      call bookupeqbins('H-pt-paper'//cptmin(i),20d0,0d0,700d0)
       call bookupeqbins('H1-pt'//cptmin(i),dpt,0d0,1000d0)
       call bookupeqbins('H1-pt-a'//cptmin(i),dpta,0d0,1000d0)
       call bookupeqbins('H1-pt-paper'//cptmin(i),40d0,0d0,520d0)

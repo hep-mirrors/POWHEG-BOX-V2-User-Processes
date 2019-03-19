@@ -49,11 +49,9 @@ module     p0_gg_hhg_model_qp
    real(ki) :: wphi =        0.000000000000000_ki
    real(ki),parameter :: wT =        0.000000000000000_ki
    real(ki) :: wtau =        0.000000000000000_ki
-! changed 15.11.18   
-   real(ki) :: wW = 0.000000000000000_ki
-   real(ki) :: wZ = 0.000000000000000_ki
-!   real(ki) :: wW =        2.124000000000000_ki
-!   real(ki) :: wZ =        2.495200000000000_ki
+   real(ki) :: wW =        0.000000000000000_ki
+   real(ki) :: wZ =        0.000000000000000_ki
+   real(ki) :: cHHH =        1.000000000000000_ki
    complex(ki) :: gUa
    complex(ki) :: gWWZZ
    complex(ki) :: gBa
@@ -178,7 +176,7 @@ module     p0_gg_hhg_model_qp
    complex(ki) :: gPS
    integer, parameter, private :: line_length = 80
    integer, parameter, private :: name_length = max(7,24)
-   character(len=name_length), dimension(21) :: names = (/&
+   character(len=name_length), dimension(22) :: names = (/&
       & "alpha  ", &
       & "gauge1z", &
       & "gauge2z", &
@@ -199,7 +197,8 @@ module     p0_gg_hhg_model_qp
       & "wphi   ", &
       & "wtau   ", &
       & "wW     ", &
-      & "wZ     "/)
+      & "wZ     ", &
+      & "cHHH   "/)
    character(len=1), dimension(3) :: cc = (/ '#', '!', ';'/)
    private :: digit, parsereal, names, cc
 contains
@@ -274,6 +273,7 @@ contains
    write(unit,'(A1,1x,A7,G23.16)') "#", "mtau = ", mtau
    write(unit,'(A1,1x,A7,G23.16)') "#", "wtau = ", wtau
    write(unit,'(A1,1x,A14)') "#", "Couplings etc.:"
+   write(unit,'(A1,1x,A9,G23.16)') "#", "cHHH = ", cHHH
    write(unit,'(A1,1x,A9,G23.16)') "#", "alphaS = ", gs*gs/4._ki/pi
    write(unit,'(A1,1x,A9,G23.16)') "#", "gs     = ", gs
    write(unit,'(A1,1x,A9,"(",G23.16,G23.16,")")') "#", "sw     = ", sw
@@ -701,6 +701,8 @@ contains
             wW = re
          case(21)
             wZ = re
+         case(22)
+            cHHH = re
          end select
       elseif (name(1:5).eq."mass(") then
          idx = scan(name, ')', .false.)
@@ -1237,6 +1239,9 @@ contains
          case(21)
             wZ = re
             must_be_real=.true.
+         case(22)
+            cHHH = re
+            must_be_real=.true.
          end select
      else
          if (name(1:3) /= "mdl") then
@@ -1273,7 +1278,7 @@ contains
       gWWZ=-cw*sw**(-1)
       gHZZ=sqrt(mW**2-i_*mW*wW)*cw**(-2)*sw**(-1)
       gW=sqrt2**(-1)*sw**(-1)
-      gHHH=-3.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mH**2
+      gHHH=-3.0_ki/2.0_ki/(sqrt(mW**2-i_*mW*wW))*sw**(-1)*mH**2*cHHH
       gGWX=-1.0_ki/2.0_ki*sqrt(mW**2-i_*mW*wW)*i_*sw**(-1)
       gH=1.0_ki/24.0_ki/(sqrt(mW**2-i_*mW*wW)*pi**2)*sw**(-1)
       gPmu=1.0_ki/(sqrt(mW**2-i_*mW*wW))*sqrt2**(-1)*sw**(-1)*mmu

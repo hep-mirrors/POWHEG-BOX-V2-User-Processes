@@ -29,7 +29,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       ph_Wwidth = powheginput("#Wwidth")
       if (ph_Wwidth.le.0d0) ph_Wwidth =  2.141d0
       ph_cHHH = powheginput("#cHHH")
-      if (ph_cHHH.le.0d0) ph_cHHH = 1.0d0
+      if (ph_cHHH.le.-99d0) ph_cHHH = 1.0d0
 
       ph_sthw2 = abs(1d0-(ph_Wmass/ph_Zmass)**2)
       ph_alphaem = ph_Wmass**2*ph_sthw2*8d0*ph_GF/sqrt(2d0)/4d0/pi
@@ -142,6 +142,15 @@ c      call check_gosam_err(param,ierr)
       param = 'mT='
       write(value,'(F20.10)') ph_topmass
       line = trim(param)//trim(adjustl(value))
+      call OLP_Option(line,ierr)
+      call check_gosam_err(param,ierr)
+c      call OLP_Option_qp(line,ierr)
+c      call check_gosam_err(param,ierr)
+
+      param = 'cHHH='
+      write(value,'(F20.10)') ph_cHHH
+      line = trim(param)//trim(adjustl(value))
+      write(*,*) "cHHH set in GoSam to ", ph_cHHH
       call OLP_Option(line,ierr)
       call check_gosam_err(param,ierr)
 c      call OLP_Option_qp(line,ierr)

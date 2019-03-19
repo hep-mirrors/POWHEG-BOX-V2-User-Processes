@@ -7,7 +7,7 @@ import scipy
 import scipy.optimize
 from math import sqrt
 import random
-import os
+import os, time
 
 #import matplotlib as mpl
 #import matplotlib.pyplot as plt
@@ -15,6 +15,62 @@ import os
 #from mpl_toolkits.mplot3d import Axes3D
 #import statsmodels.api as sm
 #from phasespace import *
+
+def combinegrids(grid_temp, cHHH):
+
+    # Grid exists, proceed
+    if os.path.exists(grid_temp):
+        return
+
+    # Lock to prevent other parallel processes from writing to the grid
+    # Ensure lock file exists and create unique symlink to lock file
+    os.system("touch lock")
+    lockname = grid_temp + '.%s.lock' % os.getpid()
+    os.link("lock", lockname)
+
+    # If more than 1 symlink to lock file
+    if os.stat("lock").st_nlink > 2:
+        # Wait for other instance to create grid
+        while not os.path.exists(grid_temp):
+            print "Waiting for ", str(grid_temp), " to be created"
+            time.sleep(5)
+        # Cleanup our symlink and return
+        os.system("rm -f " + lockname)
+        return
+    # else this instance should produce the grid
+
+    # Produce grid
+
+    # Grid numbering format
+    np.set_printoptions(formatter={'float': '{:.18E}'.format})
+
+    print "Combining grids for cHHH = ", cHHH
+    # Build grid for give value of cHHH
+    incr = grid_temp.split('_cHHH')[0]
+    cHHH_grids = [incr + '_cHHH_-1.0.grid',
+                  incr + '_cHHH_0.0.grid',
+                  incr + '_cHHH_1.0.grid']
+    amps = []
+
+    for grid in cHHH_grids:
+        amps.append(np.loadtxt(grid, unpack=True))
+    print "Loaded grids ", cHHH_grids
+
+    # Check that the grids have the same values for s, t
+    for amp in amps[1:]:
+        if not (np.array_equal(amp[0], amps[0][0]) and np.array_equal(amp[1], amps[0][1])):
+            print "The virtual grids do not contain the same phase-space points!"
+
+        cHHH_amp = 1 / 2. * amps[2][2] * cHHH * (cHHH + 1.0) + amps[0][2] * 1 / 2. * cHHH * (cHHH - 1.0) - amps[1][
+            2] * (cHHH - 1.0) * (cHHH + 1.0)
+        cHHH_err = np.sqrt(
+            1 / 4. * pow(amps[2][3] * cHHH * (cHHH + 1.0), 2) + 1 / 4. * pow(amps[0][3] * cHHH * (cHHH - 1.0), 2) + pow(
+                amps[1][3] * (cHHH - 1.0) * (cHHH + 1.0), 2))
+
+        np.savetxt(grid_temp, np.transpose([amps[0][0], amps[0][1], cHHH_amp, cHHH_err]))
+
+    print "Saved grid ", grid_temp
+    os.system("rm -f " + lockname)
 
 class Bin:
     def __init__(self):
@@ -493,3 +549,4 @@ class CreateGrid:
         #  ##with np.loadtxt(selected_grid) as data:
         #  ##  for d in data:
         #  #
+

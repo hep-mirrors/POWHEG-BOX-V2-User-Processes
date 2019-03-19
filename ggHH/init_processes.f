@@ -20,6 +20,7 @@
       common/cmtdep/mtdep
       integer hdecaymode
       common/chdecaymode/hdecaymode
+      real * 8 cHHH
 c     check nlegborn. This is only a sanity check while we are TESTING
 c     the code and we change often from one process to the other
       if (nlegborn.ne.4) then
@@ -111,7 +112,8 @@ c     index of the first LIGHT coloured parton in the final state
 *********************************************************************
 
       if (mtdep.eq.3) then
-         call initgrids()
+         cHHH = powheginput('#cHHH')
+         call initgrids(cHHH)
       endif
 
 *********************************************************************

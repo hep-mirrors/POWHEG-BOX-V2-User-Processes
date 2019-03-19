@@ -29,7 +29,8 @@ endif
 CC=gcc
 CXX=g++
 ## of boolean in gfortran.
-#FFLAGS= -Wall -Wimplicit-interface -fbounds-check
+#FFLAGS= -Wall -Wimplicit-interface -fbounds-check -g -O2
+FFLAGS= -g -O2
 ## For floating point exception trapping  uncomment the following
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow
 ## Use -O2 optimization
@@ -110,7 +111,7 @@ NINJAFLAGSQP=-DHAVE_CONFIG_H -I./GoSamlib -I./Gosamlib/quadsources -O2
 
 # VirtualGrids
 #LIBS+=-l:$(shell python2.7-config --prefix)/lib/libpython2.7.so # $(shell python2.7-config --ldflags)
-LIBS+=-L:$(shell python2.7-config --prefix)/lib -lpython2.7  # $(shell python2.7-config --ldflags)
+LIBS+=-L$(shell python2.7-config --prefix)/lib -lpython2.7  # $(shell python2.7-config --ldflags)
 CCFLAGS+=-I$(shell python2.7-config --prefix)/include
 CCFLAGS+=$(shell python2.7-config --cflags)
 
@@ -139,7 +140,7 @@ pwhg_cpHTO_reweight.o: pwhg_cpHTO_reweight.f $(INCLUDE)
 	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^
 
 %.o: %.cc
-	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGS) $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGS) $(FJCXXFLAGS) $(LIBHEPMC)
 
 %.o: quadsources/%.cc
 	$(CXX) $(DEBUG) -c -o $(OBJDIR)/$@ $^ $(NINJAFLAGSQP) $(FJCXXFLAGS)
@@ -150,7 +151,7 @@ FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PYTHIA8LOCATION)/include/Pythia8 -I
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib/ -lpythia8  -lstdc++ -ldl -lz
 LIBHEPMC=$(shell pythia8-config --hepmc)
 
-USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o MEborn.o grids.o \
+USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o MEborn.o grids.o D0functions.o \
         real.o btilde_gghh.o pt2maxreg.o LesHouchesreg.o pwhg_cpHTO_reweight.o hhgrid.o \
 	$(PWHGANAL)
 
@@ -231,7 +232,7 @@ veryclean:
 
 include GoSamlib/Makefile.virt.dep
 
-MEborn.o:  precision_golem.o parametre.o matrice_s.o form_factor_type.o form_factor_4p.o form_factor_3p.o cache.o constante.o array.o spinor.o
+MEborn.o:  precision_golem.o parametre.o matrice_s.o form_factor_type.o form_factor_4p.o form_factor_3p.o cache.o constante.o array.o spinor.o D0functions.o
 
 Born.o: MEborn.o
 

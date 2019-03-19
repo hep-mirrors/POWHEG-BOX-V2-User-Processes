@@ -211,7 +211,7 @@ contains
       implicit none
       real(ki), dimension(5, 4), intent(in) :: vecs
       real(ki_qp), dimension(5, 4) :: vecs_qp
-      real(ki), dimension(5, 4) :: vecsrot
+      real(ki), dimension(5, 4) :: vecsrot, vecsrot2
       real(ki), intent(in) :: scale2
       real(ki), dimension(1:4), intent(out) :: amp
       real(ki_qp), dimension(1:4) :: amp_qp
@@ -257,8 +257,15 @@ contains
             vecsrot(irot,3) = vecs(irot,2)*Sin(angle)+vecs(irot,3)*Cos(angle)
             vecsrot(irot,4) = vecs(irot,4)
          enddo
+         do irot = 1,5
+            vecsrot2(irot,1) = vecsrot(irot,1)
+            vecsrot2(irot,2) = vecsrot(irot,2)*Cos(angle)-vecsrot(irot,4)*Sin(angle)
+            vecsrot2(irot,3) = vecsrot(irot,3)
+            vecsrot2(irot,4) = vecsrot(irot,2)*Sin(angle)+vecsrot(irot,4)*Cos(angle)
+         enddo
          call adjust_kinematics(vecsrot)
-         call samplitudel01(vecsrot, scale2, ampresrot, rat2, ok, h)
+         call samplitudel01(vecsrot2, scale2, ampresrot, rat2, ok, h)
+         !print *, 'amprot ',ampresrot
          if((ampresrot(2)-ampdef(2)) .ne. 0.0_ki) then
             fpprec1 = -int(log10(abs((ampresrot(2)-ampdef(2))/((ampresrot(2)+ampdef(2))/2.0_ki))))
          else

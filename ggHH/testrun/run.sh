@@ -22,6 +22,7 @@ else
 fi
 
 function runthem {
+    export PYTHONPATH=$PWD:$PYTHONPATH
     for i in $(seq 1 $ncores)
     do
 	if [ "$1" = "3" ]
@@ -34,9 +35,9 @@ function runthem {
 	    then
 		ln -s ../Virtual/creategrid.py creategrid.py
 	    fi
-	    if [ ! -f Virt_full.grid ]
+	    if [ ! -f Virt_full_cHHH_-1.0.grid ] || [ ! -f Virt_full_cHHH_0.0.grid ] || [ ! -f Virt_full_cHHH_1.0.grid ]
 	    then
-		ln -s ../Virtual/Virt_full.grid Virt_full.grid
+		for grid in ../Virtual/Virt_full_cHHH_*.grid; do ln -s $grid ${grid##*/}; done
 	    fi
 	fi
 	# launch powheg

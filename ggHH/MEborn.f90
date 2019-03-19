@@ -38,10 +38,13 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
   integer :: i,j,k,ep,iep,nbpoints,nlegs,jmax,ievt,nsteps,l,lp
   complex(ki) :: cs1,cs2,cs3,cm0,cm1,cm2,cm3,cm4,gauge1,gauge2
   character (len=3) :: bb0,bb1
-  type(form_factor) :: D123,D132,D213,C12,C13,C23,C34
+  type(form_factor) :: D123,D132,D213,C12,C13,C23,C34,D0temp
   type(form_factor) :: t0,gauge1tri,gauge1box,gauge2box,g1trilim,g1boxlim,g2boxlim
   real(ki) :: cHHH
+  complex*16, external :: D04
+  real*8 :: mt
   logical*1 HTL
+
   !
   ! delta=1.e-8_ki
   !
@@ -55,6 +58,7 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
   m2sq=   mt2
   m3sq=   mt2  
   m4sq=   mt2  
+  mt=sqrt(mt2)
 
   k1 = p(:,1)
   k2 = p(:,2)
@@ -64,12 +68,17 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
   p12=k1+k2
   p13=k1+k3
   p23=k2+k3
+
   ! 
   call initgolem95(4)
 
   s12 = 2.0_ki*scalar(k1,k2)
   s13 = scalar(p13,p13)
   s23 = scalar(p23,p23)
+
+  D123 = D04(0d0,0d0,mh2,mh2,s12,s23,mt,mt,mt,mt)
+  D213 = D04(0d0,0d0,mh2,mh2,s12,s13,mt,mt,mt,mt)
+  D132 = D04(0d0,mh2,0d0,mh2,s23,s13,mt,mt,mt,mt)
 
   !if(.not.HTL) then
 
@@ -91,7 +100,9 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
   
   call preparesmatrix()
   !
-  D123=A40(s_null)
+  !D0temp=A40(s_null)
+  !write(6,*) 'D123=',D123,D0temp
+
   C34=A30((/1/))
   C23=A30((/2/))
   C12=A30((/3/))
@@ -100,25 +111,26 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
 
 ! crossed graphs: 1 <-> 2
 
-  call initgolem95(4)
+  !call initgolem95(4)
 
-  s12 = 2.0_ki*scalar(k1,k2)
-  s23 = scalar(p13,p13)
-  s13 = scalar(p23,p23)
+  !s12 = 2.0_ki*scalar(k1,k2)
+  !s23 = scalar(p13,p13)
+  !s13 = scalar(p23,p23)
 
-  ! box D213:
-  s_mat(1,:) = (/-m1sq*2._ki,s2-m1sq-m2sq,s23-m1sq-m3sq,s1-m1sq-m4sq/)
-  s_mat(2,:) = (/s2-m1sq-m2sq,-m2sq*2._ki,s3-m2sq-m3sq,s12-m2sq-m4sq/)
-  s_mat(3,:) = (/s23-m1sq-m3sq,s3-m2sq-m3sq,-m3sq*2._ki,s4-m3sq-m4sq/)
-  s_mat(4,:) = (/s1-m1sq-m4sq,s12-m2sq-m4sq,s4-m3sq-m4sq,-m4sq*2._ki/)
+  !! box D213:
+  !s_mat(1,:) = (/-m1sq*2._ki,s2-m1sq-m2sq,s23-m1sq-m3sq,s1-m1sq-m4sq/)
+  !s_mat(2,:) = (/s2-m1sq-m2sq,-m2sq*2._ki,s3-m2sq-m3sq,s12-m2sq-m4sq/)
+  !s_mat(3,:) = (/s23-m1sq-m3sq,s3-m2sq-m3sq,-m3sq*2._ki,s4-m3sq-m4sq/)
+  !s_mat(4,:) = (/s1-m1sq-m4sq,s12-m2sq-m4sq,s4-m3sq-m4sq,-m4sq*2._ki/)
 
-  !
-  call preparesmatrix()
-  !
-  D213=A40(s_null)
-  !    write(6,*) 'D213=',D213
+  !!
+  !call preparesmatrix()
+  !!
+  !!D0temp=A40(s_null)
+  !!write(6,*) 'D213=',D213, D0temp
 
-  call exitgolem95()
+
+  !call exitgolem95()
 
   ! crossed graphs 2 <-> 3
 
@@ -137,10 +149,9 @@ subroutine ME2born_gbij(p, mh2, mt2, muren2, cHHH, mpol)
   !
   call preparesmatrix()
   !
-  D132=A40(s_null)
+  !D0temp=A40(s_null)
+  !write(6,*) 'D132=',D132, D0temp
   C13=A30((/3/))
-  !    write(6,*) 'D132=',D132
-  !    write(6,*) 'C13=',C13 
 
   call exitgolem95()
 
