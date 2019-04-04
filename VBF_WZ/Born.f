@@ -32,6 +32,7 @@ c
 c----------------------------------------------------
 c init:
       born = 0d0
+      bmunu=0d0
 
       if (firstborn) then
          pid = 0d0
