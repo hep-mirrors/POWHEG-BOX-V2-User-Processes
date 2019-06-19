@@ -1946,14 +1946,14 @@ c     write(*,*)'bornm2',bornm2
          sfrout  = - alsu4pi * (  
      +             + gfp**2 * (2.d0*b1dsmfmz + cone)
      +             + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
-     +             + 0.5d0/sw2*sqrt(mf2)*sqrt(mfp2)/mw2*b1dsmfpmw  
+     +             + 0.5d0/sw2*sqrt(mf2)*sqrt(mf2)/mw2*b1dsmfpmw  
      +           )   
       else
          sfrout  = - alsu4pi * (  
      +               qf**2 * (2.d0*b1dsmfmg + cone*sch) 
      +             + gfp**2 * (2.d0*b1dsmfmz + cone)
      +             + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
-     +             + 0.5d0/sw2*sqrt(mf2)*sqrt(mfp2)/mw2*b1dsmfpmw  
+     +             + 0.5d0/sw2*sqrt(mf2)*sqrt(mf2)/mw2*b1dsmfpmw  
      +           )
       endif
 
@@ -2102,14 +2102,14 @@ c     write(*,*)'bornm2',bornm2
          sfrpout  = - alsu4pi * (
      +              + gfp**2 * (2.d0*b1pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b1pdsmfmz + b1pdsmfmh)
-     +              + 0.5d0/sw2*mfp2/mw2*b1pdsmfpmw 
+     +              + 0.5d0/sw2*mf2/mw2*b1pdsmfpmw 
      +            )
       else
          sfrpout  = - alsu4pi * (
      +                qf**2 * (2.d0*b1pdsmfmg) 
      +              + gfp**2 * (2.d0*b1pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b1pdsmfmz + b1pdsmfmh)
-     +              + 0.5d0/sw2*mfp2/mw2*b1pdsmfpmw 
+     +              + 0.5d0/sw2*mf2/mw2*b1pdsmfpmw 
      +            )
       endif
 
