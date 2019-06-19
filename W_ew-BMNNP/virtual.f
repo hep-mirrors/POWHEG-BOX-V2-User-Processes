@@ -898,7 +898,7 @@ c      complexmasses = .false.   !already defined in init_couplings.f
       sfrpout  = - alsu4pi * ( qf**2 * (2.d0*b1pdsmfmg)
      +              + gfp**2 * (2.d0*b1pdsmfmz)
      +              + 0.5d0/sw2*mf2/2.d0/mw2*(b1pdsmfmz + b1pdsmfmh)
-     +              + 0.5d0/sw2*mfp2/mw2*b1pdsmfpmw )
+     +              + 0.5d0/sw2*mf2/mw2*b1pdsmfpmw )
 
       return
       end subroutine sigmafrp
