@@ -135,20 +135,51 @@ c
       if (s2effin.gt.0d0) then
          call s2thetaeff_l(ph_Hmass,ph_mTop,ph_Zmass,s2effin,mwout)
          ph_Wmass= mwout
+c.....mauro-dswren-b
+         if(powheginput("#use-s2effin").gt.0d0) then
+            write(*,*)'this two options cannot be true at the same time'
+            stop
+         endif
+c.....mauro-dswren-e         
       endif
 c     ph_Wmass and pw_Z mass are intended to be on-shell masses (LEP style).
 c     they need to be converted to complex pole positions
 c
-      osWmass= ph_Wmass
-      osWwidth= ph_Wwidth
-      ph_Wmass= ph_Wmass/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
-      ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/osWmass)**2)
 
+c.....mauro-dswren-b      
+      if(powheginput("#use-s2effin").le.0d0) then
+c.....mauro-dswren-e         
+         osWmass= ph_Wmass
+         osWwidth= ph_Wwidth
+         ph_Wmass= ph_Wmass/sqrt(1.d0+(ph_Wwidth/ph_Wmass)**2)
+         ph_Wwidth= ph_Wwidth/sqrt(1.d0+(ph_Wwidth/osWmass)**2)
+c.....mauro-dswren-b         
+      else
+         write(*,*)'we are not converting GammaW in the sw scheme'
+      endif
+c.....mauro-dswren-e      
+         
       osZmass= ph_Zmass
       osZwidth= ph_Zwidth
       ph_Zmass= ph_Zmass/sqrt(1.d0+(ph_Zwidth/ph_Zmass)**2)
       ph_Zwidth= ph_Zwidth/sqrt(1.d0+(ph_Zwidth/osZmass)**2)
 
+c.....mauro-dswren-b
+c     cw is mw(pole)/mz(pole), so for this scheme the conversion is different:
+c     at this stage ph_zmass is already the pole z mass, the resulting W mass
+c     should not be converted
+      if(powheginput("#use-s2effin").gt.0d0) then
+         ph_wmass=sqrt(
+     +        ph_zmass**2*(1d0-powheginput("#use-s2effin")))
+
+         write(*,*)'using  renormalization  scheme with dsw fixed form'
+         write(*,*)'gamma(Z->e+e-). The all-order s2eff set to:',
+     +        powheginput("#use-s2effin")
+         write(*,*)'(pole value          ) mz=',ph_zmass
+         write(*,*)'(derived -pole- value) mw=',ph_wmass
+      endif
+c.....mauro-dswren-e
+      
 c     Set here lepton and quark masses for momentum reshuffle in the LHE event file
       do j=1,st_nlight         
          physpar_mq(j)=0d0
@@ -251,12 +282,32 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       sw2= 1.d0-cw2
       sw = sqrt(sw2)
 
+c.....mauro-dswren-b
+      if(powheginput("#use-s2effin").gt.0d0) then
+         sw2=powheginput("#use-s2effin")
+         sw=sqrt(sw2)
+         cw2=1d0-sw2
+         cw=sqrt(cw2)
+      endif
+c.....mauro-dswren-e
+
+
+      
       sw4= sw2*sw2
       cw4= cw2*cw2
 
       ph_sthw2= 1d0 - mw2/mz2
       ph_sthw = sqrt(ph_sthw2)
       ph_cthw = sqrt(1-ph_sthw2)
+c.....mauro-dswren-b
+      if(powheginput("#use-s2effin").gt.0d0) then
+         ph_sthw2 = powheginput("#use-s2effin")
+         ph_sthw=sqrt(ph_sthw2)
+         ph_cthw = sqrt(1-ph_sthw2)
+      endif
+c.....mauro-dswren-e      
+
+      
       ph_Zmass2 = ph_Zmass*ph_Zmass
       ph_Wmass2 = ph_Wmass*ph_Wmass
       ph_WmWw = ph_Wmass * ph_Wwidth

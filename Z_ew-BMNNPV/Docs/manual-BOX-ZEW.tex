@@ -254,15 +254,27 @@ With running scale, a minimum cutoff of 5 GeV is imposed on $m(\ell^+ \ell^-)$.
 \\ 
 The CKM mixing matrix is assumed diagonal in the EW NLO corrections.\\
 \\
-The EW radiative corrections can be calculated according to four 
-different schemes: the $\alpha(0)$ scheme, where the input parameters 
-are $\alpha(0)$, $M_W$ and $M_Z$; the $\alpha(M_Z^2)$ scheme, where the 
+The EW radiative corrections can be calculated according to four   
+different schemes, with two different realizations:
+\\
+the $\alpha(0)$ scheme, \tmtexttt{scheme 0}, where the input parameters 
+are $\alpha(0)$, $M_W$ and $M_Z$; \\
+\\
+the $\alpha(M_Z^2)$ scheme, \tmtexttt{scheme 1}, where the 
 input parameters are $\alpha(M_Z^2)$, $M_W$ and $M_Z$ (with this 
-scheme the value of the parameter \tmtexttt{alphaem\_z} should be specified); 
-the $G_\mu$ scheme, where the input parameters are $G_\mu$, $M_W$ and $M_Z$;
-a modified version of the $\alpha(M_Z^2)$ scheme, where $\alpha$ is computed
+scheme the value of the parameter \tmtexttt{alphaem\_z} should be specified);\\ 
+\\
+the $G_\mu$ scheme, \tmtexttt{scheme 2}, where the input parameters are
+$G_\mu$, $M_W$ and $M_Z$;\\
+\\
+a modified version of the $\alpha(M_Z^2)$ scheme, \tmtexttt{scheme 3},
+where $\alpha$ is computed
 at the scale $q^2=(p_q+p_{\bar{q}})^2$ where $p_q$ and $p_{\bar{q}}$ are the momenta
-of the incoming partons in the underlying Born kinematics (\tmtexttt{kn\_pborn}).
+of the incoming partons in the underlying Born kinematics (\tmtexttt{kn\_pborn}).\\
+\\
+An additional option is to replace $M_W$ with $\sin^2 \vartheta_{eff}^\ell$ as input
+parameter, by means of \tmtexttt{use-s2effin numerical value} of $\sin^2 \vartheta_{eff}^\ell$.\\
+\\
 Note that in scheme 1, 2, and 3 the the electroweak corrections are proportional
 to $\alpha^2 \alpha_0$ with $\alpha_0=$\tmtexttt{alphaem}.
 \\

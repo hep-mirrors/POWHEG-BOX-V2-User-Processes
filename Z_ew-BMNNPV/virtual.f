@@ -506,7 +506,10 @@ c.....added for scheme 3 b
       real*8 ddaa
 c.....added for scheme 3 e      
 
-      
+c.....mauro-dswren-b
+      real*8   powheginput
+      external powheginput
+c.....mauro-dswren-e      
       if (ifirst.eq.0) then
           ifirst = 1
 
@@ -562,6 +565,11 @@ c.....added for scheme 3 e
           else
              delswow=-0.5d0*cw2/sw2*dble(deltamw2/mw2 - deltamz2/mz2)
           endif
+c.....mauro-dswren-b
+          if(powheginput("#use-s2effin").gt.0d0) then
+             call get_gammaz_ee(delswow)
+          endif
+c.....mauro-dswren-e          
 *
 * eq. (3.32) of Dittmaier-Huber 
 * 
@@ -6418,6 +6426,11 @@ c      if(abs(zz-cone).lt.1.d-8) then
       complex*16 saatp0
       complex*16 deltamw2
       complex*16 deltamz2
+c.....mauro-dswren-b
+      real * 8 powheginput
+      complex*16 delze
+      complex*16 delswow
+c.....mauro-dswren-e      
 *
       call sigmawt(dble(mw2)*cone,swtmw2)
       call sigmawtp(dble(mw2)*cone,swtpmw2)
@@ -6441,6 +6454,21 @@ c      if(abs(zz-cone).lt.1.d-8) then
      +              * ( 6.d0*cone+(7.d0*cone-4.d0*sw2)
      +                              /2.d0/sw2*log(cw2) )
 *
+c.....mauro-dswren-b
+      if(powheginput("#use-s2effin").gt.0d0) then
+         call get_gammaz_ee(delswow)
+
+         delze = 0.5d0*saatp0 - sw/cw * sazt0/mz2
+
+c this expression is equivalent to the one above upon trading mw->cw mz         
+         getdeltar = 2d0*delze + 2d0*(sw2-cw2)/cw2*delswow
+     +        + swt0/mw2 - deltamz2/mz2
+     +          +    2.d0/sw/cw*sazt0/mz2
+     +          + alsu4pi/sw2 
+     +              * ( 6.d0*cone+(7.d0*cone-4.d0*sw2)
+     +                              /2.d0/sw2*log(cw2) )
+      endif
+c.....mauro-dswren-e      
       end function getdeltar
 c.....mauro-h.o. b
       subroutine ew_ho(flav,s,out)
@@ -6504,9 +6532,18 @@ c      parameter(realtest=.false.)!.true.)
       save /cconstantscale/
       
       real * 8 powheginput
-      
+c.....mauro-dswren-b
+      complex*16 bornamp(0:1,0:1)
+      common/bornamps/bornamp
+      logical usedswrenorm
+      save    usedswrenorm
+c.....mauro-dswren-e            
       if (ini.eq.0) then
 
+c.....mauro-dswren-b      
+         usedswrenorm=powheginput("#use-s2effin").gt.0d0
+c.....mauro-dswren-e
+         
          rtest=powheginput("#real_ho").gt.0d0
 
 
@@ -6515,6 +6552,7 @@ c                                                                  of Consoli Ho
 
          if(scheme.eq.2) constantscale=.true.
 
+         
          
          old_qq=0d0
          old_drho=0d0
@@ -6601,31 +6639,6 @@ c         write(*,*)'bqld',bqld,conjg(bqld)
          ini=1
       endif
 
-      qq = chargeofparticle_local(flav(1))
-
-      if (qq.gt.0d0) then
-         do i1=0,1
-            do i2=0,1
-               aql(i1,i2)=aqlu(i1,i2)
-               bql(i1,i2)=bqlu(i1,i2)
-            enddo
-         enddo
-      elseif (qq.lt.0d0) then
-         do i1=0,1
-            do i2=0,1
-               aql(i1,i2)=aqld(i1,i2)
-               bql(i1,i2)=bqld(i1,i2)
-            enddo
-         enddo
-      endif
-
-      do i1=0,1
-         do i2=0,1
-            caql(i1,i2)=conjg(aql(i1,i2))
-            cbql(i1,i2)=conjg(bql(i1,i2))
-         enddo
-      enddo
-      
       call rho(drho)
 
       if(s.eq.old_s) then
@@ -6665,172 +6678,228 @@ c      write(*,*)' drho1',drho1
 c      write(*,*)'cdda  ',cdda
 c      write(*,*)'cdrho ',cdrho
 c      write(*,*)'cdrho1',cdrho1
+c.....mauro-dswren-b            
+      if(usedswrenorm) then
+c     this is not the true born: a  factor 1/12 is missing as in deltavert
+         bornm2 = 0d0
+         do sig=0,1
+            do tau=0,1
+               bornm2 = bornm2 + 
+     +              a(sig,tau)*conjg(a(sig,tau))*
+     +              bornamp(sig,tau)*conjg(bornamp(sig,tau))
+            enddo
+         enddo
+c     in this scheme large fermionic loop contributions come from Delta alpha and Delta R
+c     but not from dsw/sw
+         out=zero
+         if(scheme.eq.0.or.scheme.eq.1.or.scheme.eq.3) then
+            out= 3d0*dda2**2 -4d0*dda1*dda2 +dda1**2 
+         else                   ! alpha_gf
+            out= (drho-drho1)+(cdrho-cdrho1)  +drho*cdrho 
+         endif
+
+         out=out*bornm2
+         
+      else
+c.....mauro-dswren-e      
+         qq = chargeofparticle_local(flav(1))
+         
+         if (qq.gt.0d0) then
+            do i1=0,1
+               do i2=0,1
+                  aql(i1,i2)=aqlu(i1,i2)
+                  bql(i1,i2)=bqlu(i1,i2)
+               enddo
+            enddo
+         elseif (qq.lt.0d0) then
+            do i1=0,1
+               do i2=0,1
+                  aql(i1,i2)=aqld(i1,i2)
+                  bql(i1,i2)=bqld(i1,i2)
+               enddo
+            enddo
+         endif
+
+         
+         do i1=0,1
+            do i2=0,1
+               caql(i1,i2)=conjg(aql(i1,i2))
+               cbql(i1,i2)=conjg(bql(i1,i2))
+            enddo
+         enddo
+         
+         
 c     dda = dda(s); drho=drho(mur) ; qq decides u/d type corrections
 c     if s,qq,mur as in the previous point, just use the old coeff?(i1,i2)
 c     otherwise compute all of them
-      if((old_qq.ne.qq).or.(old_s.ne.s).or.
-     +     (dble(old_drho).ne.dble(drho))) then
-         
-         coeff1=zero
-         coeff2=zero
-         coeff3=zero
-         coeff4=zero
-         
-         if(scheme.eq.0.or.scheme.eq.1.or.scheme.eq.3) then
-            do i1=0,1
-               do i2=0,1
-                  coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
-     1                 (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
-
-
-c                  write(*,*)'dda1',dda1
-c                  write(*,*)'dda2',dda2
-c                  write(*,*)'coeff',(3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
-c                  stop
-                  
-                  coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
-     1                 gq(i1)*gl(i2)*(3d0*dda2**2 - 4d0*dda1*dda2 + dda1**2)
-     2                 +aql(i1,i2)*(drho-drho1)
-     3                 +bql(i1,i2)*drho**2
-     4                 +drho*aql(i1,i2)*2d0*(dda2-dda1)
-     5                 )
-
-                                    
-                  coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
-     1                 conjg(gq(i1))*conjg(gl(i2))*(
-     2                 3d0*dda2**2 -4d0*dda1*dda2 +dda1**2 )
-     3                 +caql(i1,i2)*(cdrho-cdrho1)
-     4                 +cbql(i1,i2)*cdrho**2
-     5                 +cdrho*caql(i1,i2)*2d0*(dda2-dda1)
-     6                 )
-                  coeff4(i1,i2)=alpha*conjg(alpha)*(
-     1                 gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
-     2                 (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
-     3                 +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
-     4                 +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)
-     5                 +bql(i1,i2)*drho**2*conjg(gq(i1))*conjg(gl(i2))
-     6                 +cbql(i1,i2)*cdrho**2*gq(i1)*gl(i2)
-     7                 +aql(i1,i2)*caql(i1,i2)*drho*cdrho
-     8                 +aql(i1,i2)*drho*conjg(gq(i1))*conjg(gl(i2))*
-     9                 2d0*(dda2-dda1)
-     1                 +caql(i1,i2)*cdrho*gq(i1)*gl(i2)* 2d0*(dda2-dda1)
-     2                 )
-                  
+         if((old_qq.ne.qq).or.(old_s.ne.s).or.
+     +        (dble(old_drho).ne.dble(drho))) then
+            
+            coeff1=zero
+            coeff2=zero
+            coeff3=zero
+            coeff4=zero
+            
+            if(scheme.eq.0.or.scheme.eq.1.or.scheme.eq.3) then
+               do i1=0,1
+                  do i2=0,1
+                     coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
+     1                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
+                     
+                     
+c     write(*,*)'dda1',dda1
+c     write(*,*)'dda2',dda2
+c     write(*,*)'coeff',(3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
+c     stop
+                     
+                     coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
+     1                    gq(i1)*gl(i2)*(3d0*dda2**2 - 4d0*dda1*dda2 + dda1**2)
+     2                    +aql(i1,i2)*(drho-drho1)
+     3                    +bql(i1,i2)*drho**2
+     4                    +drho*aql(i1,i2)*2d0*(dda2-dda1)
+     5                    )
+                     
+                     
+                     coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
+     1                    conjg(gq(i1))*conjg(gl(i2))*(
+     2                    3d0*dda2**2 -4d0*dda1*dda2 +dda1**2 )
+     3                    +caql(i1,i2)*(cdrho-cdrho1)
+     4                    +cbql(i1,i2)*cdrho**2
+     5                    +cdrho*caql(i1,i2)*2d0*(dda2-dda1)
+     6                    )
+                     coeff4(i1,i2)=alpha*conjg(alpha)*(
+     1                    gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
+     2                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2)
+     3                    +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
+     4                    +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)
+     5                    +bql(i1,i2)*drho**2*conjg(gq(i1))*conjg(gl(i2))
+     6                    +cbql(i1,i2)*cdrho**2*gq(i1)*gl(i2)
+     7                    +aql(i1,i2)*caql(i1,i2)*drho*cdrho
+     8                    +aql(i1,i2)*drho*conjg(gq(i1))*conjg(gl(i2))*
+     9                    2d0*(dda2-dda1)
+     1                    +caql(i1,i2)*cdrho*gq(i1)*gl(i2)* 2d0*(dda2-dda1)
+     2                    )
+                     
+                  enddo
                enddo
-            enddo
 c     else gmu scheme a_gmu~a(z)*sw2
-         else
-            do i1=0,1
-               do i2=0,1
-                  coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
-     1              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
-     2              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     3              +cs2 * drho*2d0*(dda2-dda1)  
-     4              +ccs2*cdrho*2d0*(dda2-dda1)
-     5              +cs2*drho*ccs2*cdrho )
-               
-                  coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
-     1              gq(i1)*gl(i2)*
-     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
-     3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*2d0*(dda2-dda1)  
-     5              +ccs2*cdrho*2d0*(dda2-dda1)
-     6              +cs2*drho*ccs2*cdrho )
-     7              +aql(i1,i2)*(drho-drho1)          
-     8              +aql(i1,i2)*drho*2d0*(dda2-dda1)
-     9              +aql(i1,i2)*drho*(drho*cs2+cdrho*ccs2)
-     1              +bql(i1,i2)*drho**2               
-     2              )
-
-                  coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
-     1              conjg(gq(i1))*conjg(gl(i2))*
-     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
-     3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*2d0*(dda2-dda1)  
-     5              +ccs2*cdrho*2d0*(dda2-dda1)
-     6              +cs2*drho*ccs2*cdrho )
-     7              +caql(i1,i2)*(cdrho-cdrho1)          
-     8              +caql(i1,i2)*cdrho*2d0*(dda2-dda1)
-     9              +caql(i1,i2)*cdrho*(drho*cs2+cdrho*ccs2)
-     1              +cbql(i1,i2)*cdrho**2               
-     2              )
-               
-               
-                  coeff4(i1,i2)=alpha*conjg(alpha)*(
-     1              gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
-     2              (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
-     3              +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
-     4              +cs2 * drho*2d0*(dda2-dda1)  
-     5              +ccs2*cdrho*2d0*(dda2-dda1)
-     6              +cs2*drho*ccs2*cdrho )
-     7              +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)          
-     8              +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
-     9              +aql(i1,i2)*drho*caql(i1,i2)*cdrho
-     1              +bql(i1,i2)*drho**2 *conjg(gq(i1))*conjg(gl(i2))
-     2              +cbql(i1,i2)*cdrho**2 *gq(i1)*gl(i2)
-     3              +aql(i1,i2)*drho*2d0*(dda2-dda1)*
-     +              conjg(gq(i1))*conjg(gl(i2))
-     4              +caql(i1,i2)*cdrho*2d0*(dda2-dda1)*gq(i1)*gl(i2)
-     5              +aql(i1,i2)*drho*(cs2*drho+ccs2*cdrho)*
-     +              conjg(gq(i1))*conjg(gl(i2))
-     6              +caql(i1,i2)*cdrho*(cs2*drho+ccs2*cdrho)*
-     +              gq(i1)*gl(i2)
-     7                 )
-               
+            else
+               do i1=0,1
+                  do i2=0,1
+                     coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2*
+     1                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
+     2                    +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
+     3                    +cs2 * drho*2d0*(dda2-dda1)  
+     4                    +ccs2*cdrho*2d0*(dda2-dda1)
+     5                    +cs2*drho*ccs2*cdrho )
+                     
+                     coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*(
+     1                    gq(i1)*gl(i2)*
+     2                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
+     3                    +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
+     4                    +cs2 * drho*2d0*(dda2-dda1)  
+     5                    +ccs2*cdrho*2d0*(dda2-dda1)
+     6                    +cs2*drho*ccs2*cdrho )
+     7                    +aql(i1,i2)*(drho-drho1)          
+     8                    +aql(i1,i2)*drho*2d0*(dda2-dda1)
+     9                    +aql(i1,i2)*drho*(drho*cs2+cdrho*ccs2)
+     1                    +bql(i1,i2)*drho**2               
+     2                    )
+                     
+                     coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*(
+     1                    conjg(gq(i1))*conjg(gl(i2))*
+     2                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
+     3                    +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
+     4                    +cs2 * drho*2d0*(dda2-dda1)  
+     5                    +ccs2*cdrho*2d0*(dda2-dda1)
+     6                    +cs2*drho*ccs2*cdrho )
+     7                    +caql(i1,i2)*(cdrho-cdrho1)          
+     8                    +caql(i1,i2)*cdrho*2d0*(dda2-dda1)
+     9                    +caql(i1,i2)*cdrho*(drho*cs2+cdrho*ccs2)
+     1                    +cbql(i1,i2)*cdrho**2               
+     2                    )
+                     
+                     
+                     coeff4(i1,i2)=alpha*conjg(alpha)*(
+     1                    gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))*
+     2                    (3d0*dda2**2 -4d0*dda1*dda2 +dda1**2
+     3                    +cs2*(drho-drho1) + ccs2*(cdrho-cdrho1)
+     4                    +cs2 * drho*2d0*(dda2-dda1)  
+     5                    +ccs2*cdrho*2d0*(dda2-dda1)
+     6                    +cs2*drho*ccs2*cdrho )
+     7                    +caql(i1,i2)*(cdrho-cdrho1)*gq(i1)*gl(i2)          
+     8                    +aql(i1,i2)*(drho-drho1)*conjg(gq(i1))*conjg(gl(i2))
+     9                    +aql(i1,i2)*drho*caql(i1,i2)*cdrho
+     1                    +bql(i1,i2)*drho**2 *conjg(gq(i1))*conjg(gl(i2))
+     2                    +cbql(i1,i2)*cdrho**2 *gq(i1)*gl(i2)
+     3                    +aql(i1,i2)*drho*2d0*(dda2-dda1)*
+     +                    conjg(gq(i1))*conjg(gl(i2))
+     4                    +caql(i1,i2)*cdrho*2d0*(dda2-dda1)*gq(i1)*gl(i2)
+     5                    +aql(i1,i2)*drho*(cs2*drho+ccs2*cdrho)*
+     +                    conjg(gq(i1))*conjg(gl(i2))
+     6                    +caql(i1,i2)*cdrho*(cs2*drho+ccs2*cdrho)*
+     +                    gq(i1)*gl(i2)
+     7                    )
+                     
+                  enddo
                enddo
-            enddo
-         endif
-
-         if(lotest) then
-
-            do i1=0,1
-               do i2=0,1
-                  coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2
+            endif
+            
+            if(lotest) then
                
-                  coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*
-     1              gq(i1)*gl(i2)
-
-                  coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*
-     1              conjg(gq(i1))*conjg(gl(i2))
-               
-               
-                  coeff4(i1,i2)=alpha*conjg(alpha)*
-     1              gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))
-
-               
+               do i1=0,1
+                  do i2=0,1
+                     coeff1(i1,i2)=alpha*conjg(alpha)*qq**2*ql**2
+                     
+                     coeff2(i1,i2)=alpha*conjg(alpha)*qq*ql*
+     1                    gq(i1)*gl(i2)
+                     
+                     coeff3(i1,i2)=alpha*conjg(alpha)*qq*ql*
+     1                    conjg(gq(i1))*conjg(gl(i2))
+                     
+                     
+                     coeff4(i1,i2)=alpha*conjg(alpha)*
+     1                    gq(i1)*gl(i2)*conjg(gq(i1))*conjg(gl(i2))
+                     
+                     
+                  enddo
                enddo
-            enddo
-         endif
+            endif
+            
             
         
          
-      endif
+         endif
 c     using flo
-c$$$      bornm2 = 0d0
-c$$$      do sig=0,1
-c$$$          do tau=0,1
-c$$$              bornm2 = bornm2 + 
-c$$$     +                  a(sig,tau)  *conjg(a(sig,tau))*
-c$$$     +                  flo(sig,tau)*conjg(flo(sig,tau))
-c$$$          enddo
+c$$$  bornm2 = 0d0
+c$$$  do sig=0,1
+c$$$  do tau=0,1
+c$$$  bornm2 = bornm2 + 
+c$$$  +                  a(sig,tau)  *conjg(a(sig,tau))*
+c$$$  +                  flo(sig,tau)*conjg(flo(sig,tau))
 c$$$  enddo
-c$$$      and writing explicitly
-c$$$      flo(sig,tau)*conjg(flo(sig,tau))=16d0*pi2*alpha*conjg(alpha)/s/s*(
-c$$$      qq*ql*qq*ql+qq*ql*gq(sig)*gl(tau)*chiz+qq*ql*conjg(gq(sig)*gl(tau)*chiz)
-c$$$      +gq(sig)*gl(tau)*chiz*conjg(gq(sig)*gl(tau)*chiz)
+c$$$  enddo
+c$$$  and writing explicitly
+c$$$  flo(sig,tau)*conjg(flo(sig,tau))=16d0*pi2*alpha*conjg(alpha)/s/s*(
+c$$$  qq*ql*qq*ql+qq*ql*gq(sig)*gl(tau)*chiz+qq*ql*conjg(gq(sig)*gl(tau)*chiz)
+c$$$  +gq(sig)*gl(tau)*chiz*conjg(gq(sig)*gl(tau)*chiz)
 c     replacing each of the four by its transformation
 c     (a**2 q**2 q**2 /  a**2 q q g g / a**2 q q g~ g~ /a**2 g g g~ g`)
 
-      out=zero
-      do i1=0,1
-         do i2=0,1
-            out = out + 
-     +           a(i1,i2)  *conjg(a(i1,i2))*16d0*pi2/s/s*
-     +           ( coeff1(i1,i2) + coeff2(i1,i2)*chiz
-     +           + coeff3(i1,i2)*conjg(chiz)
-     +           + coeff4(i1,i2)*conjg(chiz)*chiz )            
+         
+         out=zero
+         do i1=0,1
+            do i2=0,1
+               out = out + 
+     +              a(i1,i2)  *conjg(a(i1,i2))*16d0*pi2/s/s*
+     +              ( coeff1(i1,i2) + coeff2(i1,i2)*chiz
+     +              + coeff3(i1,i2)*conjg(chiz)
+     +              + coeff4(i1,i2)*conjg(chiz)*chiz )            
+            enddo
          enddo
-      enddo
+c.....mauro-dswren-b               
+      endif
+c.....mauro-dswren-e      
 
 c     this will be added to the 1-loop virtual
 c     there is  a coeff 1/12 missing, that is added in setvirtual
@@ -7714,3 +7783,495 @@ c     type=1 -> leptons; type=2 -> light quarks ; type=3 -> top; type=4 -> WW lo
       end subroutine part_sigmaaatp
       
 c.....mauro-had-e      
+c.....mauro-dswren-b
+c     dsw/sw fixed from the congition delta( gv/ga)=0
+c     delta( gv ) and delta( ga ) computed from Z>e+e-
+c     only weak corrections are computed, since the qed ones
+c     are abelian and they will cancel out in the final
+c     expression (that is function of dgL/gL-dgR/gR)
+      subroutine get_gammaz_ee(newdswsw)
+      implicit none
+      include 'pwhg_physpar.h'
+      include 'PhysPars.h'
+      include 'mathx.h'
+        
+      complex*16 out,outp,outm,llp,llm,newdswsw
+      integer order
+      
+      complex*16 gfp,gfm,cfp,cfm
+      real*8 ee,xx
+
+      complex*16 lo
+
+c      real*8 rmw,rmz,rmz2,rmw2
+c      real*8 rsw,rcw,rsw2,rcw2
+
+      complex*16  rmw,rmz,rmz2,rmw2
+      complex*16  rsw,rcw,rsw2,rcw2
+
+      
+      complex*16 gammabare,gammact0,gammact1,dr0,dr1
+      complex*16 gammabarep,gammact0p,gammact1p
+      complex*16 gammabarem,gammact0m,gammact1m
+      complex*16 normm,normp
+      
+      
+      complex*16 qed
+
+      complex*16 sxnum,dxnum,sxden,dxden
+      
+      if(complexmasses) then
+         write(*,*)'in get_gammaz_ee:'
+         write(*,*)'this renorm. scheme is defined'
+         write(*,*)'for real masses only. stop'
+         stop
+      endif
+
+c total qed correction (Hollik BeenakKer 1988) 
+      qed=3d0*alsu4pi*cone ! * q**2 (which is 1 here) 
+      
+!      rmw=ph_wmass
+!      rmz=ph_zmass
+
+      rmz2=mz2 !rmz**2
+      rmw2=mw2 !rmw**2
+
+      rmw=sqrt(mw2)!ph_wmass
+      rmz=sqrt(mz2)!ph_zmass
+
+      
+      rcw2=rmw2/rmz2
+      rsw2=1d0-rcw2
+      rcw=sqrt(rcw2)
+      rsw=sqrt(rsw2)
+
+
+      
+      ee=sqrt(el2_scheme) ! true e used in LO amplitude for DY
+
+      
+      gfp=gl(1)
+      gfm=gl(0)
+      cfp=conjg(gfp)
+      cfm=conjg(gfm)
+
+      out=zero
+      llp=zero
+      llm=zero
+      
+
+      llp=cone
+      llm=cone
+
+
+      normm = ee**2*gfm*cfm*rmz2 * ( 2d0 )/3d0
+      normp = ee**2*gfp*cfp*rmz2 * ( 2d0 )/3d0
+      
+      outm = ee**2*gfm*cfm*rmz2 * ( 2*llm )/3d0
+      outp = ee**2*gfp*cfp*rmz2 * ( 2*llp )/3d0
+      lo=outp+outm
+
+C      write(*,*)'lo',lo
+      
+      call get_llpm(3,llp,llm)
+      outm = ee**2*gfm*cfm*rmz2 * ( 2*llm )/3d0
+      outp = ee**2*gfp*cfp*rmz2 * ( 2*llp )/3d0
+      gammabarep=outp
+      gammabarem=outm
+      gammabare=outp+outm
+
+      
+c      write(*,*)'bb',gammabare
+
+c      write(*,*)'bp',gammabarep
+c      write(*,*)'bm',gammabarem
+      
+c here the ct part must include the scheme dep. dr/da subtraction 
+      
+      call get_llpm(2,llp,llm)
+      outm = ee**2*gfm*cfm*rmz2 * ( 2*llm )/3d0
+      outp = ee**2*gfp*cfp*rmz2 * ( 2*llp )/3d0
+      gammact0p=outp
+      gammact0m=outm
+      gammact0=outp+outm
+
+c      write(*,*)'c0',gammact0
+      
+      call get_llpm(5,llp,llm)       ! new operation mode
+      outm = ee**2*gfm*cfm*rmz2 * ( 2*llm )/3d0
+      outp = ee**2*gfp*cfp*rmz2 * ( 2*llp )/3d0
+      gammact1m=outm
+      gammact1p=outp
+      gammact1=outp+outm
+
+c      write(*,*)'c1',gammact1      
+
+      sxnum=(gfp*(gammabarep+gammact0p)/normp +
+     +       gfm*(gammabarem+gammact0m)/normm)/(gfp+gfm)
+      dxnum=(gfp*(gammabarep+gammact0p)/normp -
+     +       gfm*(gammabarem+gammact0m)/normm)/(gfp-gfm)
+
+
+      sxden=(gfp*(gammact1p)/normp +
+     +       gfm*(gammact1m)/normm)/(gfp+gfm)
+      dxden=(gfp*(gammact1p)/normp -
+     +       gfm*(gammact1m)/normm)/(gfp-gfm)
+
+      newdswsw=realpart((sxnum-dxnum)/(-sxden+dxden))
+      newdswsw=newdswsw*cone
+      
+      
+      end subroutine get_gammaz_ee
+
+
+      subroutine get_llpm(i,llp,llm)
+      implicit none
+      include 'pwhg_physpar.h'
+      include 'PhysPars.h'
+      include 'mathx.h'
+c      real*8 rmw,rmz,rmz2,rmw2
+c      real*8 rsw,rcw,rsw2,rcw2
+
+
+      complex*16 rmw,rmz,rmz2,rmw2
+      complex*16 rsw,rcw,rsw2,rcw2
+      
+      
+      integer i
+      complex*16 llp,llm
+
+      complex*16 c0aA,c0aZ,c0aW,c0bZ
+      complex*16 nuaA,nuaZ,nuaW,nubZ
+      complex*16 b0d00w,b0d00z,b0dzww,b0dz00
+
+      complex*16 szztpmz2,saatp0,sazt0,delze,delzz,delznn
+      complex*16 deltamw2,swtmw2,deltamz2,szztmz2
+      complex*16 gctZle,ccgm,gctZre,ccgp,ssgp,ssgm
+      complex*16 ssgctZle,ssgctZre
+      complex*16 saatmz2notop
+      complex*16 saatp0notop 
+      
+      complex*16 local_getdeltar
+      external local_getdeltar
+      complex*16 delta,ddswsw,deltass
+
+      complex*16 gnp,gnm,glp,glm
+      real*8 x3l
+
+      complex*16 saztmz2
+
+      complex*16 ddzel,ddzer,cdzel,cdzer,delaz
+
+      
+      x3l=-0.5d0
+
+      
+      gnp=gn(1)
+      gnm=gn(0)
+
+      glp=gl(1)
+      glm=gl(0)
+      
+      llp=0d0
+      llm=0d0
+        
+      nuaA=zero
+      nuaZ=zero
+      nubZ=zero
+      
+c      rmw=ph_wmass
+c      rmz=ph_zmass
+
+c      rmz2=rmz**2
+c      rmw2=rmw**2
+
+      rmz2=mz2 !rmz**2
+      rmw2=mw2 !rmw**2
+
+      rmw=sqrt(mw2)!ph_wmass
+      rmz=sqrt(mz2)!ph_zmass
+
+      
+      rcw2=rmw2/rmz2
+      rsw2=1d0-rcw2
+      rcw=sqrt(rcw2)
+      rsw=sqrt(rsw2)
+
+      call b0reg(zero,zero,rmw2*cone,          b0d00w)
+      call b0reg(zero,zero,rmz2*cone,          b0d00z)
+      call b0reg(rmz2*cone,rmw2*cone,rmw2*cone,b0dzww)
+      call b0reg(rmz2*cone,zero,zero,          b0dz00)
+
+      call c0reg2(rmz2*cone,rmz2*cone,c0aZ)
+      call c0reg2(rmz2*cone,rmw2*cone,c0aW)
+      call c0reg3(rmz2*cone,rmw2*cone,c0bZ)
+
+
+
+      
+      nuaA=zero
+      
+      nuaZ =-2d0*rmz**2*c0az*(cone+rmz2/rmz/rmz)**2  
+     &     -b0dz00*(3d0*cone+2d0*rmz2/rmz/rmz)  
+     &     +2d0*b0d00z*(2d0*cone+rmz2/rmz/rmz)-2d0    
+      
+      nuaW =-2d0*rmz**2*c0aW*(cone+rmw2/rmz/rmz)**2  
+     &     -b0dz00*(3d0*cone+2d0*rmw2/rmz/rmz)  
+     &     +2d0*b0d00w*(2d0*cone+rmw2/rmz/rmz)-2d0    
+
+      nubZ=2d0*(2d0*rmw2+rmw2**2/rmz**2)*c0bz  
+     &     -b0dzww*(cone+2d0*rmw2/rmz/rmz)  
+     &     +2d0*b0d00w*(2d0*cone+rmw2/rmz/rmz)
+
+      
+
+
+      call sigmazztp(rmz2*cone,szztpmz2)
+      call sigmaaatp(zero,saatp0,.true.)
+      call sigmaazt(zero,sazt0)
+      delze = 0.5d0*saatp0 - rsw/rcw * sazt0/rmz2
+
+      
+      delzz = - realpart(szztpmz2)
+
+      call sigmaazt(dble(rmz2)*cone,saztmz2)
+      delaz = (- 2d0/rmz2*saztmz2)
+
+
+c     lepton mass irrelevant if the qed corrections are off
+      call deltazfl_noqed(cone,gl(0),gl(1),zero,zero,ddzel)
+      call deltazfr_noqed(cone,gl(0),gl(1),zero,zero,ddzer)
+
+      
+      call sigmawt( rmw2*cone,swtmw2)
+      call sigmazzt(rmz2*cone,szztmz2)
+      deltamw2 = realpart(swtmw2 )
+      deltamz2 = realpart(szztmz2)
+      ddswsw=-0.5d0*rcw2/rsw2*dble(deltamw2/rmw2 - deltamz2/rmz2)
+
+      
+      ccgp=-(delze+0d0*ddswsw/rcw2)*rsw/rcw
+      ccgm=+(delze+0d0*ddswsw*(rsw2-rcw2)/rcw2)/rsw/rcw
+
+      ssgp=-(0d0*delze+cone/rcw2)*rsw/rcw
+      ssgm=+(0d0*delze+cone*(rsw2-rcw2)/rcw2)/rsw/rcw
+
+      
+      cdzer=conjg(ddzer)
+      cdzel=conjg(ddzel)
+      
+      gctZre=glp*(ccgp*ql/glp +0.5d0*delzz  
+     +     +0.5d0*(cone*(cdzer)+ ddzer ))  
+     +     -0.5d0*ql*delaz
+      gctZle=glm*(ccgp*ql/glm + ccgm*x3l/glm  
+     +     +0.5d0*delzz  
+     +     +0.5d0*(cone*(cdzel)+ ddzel ))  
+     +     -0.5d0*ql*delaz
+
+            
+      ssgctZre=glp*(ssgp*ql/glp)
+      ssgctZle=glm*(ssgp*ql/glm + ssgm*x3l/glm)
+
+
+      deltass=zero
+      if (scheme.eq.0) then
+         delta = zero
+      elseif (scheme.eq.1.or.scheme.eq.3) then ! here q^2 == rmz2
+         call sigmaaat( rmz2*cone,saatmz2notop,.false.)
+         call sigmaaatp(zero     ,saatp0notop ,.false.)
+         delta = 0.5d0 * (saatp0notop - saatmz2notop/rmz2 )
+      else
+         delta =   0.5d0* local_getdeltar()
+         deltass = 0.5d0* ( 2d0*(sw2-cw2)/cw2 *cone) ! dr=dr(ds/s=0) + 2d0*(sw2-cw2)/cw2*ds/s         
+      endif
+
+
+      llp=ql*ql*nuaA+glp*glp*nuaZ
+      llm=ql*ql*nuaA+glm*glm*nuaZ+nuaW/2d0/rsw2*gnm/glm 
+     &     -(rcw/rsw)*(0.5d0/rsw2)*nubZ/glm
+
+! 2 * re mo^* m1
+      llp=2d0*llp*alsu4pi
+      llm=2d0*llm*alsu4pi
+      if(i.eq.3) then
+         return                 ! bare loop
+      elseif(i.eq.2) then
+         llp=2d0*(gctzre/glp-delta) ! ct only
+         llm=2d0*(gctzle/glm-delta)
+      elseif(i.eq.1) then 
+         llp=llp+2d0*(gctzre/glp-delta) ! full   
+         llm=llm+2d0*(gctzle/glm-delta)
+      elseif(i.eq.4) then
+         llp=llp+2d0*(gctzre/glp-delta) ! full ds=0   
+         llm=llm+2d0*(gctzle/glm-delta)
+      elseif(i.eq.5) then
+         llp=2d0*(ssgctzre/glp-deltass) ! ct only ds=1
+         llm=2d0*(ssgctzle/glm-deltass)
+      else
+         write(*,*)'error stop'
+         stop
+      end if      
+
+      
+      end subroutine get_llpm
+
+c   
+c     here the part ~ dsw/sw in deltar has been removed
+      complex*16 function local_getdeltar()
+      implicit none
+      include 'mathx.h'
+      include 'pwhg_math.h'
+      include 'pwhg_physpar.h'
+*     
+      complex*16 swtmw2
+      complex*16 swtpmw2
+      complex*16 swt0
+      complex*16 szztmz2
+      complex*16 szztpmz2
+      complex*16 sazt0
+      complex*16 saatp0
+      complex*16 deltamw2
+      complex*16 deltamz2
+      complex*16 delze
+      complex*16 delswow
+*     
+      call sigmawt(dble(mw2)*cone,swtmw2)
+      call sigmawtp(dble(mw2)*cone,swtpmw2)
+      call sigmawt(zero,swt0)
+      call sigmazzt(dble(mz2)*cone,szztmz2)
+      call sigmazztp(dble(mz2)*cone,szztpmz2)
+      call sigmaazt(zero,sazt0)
+      call sigmaaatp(zero,saatp0,.true.)
+      
+      deltamz2  = szztmz2 + ii*dimag(mz2)*szztpmz2
+*     
+      delze = 0.5d0*saatp0 - sw/cw * sazt0/mz2
+      
+      local_getdeltar = 2d0*delze !       + 2d0*(sw2-cw2)/cw2*delswow
+     +     + swt0/mw2 - deltamz2/mz2
+     +     +    2.d0/sw/cw*sazt0/mz2
+     +     + alsu4pi/sw2 
+     +     * ( 6.d0*cone+(7.d0*cone-4.d0*sw2)
+     +     /2.d0/sw2*log(cw2) )
+      end function local_getdeltar
+      
+      subroutine deltazfl_noqed(qf,gfm,gfp,mf2,mfp2,dzflout)
+* only flavour diagonal terms are considered since ckm=1 always
+*
+      implicit none
+      include'PhysPars.h'
+*
+      complex*16 qf,mf2,mfp2,gfm,gfp
+      complex*16 dzflout
+*
+      complex*16 sfl,sflp,sfrp,sfsp
+*
+      call sigmafl_noqed (qf,gfm,gfp,mf2,mfp2,mf2,sfl )
+
+      if(dble(mf2).gt.0d0.or.dble(mfp2).gt.0d0) then
+         write(*,*)'only the massless limit allowed in weak corr'
+         stop
+      endif
+      
+      if (complexmasses) then
+         write(*,*)'complexmasses not allowed in this scheme'
+         stop
+      else
+          dzflout = dble(- sfl )
+      endif
+ 
+      end subroutine deltazfl_noqed
+
+      subroutine deltazfr_noqed(qf,gfm,gfp,mf2,mfp2,dzfrout)
+* only flavour diagonal terms are considered since ckm=1 always
+*
+      implicit none
+      include'PhysPars.h'
+*
+      complex*16 qf,gfm,gfp,mf2,mfp2
+      complex*16 dzfrout
+*
+      complex*16 sfr,sflp,sfrp,sfsp
+*
+      call sigmafr_noqed (qf,gfm,gfp,mf2,mfp2,mf2,sfr )
+
+
+      if(dble(mf2).gt.0d0.or.dble(mfp2).gt.0d0) then
+         write(*,*)'only the massless limit allowed in weak corr'
+         stop
+      endif
+
+      
+      if (complexmasses) then
+         write(*,*)'complexmasses not allowed in this scheme'
+         stop
+      else
+          dzfrout = dble(- sfr)
+      endif
+
+      end subroutine deltazfr_noqed
+*
+* generic fermion self-energies
+*
+* eq. (B.6) of ArXiv:0709.1075 (Denner Fortschritte)
+*
+      subroutine sigmafr_noqed(qf,gfm,gfp,mf2,mfp2,s,sfrout)
+      implicit none
+      include'mathx.h'
+      include'pwhg_math.h'
+      include'pwhg_physpar.h'
+*
+      complex*16 qf,gfm,gfp,mf2,mfp2,s
+      complex*16 sfrout
+*
+      complex*16 b1dsmfmg,b1dsmfmz,b1dsmfmh,b1dsmfpmw
+*
+      if(abs(qf).lt.epsilon) then
+          b1dsmfmg = zero
+      else
+          call b1reg(s*cone,mf2*cone,zero,b1dsmfmg)
+      endif
+
+      call b1reg(s*cone,mf2*cone,mz2,b1dsmfmz)
+      call b1reg(s*cone,mf2*cone,mh2,b1dsmfmh)
+      call b1reg(s*cone,mfp2*cone,mw2,b1dsmfpmw)
+
+
+      sfrout  = - alsu4pi * (  
+     +     + gfp**2 * (2.d0*b1dsmfmz + cone)
+     +     + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
+     +     + 0.5d0/sw2*sqrt(mf2)*sqrt(mfp2)/mw2*b1dsmfpmw  
+     +     )   
+      end subroutine sigmafr_noqed
+
+      subroutine sigmafl_noqed(qf,gfm,gfp,mf2,mfp2,s,sflout)
+      implicit none
+      include'mathx.h'
+      include'pwhg_math.h'
+      include'pwhg_physpar.h'
+*
+      complex*16 qf,gfm,gfp,mf2,mfp2,s
+      complex*16 sflout
+*
+      complex*16 b1dsmfmg,b1dsmfmz,b1dsmfmh,b1dsmfpmw
+*
+      if(abs(qf).lt.epsilon) then
+      ! terms only multiplied by qf
+          b1dsmfmg = zero
+      else
+          call b1reg(s*cone,mf2*cone,zero,b1dsmfmg)
+      endif
+
+      call b1reg(s*cone,mf2*cone,mz2,b1dsmfmz)
+      call b1reg(s*cone,mf2*cone,mh2,b1dsmfmh)
+      call b1reg(s*cone,mfp2*cone,mw2,b1dsmfpmw)
+
+      sflout  = - alsu4pi * (   
+     +     + gfm**2 * (2.d0*b1dsmfmz + cone)
+     +     + 0.5d0/sw2*mf2/2.d0/mw2*(b1dsmfmz + b1dsmfmh)
+     +     + 0.5d0/sw2*((2.d0*cone+mfp2/mw2)*b1dsmfpmw+cone)  
+     +     )   
+
+      
+      end subroutine sigmafl_noqed
+c.....mauro-dswren-e      
