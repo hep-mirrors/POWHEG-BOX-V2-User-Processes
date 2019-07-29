@@ -1,0 +1,90 @@
+ b~ (g  ) ==>  mu-  mu+  b~      | mult=  1
+ b~  b    ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(b~  b  ) ==>  mu-  mu+  g       | mult=  1
+ b~  b    ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ c~ (g  ) ==>  mu-  mu+  c~      | mult=  1
+ c~  c    ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(c~  c  ) ==>  mu-  mu+  g       | mult=  1
+ c~  c    ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ s~ (g  ) ==>  mu-  mu+  s~      | mult=  1
+ s~  s    ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(s~  s  ) ==>  mu-  mu+  g       | mult=  1
+ s~  s    ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ u~ (g  ) ==>  mu-  mu+  u~      | mult=  1
+ u~  u    ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(u~  u  ) ==>  mu-  mu+  g       | mult=  1
+ u~  u    ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ d~ (g  ) ==>  mu-  mu+  d~      | mult=  1
+ d~  d    ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(d~  d  ) ==>  mu-  mu+  g       | mult=  1
+ d~  d    ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+(g  )b~   ==>  mu-  mu+  b~      | mult=  1
+ b   b~   ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )c~   ==>  mu-  mu+  c~      | mult=  1
+ c   c~   ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )s~   ==>  mu-  mu+  s~      | mult=  1
+ s   s~   ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )u~   ==>  mu-  mu+  u~      | mult=  1
+ u   u~   ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )d~   ==>  mu-  mu+  d~      | mult=  1
+ d   d~   ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )d    ==>  mu-  mu+  d       | mult=  1
+ d~  d    ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )u    ==>  mu-  mu+  u       | mult=  1
+ u~  u    ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )s    ==>  mu-  mu+  s       | mult=  1
+ s~  s    ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )c    ==>  mu-  mu+  c       | mult=  1
+ c~  c    ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(g  )b    ==>  mu-  mu+  b       | mult=  1
+ b~  b    ==>  mu-  mu+     | uborn, mult=  1
+   1  5
+(d   d~ ) ==>  mu-  mu+  g       | mult=  1
+ d   d~   ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ d  (g  ) ==>  mu-  mu+  d       | mult=  1
+ d   d~   ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(u   u~ ) ==>  mu-  mu+  g       | mult=  1
+ u   u~   ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ u  (g  ) ==>  mu-  mu+  u       | mult=  1
+ u   u~   ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(s   s~ ) ==>  mu-  mu+  g       | mult=  1
+ s   s~   ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ s  (g  ) ==>  mu-  mu+  s       | mult=  1
+ s   s~   ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(c   c~ ) ==>  mu-  mu+  g       | mult=  1
+ c   c~   ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ c  (g  ) ==>  mu-  mu+  c       | mult=  1
+ c   c~   ==>  mu-  mu+     | uborn, mult=  1
+   2  5
+(b   b~ ) ==>  mu-  mu+  g       | mult=  1
+ b   b~   ==>  mu-  mu+     | uborn, mult=  1
+   0  5
+ b  (g  ) ==>  mu-  mu+  b       | mult=  1
+ b   b~   ==>  mu-  mu+     | uborn, mult=  1
+   2  5
