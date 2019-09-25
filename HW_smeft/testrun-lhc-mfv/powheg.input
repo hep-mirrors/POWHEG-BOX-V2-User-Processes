@@ -116,9 +116,8 @@ LambdaNP 1000 ! (default 1000 GeV)
  
 !  Left handed currents 
 A_QphiU 1d-2
-A_Uphi  1d-2
 A_QphiD 1d-2
-A_Dphi  1d-2
+B_QphiD 1d-2
 
 ! phi^dagger phi W W operators 
 CC_ww 1d-2

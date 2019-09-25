@@ -81,7 +81,7 @@ runningscale 1    ! default is 1, true, central scale equal to Z/gamma virtualit
 ! DIMENSION SIX LAGRANGIAN
 ! Include weak edms
 dim6 1 !(default 0, does not include dimension-six operators. If 1 include dim. 6) 
-fcnc 1
+fcnc 1 !(default 0, if 1 includes flavor changing neutral current channels) 
 
 ! New Physics Scale
 ! Scale at which the coefficients of dim-6 operators are given
@@ -92,37 +92,38 @@ LambdaNP 1000 ! (default 1000 GeV)
 
 ! Weak dipole operators 
 ! Real Part of GammaU_W and GammaU_gamma
- ReGUw_uu 0d0  ! (default 0d0)
- ReGUe_uu 0d0  ! (default 0d0)
+ ReGUw_uu 1d-1  ! (default 0d0)
+ ReGUe_uu 1d-1  ! (default 0d0)
 ! Imag Part of GammaU_W and GammaU_gamma
- ImGUw_u 0d0  ! (default 0d0)
- ImGUe_u 0d0  ! (default 0d0)
+ ImGUw_uu 1d-1  ! (default 0d0)
+ ImGUe_uu 1d-1  ! (default 0d0)
 ! Real Part of GammaD_W and GammaD_gamma
- ReGDw_ds 0d0  ! (default 0d0)
- ReGDe_d  0d0  ! (default 0d0)
+ ReGDw_ds  1d-2  ! (default 0d0)
+ ReGDe_dd  1d-2  ! (default 0d0)
 ! Imag Part of GammaD_W and GammaD_gamma
- ImGDw_d 0d0  ! (default 0d0)
- ImGDe_d 0d0  ! (default 0d0)
+ ImGDw_dd 1d-2  ! (default 0d0)
+ ImGDe_dd 1d-2  ! (default 0d0)
 
 ! Semileptonic four-fermion operators
 ! Vector operators
- QLu_uu       1d-3    	! (default 0d0)
+ QLu_uu      1d-3    	! (default 0d0)
  QLd_dd      1d-3	! (default 0d0)	
  Ceu_uu      1d-3	! (default 0d0)
  Ced_dd      1d-3	! (default 0d0)
  CLu_uu      1d-3	! (default 0d0)
  CLd_dd      1d-3	! (default 0d0)
  Qe_dd       1d-1	! (default 0d0)
- ! Scalar and tensor operators
+! Scalar and tensor operators
  ReLedQ_dd   1d-3	! (default 0d0)
  ReLeQu_uu   1d-3	! (default 0d0)
  ReLeQu3_uu  1d-3	! (default 0d0)
  ReLeQu_uc   1d-2
- ReLedQ_uc   1d-2
+ ReLedQ_ds   1d-2
  ReLeQu3_uc  1d-2
- 
+
+! Flavor changing vector-type operators 
 QLd_sb  1d-2
-CLd_sb  1d-2 
+CLd_ds  1d-2 
 
  
 
