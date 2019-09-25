@@ -1,0 +1,20 @@
+This reference runs can be reproduced (within small errors) by running the
+original radish_scale_variation (tagged as paper_results), provided:
+
+1) one runs with a POWHEG-BOX-V@ version after revision r3668.
+   Only this version the fixedgrid option works for manyseeds runs.
+
+2) The call to random() to set brkn_azi is replaced by a call to the
+   internal f90 random_number function (otherwise the random number
+   sequence is altered):
+      call random_number(rndazi)
+      brkn_azi = 2*pi*rndazi
+   instead of
+      brkn_azi = 2*pi*random()
+
+3) the
+      C1_P1_matrix_PDFs%tab(:,:,iQ)     = C1_matrix .conv. P1_PDFs%tab(:,:,iQ)
+   line in pdfs_tools.f90 is deleted. This line is superflous because the
+   C1_P1_matrix_PDFs was already computed earlier with a different
+   convolution order. If present, it affects the output with an error
+   typical of the Hoppet convolution machinery.
