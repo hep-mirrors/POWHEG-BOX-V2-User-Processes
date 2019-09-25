@@ -291,7 +291,7 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o  		\
 #MADLIBS=libdhelas3.a libmadgraph.a libmodel.a
 
 # Get SVN info for SVN version stamping code
-$(shell ../svnversion/svnversion.sh>/dev/null)
+$(shell $(V2DIR)/svnversion/svnversion.sh $(PWD) $(Zj) $(V2DIR) >/dev/null)
 
 
 
