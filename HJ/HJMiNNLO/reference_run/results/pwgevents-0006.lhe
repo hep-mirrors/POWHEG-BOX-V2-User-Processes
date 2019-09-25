@@ -1,0 +1,1348 @@
+<LesHouchesEvents version="3.0">
+<!--
+file generated with POWHEG-BOX-V2
+SVN status Begin
+/home/nason/Pheno/POWHEG-BOX-V2
+URL: svn://powhegbox.mib.infn.it/trunk/POWHEG-BOX-V2
+Rev.3655
+Warning: not a clean version:
+?       bbinit-tmp.f
+?       examin_mintupb.f
+?       gen.f
+?       loadmintupb.f
+?       mint_upb-3204.f
+?       mint_upb-3205.f
+?       pwhg_book.h
+?       test-recident.f
+M       Docs/BoundViolationFixes.tm
+M       Docs/README.Compression-And-Weights
+M       bbinit.f
+M       include/pwhg_flg.h
+M       include/pwhg_pdf.h
+M       include/pwhg_rwl.h
+M       include/pwhg_weights.h
+M       integrator.f
+M       pwhg_init.f
+/home/nason/Pheno/POWHEG-BOX-V2/HJ
+URL: svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/HJ
+Rev.3415
+Warning: not a clean version:
+?       nnlopsreweighter-newrwgt-multinew.f
+M       Makefile
+M       nnlopsreweighter-newrwgt.f
+SVN status End
+Input file powheg.input contained:
+! TO CORRECT FOR UB VIOLATIONS DETECTED DURING STAGE 4
+!btildeviol 1
+!corr_btilde 0.994201009586
+!corr_remnant 0.957678644267
+
+
+! SCALE VARIATION
+renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact
+facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
+
+rwl_file '-'
+
+lhrwgt_id 'st4'
+lhrwgt_descr 'st4 NNLOPS'
+
+! ALPHAS AND PDF EVOLUTION
+alphas_from_pdf 1 ! (default 0) if 1, uses alphas from PDF evolution tool (e.g. lhapdf or hoppet)
+
+
+! MINLO SETTINGS
+
+minlo 1         ! (default 0) if 1, activate minlo
+
+minnlo 1       ! (default 0) if 1, activate miNNlo
+
+modlog_p 6     ! (optional, only works if minnlo is set to 1)
+               ! if present, activate modified logs and set the exponent
+
+exp_sud_const 0 ! (default 1) if 0, constant parts of MiNLO Sudakov are kept in the exponent
+
+inc_delta_terms 0 ! (default 1) if 0, as^3 NNLO delta terms are not included
+
+minlo_nnll 1    ! Use improved nnll Sudakov form factors (default)
+
+sudscalevar 1   ! (default 1) scale variation also in Sudakov form factors in minlo
+
+distribute_by_ub 1 ! (default 0) if 1 distribute d3 terms according to kinematics of ub
+
+distribute_by_ub_AP 1 ! (default 0) if 1 distribute d3 terms according to kinematics of ub
+
+radish_sudakov 1 ! (default 0) if 1, use radish sudakov (not all other options will be available whe
+
+alphas_cutoff_fact 2.5 ! (Higgs: 2.5, DY: 1.8) see setlocalscales.f
+
+pdf_cutoff_fact 2.5 ! (Higgs: 2.5, DY: 1.8) see setlocalscales.f
+
+
+! OBSOLETE MINNLO FLAGS, OR FLAGS THAT WERE USED/NEEDED IN MINLO, BUT THAT NOW WE DON'T WANT ANYMORE
+#factsc2min 2    ! at this value the factorization scale is frozen (needed with minlo) ! in minnlo,
+#resscfact 0.5 ! obsolete, was just an attempt never fully pursued
+#flg_d3_in_sud 1 ! (default 0) if 1, as^3 terms are included in the Sudakov form factor
+
+
+
+numevts 50
+ih1   1            ! hadron 1 (1 for protons, -1 for antiprotons)
+ih2   1            ! hadron 2 (1 for protons, -1 for antiprotons)
+ebeam1 6500d0      ! energy of beam 1
+ebeam2 6500d0      ! energy of beam 2
+
+hmass 125
+! hwidth 0.4171529E-02 ! old value
+hwidth 0.004152d0    ! Pick the value used by hnnlo-V2
+bwcutoff 1000
+
+! To be set only if using LHA pdfs
+lhans1   91500      ! pdf set for hadron 1 (LHA numbering)
+lhans2   91500      ! pdf set for hadron 2 (LHA numbering)
+! To be set only if using internal mlm pdf
+ndns1 131         ! pdf set for hadron 1 (mlm numbering)
+ndns2 131         ! pdf set for hadron 2 (mlm numbering)
+! To be set only if using different pdf sets for the two incoming hadrons
+! QCDLambda5  0.25 ! for not equal pdf sets
+
+! Parameters to allow or not the use of stored data
+use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <>
+
+
+higgsfixedwidth 1 ! (default 0), If 1 uses standard, fixed width Breit-Wigner
+                   ! formula, if 0 it uses the running width Breit-Wigner
+#bornsuppfact 1 ! (default 1), If 1 the Born suppression factor is included.
+                ! Weighted events are generated. If 0 no suppression
+                ! factor is included, and events are unweighted. A
+                ! generation cut bornktmin>0 must be supplied in this case.
+#ckkwscalup 1 ! (default 1), If 1 compute the scalup scale for subsequent
+              ! shower using the smallest kt in the final state;
+              ! If 0, use the standard POWHEG BOX scalup
+
+#runningscales 1  ! (default 0), if 0 use hmass as central
+                  ! factorization and renormalization scale;
+                  ! if 1 use the Ht/2
+
+ncall1   1000    ! number of calls for initializing the integration grid
+itmx1    1       ! number of iterations for initializing the integration grid
+ncall2   1000    ! number of calls for computing the integral and finding upper bound
+itmx2    2        ! number of iterations for computing the integral and finding upper bound
+foldcsi   1       ! number of folds on csi integration
+foldy     1       ! number of folds on  y  integration
+foldphi   1       ! number of folds on phi integration
+nubound  1000     ! number of bbarra calls to setup norm of upper bounding function
+
+#iseed    12       ! initialize random number sequence
+#rand1     3       ! initialize random number sequence
+#rand2     -1      ! initialize random number sequence
+
+! OPTIONAL PARAMETERS
+
+testplots  1       ! (default 0, do not) do NLO and PWHG distributions
+
+#withnegweights 1  ! (1 default) If 1 output negative weighted events.
+                   ! If 0 descard them
+
+#bornonly   0     ! (default 0) if 1 do Born only
+
+bornktmin 0.26    ! Minimum transverse momentum if the Higgs at the underlying Born level
+
+storeinfo_rwgt 1   ! store info to allow for reweighting
+
+flg_debug      1   ! store extra event info for debugging
+
+#nohad 1            ! no hadronization and U.E. in pythia
+
+! PARALLEL RUNS
+
+# the following is for parallel runs (see manual in Z2jet/Docs/)
+manyseeds 1
+parallelstage 4
+xgriditeration 1
+maxseeds 1000
+
+! OPTIONS TO DEAL WITH UNSTABLE POINTS/GRIDS
+storemintupb 0    ! (default 0) if 1 save calls in a file
+
+check_bad_st1 1  ! (default 0) if 1, takes care of removing bad grids during stage 1
+check_bad_st2 1  ! (default 0) if 1, takes care of removing bad grids during stage 2
+
+ubexcess_correct 1
+
+fixedgrid 1
+
+End of powheg.input content
+PDF package: lha
+ Random number generator initialized with:            6             0             0
+-->
+<header>
+<initrwgt>
+<weightgroup name='First-Weights' combine=' ' >
+<weight id='11' > renscfact=1.0 facscfact=1.0 </weight>
+<weight id='12' > renscfact=1.0 facscfact=2.0 </weight>
+<weight id='21' > renscfact=2.0 facscfact=1.0 </weight>
+<weight id='22' > renscfact=2.0 facscfact=2.0 </weight>
+<weight id='1H' > renscfact=1.0 facscfact=0.5 </weight>
+<weight id='H1' > renscfact=0.5 facscfact=1.0 </weight>
+<weight id='HH' > renscfact=0.5 facscfact=0.5 </weight>
+</weightgroup>
+</initrwgt>
+</header>
+<init>
+     2212     2212  6.50000E+03  6.50000E+03     -1     -1     -1     -1     -4      1
+  3.74383E+01  1.26201E+00  1.00000E+00  10001
+</init>
+<event>
+      5  10001 -1.48134E+02  9.08694E+00 -1.00000E+00  1.72412E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.712526392E+01  2.712526392E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -2.222706915E+02  2.222706915E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -7.862636276E+00 -1.046468913E+01 -1.764579370E+02  2.166405874E+02  1.249976393E+02  0.00000E+00  9.000E+00
+      21     1     1     2   511   502 -1.171176524E+00  1.144582713E+01  5.089316736E-01  1.151684091E+01  3.782958470E-07  0.00000E+00  9.000E+00
+      21     1     1     2   503   511  9.033812800E+00 -9.811379979E-01 -1.919642222E+01  2.123852706E+01  3.371747881E-07  0.00000E+00  9.000E+00
+#rwgt            1          31  -478.27379535928543                6          16           0
+<weights>
+-.14813E+03
+-.16420E+03
+-.85763E+02
+-.95402E+02
+-.12477E+03
+-.27080E+03
+-.22986E+03
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.81314E+01 -1.00000E+00  1.55842E-01
+      -1    -1     0     0     0   501  0.000000000E+00  0.000000000E+00  7.142714683E+02  7.142714683E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -5.550364306E+01  5.550364306E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.485139696E+02 -7.182127576E+00  1.869546853E+02  2.696016771E+02  1.250001113E+02  0.00000E+00  9.000E+00
+      -1     1     1     2     0   512 -1.308569202E+02  1.130237730E+01  4.603539956E+02  4.787244286E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   512   502 -1.765704947E+01 -4.120249726E+00  1.145914433E+01  2.144900563E+01  1.685873940E-07  0.00000E+00  9.000E+00
+#rwgt            1           2  0.95834423828584470                6         393           0
+<weights>
+0.53034E+02
+0.52144E+02
+0.41155E+02
+0.40390E+02
+0.53737E+02
+0.69784E+02
+0.70821E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  6.08115E+00 -1.00000E+00  2.24019E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  2.317055196E+03  2.317055196E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -4.891253765E+00  4.891253765E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  9.295304101E+00 -6.097620528E-01  8.507732378E+02  8.599571306E+02  1.249975592E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -4.726134623E+00  4.622618249E+00  3.702143179E+01  3.760706529E+01  6.743495762E-07  0.00000E+00  9.000E+00
+      21     1     1     2   511   503 -4.569169478E+00 -4.012856196E+00  1.424369273E+03  1.424382254E+03  1.525878906E-05  0.00000E+00  9.000E+00
+#rwgt            1          31   73.263236076999434                6         719           0
+<weights>
+0.53034E+02
+0.50806E+02
+0.40739E+02
+0.40262E+02
+0.49161E+02
+0.79326E+02
+0.76295E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -1.17475E+02  8.29586E+00 -1.00000E+00  2.05341E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.904537608E+02  1.904537608E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   512  0.000000000E+00  0.000000000E+00 -1.220362284E+02  1.220362284E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  3.414235986E+00 -1.590472807E+00  1.639921861E+02  2.062317186E+02  1.249955921E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -2.713210917E+00  9.856659090E+00 -9.725759279E+01  9.779342819E+01  1.907348633E-06  0.00000E+00  9.000E+00
+      21     1     1     2   502   512 -7.010250691E-01 -8.266186283E+00  1.682939046E+00  8.464842328E+00  1.931411236E-07  0.00000E+00  9.000E+00
+#rwgt            1          31  -353.37355039846761                6        1041           0
+<weights>
+-.11748E+03
+-.13101E+03
+-.51247E+02
+-.58765E+02
+-.83201E+02
+-.27404E+03
+-.20722E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  6.75415E+00 -1.00000E+00  2.17327E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  2.742559264E+03  2.742559264E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -2.981962003E+00  2.981962003E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.357367381E+01 -6.989601467E+00  1.381212699E+03  1.386941453E+03  1.249999048E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501  7.272858914E+00  4.556854277E+00  1.247553536E+03  1.247583058E+03  1.525878906E-05  0.00000E+00  9.000E+00
+      21     1     1     2   511   503  6.300814900E+00  2.432747190E+00  1.108110663E+02  1.110167146E+02  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          31   36.629216851935539                6        2478           0
+<weights>
+0.53034E+02
+0.44132E+02
+0.38475E+02
+0.32624E+02
+0.62263E+02
+0.80833E+02
+0.96755E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.14630E+01 -1.00000E+00  1.63856E-01
+      21    -1     0     0   512   501  0.000000000E+00  0.000000000E+00  3.166592042E+02  3.166592042E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -4.965907242E+01  4.965907242E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  2.730855200E+00 -6.296133630E+01  1.176938087E+02  1.828959377E+02  1.250100156E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -1.324173986E+01  8.167450224E+01  1.010136661E+02  1.305749927E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   512   503  1.051088466E+01 -1.871316593E+01  4.829265703E+01  5.284734619E+01  9.536743164E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   79.892693884518607                6        3128           0
+<weights>
+0.53034E+02
+0.47525E+02
+0.41623E+02
+0.37927E+02
+0.59451E+02
+0.69130E+02
+0.79547E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.82956E+01  2.56947E+00 -1.00000E+00  1.83805E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.738336105E+02  2.738336105E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -2.523212577E+01  2.523212577E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  2.700911073E+01  1.967909017E+01  1.719078979E+02  2.151612294E+02  1.250010825E+02  0.00000E+00  9.000E+00
+       5     1     1     2   502     0 -6.793653020E+00 -2.180396286E+00  1.305746233E+01  1.487968991E+01  2.384185791E-07  0.00000E+00  9.000E+00
+      -5     1     1     2     0   501 -2.021545771E+01 -1.749869388E+01  6.363612449E+01  6.902481697E+01  6.743495762E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   180.95267923892666                6        3560           0
+<weights>
+0.58296E+02
+0.60465E+02
+0.46342E+02
+0.48164E+02
+0.54682E+02
+0.75584E+02
+0.70932E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  7.62315E+01  3.18957E+01 -1.00000E+00  1.34334E-01
+       1    -1     0     0   501     0  0.000000000E+00  0.000000000E+00  9.894500005E+01  9.894500005E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   501  0.000000000E+00  0.000000000E+00 -5.604400778E+02  5.604400778E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.091432186E+01  2.481762173E+01 -4.897816518E+02  5.062075320E+02  1.249998490E+02  0.00000E+00  9.000E+00
+       1     1     1     2   511     0  3.314344605E+01 -1.944018855E+00  8.325209718E+01  8.962800293E+01  3.015782986E-06  0.00000E+00  9.000E+00
+      21     1     1     2   502   511 -2.222912419E+01 -2.287360288E+01 -5.496552313E+01  6.354954290E+01  6.743495762E-07  0.00000E+00  9.000E+00
+#rwgt            1           4   5.9167743964496600                6        3823           0
+<weights>
+0.76232E+02
+0.79223E+02
+0.75348E+02
+0.76395E+02
+0.73993E+02
+0.67184E+02
+0.60980E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  7.66857E+01  4.97714E+00 -1.00000E+00  2.42053E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.901991068E+02  2.901991068E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   512   502  0.000000000E+00  0.000000000E+00 -2.892226194E+01  2.892226194E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.608282293E+00  7.932828167E+00  1.325496877E+02  1.823728690E+02  1.249997093E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  4.717633042E+00 -4.046456679E+00  1.310911953E+02  1.312384523E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   512   501 -3.109350749E+00 -3.886371489E+00 -2.364038175E+00  5.510047361E+00  1.763129170E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   267.28127113533299                6        4053           0
+<weights>
+0.76686E+02
+0.80676E+02
+0.60161E+02
+0.64294E+02
+0.63507E+02
+0.11247E+03
+0.94889E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.36805E+00 -1.00000E+00  1.43575E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  7.186035758E+01  7.186035758E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -6.826108642E+02  6.826108642E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  9.886554221E+01 -1.579812852E+02 -1.908225938E+02  2.945685657E+02  1.249995826E+02  0.00000E+00  9.000E+00
+       3     1     1     2   502     0 -2.602159444E+01  2.613268594E+01 -8.576440161E+01  9.335723451E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      -3     1     1     2     0   501 -7.284394777E+01  1.318485993E+02 -3.341635112E+02  3.665454216E+02  3.814697266E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   19.186374171537267                6        5195           0
+<weights>
+0.53034E+02
+0.53827E+02
+0.40908E+02
+0.41192E+02
+0.51964E+02
+0.70439E+02
+0.68355E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  1.24207E+02  4.51979E+00 -1.00000E+00  2.49737E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  6.692907885E+01  6.692907885E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -9.041328214E+01  9.041328214E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  6.464546842E+00 -1.044568516E+01 -1.837018087E+01  1.269238669E+02  1.249852061E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -1.098366353E+01  1.052383279E+01 -1.385664239E+01  2.057664841E+01  2.384185791E-07  0.00000E+00  9.000E+00
+      21     1     1     2   511   503  4.519116692E+00 -7.814763050E-02  8.742619969E+00  9.841845693E+00  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          31   442.07568092567965                6        5759           0
+<weights>
+0.12421E+03
+0.15011E+03
+0.92931E+02
+0.11127E+03
+0.95866E+02
+0.17906E+03
+0.13548E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.66447E+00 -1.00000E+00  1.73204E-01
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00  1.146035358E+01  1.146035358E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      -1    -1     0     0     0   501  0.000000000E+00  0.000000000E+00 -5.075181198E+02  5.075181198E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.073750451E+01  2.834983752E+00 -3.865246608E+02  4.063861122E+02  1.250001108E+02  0.00000E+00  9.000E+00
+      -1     1     1     2     0   512 -1.499711807E+01  4.710131157E+00 -8.779441176E+01  8.919056913E+01  1.348699152E-06  0.00000E+00  9.000E+00
+      21     1     1     2   512   502  4.259613560E+00 -7.545114909E+00 -2.173869368E+01  2.340179201E+01  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          21   1.2180163964746415                6        6540           0
+<weights>
+0.53034E+02
+0.60016E+02
+0.45411E+02
+0.51176E+02
+0.45420E+02
+0.61449E+02
+0.52124E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.07886E+01 -1.00000E+00  1.35531E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  9.151264451E+01  9.151264451E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -1.164582710E+02  1.164582710E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  2.612308809E+01  2.390227675E+01  1.318706377E+01  1.305813348E+02  1.249954070E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   511 -1.695929195E+01  1.202280365E+01 -3.431134859E+01  4.011775209E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   511   502 -9.163796146E+00 -3.592508040E+01 -3.821341712E+00  3.727182869E+01  4.400260168E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   108.30595945752817                6        6710           0
+<weights>
+0.53034E+02
+0.55589E+02
+0.46109E+02
+0.48068E+02
+0.49653E+02
+0.60113E+02
+0.55684E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.60699E+00 -1.00000E+00  2.46065E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  7.362966189E+01  7.362966189E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -8.287239171E+01  8.287239171E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  4.184126412E+00  6.153321220E+00 -3.431261720E+01  1.298309946E+02  1.249934446E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   512 -4.311112566E+00 -1.729954552E+00  1.394578999E+01  1.469909836E+01  2.384185791E-07  0.00000E+00  9.000E+00
+      21     1     1     2   512   501  1.269861535E-01 -4.423366668E+00  1.112409739E+01  1.197196061E+01  1.685873940E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   124.18028655014083                6        6955           0
+<weights>
+0.53034E+02
+0.93021E+02
+0.55843E+02
+0.86088E+02
+-.89487E+00
+0.75014E+02
+-.16797E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.75405E+01 -1.00000E+00  1.24618E-01
+       2    -1     0     0   503     0  0.000000000E+00  0.000000000E+00  1.596380935E+03  1.596380935E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -4.998278939E+01  4.998278939E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.146755959E+02 -3.544517894E+01  4.021180693E+02  4.378707364E+02  1.249999485E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -3.065293650E+01  8.199834883E+01  3.375745800E+01  9.382375871E+01  2.023048729E-06  0.00000E+00  9.000E+00
+       2     1     1     2   501     0 -8.402265941E+01 -4.655316990E+01  1.110522618E+03  1.114669229E+03  2.642899792E-05  0.00000E+00  9.000E+00
+#rwgt            1          31   86.458972135507793                6        7997           0
+<weights>
+0.53034E+02
+0.54880E+02
+0.39172E+02
+0.40319E+02
+0.50710E+02
+0.74282E+02
+0.70843E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  6.21975E+01  6.36062E+00 -1.00000E+00  2.21103E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  1.543338192E+02  1.543338192E+02  0.000000000E+00  0.00000E+00  9.000E+00
+       4    -1     0     0   501     0  0.000000000E+00  0.000000000E+00 -9.372158677E+01  9.372158677E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -4.998377164E+01 -2.698086191E+01 -9.260603464E+00  1.376131499E+02  1.250011037E+02  0.00000E+00  9.000E+00
+       4     1     1     2   502     0  4.452684248E+01  3.024879899E+01  1.594631493E+01  5.614191394E+01  1.168007728E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   502  5.456929160E+00 -3.267937081E+00  5.392652093E+01  5.430034207E+01  6.743495762E-07  0.00000E+00  9.000E+00
+#rwgt            1          26  0.49358697690152953                6        8127           0
+<weights>
+0.62198E+02
+0.67482E+02
+0.51492E+02
+0.55929E+02
+0.55911E+02
+0.75558E+02
+0.68190E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -1.26792E+02  2.73040E+01 -1.00000E+00  1.55929E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.181376221E+01  2.181376221E+01  0.000000000E+00  0.00000E+00  9.000E+00
+       2    -1     0     0   502     0  0.000000000E+00  0.000000000E+00 -1.337179150E+03  1.337179150E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -3.959259806E+00 -1.193454586E+01 -2.688149580E+02  2.967245159E+02  1.250033903E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -1.270118241E+01  3.356642652E+01 -3.428086803E+01  4.963066529E+01  8.259061849E-07  0.00000E+00  9.000E+00
+       2     1     1     2   503     0  1.666044222E+01 -2.163188065E+01 -1.012269562E+03  1.012637732E+03  1.078959322E-05  0.00000E+00  9.000E+00
+#rwgt            1          31  -427.77723357539725                6        8679           0
+<weights>
+-.12679E+03
+-.13146E+03
+-.75591E+02
+-.78275E+02
+-.11828E+03
+-.22367E+03
+-.20870E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  3.18087E+00 -1.00000E+00  2.66105E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  9.812315635E+00  9.812315635E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -1.882289954E+03  1.882289954E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -5.451591455E+00 -1.422297906E+00 -1.877695625E+03  1.881859802E+03  1.249948491E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501  4.277747513E+00 -2.163895861E+00  4.096872322E+00  6.306023462E+00  9.518098487E-07  0.00000E+00  9.000E+00
+      21     1     1     2   511   503  1.173843943E+00  3.586193766E+00  1.121114149E+00  3.936444114E+00  2.117852927E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   154.69599373230434                6        8986           0
+<weights>
+0.53034E+02
+0.42642E+02
+0.38233E+02
+0.31353E+02
+0.62022E+02
+0.89190E+02
+0.10640E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.53850E+00 -1.00000E+00  1.68625E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  9.073509234E+01  9.073509234E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -2.271693335E+02  2.271693335E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  3.065939221E+01 -1.057467862E+02 -3.989637099E+01  1.712856719E+02  1.249987194E+02  0.00000E+00  9.000E+00
+       2     1     1     2   503     0 -6.056436112E+00  1.413668268E+01 -1.121015210E+01  1.903138790E+01  3.371747881E-07  0.00000E+00  9.000E+00
+      -2     1     1     2     0   502 -2.460295610E+01  9.161010348E+01 -8.532771805E+01  1.275873661E+02  2.132480600E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   69.363239700464661                6       11104           0
+<weights>
+0.53034E+02
+0.47629E+02
+0.40113E+02
+0.36235E+02
+0.59252E+02
+0.71534E+02
+0.80955E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  6.25749E+01  3.36547E+00 -1.00000E+00  1.94275E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.545830361E+02  1.545830361E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -3.634296857E+01  3.634296857E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  2.112661728E+01  3.633592551E+00  1.055478504E+02  1.650025590E+02  1.250038351E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   511 -6.024148023E+00 -3.248459036E-01  1.825580689E-01  6.035661663E+00  9.302043162E-08  0.00000E+00  9.000E+00
+      21     1     1     2   511   502 -1.510246926E+01 -3.308746648E+00  1.250965902E+01  1.988778396E+01  1.685873940E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   191.19808559946281                6       11620           0
+<weights>
+0.62575E+02
+0.73826E+02
+0.52668E+02
+0.61003E+02
+0.51045E+02
+0.75033E+02
+0.58833E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  7.91753E+01  1.66173E+01 -1.00000E+00  1.66411E-01
+      21    -1     0     0   503   512  0.000000000E+00  0.000000000E+00  5.784237043E+02  5.784237043E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -1.518416634E+01  1.518416634E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  6.941451723E+00 -1.087323619E+01  2.686222330E+02  2.965621674E+02  1.249992161E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  1.301172956E+01  1.033591425E+01  9.596436530E+01  9.739248244E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   501   512 -1.995318128E+01  5.373219383E-01  1.986529396E+02  1.996532208E+02  2.697398305E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   263.26034098058415                6       11974           0
+<weights>
+0.79175E+02
+0.79485E+02
+0.60857E+02
+0.61946E+02
+0.76399E+02
+0.10718E+03
+0.10538E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -2.18076E+02  8.87135E+00 -1.00000E+00  2.01717E-01
+       2    -1     0     0   501     0  0.000000000E+00  0.000000000E+00  1.223084391E+02  1.223084391E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   511  0.000000000E+00  0.000000000E+00 -5.323034064E+01  5.323034064E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  5.581704740E-01 -4.474331890E+00  5.767632076E+01  1.377406384E+02  1.250023772E+02  0.00000E+00  9.000E+00
+       2     1     1     2   502     0 -9.427186784E+00  4.270652979E+00  2.179870751E+01  2.413076826E+01  3.371747881E-07  0.00000E+00  9.000E+00
+      21     1     1     2   501   511  8.869016310E+00  2.036789112E-01 -1.039692984E+01  1.366737303E+01  3.153981341E-07  0.00000E+00  9.000E+00
+#rwgt            1           8  -6.4740990252708910                6       12362           0
+<weights>
+-.21808E+03
+-.24015E+03
+-.13092E+03
+-.14336E+03
+-.19141E+03
+-.38012E+03
+-.33432E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.01183E+01 -1.00000E+00  1.68650E-01
+       1    -1     0     0   501     0  0.000000000E+00  0.000000000E+00  1.123047225E+02  1.123047225E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   501  0.000000000E+00  0.000000000E+00 -3.330932255E+02  3.330932255E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  4.152632000E+01  9.848312495E+01 -2.776371067E+02  3.226494862E+02  1.248878168E+02  0.00000E+00  9.000E+00
+       1     1     1     2   512     0 -1.279777652E+01 -5.621807310E+01  3.157262969E+01  6.573496613E+01  1.168007728E-06  0.00000E+00  9.000E+00
+      21     1     1     2   502   512 -2.872854348E+01 -4.226505185E+01  2.527597410E+01  5.701349564E+01  2.050954167E-06  0.00000E+00  9.000E+00
+#rwgt            1           4   2.6467592586812105                6       12549           0
+<weights>
+0.53034E+02
+0.54690E+02
+0.40095E+02
+0.41051E+02
+0.51120E+02
+0.72078E+02
+0.69253E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  3.93996E+01 -1.00000E+00  1.34621E-01
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00  1.442142933E+02  1.442142933E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      -2    -1     0     0     0   501  0.000000000E+00  0.000000000E+00 -2.191840358E+02  2.191840358E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  4.966294825E+01  4.396777813E+01  8.966699563E+01  1.675238894E+02  1.249980379E+02  0.00000E+00  9.000E+00
+      -2     1     1     2     0   511 -6.378163558E+01 -5.204278390E+00 -1.120515271E+02  1.290376932E+02  3.015782986E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   502  1.411868733E+01 -3.876349974E+01 -5.258521105E+01  6.683674637E+01  9.536743164E-07  0.00000E+00  9.000E+00
+#rwgt            1          23  0.90517181096526123                6       13010           0
+<weights>
+0.53034E+02
+0.58531E+02
+0.67228E+02
+0.70845E+02
+0.48453E+02
+0.11594E+02
+0.58192E+01
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.34331E+01 -1.00000E+00  1.81924E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  9.385212067E+02  9.385212067E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      -3    -1     0     0     0   502  0.000000000E+00  0.000000000E+00 -5.354100333E+01  5.354100333E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  5.926549283E+01 -1.359703452E+01  6.939202346E+02  7.077057568E+02  1.249994730E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -6.979289800E+01  2.194102667E+01  2.309523103E+02  2.422631357E+02  5.394796609E-06  0.00000E+00  9.000E+00
+      -3     1     1     2     0   501  1.052740517E+01 -8.343992144E+00 -3.989234157E+01  4.209331753E+01  1.907348633E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   106.43848431122623                6       13181           0
+<weights>
+0.53034E+02
+0.55937E+02
+0.37639E+02
+0.39580E+02
+0.49272E+02
+0.78163E+02
+0.72450E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.05564E+01 -1.00000E+00  1.92907E-01
+      21    -1     0     0   502   511  0.000000000E+00  0.000000000E+00  1.967679243E+03  1.967679243E+03  0.000000000E+00  0.00000E+00  9.000E+00
+       4    -1     0     0   501     0  0.000000000E+00  0.000000000E+00 -7.837310838E+00  7.837310838E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -3.787763919E+01 -2.809421172E+01  1.661147598E+03  1.666511656E+03  1.250030371E+02  0.00000E+00  9.000E+00
+       4     1     1     2   502     0  4.305672548E+01  3.729280277E+01  1.586968172E+02  1.686099479E+02  4.264961200E-06  0.00000E+00  9.000E+00
+      21     1     1     2   501   511 -5.179086290E+00 -9.198591048E+00  1.399975176E+02  1.403949498E+02  1.907348633E-06  0.00000E+00  9.000E+00
+#rwgt            1          26  0.21088547038770922                6       13804           0
+<weights>
+0.53034E+02
+0.55974E+02
+0.44082E+02
+0.46047E+02
+0.49669E+02
+0.63722E+02
+0.59260E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.14529E+01 -1.00000E+00  1.89044E-01
+      -3    -1     0     0     0   501  0.000000000E+00  0.000000000E+00  4.994454652E+01  4.994454652E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -8.852920485E+02  8.852920485E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -2.385998140E+00 -2.414219927E+01 -1.520892418E+02  1.983624683E+02  1.250119699E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -1.446977785E+00  1.334970607E+01 -7.087764570E+02  7.089036425E+02  1.078959322E-05  0.00000E+00  9.000E+00
+      -3     1     1     2     0   503  3.832975925E+00  1.079249321E+01  2.551819681E+01  2.797048413E+01  7.539457465E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   49.578997573883981                6       14101           0
+<weights>
+0.53034E+02
+0.50522E+02
+0.74105E+02
+0.72252E+02
+0.58424E+02
+-.77241E+01
+0.14790E+01
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  1.09770E+02  3.43568E+00 -1.00000E+00  2.52507E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.686635167E+02  1.686635167E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -6.674662590E+01  6.674662590E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.794262015E-01  7.029108288E+00 -7.276363586E+00  1.254040125E+02  1.249951213E+02  0.00000E+00  9.000E+00
+      21     1     1     2   511   502 -3.522249138E+00 -7.822474435E+00  9.564750505E+01  9.603146655E+01  1.907348633E-06  0.00000E+00  9.000E+00
+      21     1     1     2   503   511  3.342822936E+00  7.933661472E-01  1.354574934E+01  1.397466351E+01  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          31   405.27877403049382                6       14927           0
+<weights>
+0.10977E+03
+0.13584E+03
+0.89063E+02
+0.10828E+03
+0.73460E+02
+0.16039E+03
+0.10170E+03
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  6.80982E+01  2.20912E+00 -1.00000E+00  3.37585E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  7.677614238E+01  7.677614238E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   512  0.000000000E+00  0.000000000E+00 -7.476248990E+01  7.476248990E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -4.346424201E+00  5.549409507E-01 -7.717491858E+00  1.253150357E+02  1.250003966E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501  2.942495711E+00 -2.260571414E+00  1.763277396E+01  1.801896728E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   503   512  1.403928490E+00  1.705630463E+00 -7.901629627E+00  8.204629257E+00  8.429369702E-08  0.00000E+00  9.000E+00
+#rwgt            1          31   255.40450682271646                6       16592           0
+<weights>
+0.68098E+02
+0.83769E+02
+0.50281E+02
+0.62314E+02
+0.44513E+02
+0.11164E+03
+0.72956E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  6.24165E+01  6.77235E+00 -1.00000E+00  2.17161E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  8.213922796E+02  8.213922796E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   511   502  0.000000000E+00  0.000000000E+00 -1.371715960E+01  1.371715960E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.299178272E+01 -1.240618216E+01  3.383847866E+02  3.611728828E+02  1.249755483E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  6.221008930E+00  1.255210138E+01  4.663384826E+02  4.665488577E+02  7.629394531E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   501  6.770773794E+00 -1.459192272E-01  2.951850772E+00  7.387698773E+00  2.858538343E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   140.52310478183665                6       18600           0
+<weights>
+0.62417E+02
+0.70751E+02
+0.51929E+02
+0.57954E+02
+0.53585E+02
+0.75992E+02
+0.63298E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  1.28572E+02  4.45707E+00 -1.00000E+00  2.50899E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  4.088000895E+01  4.088000895E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   512   502  0.000000000E+00  0.000000000E+00 -3.643045937E+02  3.643045937E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  3.823514053E+00  5.670274187E+00 -6.225498855E+01  1.398076218E+02  1.249948649E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  6.329790241E-01 -5.598327516E+00 -1.722254325E+00  5.891357516E+00  9.185692672E-08  0.00000E+00  9.000E+00
+      21     1     1     2   512   501 -4.456493077E+00 -7.194667090E-02 -2.594473418E+02  2.594856233E+02  5.394796609E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   358.00008648681609                6       19467           0
+<weights>
+0.12857E+03
+0.15719E+03
+0.90418E+02
+0.11056E+03
+0.91777E+02
+0.20328E+03
+0.14789E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  7.59694E+00 -1.00000E+00  1.87498E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  1.378079566E+01  1.378079566E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -1.272068565E+03  1.272068565E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.209296133E+00 -4.555090592E+01 -1.209961526E+03  1.217254321E+03  1.249993574E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501  6.096731698E+00  3.622889902E+01 -3.837264845E+01  5.312403797E+01  1.261592536E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   503 -7.306027831E+00  9.322006908E+00 -9.953595157E+00  1.547100230E+01  5.717076687E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   99.697233589092477                6       19893           0
+<weights>
+0.53034E+02
+0.56024E+02
+0.39755E+02
+0.41724E+02
+0.49071E+02
+0.73876E+02
+0.67775E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -5.30342E+01  1.23534E+01 -1.00000E+00  1.84733E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  5.411982982E+01  5.411982982E+01  0.000000000E+00  0.00000E+00  9.000E+00
+       1    -1     0     0   501     0  0.000000000E+00  0.000000000E+00 -3.407117971E+02  3.407117971E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  3.114881578E+01 -2.996514084E+01 -3.289360635E+01  1.362929160E+02  1.250024448E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -1.966709880E+01  2.478805177E+01 -1.151308887E+02  1.194000159E+02  2.336015456E-06  0.00000E+00  9.000E+00
+       1     1     1     2   502     0 -1.148171699E+01  5.177089069E+00 -1.385674722E+02  1.391386950E+02  2.697398305E-06  0.00000E+00  9.000E+00
+#rwgt            1          31  -67.077187307410384                6       20535           0
+<weights>
+-.53034E+02
+-.42386E+02
+-.78486E+01
+-.38818E-01
+-.58956E+02
+-.14556E+03
+-.15274E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -6.54087E+01  1.34267E+00 -1.00000E+00  3.45008E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.823772896E+01  2.823772896E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -1.550385308E+02  1.550385308E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -3.220998073E+00 -2.672749744E+00 -1.256712083E+02  1.773097145E+02  1.250118548E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   511  1.974015115E+00  2.174951247E+00  1.283243010E+00  3.205286450E+00  1.210576058E-07  0.00000E+00  9.000E+00
+      21     1     1     2   511   501  1.246982958E+00  4.977984968E-01 -2.412836508E+00  2.761258745E+00  2.980232239E-08  0.00000E+00  9.000E+00
+#rwgt            1          31  -185.89736997488140                6       21053           0
+<weights>
+-.65409E+02
+-.88850E+02
+-.39074E+02
+-.53502E+02
+-.33217E+02
+-.13416E+03
+-.69605E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.26772E+01 -1.00000E+00  1.44611E-01
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00  5.206911451E+02  5.206911451E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      -3    -1     0     0     0   501  0.000000000E+00  0.000000000E+00 -2.945730335E+01  2.945730335E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -2.508500497E+01 -5.743799726E+01  4.259885947E+02  4.483528311E+02  1.250023895E+02  0.00000E+00  9.000E+00
+      -3     1     1     2     0   512  3.500800639E+00  5.048262020E+01  6.005415920E+01  7.853185713E+01  1.651812370E-06  0.00000E+00  9.000E+00
+      21     1     1     2   512   502  2.158420433E+01  6.955377060E+00  5.191087933E+00  2.326376024E+01  8.575615030E-07  0.00000E+00  9.000E+00
+#rwgt            1          27   1.0213110154668024                6       22463           0
+<weights>
+0.53034E+02
+0.54625E+02
+0.44088E+02
+0.45212E+02
+0.51045E+02
+0.63666E+02
+0.61207E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  7.55243E+00 -1.00000E+00  2.10641E-01
+      21    -1     0     0   502   501  0.000000000E+00  0.000000000E+00  4.911615100E+02  4.911615100E+02  0.000000000E+00  0.00000E+00  9.000E+00
+       4    -1     0     0   511     0  0.000000000E+00  0.000000000E+00 -1.573269010E+01  1.573269010E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.451949822E+01  1.703705961E+00  4.512430177E+02  4.684646108E+02  1.250004482E+02  0.00000E+00  9.000E+00
+       4     1     1     2   502     0 -1.812580914E+01 -8.339491524E+00  2.352741250E+01  3.084852047E+01  8.920806376E-07  0.00000E+00  9.000E+00
+      21     1     1     2   511   501  3.606310924E+00  6.635785564E+00  6.583897065E-01  7.581068891E+00  9.155426716E-08  0.00000E+00  9.000E+00
+#rwgt            1          26  0.33454798582201883                6       22695           0
+<weights>
+0.53034E+02
+0.56318E+02
+0.52738E+02
+0.57213E+02
+0.48886E+02
+0.43340E+02
+0.43359E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.03779E+00 -1.00000E+00  2.21355E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  9.437377573E+00  9.437377573E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -5.025369567E+02  5.025369567E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -3.271457131E+00  3.522733680E-01 -4.812406396E+02  4.972214001E+02  1.250029639E+02  0.00000E+00  9.000E+00
+      21     1     1     2   512   501 -5.810099914E-01  1.953202053E+00  3.684992625E-02  2.038118933E+00  1.257518285E-07  0.00000E+00  9.000E+00
+      21     1     1     2   502   512  3.852467123E+00 -2.305475421E+00 -1.189578943E+01  1.271481522E+01  1.685873940E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   99.105535343879751                6       23055           0
+<weights>
+0.53034E+02
+0.56498E+02
+0.41414E+02
+0.45243E+02
+0.44671E+02
+0.76081E+02
+0.65645E+02
+</weights>
+# Start extra-info-previous-event
+ #            2        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.53760E+00 -1.00000E+00  2.03773E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  5.816927767E+02  5.816927767E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -9.392168187E+00  9.392168187E+00  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  9.660519392E+00  7.671789674E+00  4.837650185E+02  4.998063378E+02  1.250024008E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -1.360986288E+00 -9.673880507E+00  2.049214469E+01  2.270163522E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   511   503 -8.299533104E+00  2.002090833E+00  6.804344526E+01  6.857697179E+01  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          31   90.614007860138855                6       23710           0
+<weights>
+0.53034E+02
+0.53215E+02
+0.46296E+02
+0.48006E+02
+0.47802E+02
+0.63681E+02
+0.59401E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.40947E+01 -1.00000E+00  1.79885E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.370281923E+02  1.370281923E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   512   503  0.000000000E+00  0.000000000E+00 -1.446940773E+02  1.446940773E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  6.719815049E+01  6.701397134E+00 -7.437131626E+01  1.603619395E+02  1.249974352E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -7.575676127E+01  4.497355595E+00  7.355748552E+01  1.056883000E+02  2.523185073E-06  0.00000E+00  9.000E+00
+      21     1     1     2   512   502  8.558610784E+00 -1.119875273E+01 -6.852054186E+00  1.567203011E+01  1.884864366E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   73.707593957364111                6       23951           0
+<weights>
+0.53034E+02
+0.55887E+02
+0.44693E+02
+0.46557E+02
+0.49608E+02
+0.62926E+02
+0.58007E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001 -1.61198E+02  1.04474E+01 -1.00000E+00  1.93411E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  2.616357702E+02  2.616357702E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00 -1.439283664E+03  1.439283664E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.415566170E+01 -1.233701279E+01 -1.435257688E+03  1.440812468E+03  1.249934127E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  9.298062049E+00  2.158641996E+01  2.128658298E+02  2.141594943E+02  8.529922400E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   503  4.857599648E+00 -9.249407164E+00  4.474396434E+01  4.594747166E+01  1.066240300E-06  0.00000E+00  9.000E+00
+#rwgt            1          31  -350.25911677845306                6       24544           0
+<weights>
+-.16120E+03
+-.13193E+03
+-.95707E+02
+-.77978E+02
+-.19578E+03
+-.28838E+03
+-.35000E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.70143E+01 -1.00000E+00  1.72330E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.375442008E+03  1.375442008E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   512  0.000000000E+00  0.000000000E+00 -1.520533249E+01  1.520533249E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -2.299281637E+01  1.339097533E+01  4.397036074E+02  4.579022076E+02  1.250087257E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  1.244787104E+01 -2.674356879E+01  9.140680649E+02  9.145439274E+02  1.868812365E-05  0.00000E+00  9.000E+00
+      21     1     1     2   502   512  1.054494533E+01  1.335259346E+01  6.465003614E+00  1.820120589E+01  6.307962682E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   37.032394883451694                6       27986           0
+<weights>
+0.53034E+02
+0.49879E+02
+0.51106E+02
+0.49044E+02
+0.56249E+02
+0.47783E+02
+0.53324E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.63645E+01 -1.00000E+00  1.26762E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.091000640E+02  2.091000640E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      -1    -1     0     0     0   503  0.000000000E+00  0.000000000E+00 -6.556177369E+02  6.556177369E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -2.716719887E+02 -2.851743584E+01 -1.193379279E+02  3.232163780E+02  1.249334718E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501  2.436539212E+02 -5.317598930E+01 -5.423407067E+01  2.552180511E+02  3.693564745E-06  0.00000E+00  9.000E+00
+      -1     1     1     2     0   502  2.801806746E+01  8.169342515E+01 -2.729456744E+02  2.862833719E+02  3.814697266E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   11.845392765684434                6       28515           0
+<weights>
+0.53034E+02
+0.56411E+02
+0.42942E+02
+0.44895E+02
+0.49213E+02
+0.66131E+02
+0.59555E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  7.50517E+01  1.47695E+01 -1.00000E+00  1.74562E-01
+      21    -1     0     0   501   502  0.000000000E+00  0.000000000E+00  5.257704859E+02  5.257704859E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00 -3.114501058E+01  3.114501058E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.388090156E+01  3.566406019E+01  4.910747378E+02  5.081828340E+02  1.250231582E+02  0.00000E+00  9.000E+00
+      -1     1     1     2     0   502 -1.851168648E+01 -2.028037056E+01  1.269033844E+01  3.024930836E+01  5.331201500E-07  0.00000E+00  9.000E+00
+       1     1     1     2   511     0  4.630784915E+00 -1.538368963E+01 -9.139600884E+00  1.848335413E+01  1.192092896E-07  0.00000E+00  9.000E+00
+#rwgt            1          21   2.3519758868742016                6       28857           0
+<weights>
+0.75052E+02
+0.76031E+02
+0.60797E+02
+0.61791E+02
+0.73809E+02
+0.94541E+02
+0.93416E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  1.06650E+01 -1.00000E+00  1.85291E-01
+       4    -1     0     0   501     0  0.000000000E+00  0.000000000E+00  2.329276030E+03  2.329276030E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   512  0.000000000E+00  0.000000000E+00 -3.823725509E+02  3.823725509E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -1.630045787E+01 -1.623575474E+01 -7.290576453E+01  1.465204311E+02  1.249947261E+02  0.00000E+00  9.000E+00
+       4     1     1     2   502     0  6.779624224E+00  8.232809877E+00  2.292314448E+03  2.292339257E+03  3.051757812E-05  0.00000E+00  9.000E+00
+      21     1     1     2   501   512  9.520833645E+00  8.002944866E+00 -2.725052044E+02  2.727888924E+02  5.394796609E-06  0.00000E+00  9.000E+00
+#rwgt            1          12   8.3624875446315833E-002           6       29104           0
+<weights>
+0.53034E+02
+0.69390E+02
+0.10588E+03
+0.11325E+03
+0.37151E+02
+-.85093E+02
+-.11940E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  2.17542E+02  1.22973E+01 -1.00000E+00  1.85798E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  2.410318669E+02  2.410318669E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   511   502  0.000000000E+00  0.000000000E+00 -5.712933551E+02  5.712933551E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.063467994E+01 -1.725346386E+01 -5.014392710E+02  5.171806426E+02  1.249947844E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  1.584568618E+00  1.863720394E+01  2.321714041E+02  2.329236294E+02  2.697398305E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   501 -1.221924856E+01 -1.383740082E+00 -6.099362135E+01  6.222094999E+01  1.168007728E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   439.98651602456749                6       30695           0
+<weights>
+0.21754E+03
+0.19721E+03
+0.17651E+03
+0.15999E+03
+0.24314E+03
+0.27627E+03
+0.30782E+03
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  6.38955E+01  7.78898E+00 -1.00000E+00  2.08869E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.057006726E+02  1.057006726E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   512  0.000000000E+00  0.000000000E+00 -9.454771499E+01  9.454771499E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  8.945544098E+00 -1.163859798E+00  6.616475692E+01  1.417117756E+02  1.249922996E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -7.705150220E+00  8.853434910E+00 -2.655504266E+01  2.903313522E+01  8.920806376E-07  0.00000E+00  9.000E+00
+      21     1     1     2   502   512 -1.240393879E+00 -7.689575112E+00 -2.845675665E+01  2.950347677E+01  4.768371582E-07  0.00000E+00  9.000E+00
+#rwgt            1          31   220.50911127228147                6       32665           0
+<weights>
+0.63895E+02
+0.65089E+02
+0.56590E+02
+0.59144E+02
+0.59661E+02
+0.71458E+02
+0.69635E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.96753E+01 -1.00000E+00  1.53367E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.337624688E+03  1.337624688E+03  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   511   502  0.000000000E+00  0.000000000E+00 -1.761316814E+01  1.761316814E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  6.896219632E+01 -5.022084171E+00  1.152319154E+03  1.161139551E+03  1.249984765E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502 -5.434572573E+01  3.084803685E+01  1.408251622E+02  1.540674709E+02  1.907348633E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   501 -1.461647059E+01 -2.582595267E+01  2.686720419E+01  4.003083443E+01  1.390207266E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   37.141515158309716                6       33352           0
+<weights>
+0.53034E+02
+0.48031E+02
+0.40595E+02
+0.37140E+02
+0.58691E+02
+0.71541E+02
+0.80601E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  2.07722E+01 -1.00000E+00  1.59362E-01
+      21    -1     0     0   501   512  0.000000000E+00  0.000000000E+00  2.934669784E+01  2.934669784E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      -1    -1     0     0     0   501  0.000000000E+00  0.000000000E+00 -3.919562503E+02  3.919562503E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0 -3.188449445E+01  3.217658221E+01 -3.019256829E+02  3.299018569E+02  1.249966550E+02  0.00000E+00  9.000E+00
+      -1     1     1     2     0   502  1.451036725E+01 -1.486379543E+01 -6.340719468E+01  6.672297588E+01  6.743495762E-07  0.00000E+00  9.000E+00
+      21     1     1     2   502   512  1.737412720E+01 -1.731278678E+01  2.723325043E+00  2.467811543E+01  5.331201500E-07  0.00000E+00  9.000E+00
+#rwgt            1          21   1.4353830042135145                6       33663           0
+<weights>
+0.53034E+02
+0.60399E+02
+0.41962E+02
+0.47562E+02
+0.44695E+02
+0.69931E+02
+0.58269E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  5.30342E+01  8.20249E+00 -1.00000E+00  2.04229E-01
+      21    -1     0     0   511   501  0.000000000E+00  0.000000000E+00  1.425997934E+01  1.425997934E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   502   503  0.000000000E+00  0.000000000E+00 -4.064692397E+02  4.064692397E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.201766334E+00  6.641130821E+00 -3.139020036E+02  3.378197124E+02  1.246681249E+02  0.00000E+00  9.000E+00
+      21     1     1     2   502   501 -8.036040360E+00 -1.644046548E+00 -7.170655856E+01  7.217417387E+01  1.907348633E-06  0.00000E+00  9.000E+00
+      21     1     1     2   511   503  6.834274026E+00 -4.997084273E+00 -6.600698228E+00  1.073533278E+01  0.000000000E+00  0.00000E+00  9.000E+00
+#rwgt            1          31   152.80070240445659                6       33778           0
+<weights>
+0.53034E+02
+0.60757E+02
+0.42656E+02
+0.49051E+02
+0.40118E+02
+0.72724E+02
+0.54650E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+<event>
+      5  10001  9.82739E+01  2.11633E+00 -1.00000E+00  3.35125E-01
+      21    -1     0     0   503   501  0.000000000E+00  0.000000000E+00  1.995397383E+02  1.995397383E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      21    -1     0     0   501   512  0.000000000E+00  0.000000000E+00 -6.802589716E+02  6.802589716E+02  0.000000000E+00  0.00000E+00  9.000E+00
+      25     1     1     2     0     0  1.143861921E-01  1.028232579E-01  1.676555420E+02  2.090924122E+02  1.249449175E+02  0.00000E+00  9.000E+00
+      21     1     1     2   503   502  4.116038360E-01  2.075916851E+00  1.106355882E+01  1.126415475E+01  0.000000000E+00  0.00000E+00  9.000E+00
+      21     1     1     2   502   512 -5.259900280E-01 -2.178740109E+00 -6.594383340E+02  6.594421430E+02  7.629394531E-06  0.00000E+00  9.000E+00
+#rwgt            1          31   301.92210886761387                6       34147           0
+<weights>
+0.98274E+02
+0.14053E+03
+0.66671E+02
+0.94813E+02
+0.58209E+02
+0.15759E+03
+0.95544E+02
+</weights>
+# Start extra-info-previous-event
+ #            1        rad_kinreg
+ #            1          rad_type
+ #            6         34131             0     previous event's random seeds
+# End extra-info-previous-event
+</event>
+</LesHouchesEvents>
+ #Random number generator exit values:            6         35109             0
