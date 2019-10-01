@@ -9,7 +9,7 @@ PDF=lhapdf
 ## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
 ##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
-ANALYSIS=MiNNLO
+ANALYSIS=MiNNLOub
 
 ## For static linking uncomment the following
 #STATIC= -static
@@ -214,7 +214,8 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-ubproj.o fastjetfortran.o boostrot4.o  BornProj.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-ubproj.o fastjetfortran.o
+#boostrot4.o  BornProj.o
 
 endif
 

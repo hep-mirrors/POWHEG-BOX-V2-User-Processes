@@ -74,36 +74,36 @@ c     extra plots
          call bookupeqbins('ptj1-yj4'//trim(suffix(icut)),dpt,0d0,500d0)
       enddo
 
-
-      call bookupeqbins('debug_yV',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub',5*dy, -8d0,8d0)
-      call bookupeqbins('yVubdiff',  5*dy, -8d0,8d0)
- 
-      call bookupeqbins('debug_yV-ptv-0-10',   5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-ptv-10-30',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-ptv-30-60',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-ptv-60-120', 5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-ptv>120', 5*dy, -8d0,8d0)
-
-      call bookupeqbins('debug_yVub-ptv-0-10',   5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-ptv-10-30',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-ptv-30-60',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-ptv-60-120', 5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-ptv>120', 5*dy, -8d0,8d0)
-
-      call bookupeqbins('debug_yV-scalup-0-10',   5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-scalup-10-30',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-scalup-30-60',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-scalup-60-120', 5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yV-scalup>120', 5*dy, -8d0,8d0)
-
-      call bookupeqbins('debug_yVub-scalup-0-10',   5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-scalup-10-30',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-scalup-30-60',  5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-scalup-60-120', 5*dy, -8d0,8d0)
-      call bookupeqbins('debug_yVub-scalup>120', 5*dy, -8d0,8d0)
-
-
+c$$$
+c$$$      call bookupeqbins('debug_yV',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub',5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('yVubdiff',  5*dy, -8d0,8d0)
+c$$$ 
+c$$$      call bookupeqbins('debug_yV-ptv-0-10',   5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-ptv-10-30',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-ptv-30-60',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-ptv-60-120', 5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-ptv>120', 5*dy, -8d0,8d0)
+c$$$
+c$$$      call bookupeqbins('debug_yVub-ptv-0-10',   5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-ptv-10-30',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-ptv-30-60',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-ptv-60-120', 5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-ptv>120', 5*dy, -8d0,8d0)
+c$$$
+c$$$      call bookupeqbins('debug_yV-scalup-0-10',   5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-scalup-10-30',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-scalup-30-60',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-scalup-60-120', 5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yV-scalup>120', 5*dy, -8d0,8d0)
+c$$$
+c$$$      call bookupeqbins('debug_yVub-scalup-0-10',   5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-scalup-10-30',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-scalup-30-60',  5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-scalup-60-120', 5*dy, -8d0,8d0)
+c$$$      call bookupeqbins('debug_yVub-scalup>120', 5*dy, -8d0,8d0)
+c$$$
+c$$$
 
 
 
@@ -148,7 +148,7 @@ c     arrays to reconstruct jets
       
       real *8 plp(4),ylp,etalp,ptlp,mlp
       real *8 plm(4),ylm,etalm,ptlm,mlm
-      real * 8 pub(4,10),yVub,etaVub,ptVub,mVub
+c$$$      real * 8 pub(4,10),yVub,etaVub,ptVub,mVub
       real *8 powheginput
       integer kinreg_to_analyze
       real *8 corrfactor
@@ -156,37 +156,37 @@ c     arrays to reconstruct jets
 
 
       if(whcprg.eq.'NLO') then
-         pub(4,1:10)=phep(4,1:10)
+c$$$         pub(4,1:10)=phep(4,1:10)
          goto 123
       endif
 
-      if(whcprg.eq.'LHEF' .and. powheginput("ubanalysis").eq.1) then
-         
-c     exclude remnants
-         if(rad_type /= 1) return
-
-c     analyze only ISR (rad_kinreg=1) OR FSR (rad_kinreg=2).
-c     Put underlying-born-like events into ISR-like.
-         if(powheginput("kinreg").eq.1) then
-            kinreg_to_analyze=1
-         elseif(powheginput("kinreg").eq.2) then
-            kinreg_to_analyze=2
-         else
-            write(*,*) 'analysis ubproj, need kinreg...'
-            stop
-         endif
-         
-c     if event is UB or ISR, analyze ONLY if kinreg_to_analye = 1
-         if(rad_kinreg .le.1 .and. kinreg_to_analyze.eq.2) return
-         
-c     if event is FSR, analyze ONLY if kinreg_to_analye = 2
-         if(rad_kinreg.eq.2 .and. kinreg_to_analyze.eq.1) return
-
-         call reconstruct_born(pub)
-         
-      else
-         pub(4,1:10)=phep(4,1:10)
-      endif
+c$$$      if(whcprg.eq.'LHEF' .and. powheginput("ubanalysis").eq.1) then
+c$$$         
+c$$$c     exclude remnants
+c$$$         if(rad_type /= 1) return
+c$$$
+c$$$c     analyze only ISR (rad_kinreg=1) OR FSR (rad_kinreg=2).
+c$$$c     Put underlying-born-like events into ISR-like.
+c$$$         if(powheginput("kinreg").eq.1) then
+c$$$            kinreg_to_analyze=1
+c$$$         elseif(powheginput("kinreg").eq.2) then
+c$$$            kinreg_to_analyze=2
+c$$$         else
+c$$$            write(*,*) 'analysis ubproj, need kinreg...'
+c$$$            stop
+c$$$         endif
+c$$$         
+c$$$c     if event is UB or ISR, analyze ONLY if kinreg_to_analye = 1
+c$$$         if(rad_kinreg .le.1 .and. kinreg_to_analyze.eq.2) return
+c$$$         
+c$$$c     if event is FSR, analyze ONLY if kinreg_to_analye = 2
+c$$$         if(rad_kinreg.eq.2 .and. kinreg_to_analyze.eq.1) return
+c$$$
+c$$$c         call reconstruct_born(pub)
+c$$$         
+c$$$      else
+c$$$         pub(4,1:10)=phep(4,1:10)
+c$$$      endif
 
  
  123  continue
@@ -338,68 +338,68 @@ c     total sigma
 c     Higgs histograms 
       call getyetaptmass(pV,yV,etaV,ptV,mV)
       call filld('yV',yV,dsig)
-
-      call filld('debug_yV',yV,dsig)
-      if(0d0.le.ptV .and. ptV.lt.10d0) then
-         call filld('debug_yV-ptv-0-10',yV,dsig)
-      elseif(10d0.le.ptV .and. ptV.lt.30d0) then
-         call filld('debug_yV-ptv-10-30',yV,dsig)
-      elseif(30d0.le.ptV .and. ptV.lt.60d0) then
-         call filld('debug_yV-ptv-30-60',yV,dsig)
-      elseif(60d0.le.ptV .and. ptV.lt.12d0) then
-         call filld('debug_yV-ptv-60-120',yV,dsig)
-      elseif(120d0.le.ptV) then
-         call filld('debug_yV-ptv>120',yV,dsig)
-      endif
-      if(0d0.le.scalup .and. scalup.lt.10d0) then
-         call filld('debug_yV-scalup-0-10',yV,dsig)
-      elseif(10d0.le.scalup .and. scalup.lt.30d0) then
-         call filld('debug_yV-scalup-10-30',yV,dsig)
-      elseif(30d0.le.scalup .and. scalup.lt.60d0) then
-         call filld('debug_yV-scalup-30-60',yV,dsig)
-      elseif(60d0.le.scalup .and. scalup.lt.12d0) then
-         call filld('debug_yV-scalup-60-120',yV,dsig)
-      elseif(120d0.le.scalup) then
-         call filld('debug_yV-scalup>120',yV,dsig)
-      endif
+c$$$
+c$$$      call filld('debug_yV',yV,dsig)
+c$$$      if(0d0.le.ptV .and. ptV.lt.10d0) then
+c$$$         call filld('debug_yV-ptv-0-10',yV,dsig)
+c$$$      elseif(10d0.le.ptV .and. ptV.lt.30d0) then
+c$$$         call filld('debug_yV-ptv-10-30',yV,dsig)
+c$$$      elseif(30d0.le.ptV .and. ptV.lt.60d0) then
+c$$$         call filld('debug_yV-ptv-30-60',yV,dsig)
+c$$$      elseif(60d0.le.ptV .and. ptV.lt.12d0) then
+c$$$         call filld('debug_yV-ptv-60-120',yV,dsig)
+c$$$      elseif(120d0.le.ptV) then
+c$$$         call filld('debug_yV-ptv>120',yV,dsig)
+c$$$      endif
+c$$$      if(0d0.le.scalup .and. scalup.lt.10d0) then
+c$$$         call filld('debug_yV-scalup-0-10',yV,dsig)
+c$$$      elseif(10d0.le.scalup .and. scalup.lt.30d0) then
+c$$$         call filld('debug_yV-scalup-10-30',yV,dsig)
+c$$$      elseif(30d0.le.scalup .and. scalup.lt.60d0) then
+c$$$         call filld('debug_yV-scalup-30-60',yV,dsig)
+c$$$      elseif(60d0.le.scalup .and. scalup.lt.12d0) then
+c$$$         call filld('debug_yV-scalup-60-120',yV,dsig)
+c$$$      elseif(120d0.le.scalup) then
+c$$$         call filld('debug_yV-scalup>120',yV,dsig)
+c$$$      endif
 
       call filld('ptV',ptV,dsig)
       call filld('ptVzoom',ptV,dsig)
 
-      call getyetaptmass(pub(:,1),yVub,etaVub,ptVub,mVub)
-      if(yVub /= yVub) then
-         write(*,*) "! pub=",pub,"rad_type",rad_type,"rad_kinreg",rad_kinreg
-      endif
-
-      call filld('debug_yVub',yVub,dsig)
-      if(0d0.le.ptV .and. ptV.lt.10d0) then
-         call filld('debug_yVub-ptv-0-10',yVub,dsig)
-      elseif(10d0.le.ptV .and. ptV.lt.30d0) then
-         call filld('debug_yVub-ptv-10-30',yVub,dsig)
-      elseif(30d0.le.ptV .and. ptV.lt.60d0) then
-         call filld('debug_yVub-ptv-30-60',yVub,dsig)
-      elseif(60d0.le.ptV .and. ptV.lt.12d0) then
-         call filld('debug_yVub-ptv-60-120',yVub,dsig)
-      elseif(120d0.le.ptV) then
-         call filld('debug_yVub-ptv>120',yVub,dsig)
-      endif
-      if(0d0.le.scalup .and. scalup.lt.10d0) then
-         call filld('debug_yVub-scalup-0-10',yVub,dsig)
-      elseif(10d0.le.scalup .and. scalup.lt.30d0) then
-         call filld('debug_yVub-scalup-10-30',yVub,dsig)
-      elseif(30d0.le.scalup .and. scalup.lt.60d0) then
-         call filld('debug_yVub-scalup-30-60',yVub,dsig)
-      elseif(60d0.le.scalup .and. scalup.lt.12d0) then
-         call filld('debug_yVub-scalup-60-120',yVub,dsig)
-      elseif(120d0.le.scalup) then
-         call filld('debug_yVub-scalup>120',yVub,dsig)
-      endif
-
-      if(yV>0) then
-         call filld('yVubdiff',yV-yVub,dsig)
-      else
-         call filld('yVubdiff',yVub-yV,dsig)
-      endif
+c$$$      call getyetaptmass(pub(:,1),yVub,etaVub,ptVub,mVub)
+c$$$      if(yVub /= yVub) then
+c$$$         write(*,*) "! pub=",pub,"rad_type",rad_type,"rad_kinreg",rad_kinreg
+c$$$      endif
+c$$$
+c$$$      call filld('debug_yVub',yVub,dsig)
+c$$$      if(0d0.le.ptV .and. ptV.lt.10d0) then
+c$$$         call filld('debug_yVub-ptv-0-10',yVub,dsig)
+c$$$      elseif(10d0.le.ptV .and. ptV.lt.30d0) then
+c$$$         call filld('debug_yVub-ptv-10-30',yVub,dsig)
+c$$$      elseif(30d0.le.ptV .and. ptV.lt.60d0) then
+c$$$         call filld('debug_yVub-ptv-30-60',yVub,dsig)
+c$$$      elseif(60d0.le.ptV .and. ptV.lt.12d0) then
+c$$$         call filld('debug_yVub-ptv-60-120',yVub,dsig)
+c$$$      elseif(120d0.le.ptV) then
+c$$$         call filld('debug_yVub-ptv>120',yVub,dsig)
+c$$$      endif
+c$$$      if(0d0.le.scalup .and. scalup.lt.10d0) then
+c$$$         call filld('debug_yVub-scalup-0-10',yVub,dsig)
+c$$$      elseif(10d0.le.scalup .and. scalup.lt.30d0) then
+c$$$         call filld('debug_yVub-scalup-10-30',yVub,dsig)
+c$$$      elseif(30d0.le.scalup .and. scalup.lt.60d0) then
+c$$$         call filld('debug_yVub-scalup-30-60',yVub,dsig)
+c$$$      elseif(60d0.le.scalup .and. scalup.lt.12d0) then
+c$$$         call filld('debug_yVub-scalup-60-120',yVub,dsig)
+c$$$      elseif(120d0.le.scalup) then
+c$$$         call filld('debug_yVub-scalup>120',yVub,dsig)
+c$$$      endif
+c$$$
+c$$$      if(yV>0) then
+c$$$         call filld('yVubdiff',yV-yVub,dsig)
+c$$$      else
+c$$$         call filld('yVubdiff',yVub-yV,dsig)
+c$$$      endif
 
 
 C     find jets 

@@ -17,6 +17,8 @@
 c     vector boson id and decay
       integer idvecbos,vdecaymode
       common/cvecbos/idvecbos,vdecaymode
+      flg_storemintupb_nooutliers = .true.
+
       flg_minnloproc = 'Z'
 c     check nlegborn. This is only a sanity check while we are TESTING 
 c     the code and we change often from one process to the other
