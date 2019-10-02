@@ -12,6 +12,7 @@
       real * 8 tmp
       real * 8 powheginput
       external powheginput
+      flg_storemintupb_nooutliers = .true.
       flg_minnloproc = 'H'
 c determined if quark mass effects are required
       if(powheginput("#quarkmasseffects").eq.1) then
