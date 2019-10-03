@@ -17,6 +17,7 @@ ANALYSIS=MiNNLO
 
 V2DIR=$(shell (cd ../.. ; pwd))
 STDCLIB=-lstdc++
+#STDCLIB=-lc++
 
 stdclib=$(STDCLIB)
 
