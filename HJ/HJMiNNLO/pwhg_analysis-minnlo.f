@@ -1,3 +1,12 @@
+
+c     when using "dsig(1:rwl_num_weights)", i.e
+c     rwl_weights(1:rwl_num_weights), we are actually going in real*4
+c     precision. This is why some digits will differ wrt when we use
+c     dsig0
+
+
+
+
       subroutine init_hist
       implicit none
       include 'pwhg_math.h'
@@ -36,6 +45,7 @@ c      call bookupeqbins('ptj1_check',3d0,0d0,300d0)
       call bookupeqbins('ptj1',dpt,0d0,500d0)
 
       do icut=1,ncuts
+c         call bookupeqbins('y-H'//trim(suffix(icut)),dy,-8d0,8d0)
          call bookupeqbins('y-j1'//trim(suffix(icut)),dy,-8d0,8d0)
          call bookupeqbins('dy-h-j1'//trim(suffix(icut)),dy,-8d0,8d0)
          
@@ -69,6 +79,10 @@ c     extra plots
       implicit none
       include 'hepevt.h'
       include 'pwhg_weights.h'
+      include 'nlegborn.h'
+      include 'pwhg_rad.h'
+c      include 'pwhg_lhrwgt.h'
+      include 'pwhg_rwl.h'
       logical ini
       data ini/.true./
       save ini
@@ -92,8 +106,21 @@ c     arrays to reconstruct jets
      1     phij(maxjet),pj(4,maxjet),rr,ptrel(4),
      2     yj1,etaj1,ptj1,mj1,dyhj1,detahj1,dphihj1,drhj1
       integer j1,found,mjets,ihep,icut,i
-      
- 
+      real *8 powheginput
+      real *8 corrfactor
+
+      corrfactor=1d0
+      if(powheginput("#btildeviol").eq.1.and.WHCPRG.ne.'NLO') then
+         if(rad_type.eq.1) then
+            corrfactor=powheginput('corr_btilde')
+         elseif(rad_type.eq.2) then
+            corrfactor=powheginput('corr_remnant')
+         else
+            print*, 'no rew'
+         endif
+      endif
+
+
       if (ini) then
          write(*,*) '*****************************'
          if(whcprg.eq.'NLO') then
@@ -105,36 +132,90 @@ c     arrays to reconstruct jets
             write (*,*) '           HERWIG ANALYSIS            '
          elseif(WHCPRG.eq.'PYTHIA') then
             write (*,*) '           PYTHIA ANALYSIS            '
+         elseif(WHCPRG.eq.'PY8   ') then
+            write (*,*) '           PYTHIA 8 ANALYSIS        '
          endif
          write(*,*) '*****************************'
-         if(weights_num.eq.0) then
+
+
+c         if(weights_num.eq.0) then
+c            call setupmulti(1)
+c         else
+c            call setupmulti(weights_num)
+c         endif
+
+
+                  
+         write(*,*) ''
+         write(*,*) '*****************************'
+         write(*,*) '** weights_num     = ',weights_num
+         write(*,*) '** rwl_num_weights = ',rwl_num_weights
+         write(*,*) '** rwl_num_groups = ',rwl_num_groups
+         write(*,*) '*****************************'
+         write(*,*) ''
+            
+         if(weights_num.eq.0.and.rwl_num_weights.eq.0) then
             call setupmulti(1)
-         else
+         else if(weights_num.ne.0.and.rwl_num_weights.eq.0) then
             call setupmulti(weights_num)
+         else if(weights_num.eq.0.and.rwl_num_weights.ne.0) then
+            call setupmulti(rwl_num_weights)
+         else
+            call setupmulti(rwl_num_weights)
+         endif
+            
+         if(weights_num.eq.0.and.rwl_num_weights.gt.weights_max) then
+            write(*,*) 'ERROR:'
+            write(*,*) 'incoming number of weights (rwl_num_weights)'
+            write(*,*) 'is greater than declared dsig and bWdsig    '
+            write(*,*) 'array length.'
+            stop
          endif
 
          ini=.false.
       endif
 
       dsig=0
-      if(weights_num.eq.0) then
+      
+      if(weights_num.eq.0.and.rwl_num_weights.eq.0) then
          dsig(1)=dsig0
-      else
+      else if(weights_num.ne.0.and.rwl_num_weights.eq.0) then
          dsig(1:weights_num)=weights_val(1:weights_num)
+      else if(weights_num.eq.0.and.rwl_num_weights.ne.0) then
+         dsig(1:rwl_num_weights)=rwl_weights(1:rwl_num_weights)
+      else
+         dsig(1:rwl_num_weights)=rwl_weights(1:rwl_num_weights)
       endif
+      
+c      print*, dsig0,dsig(1)
+
       if(sum(abs(dsig)).eq.0) return
+
+      dsig=dsig*corrfactor
 
 c     Loop over final state particles to find Higgs
       found=0
-      do ihep=1,nhep
-         if (((isthep(ihep).eq.1).or.(isthep(ihep).eq.2)
+c      print*, '>>>> ',nhep
+      if(WHCPRG.eq.'PY8   ') then
+         do ihep=1,nhep
+            if((isthep(ihep).gt.0).and.(idhep(ihep).eq.25)) then
+               j1=ihep
+               pH(1:4) = phep(1:4,j1)
+c               print*, ihep,pH
+            endif
+         enddo
+         found=1
+      else
+         do ihep=1,nhep
+            if (((isthep(ihep).eq.1).or.(isthep(ihep).eq.2)
      #.or.(isthep(ihep).eq.155).or.(isthep(ihep).eq.195))
      #.and.(idhep(ihep).eq.25)) then
-            j1=ihep
-            found=found+1
-            pH(1:4) = phep(1:4,j1)
-         endif
-      enddo
+               j1=ihep
+               found=found+1
+               pH(1:4) = phep(1:4,j1)
+            endif
+         enddo
+      endif
       if(found.lt.1) then
          write(*,*) 'ERROR: Higgs not found'
          call exit(1)
@@ -178,6 +259,7 @@ C     -- Plot inclusive and exclusive jet multiplicties at two jet-pT thresholds
       call getdydetadphidr(pH,pj(:,1),dyhj1,detahj1,dphihj1,drhj1)
       do icut = 1,ncuts
          if(ktj(1) .gt. jetcut(icut)) then
+c            call filld('y-H'//trim(suffix(icut)),yH,dsig)
             call filld('y-j1'//trim(suffix(icut)),rapj(1),dsig)
             call filld('dy-h-j1'//trim(suffix(icut)),dyhj1,dsig)
             call filld('dphi-h-j1'//trim(suffix(icut)),dphihj1,dsig)
@@ -223,6 +305,9 @@ c        but (i+1)-jet (and all the others) is too soft
      $     ptrel,pjet)
 c     arrays to reconstruct jets, radius parameter rr
       implicit none
+c     tell to the analysis file which program is running it
+      character * 6 WHCPRG
+      common/cWHCPRG/WHCPRG
       integer iflag,mjets
       real * 8  rr,ptmin,kt(*),eta(*),rap(*),
      1     phi(*),ptrel(3),pjet(4,*)
@@ -257,21 +342,38 @@ C - Initialize arrays and counters for output jets
       enddo
       if(iflag.eq.1) then
 C     - Extract final state particles to feed to jet finder
-         do j=1,nhep
-c all but the Higgs
-            if (isthep(j).eq.1.and..not.idhep(j).eq.25) then
-               if(ntracks.eq.maxtrack) then
-                  write(*,*) 'analyze: need to increase maxtrack!'
-                  write(*,*) 'ntracks: ',ntracks
-                  stop
+         if(WHCPRG.eq.'PY8   ') then
+            do j=1,nhep
+               if((isthep(j).gt.0).and..not.idhep(j).eq.25) then
+                  if(ntracks.eq.maxtrack) then
+                     write(*,*) 'analyze: need to increase maxtrack!'
+                     write(*,*) 'ntracks: ',ntracks
+                     stop
+                  endif
+                  ntracks=ntracks+1
+                  do mu=1,4
+                     ptrack(mu,ntracks)=phep(mu,j)
+                  enddo
+                  itrackhep(ntracks)=j
                endif
-               ntracks=ntracks+1
-               do mu=1,4
-                  ptrack(mu,ntracks)=phep(mu,j)
-               enddo
-               itrackhep(ntracks)=j
-            endif
-         enddo
+            enddo
+         else
+            do j=1,nhep
+c     all but the Higgs
+               if (isthep(j).eq.1.and..not.idhep(j).eq.25) then
+                  if(ntracks.eq.maxtrack) then
+                     write(*,*) 'analyze: need to increase maxtrack!'
+                     write(*,*) 'ntracks: ',ntracks
+                     stop
+                  endif
+                  ntracks=ntracks+1
+                  do mu=1,4
+                     ptrack(mu,ntracks)=phep(mu,j)
+                  enddo
+                  itrackhep(ntracks)=j
+               endif
+            enddo
+         endif
       else
          do j=1,nup
             if (istup(j).eq.1.and..not.islept(idup(j))) then

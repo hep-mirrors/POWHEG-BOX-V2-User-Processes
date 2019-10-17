@@ -10,6 +10,7 @@ PDF=lhapdf
 ##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
 ANALYSIS=MiNNLO
+#ANALYSIS=MiNNLODEBUG
 
 ## For static linking uncomment the following
 #STATIC= -static
@@ -208,15 +209,15 @@ FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
  endif
 
-ifeq ("$(ANALYSIS)","MiNNLOub")
+
+ifeq ("$(ANALYSIS)","MiNNLODEBUG")
 ##To include Fastjet configuration uncomment the following lines. 
 FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-ubproj.o fastjetfortran.o
-PWHGANAL2=pwhg_bookhist-multi.o pwhg_analysis-minnlo-ubproj-2.o fastjetfortran.o
-endif
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-debug.o fastjetfortran.o
+ endif
 
 
 # PYTHIA 8
@@ -338,16 +339,6 @@ LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o		\
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
 	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
-
-
-LHEF2=lhef_analysis.o boostrot.o random.o cernroutines.o		\
-     opencount.o powheginput.o $(PWHGANAL2)	\
-     lhefread.o pwhg_io_interface.o rwl_weightlists.o newunit.o pwhg_analysis_driver.o bra_ket_subroutines.o $(FPEOBJ)
-
-# target to analyze LHEF output
-lhef_analysis2:$(LHEF2)
-	$(FF) $(patsubst %,$(OBJ)/%,$(LHEF2)) $(LIBS) $(LIBSFASTJET) $(STATIC)  -o $@ 
-
 
 
 
