@@ -75,7 +75,6 @@ c     extra plots
       enddo
 
 
-
       end
 
       
@@ -84,6 +83,10 @@ c     extra plots
       implicit none
       include 'hepevt.h'
       include 'pwhg_weights.h'
+      include 'nlegborn.h'
+      include 'pwhg_rad.h'
+      include 'pwhg_rwl.h'
+      include 'LesHouches.h'
       logical ini
       data ini/.true./
       save ini
@@ -110,16 +113,35 @@ c     arrays to reconstruct jets
       integer maxnumlep
       parameter (maxnumlep=10)
       integer emvec(maxnumlep),epvec(maxnumlep),iep,iem,ep,em,mu,neplus,neminus
-
+      
       real *8 plp(4),ylp,etalp,ptlp,mlp
       real *8 plm(4),ylm,etalm,ptlm,mlm
-
-      include 'LesHouches.h'
-      include 'nlegborn.h'
-      include 'pwhg_flst.h'
-      include 'pwhg_rad.h'
+c$$$      real * 8 pub(4,10),yVub,etaVub,ptVub,mVub
       real *8 powheginput
-      
+      integer kinreg_to_analyze
+      real *8 corrfactor
+      logical iseplus,iseminus
+
+
+      if(whcprg.eq.'NLO') then
+c$$$         pub(4,1:10)=phep(4,1:10)
+         goto 123
+      endif
+
+ 
+ 123  continue
+
+      corrfactor=1d0
+      if(powheginput("#btildeviol").eq.1.and.WHCPRG.ne.'NLO') then
+         if(rad_type.eq.1) then
+            corrfactor=powheginput('corr_btilde')
+         elseif(rad_type.eq.2) then
+            corrfactor=powheginput('corr_remnant')
+         else
+            print*, 'no rew'
+         endif
+      endif
+c      print*, corrfactor,rad_type
 
       if (ini) then
          write(*,*) '*****************************'
@@ -133,33 +155,56 @@ c     arrays to reconstruct jets
             stop
          elseif(WHCPRG.eq.'PYTHIA') then
             write (*,*) '           PYTHIA ANALYSIS            '
-            stop
+         elseif(WHCPRG.eq.'PY8   ') then
+            write (*,*) '           PYTHIA 8 ANALYSIS        '
          endif
          write(*,*) '*****************************'
-         if(weights_num.eq.0) then
+
+
+         write(*,*) ''
+         write(*,*) '*****************************'
+         write(*,*) '** weights_num     = ',weights_num
+         write(*,*) '** rwl_num_weights = ',rwl_num_weights
+         write(*,*) '** rwl_num_groups = ',rwl_num_groups
+         write(*,*) '*****************************'
+         write(*,*) ''
+            
+         if(weights_num.eq.0.and.rwl_num_weights.eq.0) then
             call setupmulti(1)
-         else
+         else if(weights_num.ne.0.and.rwl_num_weights.eq.0) then
             call setupmulti(weights_num)
+         else if(weights_num.eq.0.and.rwl_num_weights.ne.0) then
+            call setupmulti(rwl_num_weights)
+         else
+            call setupmulti(rwl_num_weights)
+         endif
+            
+         if(weights_num.eq.0.and.rwl_num_weights.gt.weights_max) then
+            write(*,*) 'ERROR:'
+            write(*,*) 'incoming number of weights (rwl_num_weights)'
+            write(*,*) 'is greater than declared dsig and bWdsig    '
+            write(*,*) 'array length.'
+            stop
          endif
 
          ini=.false.
       endif
 
-      if(powheginput('#noremn').eq.1) then
-         !print*, rad_type,nhep
-         if(rad_type.ne.1) then
-            !print*, 'REMNANT ',rad_type,nhep
-            return
-         endif
+      dsig=0
+
+      if(weights_num.eq.0.and.rwl_num_weights.eq.0) then
+         dsig(1)=dsig0
+      else if(weights_num.ne.0.and.rwl_num_weights.eq.0) then
+         dsig(1:weights_num)=weights_val(1:weights_num)
+      else if(weights_num.eq.0.and.rwl_num_weights.ne.0) then
+         dsig(1:rwl_num_weights)=rwl_weights(1:rwl_num_weights)
+      else
+         dsig(1:rwl_num_weights)=rwl_weights(1:rwl_num_weights)
       endif
 
-      dsig=0
-      if(weights_num.eq.0) then
-         dsig(1)=dsig0
-      else
-         dsig(1:weights_num)=weights_val(1:weights_num)
-      endif
       if(sum(abs(dsig)).eq.0) return
+
+      dsig=dsig*corrfactor
 
 c     Loop over final state particles to find V decay
       neminus=0
@@ -168,20 +213,34 @@ c     Loop over final state particles to find V decay
          emvec(i) = 0
          epvec(i) = 0
       enddo
+
       do ihep=1,nhep
-         if (isthep(ihep).eq.1) then
-            if(idhep(ihep).eq.11) then
+c         print*, ihep,jmohep(1,ihep),idhep(ihep)
+         iseminus=idhep(ihep).eq.11
+         iseplus=idhep(ihep).eq.-11
+c     I require ihep>3 to make sure I don't pick up jmohep(1,ihep)=0, as this
+c     gives a bound violation when computing idhep(jmohep(1,ihep))=idhep(0)...
+         if(whcprg.eq.'PY8'.and.ihep.gt.3) then
+            iseminus=iseminus.and.idhep(jmohep(1,ihep)).eq.23
+            iseplus=iseplus.and.idhep(jmohep(1,ihep)).eq.23
+         endif
+c     isthep = 23 is needed for PY8 run at partonic level!
+         if (isthep(ihep).eq.1 .or. isthep(ihep).eq.23) then
+            if(iseminus) then
+c               print*, ihep, idhep(ihep), jmohep(1,ihep)
                neminus=neminus+1
                emvec(neminus)=ihep
-            elseif(idhep(ihep).eq.-11) then
+            elseif(iseplus) then
+c               print*, ihep, idhep(ihep), jmohep(1,ihep)
                neplus=neplus+1
                epvec(neplus)=ihep
+c               print*, ihep, idhep(ihep), jmohep(1,ihep)
             endif
          endif         
       enddo
          
       if (neminus.ne.1.or.neplus.ne.1) then
-         write(*,*) "Too many leptons found. PROGRAM ABORT"
+         write(*,*) "Too many leptons found. PROGRAM ABORT ",neplus,neminus
          call exit(1)
       else 
          iem=emvec(1)
@@ -212,8 +271,11 @@ c     total sigma
 c     Higgs histograms 
       call getyetaptmass(pV,yV,etaV,ptV,mV)
       call filld('yV',yV,dsig)
+
       call filld('ptV',ptV,dsig)
       call filld('ptVzoom',ptV,dsig)
+
+
 
 C     find jets 
       rr=0.4d0       
@@ -291,6 +353,7 @@ c        but (i+1)-jet (and all the others) is too soft
       call filld('ptlemzoom', ptlm,   dsig)
 
 
+
       end
       
 
@@ -299,6 +362,9 @@ c        but (i+1)-jet (and all the others) is too soft
      $     ptrel,pjet)
 c     arrays to reconstruct jets, radius parameter rr
       implicit none
+c     tell to the analysis file which program is running it
+      character * 6 WHCPRG
+      common/cWHCPRG/WHCPRG
       integer iflag,mjets
       real * 8  rr,ptmin,kt(*),eta(*),rap(*),
      1     phi(*),ptrel(3),pjet(4,*)
@@ -333,23 +399,41 @@ C - Initialize arrays and counters for output jets
       enddo
       if(iflag.eq.1) then
 C     - Extract final state particles to feed to jet finder
-         do j=1,nhep
-c all but the Higgs
-            if
-     $           (isthep(j).eq.1.and..not.islept(idhep(j)).and..not.idhep(j)
-     $           .eq.23) then
-               if(ntracks.eq.maxtrack) then
-                  write(*,*) 'analyze: need to increase maxtrack!'
-                  write(*,*) 'ntracks: ',ntracks
-                  stop
+         if(WHCPRG.eq.'PY8   ') then
+            do j=1,nhep
+c all but Z and leptons
+               if((isthep(j).gt.0).and..not.islept(idhep(j)).and..not.idhep(j)
+     $              .eq.23) then
+                  if(ntracks.eq.maxtrack) then
+                     write(*,*) 'analyze: need to increase maxtrack!'
+                     write(*,*) 'ntracks: ',ntracks
+                     stop
+                  endif
+                  ntracks=ntracks+1
+                  do mu=1,4
+                     ptrack(mu,ntracks)=phep(mu,j)
+                  enddo
+                  itrackhep(ntracks)=j
                endif
-               ntracks=ntracks+1
-               do mu=1,4
-                  ptrack(mu,ntracks)=phep(mu,j)
-               enddo
-               itrackhep(ntracks)=j
-            endif
-         enddo
+            enddo
+         else
+            do j=1,nhep
+c all but Z and leptons
+               if(isthep(j).eq.1.and..not.islept(idhep(j)).and..not.idhep(j)
+     $              .eq.23) then
+                  if(ntracks.eq.maxtrack) then
+                     write(*,*) 'analyze: need to increase maxtrack!'
+                     write(*,*) 'ntracks: ',ntracks
+                     stop
+                  endif
+                  ntracks=ntracks+1
+                  do mu=1,4
+                     ptrack(mu,ntracks)=phep(mu,j)
+                  enddo
+                  itrackhep(ntracks)=j
+               endif
+            enddo
+         endif
       else
          do j=1,nup
             if (istup(j).eq.1.and..not.islept(idup(j))) then

@@ -9,7 +9,7 @@ PDF=lhapdf
 ## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
 ##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
-ANALYSIS=MiNNLOub
+ANALYSIS=MiNNLO
 
 ## For static linking uncomment the following
 #STATIC= -static
@@ -208,17 +208,6 @@ LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
  endif
-
-ifeq ("$(ANALYSIS)","MiNNLOub")
-##To include Fastjet configuration uncomment the following lines. 
-FASTJET_CONFIG=$(shell which fastjet-config)
-#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-ubproj.o fastjetfortran.o
-#boostrot4.o  BornProj.o
-
-endif
 
 
 # PYTHIA 8
