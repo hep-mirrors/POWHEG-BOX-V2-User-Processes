@@ -1,0 +1,157 @@
+! WZ boson production parameters
+mllmin 50.1d0      ! default 0.1 GeV this is minimum invar mass for Z leptons (at the generation level)
+
+
+numevts 0   ! number of events to be generated
+ih1   1           ! hadron 1 (1 for protons, -1 for antiprotons)
+ih2   1           ! hadron 2 (1 for protons, -1 for antiprotons)
+ebeam1 6500d0     ! energy of beam 1
+ebeam2 6500d0     ! energy of beam 2
+! To be set only if using LHA pdfs
+lhans1   13400    ! pdf set for hadron 1 (LHA numbering)
+lhans2   13400    ! pdf set for hadron 2 (LHA numbering)
+! To be set only if using internal mlm pdf
+!ndns1 131         ! pdf set for hadron 1 (mlm numbering)
+!ndns2 131         ! pdf set for hadron 2 (mlm numbering)
+! To be set only if using different pdf sets for the two incoming hadrons
+! QCDLambda5  0.25 ! for not equal pdf sets 
+
+
+! Parameters to allow or not the use of stored data
+use-old-grid    0 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound  0 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
+ncall1  50000    ! number of calls for initializing the integration grid
+itmx1   10        ! number of iterations for initializing the integration grid
+ncall2  400000   ! number of calls for computing the integral and finding upper bound
+itmx2   10        ! number of iterations for computing the integral and finding upper bound
+foldcsi   1       ! number of folds on csi integration
+foldy     1       ! number of folds on  y  integration
+foldphi   1       ! number of folds on phi integration
+#nubound  10000       ! number of bbarra calls to setup norm of upper bounding function
+nubound  10       ! number of bbarra calls to setup norm of upper bounding function
+
+
+! SM INPUT PARAMETERS AND EW SCHEME
+! EW scheme controlled by ewscheme switch, value between 1 and 5 (default is 3)
+! ewscheme = 1: GF, 1/alpha(MZ), MZ as input; sin(theta_W)^2 and MW calculated
+!          = 2: GF, sin(theta_W)^2, MZ as input; 1/alpha(MZ) and MW calculated
+!          = 3: GF, MW, MZ as input; 1/alpha(MZ) and sin(theta_W)^2 calculated
+!	   = 4: 1/alpha(0), MW, MZ as input; 1/alpha(MZ) calculated and sin(theta_W)^2 calculated
+!	   = 5: 1/alpha(MZ), MW, MZ as input; sin(theta_W)^2 calculated
+ewscheme    3
+Zmass       91.1876d0    ! mass of the Z boson [GeV] (default is PDG 2016 value)
+Wmass       80.385d0     ! mass of the W boson [GeV] (default is PDG 2016 value) used as input for ewscheme = 3,4,5
+GF          1.1663787e-5 ! default is 1.1663787e-5 GeV^-2, used as input for ewscheme = 1,2,3
+#inv_alpha                ! 1/alpha, in the Thomson limit for ewscheme = 4, at MZ for ewscheme=1,5
+#sin2w                    ! sin(theta_W)^2, used as input for ewscheme = 2 (default is PDG 2016 value)
+Zwidth      2.41143316d0 ! width of the Z boson [GeV] (default is PDG 2016 value)
+Wwidth      2.085d0      ! width of the W boson [GeV] (default is PDG 2016 value)
+
+
+! INPUT PARAMETERS FOR THE ANOMALOUS (EFT) CALCULATION
+! if SU(2) invariance is enforced, the default input parameters must be lambda_z, delg1_z, delk_z, delQuL_z, and delQdL_z,
+! so that lambda_g, delk_g, and delQL_w are internally calculated, and the values given by the user will be discarded
+EFTswitch   0       ! switch between anomalous couplings (0, default) or EFT Wilson coefficients (1). Default is 0
+EFTsu2      1       ! enforce SU(2) invariance (1) or not (0) within the new operators. Default is 1
+nLambdaEFT  0       ! integer n to control the EFT expansion up to 1/Lambda^(2n); n = 0 is the SM case
+#tevscale    1d10    ! scale at which unitarity dumping factor enters when using anomalous couplings; DO NOT use it for EFT Wilson coefficients!!
+delg1_z     0d0    ! anomalous triple gauge boson coupling for W^+_(mu,nu) W^-_mu Z_nu
+delg1_g     0d0    ! anomalous triple gauge boson coupling for W^+_(mu,nu) W^-_mu gamma_nu (should be 0 due to gauge invariance)
+#lambda_g   0d0     ! anomalous triple gauge boson coupling for W^+_(rho,mu) W^-_(mu,nu) Z_(nu,rho)
+lambda_z    0d0    ! anomalous triple gauge boson coupling for W^+_(rho,nu) W^-_(mu,nu) gamma_(nu,rho)
+#delk_g     0d0     ! anomalous triple gauge boson coupling for W^+_mu W^-_nu Z_(mu,nu)
+delk_z      0d0    ! anomalous triple gauge boson coupling for W^+_mu W^-_nu gamma_(mu,nu)
+delgQuL_z   0d0     ! anomalous left-handed u-type quark couplings to the Z boson
+delgQuR_z   0d0     ! anomalous right-handed u-type quark couplings to the Z boson
+delgQdL_z   0d0     ! anomalous left-handed d-type quark couplings to the Z boson
+delgQdR_z   0d0     ! anomalous right-handed d-type quark couplings to the Z boson
+#delgQL_w   0d0     ! anomalous left-handed quark couplings to the W boson
+#delgQR_w   0d0     ! anomalous right-handed quark couplings to the W boson
+#LambdaEFT   1d3      ! EFT scale in GeV, used when EFTswitch = 1 (julien: Could it be merged with tevscale?)
+#C3W                  ! Wilson coefficient for the O3W operator   (EFTswitch = 1)
+#CHD                  ! Wilson coefficient for the OHD operator   (EFTswitch = 1)
+#CHWB                 ! Wilson coefficient for the OHWB operator  (EFTswitch = 1)
+#C1Hq                 ! Wilson coefficient for the OHq_1 operator (EFTswitch = 1)
+#C3Hq                 ! Wilson coefficient for the OHq_3 operator (EFTswitch = 1)
+#C3Hl                 ! Wilson coefficient for the OHl_3 operator (EFTswitch = 1)
+#CHu                  ! Wilson coefficient for the OHu operator   (EFTswitch = 1)
+#CHd                  ! Wilson coefficient for the OHd operator   (EFTswitch = 1)
+#CHud                 ! Wilson coefficient for the OHud operator  (EFTswitch = 1)
+#Cll                  ! Wilson coefficient for the Oll operator   (EFTswitch = 1)
+
+
+! OPTIONAL PARAMETERS
+
+fixedscale 1       ! (default 0) if 0, muren0 = mufact0 = M_WZ ; if 1, muren0 = mufact0 = M_Z
+renscfact  0.5d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
+facscfact  0.5d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
+#bornonly   1      ! (default 0) if 1 do Born only
+testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+
+
+! PARAMETERS FOR CUTS
+
+! cutflag takes care of the activation of the cuts
+! if cutflag = 0, no cuts are applied in the analysis
+! if cutflag = 1, cuts are applied and only the cut histograms are filled
+! if cutflag = 2, both the no-cuts and the cut histograms are filled
+cutflag     2           ! (default 0, no cuts)
+
+ptlcut1     15.0d0      ! (default 0) min. pT cut on the leading charged lepton coming from the Z decay
+ylcut1      2.5d0       ! (default 100) max. rapidity cut on the leading lepton coming from the Z decay
+ptlcut2     15.0d0      ! (default 0) min. pT cut on the sub-leading charged lepton coming from the Z decay
+ylcut2      2.5d0       ! (default 100) max. rapidity cut on the sub-leading lepton coming from the Z decay
+ptlcutW     20.0d0      ! (default 0) min. pT cut on the charged lepton coming from the W decay
+ylcutW      2.5d0       ! (default 100) max. rapidity cut on the charged lepton coming from the W decay
+
+delrZcut    0.2d0	! (default 0) min. DeltaR between the two charged leptons coming from the Z decay
+delrZ1Wcut  0.3d0	! (default 0) min. DeltaR between the charged lepton coming from the W decay and the leading one from the Z decay
+delrZ2Wcut  0.3d0	! (default 0) min. DeltaR between the charged lepton coming from the W decay and the sub-leading one from the Z decay
+
+rjet        0.4d0       ! (default 0.4) R-parameter for the jet definition 
+ptjcut      25.0d0      ! (default 100,000) Minimum pt to define a jet
+yjcut       4.5d0       ! (default 0) Maximum rapidity to define a jet
+#jetveto     1           ! (default 0) if 1 perform jet veto
+
+#etmiss      15.0d0      ! (default 0) min. missing ET
+mllcut      81.1876d0   ! (default 0.1) min. di-lepton invariant mass for leptons coming from the Z decay
+mllcut2     101.1876d0	! (default 1e10) max. di-lepton invariant mass for leptons coming from the Z decay
+mtwcut      30d0        ! (default 0) min. cut on the mTW variable
+#mlllcut    0d0		! (default 0) min. invariant mass for the three charged leptons of the process
+
+
+! OPTIONAL CHOICE FOR THE RANDOM SEED
+
+#iseed    1234    ! initialize random number sequence 
+#rand1     -1      ! initialize random number sequence 
+#rand2     -1      ! initialize random number sequence 
+
+manyseeds  1       ! Used to perform multiple runs with different random
+                   ! seeds in the same directory.
+                   ! If set to 1, the program asks for an integer j;
+                   ! The file pwgseeds.dat at line j is read, and the
+                   ! integer at line j is used to initialize the random
+                   ! sequence for the generation of the event.
+                   ! The event file is called pwgevents-'j'.lhe
+
+
+! DECAY MODE SELECTOR
+! if all the lines below are commented, then all possible decay modes will be included
+! to select a specific decay mode, comment out the required line
+e-ee 1          ! Do only W-> e-nu, Z-> ee
+#e+ee 1          ! Do only W-> e+nu, Z-> ee
+
+! PARAMETER FOR THE ANALYSIS
+! it has to match the decay mode selector, otherwise the analysis and the cuts are wrong
+! give PDG numbers
+vmodeZ      11    ! absolute value of the PDG number for the (charged) leptons from the Z decay
+vmodeW      11    ! PDG number of the charged lepton from the W decay (W- here)
+#vmodeW      -11   ! PDG number of the charged lepton from the W decay (W+ here)
+
+
+! OPTIONAL PARAMETERS FOR THE CALCULATION
+
+#zerowidth 0         ! if 1 (true) use zero width approximatrion (default 0)
+#withinterference 1  ! if 1 (true) include interference for like flavour charged leptons (default 1)
+#dronly 1	     ! if 1 (true) only include double resonant diagrams (default 0)
+#diagCKM 0	     ! if 1 (true) then diagonal CKM matrix (default 0)

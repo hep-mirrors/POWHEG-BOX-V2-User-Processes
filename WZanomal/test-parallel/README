@@ -1,0 +1,14 @@
+In order to perform a parallel run, modify the runpar.sh script to
+suite your system, and execute it.
+
+NOTICE:
+
+the total number of ncall1 times the number of processes (24 in
+the example) should roughly match the value of ncall1 in the test/powheg.input
+file;
+
+the number ncall2 times the number of processes should match ncall2*itmx2
+in  test/powheg.input
+
+then number nubounds times the number of processes should match ncall2*itmx2
+in  test/powheg.input should match the value of nubound in  test/powheg.input.
