@@ -1,0 +1,607 @@
+\documentclass[11pt,a4paper]{article}\pdfoutput=1
+
+%\usepackage{jheppub}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{xspace}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage[toc,page]{appendix}
+\usepackage{mathtools}
+\usepackage{slashed}
+\usepackage{listings}
+
+%---------------------------------------------------------------------------------------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=magenta,
+}
+
+%---------------------------------------------------------------------------------------------------
+\newcommand{\POWHEG}{{\tt{POWHEG}}}
+\newcommand{\POWHEGBOX}{{\tt{POWHEG-BOX}}}
+\newcommand{\POWHEGBOXVTWO}{{\tt{POWHEG-BOX-V2}}}
+\newcommand{\MINLO}{{\tt{MiNLO}}}
+\newcommand{\MINNLO}{{\tt{MiNNLO}}}
+\newcommand{\hbbg}{{\tt{h\_bbg}}}
+\newcommand{\pythia}{{\texttt{Pythia8}}}
+%
+\newcommand{\Hbb}[1]{\ensuremath{H\to b\bar{b}{#1}}}
+\newcommand{\gev}{\textrm{GeV}}
+
+%---------------------------------------------------------------------------------------------------
+\definecolor{xcode}{rgb}{0.25,0.25,0.75}
+
+\textwidth 15.5cm
+\hoffset -1.5cm 
+%---------------------------------------------------------------------------------------------------
+\title{The \POWHEGBOXVTWO{} user manual:\\ Higgs boson decay into pair of $b$-quarks at NNLOPS}
+\author{Wojciech Bizo\'n, Emanuele Re, Giulia Zanderighi}
+
+%%>>>
+%\author[a,b]{Wojciech Bizo\'n,}
+%\author[c,d]{
+%\author[e]{
+%
+%%>>>
+%\affiliation[a]{Institute for Theoretical Particle Physics, KIT, Karlsruhe, Germany}
+%\affiliation[b]{Institut f\"ur Kernphysik, KIT, 76344 Eggenstein-Leopoldshafen, Germany}
+%\affiliation[c]{Theoretical Physics Department, CERN, 1211 Geneva 23, Switzerland}
+%\affiliation[d]{LAPTh, CNRS, Universit\'e Savoie Mont Blanc, 74940 Annecy, France}
+%\affiliation[e]{Max-Planck-Institut fu\"ur Physik, D-80805 Munich, Germany}
+%
+%%>>>
+%\emailAdd{wojciech.bizon@kit.edu}
+%\emailAdd{emanuele.re@lapth.cnrs.fr}
+%\emailAdd{zanderi@mpp.mpg.de}
+%
+%\abstract{FIXME: xxxxxxxxxxxxxx
+%}
+%
+%
+%\keywords{FIXME: xxxxxxxxxxxxx}
+
+\begin{document}
+\maketitle \flushbottom
+\lstset{
+  language=bash,
+  basicstyle=\small\ttfamily\color{xcode},
+  basewidth=0.5em,
+  backgroundcolor=\color{blue!3}
+}
+
+%###################################################################################################
+\section{Introduction}
+\label{sec:intro}
+
+%%
+In this manual, we describe the \POWHEGBOXVTWO{} implementation of the
+Higgs boson decay into a pair of $b$-quarks accompanied by a gluon,
+\begin{equation}
+  H \longrightarrow b + \bar{b}~ + g \,,
+\end{equation}
+at NLO QCD accuracy.
+%
+The program is equipped with the \MINLO{} procedure, introduced in
+Refs.~\cite{Hamilton:2012np,Hamilton:2012rf}, that ensures that one
+retains NLO QCD accuracy for \Hbb{} observables upon integrating out
+the additional real radiation.
+%
+Furthermore, the accuracy for the \Hbb{} observables can by upgraded
+to NNLO QCD by a suitable reweighting of the Les Houches events.
+%
+The details of the \MINLO{} procedure as well as NNLO reweighting are
+investigated in the Ref.~\cite{hbbg-paper}.
+
+%%
+This document is organised as follows: in Sec.~\ref{sec:generation} we
+briefly describe how to generate and reweight the \hbbg{} event
+samples; in Sec.~\ref{sec:interface} we explain how to interface the
+\hbbg{} event sample with a specific Higgs production event
+sample, where the Higgs is undecayed. Finally, in Sec.~\ref{sec:parton-shower} we describe how to
+match the produced event sample with parton shower. We list all
+physical and technical input parameters used in the \hbbg{} code in
+App.~\ref{app:input} and App.~\ref{app:tech} respectively.
+
+
+
+%###################################################################################################
+\section{Generation of \hbbg{} events}
+\label{sec:generation}
+
+%---------------------------------------------------------------------------------------------------
+\subsection{Generation of event sample with \POWHEG{}}
+\label{sec:generation_1}
+\begin{itemize}
+  \renewcommand{\labelitemi}{$\rightarrow$}
+  %%
+\item Download the \hbbg{} user process into the \POWHEGBOXVTWO{} directory.
+  %%
+\item Navigate to the user process directory and build the executable
+  \begin{lstlisting}
+    $> cd POWHEG-BOX-V2/h_bbg
+    $> make pwhg_main
+  \end{lstlisting}
+  %%
+\item Run the code (for example)
+  \begin{lstlisting}
+    $> cd testrun
+    $> ../pwhg_main
+  \end{lstlisting}
+\end{itemize}
+Successful run should produce the file {\tt{pwgevents.lhe}} containing
+1000 \hbbg{} events in the Les Houches format and should terminate in
+only a few seconds. The physical and technical input parameters can
+be changed by editing the {\tt{powheg.input}} card, which are listed
+in App.~\ref{app:input} and App.~\ref{app:tech}. It is also possible
+to run the code in parallel mode - for this a {\tt{powheg.input-save}}
+card and relevant scripts from {\tt{testrun-parallel}} can be used as
+an example.
+
+Such event sample(s) can be already interfaced with a user's Higgs
+production process. However, in order to achieve NNLOPS QCD accuracy,
+an NNLO reweighting is required, see Sec.~\ref{sec:nnlo-rwgt}.
+
+
+%---------------------------------------------------------------------------------------------------
+\subsection{NNLO reweighting of the event sample}
+\label{sec:nnlo-rwgt}
+The NNLO reweighting is performed along the lines of the standard
+\MINNLO{} technique, outlined in Sec.~5 of
+Ref.~\cite{Hamilton:2012rf}.
+%
+In this particular case, due to simplicity of the \Hbb{} process, the
+\MINNLO{} procedure boils down to a 0-dimensional NNLO reweighting that
+is driven only by the total decay width ($\Gamma_{\rm{NNLO}}$) and its
+\MINLO{} counter-part ($\Gamma_{\MINLO{}}$). Weights of all events
+should be adjusted using a reweighting factor
+\begin{align}
+  \mathcal{W} = \frac{\Gamma_{\rm{NNLO}}}{\Gamma_{\MINLO{}}}\,.
+\end{align}
+%
+In a more refined scheme, described in Sec.~2.2 of
+Ref.~\cite{hbbg-paper}, which we adopt as our default,
+the reweighting also depends on the three-jet
+resolution parameter $y_3$ through a function
+\begin{align}
+  \mathcal{W}(y_3) =
+  h(y_3) \cdot
+  \frac{ \Gamma_{\rm{NNLO}} - \Gamma_{\MINLO{},\rm{B}} }{ \Gamma_{\MINLO{},\rm{A}} }
+  +
+  \left(  1 - h(y_3) \right),
+\end{align}
+where we have introduced a function $h(y_3)$,
+\begin{align}
+  \label{eq:hval}
+  h(y_3) = \frac{1}{1 + \left(y_3 / y_{3,\rm{ref}}\right)^{\alpha} }
+  \qquad\rm{with}\qquad
+  \begin{cases}
+    &\alpha > 0 \\
+    &y_{3,\rm{ref}} > 0
+    \end{cases},
+\end{align}
+that is used to classify the hardness of an event, i.e. $h(y_3)$
+approaches one for $y_3\to 0$ and $h(y_3)\ll 1$ for hard events, so that for hard events
+$\mathcal{W} = 1$. As a
+default values we choose $y_{3,\rm{ref}} = e^{-4}$ and $\alpha = 2$.
+
+~\\~
+\noindent
+In order to perform the NNLO reweighting of an event sample {\tt{pwgevents.lhe}}:
+\begin{itemize}
+  \renewcommand{\labelitemi}{$\rightarrow$}
+  %%
+\item Navigate to the user process directory \POWHEGBOXVTWO{}{\tt{/}}\hbbg{}
+  %%
+\item Compile the program {\tt{hdec}} which will drive the reweighting process
+  \begin{lstlisting}
+    $> make hdec -f makefile.hdec
+  \end{lstlisting}
+  After program is compiled, syntax can be checked by executing
+  \begin{lstlisting}
+    $> ./hdec
+  \end{lstlisting}
+  %%
+\item Analyse existing event samples in order to calculate values
+  $\Gamma_{\MINLO{},\rm{A/B}}$
+  \begin{lstlisting}
+    $> cd testrun
+    $> ../hdec -histprep -events pwgevents.lhe -out hist.dat
+  \end{lstlisting}
+  This will produce file {\tt{hist.dat}} which contains necessary
+  information used later for the NNLO reweighting. Note that the
+  values of parameters $y_{3,\rm{ref}}$ and $\alpha$,
+  cf. Eq.~\eqref{eq:hval}, can be altered using optional arguments
+  {\tt{-y3ref}} and {\tt{y3pow}}.
+
+  The output file {\tt{hist.dat}} contains results for a different
+  renormalization scale variation, as specified in the {\tt
+    powheg.input file}.  In the following, the number of weights at
+  the \MINLO{} level will be denoted as {\tt num-lhef-wgt}. For
+  example, if the original \MINLO{} events were obtained with a
+  reweighting that performs a standard 3-point variation ($\mu_R =
+  K_R^{\rm{MiNLO}} \mu_0$, with $K_R^{\rm{MiNLO}}=\{1.0,\, 0.5,\,
+  2.0\}$), then {\tt num-lhef-wgt}=3.
+  
+  In case of parallel run ({\tt{testrun-parallel}}), remember to
+  analyse all produced event files and merge the obtained histograms.
+  The analysis of multiple event files can be performed either by
+  specifying a number of event files following keyword {\tt{-event}}
+  in the above example. Alternatively, analyse files separately and
+  direct the output to various output files which can be specified
+  using {\tt{-out}} keyword, for example
+  \begin{lstlisting}
+    $> cd testrun
+    $> ../hdec -histprep -events pwgevents-0001.lhe -out hist-0001.dat
+    $> ../hdec -histprep -events pwgevents-0002.lhe -out hist-0002.dat
+    $> ...
+    $> ...
+  \end{lstlisting}
+  Various output files {\tt{hist-????.dat}} should be merged by running
+  \begin{lstlisting}
+    $> ../hdec -histmerge -files hist-????.lhe -out hist.dat
+  \end{lstlisting}
+  which will combine results saved in all histograms into a single
+  output file {\tt{hist.dat}} which will be used later for the NNLO
+  reweighting.
+
+\item Having obtained the histogram file {\tt{hist.dat}}, the NNLO
+  reweighting can be performed by running
+  \begin{lstlisting}
+    $> ../hdec -minnlo -hist hist.dat -events pwgevents.lhe
+  \end{lstlisting}
+  which will produce a reweighted event file
+  {\tt{pwgevents.lhe-minnlo}}, where the NNLO weights were appended
+  after the \MINLO{} ones. Multiple files can be reweighted at once
+  simply by specifying a number of arguments after the keyword
+  {\tt{-events}}; each file name will be supplied with the
+  ``{\tt{-minnlo}}'' suffix after reweighting.
+
+  Note that, by default, the NNLO reweighting will prepare all
+  possible combinations of weights, i.e. for each of \MINLO{} weights,
+  the reweighted file will contain three weights related to scale
+  variation in the computation of $\Gamma_{\rm{NNLO}}$ with
+  $K_R^{\rm{NNLO}}=\{1.0,\, 0.5,\, 2.0\}$.
+
+  The user can constrain the possible scale combinations by preparing
+  a file {\tt{wgt.dat}} which contains a list of desired scale
+  combinations. Each line of this file must contain the identifier of
+  a given \MINLO{} weight ({\tt minlo\_wgt=1,2,...,num-lhef-wgt})
+  followed by the factor to be used to perform the (renormalisation)
+  scale variation in the computation of $\Gamma_{\rm{NNLO}}$ ({\tt
+    nnlo\_renscfact}=$K_R^{\rm{NNLO}}$).
+  
+  For example, if one wants to perform a totally correlated scale
+  variation (i.e. $K_R^{\rm{MiNLO}}=K_R^{\rm{NNLO}}$), then the
+  {\tt{wgt.dat}} file should be
+  \begin{lstlisting}[basicstyle=\small\ttfamily\color{black}]
+    1   1.0
+    2   0.5
+    3   2.0
+  \end{lstlisting}
+  It is responsibility of the user to make sure that the correct order
+  is used for the {\tt minlo\_wgt} values: in the above example, {\tt
+    minlo\_wgt=1,2,3} must correspond to $K_R^{\rm{MiNLO}}=\{1.0,\,
+  0.5,\, 2.0\}$, respectively.
+
+  The file {\tt{wgt.dat}} that contains desired scale combinations
+  should be passed to the reweighter programm using keyword
+  {\tt{-weights}}, i.e.
+  \begin{lstlisting}
+    $> ../hdec -minnlo -hist hist.dat -events pwgevents.lhe -weights wgt.dat
+  \end{lstlisting}
+\end{itemize}
+
+Note that while the $\Gamma_{\MINLO{}}$ is computed on the fly using
+the event file generated, $\Gamma_{\rm NNLO}$ is computed internally
+using the Higgs mass which is read off from the event file. The value
+of the strong coupling used for calculation is by default set to
+$\alpha_s(M_Z) = 0.1181$. This value can be changed using keyword
+{\tt{-asmz}} followed by the desired value.
+
+
+
+%###################################################################################################
+\section{Interface of \hbbg{} events with a specific production mode}
+\label{sec:interface}
+
+In this section we describe how to combine a sample of \Hbb{} decays
+(at \MINLO{} accuracy in the decay, or upgraded to NNLOPS) together
+with a sample of events containing the production of an undecayed Higgs boson
+and other final state particles (at NLOPS, \MINLO{}, or NNLOPS
+accuracy in production).  The resulting event sample will contain the
+full production kinematics, upgraded with the \Hbb{} decay at (N)NLO.
+
+From now on we assume that the user has generated a LH event file
+containing \Hbb{} decays following the steps described
+in Sec.~\ref{sec:generation}. In the following we denote this file as {\tt
+  pwgdecays.lhe} ({\tt pwgdecays-0001.lhe}, {\tt pwgdecays-0002.lhe},
+..., if they were obtained through parallel runs). We also assume that
+the user has generated events for Higgs production. We call this file
+{\tt pwgproduction.lhe} ({\tt pwgproduction-0001.lhe}, {\tt
+  pwgproduction-0002.lhe}, ..., if they were obtained through parallel
+runs).
+
+\begin{itemize}
+\item Compile the {\tt{hdec}} program in the main \hbbg{} directory
+  \begin{lstlisting}
+    $> cd POWHEG-BOX-V2/h_bbg
+    $> make hdec -f makefile.hdec
+  \end{lstlisting}
+  %%
+\item The interface can be performed by running
+  \begin{lstlisting}
+    $> ../hdec -interface -decay pwgdecays.lhe -prod pwgproduction.lhe
+  \end{lstlisting}
+  The combined events will be saved into {\tt{pwgproduction.lhe-hbb}}
+  file. The user should check that the number of decay events is
+  greater or equal to the number of production events.  If more than
+  one decay file is needed to satisfy this requirement, a number of
+  files can be specified after the {\tt{-decay}} keyword.
+
+  Note that, by default, program will prepare all possible
+  combinations of the weights in the production and decay files. In
+  order to constrain ththe possible scale combinations, the user
+  should prepare a file {\tt{scales-comb.dat}} that lists desired
+  combinations. Each line of this file should contain two integers,
+  the first is the identifier of the production file weight and the
+  second identifies the decay file weight. The file should be passed
+  to the programm using {\tt{-weights}} keyword, i.e.
+  \begin{lstlisting}
+    $> ../hdec -interface -decay pwgdecays.lhe -prod pwgproduction.lhe
+               -weights scale-comb.dat
+  \end{lstlisting}
+
+  For example, if the production file contains 7 weights,
+  corresponding to renormalisation and factorisation scale variations
+  \begin{align}
+    (K_{R}^{\rm{prod}},K_{F}^{\rm{prod}}) = \{
+    (1.0, 1.0),\,
+    (1.0, 0.5),\,
+    (1.0, 2.0),\,
+    (0.5, 0.5),\,
+    (0.5, 1.0),\,
+    (2.0, 1.0),\,
+    (2.0, 2.0)\,
+    \}\,,
+  \end{align}
+  and the decay file contains 3 weights corresponding to
+  \begin{align}
+    K_{R}^{\rm{dec}} = \{ 1.0,\, 0.5,\, 2.0 \}\,,
+  \end{align}
+  and one wants to correlate the production and decay renormalisation
+  scale variation, the file {\tt{scale-comb.dat}} should read
+  \begin{lstlisting}[basicstyle=\small\ttfamily\color{black}]
+    1   1
+    2   1
+    3   1
+    4   2
+    5   2
+    6   3
+    7   3
+  \end{lstlisting}
+  %%
+
+  The default value of the branching ratio that is used for the \Hbb{}
+  decay is set to $\rm{Br} = 0.5824$. This value can be modified by
+  using the keyword {\tt{-BrHbb}} followed by the desired value of the
+  branching ratio.
+\end{itemize}
+
+
+
+%###################################################################################################
+\section{Matching with parton shower}
+\label{sec:parton-shower}
+
+In this section we describe how to parse \Hbb{} Les Houches events,
+interfaced with a desired Higgs production channel, to a parton
+shower.
+%
+We stress that since after the interface Les Houches record is a
+compound prepared from two sources, production and decay of the Higgs
+boson, and as such contains two separate veto scales:
+\texttt{scalup\_prod} and \texttt{scalup\_dec} for production and
+decay respectively.
+%
+Radiation generated by a parton shower, depending on its origin,
+should respect the relevant bound.
+%
+We supply a parton shower driver that allows a user to process events
+produced along the instructions of Sec.~\ref{sec:interface} with a
+\pythia{} parton shower~\cite{Sjostrand:2014zea}.
+
+In order to prepare a drive, one should
+\begin{itemize}
+  %--------------------
+\item Prepare a desired phenomenological analysis by modifying a
+  subroutines \texttt{init\_hists} and \texttt{analysis} of the
+  \texttt{src/f77/pwhg\_analysis.f} file, by default it contains only
+  an entry for a calculation of the total cross section.
+
+  It is possible to use the default \POWHEG{} histogramming facility or
+  link user's external analysis. The connection should be established
+  withing the \texttt{src/f77/pwhg\_analysis.f} file.
+  
+  %--------------------
+\item Compile the \pythia{} driver in the main \hbbg{}
+  directory.
+  \begin{lstlisting}
+    $> cd POWHEG-BOX-V2/h_bbg
+    $> make main-PYTHIA-lhef
+  \end{lstlisting}
+  %--------------------
+\item To process parton shower, navigate to directory with Les Houches
+  event files and run the shower driver
+  \begin{lstlisting}
+    $> cd testrun
+    $> echo <event-file> | ../main-PYTHIA-lhef
+  \end{lstlisting}
+  where \texttt{<event-file>} is an event file to be
+  showered. Successful run should produce histogram files with a
+  \texttt{.top} extension.
+\end{itemize}
+
+We note that a state-of-the-art \pythia{} parton shower,
+provides its own facility to veto emissions off various
+resonances. For that reason it is possible to use the built-in tools
+known as the \texttt{UserHooks}.
+%
+For more details please refer to the original \pythia{}
+reference guide on this topic~\cite{Pythia8UserHooks,Pythia8POWHEG}.
+
+
+\appendix
+%###################################################################################################
+\section{Physical input parameters}
+\label{app:input}
+A list of physical parameters that can be adjusted by the user in the
+\texttt{powheg.input} card. Floating point numbers should be simply
+specified as numbers, the logical variables are specified with 0/1 for
+True/False, respectively.
+
+\begin{itemize}
+  %%%
+\item \texttt{hmass} [float]: mass of the Higgs boson, in \gev{}.
+  %%%
+\item \texttt{hwidth} [float]: total width of the Higgs boson resonance, in
+  \gev{}.
+  %%%
+\item \texttt{bmass} [float]: $b$-quark pole mass, in \gev{}, used for
+  calculation of the Yukawa coupling (the dependence cancels out once
+  an \Hbb{} branching fraction is applied for during the
+  interface). The kinematics of the decay is always calculated with
+  massless $b$-quarks.
+  %%%
+\item \texttt{mb\_running} [logical]: if False the pole $b$-quark
+  Yukawa will not be transformed into $\overline{\mathrm{MS}}$ one
+  calculated at the renormalization scale.
+
+\item \texttt{massive\_b\_lhe} [logical]: if True the Les Houches
+  event file will contain massive $b$-quarks (calculation is performed
+  in the massless approximation, reshuffling is applied at the stage
+  of generating of the Les Houches file)
+\end{itemize}
+
+Moreover we have
+\begin{itemize}
+  %%%
+\item \texttt{renscfact} [float]: modification of a renormalization
+  scale, $\mu_{R} = \texttt{renscfact} \cdot \mu_0$, with $\mu_0$
+  equal to the Higgs mass.
+  %%%
+\item \texttt{xresummation} [float]: modification of the resummation
+  scale, $Q_{\text{res}} = \texttt{xresummation}\cdot Q_{0}$, with
+  $Q_0$ equal to the Higgs mass.
+  %%%
+\item \texttt{sudscalevar} [logical]: if True scale variation is also
+  performed in the Sudakov radiator.
+\end{itemize}
+
+
+%###################################################################################################
+\section{Technical parameters}
+\label{app:tech}
+All technical parameters in the \texttt{powheg.input} card can be modified by the user. The most relevant include: 
+\begin{itemize}
+  %%%
+\item \texttt{itmx1}/\texttt{itmx2} [integer]: number of Monte Carlo
+  subsequent runs at \texttt{stage1} and \texttt{stage2} of a
+  \POWHEG{} run (if using parallel version of the run, \texttt{itmx1}
+  is ignored and set to 1).
+  %%%
+\item \texttt{ncall1}/\texttt{ncall2} [integer]: number of Monte Carlo
+  sampling points at \texttt{stage1} and \texttt{stage2} of a
+  \POWHEG{} run.
+  %%%
+\item \texttt{nubound} [integer]: number of sampling points at
+  \texttt{stage3} of a \POWHEG{} run.
+  %%%
+\item \texttt{numevts} [integer]: number of requested event records in
+  a single Les Houches event file.
+\end{itemize}
+
+
+
+
+%###################################################################################################
+\begin{thebibliography}{10}
+
+  %\cite{hbbg-paper}
+\bibitem{hbbg-paper}
+  W.~Bizon, E.~Re, and G.~Zanderighi,
+  ``NNLOPS description of the H$\to\! b\bar{b}$ decay with \MINLO{},''
+  %JHEP {\bf 19xx} (2019) xxx
+  %doi:10.1007/JHEPxx(2019)xxx
+  %[arXiv:19xx.xxxxx [hep-ph]]
+  .
+  
+  %\cite{Nason:2004rx}
+\bibitem{Nason:2004rx}
+  P.~Nason,
+  ``A new method for combining NLO QCD with shower Monte Carlo algorithms,''
+  JHEP {\bf 0411} (2004) 040
+  [arXiv:hep-ph/0409146].
+  %%CITATION = JHEPA,0411,040;%%
+
+  %\cite{Frixione:2007vw}
+\bibitem{Frixione:2007vw}
+  S.~Frixione, P.~Nason and C.~Oleari,
+  ``Matching NLO QCD computations with Parton Shower simulations: the POWHEG method,''
+  JHEP {\bf 0711} (2007) 070
+  [arXiv:0709.2092].
+  %%CITATION = JHEPA,0711,070;%%
+
+  %\cite{Alioli:2010xd}
+\bibitem{Alioli:2010xd}
+  S.~Alioli, P.~Nason, C.~Oleari and E.~Re,
+  ``A general framework for implementing NLO calculations in shower Monte Carlo programs: the POWHEG BOX,''
+  JHEP {\bf 1006} (2010) 043
+  [arXiv:1002.2581].
+
+  %\cite{Jezo:2015aia}
+\bibitem{Jezo:2015aia}
+  T.~Jezo and P.~Nason,
+  ``On the Treatment of Resonances in Next-to-Leading Order Calculations Matched to a Parton Shower,''
+  JHEP {\bf 1512} (2015) 065
+  [arXiv:1509.09071].
+
+  %\cite{Hamilton:2012np}
+\bibitem{Hamilton:2012np}
+  K.~Hamilton, P.~Nason and G.~Zanderighi,
+  %``MINLO: Multi-Scale Improved NLO,''
+  JHEP {\bf 1210} (2012) 155
+  doi:10.1007/JHEP10(2012)155
+  [arXiv:1206.3572 [hep-ph]].
+
+  %\cite{Hamilton:2012rf}
+\bibitem{Hamilton:2012rf}
+  K.~Hamilton, P.~Nason, C.~Oleari and G.~Zanderighi,
+  %``Merging H/W/Z + 0 and 1 jet at NLO with no merging scale: a path to parton shower + NNLO matching,''
+  JHEP {\bf 1305} (2013) 082
+  doi:10.1007/JHEP05(2013)082
+  [arXiv:1212.4504 [hep-ph]].
+
+  %\cite{Sjostrand:2014zea}
+\bibitem{Sjostrand:2014zea}
+  T.~Sjöstrand {\it et al.},
+  %``An Introduction to PYTHIA 8.2,''
+  Comput.\ Phys.\ Commun.\  {\bf 191} (2015) 159
+  doi:10.1016/j.cpc.2015.01.024
+  [arXiv:1410.3012 [hep-ph]].
+  %%CITATION = doi:10.1016/j.cpc.2015.01.024;%%
+  %1907 citations counted in INSPIRE as of 22 Oct 2019
+
+\bibitem{Pythia8UserHooks}
+  \url{http://home.thep.lu.se/Pythia/pythia82html/UserHooks.html}
+
+\bibitem{Pythia8POWHEG}
+  \url{http://home.thep.lu.se/Pythia/pythia82html/POWHEGMerging.html}
+  
+\end{thebibliography}
+
+
+\end{document}
