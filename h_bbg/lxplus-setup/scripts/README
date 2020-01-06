@@ -1,0 +1,40 @@
+########################################################################
+##### RUNNING POWHEG
+########################################################################
+(1) Submitting jobs:
+    (1a) Adjust "xshift" in "submit-pwhg.sh"
+         > this parameter can be used adjust starting seed in case some runs are already present and you want to add more
+    (1b) Adjust "queuetype" in "submit-pwhg.sh"
+         > choose which type of a queue to use (examples: nextweek, testmatch, tomorrow)
+         > more information: https://twiki.cern.ch/twiki/bin/view/ABPComputing/LxbatchHTCondor
+    (1c) Adjust "njobs" in "submit-pwhg.sh"
+         > choose how many jobs should be submitted
+    (1d) Submit jobs to the cluster
+         > run: ./submit-pwhg.sh [xstage] [xgrid]
+         > [xstage] = stage number: 1,2,3,4 (see description below)
+         > [xgrid] = grid iteration number: 1,2,... (see description below)
+(2) Collecting results after job completion:
+    (2a) Make sure all jobs have been completed
+    (2b) run: ./scripts/prep-tarball.sh [xstage] [xgrid]
+
+
+
+########################################################################
+## STAGE=1 / GRID=1
+Follow "RUNNING POWHEG" instructions with "xstage=1" and "xgrid=1"
+
+########################################################################
+## STAGE=1 / GRID=2 [ optional ]
+Follow "RUNNING POWHEG" instructions with "xstage=1" and "xgrid=2"
+
+########################################################################
+## STAGE=2 / GRID=1
+Follow "RUNNING POWHEG" instructions with "xstage=2" and "xgrid=1"
+
+########################################################################
+## STAGE=3 / GRID=1
+Follow "RUNNING POWHEG" instructions with "xstage=3" and "xgrid=1"
+
+########################################################################
+## STAGE=4 / GRID=1
+Follow "RUNNING POWHEG" instructions with "xstage=4" and "xgrid=1"

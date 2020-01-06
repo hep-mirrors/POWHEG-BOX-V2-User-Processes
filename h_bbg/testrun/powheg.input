@@ -1,0 +1,75 @@
+numevts 1000     ! number of events to be generated
+
+bornktmin     -1d0 ! (default 0d0) generation cut. Minimum kt in underlying Born
+
+! Parameters to allow or not the use of stored data
+use-old-grid    1 ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
+
+ncall1  2500     ! number of calls for initializing the integration grid
+itmx1        4     ! number of iterations for initializing the integration grid
+ncall2  2500     ! number of calls for computing the integral and finding upper bounding envelope
+itmx2       12     ! number of iterations for computing the integral and finding upper bouding envelope
+foldcsi      1     ! number of folds on csi integration
+foldy        1     ! number of folds on  y  integration
+foldphi      1     ! number of folds on phi integration
+nubound    1000     ! number of calls to set up the upper bounding norms for radiation
+
+! OPTIONAL PARAMETERS
+
+xresummation 1d0
+renscfact  1d0    ! (default 1d0) ren scale factor: muren  = muref * renscfact 
+facscfact  1d0    ! (default 1d0) fac scale factor: mufact = muref * facscfact 
+
+bornonly   0      ! (default 0) if 1 do Born only
+testplots  1      ! (default 0, do not) do NLO and PWHG distributions
+
+iseed   1234     !  Start the random number generator with seed iseed
+#rand1     0       !  skipping  rand2*100000000+rand1 numbers.         
+#rand2     0       !  (see RM48 short writeup in CERNLIB)              
+
+#manyseeds 1       ! Used to perform multiple runs with different random
+                   ! seeds in the same directory.
+                   ! If set to 1, the program asks for an integer j.
+                   ! The file pwgseeds.dat at line j is read, and the
+                   ! integer at line j is used to initialize the random
+                   ! sequence for the generation of the events.
+                   ! The event file is called pwgevents-'j'.lhe
+
+#---------------------------------------------------------------------------------------------------
+bmass 4.92d0
+hmass 125d0
+hwidth 0.004088d0
+mb_running 1
+
+#---------------------------------------------------------------------------------------------------
+smartsig 1
+minlo 1
+minlo_nnll 1
+sudscalevar 1
+
+#---------------------------------------------------------------------------------------------------
+par_fsrtinycsi 1d-8
+par_fsrtinyy 1d-8
+
+#---------------------------------------------------------------------------------------------------
+ih1 1
+ih2 1
+ndns1 -100
+ndns2 -100
+ebeam1 -1d0
+ebeam2 -1d0
+
+
+#---------------------------------------------------------------------------------------------------
+rwl_file '-'
+<initrwgt>
+<weight id=' 1'> renscfact=1.0 facscfact=1.0 </weight>
+<weight id=' 2'> renscfact=0.5 facscfact=1.0 </weight>
+<weight id=' 3'> renscfact=2.0 facscfact=1.0 </weight>
+</initrwgt>
+
+lhrwgt_id 'st4'
+lhrwgt_descr 'st4 MiNLO'
+
+storeinfo_rwgt 1   ! store info to allow for reweighting

@@ -1,0 +1,14 @@
+build/mod_error.o : src/f90/mod_error.f90 |build 
+build/mod_types.o : src/f90/mod_types.f90 |build 
+build/mod_files.o : src/f90/mod_files.f90 build/mod_error.o |build 
+build/mod_hepev.o : src/f90/mod_hepev.f90 build/mod_files.o build/mod_types.o |build 
+build/mod_interface.o : src/f90/mod_interface.f90 build/mod_transform.o build/mod_reshuffle.o build/mod_analysis.o build/mod_hepev.o |build 
+build/mod_minnlo.o : src/f90/mod_minnlo.f90 build/mod_gamma_hbb.o build/mod_analysis.o build/mod_settings.o build/mod_alphas.o build/mod_hepev.o build/mod_files.o build/mod_types.o |build 
+build/mod_analysis.o : src/f90/mod_analysis.f90 build/mod_reshuffle.o build/mod_cluster.o build/mod_hepev.o build/mod_files.o build/mod_types.o build/mod_error.o |build 
+build/mod_cluster.o : src/f90/mod_cluster.f90 build/mod_types.o |build 
+build/mod_reshuffle.o : src/f90/mod_reshuffle.f90 build/mod_types.o |build 
+build/mod_transform.o : src/f90/mod_transform.f90 build/mod_types.o |build 
+build/mod_alphas.o : src/f90/mod_alphas.f90 build/mod_error.o build/mod_types.o |build 
+build/mod_gamma_hbb.o : src/f90/mod_gamma_hbb.f90 build/mod_alphas.o build/mod_types.o |build 
+build/mod_settings.o : src/f90/mod_settings.f90 build/mod_types.o |build 
+build/hdec.o : src/hdec.f90 build/mod_interface.o build/mod_minnlo.o build/mod_analysis.o build/mod_alphas.o build/mod_settings.o build/mod_files.o |build 

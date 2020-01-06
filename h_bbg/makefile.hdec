@@ -1,0 +1,74 @@
+### Fortran compiler                                                                                                                                                                                                              
+FC = gfortran
+FCFLAGS = -Wall -ffree-line-length-none -g -Wmaybe-uninitialized -Wuninitialized -Wno-unused-dummy-argument -Wno-unused-variable #-Og                                                                                             
+
+### C++ compiler                                                                                                                                                                                                                  
+CXX = g++
+CXXFLAGS = -Wall -g $(FASTJET_CXXFLAGS)
+
+### Link additional libraries
+LIBS= $(FASTJET_LIBS) -lstdc++
+
+### Directories
+BUILDPATH := build
+SRCPATH := src
+
+### List of source files
+sources_f90=\
+  ./src/f90/mod_error.f90 \
+  ./src/f90/mod_types.f90 \
+  ./src/f90/mod_files.f90 \
+  ./src/f90/mod_hepev.f90 \
+  ./src/f90/mod_interface.f90 \
+  ./src/f90/mod_minnlo.f90 \
+  ./src/f90/mod_analysis.f90 \
+  ./src/f90/mod_cluster.f90 \
+  ./src/f90/mod_reshuffle.f90 \
+  ./src/f90/mod_transform.f90 \
+	./src/f90/mod_alphas.f90 \
+	./src/f90/mod_gamma_hbb.f90 \
+	./src/f90/mod_settings.f90
+
+sources_f77=
+
+sources_cc=
+
+### List of object files
+objects=$(patsubst %.o, $(BUILDPATH)/%.o, \
+  $(notdir $(patsubst %.f90, %.o, $(sources_f90))) \
+  $(notdir $(patsubst %.f, %.o, $(sources_f77))) \
+  $(notdir $(patsubst %.cc, %.o, $(sources_cc))) \
+  )
+
+### Executable targets
+EXE := hdec
+
+all: $(EXE)
+
+.SECONDEXPANSION:
+$(EXE): $(BUILDPATH)/$$@.o $(objects)
+
+### Build directory
+$(BUILDPATH):
+	mkdir -p $(BUILDPATH)
+
+### Specific rules
+#empty
+
+### Generic rules
+include makefile.hdec.dep
+%.o: $(BUILDPATH)
+
+%:
+	$(FC) $(FCFLAGS) $(LIBS) -o $@ $^
+
+%.o:
+	$(FC) $(FCFLAGS) -J$(BUILDPATH) -o $@ -c $<
+
+depend: $(sources_f90) $(sources_f77) $(patsubst %,$(SRCPATH)/%.f90,$(EXE))
+	makedepf90 -d "|$(BUILDPATH)" -b $(BUILDPATH) $^ > Makefile.dep
+
+clean:
+	rm -rf $(EXE) $(BUILDPATH)
+
+.PHONY: all depend clean

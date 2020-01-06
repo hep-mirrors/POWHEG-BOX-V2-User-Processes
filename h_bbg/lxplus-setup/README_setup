@@ -1,0 +1,18 @@
+########################################################################
+##                                                                    ##
+## POWHEG-BOX-V2/h_bbg                                                ##
+## Wojciech Bizon, Emanuele Re, Giulia Zanderighi                     ##
+##                                                                    ##
+########################################################################
+##                                                                    ##
+##      Instructions on using "lxplus-setup" on the CERN cluster      ##
+##                                                                    ##
+########################################################################
+
+1. To create a master directory for the h_bbg process run:
+	 (1a) Adjust the name of the master directory in "setup.sh" script
+	 (1b) Adjust the desired output directory in "setup.sh" script
+	 (1c) Adjust master input card "powheg.input-save" inside "cards/" directory
+	 (1d) Run: ./setup.sh
+
+2. Enter newly created master directory and follow instructions therein

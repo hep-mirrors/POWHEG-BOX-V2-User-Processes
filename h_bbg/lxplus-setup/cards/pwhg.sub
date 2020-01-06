@@ -1,0 +1,9 @@
+executable              = scripts/condor-pwhg.sh
+######################### ClusterId    ProcId    Stage  GridIt Shift
+arguments               = $(ClusterId) $(ProcId) XSTAGE XGRID XSHIFT
+output                  = log/pwhg-XSTAGE-XGRID.$(ClusterId).$(ProcId).out
+error                   = log/pwhg-XSTAGE-XGRID.$(ClusterId).$(ProcId).err
+log                     = log/pwhg-XSTAGE-XGRID.$(ClusterId).log
++JobFlavour = "QUEUETYPE"
+transfer_output_files= ""
+queue NJOBS
