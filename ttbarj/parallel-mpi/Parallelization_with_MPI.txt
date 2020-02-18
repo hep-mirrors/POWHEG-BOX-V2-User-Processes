@@ -1,0 +1,23 @@
+Parallelization via MPI can be achieved by copying the files in this folder
+in the process subfolder.
+Two examples are provided:
+
+1) runparallel-mpi.f
+
+that performs the parallel stages 1 to 4, with 2 iterations in the stage 1 (grid adaptation)
+
+2) runparallel-mpi-PYTHIA8.f
+
+that performs the showering in parallel.
+
+These files can be compiled with e.g. 
+
+mpif90 runparallel-mpi.f -o runparallel-mpi
+
+and then run via e.g.
+
+mpirun -n CORES runparallel-mpi pwhg_main-COMPILER
+
+The users can easily adapt them to their needs. In case of doubts please contact the authors.
+
+

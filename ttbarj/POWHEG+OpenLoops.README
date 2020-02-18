@@ -1,0 +1,75 @@
+
+1) Download OpenLoops from http://openloops.hepforge.org via
+svn checkout http://openloops.hepforge.org/svn/OpenLoops/branches/public ./OpenLoops
+
+
+2) Compile OpenLoops via
+cd OpenLoops
+./scons
+
+
+3) The compiler can be specified in the file
+openloops.cfg which should have the format
+
+<begin openloops.cfg>
+[OpenLoops]
+compiler=gfortran
+<end openloops.cfg>
+
+
+4) Add the following lines at the appropriate
+  positions of the POWHEG Makefile
+
+>>
+OLPATH=<PATH_TO_OPENLOOPS>
+
+ifdef OLPATH
+FF+= -I$(OLPATH)/lib_src/openloops/mod
+LIBS+= -Wl,-rpath=$(OLPATH)/lib -L$(OLPATH)/lib  -lopenloops
+USER+=openloops.o
+endif
+<<
+
+
+5) openloops.f
+the file openloops.f should be either in the main POWHEG-BOX folder
+or within the process directory
+
+
+6) use the following files inside the POWHEG-BOX
+born.f
+virtual.f
+real.f
+
+which call the POWHEG+OpenLoops interface inside openloops.f
+
+
+7) The OpenLoops paramters should be initialized at the approbriate
+positions, i.e. for example inside init_process.f, via
+
+  call openloops_init()
+
+Additionally process-dependent parameters (e.g. coupling orders) should be set
+inside init_process.f
+
+For example:
+
+  call set_parameter("order_ew", 3)    ! set order_ew -> NLO QCD
+  call set_parameter("nq_nondecoupled", st_nlight) ! set number of light flavour quarks
+
+
+8) Obtain the required OpenLoops libraries via
+./openloops libinstall <librarynames>
+
+e.g. to install all libraries for Higgs-Strahlung plus two jets:
+
+./openloops libinstall ppln pplnj pplnjj pphll ppllj pplljj
+
+The publically available processes can be found at
+http://openloops.hepforge.org
+
+
+
+
+
+
