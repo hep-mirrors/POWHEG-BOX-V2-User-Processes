@@ -221,7 +221,7 @@ c
 
 c for MSbar scheme compute runnning bmass (used in Yukawa coupling only):  
       if (init) then 
-         if(powheginput('#runningscales').eq.1) then
+         if(powheginput('#runningscales').ne.0) then
             yuk_comp=.true.
          endif   
          if(powheginput('#bornonly').eq.1) then
