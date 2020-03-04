@@ -244,7 +244,7 @@ LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -L$(shell $(RIVET_CON
 LIBS+=-lz
 
 NNLOPS_PLUGINS =pdfs_tools.o rad_tools.o coefficient_functions_nnlops.o internal_parameters.o\
-	sudakov_radiators.o
+	sudakov_radiators.o frcgauss.o
 
 HOPPET= hplog.o xpij2e.o xpns2e.o assertions.o coefficient_functions.o \
 	convolution.o dglap_choices.o dglap_holders.o dglap_objects.o \
@@ -384,7 +384,8 @@ internal_parameters.o: hoppet_v1.o
 coefficient_functions_nnlops.o: rad_tools.o internal_parameters.o
 pdfs_tools.o: rad_tools.o internal_parameters.o coefficient_functions_nnlops.o
 driver.o: rad_tools.o pdfs_tools.o internal_parameters.o sudakov_radiators.o
-sudakov_radiators.o: rad_tools.o
+sudakov_radiators.o: rad_tools.o frcgauss.o setstrongcoupl.o
+frcgauss.o:
 
 
 xpij2e.o: qcd.o
