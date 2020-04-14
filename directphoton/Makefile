@@ -70,11 +70,12 @@ endif
 
 
 ## LoopTools
-LT=PathToLoopTools
+LT=$(HOME)/tomasjezo/tools/LoopTools/2.15
+#LT=PathToLoopTools
 LTFLAGS=-I$(LT)/include -L$(LT)/lib64 -looptools
 LIBS+= -L$(LT)/lib64 -looptools
 
-FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) $(LTFLAGS)
+FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE2) $(LTFLAGS)
 
 
 INCLUDE =$(wildcard ../include/*.h *.h include/*.h)

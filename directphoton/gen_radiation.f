@@ -671,6 +671,7 @@ c$$$            goto 1
 c$$$         endif
 c$$$         sudawgt = sudawgt * 2.d0/sudarwgtfac
          sudawgt = sudawgt/sudarwgtfac
+         uborns = sqrt(kn_born_pt2)
       endif
       end
 

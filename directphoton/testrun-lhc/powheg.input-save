@@ -51,5 +51,19 @@ xgriditeration 1 ! which grid iteration in stage 1
 
 ! for artificially enhanced statistics. If applied, don't forget to multiply the regular weight with 'sudakovwgt'. 
 enhancedradfac 50 ! if > 0 then the splitting kernel used for photon radiation is multiplied by this factor (lhrwgt_id has to be set, too)
-lhrwgt_id 'central'
-lhrwgt_descr 'Central weight, photon splitting enhanced by factor 50'
+#lhrwgt_id 'central'  ! lhrwgt_ reweighting does not work with this version of the code
+#lhrwgt_descr 'Central weight, photon splitting enhanced by factor 50' ! lhrwgt_ reweighting does not work with this version of the code
+rwl_file '-'
+<initrwgt>
+<weightgroup name='nominal' combine='None'>
+<weight id='0'>default</weight>
+</weightgroup>
+<weightgroup name='scale_variations' combine='None'>
+<weight id='1'> renscfact=2d0 facscfact=2d0 </weight>
+<weight id='2'> renscfact=0.5d0 facscfact=0.5d0 </weight>
+<weight id='3'> renscfact=1d0 facscfact=2d0 </weight>
+<weight id='4'> renscfact=1d0 facscfact=0.5d0 </weight>
+<weight id='5'> renscfact=2d0 facscfact=1d0 </weight>
+<weight id='6'> renscfact=0.5d0 facscfact=1d0 </weight>
+</weightgroup>
+</initrwgt>

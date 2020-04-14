@@ -4,16 +4,14 @@
 
 if [ ! $# -eq 7 ]
 then
-    echo "Usage: $0 0/1 0/1 0/1 0/1 0/1 0/1 [number of cores used]"
-    echo "       where 0 or 1 indicates if stage 1 2 3 4 5 6 is to be started." # 1,2,3 grids; 4 events; 5 scale var; 6 pdf var
+    echo "Usage: $0 0/1 0/1 0/1 0/1 [number of cores used]"
+    echo "       where 0 or 1 indicates if stage 1 2 3 4 is to be started." # 1,2,3 grids; 4 events;
     exit 1
 else
     stage1=$1
     stage2=$2
     stage3=$3
     stage4=$4
-    stage5=$5
-    stage6=$6
 fi
 
 > timings.txt
@@ -42,15 +40,6 @@ fi
 if [ $stage4 -eq 1 ]
 then
     echo -n '4 '
-fi
-if [ $stage5 -eq 1 ]
-then
-    echo -n '5 '
-fi
-echo
-if [ $stage6 -eq 1 ]
-then
-    echo -n '6 '
 fi
 echo
 
@@ -112,92 +101,6 @@ then
     done
     wait
 fi
-
-if [ $stage5 -eq 1 ]
-then
-    echo "stage 5: reweight scale variations"
-    for m in 0.5 1.0 2.0
-    do
-	for n in 0.5 1.0 2.0
-	do
-	    mn=$(echo "$m/$n" | bc)
-	    nm=$(echo "$n/$m" | bc)
-	    if [ $mn -eq 2 -o $nm -eq 2 -o "$m" = "$n" -a "$m" != "1.0" ]
-	    then
-		# reweight events
-		cat $INPUT | sed "s/.*renscfact.*/renscfact ${m}d0/ ; s/.*facscfact.*/facscfact ${n}d0/" > powheg.input
-		sed -i 's/parallelstage.*/parallelstage 4/ ; s/lhrwgt_id.*/lhrwgt_id '"'"'scales'${m}${n}''"'"'/ ; s/lhrwgt_descr.*/lhrwgt_descr '"'"'MUR'${m}' MUF'${n}''"'"'/' powheg.input
-		echo >> powheg.input
-		echo 'compute_rwgt 1' >> powheg.input
-		echo >> powheg.input
-		(echo -n rwgt ' ' ; date ) >> timings.txt
-		for i in `seq 1 $ncores`
-		do
-    		    case $i in
-    			?) ch=000$i ;;
-    			??) ch=00$i ;;
-    			???) ch=0$i ;;
-    			????) ch=$i ;;
-    		    esac
-    		    (echo $i ; echo pwgevents-${ch}.lhe ) | $PRG > run-rwgt-scl${m}${n}-$i.log 2>&1 &
-		done
-		wait
-		for i in `seq 1 $ncores`
-		do
-    		    case $i in
-    			?) ch=000$i ;;
-    			??) ch=00$i ;;
-    			???) ch=0$i ;;
-    			????) ch=$i ;;
-    		    esac
-    		    mv pwgevents-rwgt-${ch}.lhe pwgevents-${ch}.lhe
-		done
-		wait
-	    fi
-	done
-    done
-fi
-
-
-if [ $stage6 -eq 1 ]
-then
-    echo "stage 6: reweight PDF variations (PDFs equal for a and b)"
-    # get current PDF sets
-    PDF=$(grep lhans1 powheg.input-save | sed 's/lhans1 \+\([0-9]\+\).*/\1/')
-    for m in $(seq $(( $PDF + 1 )) $(( $PDF + $ERRSETS )))
-    do
-	# reweight events
-	cat $INPUT | sed "s/lhans1.*/lhans1 ${m}/ ; s/lhans2.*/lhans2 ${m}/" > powheg.input
-	sed -i 's/parallelstage.*/parallelstage 4/ ; s/lhrwgt_id.*/lhrwgt_id '"'"'PDF'${m}''"'"'/ ; s/lhrwgt_descr.*/lhrwgt_descr '"'"'PDF '${m}''"'"'/' powheg.input
-	echo >> powheg.input
-	echo 'compute_rwgt 1' >> powheg.input
-	echo >> powheg.input
-	(echo -n rwgt ' ' ; date ) >> timings.txt
-	for i in `seq 1 $ncores`
-	do
-    	    case $i in
-    		?) ch=000$i ;;
-    		??) ch=00$i ;;
-    		???) ch=0$i ;;
-    		????) ch=$i ;;
-    	    esac
-    	    (echo $i ; echo pwgevents-${ch}.lhe ) | $PRG > run-rwgt-pdf${m}${n}-$i.log 2>&1 &
-	done
-	wait
-	for i in `seq 1 $ncores`
-	do
-    	    case $i in
-    		?) ch=000$i ;;
-    		??) ch=00$i ;;
-    		???) ch=0$i ;;
-    		????) ch=$i ;;
-    	    esac
-    	    mv pwgevents-rwgt-${ch}.lhe pwgevents-${ch}.lhe
-	done
-	wait
-    done
-fi
-
 
 (echo -n end ' ' ; date ) >> timings.txt
 

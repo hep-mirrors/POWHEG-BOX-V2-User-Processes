@@ -12,5 +12,5 @@ c     sudarwgtfact contains the constant with which the Sudakov exponent has
 c     been scaled
       logical flg_sudakov_rwgt, flg_sudarw_tmp
       common/sudarwgt_flg/ flg_sudakov_rwgt, flg_sudarw_tmp
-      double precision sudawgt, sudarwgtfac
-      common/sudarwgt/ sudawgt, sudarwgtfac
+      double precision sudawgt, sudarwgtfac, uborns
+      common/sudarwgt/ sudawgt, sudarwgtfac, uborns

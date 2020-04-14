@@ -143,13 +143,14 @@ c     save last random number
       implicit none
       include 'nlegborn.h'
       include 'pwhg_kn.h'
+      include 'pwhg_rwgtsuda.h'
       integer nlf
       character*50 string
       character(200) buffer
 c     write(buffer,,'(a,e16.9,a)')"<scales uborns='",2*kn_cmpborn(0,1),
 c     &     "'> </scales>"
-c     call  pwhg_io_write(nlf,trim(buffer))
-      write(buffer,'(a,e16.9,a)')"<scales uborns='",sqrt(kn_born_pt2),
+c     call  pwhg_io_write(nlf,trim(buffer))      
+      write(buffer,'(a,e16.9,a)')"<scales uborns='",uborns,
      &     "'> </scales>"
       call  pwhg_io_write(nlf,trim(buffer))
       end
