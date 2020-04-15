@@ -12,9 +12,9 @@ c
 
       integer nlegs
       parameter (nlegs=nlegborn)
-      real * 8 p(0:3,nlegs),bornjk(nlegs,nlegs)
+      real * 8 p(0:3,nlegs),p0(0:3,nlegs),bornjk(nlegs,nlegs)
       real * 8 bmunu(0:3,0:3,nlegs),born,colcf
-      integer vflav(nlegs)
+      integer vflav(nlegs),vflav0(nlegs)
       real*8 virtual
 
 
@@ -40,10 +40,20 @@ c
 c================================================
 
       virtual = 0d0
+      if (abs(kn_jacborn).lt.1d-10) return
+      if(idvecbos1.eq.24) then ! W+Zjj
+         vflav0=vflav
+         p0=p
+      else
+c Apply CP to the kinematics ! obtain W-Zjj
+         vflav0=-vflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
       
       pwzsum = 0d0
       do j = 1,nlegs
-         pwzsum = pwzsum+real(j)*p(0,j)
+         pwzsum = pwzsum+real(j)*p0(0,j)
       enddo
 
       if (firsttime) then
@@ -78,15 +88,15 @@ c         col_dec = 3d0
       if(fakevirt.eq.1) then  
 
       if ( pwzsum.ne.pid) then ! new PS point -> compute tensors
-         call compute_tensors_wz(p) 
+         call compute_tensors_wz(p0) 
          pid = 0d0
          do j = 1,nlegs
-            pid = pid+real(j)*p(0,j)
+            pid = pid+real(j)*p0(0,j)
          enddo                
       endif
       ttype = 1
       call provide_tensors_wz(ttype)
-      call compborn_wzjj_ew(p,vflav,born) 
+      call compborn_wzjj_ew(p0,vflav0,born) 
       born = col_dec*had_sum*born
       virtual = 0.2d0*born
       
@@ -96,15 +106,15 @@ c
             
 c            print*,'comp tensors:'
 
-            call compute_tensors_wz(p) 
+            call compute_tensors_wz(p0) 
             pid = 0d0
             do j = 1,nlegs
-               pid = pid+real(j)*p(0,j)
+               pid = pid+real(j)*p0(0,j)
             enddo
          endif
          ttype = 1
          call provide_tensors_wz(ttype)
-         call compvirt_wzjj_ew(p,vflav,virtual) 
+         call compvirt_wzjj_ew(p0,vflav0,virtual) 
          virtual = col_dec*had_sum*virtual
          
 c     cancel as/(2pi) associated with amp2. It will be put back by real_ampsq
@@ -129,7 +139,7 @@ c
       integer nlegs,nf
       parameter (nlegs=nlegborn)
       real*8 pin(0:3,nlegs)  
-      integer bflav(nlegs)
+      integer bflav(nlegs),bflav_loc(nlegs)
       real*8 virtual
 c
 c vbfnlo stuff:
@@ -160,7 +170,6 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
       if (decmode_lep.or.decmode_slp) then 
          bos = 32               ! for W+Z>lvl'l' 
-c note: use bos=42 for W-Z         
       else
          stop 'unsupported decay mode'
       endif    

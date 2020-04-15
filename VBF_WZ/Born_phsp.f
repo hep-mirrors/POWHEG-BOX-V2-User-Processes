@@ -28,8 +28,8 @@ c      data debug/.true./
       save ini, mwz_low, mwz_high 
 
 c generation cuts:
-      real*8 mllmin
-      real*8 m2ll_w,m2ll_z,m2llmin
+      real*8 mllmin, mwmin
+      real*8 m2ll_w,m2_w,m2ll_z,m2llmin
       real*8 pt1cut,pt2cut,pt1,pt2
       real*8 ptlcut,ptl
       logical generation_cuts
@@ -84,6 +84,9 @@ c------------------------------------
 c generation cuts:
          generation_cuts = .false.
          m2llmin = 0d0
+         mwmin=0.01d0
+         mwmin=powheginput('#mw_gencut')
+         if (mwmin.lt.0d0) mwmin=0.01d0 ! Replace invalid input by default
 c read generation cut for mll from input:
          mllmin = powheginput('mll_gencut')
          if (mllmin.lt.0.5d0) then
@@ -113,10 +116,11 @@ c     (disabled by default; change here if you want to use this feature):
             write(*,*) 'ptj2_min = ',pt2cut
             write(*,*) ''
             write(*,*) 'lepton cuts:'
-            write(*,*) 'mll_min    = ',dsqrt(m2llmin)
+            write(*,*) 'mll_min (on charged leptons only)    = ',dsqrt(m2llmin)
             write(*,*) 'ptl_min= ',ptlcut
          endif
-
+         write(*,*) '**** Technical cut on w mass: ****'
+         write(*,*) 'mw_min = ',mwmin
       endif
 
 c      print*,'***************'
@@ -284,7 +288,6 @@ c     but only Z decay considered for generation cuts:
             kn_jacborn=0d0
          endif
          
-         
          m2ll_z = abs(
      &        (kn_pborn(0,5)+kn_pborn(0,6))**2-
      &        (kn_pborn(1,5)+kn_pborn(1,6))**2-
@@ -297,9 +300,21 @@ c     but only Z decay considered for generation cuts:
          
       endif                     !lep. decay
 
-c
       endif !generation_cuts
 
+      m2_w= abs(
+     &        (kn_pborn(0,3)+kn_pborn(0,4))**2-
+     &        (kn_pborn(1,3)+kn_pborn(1,4))**2-
+     &        (kn_pborn(2,3)+kn_pborn(2,4))**2-
+     &        (kn_pborn(3,3)+kn_pborn(3,4))**2)
+c
+c technical cut also on W mass - nt only for leptonic decays, but always
+c (necessary for tensor reduction!)
+c      
+      if(m2_w.lt.mwmin) then
+           kn_jacborn=0d0
+      endif
+c
 
 c------------
 c

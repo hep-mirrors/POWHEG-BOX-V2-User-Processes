@@ -35,14 +35,14 @@ use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound
 skipbtlgrid 0     ! default 0; if 1 skip calculation of btlgrid  
 skiprmngrid 0     ! default 0; if 1 skip calculation of rmngrid  
 
-ncall1  100000 ! number of calls for initializing the integration grid
-itmx1    3      ! number of iterations for initializing the integration grid
-ncall2 200000
+ncall1  5000 ! number of calls for initializing the integration grid
+itmx1    2      ! number of iterations for initializing the integration grid
+ncall2 5000
 itmx2    2      ! number of iterations for computing the integral and finding upper bound
 foldcsi   2     ! number of folds on csi integration
 foldy     2     ! number of folds on  y  integration
 foldphi   2    ! number of folds on phi integration
-nubound 100000       ! number of bbarra calls to setup norm of upper bounding function
+nubound 0       ! number of bbarra calls to setup norm of upper bounding function
 icsimax  1      ! <= 100, number of csi subdivision when computing the upper bounds
 iymax    1      ! <= 100, number of y subdivision when computing the upper bounds
 xupbound 2d0    ! increase upper bound for radiation generation
@@ -52,7 +52,7 @@ xupbound 2d0    ! increase upper bound for radiation generation
 channel_type  0   ! Channels can be found in init_processes.f
 #renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
 #facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
-bornonly   0      ! (default 0) if 1 do Born only
+bornonly   1      ! (default 0) if 1 do Born only
 #loevents 1
 smartsig   1      ! (default 1) remember equal amplitudes (0 do not remember)
 withdamp    1      ! (default 0, do not use) use Born-zero damping factor
@@ -64,7 +64,7 @@ testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 #rand1     -1      ! initialize random number sequence 
 #rand2     -1      ! initialize random number sequence 
 
-#manyseeds 1       ! Used to perform multiple runs with different random
+manyseeds 1       ! Used to perform multiple runs with different random
                    ! seeds in the same directory.
                    ! If set to 1, the program asks for an integer j;
                    ! The file pwgseeds.dat at line j is read, and the
@@ -75,11 +75,11 @@ testplots  1      ! (default 0, do not) do NLO and PWHG distributions
 
 #fakevirt 1	   ! uses Born for determining virt. grid
 withnegweights 1   ! default 1 allow negative weights
-runningscales  3   ! default 0 (no running scales); 1-3 use running scales
+runningscales  0   ! default 0 (no running scales); 1-3 use running scales
 btlscalereal   1   ! flag for running scales
 btlscalect     1   ! flag for running scales
 wz_res_type    0   ! 1:WZ continuum; 2:Higgs resonance (not supported); 0:all (default)
 #storeinfo_rwgt 1   ! store info for reweighting events 
 
-#xgriditeration 1   ! identifier for grid generation
-#parallelstage  2   ! identifier for parallel running stages
+xgriditeration 2   ! identifier for grid generation
+parallelstage  1   ! identifier for parallel running stages

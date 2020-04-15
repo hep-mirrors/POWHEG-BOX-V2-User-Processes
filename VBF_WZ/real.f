@@ -1,5 +1,5 @@
 c
-      subroutine setreal(p,fermion_flav,amp2)
+      subroutine setreal(p,rflav,amp2)
       implicit none
       include 'nlegborn.h'
       include 'pwhg_math.h'
@@ -7,8 +7,8 @@ c
       include 'cvecbos.h'
       integer nleg
       parameter (nleg=nlegreal)
-      real * 8 p(0:3,nleg)
-      integer fermion_flav(nleg)
+      real * 8 p(0:3,nleg),p0(0:3,nleg)
+      integer rflav(nleg),rflav0(nleg)
       real * 8 amp2
       real*8 col_dec,had_sum
       integer ttype
@@ -22,13 +22,20 @@ c
       real*8 pmg(0:3,1:9)
       real*8 mg
 
-c test only:
-      integer rflav(nleg)
-
-	 
 c----------------------------------------------------
-c
-      rflav = fermion_flav
+c   
+      
+      if(idvecbos1.eq.24) then !W+Zjj
+         rflav0=rflav
+         p0=p
+      else ! W-Zjj
+c Apply CP to the kinematics
+         rflav0=-rflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
+      
+
       if (firstreal) then
          pidr = 0d0
          firstreal = .false.
@@ -36,7 +43,7 @@ c
       
       pzsum = 0d0
       do j = 1,nleg
-            pzsum = pzsum+real(j)*p(0,j)
+            pzsum = pzsum+real(j)*p0(0,j)
       enddo              
 
       had_sum = 1d0
@@ -49,15 +56,15 @@ c
       endif  
 
       if ( pzsum.ne.pidr) then ! new PS point -> compute tensors
-         call compute_tensors_wz_real(p) 
+         call compute_tensors_wz_real(p0) 
          pidr = 0d0
          do j = 1,nleg
-            pidr = pidr+real(j)*p(0,j)
+            pidr = pidr+real(j)*p0(0,j)
          enddo  
       endif   
       ttype = 3
       call provide_tensors_wz(ttype)
-      call compreal_wzjj_ew(p,fermion_flav,amp2)
+      call compreal_wzjj_ew(p0,rflav0,amp2)
 
       amp2 = amp2*col_dec*had_sum
 
@@ -81,7 +88,7 @@ c
       integer nlegs
       parameter (nlegs=nlegreal)
       real*8 pin(0:3,nlegs)  
-      integer bflav(nlegs)
+      integer bflav(nlegs),bflav_loc(nlegs)
       real*8 amp2 
 c
 c vbfnlo stuff:
@@ -116,11 +123,8 @@ c comp:
       parameter (mg_comp=.false.)
       
 c for testing purposes:
-      double complex qsum
-      double complex tampw,tampwr
-      integer ipw,ipwr,isw1,isw3
-      double complex tampm,tampmr
-      integer ipm,ipmr,ism1,ism3
+      double complex tampwr
+      integer ipwr
       common /wpzrtest/ tampwr(2000,-1:1,-1:1,2,-1:1,6), ipwr
 
 c
@@ -128,7 +132,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
       if (decmode_lep) then 
          bos = 32               ! for W+Z>lvl'l' 
-c note: use bos=42 for W-Z         
+c note: use bos=42 for hard-wired W-Z amplitudes (not necessary when crossing is used)         
       else
          stop 'unsupported decay mode'
       endif    
@@ -144,7 +148,7 @@ c note: use bos=42 for W-Z
 
          do i = 1,4
             v(mu,i) = pin(mu,i+2)
-         enddo !i  
+         enddo !i  bos
 
          if (bflav(1)*bflav(2).ne.0) then ! final-state gluon 
             if (bflav(9).eq.0) then
@@ -491,12 +495,8 @@ c try to define general rule for computing k:
       call qqwpzqqj(pbar,fsign,qbar,gsign,bos,k,res(1))
 
       if (mg_comp) then
-         print*,'k=',k
-         print*,'mg res =',res_comp(:,k)
-         print*,'qq res =',res(:)
-         print*,'ratio1=',res(1)/res_comp(1,k)
-         print*,'ratio2=',res(2)/res_comp(2,k)
-         print*,'ratio3=',res(3)/res_comp(3,k)
+         print*,'madgraph res =',res_comp(:,k)
+         print*,'vbfnlo res =',res(:)
          if ((abs(1-abs(res(1)/res_comp(1,k)))).ge.1d-5) then
             print*,'bad point?'
          endif

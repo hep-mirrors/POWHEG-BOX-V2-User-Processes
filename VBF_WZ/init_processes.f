@@ -39,7 +39,7 @@ c      parameter (debug=.true.)
       integer max_flav
       logical tag,newtag
 
-      logical emit_Wp_upper,emit_Z_upper,emit_Wp_lower,emit_Z_lower
+      logical emit_Z_upper,emit_Z_lower,emit_W_upper,emit_W_lower
       integer flst_nreal_WW, flst_nborn_WW
       logical CKM_diag
 
@@ -47,6 +47,9 @@ c      parameter (debug=.true.)
 
       integer ftype(1:9)
       integer icc
+
+c stuff for charge conjugated process:
+c      integer i1_loc,i2_loc,i7_loc,i8_loc,i9_loc
 
 
 c     lepton masses
@@ -58,13 +61,22 @@ c******************************************************
 c     Choose the process to be implemented
 c******************************************************
 c ID of vector bosons produced
-c fixed to WZ:
-      idvecbos1=24 !W
-      idvecbos2=23 !Z
 
 c   decay products of the two vector bosons
       vdecaymodeW=powheginput('vdecaymodeW')
       vdecaymodeZ=powheginput('vdecaymodeZ')
+
+c W+ or W-:
+      if(vdecaymodeW.gt.0) then
+         idvecbos1=-24 !W-
+      else
+         idvecbos1=24 !W+
+      endif
+c Z boson:
+      idvecbos2=23 !Z
+
+      print*,'id_vecbos=',idvecbos1
+c      stop
 
 c no symmetry factors needed for WZ: 
       vsymfact=1d0
@@ -77,11 +89,27 @@ C     default is zerowidth = .true.
          zerowidth = .true. 
          write(*,*) 'Zero-width approximation for Vs' 
       endif
-      
+
+      if (idvecbos1.eq.24) then !W+
+
       if (((vdecaymodeW).ne.-11).and.((vdecaymodeW).ne.-13)) then 
          stop 'W decay mode should be put in terms of the charged
      .        leptons: 11, 13 '
       endif
+
+      elseif  (idvecbos1.eq.-24) then !W-
+
+      if (((vdecaymodeW).ne.11).and.((vdecaymodeW).ne.13)) then 
+         stop 'W decay mode should be put in terms of the charged
+     .        leptons: 11, 13 '
+      endif
+
+      else !idvecbos1 no W+ or W-
+
+         stop ' W boson ID is not set correctly'
+
+      endif
+
 
       if (((vdecaymodeZ).ne.11).and.((vdecaymodeZ).ne.13)) then
          stop 'Z decay mode should be put in terms of the charged 
@@ -128,10 +156,19 @@ c makes them radiate
      . vdecaymodeW = sign(1,vdecaymodeW)*(abs(vdecaymodeW) + 100)
 
       write(*,*) 
-      write(*,*) ' POWHEG: W Z + 2j production and decay ' 
+      if (idvecbos1.eq.24) then 
+         write(*,*) ' POWHEG: W+Z + 2j production and decay ' 
+      elseif (idvecbos1.eq.-24) then 
+         write(*,*) ' POWHEG: W-Z + 2j production and decay ' 
+      endif !W+ or W-
       if (vdecaymodew.eq.-11) write(*,*) '         to e+ ve '
       if (vdecaymodew.eq.-13) write(*,*) '         to mu+ vmu'
       if (vdecaymodew.eq.-15) write(*,*) '         to tau+ vtau'
+c
+      if (vdecaymodew.eq.11) write(*,*) '         to e- ve~ '
+      if (vdecaymodew.eq.13) write(*,*) '         to mu- vmu~'
+      if (vdecaymodew.eq.15) write(*,*) '         to tau- vtau~'
+c
       write(*,*)'            and'
       if (vdecaymodeZ.eq.11) write(*,*) '          e- e+ '
       if (vdecaymodeZ.eq.13) write(*,*) '          mu- mu+ '
@@ -264,7 +301,7 @@ c     (all subsequent particles are coloured)
       flst_nborn=0
       flst_nreal=0
 
-c ordering of leptons for matrix elemtsn is: 
+c ordering of leptons for matrix elements is: 
 c     i4=l+, i3=vl; i5 =l+ , i6=l-
 
       i4=vdecaymodeW
@@ -272,11 +309,16 @@ c     this is a convoluted way of doing things, but it ends up pairing
 c     lepton-antineutrino, and antilepton-neutrino
       i3=-sign(1,i4)*(abs(i4)+1)
 
-      i5=-vdecaymodeZ
+      i5=-vdecaymodeZ*sign(1,idvecbos1)
       i6=-i5
+c BJ: ev. muss auch Z-Leptonen vertauschen.
+
+c---
 
 c     Born graphs
       flst_nborn=0
+
+c general:
       condition=.false.
       CKM_diag = .true.
       
@@ -285,11 +327,12 @@ c     Born graphs
 
       ftype(1:9) = 0
 
-
-      emit_Wp_upper = .true.
       emit_Z_upper = .true.
-      emit_Wp_lower = .true.
       emit_Z_lower = .true.
+      emit_W_upper = .true.
+      emit_W_lower = .true.
+
+c      print*,'start Born loop'
 
 c orig:
       do i1=-max_flav,max_flav
@@ -302,12 +345,13 @@ c     no gluons:
          condition = ((i1*i2*i7*i8).ne.0)
          if (.not.condition) goto 800
 
+
          if (channel_type.eq.0) then
              condition=.true.
 
          else !specific channel_type (.ne.0)    
-             
-c identify flavor channels for W+Z:
+
+c identify flavor channels for W+Z / W-Z:
             if (i1.gt.0) then 
                ftype(1) = 2-mod(abs(i1),2)      
                ftype(7) = 2-mod(abs(i7),2) 
@@ -323,30 +367,45 @@ c identify flavor channels for W+Z:
                ftype(2) = 2-mod(abs(i8),2)   
             endif
 
-           k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
-
+           if (idvecbos1.gt.0) then 
+              k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
+           else
+              k = -7*ftype(1)-5*ftype(2)+6*ftype(7)+4*ftype(8)
+           endif   
 
            if (k.eq.channel_type) then
-                 condition=.true.
-           else  
+                 condition=.true. 
+              else  
                  condition = .false.
            endif !k
+           if (.not.condition) goto 800
+
+c           if (k.eq.4) then 
+c              print*,'loc channel k =',k
+c              print*,'flavs=',i1,i2,i7,i8
+c           endif
    
          endif !channel_type
 
          if (CKM_diag) then
-            emit_Wp_upper = (i7.eq.i1-1)
             emit_Z_upper = (i7.eq.i1)
-            emit_Wp_lower = (i8.eq.i2-1)
             emit_Z_lower = (i8.eq.i2) 
+
+            if (idvecbos1.gt.0) then  !W+
+               emit_W_upper = (i7.eq.i1-1)
+               emit_W_lower = (i8.eq.i2-1)
+            else !W-
+               emit_W_upper = (i7.eq.i1+1)
+               emit_W_lower = (i8.eq.i2+1)      
+            endif   
          else
             stop 'Only diagonal CKM implemented'            
          endif
 
                     condition = condition.and. (
-c     W+ emission from upper leg                        
-     #                    (((charge3(i1)-(charge3(i7)+3)
-     #                    .eq.0).and.(emit_Wp_upper)) .and.
+c     W emission from upper leg                        
+     #                    (((charge3(i1)-(charge3(i7)+sign(3,idvecbos1))
+     #                    .eq.0).and.(emit_W_upper)) .and.
 c     Z emission from lower leg                        
      #                    ((charge3(i2)-(charge3(i8))
      #                    .eq.0).and.(emit_Z_lower)))
@@ -354,9 +413,9 @@ c     Z emission from lower leg
 c     Z emission from upper leg                        
      #                    (((charge3(i1)-(charge3(i7))
      #                    .eq.0).and.(emit_Z_upper)) .and.
-c     W+ emission from lower leg                        
-     #                    ((charge3(i2)-(charge3(i8)+3)
-     #                    .eq.0).and.(emit_Wp_lower))))
+c     W emission from lower leg                        
+     #                    ((charge3(i2)-(charge3(i8)+sign(3,idvecbos1))
+     #                    .eq.0).and.(emit_W_lower))))
 
 
                   if(condition) then
@@ -400,6 +459,9 @@ c     W+ emission from lower leg
       flst_nborn_WW = flst_nborn
 
 
+c      stop
+
+
 cccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     Real graphs
@@ -430,7 +492,7 @@ c     no extra gluons:
              condition=.true.
          else     
 
-c identify flavor channels for W+Z:
+c identify flavor channels for W+Z / W-Z:
             if (i1.gt.0) then 
                ftype(1) = 2-mod(abs(i1),2)      
                ftype(7) = 2-mod(abs(i7),2) 
@@ -446,39 +508,50 @@ c identify flavor channels for W+Z:
                ftype(2) = 2-mod(abs(i8),2)   
             endif
 
-           k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)      
+           if (idvecbos1.gt.0) then 
+              k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
+           else
+              k = -7*ftype(1)-5*ftype(2)+6*ftype(7)+4*ftype(8)
+           endif   
 
            if (k.eq.channel_type) then
                  condition=.true. 
               else  
                  condition = .false.
            endif !k
+           if (.not.condition) goto 801
    
          endif !channel_type
 c
          if (CKM_diag) then
-            emit_Wp_upper = (i7.eq.i1-1)
             emit_Z_upper = (i7.eq.i1)
-            emit_Wp_lower = (i8.eq.i2-1)
-            emit_Z_lower = (i8.eq.i2)                 
+            emit_Z_lower = (i8.eq.i2) 
+
+            if (idvecbos1.gt.0) then  !W+
+               emit_W_upper = (i7.eq.i1-1)
+               emit_W_lower = (i8.eq.i2-1)
+            else !W-
+               emit_W_upper = (i7.eq.i1+1)
+               emit_W_lower = (i8.eq.i2+1)      
+            endif   
          else
             stop 'Only diagonal CKM implemented'
          endif
 
          condition = condition.and.( 
-c     W+ emission from upper leg                        
-     #                    (((charge3(i1)-(charge3(i7)+3)
-     #                    .eq.0).and.(emit_Wp_upper)) .and.
-c     W- emission from lower leg                        
+c     W emission from upper leg                        
+     #                    (((charge3(i1)-(charge3(i7)+sign(3,idvecbos1))
+     #                    .eq.0).and.(emit_W_upper)) .and.
+c     Z emission from lower leg                        
      #                    ((charge3(i2)-(charge3(i8))
      #                    .eq.0).and.(emit_Z_lower)))
      #                    .or.
-c     W- emission from upper leg                        
+c     Z emission from upper leg                        
      #                    (((charge3(i1)-(charge3(i7))
      #                    .eq.0).and.(emit_Z_upper)) .and.
-c     W+ emission from lower leg                        
-     #                    ((charge3(i2)-(charge3(i8)+3)
-     #                    .eq.0).and.(emit_Wp_lower))))
+c     W emission from lower leg                        
+     #                    ((charge3(i2)-(charge3(i8)+sign(3,idvecbos1))
+     #                    .eq.0).and.(emit_W_lower))))
 
 c
          if(condition) then
@@ -526,8 +599,6 @@ C the gq->qqq case:
       do i8=-max_flav,max_flav
       do i9=-max_flav,-1
 
-c         i8 = i2
-
 c     no extra gluons:
          condition = ((i9*i2*i7*i8).ne.0)
          if (.not.condition) goto 802
@@ -552,40 +623,50 @@ c
                ftype(2) = 2-mod(abs(i8),2)   
             endif
 
-           k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
-             
+           if (idvecbos1.gt.0) then 
+              k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
+           else
+              k = -7*ftype(1)-5*ftype(2)+6*ftype(7)+4*ftype(8)
+           endif   
 
            if (k.eq.channel_type) then
               condition=.true. 
            else  
               condition = .false.
            endif !k
+           if (.not.condition) goto 802
    
          endif !channel_type
 
          if (CKM_diag) then
-            emit_Wp_upper = (i7.eq.(-i9-1))
             emit_Z_upper = (i7.eq.(-i9))
-            emit_Wp_lower = (i8.eq.i2-1)
-            emit_Z_lower = (i8.eq.i2)                 
+            emit_Z_lower = (i8.eq.i2)     
+
+            if (idvecbos1.gt.0) then 
+               emit_W_upper = (i7.eq.(-i9-1))
+               emit_W_lower = (i8.eq.i2-1)
+            else !W-
+               emit_W_upper = (i7.eq.(-i9+1))
+               emit_W_lower = (i8.eq.i2+1)
+            endif 
          else
             stop 'Only diagonal CKM implemented'
          endif
 
          condition = condition.and.(
-c     W+ emission from upper leg                        
-     #                    ((((-charge3(i9)-(charge3(i7)+3)
-     #                    .eq.0).and.(emit_Wp_upper)) .and.
-c     W- emission from lower leg                        
+c     W emission from upper leg                        
+     #                    (((-charge3(i9)-charge3(i7)-sign(3,idvecbos1)
+     #                    .eq.0).and.(emit_W_upper)) .and.
+c     Z emission from lower leg                        
      #                    ((charge3(i2)-(charge3(i8))
-     #                    .eq.0).and.(emit_Z_lower))))
+     #                    .eq.0).and.(emit_Z_lower)))
      #                    .or.
-c     W- emission from upper leg                        
+c     Z emission from upper leg                        
      #                    (((-charge3(i9)-(charge3(i7))
      #                    .eq.0).and.(emit_Z_upper)) .and.
-c     W+ emission from lower leg                        
-     #                    ((charge3(i2)-(charge3(i8)+3)
-     #                    .eq.0).and.(emit_Wp_lower)))
+c     W emission from lower leg                        
+     #                    ((charge3(i2)-charge3(i8)-sign(3,idvecbos1)
+     #                    .eq.0).and.(emit_W_lower)))
      #                    )
 
 c     no extra gluons:
@@ -642,7 +723,7 @@ c     no extra gluons:
          if (channel_type.eq.0.or.channel_type.eq.8) then
              condition=.true.
          else     
-   
+                
             if (i1.gt.0) then 
                ftype(1) = 2-mod(abs(i1),2)      
                ftype(7) = 2-mod(abs(i7),2) 
@@ -657,41 +738,53 @@ c     no extra gluons:
                ftype(8) = 2-mod(abs(i9),2)        
                ftype(2) = 2-mod(abs(i8),2)   
             endif
-  
 
-           k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
+            if (idvecbos1.gt.0) then 
+              k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
+            else
+              k = -7*ftype(1)-5*ftype(2)+6*ftype(7)+4*ftype(8)
+            endif   
 
            if (k.eq.channel_type) then
                  condition=.true. 
            else  
                  condition = .false.
            endif !k
+           if (.not.condition) goto 803
+
    
          endif !channel_type
 
          if (CKM_diag) then
-            emit_Wp_upper = (i7.eq.i1-1)
             emit_Z_upper = (i7.eq.i1)
-            emit_Wp_lower = (i8.eq.-i9-1)
-            emit_Z_lower = (i8.eq.-i9)                 
+            emit_Z_lower = (i8.eq.-i9) 
+
+            if (idvecbos1.gt.0) then 
+               emit_W_upper = (i7.eq.i1-1)
+               emit_W_lower = (i8.eq.-i9-1)
+            else ! W-
+               emit_W_upper = (i7.eq.i1+1)
+               emit_W_lower = (i8.eq.-i9+1)
+            endif   
+
          else
             stop 'Only diagonal CKM implemented'
          endif  
 
          condition = condition.and.(
 c     W+ emission from upper leg                        
-     #                    (((charge3(i1)-(charge3(i7)+3)
-     #                    .eq.0).and.(emit_Wp_upper)) .and.
-c     W- emission from lower leg                        
+     #                    (((charge3(i1)-charge3(i7)-sign(3,idvecbos1)
+     #                    .eq.0).and.(emit_W_upper)) .and.
+c     Z emission from lower leg                        
      #                    ((-charge3(i9)-(charge3(i8))
      #                    .eq.0).and.(emit_Z_lower)))
      #                    .or.
-c     W- emission from upper leg                        
+c     Z emission from upper leg                        
      #                    (((charge3(i1)-(charge3(i7))
      #                    .eq.0).and.(emit_Z_upper)) .and.
-c     W+ emission from lower leg                        
-     #                    ((-charge3(i9)-(charge3(i8)+3)
-     #                    .eq.0).and.(emit_Wp_lower))))
+c     W emission from lower leg                        
+     #                    ((-charge3(i9)-charge3(i8)-sign(3,idvecbos1)
+     #                    .eq.0).and.(emit_W_lower))))
 
          if(condition) then
             flst_nreal=flst_nreal+1

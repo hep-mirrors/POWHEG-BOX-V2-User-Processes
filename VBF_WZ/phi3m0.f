@@ -18,9 +18,12 @@ c     delta(p2^2) delta(p3^2)
       wt=0d0
 
       s=p0(4)**2-p0(1)**2-p0(2)**2-p0(3)**2  
-      if (s .lt. 0d0) then
+      if (s .le. 0d0) then
        s=0d0
        wt=0d0
+       p1=0d0
+       p2=0d0
+       return
       endif
 
       roots=dsqrt(s)
@@ -48,6 +51,7 @@ c     delta(p2^2) delta(p3^2)
       write(6,*) 'p2',p2(4),p2(4)**2-p2(1)**2-p2(2)**2-p2(3)**2
       write(6,*) 'in phi3m0'
       endif
+
 
       end
 

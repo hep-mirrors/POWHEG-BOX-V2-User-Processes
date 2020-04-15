@@ -21,19 +21,19 @@ c     identify decay mode (default is fully lept.):
          decmode_lnu = .false.
          decmode_slp = .false.
 c     default are fully lept. decays:
-         if (abs(vdecaymodeW).eq.11.or.
-     &        abs(vdecaymodeW).eq.13) then ! Z1 -> ll
+         if (abs(vdecaymodeW).eq.11.or. ! W decays leptonically
+     &       abs(vdecaymodeW).eq.13) then 
             if (abs(vdecaymodeZ).eq.11.or.
-     &           abs(vdecaymodeZ).eq.13) then ! Z2 -> ll
+     &          abs(vdecaymodeZ).eq.13) then ! Z -> ll
                decmode_lep = .true.
                decmode_lnu = .false.
                decmode_slp = .false.
             elseif (abs(vdecaymodeZ).eq.12.or.
-     &              abs(vdecaymodeZ).eq.14) then ! Z2 -> vv
+     &              abs(vdecaymodeZ).eq.14) then ! Z -> vv
                decmode_slp = .false.
                decmode_lnu = .true.
                decmode_lep = .false.
-            elseif (abs(vdecaymodeZ).lt.11) then ! Z2 -> hadrons
+            elseif (abs(vdecaymodeZ).lt.11) then ! Z -> hadrons
                decmode_slp = .true.
                decmode_lnu = .false.
                decmode_lep = .false.
@@ -94,18 +94,18 @@ c     identify decay mode (default is fully lept.):
          decmode_slp = .false.
 c     default are fully lept. decays:
          if (abs(vdecaymodeW).eq.11.or.
-     &        abs(vdecaymodeW).eq.13) then ! Z1 -> ll
+     &       abs(vdecaymodeW).eq.13) then ! W decays leptonically
             if (abs(vdecaymodeZ).eq.11.or.
-     &           abs(vdecaymodeZ).eq.13) then ! Z2 -> ll
+     &          abs(vdecaymodeZ).eq.13) then ! Z -> ll
                decmode_lep = .true.
                decmode_lnu = .false.
                decmode_slp = .false.
             elseif (abs(vdecaymodeZ).eq.12.or.
-     &              abs(vdecaymodeZ).eq.14) then ! Z2 -> vv
+     &              abs(vdecaymodeZ).eq.14) then ! Z -> vv
                decmode_slp = .false.
                decmode_lnu = .true.
                decmode_lep = .false.
-            elseif (abs(vdecaymodeZ).lt.11) then ! Z2 -> hadrons
+            elseif (abs(vdecaymodeZ).lt.11) then ! Z -> hadrons
                decmode_slp = .true.
                decmode_lnu = .false.
                decmode_lep = .false.
@@ -352,6 +352,13 @@ C ---------------------------------------------------------------------
       dummy=min(i1,i2)
       dummy=min(dummy,i3)
       dummy=min(dummy,i4)
+      end
+
+      subroutine minimum3(i1,i2,i3,dummy)
+      implicit none
+      real * 8 i1,i2,i3,dummy
+      dummy=min(i1,i2)
+      dummy=min(dummy,i3)
       end
       
       subroutine sortbypt(n,iarr)

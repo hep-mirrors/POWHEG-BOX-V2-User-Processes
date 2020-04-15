@@ -10,9 +10,9 @@ c
       include 'cvecbos.h'
       integer nlegs
       parameter (nlegs=nlegborn)
-      real * 8 p(0:3,nlegs),bornjk(nlegs,nlegs)
+      real * 8 p(0:3,nlegs),p0(0:3,nlegs),bornjk(nlegs,nlegs)
       real * 8 bmunu(0:3,0:3,nlegs),born,colcf
-      integer bflav(nlegs)
+      integer bflav0(nlegs),bflav(nlegs)
       integer j,k,mu,nu
       real*8 col_dec,had_sum
       integer ttype
@@ -30,22 +30,31 @@ c
       common /bcounter/bcount
 	
 c----------------------------------------------------
+
 c init:
       born = 0d0
-      bmunu=0d0
+      bmunu = 0d0
+      if (abs(kn_jacborn).lt.1d-10) return
+
+      if(idvecbos1.eq.24) then ! W+Zjj
+         bflav0=bflav
+         p0=p
+      else
+c Apply CP to the kinematics ! obtain W-Zjj
+         bflav0=-bflav
+         p0=p
+         p0(1,:)=-p(1,:)
+      endif
 
       if (firstborn) then
          pid = 0d0
          firstborn = .false.
-
          bcount = 0
-      endif   
-      
+      endif         
       bcount = bcount+1
-
       psum = 0d0
       do j = 1,nlegs
-         psum = psum+real(j)*p(0,j)
+         psum = psum+real(j)*p0(0,j)
       enddo
 
     
@@ -59,24 +68,21 @@ c init:
          endif
       endif   
       
-c     test/init:
-c      born = 1d-10
-
       if ( psum.ne.pid) then    ! new PS point -> compute tensors
-         call compute_tensors_wz(p) 
+         call compute_tensors_wz(p0) 
          pid = 0d0
          do j = 1,nlegs
-            pid = pid + real(j)*p(0,j)
+            pid = pid + real(j)*p0(0,j)
          enddo
       endif   
       ttype = 1
       call provide_tensors_wz(ttype)
-      call compborn_wzjj_ew(p,bflav,born) 
-      
+      call compborn_wzjj_ew(p0,bflav0,born) 
+
       born = born*col_dec*had_sum
 
       do j=1,nlegs
-         if(abs(bflav(j)).le.6) then
+         if(abs(bflav0(j)).le.6) then
             do k=j+1,nlegs
                if (((j.eq.1).and.(k.eq.7)).or.
      #             ((j.eq.2).and.(k.eq.8))) then   
@@ -106,7 +112,7 @@ c
       integer nlegs,nf
       parameter (nlegs=nlegborn)
       real*8 pin(0:3,nlegs)  
-      integer bflav(nlegs)
+      integer bflav(nlegs),bflav_loc(nlegs)
       real*8 born
 c
 c vbfnlo stuff:
@@ -131,7 +137,7 @@ c
       integer icc
       integer k
 
-c comp:
+c comparison:
       real*8 res_comp(4),dum
       logical mg_comp
 c      parameter (mg_comp=.true.)
@@ -175,16 +181,12 @@ c lepton momenta:
          pbar(mu,8) = v(mu,4) ! mu-
       enddo
       if (bos.eq.32) then
-      fsign(5) = -1
-      fsign(6) = 1
-      fsign(7) = -1
-      fsign(8) = 1
-c      elseif (bos.eq.21) then 
-c      fsign(5) = -1
-c      fsign(6) = 1
-c      fsign(7) = 1
-c      fsign(8) = -1
+         fsign(5) = -1
+         fsign(6) = 1
+         fsign(7) = -1
+         fsign(8) = 1
       endif
+
       
       if (bflav(1).gt.0.and.bflav(2).gt.0) then
 
@@ -201,10 +203,6 @@ c   physToDiag(ext.momentum label) = Feynman diagram label
       fsign(2) = 1
       fsign(3) = 1
       fsign(4) = 1
-
-c test only
-c      goto 111
-
 
       elseif (bflav(1).gt.0.and.bflav(2).lt.0) then
 
@@ -247,7 +245,7 @@ c
       fsign(1) = -1
       fsign(2) = -1
       fsign(3) = -1
-      fsign(4) = -1      
+      fsign(4) = -1
 
  111  continue
 
@@ -267,9 +265,7 @@ c get the amplitude squared:
          do i = 1,4
             pbar(mu,physToDiag(i))=p(mu,i)
          enddo
-      enddo	 
-
-c      print*,'bflav=',bflav(1:2),bflav(7:8)
+      enddo
 
 c use value of bflav to select appropriate uucc, uuss etc.
       if (bflav(1).gt.0) then 
@@ -286,33 +282,27 @@ c use value of bflav to select appropriate uucc, uuss etc.
          if(mod(abs(bflav(8)),2).eq.0) ftype(2) = 2 ! fermion2 = up-type 
          if(mod(abs(bflav(2)),2).eq.0) ftype(8) = 2 ! fermion8 = up-type 
       endif
-
-
  
       k = 6*ftype(1)+4*ftype(2)-7*ftype(7)-5*ftype(8)
 
       if (mg_comp) then
       	if(decmode_lep) then 
-         call qqwzqq_comp(pbar,fsign,0,bos,
+           print*,'call mg sum:'
+           call qqwzqq_comp(pbar,fsign,0,bos,
      &        res_comp(1),res_comp(2),res_comp(3),res_comp(4))
 	elseif(decmode_slp) then
-	 stop 'Not implemented yet'
+           stop 'Not implemented yet'
 	endif !decmode
       endif !mg
 
       call qqwpzqq_channel(pbar,fsign,0,1,k,bos,res)
 
-
-
       if (mg_comp) then
          if (abs((abs(res/res_comp(k))-1d0)).gt.1d-1) then
             print*,'for k=',k
-            print*,'qq res =',res
-            print*,'mg res =',res_comp(k)
-            print*,'qq/mg=',res/res_comp(k)
-            print*,'ALLE ACHTUNG --->'
-            print*,'abs(res/res_comp(k))=',abs(res/res_comp(k))
-            print*,'abs(res/res_comp(k))-1=',abs(res/res_comp(k))-1d0
+            print*,'vbfnlo result =',res
+            print*,'madgraph res =',res_comp(k)
+            print*,'vbfnlo/madgraph=',res/res_comp(k)
          endif       
       endif
 
@@ -513,12 +503,11 @@ c     on the Les Houches interface.
       data ini/.true./
       save ini
 
-c W id:
-      idvecbos1=24
+c W:
       call add_resonance(idvecbos1,3,4)
+
+c Z:
 C     need to shift (56) to (67) since previous res adds a label 
-c Z id:
-      idvecbos2=23
       call add_resonance(idvecbos2,6,7)
       if(ini) then
          write(*,*) 'Adding resoncance'
