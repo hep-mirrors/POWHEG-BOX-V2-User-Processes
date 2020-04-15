@@ -142,7 +142,7 @@ c-----> virtual
          const1= (8*st_alpha*(CA-CF)*CF*Pi*(1/y13+1/y23))/mH**2
 
          const2=(
-     $        -12*CF + 11*CA*LL1 + 18*CF*LL1*0.0d0 + 3*CA*Pi**2 + 6*CF*Pi**2
+     $        -12*CF + 11*CA*LL1 + 18*CF*LL1 + 3*CA*Pi**2 + 6*CF*Pi**2
      $        - 4*LL1*Nf*TR
      $        + 3*CA*log(y12)**2 - 6*CF*log(y12)**2 - 3*CA*log(y13)**2
      $        - 3*CA*log(y23)**2
