@@ -70,8 +70,7 @@ endif
 
 
 ## LoopTools
-LT=$(HOME)/tomasjezo/tools/LoopTools/2.15
-#LT=PathToLoopTools
+LT=PathToLoopTools
 LTFLAGS=-I$(LT)/include -L$(LT)/lib64 -looptools
 LIBS+= -L$(LT)/lib64 -looptools
 
