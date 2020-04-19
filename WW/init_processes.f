@@ -213,6 +213,11 @@ c do only e+e-
       if(powheginput("#e+e-").eq.1) then
          if(ida1.ne.-11.or.id2.ne.11) return
       endif
+c do only mutau
+      if(powheginput("#mutau").eq.1) then
+         if(.not. ((abs(ida1)==13 .and. abs(id2) == 15) .or.
+     1    (abs(ida1)==15 .and. abs(id2) == 13) )) return
+      endif
 c do only e+e-
       if(powheginput("#mu+mu-").eq.1) then
          if(ida1.ne.-13.or.id2.ne.13) return
