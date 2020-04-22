@@ -443,7 +443,7 @@ c     W couplings
 	do i=1,3
 	  do j = 1,3 
 	    do k = 1,3 
-	    aux1(i,j) = aux1(i,j) + 1/2d0*
+	    aux1(i,j) = aux1(i,j) + 
      .   ( -ph_QLu(i,k) * ph_CKM(k,j)   +  ph_CKM(i,k) * ph_QLd(k,j) )
 	    enddo	
 	  enddo	  
@@ -695,7 +695,7 @@ c     W couplings
 	do i=1,3
 	  do j = 1,3 
 	    do k = 1,3 
-	    aux1(i,j) = aux1(i,j) + 1/2d0*
+	    aux1(i,j) = aux1(i,j) +
      .   ( -ph_QLu(i,k) * ph_CKM(k,j)   +  ph_CKM(i,k) * ph_QLd(k,j) )
 	    enddo	
 	  enddo	  
