@@ -8,7 +8,7 @@ endif
 PDF=lhapdf
 #Choose Analysis: none,  antikt
 ## default analysis may require FASTJET package, that has to be installed separately (see below)
-ANALYSIS=antikt
+ANALYSIS=none
 #
 #
 ifeq ("$(COMPILER)","gnu")
@@ -44,12 +44,11 @@ OPT = -O3 #-fast
 #PP=-fpp #-DHELAS_CHECK
 endif
 
-#Path to the OpenLoops installation
-
-#OLPATH=$(PWD)/../OpenLoopsStuff/OpenLoops
+#Path to the OpenLoops installation (examples provided below)
+# OLPATH=$(PWD)/../OpenLoopsStuff/OpenLoops
 # OLPATH=/home/gavardi/fortran/OpenLoops2
 # OLPATH=/home/gavardi/fortran/OpenLoops2_test/OpenLoops
-OLPATH=/home/alioli/work/OpenLoops-public_beta
+# OLPATH=/home/alioli/work/OpenLoops-public_beta
 
 #Required OL libraries
 OLLIBS=ppttj ppttj_dec
@@ -80,13 +79,14 @@ LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CO
 # LIBSTDCPP=/usr/lib/gcc/x86_64-redhat-linux/4.1.1
 # LIBSLHAPDF+=  -L$(LIBGFORTRANPATH)  -lgfortranbegin -lgfortran -L$(LIBSTDCPP) -lstdc++
 LIBS+=$(LIBSLHAPDF)
+CXXFLAGS+=$(shell $(LHAPDF_CONFIG) --cxxflags)
 else
 PDFPACK=mlmpdfif.o hvqpdfpho.o
 endif
 
 # PYTHIA 8
 PYTHIA8LOCATION=/usr/
-FJCXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PYTHIA8LOCATION)/include/Pythia8 -I$(PYTHIA8LOCATION)/include/Pythia8Plugins
+CXXFLAGS+=-I$(PYTHIA8LOCATION)/include -I$(PYTHIA8LOCATION)/include/Pythia8 -I$(PYTHIA8LOCATION)/include/Pythia8Plugins
 LIBPYTHIA8=-L$(PYTHIA8LOCATION)/lib64/ -lpythia8  -lstdc++ #-llhapdfdummy
 LIBHEPMC=-L/usr/lib64 -lHepMC
 
@@ -95,15 +95,15 @@ LIBHEPMC=-L/usr/lib64 -lHepMC
 ifeq ("$(ANALYSIS)","antikt")
 ##To include Fastjet configuration uncomment the following lines.
 FASTJET_CONFIG=$(shell which fastjet-config)
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins )  -lstdc++
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
+LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins )
+CXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
 PWHGANAL=pwhg_bookhist-multi-new.o pwhg_analysis-antikt.o
 PWHGANAL+= fastjetfortran.o
 else
-PWHGANAL=pwhg_analysis-dummy.o
+PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi-new.o
 endif
 
-LIBS+=$(LIBSFASTJET)
+LIBS+=$(LIBSFASTJET) -lstdc++
 
 all: pwhg_main
 openloops.o: compile_openloops
@@ -121,7 +121,7 @@ ttjdecay.o: compile_openloops
 	$(CC) $(DEBUG) -c -o $(OBJ)/$@ $^
 
 %.o: %.cc | $(OBJDIR)
-	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(FJCXXFLAGS)
+	$(CXX) $(DEBUG) -c -o $(OBJ)/$@ $^ $(CXXFLAGS)
 
 LIBS+=-lz
 USER=init_couplings.o init_processes.o Born_phsp.o Born.o virtual.o \
@@ -240,9 +240,11 @@ ifdef OLLIBS
 	fi
 else
 	@echo "ERROR compiling OpenLoops: OLLIBS not specified!" ;
+	exit 1
 endif
 else
 	@echo "ERROR compiling OpenLoops: OLPATH not specified!" ;
+	exit 1
 endif
 
 
