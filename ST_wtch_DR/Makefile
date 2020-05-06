@@ -183,6 +183,9 @@ PWHG_OFF=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
 	sigcollsoft.o sigvirtual.o  $(PDFPACK) $(USER_OFF) $(FPEOBJ) lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o
 pwhg_main_OFF: $(PWHG_OFF) $(LIBMADGRAPH)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG_OFF)) $(LIBS) $(LIBMADGRAPH) $(LIBSFASTJET) $(STATIC) -o $@
+
+plot_BW: plotbw.o
+	gfortran plotbw.f -o plotbw.exe
 ########################################
 
 
