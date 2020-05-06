@@ -57,6 +57,9 @@ It can be downloaded from here:
 \end{center}
 Apart from obvious changes, the content of this manual is still valid.
 
+A better treatment of offshellness effects was added in May 2020 (from
+rev r3409). It's explained in sec. 4.
+
 \section{Introduction}
 
 The \tmtexttt{POWHEG BOX} program is a framework for implementing NLO
@@ -329,6 +332,46 @@ the CKM matrix exactly equal to zero.\\
 \#lhfm/mumass      0.1056   \phantom{a} ! mu mass \\
 \#lhfm/taumass     1.777    \phantom{a} ! tau mass \\
 }
+
+\subsection*{A new option to simulate offshellness effects}
+From revision r3409 (May 2020) the procedure used to simulate
+offshellness effects of the $W$ bosons was improved ({\bf so far only
+  for the DR case}), to take into account that the invariant mass
+distribution of the primary $W$ boson from the hard scattering should
+deviate slightly from an exact Breit-Wigner shape, due to the fact
+that the structure of the $2\to 2$ (and $2\to 3$) amplitudes contains
+different propagators for the internal lines, that are not constant
+when the virtuality of the $W$ boson is fixed to a given value. In the
+NLO computation of the hard scattering, nothing was changed (all is
+computed with onshell external final states), therefore the total
+cross section remains unchanged. However, the aforementioned effects
+are now taken into account when generating full events with decays.
+
+To activate this improved treatment, a new (optional) flag was introduced~\\~\\
+%
+\tmtexttt{
+\#  fulloffshell 1
+}
+%
+~\\~\\~
+When the flag is activated, if needed the user can also select in
+which interval the virtuality of the primary $W$ boson ($Q_W$) has to
+be generated:~\\~\\
+%
+\tmtexttt{
+\#  numwidth\_W 15\\
+\#  min\_W\_mass 40d0
+}
+%
+~\\~\\~
+%
+The first token set a constraint on the lower and upper bounds of the
+virtuality of the $W$ boson ($Q_W\in [m_W - \mbox{\tmtexttt numwidth\_W}\ \Gamma_W, m_W + \mbox{\tmtexttt numwidth\_W}\ \Gamma_W]$).
+%
+The second token allows to put an additional lower bound on the same
+quantity (typically in experimental analysis one is interested to the
+tail at large values of $Q_W$).
+
 
 \section{Generation of a sample with $t$ and $\bar{t}$
   events}\label{sec:merging}

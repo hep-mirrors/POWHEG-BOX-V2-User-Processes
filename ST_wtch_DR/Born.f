@@ -1076,7 +1076,7 @@ ccccccccccccccccccccccccccccccccc
       data iw/24/
       integer mu,ileg
       real *8 beta_lab_to_cm(3),beta_cm_to_lab(3)
-      real *8 amp2pow,amp2mad,rat
+      real *8 amp2pow,amp2mad,rat,fluxpow,fluxmad
       real *8 m678_2,m67_2,m68_2,m68min_2,m68max_2,m6,m7,m8
       real *8 m910_2,m9,m10
       real *8 k3cm_tdec(0:3,6:8),k2cm_wdec(0:3,9:10),
@@ -1100,17 +1100,19 @@ ccccccccccccccccccccccccccccccccc
 c$$$      logical reorder
 
       logical verbose
-      parameter (verbose=.false.)
+      parameter (verbose=.true.)
 
       real *8 tiny
       parameter (tiny=1.d-6)
-
+     
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     variables needed to generate the decay with the veto method:
 c     phase space & luminosity upper bound
       real *8 cfacbound
+c     !: old
       data cfacbound/2.5d0/
-      save cfacbound
+c     !: May2020. If m67 and m910 are allowed to go
+c     far from the peak, empirically it seems that this factor should be bigger, see below
 c     decay upper bound normalization factor
       real *8 boundnorm
       data boundnorm/0d0/
@@ -1124,9 +1126,20 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real *8 topdecamp,wdecamp
       real *8 dotp,random,powheginput
       external dotp,random,powheginput
-
-
       real *8 tmp
+
+c     !: May2020
+      integer inifulloffshell
+      data inifulloffshell/0/
+      save inifulloffshell
+      logical fulloffshell,pdfveto,fluxveto
+      save fulloffshell,pdfveto,fluxveto
+      real *8 m67_min,cfacpdf,numwidth
+      parameter (m67_min=40d0)
+      real *8 m910_min,m910_numwidth
+      save m910_min,m910_numwidth
+      real *8 amp2powOFF,fluxpowOFF
+      
 ccccccccccccccccccccccccccccccccccc
 c     local functions:
 c     spin summmed and averaged amplitude squared for top decay
@@ -1152,6 +1165,33 @@ c     in m12 rest frame (PDG eq. 38.16)
      $sqrt((m12**2-(m1+m2)**2)*(m12**2-(m1-m2)**2))/2./m12
 cccccccccccccccccccccccccccccccccc
 
+c     !: May2020
+      if(inifulloffshell.eq.0) then
+         fulloffshell=powheginput("#fulloffshell").eq.1
+         if(fulloffshell) then
+            cfacbound = 7d0
+            pdfveto=powheginput("#pdfveto").eq.1 !: default=false
+            fluxveto=.true.
+            write(*,*) '========================================='
+            write(*,*) 'fulloffshell option activated'
+            write(*,*) '========================================='
+            m910_min=powheginput("#min_W_mass")
+            if(m910_min.lt.0d0) m910_min=40d0 !: default
+            m910_numwidth=powheginput("#numwidth_W")
+            if(m910_numwidth.lt.0d0) m910_numwidth=15d0 !: default
+            write(*,*) 'virtuality of primary W: ',max(m910_min
+     $           ,wmass_pow-m910_numwidth*wwidth_pow),wmass_pow
+     $           +m910_numwidth*wwidth_pow
+         else
+c     backward compatibility
+            pdfveto=.true. 
+            fluxveto=.false.
+            m910_min=40d0
+            m910_numwidth=15d0
+         endif
+         inifulloffshell=1
+      endif
+      
 c$$$c     to keep track of relabelling.
 c$$$c     If at the end reorder=true, exchange momenta
 c$$$c     and idup's of particles 4 and 5.
@@ -1199,6 +1239,8 @@ c     hit-and-miss procedure. Therefore, for simplicity here set alfas=1.
       tmass=mtMS
 c     undecayed matrix elements are computed assuming widths=0
       twidth=0d0
+c     !ER:
+c      twidth = topwidth_pow    
       wwidth=0d0
 c     In all the decay procedure, I use MAD routines obtained
 c     without the CKM corrections, both for the decayed and
@@ -1412,7 +1454,7 @@ c     now in amp2pow there is the full powheg squared amplitude
 c     for the last MASSLESS generated event (no flux, no pdf, no ckm,
 c     no phase space, alfas=1)
 
-
+      fluxpow=2d0*(klab_undec(0,1)+klab_undec(0,2))**2
 
 c     fill boost velocities
       do mu=1,3
@@ -1476,6 +1518,7 @@ c     the top offshellness as value for the top mass.
 c     Same consideration holds for W mass.
 c     !: At present, however, the W mass in MadGraph is always kept
 c     fixed and equal to its central value.
+c     !: May2020: when the fulloffshell option is on, the above comment doesn't apply!
 ccccccccccccccc
 c     In graphs where a top propagator is present
 c     in the production process, twidth can/should be set to ZERO
@@ -1500,16 +1543,23 @@ c     changes in luminosity and phase space factors
 c     'phase-space & luminosity' hit-and-miss return point
  2    continue
 c     ->> generate top virtuality (offshellness)
-      m678_2=virt2(topmass_pow,topwidth_pow,random())
-c     Uncomment the following to test strict t pole approximation
-      m678_2=topmass_pow**2
+      if(fulloffshell) then
+         m678_2=virt2(topmass_pow,topwidth_pow,random())
+         m678_2=topmass_pow**2
+      else
+         m678_2=virt2(topmass_pow,topwidth_pow,random()) !: May2020: ugly but needed for backward compatibility
+         m678_2=topmass_pow**2
+      endif
       if(m678_2.lt.wmass_pow**2) then
 c$$$         write(*,*) 'PS&LUM HIT&MISS, m678'
          goto 2
       endif
 c     restrict allowed range of m678 within 20 widths wrt peak value
 c     (to avoid problems with veto upper bound)
-      if(dabs(sqrt(m678_2)-topmass_pow)/topwidth_pow.gt.20) then
+c     !: May2020: with fulloffshell, we want to allow more phase space
+      numwidth=10d0
+      if(fulloffshell) numwidth=10d0
+      if(dabs(sqrt(m678_2)-topmass_pow)/topwidth_pow.gt.numwidth) then
 c$$$         write(*,*) 'm678 too far wrt peak value: ',sqrt(m678_2),' regenerate'
          goto 2
       endif
@@ -1523,15 +1573,21 @@ c     along its BW should improve the efficency.
 c     m68_2 is generated flat between the correct boundaries that depends
 c     upon m67.
       m67_2=virt2(wmass_pow,wwidth_pow,random())
-c     Uncomment the following to test strict w pole approximation
-c$$$      m67_2=wmass_pow**2
+c     !: Uncomment the following to test strict w pole approximation
+c      m67_2=wmass_pow**2
+      if(dabs(sqrt(m67_2)).lt.m67_min) goto 2
+      
       if((m67_2.lt.(m6+m7)**2).or.(m67_2.gt.m678_2)) then
 c$$$         write(*,*) 'PS&LUM HIT&MISS, m67',m67_2
          goto 2
       endif
 c     extreme values of m67 seem to cause problems here
 c     (more serious than s/t-channel). Therefore, avoid them!
-      if((dabs(sqrt(m67_2)-wmass_pow)/wwidth_pow).gt.20) then
+
+c     !: May2020: with fulloffshell, we want to allow more phase space
+      numwidth=20d0
+      if(fulloffshell) numwidth=40d0
+      if((dabs(sqrt(m67_2)-wmass_pow)/wwidth_pow).gt.numwidth) then    
 c$$$         write(*,*) 'extreme value for m67: ',sqrt(m67_2),' regenerate'
          goto 2
       endif
@@ -1540,16 +1596,27 @@ c$$$         write(*,*) 'extreme value for m67: ',sqrt(m67_2),' regenerate'
       m68_2=m68min_2 +random()*(m68max_2-m68min_2)
 
 c     ->> generate W virtuality (offshellness)
-      m910_2=virt2(wmass_pow,wwidth_pow,random())
-c     Uncomment the following to test strict w pole approximation
-      m910_2=wmass_pow**2
+      if(fulloffshell) then
+         m910_2=virt2(wmass_pow,wwidth_pow,random())
+c     m910_2=m910_min**2 + random() * (150d0**2 -m910_min**2)
+      else
+         m910_2=virt2(wmass_pow,wwidth_pow,random())  !: May2020: ugly but needed for backward compatibility
+         m910_2=wmass_pow**2
+      endif
+      
+c     !:
+      if(dabs(sqrt(m910_2)).lt.m910_min) goto 2
+      
       if(m910_2.lt.(m9+m10)**2) then
 c$$$         write(*,*) 'PS&LUM HIT&MISS, m910',m910_2
          goto 2
       endif
 c     restrict allowed range of m910 within 15 widths wrt peak value
 c     (to avoid problems with veto upper bound)
-      if(dabs(sqrt(m910_2)-wmass_pow)/wwidth_pow.gt.15) then
+c     !: May2020: with fulloffshell, we want to allow more phase space
+      numwidth=15d0
+      if(fulloffshell) numwidth=m910_numwidth
+      if(dabs(sqrt(m910_2)-wmass_pow)/wwidth_pow.gt.numwidth) then
 c$$$         write(*,*) 'm910 too far wrt peak value: ',sqrt(m910_2),' regenerate'
          goto 2
       endif
@@ -1599,10 +1666,13 @@ c     check that kwtvec_dec and kwtvec_undec are the same
          endif
       enddo
 
+     
 c     phase-space factor for hit-and-miss
 c     6-> e, 7->ve, 8->b, 9->e, 10->ve
+ccccccccccccccccccccccccc
+      cfac=1d0      !ER: play with phase-space
 c     1/(Etop*Ew) in wt frame
-      cfac=      kwtcm_undec(0,3)/kwtcm_dec(0,3)
+      cfac=cfac *kwtcm_undec(0,3)/kwtcm_dec(0,3)
       cfac=cfac *kwtcm_undec(0,4)/kwtcm_dec(0,4)
 c     t->Wb phase space:  bvec/topmass (b assumed massless)
       cfac=cfac *(decmom(sqrt(m678_2),sqrt(m67_2),m8)/sqrt(m678_2))/
@@ -1613,23 +1683,33 @@ c     W->lv phase space, W from top: lvec/wmass (l and v assumed massless)
 c     W->lv phase space, primary W: lvec/wmass (l and v assumed massless)
       cfac=cfac *(decmom(sqrt(m910_2),m9,m10)/sqrt(m910_2))/
      $(decmom(wmass_pow,m9,m10)/wmass_pow)
+cccccccccccccccccccccc
 c     Jacobian: sqrt(tau) * (mwt/Ewt)  in CM frame
       mwt_dec=Ewt_wtcm
       mwt_undec=sqrt(topmass_pow**2 + wmass_pow**2 +
-     $2d0*dotp(kwtcm_undec(0,3),kwtcm_undec(0,4)))
+     $     2d0*dotp(kwtcm_undec(0,3),kwtcm_undec(0,4)))
       sqrttau_dec  = Ewt_cm+kcm_undec(0,5)
       sqrttau_undec= kcm_undec(0,3)+kcm_undec(0,4)+
-     $kcm_undec(0,5)
-      cfac=cfac *(sqrttau_dec*mwt_dec/Ewt_cm)/
-     $(sqrttau_undec *mwt_undec/(kcm_undec(0,3)+kcm_undec(0,4)))
+     $     kcm_undec(0,5)
+      cfac=cfac *(sqrttau_dec*mwt_dec/Ewt_cm)/ (sqrttau_undec *mwt_undec
+     $     /(kcm_undec(0,3)+kcm_undec(0,4))) 
+
+c      print*, "sqrt taus ratio ",sqrttau_dec/sqrttau_undec !:
+      
+cccccccccccccccccccccccccccccc
+c     !: PDFs
 c     Luminosity change: f(x1)*f(x2)
 c     The choice for the factorization scale here is not
 c     unambiguos. I use topmass_pow (BW peak), a safe value.
 c     It can be argued that other choices are more appropriate.
       st_mufact2=topmass_pow**2
+      cfacpdf=1d0
       do ileg=1,2
          xpdf(ileg)=pup(4,ileg)/kn_beams(0,ileg)
          xpdf_dec(ileg)=xpdf(ileg)*sqrttau_dec/sqrttau_undec
+
+c         print*, kn_beams(0,ileg)
+         
          if(xpdf_dec(ileg).gt.1d0) then
          write(*,*)'PS&LUM HIT&MISS, x1_dec,x2_dec ',ileg,xpdf_dec(ileg)
             goto 2
@@ -1640,14 +1720,14 @@ c     It can be argued that other choices are more appropriate.
             call pdfcall(1,xpdf(1),pdf1_und)
             call pdfcall(1,xpdf_dec(1),pdf1_dec)
             if(pdf1_und(flav(1)).ne.0) then
-               cfac=cfac 
+               cfacpdf=cfacpdf 
      $              *pdf1_dec(flav(1))/pdf1_und(flav(1))
             endif
          elseif(ileg.eq.2) then
             call pdfcall(2,xpdf(2),pdf2_und)
             call pdfcall(2,xpdf_dec(2),pdf2_dec)
             if(pdf2_und(flav(2)).ne.0) then
-               cfac=cfac 
+               cfacpdf=cfacpdf
      $              *pdf2_dec(flav(2))/pdf2_und(flav(2))
             endif
          else
@@ -1655,6 +1735,8 @@ c     It can be argued that other choices are more appropriate.
             call exit(1)
          endif
       enddo
+      if(pdfveto) cfac=cfac*cfacpdf
+cccccccccccccccccccccccccccccccccccccc      
 c     hit-and-miss rule, as in POWHEG-hvq
       if(cfac.gt.cfacbound) then
          if(verbose) then
@@ -1890,7 +1972,12 @@ c     W's, also because there are 2 of them...
 c     Therefore, wmass in madgraph is the central value
 c     of the BW.
 ccccccccccccccccccccccccccccc
-
+c     !: May2020. Here we use the physical masses
+      if(fulloffshell) then
+         mtMS=topmass_pow
+         tmass=topmass_pow
+      endif
+      
 c     -->> Born-like event
       if(nup.eq.nlegborn) then
 c     bg
@@ -1903,6 +1990,8 @@ c     gb
             write(*,*) 'Error in twdecay (born dec flavour)'
             call exit(1)
          endif
+
+         fluxmad=2d0*(kbcm_mad(0,1)+kbcm_mad(0,2))**2 !ER:
 
 c     -->> real event
       elseif(nup.eq.nlegreal) then
@@ -1978,7 +2067,10 @@ c$$$            ileg=idup_loc(4)
 c$$$            idup_loc(4)=idup_loc(5)
 c$$$            idup_loc(5)=ileg
 c$$$            reorder=.false.         
-c$$$         endif
+c$$$  endif
+
+         fluxmad=2d0*(krcm_mad(0,1)+krcm_mad(0,2))**2 !ER:
+         
       else
          write(*,*) 'Invalid nup in twdecay, 2'
          call exit(1)
@@ -1991,7 +2083,7 @@ c     in powheg squared matrix element
       xboundb=xboundb
      #/((m678_2-tmass**2)**2+tmass**2*twidth**2) ! top
      #/((m67_2-wmass**2)**2+wmass**2*wwidth**2)  ! w from top
-     #/((m910_2-wmass**2)**2+wmass**2*wwidth**2) ! primary w
+     #/((m910_2-wmass**2)**2+wmass**2*wwidth**2) ! primary w !ER: !ER:
 cccccccccccccccccccccccccccccccccccccccccc
 c     Notice that (m678_2-tmass**2) is always zero,
 c     because of the assignment above.
@@ -2001,8 +2093,31 @@ c     hit-and-miss ratio is calculated.
 c     Therefore, an arbitrary large value for twidth is no
 c     longer needed. For the w propagators, this is not
 c     true.
+
+c     !: May2020: The above comment doesn't apply when the fulloffshell
+c     option is activated
+      
 cccccccccccccccccccccccccccccccccccccccccc
 
+ccccccccccccccccccccccccccccccccccccccccccccc
+c     !: May2020
+c     !: This is the crucial change. See comment before the subroutine recompute_undec_mad
+ccccccccccccccccccccccccccccccccccccccccccccc
+      if(fulloffshell) then
+c$$$      call recompute_undec_mad(klab_undec,idup_loc,amp2powOFF)
+c$$$      print*, amp2powOFF/amp2pow
+c$$$      do ileg=1,5
+c$$$         call boost(beta_lab_to_cm,klab_undec(0,ileg),ptemp(0))
+c$$$         print*, ptemp
+c$$$         print*, kcm_undec_off(:,ileg)
+c$$$      enddo
+         call recompute_undec_mad(kcm_undec_off,idup_loc,amp2powOFF)
+         fluxpowOFF=2d0*(kcm_undec_off(0,1)+kcm_undec_off(0,2))**2
+c     print*, sqrt(m678_2),sqrt(m910_2),amp2powOFF/amp2pow
+         amp2pow=amp2powOFF
+         fluxpow=fluxpowOFF
+      endif
+      
 c     Amplitude squared for (top decay * w decay)
       xboundb=xboundb*(topdecamp(m678_2,m67_2)/sthw2_pow)*
      #(wdecamp(m67_2)/sthw2_pow)
@@ -2018,12 +2133,23 @@ c$$$     $     (sthw2_pow)**3
 ccccccccccccccccccccccccccccccccccc
 
       rat=amp2mad/(xboundb*amp2pow)
-
+c     !: May2020: added option to correct for fluxes
+      if(fulloffshell.and.fluxveto) then
+c     Rememeber: dsigma = amp2/flux, and rat is amp2mad/amp2pow
+         rat=rat*(fluxpow/fluxmad)
+      endif
+      
       if(ini.eq.0) then
-         nubound=powheginput('nubound')
+c     !: May2020: Set to 50K the default number of points to be used to sample the upper bound.
+c     Here we are also probing more off-shell regions...
+         if(fulloffshell) then
+            nubound=500000
+         else
+            nubound=powheginput('nubound')
 c     use as number of trial points nubound, or 10000 is nubound
 c     is larger (10000 is an empyrical value)
-         nubound=min(nubound,10000)
+            nubound=min(nubound,10000)
+         endif
          iii=iii+1
          boundnorm=max(boundnorm,rat)
          if(iii.eq.nubound) goto 3
@@ -2065,7 +2191,11 @@ c     If we are here, kinematics has been accepted: we can save the momenta
       do ileg=1,nlegreal
        call boost(beta_cm_to_lab,kcm_undec_off(0,ileg),klab_dec(0,ileg))
       enddo
+c      print*, '==========='
+c      print*, kcm_undec_off(:,1)
+c      print*, kcm_undec_off(:,2)
 
+      
 c     WARNING: Notice that, at this point, in k3cm_tdec,
 c     the top decay products are ordered as (b,e+,ve).
 c     Instead, I want them in the usual order,
@@ -2088,7 +2218,11 @@ c     i.e. (6-> e, 7->ve, 8->b).
          call boost(beta_cm_to_lab,k2cm_wdec(0,ileg),klab_dec(0,ileg))
       enddo
 
-c     call check_kinematics(klab_dec,nlegreal+3)
+c      print*, '==========='
+c      print*, klab_dec(:,1)
+c      print*, klab_dec(:,2)
+      
+c      call check_kinematics(klab_dec,nlegreal+3) !ER:
       end
 
       subroutine pickwdecay(iw1,mdecw1,iw2,mdecw2,iw3,mdecw3,iw4,mdecw4,
@@ -3383,3 +3517,201 @@ c$$$      subroutine momenta_reshuffle(ires,i1,i2,decmass)
 c$$$      implicit none
 c$$$      end
 
+
+ccccccccccccccccccccc
+
+
+
+      subroutine recompute_undec_mad(kcm_undec_off,idup_loc,amp2)
+c     This subroutine recomputes the undecayed MadGraph matrix elements,
+c     but setting the mass of the top and the W equal to the current
+c     off-shellness present in kcm_undec_off
+c     (|M_undec(offshell)|^2). This is more appropriate than what the
+c     code originally did, the reason being that, now, when I compute
+
+c     |M_undec(offshell)|^2 * BW_factors * decay_factors
+
+c     (this is done through xboundb*amp2pow), the squared ME contains an
+c     information about the rest of the production amplitude. Before
+c     this improvement, the undecayed ME was computed using the exact
+c     onshell kinematics, and therefore the interplay between the BW
+c     factor (and its offshell kinematics) and the internal structure of
+c     the undecayed amplitude (internal propagators: t-channel top or
+c     s-channel b) was completely missing. This is crucial, because it
+c     alters the exact BW shape.
+      
+      implicit none
+      include 'PhysPars.h'
+      include 'pwhg_math.h'
+cccccccccccccccccccccccccccccccc    
+c     common bl. originally present in lh_readin, needed
+c     by my_setpara
+c
+c     Common to lh_readin and printout
+c
+      double precision  alpha, gfermi, alfas
+      double precision  mtMS,mbMS,mcMS,mtaMS!MSbar masses
+      double precision  Vud             !CKM matrix elements
+      common/values/    alpha,gfermi,alfas,   
+     &                  mtMS,mbMS,mcMS,mtaMS,
+     &                  Vud
+ccccccccccccccccccccccccccccccccc
+      include 'nlegborn.h'
+      include 'LesHouches.h'
+      integer idup_loc(nlegreal),ileg
+      real *8 kcm_undec_off(0:3,nlegreal),amp2,dotp,amp2mad
+     $     ,klab_undec(0:3,nlegreal),kblab(0:3,nlegborn)
+      real *8 mtMS_loc,tmass_loc,twidth_loc,wmass_loc,wwidth_loc,www,gfermi_loc
+      
+c     Calculate undecayed matrix element.
+c     No need of using realistic or current strong coupling for the
+c     hit-and-miss procedure. Therefore, for simplicity here set alfas=1.
+      alfas=1.
+
+cccccccccccccccccccccccccccccccccccccccc      
+c     SAVE (this subroutine is called within the hit-and-miss loop, we
+c     don't want to change the quantities below, except for the MG
+c     evaluation within this subroutine):
+      mtMS_loc   = mtMS
+      tmass_loc  = tmass
+      twidth_loc = twidth
+      wmass_loc  = wmass    
+      wwidth_loc = wwidth
+c      gfermi_loc = gfermi
+ccccccccccccccccccccccccccccccccccccccc
+c     Now assign top and W masses equal to the current offshellness
+c     TOP
+      mtMS=sqrt(dotp(kcm_undec_off(:,3),kcm_undec_off(:,3)))
+      tmass=mtMS
+c     PRIMARY W
+      wmass=sqrt(dotp(kcm_undec_off(:,4),kcm_undec_off(:,4)))     
+
+c     Compute undecayed ME with physical widths (there's an ambiguity on
+c     this point, as the nominal mass is not the physical one, but using
+c     a physical width is a possible option).
+c     twidth = 0d0
+      twidth = topwidth_pow     !:
+c     wwidth = 0d0
+      wwidth = wwidth_pow   !:
+c      www=zmass*sqrt(1-sthw2_pow)
+c      gfermi=pi*zmass**2*alpha/sqrt(2.)
+c      gfermi=gfermi/(zmass**2*www**2 - www**4)
+cccccccccccccccccccccccccccccccccccccccc
+
+c     In all the decay procedure, I use MAD routines obtained
+c     without the CKM corrections, both for the decayed and
+c     the undecayed part. This means that routines were
+c     generated with madgraph without the smckm option enabled,
+c     that was instead used for the production subprocesses.
+      call my_setpara
+
+c     fill klab_undec properly
+      do ileg=1,2
+         klab_undec(:,ileg)=kcm_undec_off(:,ileg)
+      enddo
+c     to avoid bugs in HELAS, restore exact masslessness of incoming partons 
+      klab_undec(0,1)=dabs(klab_undec(3,1))
+      klab_undec(0,2)=dabs(klab_undec(3,2))
+c     input order: madgraph order: (t,w), and here momenta are already in the "madgraph" order
+      klab_undec(:,4)=kcm_undec_off(:,4)
+      klab_undec(:,3)=kcm_undec_off(:,3)
+
+c     -->> Born-like event
+      if(nup.eq.nlegborn) then
+         klab_undec(:,5)=0d0
+c     from klab_undec to kblab
+         call preal_to_pborn(klab_undec,kblab)
+c     now reevaluate Born squared amplitude, using HELAS.
+c     bg
+         if(idup_loc(1).eq.1.and.idup_loc(2).eq.0) then
+            call Sbg_twm_undec(kblab,amp2mad)
+c     gb
+         elseif(idup_loc(1).eq.0.and.idup_loc(2).eq.1) then
+            call Sgb_twm_undec(kblab,amp2mad)
+         else
+            write(*,*) 'Error in recompute, Born'
+            call exit(1)
+         endif
+c     -->> real event
+      elseif(nup.eq.nlegreal) then
+         klab_undec(:,5)=kcm_undec_off(:,5)
+c     ux u -> bx
+         if ((idup_loc(1).eq.-2).and.
+     $        (idup_loc(2).eq.2).and.
+     $        (idup_loc(5).eq.-1)) then
+            call Suxu_twmbx_undec(klab_undec,amp2mad)
+c     ux b -> ux
+         elseif((idup_loc(1).eq.-2).and.
+     $        (idup_loc(2).eq.1).and.
+     $        (idup_loc(5).eq.-2)) then
+            call Suxb_twmux_undec(klab_undec,amp2mad)
+c     u ux -> bx 
+         elseif((idup_loc(1).eq.2).and.
+     $        (idup_loc(2).eq.-2).and.
+     $        (idup_loc(5).eq.-1)) then
+            call Suux_twmbx_undec(klab_undec,amp2mad)
+c     u b  -> u
+         elseif((idup_loc(1).eq.2).and.
+     $        (idup_loc(2).eq.1).and.
+     $        (idup_loc(5).eq.2)) then
+            call Sub_twmu_undec(klab_undec,amp2mad)
+c     bx b -> bx
+         elseif((idup_loc(1).eq.-1).and.
+     $        (idup_loc(2).eq.1).and.
+     $        (idup_loc(5).eq.-1)) then
+            call Sbxb_twmbx_undec(klab_undec,amp2mad)
+c     b ux -> ux
+         elseif((idup_loc(1).eq.1).and.
+     $        (idup_loc(2).eq.-2).and.
+     $        (idup_loc(5).eq.-2)) then
+            call Sbux_twmux_undec(klab_undec,amp2mad)
+c     b u  -> u 
+         elseif((idup_loc(1).eq.1).and.
+     $        (idup_loc(2).eq.2).and.
+     $        (idup_loc(5).eq.2)) then
+            call Sbu_twmu_undec(klab_undec,amp2mad)
+c     b bx -> bx
+         elseif((idup_loc(1).eq.1).and.
+     $        (idup_loc(2).eq.-1).and.
+     $        (idup_loc(5).eq.-1)) then
+            call Sbbx_twmbx_undec(klab_undec,amp2mad)
+c     b b  -> b
+         elseif((idup_loc(1).eq.1).and.
+     $        (idup_loc(2).eq.1).and.
+     $        (idup_loc(5).eq.1)) then
+            call Sbb_twmb_undec(klab_undec,amp2mad)
+c     b g  -> g
+         elseif((idup_loc(1).eq.1).and.
+     $        (idup_loc(2).eq.0).and.
+     $        (idup_loc(5).eq.0)) then
+            call Sbg_twmg_undec(klab_undec,amp2mad)
+c     g b  -> g
+         elseif((idup_loc(1).eq.0).and.
+     $        (idup_loc(2).eq.1).and.
+     $        (idup_loc(5).eq.0)) then
+            call Sgb_twmg_undec(klab_undec,amp2mad)
+c     g g  -> bx 
+         elseif((idup_loc(1).eq.0).and.
+     $        (idup_loc(2).eq.0).and.
+     $        (idup_loc(5).eq.-1)) then
+            call Sgg_twmbx_undec(klab_undec,amp2mad)
+         else
+            write(*,*) 'Error in twdecay (real flavour 4)'
+            call exit(1)
+         endif
+      else
+         write(*,*) 'Invalid nup in twdecay, 1'
+         call exit(1)
+      endif
+
+      amp2=amp2mad
+ccccccccccccccccccccccccccccccccccccc
+c     RESTORE:
+      mtMS   = mtMS_loc
+      tmass  = tmass_loc
+      twidth = twidth_loc
+      wmass  = wmass_loc    
+      wwidth = wwidth_loc
+c      gfermi = gfermi_loc
+cccccccccccccccccccccccccccccccccccc
+      end
