@@ -25,6 +25,11 @@ c  pwhgfill  :  fills the histograms with data
       icut=-1
       diag=0
 
+      call bookupeqbins('m67',2d0,23d0,163d0)
+      call bookupeqbins('m910',2d0,23d0,163d0)
+      call bookupeqbins('m910all',2d0,23d0,243d0)
+      
+      
  111  continue
       icut=icut+1
 
@@ -252,6 +257,9 @@ c     we need to tell to this analysis file which program is running it
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
 
+      real *8 p67(0:3),p910(0:3),m67,m910
+      
+
       if (ini) then
          write(*,*) '*****************************'
          if(whcprg.eq.'NLO'.or.whcprg.eq.'LHE') then
@@ -303,6 +311,11 @@ c     !: look only for W associated to wcode
                   endif
                endif
             enddo
+
+            p910(:)=p_w(:,1)
+
+
+            
          elseif(whcprg.eq.'LHE') then
 
 c     ist values for top and W
@@ -314,6 +327,15 @@ c     write(*,*) istup(ihep),idup(ihep),pup(1:4,ihep)
                ist=istup(ihep)
                id=idup(ihep)
                phep(1:4,ihep)=pup(1:4,ihep)
+
+               if(id.eq.24) then
+                  p67(0)=phep(4,ihep)
+                  p67(1:3)=phep(1:3,ihep)
+               endif
+               if(id.eq.-24) then
+                  p910(0)=phep(4,ihep)
+                  p910(1:3)=phep(1:3,ihep)
+               endif
                
 c     top
                if(ist.eq.ist_top.and.abs(id).eq.abs(tcode)) then
@@ -412,6 +434,14 @@ ccccccccccccccccccccccccccccccc
 c     Observables
 ccccccccccccccccccccccccccccccc 
 
+
+      call getinvmass(p67,m67)
+      call getinvmass(p910,m910)
+      call filld('m67',m67,dsig)
+      call filld('m910',m910,dsig)
+      call filld('m910all',m910,dsig)
+
+      
 c     t
       pt_t      = sqrt(p_top(1,1)**2+p_top(2,1)**2)
       call getrapidity(p_top(0,1),y_t)

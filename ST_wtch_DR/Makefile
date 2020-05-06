@@ -87,11 +87,11 @@ endif
 # add libdhelas3.2a to the list of linked libraries:
 LIBMADGRAPH=madgraph/dhelas3.2/libdhelas3.2.a
 # add libqcdloop.a and libff.a to the list of linked libraries:
-LIBSQCDLOOP= QCDLoop-1.9/ql/libqcdloop.a QCDLoop-1.9/ff/libff.a
+LIBSQCDLOOP= QCDLoop-1.96/ql/libqcdloop.a QCDLoop-1.96/ff/libff.a
 LIBS += $(LIBSQCDLOOP)
 # clear and reassign VPATH (needs also directories relevant to link madgraph):
 vpath
-VPATH= ./:../:$(OBJ)/:madgraph/:madgraph/ME_decayed:QCDLoop-1.9/ql:QCDLoop-1.9/ff
+VPATH= ./:../:$(OBJ)/:madgraph/:madgraph/ME_decayed:QCDLoop-1.96/ql:QCDLoop-1.96/ff
 # list of madgraph routines:
 MADGRAPH= $(LIBSMADGRAPH) my_setpara.o switchmom.o \
 	MAD_born_routines.o MAD_real_routines_DR.o \
@@ -162,6 +162,31 @@ clean:
 	madgraph/dhelas3.2/*.o madgraph/dhelas3.2/*.a \
 	merge_t_tb
 
+###########################################################################
+# CODE TO CHECK FULL OFFSHELLNESS EFFECTS. TO BE USED ONLY BY THE ORIGINAL AUTHOR.
+# IT ALLOWS TO INTEGRATE THE DECAYED ME (AT LO ONLY) ON THE FULL OFFSHELL PHASE SPACE.
+# NO SPIN EFFECTS (THE PHASE SPACE IS 2->2, BUT WITH OFFSHELLNESS, SO THAT ONE CAN COMPUTE THE
+# FULL LO MATRIX ELEMENT, AND CHECK THE BW SHAPES OF THE PRIMARY W AND THE TOP)
+###########################################################################
+USER_OFF=init_couplings.o init_processes.o Born_phsp_offshell.o Born_offshell.o virtual.o	\
+     real.o $(PWHGANAL) bmunu2.o boost.o $(MADGRAPH)
+PWHG_OFF=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o		\
+	LesHouches.o LesHouchesreg.o gen_Born_phsp.o find_regions.o	\
+	test_Sudakov.o pt2maxreg.o sigborn.o gen_real_phsp.o maxrat.o	\
+	gen_index.o gen_radiation.o Bornzerodamp.o sigremnants.o	\
+	random.o boostrot.o bra_ket_subroutines.o cernroutines.o	\
+	init_phys.o powheginput.o pdfcalls.o sigreal.o sigcollremn.o	\
+	pwhg_analysis_driver.o checkmomzero.o		\
+	setstrongcoupl.o integrator.o newunit.o mwarn.o sigsoftvirt.o	\
+	reshufflemoms.o setlocalscales.o validflav.o mint_upb.o  \
+	minlo_checks.o  pwhgreweight.o opencount.o ubprojections.o \
+	sigcollsoft.o sigvirtual.o  $(PDFPACK) $(USER_OFF) $(FPEOBJ) lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o
+pwhg_main_OFF: $(PWHG_OFF) $(LIBMADGRAPH)
+	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG_OFF)) $(LIBS) $(LIBMADGRAPH) $(LIBSFASTJET) $(STATIC) -o $@
+########################################
+
+
+
 ###################################################################
 # From here on there are targets specific to the ST implementation
 ##################################################################
@@ -185,3 +210,7 @@ MERGE_t_tb=merge_t_tb.o newunit.o random.o cernroutines.o
 merge_t_tb: $(MERGE_t_tb)
 	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(MERGE_t_tb)) -o $@
 ##########
+
+
+
+
