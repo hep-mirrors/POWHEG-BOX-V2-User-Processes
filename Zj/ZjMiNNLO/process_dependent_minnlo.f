@@ -1,7 +1,9 @@
       subroutine init_masses_Dterms()
       use internal_parameters, pi_hoppet => pi, cf_hoppet => cf, ca_hoppet => ca, tf_hoppet => tf
       implicit none
+      double precision powheginput
       include 'PhysPars.h'
+      if(powheginput('#zmass') .ge. 0d0) ph_zmass = powheginput('#zmass') 
       call set_masses(ph_zmass)
       end
 
@@ -15,8 +17,9 @@ c DUMMY routine for bmass used in setlocalscales.f for Higgs
 c DUMMY routine for bmass used in setlocalscales.f for Higgs
       function get_M_for_init_Dterms()
       implicit none
-      double precision get_M_for_init_Dterms
+      double precision get_M_for_init_Dterms, powheginput
       include 'PhysPars.h'
+      if(powheginput('#zmass') .ge. 0d0) ph_zmass = powheginput('#zmass')
       get_M_for_init_Dterms = ph_zmass
       end
 c DUMMY routine for bmass used in setlocalscales.f for Higgs

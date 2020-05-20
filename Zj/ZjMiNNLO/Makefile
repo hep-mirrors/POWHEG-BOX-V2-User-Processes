@@ -4,8 +4,8 @@ COMPILER=gfortran
 FC=$(COMPILER)
 ## Choose PDF: native,lhapdf
 ## LHAPDF package has to be installed separately
-PDF=lhapdf
-#PDF=hoppet
+#PDF=lhapdf
+PDF=hoppet
 ## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
 ##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
@@ -19,10 +19,11 @@ V2DIR=$(shell (cd ../.. ; pwd))
 STDCLIB=-lstdc++
 #STDCLIB=-lc++
 
+
 stdclib=$(STDCLIB)
 
 ifeq ("$(COMPILER)","gfortran")	
-F77=gfortran -fno-automatic -ffixed-line-length-none -ffree-line-length-none -fbounds-check -fno-align-commons
+F77=gfortran -ffixed-line-length-none -ffree-line-length-none -fbounds-check -fno-align-commons
 # -finit-real=nan -ffpe-trap=invalid,zero,overflow
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -77,8 +78,6 @@ PLUGINSDIRINC=$(PLUGINSDIR)/include
 LOCALHOPPET=$(PLUGINSDIR)/hoppet
 VPATH=.:$(PLUGINSDIR):$(LOCALHOPPET):$(Zj):$(Zj)/Madlib:$(Zj)/MODEL:$(Zj)/DHELAS:$(V2DIR):$(OBJ)/
 
-
-
 INCLUDE0=$(Zj)
 INCLUDE1=$(V2DIR)/include
 FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(PWD) -I$(PLUGINSDIRINC) -I$(INCLUDE0) -I$(INCLUDE1) -J$(OBJ)
@@ -109,7 +108,7 @@ endif
 
 ifeq ("$(PDF)","hoppet")
 LHAPDF_CONFIG=lhapdf-config
-PDFPACK=hoppetif.o lhapdf6ifcc.o
+PDFPACK=hoppetif.o hoppetifcc.o
 FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF $(stdclib) -std=c++11
 LIBS+=$(LIBSLHAPDF)
@@ -206,8 +205,8 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
- endif
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o #boostrot4.o  BornProj.o
+endif
 
 
 # PYTHIA 8
@@ -289,7 +288,6 @@ $(shell $(V2DIR)/svnversion/svnversion.sh $(PWD) $(Zj) $(V2DIR) >/dev/null)
 # target to generate LHEF output
 pwhg_main:$(PWHG)
 	$(FF) $(patsubst %,$(OBJ)/%,$(PWHG))  $(LIBSFASTJET) $(LIBS) $(STATIC) -o $@
-
 
 
 # libfiles.a: $(LIBFILES)
@@ -386,7 +384,7 @@ pdfs_tools.o: rad_tools.o internal_parameters.o coefficient_functions_nnlops.o
 driver.o: rad_tools.o pdfs_tools.o internal_parameters.o sudakov_radiators.o
 sudakov_radiators.o: rad_tools.o frcgauss.o setstrongcoupl.o
 frcgauss.o:
-
+hoppetif.o: pdfs_tools.o rad_tools.o
 
 xpij2e.o: qcd.o
 xpns2e.o: qcd.o

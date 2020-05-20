@@ -74,6 +74,12 @@ c     extra plots
          call bookupeqbins('ptj1-yj4'//trim(suffix(icut)),dpt,0d0,500d0)
       enddo
 
+      call bookupeqbins('ptV_y_lt_3',dpt,0d0,500d0)
+      call bookupeqbins('ptVzoom_y_lt_3',dptzoom,0d0,50d0)
+      call bookupeqbins('ptV_y_gt_3',dpt,0d0,500d0)
+      call bookupeqbins('ptVzoom_y_gt_3',dptzoom,0d0,50d0)
+      call bookupeqbins('ptV_y_gt_3.75',dpt,0d0,500d0)
+      call bookupeqbins('ptVzoom_y_gt_3.75',dptzoom,0d0,50d0)
 
       end
 
@@ -87,6 +93,7 @@ c     extra plots
       include 'pwhg_rad.h'
       include 'pwhg_rwl.h'
       include 'LesHouches.h'
+      include 'pwhg_kn.h'
       logical ini
       data ini/.true./
       save ini
@@ -128,6 +135,7 @@ c$$$         pub(4,1:10)=phep(4,1:10)
          goto 123
       endif
 
+
  
  123  continue
 
@@ -160,6 +168,12 @@ c      print*, corrfactor,rad_type
          endif
          write(*,*) '*****************************'
 
+
+c         if(weights_num.eq.0) then
+c            call setupmulti(1)
+c         else
+c            call setupmulti(weights_num)
+c         endif
 
          write(*,*) ''
          write(*,*) '*****************************'
@@ -205,6 +219,13 @@ c      print*, corrfactor,rad_type
       if(sum(abs(dsig)).eq.0) return
 
       dsig=dsig*corrfactor
+
+      do i=1,rwl_num_weights
+         if(dsig(i) > 1d9 .or. dsig(i)+1 .eq. dsig(i)) then
+            write(*,*) "LARGE weight. DISCARDING EVENT, i, weight = ",i, dsig(i)
+            return
+         endif
+      enddo
 
 c     Loop over final state particles to find V decay
       neminus=0
@@ -274,9 +295,18 @@ c     Higgs histograms
 
       call filld('ptV',ptV,dsig)
       call filld('ptVzoom',ptV,dsig)
-
-
-
+      if(dabs(yV).lt.3d0) then
+         call filld('ptV_y_lt_3',ptV,dsig)
+         call filld('ptVzoom_y_lt_3',ptV,dsig)
+      elseif(dabs(yV).ge.3d0) then
+         call filld('ptV_y_gt_3',ptV,dsig)
+         call filld('ptVzoom_y_gt_3',ptV,dsig)
+         if(dabs(yV).ge.3.75d0) then
+            call filld('ptV_y_gt_3.75',ptV,dsig)
+            call filld('ptVzoom_y_gt_3.75',ptV,dsig)
+         endif
+      endif
+      
 C     find jets 
       rr=0.4d0       
       ptmin=0d0

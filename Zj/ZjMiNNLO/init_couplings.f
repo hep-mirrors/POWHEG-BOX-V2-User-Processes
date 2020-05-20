@@ -19,9 +19,9 @@ c     to define here rad_bottomthr2
 
       flg_minnlo=powheginput('#minnlo').eq.1
       flg_uubornonly=powheginput('#uubornonly').eq.1
-      if (flg_uubornonly) then
-         flg_bornonly = .true.
-      endif
+c$$$      if (flg_uubornonly) then
+c$$$         flg_bornonly = .true.
+c$$$      endif
 c     If minlo is not present in the input card, but minnlo is,
 c     then set also flg_minlo to true, so that we are sure all is done
 c     properly in setlocalscales and for all other occurencies of
