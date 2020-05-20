@@ -19,12 +19,6 @@ V2DIR=$(shell (cd ../.. ; pwd))
 STDCLIB=-lstdc++
 #STDCLIB=-lc++
 
-ifeq ("$(shell whoami)","re")
-V2DIR = /home/re/Fortran/SVN/trunk/POWHEG-BOX-V2/
-STDCLIB=-lstdc++
-endif
-
-
 stdclib=$(STDCLIB)
 
 ifeq ("$(COMPILER)","gfortran")	
