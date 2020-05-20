@@ -1,0 +1,6 @@
+st1 xg1  lun 30 set 2019, 16.44.19, CEST
+st1 xg2  lun 30 set 2019, 16.55.12, CEST
+st2  lun 30 set 2019, 16.59.35, CEST
+st3  lun 30 set 2019, 19.21.24, CEST
+st4  lun 30 set 2019, 19.34.43, CEST
+end  lun 30 set 2019, 23.04.02, CEST
