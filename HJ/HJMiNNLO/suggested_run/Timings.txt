@@ -1,6 +1,0 @@
-st1 xg1  mer  2 ott 2019, 07.30.05, CEST
-st1 xg2  mer  2 ott 2019, 07.31.21, CEST
-st2  mer  2 ott 2019, 07.32.38, CEST
-st3  mer  2 ott 2019, 07.45.06, CEST
-st4  mer  2 ott 2019, 07.47.46, CEST
-end  mer  2 ott 2019, 09.24.33, CEST

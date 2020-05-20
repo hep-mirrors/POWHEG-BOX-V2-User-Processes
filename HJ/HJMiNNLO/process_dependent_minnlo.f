@@ -1,15 +1,24 @@
       subroutine init_masses_Dterms()
       use internal_parameters, pi_hoppet => pi, cf_hoppet => cf, ca_hoppet => ca, tf_hoppet => tf
       implicit none
+      double precision powheginput
       include 'PhysPars.h'
+      ph_zmass = powheginput('#zmass') 
+      if (ph_zmass .lt. 0) ph_zmass = 91.1876d0
+      ph_topmass = powheginput('#topmass')
+      if (ph_topmass .lt. 0) ph_topmass = 173.2d0
       call set_masses(ph_zmass,ph_topmass)
+      print*, "Z, topmass = ",ph_zmass, ph_topmass
       end
 
       function get_M_for_init_Dterms()
       implicit none
-      double precision get_M_for_init_Dterms
+      double precision get_M_for_init_Dterms, powheginput
+
       include 'PhysPars.h'
+      ph_hmass = powheginput('hmass') 
       get_M_for_init_Dterms = ph_hmass
+      print*, "Hmass = ",ph_hmass
       end
 
       subroutine get_B_V1_V2(pborn_UUB,msqB,msqV1,msqV2)
@@ -72,7 +81,7 @@ c$$$      endif
       endif
 
       gf=ph_gfermi
-      
+
       amp2=xnorm*tmp*st_alpha*st_alpha*GF*2d0*s
 
 c     the multiplication for 2s is needed to remove the flux factor
