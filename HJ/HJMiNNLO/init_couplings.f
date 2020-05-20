@@ -3,6 +3,7 @@
       include "coupl.inc"
       include "pwhg_flg.h"
       include 'PhysPars.h'
+      include 'pwhg_physpar.h'
 c Avoid multiple calls to this subroutine. The parameter file is opened
 c but never closed ...
       logical called
@@ -54,6 +55,9 @@ c$$$      physpar_mq(5)=4.80d0     ! bottom
 c     If the topmass is not set (see Topmass/*), we need to set it to
 c     the correct value because we will need it for the loop corrections in d3
       if(ph_topmass.le.0d0) ph_topmass=173.2d0
+
+      physpar_mq(4)= 1.40d0
+      physpar_mq(5)= 4.92d0
 
       end
 

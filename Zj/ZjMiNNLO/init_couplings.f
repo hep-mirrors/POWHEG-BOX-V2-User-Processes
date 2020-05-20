@@ -158,7 +158,9 @@ c      write(*,*) 'W width = ',ph_Wwidth
       write(*,*) sqrt(ph_Zmass2low),'< M_Z <',sqrt(ph_Zmass2high)
       write(*,*) '*************************************'
       endif
-
+      physpar_mq(4)= 1.40d0
+      physpar_mq(5)= 4.92d0
+      
       end
 
 
