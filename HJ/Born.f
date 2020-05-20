@@ -126,6 +126,8 @@ c by charge conjugation. Check if this is the case
       include 'pwhg_flg.h'
 c Specify here if resonances need be written in the event file.
       if(flg_ckkwscalup) call change_scalup
+c     give masses to final-state products
+      call lhefinitemasses
       end
 
 
