@@ -250,10 +250,37 @@ c.....mod
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
+      include 'pwhg_pdf.h'
       real * 8 b0,mu0sq,as,pwhg_alphas
       external pwhg_alphas
       b0=(33-2*5)/(12*pi)
       mu0sq=(2*st_lambda5MSB)**2
+c.....mauro-lhapdfAS-b
+ccccccccccccc
+c                         !: 20-05-2016: Improvement: rather than freezing CMW alphas, in
+c     order to avoid that aCMW/alphas0 exceeds 1 (which creates an
+c     upper-bound violation when generating ISR), it's enough to just
+c     increase a bit the scale at which aCMW (computed starting from the
+c     running of LHAPDF) is matched to alphas0. This scale is mu0sq.
+c     Using 4*lambda rather than 2*lambda was found empirically. Notice
+c     that this should not affect physics result, since the cutoff on
+c     radiation is above mu0sq, i.e. rad_ptsqmin > mu0sq.
+      if(pdf_alphas_from_PDF) then
+         mu0sq=(4*st_lambda5MSB)**2
+      else
+         mu0sq=(2*st_lambda5MSB)**2
+      endif
+c     Moreover, pwhg_alphas0 can be called always with nlc=5, so
+c     changing nlc in this file and in gen_radiation.f is not needed
+c     anymore. Recall that alphas0 is just used as a function that
+c     should be bigger than aCMW through all the pt region that can be
+c     probed when generating ISR (BOX paper, E.2). For single top, I
+c     have kept these changes, but there was no real reason to do so.
+
+c     Notice that in this way we can reproduce exactly what we run for the
+c     WWJ-MiNLO paper, as well as for the WW@NNLOPS paper
+ccccccccccc
+c.....mauro-lhapdfAS-e      
 c running value of alpha at initial scale (see notes: running_coupling)
       as=pwhg_alphas(mu0sq,st_lambda5MSB,-1)
 c for better NLL accuracy (FNO2006, (4.32) and corresponding references)
@@ -286,6 +313,7 @@ c
       include 'nlegborn.h'
       include 'pwhg_flst.h'
       include 'pwhg_rad.h'
+      include 'pwhg_pdf.h'
       real * 8 pwhg_alphas,q2,xlam
       integer inf
       real * 8 pi
@@ -297,6 +325,25 @@ c
       data olam/0.d0/
       save olam,b5,bp5,b4,bp4,b3,bp3,xlc,xlb,xllc,xllb,c45,c35,xmc,xmb
 
+c.....mauro-lhapdfAS-b
+      real*8 alphasfrompdf
+      external alphasfrompdf
+      logical ini
+      data ini/.true./
+      save ini
+
+      if(ini) then
+         if(pdf_alphas_from_PDF) then
+            write(*,*) '********************************'
+            write(*,*) '    Using alpha_s from LHAPDF'
+            write(*,*) '    alphas(mz=91.1876) = ',alphasfrompdf(91.1876d0)
+            write(*,*) '********************************'
+         endif
+         ini=.false.
+      endif
+
+      
+c.....mauro-lhapdfAS-e            
 c      logical ini
 c      data ini/.true./
 c      save ini
@@ -334,27 +381,35 @@ c      return
       xlq = 2 * log( q/xlam )
       xllq = log( xlq )
       nf = inf
-      if( nf .lt. 0) then
-        if( q .gt. xmb ) then
-          nf = 5
-        elseif( q .gt. xmc ) then
-          nf = 4
-        else
-          nf = 3
-        endif
-      endif
-      if    ( nf .eq. 5 ) then
-        pwhg_alphas = 1/(b5 * xlq) -  bp5/(b5 * xlq)**2 * xllq
-      elseif( nf .eq. 4 ) then
-        pwhg_alphas =
-     #    1/( 1/(1/(b4 * xlq) - bp4/(b4 * xlq)**2 * xllq) + c45 )
-      elseif( nf .eq. 3 ) then
-        pwhg_alphas =
-     #    1/( 1/(1/(b3 * xlq) - bp3/(b3 * xlq)**2 * xllq) + c35 )
+c.....mauro-lhapdfAS-b
+      if(pdf_alphas_from_PDF) then
+         pwhg_alphas=alphasfrompdf(q)
       else
-        print *,'error in alfa: unimplemented # of light flavours',nf
-        call exit(1)
+c.....mauro-lhapdfAS-e      
+         if( nf .lt. 0) then
+            if( q .gt. xmb ) then
+               nf = 5
+            elseif( q .gt. xmc ) then
+               nf = 4
+            else
+               nf = 3
+            endif
+         endif
+         if    ( nf .eq. 5 ) then
+            pwhg_alphas = 1/(b5 * xlq) -  bp5/(b5 * xlq)**2 * xllq
+         elseif( nf .eq. 4 ) then
+            pwhg_alphas =
+     #1/( 1/(1/(b4 * xlq) - bp4/(b4 * xlq)**2 * xllq) + c45 )
+         elseif( nf .eq. 3 ) then
+            pwhg_alphas =
+     #1/( 1/(1/(b3 * xlq) - bp3/(b3 * xlq)**2 * xllq) + c35 )
+         else
+            print *,'error in alfa: unimplemented # of light flavours',nf
+            call exit(1)
+         endif
+c.....mauro-lhapdfAS-b
       endif
+c.....mauro-lhapdfAS-e      
       return
       end
 

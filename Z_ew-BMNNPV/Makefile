@@ -16,7 +16,7 @@ ANALYSIS=report
 #STATIC= -static
 #
 ifeq ("$(COMPILER)","gfortran")
-F77= $(COMPILER) -fno-automatic  -ffixed-line-length-none
+F77= $(COMPILER) -fno-automatic  -ffixed-line-length-none -std=legacy
 #FPE=-ffpe-trap=invalid,zero,overflow,underflow -finit-real=nan
 # -finit-real=nan
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
