@@ -2,9 +2,7 @@
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
 COMPILER=gfortran
 FC=$(COMPILER)
-## Choose PDF: native,lhapdf
-## LHAPDF package has to be installed separately
-#PDF=lhapdf
+## Choose PDF: For MiNNLOPS, hoppet should be used
 PDF=hoppet
 ## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
 ##           the first 4 analyses require the FASTJET package, that has to be 
@@ -18,7 +16,6 @@ ANALYSIS=MiNNLO
 V2DIR=$(shell (cd ../.. ; pwd))
 STDCLIB=-lstdc++
 #STDCLIB=-lc++
-
 
 stdclib=$(STDCLIB)
 
@@ -205,8 +202,8 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o #boostrot4.o  BornProj.o
-endif
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
+ endif
 
 
 # PYTHIA 8
@@ -216,14 +213,7 @@ FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8Plugins
 
-LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -ldl -lstdc++ # -lHepMC #-llhapdfdummy
-
-# RIVET
-##RIVET_CONFIG=$(shell which rivet-config)
-##FJCXXFLAGS+=-I$(shell $(RIVET_CONFIG) --includedir)
-##LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -L$(shell $(RIVET_CONFIG) --libdir) -lRivet -lYODA -lHepMC -ldl -lstdc++
-
-LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -L$(shell $(RIVET_CONFIG) --libdir) -ldl -lstdc++
+LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -ldl $(stdclib)
 
 %.o: %.f90 $(INCLUDE)
 	$(FF) -c -o $(OBJ)/$@ $<

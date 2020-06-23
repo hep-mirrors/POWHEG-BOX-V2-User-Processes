@@ -221,7 +221,7 @@ c         endif
       dsig=dsig*corrfactor
 
       do i=1,rwl_num_weights
-         if(dsig(i) > 1d9 .or. dsig(i)+1 .eq. dsig(i)) then
+         if(abs(dsig(i)) > 1d8 .or. dsig(i)+1 .eq. dsig(i)) then
             write(*,*) "LARGE weight. DISCARDING EVENT, i, weight = ",i, dsig(i)
             return
          endif

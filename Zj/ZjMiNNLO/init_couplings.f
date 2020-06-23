@@ -17,11 +17,13 @@ c     to define here rad_bottomthr2
       logical verbose
       parameter(verbose=.true.)
 
+c     For V+J, the use of flg_doublefsr is recommended.
+c     We make it the default, at least when minnlo is used.
+      flg_doublefsr=.true.
+      if(powheginput("#doublefsr").eq.0) flg_doublefsr=.false.
+      
       flg_minnlo=powheginput('#minnlo').eq.1
       flg_uubornonly=powheginput('#uubornonly').eq.1
-c$$$      if (flg_uubornonly) then
-c$$$         flg_bornonly = .true.
-c$$$      endif
 c     If minlo is not present in the input card, but minnlo is,
 c     then set also flg_minlo to true, so that we are sure all is done
 c     properly in setlocalscales and for all other occurencies of

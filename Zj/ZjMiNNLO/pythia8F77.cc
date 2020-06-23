@@ -83,6 +83,8 @@ extern "C" {
     pythia.readString("SpaceShower:pTmaxMatch = 1");
     pythia.readString("TimeShower:pTmaxMatch = 1");
 
+    pythia.readString("SpaceShower:dipoleRecoil = 1"); // use different recoil scheme
+
     pythia.readString("SpaceShower:QEDshowerByQ = off"); // From quarks.        
     pythia.readString("SpaceShower:QEDshowerByL = off"); // From Leptons.       
     pythia.readString("TimeShower:QEDshowerByQ = off"); // From quarks.         
