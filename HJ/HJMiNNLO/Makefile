@@ -2,15 +2,12 @@
 ## Choose compiler: gfortran,ifort (g77 not supported, F90 constructs in use!)
 COMPILER=gfortran
 FC=$(COMPILER)
-## Choose PDF: native,lhapdf
-## LHAPDF package has to be installed separately
-PDF=lhapdf
-#PDF=hoppet
+## Choose PDF: For MiNNLOPS, hoppet should be used
+PDF=hoppet
 ## ANALYSIS: none, BnJ, HnJ, alt, NNLOPS
 ##           the first 4 analyses require the FASTJET package, that has to be 
 ##           installed separately (see below)
 ANALYSIS=MiNNLO
-#ANALYSIS=MiNNLODEBUG
 
 ## For static linking uncomment the following
 #STATIC= -static
@@ -23,7 +20,7 @@ STDCLIB=-lstdc++
 stdclib=$(STDCLIB)
 
 ifeq ("$(COMPILER)","gfortran")	
-F77=gfortran -fno-automatic -ffixed-line-length-none -ffree-line-length-none -fbounds-check -fno-align-commons
+F77=gfortran -ffixed-line-length-none -ffree-line-length-none -fbounds-check -fno-align-commons
 # -finit-real=nan -ffpe-trap=invalid,zero,overflow
 ## -fbounds-check sometimes causes a weird error due to non-lazy evaluation
 ## of boolean in gfortran.
@@ -109,7 +106,7 @@ endif
 
 ifeq ("$(PDF)","hoppet")
 LHAPDF_CONFIG=lhapdf-config
-PDFPACK=hoppetif.o lhapdf6ifcc.o
+PDFPACK=hoppetif.o hoppetifcc.o
 FJCXXFLAGS+= $(shell $(LHAPDF_CONFIG) --cxxflags)
 LIBSLHAPDF= -Wl,-rpath,$(shell $(LHAPDF_CONFIG) --libdir)  -L$(shell $(LHAPDF_CONFIG) --libdir) -lLHAPDF $(stdclib) -std=c++11
 LIBS+=$(LIBSLHAPDF)
@@ -210,16 +207,6 @@ PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
  endif
 
 
-ifeq ("$(ANALYSIS)","MiNNLODEBUG")
-##To include Fastjet configuration uncomment the following lines. 
-FASTJET_CONFIG=$(shell which fastjet-config)
-#FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
-LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
-FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo-debug.o fastjetfortran.o
- endif
-
-
 # PYTHIA 8
 PYTHIA_CONFIG=$(shell which pythia8-config)
 
@@ -227,14 +214,7 @@ FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8
 FJCXXFLAGS+=-I$(shell $(PYTHIA_CONFIG) --includedir)/Pythia8Plugins
 
-LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -ldl -lstdc++ # -lHepMC #-llhapdfdummy
-
-# RIVET
-##RIVET_CONFIG=$(shell which rivet-config)
-##FJCXXFLAGS+=-I$(shell $(RIVET_CONFIG) --includedir)
-##LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -L$(shell $(RIVET_CONFIG) --libdir) -lRivet -lYODA -lHepMC -ldl -lstdc++
-
-LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -L$(shell $(RIVET_CONFIG) --libdir) -ldl -lstdc++
+LIBPYTHIA8= -L$(shell $(PYTHIA_CONFIG) --libdir) -lpythia8 -ldl $(stdclib)
 
 %.o: %.f90 $(INCLUDE)
 	$(FF) -c -o $(OBJ)/$@ $<
@@ -423,7 +403,7 @@ pdfs_tools.o: rad_tools.o internal_parameters.o coefficient_functions_nnlops.o
 driver.o: rad_tools.o pdfs_tools.o internal_parameters.o sudakov_radiators.o
 sudakov_radiators.o: rad_tools.o frcgauss.o setstrongcoupl.o
 frcgauss.o:
-
+hoppetif.o: pdfs_tools.o rad_tools.o
 
 xpij2e.o: qcd.o
 xpns2e.o: qcd.o

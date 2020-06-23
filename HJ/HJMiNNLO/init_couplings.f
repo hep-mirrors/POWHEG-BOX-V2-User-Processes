@@ -16,6 +16,11 @@ c but never closed ...
          called=.true.
       endif
 
+c     For F+J, the use of flg_doublefsr is recommended.
+c     We make it the default, at least when minnlo is used.
+      flg_doublefsr=.true.
+      if(powheginput("#doublefsr").eq.0) flg_doublefsr=.false.
+      
       flg_processid='HJ'
       flg_minnlo=powheginput('#minnlo').eq.1
 c     If minlo is not present in the input card, but minnlo is,

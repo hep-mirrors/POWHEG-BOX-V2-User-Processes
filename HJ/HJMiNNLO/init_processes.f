@@ -57,9 +57,12 @@ c explicit request not to include them
       flg_withdamp=.true.
       flg_bornzerodamp=.true.
 
-      flg_ckkwscalup=.true.
-      if(powheginput("#ckkwscalup").eq.0) then
-         flg_ckkwscalup=.false.
+c     For the MiNNLO release (after 2006.04133), we prefer to keep
+c     everything as simple as possible: we don't use the ckkwscalup
+c     option by default (in HJ, by default, this option is instead used)
+      flg_ckkwscalup=.false.
+      if(powheginput("#ckkwscalup").eq.1) then
+         flg_ckkwscalup=.true.
       endif
 
       call init_processes_born
