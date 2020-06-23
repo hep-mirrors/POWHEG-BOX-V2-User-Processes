@@ -1,6 +1,3 @@
-!!!!! This analysis is from WjMiNNLO and needs to be adjusted, added stop to prevent using it before adjustment
-!
-! add inv mass plot
       subroutine init_hist
       implicit none
       include 'pwhg_math.h'
@@ -130,7 +127,7 @@ c$$$      real * 8 pub(4,10),yVub,etaVub,ptVub,mVub
       integer kinreg_to_analyze,vdecaytemp,vdecay2temp,idvecbos
       real *8 corrfactor
       logical iseplus,iseminus
-      save vdecaytemp, vdecay2temp
+      save vdecaytemp,vdecay2temp,idvecbos
 
 
       if(whcprg.eq.'NLO') then
@@ -240,7 +237,7 @@ c      print*, corrfactor,rad_type
       dsig=dsig*corrfactor
 
       do i=1,rwl_num_weights
-         if(dsig(i) > 1d9 .or. dsig(i)+1 .eq. dsig(i)) then
+         if(abs(dsig(i)) > 1d7 .or. dsig(i)+1 .eq. dsig(i)) then
             write(*,*) "LARGE weight. DISCARDING EVENT, i, weight = ",i, dsig(i)
             return
          endif
@@ -260,11 +257,11 @@ c         print*, ihep,jmohep(1,ihep),idhep(ihep)
          iseplus=idhep(ihep).eq.vdecay2temp
 c     I require ihep>3 to make sure I don't pick up jmohep(1,ihep)=0, as this
 c     gives a bound violation when computing idhep(jmohep(1,ihep))=idhep(0)...
-         if(whcprg.eq.'PY8'.and.ihep.gt.3) then
+         if(whcprg.eq.'PY8'.and.ihep.gt.3 .and. (iseminus .or. iseplus)) then
             iseminus=iseminus.and.idhep(jmohep(1,ihep)).eq.idvecbos
             iseplus=iseplus.and.idhep(jmohep(1,ihep)).eq.idvecbos
          endif
-c     isthep = 24 is needed for PY8 run at partonic level!
+c     isthep = 23 is needed for PY8 run at partonic level!
          if (isthep(ihep).eq.1 .or. isthep(ihep).eq.23) then
             if(iseminus) then
 c               print*, ihep, idhep(ihep), jmohep(1,ihep)
@@ -450,9 +447,9 @@ C - Initialize arrays and counters for output jets
 C     - Extract final state particles to feed to jet finder
          if(WHCPRG.eq.'PY8   ') then
             do j=1,nhep
-c all but Z and leptons
-               if((isthep(j).gt.0).and..not.islept(idhep(j)).and..not.idhep(j)
-     $              .eq.23) then
+c all but W and leptons
+               if((isthep(j).gt.0).and.(.not.islept(idhep(j))).and.
+     $              (.not.(abs(idhep(j)).eq.24)) then
                   if(ntracks.eq.maxtrack) then
                      write(*,*) 'analyze: need to increase maxtrack!'
                      write(*,*) 'ntracks: ',ntracks
