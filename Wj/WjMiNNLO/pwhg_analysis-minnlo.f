@@ -449,7 +449,7 @@ C     - Extract final state particles to feed to jet finder
             do j=1,nhep
 c all but W and leptons
                if((isthep(j).gt.0).and.(.not.islept(idhep(j))).and.
-     $              (.not.(abs(idhep(j)).eq.24)) then
+     $              (.not.(abs(idhep(j)).eq.24))) then
                   if(ntracks.eq.maxtrack) then
                      write(*,*) 'analyze: need to increase maxtrack!'
                      write(*,*) 'ntracks: ',ntracks
