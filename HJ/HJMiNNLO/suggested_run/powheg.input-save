@@ -34,7 +34,7 @@ largeptscales 0  ! (default 0) if 0, at large pt, use muR=muF~Q in fixed order p
                  !             if 1, at large pt, use muR=muF=pt in the fixed-order part
 Q0 2.            ! (default 2.) Q0 value used in profiled scales (see 2006.04133 for more details)
                  !              smaller values can be used too.
-	 
+
 ! PROCESS PARAMETERS
 hmass 125          ! higgs mass
 hwidth 0.004152d0  ! higgs width
