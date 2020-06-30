@@ -1,0 +1,112 @@
+***********************************************
+ stage  1
+***********************************************
+./run.sh: line 63:  1420 Done                    echo $i
+      1421 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1429 Done                    echo $i
+      1430 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1432 Done                    echo $i
+      1433 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1441 Done                    echo $i
+      1442 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1423 Done                    echo $i
+      1424 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1426 Done                    echo $i
+      1427 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1435 Done                    echo $i
+      1436 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1438 Done                    echo $i
+      1439 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1457 Done                    echo $i
+      1458 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1460 Done                    echo $i
+      1461 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1463 Done                    echo $i
+      1464 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1466 Done                    echo $i
+      1467 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1469 Done                    echo $i
+      1470 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1472 Done                    echo $i
+      1473 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1478 Done                    echo $i
+      1479 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1475 Done                    echo $i
+      1476 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1501 Done                    echo $i
+      1502 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1504 Done                    echo $i
+      1505 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1507 Done                    echo $i
+      1508 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1510 Done                    echo $i
+      1511 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1513 Done                    echo $i
+      1514 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1516 Done                    echo $i
+      1517 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1520 Done                    echo $i
+      1521 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 63:  1525 Done                    echo $i
+      1526 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+***********************************************
+ stage  2
+***********************************************
+***********************************************
+ iteration  1
+***********************************************
+./run.sh: line 81:  1539 Done                    echo $i
+      1540 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1542 Done                    echo $i
+      1543 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1545 Done                    echo $i
+      1546 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1548 Done                    echo $i
+      1549 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1557 Done                    echo $i
+      1558 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1551 Done                    echo $i
+      1552 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1554 Done                    echo $i
+      1555 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1561 Done                    echo $i
+      1562 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+***********************************************
+ iteration  2
+***********************************************
+./run.sh: line 81:  1576 Done                    echo $i
+      1577 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1579 Done                    echo $i
+      1580 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1582 Done                    echo $i
+      1583 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1585 Done                    echo $i
+      1586 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1588 Done                    echo $i
+      1589 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1597 Done                    echo $i
+      1598 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1591 Done                    echo $i
+      1592 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1594 Done                    echo $i
+      1595 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+***********************************************
+ iteration  3
+***********************************************
+./run.sh: line 81:  1614 Done                    echo $i
+      1615 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1620 Done                    echo $i
+      1621 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1623 Done                    echo $i
+      1624 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1632 Done                    echo $i
+      1633 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1617 Done                    echo $i
+      1618 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1626 Done                    echo $i
+      1627 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1629 Done                    echo $i
+      1630 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+./run.sh: line 81:  1635 Done                    echo $i
+      1636 Aborted                 (core dumped) | $prg > $logfile-$i.log 2>&1
+0 minutes and 25 seconds elapsed since script start.

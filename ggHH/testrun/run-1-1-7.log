@@ -1,0 +1,82 @@
+  found input file powheg.input
+  opened powheg.input
+  powheginput keyword compress_lhe         absent; set to   -1000000.0000000000     
+  powheginput keyword compress_upb         absent; set to   -1000000.0000000000     
+  powheginput keyword testplots            set to    1.0000000000000000     
+  powheginput keyword numevts              set to    3000.0000000000000     
+  powheginput keyword storemintupb         set to    1.0000000000000000     
+  powheginput keyword mintupbxless         absent; set to   -1000000.0000000000     
+  powheginput keyword fastbtlbound         set to    1.0000000000000000     
+  powheginput keyword mintupbratlim        absent; set to   -1000000.0000000000     
+  powheginput keyword StoredubNoOutliers   absent; set to   -1000000.0000000000     
+  powheginput keyword maxseeds             set to    9999.0000000000000     
+  powheginput keyword manyseeds            set to    1.0000000000000000     
+ enter which seed
+  powheginput keyword rwl_add              absent; set to   -1000000.0000000000     
+  powheginput keyword rwl_format_rwgt      absent; set to   -1000000.0000000000     
+  powheginput keyword flg_debug            absent; set to   -1000000.0000000000     
+  powheginput keyword withnegweights       absent; set to   -1000000.0000000000     
+  powheginput keyword bornsuppfact         absent; set to   -1000000.0000000000     
+  powheginput keyword ptsupp               absent; set to   -1000000.0000000000     
+  powheginput keyword doublefsr            absent; set to   -1000000.0000000000     
+  powheginput keyword smartsig             absent; set to   -1000000.0000000000     
+  powheginput keyword withsubtr            absent; set to   -1000000.0000000000     
+  powheginput keyword hfact                absent; set to   -1000000.0000000000     
+  powheginput keyword withdamp             absent; set to   -1000000.0000000000     
+  powheginput keyword bornzerodamp         absent; set to   -1000000.0000000000     
+  powheginput keyword hdamp                set to    250.00000000000000     
+  powheginput keyword bornonly             absent; set to   -1000000.0000000000     
+  powheginput keyword LOevents             absent; set to   -1000000.0000000000     
+  powheginput keyword novirtual            absent; set to   -1000000.0000000000     
+  powheginput keyword iseed                absent; set to   -1000000.0000000000     
+  powheginput keyword rand1                absent; set to   -1000000.0000000000     
+  powheginput keyword rand2                absent; set to   -1000000.0000000000     
+  powheginput keyword iupperisr            absent; set to   -1000000.0000000000     
+  powheginput keyword iupperfsr            absent; set to   -1000000.0000000000     
+  powheginput keyword pdfreweight          absent; set to   -1000000.0000000000     
+  powheginput keyword storeinfo_rwgt       set to    1.0000000000000000     
+  powheginput keyword compute_rwgt         absent; set to   -1000000.0000000000     
+  powheginput keyword minlo                absent; set to   -1000000.0000000000     
+  powheginput keyword nnlops               absent; set to   -1000000.0000000000     
+  powheginput keyword alphas_from_pdf      absent; set to   -1000000.0000000000     
+  powheginput keyword alphas_from_lhapdf   absent; set to   -1000000.0000000000     
+  powheginput keyword ubexcess_correct     set to    1.0000000000000000     
+ RM48 INITIALIZED:  54217137           0         0
+  powheginput keyword par_diexp            absent; set to   -1000000.0000000000     
+  powheginput keyword par_dijexp           absent; set to   -1000000.0000000000     
+  powheginput keyword par_2gsupp           absent; set to   -1000000.0000000000     
+  powheginput keyword ih1                  set to    1.0000000000000000     
+  powheginput keyword ih2                  set to    1.0000000000000000     
+  powheginput keyword lhans1               set to    90400.000000000000     
+  powheginput keyword lhans2               set to    90400.000000000000     
+  powheginput keyword lhapdf6maxsets       absent; set to   -1000000.0000000000     
+terminate called after throwing an instance of 'LHAPDF::ReadError'
+  what():  Info file not found for PDF set ''
+
+Program received signal SIGABRT: Process abort signal.
+
+Backtrace for this error:
+#0  0x7fdb3338c59f in ???
+#1  0x7fdb3338c520 in ???
+#2  0x7fdb3338db00 in ???
+#3  0x7fdb35410b2a in ???
+#4  0x7fdb3541c3b7 in ???
+#5  0x7fdb3541c422 in ???
+#6  0x7fdb3541c674 in ???
+#7  0x7fdb3577fa8f in ???
+#8  0x7fdb3579ab6f in ???
+#9  0x7fdb3579b7ed in ???
+#10  0x5187f4 in setlha6set_
+	at ../lhapdf6ifcc.cc:20
+#11  0x517b18 in genericpdfset_
+	at ../lhapdf6if.f:52
+#12  0x51841a in genericpdfpar_
+	at ../lhapdf6if.f:264
+#13  0x4dd3da in init_phys_
+	at ../init_phys.f:71
+#14  0x4b18b6 in pwhginit_
+	at ../pwhg_init.f:147
+#15  0x4afa9b in MAIN__
+	at ../pwhg_main.f:158
+#16  0x4ae42c in main
+	at ../pwhg_main.f:386
