@@ -403,7 +403,7 @@ c.....mauro-had-e
      +              - (ql*gq(sig)+qq*gl(tau))
      +              /(s*(s*cone-mz2+ii*ph_ZmZw))
      +              * (sazts + 0.5d0*delaz*s
-     +              + 0.5d0*delza*(s*cone-mz2+ii*ph_ZmZw)) ) 
+     +              + 0.5d0*delza*(s*cone-mz2           )) ) 
      +              *a(sig,tau)*conjg(a(sig,tau))
      +              *conjg(bornamp(sig,tau))
                
