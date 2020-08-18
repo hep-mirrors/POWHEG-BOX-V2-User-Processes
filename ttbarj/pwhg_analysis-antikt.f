@@ -1210,7 +1210,7 @@ c     copy momenta to construct jets
          endif
 c     FastJet wrapper is contained in the the file fastjet_wrap.cpp in the same directory of libvirtual
          call fastjet_kt(ptrack,ntracks,ptmin_jet,R_jet,
-     $        -1d0,3,0,0,njets,pj,jetvec)
+     $        -1d0,0,0,0,njets,pj,jetvec)
 
       else
          write(*,*) 'JET ANALYSIS TO USE UNKNOWN:',process
