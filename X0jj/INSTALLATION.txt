@@ -1,0 +1,52 @@
+The instructions to generate the process are detailed in arXiv:2008.06364
+
+
+1) run mg5_aMC, using the command
+
+path_to_MG5_aMC/bin/mg5_aMC --mode=MG5aMC_PWG
+
+Then, inside mg5_aMC, give the following commands:
+
+import model HC_NLO_X0_UFO-heft
+
+generate p p > x0 j j / t [QCD]
+
+output "directory_where_the_code_by_MG_is_created"
+
+
+Now the are two possible ways to proceed:
+
+*******************
+ FIRST WAY
+*******************
+
+2) svn checkout the X0jj directory from the User-Processes-V2 repository
+
+svn co svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/X0jj  ./"X0jj_svn_directory"
+
+
+3) replace all the files in the "directory_where_the_code_by_MG_is_created"
+with the files from the svn directory "X0jj_svn_directory"
+
+
+*******************
+ SECOND WAY
+*******************
+
+Alternatively, in "directory_where_the_code_by_MG_is_created", run the script
+
+clean_BEFORE_svn.sh
+
+and then checkout the X0jj repository with
+
+svn co svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/X0jj ./
+
+In this way, there is just a single directory, called
+"directory_where_the_code_by_MG_is_created", where the modified files are
+already under svn
+
+
+
+
+
+
