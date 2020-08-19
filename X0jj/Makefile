@@ -1,5 +1,12 @@
 #-*- Makefile -*-
 
+
+########################################################
+#  SET HERE the POWHEG-BOX-V2 path
+########################################################
+BOX=/**************/POWHEG-BOX-V2
+
+
 # this sources the MG5_aMC make_opts, which includes also the virtual libraries
 # (madloop=True is needed)
 madloop=True
@@ -61,7 +68,6 @@ endif
 
 
 PWD=$(shell pwd)
-BOX=/home/oleari/fortran/POWHEG-BOX-V2
 MG5PROCESS=$(PWD)
 WDNAME=$(shell basename $(PWD))
 VPATH= ./:../:$(OBJDIR):$(BOX)

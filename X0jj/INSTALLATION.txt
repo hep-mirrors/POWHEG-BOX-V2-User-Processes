@@ -1,5 +1,6 @@
 The instructions to generate the process are detailed in arXiv:2008.06364
 
+0) Please refer to the paper for downloading the plugin.
 
 1) run mg5_aMC, using the command
 
@@ -17,7 +18,7 @@ output "directory_where_the_code_by_MG_is_created"
 Now the are two possible ways to proceed:
 
 *******************
- FIRST WAY
+     FIRST WAY
 *******************
 
 2) svn checkout the X0jj directory from the User-Processes-V2 repository
@@ -30,7 +31,7 @@ with the files from the svn directory "X0jj_svn_directory"
 
 
 *******************
- SECOND WAY
+    SECOND WAY
 *******************
 
 Alternatively, in "directory_where_the_code_by_MG_is_created", run the script
@@ -44,6 +45,15 @@ svn co svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/X0jj ./
 In this way, there is just a single directory, called
 "directory_where_the_code_by_MG_is_created", where the modified files are
 already under svn
+
+
+*************************************************************************
+
+
+Please refer to the README file for further instructions and indications.
+
+
+
 
 
 
