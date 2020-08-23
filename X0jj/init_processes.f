@@ -33,7 +33,7 @@ c Print out svn information, if any
       write(*,*) "****      JHEP 1006 (2010) 043   {Alioli:2010xd}                        ****"
       write(*,*) "****                                                                    ****"
       write(*,*) "****  [4] P. Nason, C. Oleari, M. Rocco, M. Zaro,                       ****"
-      write(*,*) "****      *****************************   {****}                        ****"
+      write(*,*) "****      http://arxiv.org/abs/2008.06364 {Nason:2020lxx}               ****"
       write(*,*) "****                                                                    ****"
       write(*,*) "****  [5] J. Alwall, R. Frederix, S. Frixione, V. Hirschi, F. Maltoni,  ****"
       write(*,*) "****      JHEP 07 (2014) 079,  {Alwall:2014hca}                         ****" 
