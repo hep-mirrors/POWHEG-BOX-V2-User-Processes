@@ -77,7 +77,8 @@ INCLUDE2=$(BOX)/include
 INCLUDE3=SubProcesses/
 FF=$(F77) $(FFLAGS) $(FPE) $(OPT) $(DEBUG) -I$(INCLUDE0) -I$(INCLUDE1) -I$(INCLUDE2) -I$(INCLUDE3)
 
-INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
+#INCLUDE =$(wildcard ../include/*.h *.h include/*.h)
+INCLUDE =$(wildcard $(INCLUDE2)/*.h *.h $(INCLUDE1)/*.h $(INCLUDE1)/*.f)
 
 ifeq ("$(PDF)","lhapdf")
 LHAPDF_CONFIG=lhapdf-config
