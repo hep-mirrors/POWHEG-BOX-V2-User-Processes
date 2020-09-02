@@ -1,0 +1,33 @@
+This file documents the usage of the ttbarj process in 
+conjunction with OpenLoops 2 in the POWHEG-BOX-V2
+
+
+1) If you don't already have a local OpenLoops 2 installation, download the latest version from from 
+http://openloops.hepforge.org via
+svn checkout http://openloops.hepforge.org/svn/OpenLoops/branches/public ./OpenLoops
+
+
+2) The compiler can be specified in the file
+openloops.cfg which should have the format
+
+<begin openloops.cfg>
+[OpenLoops]
+compiler=gfortran
+<end openloops.cfg>
+
+
+3) Modify the following line at the appropriate
+  positions of the POWHEG ttbarj Makefile
+
+OLPATH=<PATH_TO_OPENLOOPS>
+
+to point to the correct OpenLoops 2 path
+
+
+4) Upon invocating the make command, both OpenLoops, the process libraries under OL_process_src
+   and the POWHEG code will be compiled
+
+
+
+
+
