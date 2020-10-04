@@ -27,7 +27,7 @@ bwcutoff 15       ! Mass window is hmass +- bwcutoff*hwidth
               ! shower using the smallest kt in the final state;
               ! If 0, use the standard POWHEG BOX scalup
 
-#runningscales 1  ! (default 0), if 0 use hmass as central
+runningscales 1  ! (default 0), if 0 use hmass as central
                   ! factorization and renormalization scale;
                   ! if 1 use the Ht scale
 
@@ -108,7 +108,7 @@ storeinfo_rwgt 1
 
 
 
-bornsuppfact 0  ! if minlo is active, set it to zero
+bornsuppfact 30  ! if minlo is active, set it to zero
 # use minlo
 minlo   1
 
@@ -122,7 +122,9 @@ storemintupb 1
 
 
 
-MGcosa    0d0
-
+MGcosa 1d0   	  ! cosine of alpha; alpha parametrises the CP nature
+       		  ! of the ggH interaction, see eq.(3.3) in 2008.06364
+		  ! e.g. MGcosa = 1d0 <-> CP-even interaction (SM)
+		  !  	 MGcosa = 0d0 <-> CP-odd interaction
 
 
