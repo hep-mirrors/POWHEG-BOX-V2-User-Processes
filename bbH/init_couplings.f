@@ -4,6 +4,8 @@
       include 'PhysPars.h'
       include "pwhg_physpar.h"
 
+      include "pwhg_par.h"
+      
       real * 8 powheginput
       external powheginput
 c Avoid multiple calls to this subroutine. The parameter file is opened
@@ -17,7 +19,12 @@ c but never closed ...
          called=.true.
       endif
 
-
+c     set threshold value for disregarding statistical outliers
+c     in combination of grid files and fixed-order results
+c     (effective only, if parameters check_bad_st1 and check_bad_st2
+c     are set to 1 in powheg.input):
+      par_thresh = 3d0
+ 
 *********************************************************
 ***********         MADGRAPH                 ************
 *********************************************************

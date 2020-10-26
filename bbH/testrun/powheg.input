@@ -80,3 +80,7 @@ parallelstage  1   ! identifier for parallel running stages
 
 toploop 1	! 1 include top loop effects; 0 disregard top loop effects
 msbar  1	! 1 MSbar renormalization; 0 On-Shell renormalization
+
+
+#check_bad_st2 1
+#check_bad_st1 1
