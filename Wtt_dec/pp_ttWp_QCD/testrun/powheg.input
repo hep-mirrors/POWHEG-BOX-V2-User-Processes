@@ -1,0 +1,139 @@
+!-------------------------------------------------------------------
+! Input card for pp -> ttW
+!-------------------------------------------------------------------
+! Constants, particle masses and widths
+!-------------------------------------------------------------------
+gfermi 1.1663787d-5        ! Fermi constant
+zmass 91.1876d0            ! Mass of the Z boson in [GeV]
+wmass 80.385d0             ! Mass of the W boson in [GeV]
+tmass 172.5d0              ! Mass of the top quark in [GeV]
+hmass 125d0                ! Mass of the Higgs boson in [GeV]
+!-------------------------------------------------------------------
+! Additional parameters for decay modelling
+!-------------------------------------------------------------------
+zwidth 2.50775d0           ! Width of the Z boson in [GeV] 
+wwidth 2.09767d0           ! Width of the W boson in [GeV]
+twidth 1.33247d0           ! Width of the top quark in [GeV]
+hwidth 0.0d0               ! Width of the Higgs boson in [GeV]
+! CKM mixing matrix between first two generations 
+CKM_Vud  0.974276d0        ! V_{ud}
+CKM_Vus  0.225358d0        ! V_{us}
+CKM_Vcd  0.225358d0        ! V_{cd}
+CKM_Vcs  0.974276d0        ! V_{cs}
+! LesHouches masses for momentum reshuffling
+! Be aware that for non-zero LesHouches masses POWHEG generates massive terminal ouput!
+lhfm/emass   0.0d0         ! Electron mass in [GeV]
+lhfm/mumass  0.0d0         ! Muon mass in [GeV]
+lhfm/taumass 0.0d0         ! Tau mass in [GeV]
+lhfm/dmass   0.0d0         ! Down-quark mass in [GeV]
+lhfm/umass   0.0d0         ! Up-quark mass in [GeV]
+lhfm/smass   0.0d0         ! Strange-quark mass in [GeV]
+lhfm/cmass   0.0d0         ! Charm-quark mass in [GeV]
+lhfm/bmass   0.0d0         ! Bottom-quark mass in [GeV]
+zerowidth 0  	           ! if 1, use zero width approximation during decay, otherwise off-shell smearing
+correlations 1		   ! if 1, top decays are correlated, otherwise uncorrelated
+topdecaymode 33333         ! 0 stable tops
+#    	                   ! an integer of 5 digits that are either 0, or 2, representing in 
+#                          ! the order the maximum number of the following particles(antiparticles)
+#                          ! in the final state: e  mu tau up charm
+#                          ! For example
+#                          ! 33333    All decays (up to 3 units of everything)
+#                          ! 30000    All W go into l nu (with the appropriate signs)
+#                          ! 00033    Fully hadronic
+#                          ! 00003    Fully hadronic with three charms
+#                          ! 00021    Fully hadronic with a single charm
+#                          ! 00012    Fully hadronic with at least one charm
+samesignleptons 1          ! if 1 selects same sign lepton signatures (no tau leptons)
+                           ! the value of topdecaymode will be ignored, but must be positive!
+!BrWlep 0.33d0             ! Total Leptonic Branching ratio Br[W -> lep]
+                           ! Will be used in determining the prob. for decay channels
+                           ! Br[W -> l_i vl_i ] = BrWlep/3
+                           ! Br[W -> q_i q'_i ] = (1-BrWlep)/2
+                           ! default: BrWlep = 1/3
+!-------------------------------------------------------------------
+! Partondistribution functions
+!-------------------------------------------------------------------
+ih1   1                    ! hadron 1 (1 for protons, -1 for antiprotons)
+ih2   1                    ! hadron 2 (1 for protons, -1 for antiprotons)
+ebeam1 6500d0              ! energy of beam 1
+ebeam2 6500d0              ! energy of beam 2
+! To be set only if using LHA pdfs
+lhans1  260000             ! pdf set for hadron 1 (LHA numbering)
+lhans2  260000             ! pdf set for hadron 2 (LHA numbering)
+!-------------------------------------------------------------------
+! POWHEG parameters
+!-------------------------------------------------------------------
+numevts 0                  ! number of events to be generated
+use-old-grid    1          ! if 1 use old grid if file pwggrids.dat is present (<> 1 regenerate)
+use-old-ubound  1          ! if 1 use norm of upper bounding function stored in pwgubound.dat, if present; <> 1 regenerate
+ncall1  100000             ! number of calls for initializing the integration grid
+itmx1    5                 ! number of iterations for initializing the integration grid
+ncall2  100000             ! number of calls for computing the integral and finding upper bound
+itmx2    5                 ! number of iterations for computing the integral and finding upper bound
+foldcsi   2                ! number of folds on csi integration
+foldy     2                ! number of folds on  y  integration
+foldphi   2                ! number of folds on phi integration
+nubound 100000             ! number of bbarra calls to setup norm of upper bounding function
+icsimax  3                 ! <= 100, number of csi subdivision when computing the upper bounds
+iymax    3                 ! <= 100, number of y subdivision when computing the upper bounds
+xupbound 2d0               ! increase upper bound for radiation generation
+testplots  0               ! (default 0, do not) do NLO and PWHG distributions
+bornonly   0               ! (default 0) if 1 do Born (xsec) only
+fakevirt   0               ! (default 0) if 1 use Born for virtuals
+LOevents   0		   ! (default 0) if 1 only generate born kinematics
+!-------------------------------------------------------------------
+! Debug
+! Sometimes for PDFs with zero PDFs for large x POWHEG can be trapped
+! in an infinite loop when checking the scaling behaviour of real
+! matrix elements. Here you can switch off these tests.
+!-------------------------------------------------------------------
+colltest 1                 ! switch on/off (1=on, off=0) tests for collinear divergences
+softtest 1                 ! switch on/off (1=on, off=0) tests for soft divergences
+!-------------------------------------------------------------------
+! Damping factors
+!-------------------------------------------------------------------
+hdamp 0d0                  ! h_damp factor 
+dynamic_hdamp 1            ! if 1 use h_damp = HT/2 (overwrites hdamp)
+                           ! if 0 use fixed h_damp 
+dampscfact 1d0             ! h_damp -> h_damp*dampscfact
+hbzd 5d0                   ! Theta[ hbdz - R/(P_ij*B) ] Bornzero damping
+                           ! hbzd = 5 by default
+!-------------------------------------------------------------------
+! Renormalization and factorization scales
+!-------------------------------------------------------------------
+scalechoice 2              ! Choose a predefined scale 
+                           ! 0 - muR = muF = mt + mW/2 (default)
+                           ! 1 - muR = muF = [ mT(W) * mT(t) * mT(tb) ]^(1/3)
+                           ! 2 - muR = muF = HT/2 with HT = sum_i mT(i), where mT(i) is the transverse mass of each outgoing particle
+renscfact 1.0d0            ! muR -> muR*renscfact
+facscfact 1.0d0            ! muF -> muF*facscfact
+! The following to options should be enabled if dynamic scales should be treated
+! as in MG5_aMC@NLO. Has no effect on on fixed scale.
+btlscalereal 1             ! Compute scale for real ME and subtraction term on real kinematics
+btlscalect   1             ! Compute scale for subtraction term on born kinematics
+!-------------------------------------------------------------------
+! Random seeds
+!-------------------------------------------------------------------
+iseed    1                 ! Random seed
+#manyseeds  1              ! Used to perform multiple runs with different random
+#                          ! seeds in the same directory.
+#                          ! If set to 1, the program asks for an integer j;
+#                          ! The file pwgseeds.dat at line j is read, and the
+#                          ! integer at line j is used to initialize the random
+#                          ! sequence for the generation of the event.
+#                          ! The event file is called pwgevents-'j'.lhe
+#xgriditeration 1          ! identifier for grid generation
+#parallelstage  1          ! identifier for parallel running stages
+!-------------------------------------------------------------------
+! Reweighting
+!-------------------------------------------------------------------
+storeinfo_rwgt 1                      ! store info for reweighting events 
+compute_rwgt 0                        ! Perform reweighting 
+lhrwgt_id '0'                         ! id of the weight
+lhrwgt_descr 'muR = mu0, muF = mu0'   ! Description of the weight
+lhrwgt_group_name 'scale variation'   ! Name of weight group
+lhrwgt_group_combine 'envelope'       ! How to comibne weights
+!-------------------------------------------------------------------
+! Other options
+!-------------------------------------------------------------------
+delta_mttmin 0d0 ! (default 0d0) if not zero, use generation cut on mtt

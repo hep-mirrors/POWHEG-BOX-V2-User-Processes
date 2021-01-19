@@ -1,0 +1,7 @@
+create libdecay.a
+addlib lib/libmodel.a
+addlib lib/libdhelas.a
+addlib lib/libmg5.a
+save
+end
+
