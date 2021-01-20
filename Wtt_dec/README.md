@@ -65,7 +65,7 @@ Afterwards go into the `POWHEG-BOX-V2` directory and download the `POWHEG-BOX` i
 svn co --username anonymous --password anonymous svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/Wtt_dec
 ```
 
-To compile the `POWHEG` codes first enter the process directory `POWHEG-BOX-V2/Wtt/pp_ttWp_QCD`. 
+To compile the `POWHEG-BOX` codes first enter the process directory `POWHEG-BOX-V2/Wtt/pp_ttWp_QCD`. 
 Again, the following steps are identical for the other codes in `pp_ttWm_QCD`, `pp_ttWp_EW` or `pp_ttWm_EW`.
 One has to adjust a few path variables within the `Makefile`.
 Therefore, open the `Makefile` in an editor and look for the following variables.
