@@ -1,7 +1,7 @@
 Top-quark pair production in association with a $`W^\pm`$ boson
 ========================
 
-This document describes how to install and run the ``POWHEG`` implementation
+This document describes how to install and run the ``POWHEG-BOX`` implementation
 for the production of a top-quark pair in association with a $`W^\pm`$ boson.
 The codes provides multiple functionalities which are described in the following.
 
@@ -27,7 +27,7 @@ Change first into the `NLOX_util_1.2.0` folder and run
 where `NLOX_UTIL_PATH` is the path where the libraries should be placed. 
 Afterwards switch to the `NLOX_1.2.0` folder and compile with
 ```bash
-./install_nlox.sh --with-nloxutil=INSTALLPATH_UTIL
+./install_nlox.sh --with-nloxutil=NLOX_UTIL_PATH
 ```
 The location of the `NLOX_1.2.0` directory will be called in the following `NLOX_PATH`.
 
@@ -55,7 +55,7 @@ make -jX library flibrary -f Makefile_process
 where `X` is the number cpu cores to be used. Now the library is ready to be used.
 Repeat the steps from above to compile the `pp_Wmttbar` library as well.
 
-## Compiling POWHEG codes
+## Compiling POWHEG-BOX codes
 First, get the `POWHEG-BOX` code by typing into the terminal 
 ```bash
 svn checkout --username anonymous --password anonymous svn://powhegbox.mib.infn.it/trunk/POWHEG-BOX-V2
@@ -64,10 +64,7 @@ Afterwards go into the `POWHEG-BOX-V2` directory and download the `POWHEG-BOX` i
 ```bash
 svn co --username anonymous --password anonymous svn://powhegbox.mib.infn.it/trunk/User-Processes-V2/Wtt_dec
 ```
-or alternatively by using 
-```bash
-git clone git@gitlab.com:Powheg/Wtt_dec.git
-```
+
 To compile the `POWHEG` codes first enter the process directory `POWHEG-BOX-V2/Wtt/pp_ttWp_QCD`. 
 Again, the following steps are identical for the other codes in `pp_ttWm_QCD`, `pp_ttWp_EW` or `pp_ttWm_EW`.
 One has to adjust a few path variables within the `Makefile`.
