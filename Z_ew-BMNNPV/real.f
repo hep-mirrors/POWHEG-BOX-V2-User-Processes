@@ -34,6 +34,10 @@
 
           if (fermion_flav(1).eq.22) then
                   
+             write(*,*)'gamma-ind not yet allowed'
+             write(*,*)'please change the condition'
+             write(*,*)'to turn on the real16 matel'
+             stop
               pp(:,1) = -p(:,5)
               pp(:,5) = -p(:,1)
 
@@ -44,6 +48,10 @@
               const = -3d0
 
           elseif (fermion_flav(2).eq.22) then
+             write(*,*)'gamma-ind not yet allowed'
+             write(*,*)'please change the condition'
+             write(*,*)'to turn on the real16 matel'
+             stop
                   
               pp(:,2) = -p(:,5)
               pp(:,5) = -p(:,2)
@@ -77,6 +85,7 @@
       include 'pwhg_math.h'
       include 'pwhg_st.h'
       real * 8 p(0:3,nlegreal)
+      real * 16 p16(0:3,nlegreal)
       integer rflav(nlegreal)
       real * 8 amp2real
 
@@ -107,6 +116,28 @@ c     vector boson id and decay
       logical check,cond
       parameter (check=.false.)
 
+      integer ini
+      data ini/0/
+      save ini
+
+      real*8 powheginput
+      external powheginput
+
+      real*8 mlep2
+      common/leptmass/mlep2
+      
+      real*16 ml2,deltae,amp216
+      real*8 cutoff,vvv(0:3),tmp1,tmp2
+      save   cutoff
+      logical quadprec
+      
+
+      
+      if(ini.eq.0)then
+         ini=1
+         cutoff=powheginput("#qpreccutoff")
+         if(cutoff.le.0d0) cutoff=1d-6
+      endif
       do i=1,nlegreal
          iii(i)=rflav(i)
          do mu=0,3
@@ -126,6 +157,38 @@ c     vector boson id and decay
          if(iii(3).le.0.or.iii(4).ge.0) then
             write(*,*) 'Error in setreal 1'
             stop
+         endif
+      endif
+      vvv(:)=ploc(:,1)+ploc(:,5)
+      tmp1=vvv(0)**2-vvv(1)**2-vvv(2)**2-vvv(3)**2
+      vvv(:)=ploc(:,2)+ploc(:,5)
+      tmp2=vvv(0)**2-vvv(1)**2-vvv(2)**2-vvv(3)**2
+      
+      quadprec=.false.
+      if(tmp1.le.cutoff.or.tmp2.le.cutoff) then
+         quadprec=.true.
+         ml2 = mlep2*1.q0
+         p16=ploc*1q0
+         p16(1:2,1) = 0q0
+         p16(1:2,2) = 0q0
+         p16(1:3,4) =  p16(1:3,1)+p16(1:3,2)-p16(1:3,3)-p16(1:3,5)
+c     Mass shell
+         p16(0,5) = sqrt( p16(1,5)**2+ p16(2,5)**2 +p16(3,5)**2)
+         p16(0,3) = sqrt(p16(1,3)**2+p16(2,3)**2+p16(3,3)**2+ml2)
+         p16(0,4) = sqrt(p16(1,4)**2+p16(2,4)**2+p16(3,4)**2+ml2)
+         p16(0,1) = abs(p16(3,1))
+         p16(0,2) = abs(p16(3,2))
+c     energy conservation by rescaling initial momenta.
+c     fix electron on mass shell and iterate 4 times
+         deltae = (p16(0,5) + p16(0,3) + p16(0,4))/(p16(0,1)+p16(0,2))
+         p16(:,1) = deltae * p16(:,1)
+         p16(:,2) = deltae * p16(:,2)
+         
+         deltae = p16(0,1)+p16(0,2)-(p16(0,5) + p16(0,3) + p16(0,4))
+         if(abs(deltae/(p16(0,1)+p16(0,2))).gt.1q-25) then
+            write(*,*) ' worry: momentum not conserved!'
+            write(*,*) deltae/(p16(0,1)+p16(0,2))
+            call exit(-1)
          endif
       endif
       ferm_type(3) = +1
@@ -184,7 +247,14 @@ c     u~ u -> Z g
          endif
          
          if(cond) then
-            call q_aq_to_l_al_g(ploc,ferm_type,ferm_charge,amp2)         
+
+            if(quadprec) then
+               call q_aq_to_l_al_g16(p16,ferm_type,ferm_charge,amp216)
+               amp2=dble(amp216)
+            else
+               call q_aq_to_l_al_g(ploc,ferm_type,ferm_charge,amp2)         
+            endif
+
          else
             write(*,*) 'Error in setreal 2'
             stop
@@ -231,7 +301,13 @@ c     g u~ -> Z u~
             cond=.true.
          endif
          if(cond) then
-            call g_q_to_l_al_q(ploc,ferm_type,ferm_charge,amp2)
+            if(quadprec) then
+               call g_q_to_l_al_q16(p16,ferm_type,ferm_charge,amp216)
+               amp2=dble(amp216)
+            else
+               call g_q_to_l_al_q(ploc,ferm_type,ferm_charge,amp2)
+            endif
+
          else
             write(*,*) 'Error in setreal 3'
             stop
@@ -278,7 +354,14 @@ c     u~ g -> Z u~
             cond=.true.
          endif
          if(cond) then
-            call q_g_to_l_al_q(ploc,ferm_type,ferm_charge,amp2)
+
+            if(quadprec) then
+               call q_g_to_l_al_q16(p16,ferm_type,ferm_charge,amp216)
+               amp2=dble(amp216)
+            else
+               call q_g_to_l_al_q(ploc,ferm_type,ferm_charge,amp2)
+            endif
+            
          else
             write(*,*) 'Error in setreal 4'
             stop
@@ -765,6 +848,9 @@ c.....mauro-pair e
       save glm,glp,glmd,glpd,glm2,glp2
       save mz2m1,mz2dm1,mz2m2,megammin
 
+      real*8 cutoff,powheginput
+      external powheginput
+      save   cutoff
       ml2 = mlep2
       ml4 = ml2*ml2
 
@@ -777,6 +863,8 @@ c.....mauro-pair e
       if (ifirst.eq.0) then
           ifirst = 1
           megammin = 1.d-5
+          cutoff=powheginput("#qpreccutoff")
+          if(cutoff.le.0d0) cutoff=1d-6
 
           if (ql.ne.0d0) then
               glm = gl(0)
@@ -797,6 +885,11 @@ c.....mauro-pair e
 
       if(dotp(p(:,3),p(:,5)).lt.megammin.or.
      +   dotp(p(:,4),p(:,5)).lt.megammin) then
+         call setreal_ew16(p,fermion_flav,amp2)
+         return
+      endif
+      if(dotp(p(:,1),p(:,5)).lt.cutoff.or.
+     +   dotp(p(:,2),p(:,5)).lt.cutoff) then
          call setreal_ew16(p,fermion_flav,amp2)
          return
       endif
