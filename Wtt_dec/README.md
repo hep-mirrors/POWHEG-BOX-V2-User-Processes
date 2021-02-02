@@ -89,3 +89,12 @@ You can run the program with the an example input file via
 cd testrun
 ../pwhg_main
 ```
+
+## References
+
+[1] F. Febres Cordero, M. Kraus, L. Reina,
+    "Top-quark pair production in association with a $`W^\pm`$ gauge boson in the POWHEG-BOX",
+    [arXiv:2101.11808]
+
+
+[arXiv:2101.11808]: https://arxiv.org/abs/2101.11808    
