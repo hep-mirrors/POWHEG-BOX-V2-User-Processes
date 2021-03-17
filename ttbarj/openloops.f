@@ -313,12 +313,14 @@
         call set_parameter("hp_mode",powheginput('#ol_hp_mode'))
       end if
       if (powheginput('#ol_hp_loopacc').ge.0) then
-        call set_parameter("hp_loopacc",powheginput('#ol_hp_mode'))
+        call set_parameter("hp_loopacc",powheginput('#ol_hp_loopacc'))
       end if
 
 ! Initialize parameters
       call start
 
+! Print OL parameters to file
+      call olp_printparameter("parameters.ol")
 
       end subroutine openloops_init
 
