@@ -714,93 +714,93 @@ CCCCCCCCCCCCCCCCCCC
          
          if (ptttbar.lt.ptttbcuts(ncut)) goto 999
 c total sigma
-         call filld('total pt(ttb)>'//ttbcut,0.5d0,dsig/bsz(1))
+         call filld('total pt(ttb)>'//ttbcut,0.5d0,dsig)
 c yt asymmetry
          if(yt.gt.0d0) call filld('yt asym. pt(ttb)>'//ttbcut,
-     &        0.5d0,dsig/bsz(2))
+     &        0.5d0,dsig)
          if(yt.lt.0d0) call filld('yt asym. pt(ttb)>'//ttbcut,
-     &        0.5d0,-dsig/bsz(2))
+     &        0.5d0,-dsig)
 c yt asymmetry |Dy|<1
          if((yt.gt.0d0).and.(abs(yt).lt.1d0)) call filld(
-     &        'yt asym. |Dy|<1 pt(ttb)>'//ttbcut,0.5d0,dsig/bsz(3))
+     &        'yt asym. |Dy|<1 pt(ttb)>'//ttbcut,0.5d0,dsig)
          if((yt.lt.0d0).and.(abs(yt).lt.1d0)) call filld(
-     &        'yt asym. |Dy|<1 pt(ttb)>'//ttbcut,0.5d0,-dsig/bsz(3))
+     &        'yt asym. |Dy|<1 pt(ttb)>'//ttbcut,0.5d0,-dsig)
 c total |Dy|<1
          if(abs(yt).lt.1d0) call filld('total |Dy|<1 pt(ttb)>'//ttbcut,
-     &        0.5d0,dsig/bsz(4))
+     &        0.5d0,dsig)
 c yt asymmetry |Dy|>1
          if((yt.gt.0d0).and.(abs(yt).ge.1d0)) call filld(
-     &        'yt asym. |Dy|>1 pt(ttb)>'//ttbcut,0.5d0,dsig/bsz(5))
+     &        'yt asym. |Dy|>1 pt(ttb)>'//ttbcut,0.5d0,dsig)
          if((yt.lt.0d0).and.(abs(yt).ge.1d0)) call filld(
-     &        'yt asym. |Dy|>1 pt(ttb)>'//ttbcut,0.5d0,-dsig/bsz(5))
+     &        'yt asym. |Dy|>1 pt(ttb)>'//ttbcut,0.5d0,-dsig)
 c total |Dy|>1
          if(abs(yt).ge.1d0) call filld('total |Dy|>1 pt(ttb)>'//ttbcut,
-     &        0.5d0,dsig/bsz(6))
+     &        0.5d0,dsig)
 c yt asymmetry Mtt<450
          if((yt.gt.0d0).and.(mttbar.lt.450d0)) call filld(
-     &        'yt asym. Mtt<450 pt(ttb)>'//ttbcut,0.5d0,dsig/bsz(7))
+     &        'yt asym. Mtt<450 pt(ttb)>'//ttbcut,0.5d0,dsig)
          if((yt.lt.0d0).and.(mttbar.lt.450d0)) call filld(
-     &        'yt asym. Mtt<450 pt(ttb)>'//ttbcut,0.5d0,-dsig/bsz(7))
+     &        'yt asym. Mtt<450 pt(ttb)>'//ttbcut,0.5d0,-dsig)
 c total Mtt<450
          if(mttbar.lt.450d0) call filld('total Mtt<450 pt(ttb)>'/
-     &        /ttbcut,0.5d0,dsig/bsz(8))
+     &        /ttbcut,0.5d0,dsig)
 c yt asymmetry Mtt>450
          if((yt.gt.0d0).and.(mttbar.ge.450d0)) call filld(
-     &        'yt asym. Mtt>450 pt(ttb)>'//ttbcut,0.5d0,dsig/bsz(9))
+     &        'yt asym. Mtt>450 pt(ttb)>'//ttbcut,0.5d0,dsig)
          if((yt.lt.0d0).and.(mttbar.ge.450d0)) call filld(
-     &        'yt asym. Mtt>450 pt(ttb)>'//ttbcut,0.5d0,-dsig/bsz(9))
+     &        'yt asym. Mtt>450 pt(ttb)>'//ttbcut,0.5d0,-dsig)
 c total Mtt<450
          if(mttbar.ge.450d0) call filld('total Mtt>450 pt(ttb)>'/
-     &        /ttbcut,0.5d0,dsig/bsz(10))
+     &        /ttbcut,0.5d0,dsig)
 c top antitop charge asymmetry
          if(diffabseta.gt.0d0) call filld('t-tbar charge asym. pt(ttb)>'/
-     &        /ttbcut,0.5d0,dsig/bsz(11))
+     &        /ttbcut,0.5d0,dsig)
          if(diffabseta.lt.0d0) call filld('t-tbar charge asym. pt(ttb)>'/
-     &        /ttbcut,0.5d0,-dsig/bsz(11))
+     &        /ttbcut,0.5d0,-dsig)
 c mass of the pair
-         call filld('ttbar mass pt(ttb)>'//ttbcut,mttbar,dsig/bsz(12))
+         call filld('ttbar mass pt(ttb)>'//ttbcut,mttbar,dsig)
 c rapidity of the pair
-         call filld('ttbar y pt(ttb)>'//ttbcut,yttbar,dsig/bsz(13))
+         call filld('ttbar y pt(ttb)>'//ttbcut,yttbar,dsig)
 c pt of the pair
-         call filld('ttbar pt pt(ttb)>'//ttbcut,ptttbar,dsig/bsz(14))
+         call filld('ttbar pt pt(ttb)>'//ttbcut,ptttbar,dsig)
 c pt of the pair zoom
          call filld('ttbar pt zoom pt(ttb)>'//ttbcut,
-     &        ptttbar,dsig/bsz(15))
+     &        ptttbar,dsig)
 c pt of top
-         call filld('t pt pt(ttb)>'//ttbcut,ptt,dsig/bsz(16))
+         call filld('t pt pt(ttb)>'//ttbcut,ptt,dsig)
 c pt of antitop
-         call filld('tbar pt pt(ttb)>'//ttbcut,pttbar,dsig/bsz(17))
+         call filld('tbar pt pt(ttb)>'//ttbcut,pttbar,dsig)
 c top rapidity
-         call filld('t y pt(ttb)>'//ttbcut,yt,dsig/bsz(18))
+         call filld('t y pt(ttb)>'//ttbcut,yt,dsig)
 c antitop rapidity
-         call filld('tbar y pt(ttb)>'//ttbcut,ytbar,dsig/bsz(19))
+         call filld('tbar y pt(ttb)>'//ttbcut,ytbar,dsig)
 c top - antitop rapidity asymmetry
-         call filld('t-tbar,y asym.  pt(ttb)>'//ttbcut,yt,dsig/bsz(20))
+         call filld('t-tbar,y asym.  pt(ttb)>'//ttbcut,yt,dsig)
          call filld('t-tbar,y asym.  pt(ttb)>'//ttbcut,
-     &        ytbar,-dsig/bsz(20))
+     &        ytbar,-dsig)
 c top - antitop pseudo-rapidity asymmetry
          call filld('t-tbar,eta asym.  pt(ttb)>'//ttbcut,
-     &        etat,dsig/bsz(21))
+     &        etat,dsig)
          call filld('t-tbar,eta asym.  pt(ttb)>'//ttbcut,
-     &        etatbar,-dsig/bsz(21))
+     &        etatbar,-dsig)
 c top - antitop charge asymmetry (using y)
          call filld('t-tbar, ch asym.(y)  pt(ttb)>'//ttbcut,
-     &        abs(yt)-abs(ytbar),dsig/bsz(22))
+     &        abs(yt)-abs(ytbar),dsig)
 c top - antitop charge asymmetry (using eta)
          call filld('t-tbar, ch asym.(eta)  pt(ttb)>'//ttbcut,
-     &        diffabseta,dsig/bsz(23))
+     &        diffabseta,dsig)
 c top - antitop azimuthal distance
          call filld('t-tbar,Delta_phi pt(ttb)>'//ttbcut,
-     &        deltaphittbar/pi,dsig/bsz(24))
+     &        deltaphittbar/pi,dsig)
 c top - antitop Delta R   
          call filld('t-tbar,Delta_R   pt(ttb)>'//ttbcut,
-     &        deltaRttbar,dsig/bsz(25))
+     &        deltaRttbar,dsig)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C          PLOTS INVOLVING JETS      
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c N jets
-         call filld('Njets pt(ttb)>'//ttbcut,njets+0.5d0,dsig/bsz(29))
+         call filld('Njets pt(ttb)>'//ttbcut,njets+0.5d0,dsig)
 
          deltaphij1ttbar=deltaphi(phijet(1),phittbar)
    
@@ -829,20 +829,20 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c  PLOTS INVOLVING HARDEST JET
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c (Leading non-b) jet pt
-         call filld('pt1stjet pt(ttb)>'//ttbcut,ktjet(1),dsig/bsz(30))
+         call filld('pt1stjet pt(ttb)>'//ttbcut,ktjet(1),dsig)
          call filld('pt1stjet zoom pt(ttb)>'//ttbcut,
-     &        ktjet(1),dsig/bsz(31))
+     &        ktjet(1),dsig)
          
 c (Leading non-b) jet pt_rel
          call filld('pt_rel 1stjet pt(ttb)>'//ttbcut,
-     &        ptreljet(1),dsig/bsz(32))
+     &        ptreljet(1),dsig)
 c (Leading non-b) jet y
          idiag=0
          do icut=20,100,20
             if(ktjet(1).gt.icut) then
                write(jetcut,'(i3)') icut
                call filld('y1stjet, pt(jet)>'//jetcut//' pt(ttb)>'/
-     &           /ttbcut,yjet(1),dsig/bsz(33+idiag))
+     &           /ttbcut,yjet(1),dsig)
             endif
             idiag=idiag+1
          enddo
@@ -853,7 +853,7 @@ c (Leading non-b) jet y-yttbar
                write(jetcut,'(i3)') icut
                call filld('y1stjet-y(ttbar),pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              yjet(1)-yttbar,dsig/bsz(38+idiag))
+     &              yjet(1)-yttbar,dsig)
             endif
             idiag=idiag+1
          enddo
@@ -864,7 +864,7 @@ c (Leading non-b) jet phi-phittbar
                write(jetcut,'(i3)') icut
                call filld('phi1stjet-phi(ttbar),pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              deltaphij1ttbar/pi,dsig/bsz(43+idiag))
+     &              deltaphij1ttbar/pi,dsig)
             endif
             idiag=idiag+1
          enddo
@@ -875,16 +875,16 @@ c (Leading non-b) jet delta R jet-ttbar
                write(jetcut,'(i3)') icut
                call filld('deltaR 1stjet-(ttbar),pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              deltaRj1ttbar,dsig/bsz(48+idiag))
+     &              deltaRj1ttbar,dsig)
             endif
             idiag=idiag+1
          enddo
 
 c (Leading non-b) jet +ttbar system pt
          call filld('log10(pt) 1stjet-ttbar pt(ttb)>'//ttbcut,
-     &        0.5d0*log10(pt2systtbarj),dsig/bsz(53))
+     &        0.5d0*log10(pt2systtbarj),dsig)
          call filld('pt 1stjet-ttbar pt(ttb)>'//ttbcut,
-     &        sqrt(pt2systtbarj),dsig/bsz(54))
+     &        sqrt(pt2systtbarj),dsig)
 
          if (njets.lt.2) goto 777
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -894,13 +894,13 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          deltaRj1j2=rsep_azi_y(pjet(1,1),pjet(1,2))
         
 c (Next-to-Leading non-b) jet pt
-         call filld('pt2ndjet pt(ttb)>'//ttbcut,ktjet(2),dsig/bsz(60))
+         call filld('pt2ndjet pt(ttb)>'//ttbcut,ktjet(2),dsig)
          call filld('pt2ndjet (zoom) pt(ttb)>'//ttbcut,
-     &        ktjet(2),dsig/bsz(61))
+     &        ktjet(2),dsig)
 
 c (Next-to-Leading non-b) jet pt_rel
          call filld('pt_rel 2ndjet pt(ttb)>'//ttbcut,
-     &        ptreljet(2),dsig/bsz(62))
+     &        ptreljet(2),dsig)
 
 c (Next-to-Leading non-b) jet y
          idiag=0
@@ -908,7 +908,7 @@ c (Next-to-Leading non-b) jet y
             if(ktjet(2).gt.icut) then
                write(jetcut,'(i3)') icut
                call filld('y2ndjet pt(jet)>'//jetcut//' pt(ttb)>'/
-     &              /ttbcut,yjet(2),dsig/bsz(63+idiag))
+     &              /ttbcut,yjet(2),dsig)
             endif
             idiag=idiag+1
          enddo
@@ -919,7 +919,7 @@ c (Next-to-Leading non-b) jet y-yttbar
                write(jetcut,'(i3)') icut
                call filld('y2ndjet-y(ttbar) pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              yjet(2)-yttbar,dsig/bsz(68+idiag))
+     &              yjet(2)-yttbar,dsig)
             endif
             idiag=idiag+1
          enddo
@@ -930,7 +930,7 @@ c (Next-to-Leading non-b) jet delta R jet-ttbar
                write(jetcut,'(i3)') icut
                call filld('deltaR 2ndjet-(ttbar),pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              deltaRj2ttbar,dsig/bsz(73+idiag))
+     &              deltaRj2ttbar,dsig)
             endif
             idiag=idiag+1
          enddo
@@ -942,7 +942,7 @@ c  delta R (Leading non-b) jet - (Next-to-Leading non-b) jet
                write(jetcut,'(i3)') icut
                call filld('deltaR 1stjet-2ndjet,pt(jet)>'//jetcut/
      &              /' pt(ttb)>'//ttbcut,
-     &              deltaRj1j2,dsig/bsz(78+idiag))
+     &              deltaRj1j2,dsig)
             endif
             idiag=idiag+1
          enddo
@@ -954,35 +954,35 @@ C PLOTS FOR TRACKING NEGATIVE WEIGHTS
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c  ttbar pt         
          call filld('pt(ttb) pos-|neg| pt(ttb)>'//ttbcut,
-     &        ptttbar,dsig/bsz(100))
+     &        ptttbar,dsig)
          if (dsig.gt.0d0) then
             call filld('pt(ttb) pos pt(ttb)>'//ttbcut,
-     &           ptttbar,dsig/bsz(101))
+     &           ptttbar,dsig)
          else
             call filld('pt(ttb) neg pt(ttb)>'//ttbcut,
-     &           ptttbar,abs(dsig)/bsz(102))
+     &           ptttbar,abs(dsig))
          endif
 c  hardest jet pt         
          call filld('pt J1 pos-|neg| pt(ttb)>'//ttbcut,
-     &        ktjet(1),dsig/bsz(103))
+     &        ktjet(1),dsig)
          if (dsig.gt.0d0) then
             call filld('pt J1 pos pt(ttb)>'//ttbcut,
-     &           ktjet(1),dsig/bsz(104))
+     &           ktjet(1),dsig)
          else
             call filld('pt J1 neg pt(ttb)>'//ttbcut,
-     &           ktjet(1),abs(dsig)/bsz(105))
+     &           ktjet(1),abs(dsig))
          endif
 
          if (njets.lt.2) goto 888
 c next-to-hardest jet pt
          call filld('pt J2 pos-|neg| pt(ttb) >'//ttbcut,
-     &        ktjet(2),dsig/bsz(106))
+     &        ktjet(2),dsig)
          if (dsig.gt.0d0) then
             call filld('pt J2 pos pt(ttb)>'//ttbcut,
-     &           ktjet(2),dsig/bsz(107))
+     &           ktjet(2),dsig)
          else
             call filld('pt J2 neg pt(ttb)>'//ttbcut,
-     &           ktjet(2),abs(dsig)/bsz(108))
+     &           ktjet(2),abs(dsig))
          endif
          
  888     continue
@@ -994,37 +994,37 @@ c  PLOTS INVOLVING LEPTONS FROM TOP DECAY PRODUCTS
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c Lepton energy in top rest frame 
          if (iiep.gt.0) call filld('eem pt(ttb)>'//ttbcut,
-     &        eep,dsig/bsz(90))
+     &        eep,dsig)
 c Lepton cos theta in top rest frame 
          if (iiep.gt.0) call filld('costh1 costh2 pt(ttb)>'//ttbcut,
-     &        cthep*cthem,dsig/bsz(91))
+     &        cthep*cthem,dsig)
 c Lepton azimuth in top rest frame. The origin is the top
 c transverse direction
          if (iiep*iiem.gt.0) call filld('phi dec pt(ttb)>'//ttbcut,
-     &        dphi/pi,dsig/bsz(92))
+     &        dphi/pi,dsig)
 
 c Hardest lepton+ pt in lab. frame
          if (iiep.gt.0) call filld('lep+ pt(ttb)>'//ttbcut,
-     &        ptep,dsig/bsz(93))
+     &        ptep,dsig)
 c Hardest lepton- pt in lab. frame
          if (iiem.gt.0) call filld('lep- pt(ttb)>'//ttbcut,
-     &        ptem,dsig/bsz(94))
+     &        ptem,dsig)
 c Hardest lepton+ y in lab. frame
          if (iiep.gt.0) call filld('lep+ y pt(ttb)>'//ttbcut,
-     &        yep,dsig/bsz(95))
+     &        yep,dsig)
 c Hardest lepton- y in lab. frame
          if (iiem.gt.0) call filld('lep- y pt(ttb)>'//ttbcut,
-     &        yem,dsig/bsz(96))
+     &        yem,dsig)
 c Dilepton inv. mass
          if (iiep*iiem.gt.0)call filld('dilep inv. mass pt(ttb)>'/
-     &        /ttbcut,mepem,dsig/bsz(97))
+     &        /ttbcut,mepem,dsig)
 c Dilepton azimuthal sep.
          if (iiep*iiem.gt.0)call filld('dilep Delta phi pt(ttb)>'/
-     &        /ttbcut,deltaphiepem/pi,dsig/bsz(98))
+     &        /ttbcut,deltaphiepem/pi,dsig)
 c Dilepton azimuthal sep. with mttcut
          if((iiep*iiem.gt.0).and.(mttbar.le.400)) then
             call filld('dilep Delta phi mtt < 400 pt(ttb)>'//ttbcut,
-     &           deltaphiepem/pi,dsig/bsz(99))
+     &           deltaphiepem/pi,dsig)
          endif
  999     continue
       enddo ! end of ptttbcut do loop
@@ -1035,29 +1035,29 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       diag=numplots*nptttbcut
 
       diag=diag+1
-      call filld('DUW jet pt bin4TeV',ktjet(1),dsig/bsz(diag))
+      call filld('DUW jet pt bin4TeV',ktjet(1),dsig)
       diag=diag+1
-      call filld('DUW jet pt bin4LHC',ktjet(1),dsig/bsz(diag))
+      call filld('DUW jet pt bin4LHC',ktjet(1),dsig)
       diag=diag+1
-      call filld('DUW ttbar pt bin4TeV',ptttbar,dsig/bsz(diag))
+      call filld('DUW ttbar pt bin4TeV',ptttbar,dsig)
       diag=diag+1
-      call filld('DUW ttbar pt bin4LHC',ptttbar,dsig/bsz(diag))
+      call filld('DUW ttbar pt bin4LHC',ptttbar,dsig)
       diag=diag+1
-      call filld('DUW t pt bin4TeV',ptt,dsig/bsz(diag))
+      call filld('DUW t pt bin4TeV',ptt,dsig)
       diag=diag+1
-      call filld('DUW t pt bin4LHC',ptt,dsig/bsz(diag))
+      call filld('DUW t pt bin4LHC',ptt,dsig)
       diag=diag+1
-      call filld('DUW t eta bin4TeV',etat,dsig/bsz(diag))
+      call filld('DUW t eta bin4TeV',etat,dsig)
       diag=diag+1
-      call filld('DUW t eta bin4LHC',etat,dsig/bsz(diag))
+      call filld('DUW t eta bin4LHC',etat,dsig)
       diag=diag+1
-      call filld('DUW t y bin4TeV',yt,dsig/bsz(diag))
+      call filld('DUW t y bin4TeV',yt,dsig)
       diag=diag+1
-      call filld('DUW t y bin4LHC',yt,dsig/bsz(diag))
+      call filld('DUW t y bin4LHC',yt,dsig)
       diag=diag+1
-      call filld('DUW jet y bin4TeV',yjet(1),dsig/bsz(diag))
+      call filld('DUW jet y bin4TeV',yjet(1),dsig)
       diag=diag+1
-      call filld('DUW jet y bin4LHC',yjet(1),dsig/bsz(diag))
+      call filld('DUW jet y bin4LHC',yjet(1),dsig)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C PLOTS FOR ASYMMETRY
@@ -1069,7 +1069,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          if(mttbar.gt.icut) then
             write(attcut,'(i4)') icut
             call filld('pt 1st jet , mtt>'//attcut,
-     &           ktjet(1),dsig/bsz(diag+idiag))
+     &           ktjet(1),dsig)
          endif
          idiag=idiag+1
       enddo
@@ -1081,7 +1081,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          if(ktjet(1).gt.icut) then
             write(attcut,'(i4)') icut
             call filld('mtt,  pt 1stjet>'//attcut,
-     &           mttbar,dsig/bsz(diag+idiag))
+     &           mttbar,dsig)
          endif
          idiag=idiag+1
       enddo
@@ -1094,7 +1094,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       m0= 170d0
       mstar= 2d0* m0/sqrt(ppairttbar(1)*pjet(1,1)+ppairttbar(2)*pjet(2
      $     ,1)+ppairttbar(3)*pjet(3,1)+ppairttbar(4)*pjet(4,1))
-      call filld('m*',mstar,dsig/bsz(diag))
+      call filld('m*',mstar,dsig)
 
       end
 
