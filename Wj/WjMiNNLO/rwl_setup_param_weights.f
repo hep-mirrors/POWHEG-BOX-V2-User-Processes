@@ -43,5 +43,6 @@ c for safety, we convert the real val to the nearest integer
          if(rwl_keypresent(count,'renscfact',val)) then
             st_renfact = val
          endif
+         include 'extraweightshook.h'
       endif
       end

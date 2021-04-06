@@ -204,7 +204,7 @@ FASTJET_CONFIG=$(shell which fastjet-config)
 #FASTJET_CONFIG=~/lib/fastjet242/bin/fastjet-config
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins ) $(stdclib)
 FJCXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o fastjetfortran.o
+PWHGANAL=pwhg_bookhist-multi.o pwhg_analysis-minnlo.o #fastjetfortran.o
  endif
 
 
@@ -264,7 +264,8 @@ PWHG=pwhg_main.o pwhg_init.o bbinit.o btilde.o lhefwrite.o  		\
 	sigcollsoft.o sigvirtual.o validflav.o mint_upb.o  \
 	pwhgreweight.o opencount.o ubprojections.o minlo_checks.o \
         setlocalscales.o  process_dependent_minnlo.o $(PDFPACK) $(USER) $(FPEOBJ) \
-        lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o
+        lhefread.o pwhg_io_interface.o rwl_weightlists.o rwl_setup_param_weights.o \
+	rwl_setup_param_extraweights.o
 
 
 #LIBDIRMG=.
@@ -372,7 +373,7 @@ setlocalscales.o: rad_tools.o pdfs_tools.o sudakov_radiators.o
 process_dependent_minnlo.o: internal_parameters.o
 internal_parameters.o: hoppet_v1.o
 coefficient_functions_nnlops.o: rad_tools.o internal_parameters.o
-pdfs_tools.o: rad_tools.o internal_parameters.o coefficient_functions_nnlops.o
+pdfs_tools.o: rad_tools.o internal_parameters.o coefficient_functions_nnlops.o sudakov_radiators.o
 driver.o: rad_tools.o pdfs_tools.o internal_parameters.o sudakov_radiators.o
 sudakov_radiators.o: rad_tools.o frcgauss.o setstrongcoupl.o
 frcgauss.o:
