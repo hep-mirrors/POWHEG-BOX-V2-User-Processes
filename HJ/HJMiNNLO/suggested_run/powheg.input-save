@@ -7,7 +7,8 @@ max_io_bufsize 2000000
 
 ! SCALE VARIATION
 renscfact  1d0   ! (default 1d0) ren scale factor: muren  = muref * renscfact 
-facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact 
+facscfact  1d0   ! (default 1d0) fac scale factor: mufact = muref * facscfact
+kappaQ 1d0       ! factor of scale Q inside the (modified) logarithm: Q = Qref * kappaQ (Qref=invariant mass of the system)
 
 rwl_file '-'
 <initrwgt>
@@ -32,8 +33,15 @@ minlo 1        ! (default 0) if 1, activate minlo
 minnlo 1       ! (default 0) if 1, activate miNNlo
 largeptscales 0  ! (default 0) if 0, at large pt, use muR=muF~Q in fixed order part
                  !             if 1, at large pt, use muR=muF=pt in the fixed-order part
-Q0 2.            ! (default 2.) Q0 value used in profiled scales (see 2006.04133 for more details)
-                 !              smaller values can be used too.
+#Q0 0.5           ! (default 0.) Q0 value used in profiled scales (see 2006.04133 for more details)
+#                 !              smaller values can be used too.
+#modlog_p 6d0      ! (default 6) optional, only works if minnlo is set to 1)
+#                  ! if >0d0, activate modified logs and set the exponent
+#                  ! if -1d0, activate piecewise modified log version 1 
+#                  ! if -2d0, activate piecewise modified log version 2
+#                  ! piecewise modified log: log(Q/pT) for pT<Q/2
+#                  !                         zero for pT>Q
+#                  !                         smoothly interpolated inbetween
 
 ! PROCESS PARAMETERS
 hmass 125          ! higgs mass
@@ -68,13 +76,14 @@ use-old-ubound  1 ! if 1 use norm of upper bounding function stored in pwgubound
 #ckkwscalup 0 ! (for Hj, default was 1; for HJMiNNLO, default is 0), If 1 compute the scalup scale for subsequent
               ! shower using the smallest kt in the final state;
               ! If 0, use the standard POWHEG BOX scalup
+#doublefsr 1  ! (default 1) symmetric treatment of FSR q->qg and g->qqbar splittings
 #runningscales 1  ! (default 0), if 0 use hmass as central
                   ! factorization and renormalization scale;
                   ! if 1 use the Ht/2
 
 ncall1   5000     ! number of calls for initializing the integration grid
 itmx1    1        ! number of iterations for initializing the integration grid
-ncall2   50000    ! number of calls for computing the integral and finding upper bound
+ncall2   5000    ! number of calls for computing the integral and finding upper bound
 itmx2    1        ! number of iterations for computing the integral and finding upper bound
 foldcsi   1       ! number of folds on csi integration
 foldy     1       ! number of folds on  y  integration

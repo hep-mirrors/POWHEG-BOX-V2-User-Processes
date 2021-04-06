@@ -400,8 +400,8 @@ c palg=1 is standard kt, -1 is antikt
       palg=-1
       r=rr
 c      ptmin=20d0 
-      call fastjetppgenkt(ptrack,ntracks,r,palg,ptmin,pjet,njets,
-     $                        jetvec)
+c      call fastjetppgenkt(ptrack,ntracks,r,palg,ptmin,pjet,njets,
+c     $                        jetvec)
       mjets=njets
       if(njets.eq.0) return
 c check consistency
