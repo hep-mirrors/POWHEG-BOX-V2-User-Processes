@@ -1,6 +1,6 @@
       write(0,*) '                                                         '
       write(0,*) '        '//achar(27)//'[1;31m********************************************'//achar(27)//'[0m'
-      write(0,*) '        '//achar(27)//'[1;31m*           MiNNLOPS Version 3.1           *'//achar(27)//'[0m'
+      write(0,*) '        '//achar(27)//'[1;31m*           MiNNLOPS Version 4.0           *'//achar(27)//'[0m'
       write(0,*) '        '//achar(27)//'[1;31m********************************************'//achar(27)//'[0m'
       write(0,*) '                                                       '
       write(0,*) achar(27)//'[1;31m If you use this program for scientific work, please cite: '//achar(27)//'[0m'
