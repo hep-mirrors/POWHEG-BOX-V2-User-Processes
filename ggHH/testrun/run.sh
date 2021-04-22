@@ -85,7 +85,7 @@ done
 termin=$(date +"%s")
 difftimelps=$(($termin-$begin))
 echo "$(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed since script start."
-exit
+#exit
 
 parstage=3
 echo "***********************************************"
