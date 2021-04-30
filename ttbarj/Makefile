@@ -48,7 +48,7 @@ endif
 # OLPATH=$(PWD)/../OpenLoopsStuff/OpenLoops
 # OLPATH=/home/gavardi/fortran/OpenLoops2
 # OLPATH=/home/gavardi/fortran/OpenLoops2_test/OpenLoops
-# OLPATH=/home/alioli/work/OpenLoops-public_beta
+OLPATH=/home/alioli/work/OpenLoops-public_beta
 
 #Required OL libraries
 OLLIBS=ppttj ppttj_dec
@@ -97,7 +97,7 @@ ifeq ("$(ANALYSIS)","antikt")
 FASTJET_CONFIG=$(shell which fastjet-config)
 LIBSFASTJET += $(shell $(FASTJET_CONFIG) --libs --plugins )
 CXXFLAGS+= $(shell $(FASTJET_CONFIG) --cxxflags)
-PWHGANAL=pwhg_bookhist-multi-new.o pwhg_analysis-antikt.o
+PWHGANAL=pwhg_bookhist-multi-new.o multi_plot.o pwhg_analysis-antikt.o
 PWHGANAL+= fastjetfortran.o
 else
 PWHGANAL=pwhg_analysis-dummy.o pwhg_bookhist-multi-new.o
@@ -161,7 +161,7 @@ LHEF=lhef_analysis.o boostrot.o random.o cernroutines.o opencount.o \
 
 # target to analyze LHEF output
 lhef_analysis:$(LHEF)
-	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(LHEF))  $(LIBSFASTJET)  -o $@-$(COMPILER)
+	$(FF) $(patsubst %.o,$(OBJ)/%.o,$(LHEF)) $(LIBS) -o $@-$(COMPILER)
 
 
 # target to read event file, shower events with HERWIG + analysis

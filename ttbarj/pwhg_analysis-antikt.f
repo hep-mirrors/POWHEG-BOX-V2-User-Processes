@@ -9,21 +9,17 @@ c     You can substitute any of these with your favourite ones
 
       subroutine init_hist
       implicit none
-      include 'pwhg_book.h'
       double precision pi,pi2
       parameter(pi = 3.141592653589793D0, pi2 = 9.869604401089358D0)
-      integer icut,idiag,diag
+      integer icut
       character * 3 jetcut
       character * 4 attcut
-c     binsize
-      double precision bsz(nmh)
-      common/pwhghistcommon/bsz
 c
       integer nptttbcutmax,nptttbcut
       parameter(nptttbcutmax = 10)
       integer ptttbcuts(0:nptttbcutmax-1)
-      common/cptvbcut/ptttbcuts,nptttbcut,numplots
-      integer ncut,numplots
+      common/cptvbcut/ptttbcuts,nptttbcut
+      integer ncut
       
       character * 3 ttbcut
       integer i
@@ -34,10 +30,6 @@ c
       ptttbcuts(3) = 50
 c     number of pt cuts implemented one more than the last previous one
       nptttbcut=4
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      numplots = 109  ! <========== DO NOT FORGET TO SET THIS
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       write(*,*) '**************************************************'
       write(*,*) '**************************************************'
@@ -55,98 +47,73 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          write(unit=ttbcut,fmt="(i3)") ptttbcuts(ncut)
 
 c total cross section sanity check
-         bsz(1) = 1d0
-         call bookupeqbins('total pt(ttb)>'//ttbcut,bsz(1),0d0,1d0)
+         call bookupeqbins('total pt(ttb)>'//ttbcut,1d0,0d0,1d0)
 c yt asymmetry
-         bsz(2) = 1d0
-         call bookupeqbins('yt asym. pt(ttb)>'//ttbcut,bsz(2),0d0,1d0)
+         call bookupeqbins('yt asym. pt(ttb)>'//ttbcut,1d0,0d0,1d0)
 c yt asymmetry |yt|<1
-         bsz(3) = 1d0
          call bookupeqbins('yt asym. |Dy|<1 pt(ttb)>'//ttbcut,
-     &        bsz(3),0d0,1d0)
+     &        1d0,0d0,1d0)
 c total |yt|< 1
-         bsz(4) = 1d0
          call bookupeqbins('total |Dy|<1 pt(ttb)>'//ttbcut,
-     &        bsz(4),0d0,1d0)
+     &        1d0,0d0,1d0)
 c yt asymmetry |yt|> 1
-         bsz(5) = 1d0
          call bookupeqbins('yt asym. |Dy|>1 pt(ttb)>'//ttbcut,
-     &        bsz(5),0d0,1d0)
+     &        1d0,0d0,1d0)
 c total |yt|> 1
-         bsz(6) = 1d0
          call bookupeqbins('total |Dy|>1 pt(ttb)>'//ttbcut,
-     &        bsz(6),0d0,1d0)
+     &        1d0,0d0,1d0)
 c yt asymmetry Mtt<450
-         bsz(7) = 1d0
          call bookupeqbins('yt asym. Mtt<450 pt(ttb)>'//ttbcut,
-     &        bsz(7),0d0,1d0)
+     &        1d0,0d0,1d0)
 c total Mtt < 450
-         bsz(8) = 1d0
          call bookupeqbins('total Mtt<450 pt(ttb)>'//ttbcut,
-     &        bsz(8),0d0,1d0)
+     &        1d0,0d0,1d0)
 c yt asymmetry Mtt>450
-         bsz(9) = 1d0
          call bookupeqbins('yt asym. Mtt>450 pt(ttb)>'//ttbcut,
-     &        bsz(9),0d0,1d0)
+     &        1d0,0d0,1d0)
 c total Mtt > 450
-         bsz(10) = 1d0
          call bookupeqbins('total Mtt>450 pt(ttb)>'//ttbcut,
-     &        bsz(10),0d0,1d0)
+     &        1d0,0d0,1d0)
 c top antitop charge asymmetry
-         bsz(11) = 1d0
          call bookupeqbins('t-tbar charge asym. pt(ttb)>'//ttbcut,
-     &        bsz(11),0d0,1d0)
+     &        1d0,0d0,1d0)
 c mass of the pair
-         bsz(12)=20d0
          call bookupeqbins('ttbar mass pt(ttb)>'//ttbcut,
-     &        bsz(12),0d0,1000d0)
+     &        20d0,0d0,1000d0)
 c rapidity of the pair
-         bsz(13)=0.2d0
-         call bookupeqbins('ttbar y pt(ttb)>'//ttbcut,bsz(13),-4d0,4d0)
+         call bookupeqbins('ttbar y pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
 c pt of the pair
-         bsz(14)=4d0
          call bookupeqbins('ttbar pt pt(ttb)>'//ttbcut,
-     &        bsz(14),0d0,800d0)
+     &        4d0,0d0,800d0)
 c pt of the pair (zoom)
-         bsz(15)=0.5d0
          call bookupeqbins('ttbar pt zoom pt(ttb)>'//ttbcut,
-     &        bsz(15),0d0,100d0)
+     &        0.5d0,0d0,100d0)
 c pt of top
-         bsz(16)=5d0
-         call bookupeqbins('t pt pt(ttb)>'//ttbcut,bsz(16),0d0,500d0)
+         call bookupeqbins('t pt pt(ttb)>'//ttbcut,5d0,0d0,500d0)
 c pt of antitop
-         bsz(17)=5d0
-         call bookupeqbins('tbar pt pt(ttb)>'//ttbcut,bsz(17),0d0,500d0)
+         call bookupeqbins('tbar pt pt(ttb)>'//ttbcut,5d0,0d0,500d0)
 c top rapidity
-         bsz(18)=0.2d0
-         call bookupeqbins('t y pt(ttb)>'//ttbcut,bsz(18),-4d0,4d0)
+         call bookupeqbins('t y pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
 c antitop rapidity
-         bsz(19)=0.2d0
-         call bookupeqbins('tbar y pt(ttb)>'//ttbcut,bsz(19),-4d0,4d0)
+         call bookupeqbins('tbar y pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
 c top-antitop rapidity asymmetry
-         bsz(20)=0.2
          call bookupeqbins('t-tbar,y asym.  pt(ttb)>'//ttbcut,
-     &        bsz(20),-4d0,4d0)
+     &        0.2d0,-4d0,4d0)
 c top-antitop pseudo-rapidity asymmetry
-         bsz(21) = 0.2
          call bookupeqbins('t-tbar,eta asym.  pt(ttb)>'//ttbcut,
-     &        bsz(21),-4d0,4d0)
+     &        0.2d0,-4d0,4d0)
 c top-antitop charge asymmetry (using y)
-         bsz(22)=0.2
          call bookupeqbins('t-tbar, ch asym.(y)  pt(ttb)>'//ttbcut,
-     &        bsz(22),-4d0,4d0)
+     &        0.2d0,-4d0,4d0)
 c top-antitop charge asymmetry (using eta)
-         bsz(23)=0.2
          call bookupeqbins('t-tbar, ch asym.(eta)  pt(ttb)>'//ttbcut,
-     &        bsz(23),-4d0,4d0)
+     &        0.2d0,-4d0,4d0)
 c top-antitop azimuthal distance
-         bsz(24) = 0.02d0
          call bookupeqbins('t-tbar,Delta_phi pt(ttb)>'//ttbcut,
-     &        bsz(24),0d0,1d0)
+     &        0.02d0,0d0,1d0)
 c top-antitop Delta R distance
-         bsz(25) = 0.25d0
          call bookupeqbins('t-tbar,Delta_R   pt(ttb)>'//ttbcut,
-     &        bsz(25),0 .d0,10.d0)
+     &        0.25d0,0.d0,10.d0)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -155,8 +122,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
          
 c N jets
-         bsz(29) = 1d0
-         call bookupeqbins('Njets pt(ttb)>'//ttbcut,bsz(29),0d0,6d0)
+         call bookupeqbins('Njets pt(ttb)>'//ttbcut,1d0,0d0,6d0)
          
          
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -166,66 +132,49 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 c (Leading non-b) jet pt
-         bsz(30)=5
          call bookupeqbins('pt1stjet pt(ttb)>'//ttbcut,
-     &        bsz(30),0d0,500d0)
+     &        5d0,0d0,500d0)
 
 c (Leading non-b) jet pt (zoom)
-         bsz(31)=1
          call bookupeqbins('pt1stjet zoom pt(ttb)>'//ttbcut,
-     &        bsz(31),0d0,100d0)
+     &        1d0,0d0,100d0)
 
 c (Leading non-b) jet pt_rel
-         bsz(32)=1
          call bookupeqbins('pt_rel 1stjet pt(ttb)>'//ttbcut,
-     &        bsz(32),0d0,60d0)
+     &        1d0,0d0,60d0)
 
 c (Leading non-b) jet y
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(33+idiag)=0.2
             call bookupeqbins('y1stjet, pt(jet)>'//jetcut//' pt(ttb)>'/
-     &           /ttbcut,bsz(33+idiag),-4d0,4d0)
-            idiag=idiag+1
+     &           /ttbcut,0.2d0,-4d0,4d0)
          enddo
 c (Leading non-b) jet y-yttbar
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(38+idiag)=0.2
             call bookupeqbins('y1stjet-y(ttbar),pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(38+idiag),-4d0,4d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
          enddo
 c (Leading non-b) jet phi-phittbar
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(43+idiag)=0.02d0
             call bookupeqbins('phi1stjet-phi(ttbar),pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(43+idiag),0d0,1d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.02d0,0d0,1d0)
          enddo
 c (Leading non-b) jet delta R jet-ttbar
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(48+idiag)=0.25d0
             call bookupeqbins('deltaR 1stjet-(ttbar),pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(48+idiag),0d0,10d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.25d0,0d0,10d0)
          enddo      
 
 c (Leading non-b) jet ttbar system pt(log)
-         bsz(53)=0.06
          call bookupeqbins('log10(pt) 1stjet-ttbar pt(ttb)>'//ttbcut,
-     &        bsz(53),0d0,3d0)
+     &        0.06d0,0d0,3d0)
          
 c (Leading non-b) jet ttbar system pt
-         bsz(54)=3
          call bookupeqbins('pt 1stjet-ttbar pt(ttb)>'//ttbcut,
-     &        bsz(54),0d0,300d0)
+     &        3d0,0d0,300d0)
     
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -234,57 +183,42 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 c (Next-to-Leading non-b) jet pt
-         bsz(60)=10
          call bookupeqbins('pt2ndjet pt(ttb)>'//ttbcut,
-     &        bsz(60),0d0,600d0)
+     &        10d0,0d0,600d0)
 
-c (Next-to-Leading non-b) jet pt  (zoom)    
-         bsz(61)=1
+c (Next-to-Leading non-b) jet pt  (zoom)
          call bookupeqbins('pt2ndjet (zoom) pt(ttb)>'//ttbcut,
-     &        bsz(61),0d0,100d0)
+     &        1d0,0d0,100d0)
 
-c (Next-to-Leading non-b) jet pt_rel 
-         bsz(62)=1
+c (Next-to-Leading non-b) jet pt_rel
          call bookupeqbins('pt_rel 2ndjet pt(ttb)>'//ttbcut,
-     &        bsz(62),0d0,60d0)
+     &        1d0,0d0,60d0)
 
 c (Next-to-Leading non-b) jet y
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(63+idiag)=0.2
             call bookupeqbins('y2ndjet pt(jet)>'//jetcut//' pt(ttb)>'/
-     &           /ttbcut,bsz(63+idiag),-4d0,4d0)
-            idiag=idiag+1
+     &           /ttbcut,0.2d0,-4d0,4d0)
          enddo
 c (Next-to-Leading non-b) jet y-yttbar
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(68+idiag)=0.2
             call bookupeqbins('y2ndjet-y(ttbar) pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(68+idiag),-4d0,4d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
          enddo
 
 c (Next-to-Leading non-b) jet delta R jet-ttbar
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(73+idiag)=0.25d0
             call bookupeqbins('deltaR 2ndjet-(ttbar),pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(73+idiag),0d0,10d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.25d0,0d0,10d0)
          enddo
 
 c  delta R (Leading non-b) jet - (Next-to-Leading non-b) jet
-         idiag=0
          do icut=20,100,20
             write(jetcut,'(i3)') icut
-            bsz(78+idiag)=0.25d0
             call bookupeqbins('deltaR 1stjet-2ndjet,pt(jet)>'//jetcut/
-     &           /' pt(ttb)>'//ttbcut,bsz(78+idiag),0d0,10d0)
-            idiag=idiag+1
+     &           /' pt(ttb)>'//ttbcut,0.25d0,0d0,10d0)
          enddo
 
 
@@ -295,48 +229,38 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 c Lepton+
-c Lepton energy in top rest frame 
-         bsz(90)=2
-         call bookupeqbins('eem pt(ttb)>'//ttbcut,bsz(90),0d0,100d0)
-c Lepton cos theta in top rest frame 
-         bsz(91)=0.1
+c Lepton energy in top rest frame
+         call bookupeqbins('eem pt(ttb)>'//ttbcut,2d0,0d0,100d0)
+c Lepton cos theta in top rest frame
          call bookupeqbins('costh1 costh2 pt(ttb)>'//ttbcut,
-     &        bsz(91),-1d0,1d0)
+     &        0.1d0,-1d0,1d0)
 c Lepton azimuth in top rest frame. The origin is the top
 c transverse direction
-         bsz(92)=0.02d0
-         call bookupeqbins('phi dec pt(ttb)>'//ttbcut,bsz(92),-1d0,1d0)
+         call bookupeqbins('phi dec pt(ttb)>'//ttbcut,0.02d0,-1d0,1d0)
          
-c  Hardest lepton+ pt   
-         bsz(93)=3
-         call bookupeqbins('lep+ pt(ttb)>'//ttbcut,bsz(93),0d0,300d0)
+c  Hardest lepton+ pt
+         call bookupeqbins('lep+ pt(ttb)>'//ttbcut,3d0,0d0,300d0)
 
-c  Hardest lepton- pt   
-         bsz(94)=3
-         call bookupeqbins('lep- pt(ttb)>'//ttbcut,bsz(94),0d0,300d0)
+c  Hardest lepton- pt
+         call bookupeqbins('lep- pt(ttb)>'//ttbcut,3d0,0d0,300d0)
 
-c  Hardest lepton+ rapidity   
-         bsz(95)=0.2
-         call bookupeqbins('lep+ y pt(ttb)>'//ttbcut,bsz(95),-4d0,4d0)
+c  Hardest lepton+ rapidity
+         call bookupeqbins('lep+ y pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
 
-c  Hardest lepton- rapidity   
-         bsz(96)=0.2
-         call bookupeqbins('lep- y pt(ttb)>'//ttbcut,bsz(96),-4d0,4d0)
+c  Hardest lepton- rapidity
+         call bookupeqbins('lep- y pt(ttb)>'//ttbcut,0.2d0,-4d0,4d0)
 
-c  dilepton invariant mass   
-         bsz(97)=5
+c  dilepton invariant mass
          call bookupeqbins('dilep inv. mass pt(ttb)>'//ttbcut,
-     &        bsz(97),0d0,500d0)
+     &        5d0,0d0,500d0)
 
 c dilepton azimuthal distance
-         bsz(98)=0.02
          call bookupeqbins('dilep Delta phi pt(ttb)>'//ttbcut,
-     &        bsz(98),0d0,1d0)
+     &        0.02d0,0d0,1d0)
 
 c dilepton azimuthal distance with mtt cut
-         bsz(99)=0.02
          call bookupeqbins('dilep Delta phi mtt < 400 pt(ttb)>'/
-     &        /ttbcut,bsz(99),0d0,1d0)
+     &        /ttbcut,0.02d0,0d0,1d0)
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -344,29 +268,20 @@ C PLOTS FOR TRACKING NEGATIVE WEIGHTS
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc    
 
-      bsz(100) = 2d0      
       call bookupeqbins('pt(ttb) pos-|neg| pt(ttb)>'//ttbcut,
-     &     bsz(100),0d0,200d0)
-      bsz(101) = 2d0      
+     &     2d0,0d0,200d0)
       call bookupeqbins('pt(ttb) pos pt(ttb)>'//ttbcut,
-     &     bsz(101),0d0,200d0)
-      bsz(102) = 2d0      
+     &     2d0,0d0,200d0)
       call bookupeqbins('pt(ttb) neg pt(ttb)>'//ttbcut,
-     &     bsz(102),0d0,200d0)
-      bsz(103) = 2d0      
+     &     2d0,0d0,200d0)
       call bookupeqbins('pt J1 pos-|neg| pt(ttb)>'//ttbcut,
-     &     bsz(103),0d0,200d0)
-      bsz(104) = 2d0      
-      call bookupeqbins('pt J1 pos pt(ttb)>'//ttbcut,bsz(104),0d0,200d0)
-      bsz(105) = 2d0      
-      call bookupeqbins('pt J1 neg pt(ttb)>'//ttbcut,bsz(105),0d0,200d0)
-      bsz(106) = 2d0
+     &     2d0,0d0,200d0)
+      call bookupeqbins('pt J1 pos pt(ttb)>'//ttbcut,2d0,0d0,200d0)
+      call bookupeqbins('pt J1 neg pt(ttb)>'//ttbcut,2d0,0d0,200d0)
       call bookupeqbins('pt J2 pos-|neg| pt(ttb) >'//ttbcut,
-     &     bsz(106),0d0,200d0)
-      bsz(107) = 2d0
-      call bookupeqbins('pt J2 pos pt(ttb)>'//ttbcut,bsz(107),0d0,200d0)
-      bsz(108) = 2d0
-      call bookupeqbins('pt J2 neg pt(ttb)>'//ttbcut,bsz(108),0d0,200d0)
+     &     2d0,0d0,200d0)
+      call bookupeqbins('pt J2 pos pt(ttb)>'//ttbcut,2d0,0d0,200d0)
+      call bookupeqbins('pt J2 neg pt(ttb)>'//ttbcut,2d0,0d0,200d0)
 
       enddo                     ! end of pt (ttb) cuts loop
 
@@ -376,103 +291,57 @@ C PLOTS IN ARXIV 0810.0452
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
-      diag=numplots*nptttbcut
-
-      diag=diag+1
-      bsz(diag)=25d0
-      call bookupeqbins('DUW jet pt bin4TeV',bsz(diag),0d0,325d0)
-      
-      diag=diag+1
-      bsz(diag)=50d0
-      call bookupeqbins('DUW jet pt bin4LHC',bsz(diag),0d0,700d0)
-
-      diag=diag+1
-      bsz(diag)=25d0
-      call bookupeqbins('DUW ttbar pt bin4TeV',bsz(diag),0d0,325d0)
-
-      diag=diag+1
-      bsz(diag)=50d0
-      call bookupeqbins('DUW ttbar pt bin4LHC',bsz(diag),0d0,700d0)
-
-      diag=diag+1
-      bsz(diag)=25d0
-      call bookupeqbins('DUW t pt bin4TeV',bsz(diag),0d0,400d0)
-
-      diag=diag+1
-      bsz(diag)=50d0
-      call bookupeqbins('DUW t pt bin4LHC',bsz(diag),0d0,700d0)
-
-      diag=diag+1
-      bsz(diag)=0.4d0
-      call bookupeqbins('DUW t eta bin4TeV',bsz(diag),-4d0,4d0)
-
-      diag=diag+1
-      bsz(diag)=0.6d0
-      call bookupeqbins('DUW t eta bin4LHC',bsz(diag),-6d0,6d0)
-
-      diag=diag+1
-      bsz(diag)=0.4d0
-      call bookupeqbins('DUW t y bin4TeV',bsz(diag),-2d0,2d0)
-
-      diag=diag+1
-      bsz(diag)=0.6d0
-      call bookupeqbins('DUW t y bin4LHC',bsz(diag),-4.2d0,4.2d0)
-
-      diag=diag+1
-      bsz(diag)=0.4d0
-      call bookupeqbins('DUW jet y bin4TeV',bsz(diag),-4d0,4d0)
-
-      diag=diag+1
-      bsz(diag)=0.6d0
-      call bookupeqbins('DUW jet y bin4LHC',bsz(diag),-5.4d0,5.4d0)
+      call bookupeqbins('DUW jet pt bin4TeV',25d0,0d0,325d0)
+      call bookupeqbins('DUW jet pt bin4LHC',50d0,0d0,700d0)
+      call bookupeqbins('DUW ttbar pt bin4TeV',25d0,0d0,325d0)
+      call bookupeqbins('DUW ttbar pt bin4LHC',50d0,0d0,700d0)
+      call bookupeqbins('DUW t pt bin4TeV',25d0,0d0,400d0)
+      call bookupeqbins('DUW t pt bin4LHC',50d0,0d0,700d0)
+      call bookupeqbins('DUW t eta bin4TeV',0.4d0,-4d0,4d0)
+      call bookupeqbins('DUW t eta bin4LHC',0.6d0,-6d0,6d0)
+      call bookupeqbins('DUW t y bin4TeV',0.4d0,-2d0,2d0)
+      call bookupeqbins('DUW t y bin4LHC',0.6d0,-4.2d0,4.2d0)
+      call bookupeqbins('DUW jet y bin4TeV',0.4d0,-4d0,4d0)
+      call bookupeqbins('DUW jet y bin4LHC',0.6d0,-5.4d0,5.4d0)
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 C PLOTS FOR ASYMMETRY
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc    
-      diag=diag+1
       
 c (Leading non-b) jet pt with inv mass cuts
-      idiag=0
       do icut=0,1000,200
          write(attcut,'(i4)') icut
-         bsz(diag+idiag)=50
          call bookupeqbins('pt 1st jet , mtt>'//attcut,
-     &        bsz(diag+idiag),0d0,1000d0)
-         idiag=idiag+1
+     &        50d0,0d0,1000d0)
       enddo
 
 c inv mass with jet cuts
-      diag=diag+idiag
-      idiag=0
       do icut=0,1000,200
          write(attcut,'(i4)') icut
-         bsz(diag+idiag)=50
          call bookupeqbins('mtt,  pt 1stjet>'//attcut,
-     &        bsz(diag+idiag),0d0,1000d0)
-         idiag=idiag+1
+     &        50d0,0d0,1000d0)
       enddo
-      diag=diag+idiag
       
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 C PLOTS FOR MASS
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc    
-      diag=diag+1
       
-      bsz(diag)=0.05d0
-      call bookupeqbins('m*',bsz(diag),0d0,1d0)
+      call bookupeqbins('m*',0.05d0,0d0,1d0)
 
       end
 
 
      
-      subroutine analysis(dsig)
+      subroutine analysis(dsig0)
       implicit none
-      double precision dsig
+      real(8) :: dsig0
       include 'hepevt.h'
+      include 'pwhg_rwl.h'
+      real(8) :: dsig(rwl_maxweights)
       double precision pi
       parameter(pi = 3.141592653589793D0)
 c arrays to reconstruct jets
@@ -488,17 +357,12 @@ c arrays to reconstruct jets
       character * 6 WHCPRG
       common/cWHCPRG/WHCPRG
       data WHCPRG/'NLO   '/
-c     binsize
-      include 'pwhg_book.h'
-      double precision bsz(nmh)
-      common/pwhghistcommon/bsz
-      integer diag,idiag
 c
       integer nptttbcutmax,nptttbcut
       parameter(nptttbcutmax = 10)
       integer ptttbcuts(0:nptttbcutmax-1)
-      common/cptvbcut/ptttbcuts,nptttbcut,numplots
-      integer ncut,numplots
+      common/cptvbcut/ptttbcuts,nptttbcut
+      integer ncut
 c
       double precision deltaphi,rsep_azi_y,get_ptrel_jet
       external deltaphi,rsep_azi_y,get_ptrel_jet
@@ -534,6 +398,9 @@ c
          write(*,*) '*****************************'
          ini=.false.
       endif
+
+      call multi_plot_setup(dsig0,dsig,rwl_maxweights)
+
 c RESET ALL COUNTERS
       it=0
       iit=0
@@ -675,10 +542,7 @@ c     then sets it to the actual value found)
 
 
 c     if there are no jets skip the analysis
-      if (njets.lt.1) then
-         dsig=0
-         return
-      endif
+      if (njets < 1) return
 
 c     evaluate quantities related to leptons (if present) 
       if(iiep.gt.0) then
@@ -837,17 +701,14 @@ c (Leading non-b) jet pt_rel
          call filld('pt_rel 1stjet pt(ttb)>'//ttbcut,
      &        ptreljet(1),dsig)
 c (Leading non-b) jet y
-         idiag=0
          do icut=20,100,20
             if(ktjet(1).gt.icut) then
                write(jetcut,'(i3)') icut
                call filld('y1stjet, pt(jet)>'//jetcut//' pt(ttb)>'/
      &           /ttbcut,yjet(1),dsig)
             endif
-            idiag=idiag+1
          enddo
 c (Leading non-b) jet y-yttbar
-         idiag=0
          do icut=20,100,20
             if(ktjet(1).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -855,10 +716,8 @@ c (Leading non-b) jet y-yttbar
      &              /' pt(ttb)>'//ttbcut,
      &              yjet(1)-yttbar,dsig)
             endif
-            idiag=idiag+1
          enddo
 c (Leading non-b) jet phi-phittbar
-         idiag=0
          do icut=20,100,20
             if(ktjet(1).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -866,10 +725,8 @@ c (Leading non-b) jet phi-phittbar
      &              /' pt(ttb)>'//ttbcut,
      &              deltaphij1ttbar/pi,dsig)
             endif
-            idiag=idiag+1
          enddo
 c (Leading non-b) jet delta R jet-ttbar
-         idiag=0
          do icut=20,100,20
             if(ktjet(1).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -877,7 +734,6 @@ c (Leading non-b) jet delta R jet-ttbar
      &              /' pt(ttb)>'//ttbcut,
      &              deltaRj1ttbar,dsig)
             endif
-            idiag=idiag+1
          enddo
 
 c (Leading non-b) jet +ttbar system pt
@@ -903,17 +759,14 @@ c (Next-to-Leading non-b) jet pt_rel
      &        ptreljet(2),dsig)
 
 c (Next-to-Leading non-b) jet y
-         idiag=0
          do icut=20,100,20
             if(ktjet(2).gt.icut) then
                write(jetcut,'(i3)') icut
                call filld('y2ndjet pt(jet)>'//jetcut//' pt(ttb)>'/
      &              /ttbcut,yjet(2),dsig)
             endif
-            idiag=idiag+1
          enddo
 c (Next-to-Leading non-b) jet y-yttbar
-         idiag=0
          do icut=20,100,20
             if(ktjet(2).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -921,10 +774,8 @@ c (Next-to-Leading non-b) jet y-yttbar
      &              /' pt(ttb)>'//ttbcut,
      &              yjet(2)-yttbar,dsig)
             endif
-            idiag=idiag+1
          enddo
 c (Next-to-Leading non-b) jet delta R jet-ttbar
-         idiag=0
          do icut=20,100,20
             if(ktjet(2).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -932,11 +783,9 @@ c (Next-to-Leading non-b) jet delta R jet-ttbar
      &              /' pt(ttb)>'//ttbcut,
      &              deltaRj2ttbar,dsig)
             endif
-            idiag=idiag+1
          enddo
 
 c  delta R (Leading non-b) jet - (Next-to-Leading non-b) jet
-         idiag=0
          do icut=20,100,20 
             if(ktjet(2).gt.icut) then
                write(jetcut,'(i3)') icut
@@ -944,7 +793,6 @@ c  delta R (Leading non-b) jet - (Next-to-Leading non-b) jet
      &              /' pt(ttb)>'//ttbcut,
      &              deltaRj1j2,dsig)
             endif
-            idiag=idiag+1
          enddo
 
          
@@ -955,7 +803,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c  ttbar pt         
          call filld('pt(ttb) pos-|neg| pt(ttb)>'//ttbcut,
      &        ptttbar,dsig)
-         if (dsig.gt.0d0) then
+         if (dsig0.gt.0d0) then
             call filld('pt(ttb) pos pt(ttb)>'//ttbcut,
      &           ptttbar,dsig)
          else
@@ -965,7 +813,7 @@ c  ttbar pt
 c  hardest jet pt         
          call filld('pt J1 pos-|neg| pt(ttb)>'//ttbcut,
      &        ktjet(1),dsig)
-         if (dsig.gt.0d0) then
+         if (dsig0.gt.0d0) then
             call filld('pt J1 pos pt(ttb)>'//ttbcut,
      &           ktjet(1),dsig)
          else
@@ -977,7 +825,7 @@ c  hardest jet pt
 c next-to-hardest jet pt
          call filld('pt J2 pos-|neg| pt(ttb) >'//ttbcut,
      &        ktjet(2),dsig)
-         if (dsig.gt.0d0) then
+         if (dsig0.gt.0d0) then
             call filld('pt J2 pos pt(ttb)>'//ttbcut,
      &           ktjet(2),dsig)
          else
@@ -1032,65 +880,43 @@ c Dilepton azimuthal sep. with mttcut
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C PLOTS IN 0810.0452
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      diag=numplots*nptttbcut
 
-      diag=diag+1
       call filld('DUW jet pt bin4TeV',ktjet(1),dsig)
-      diag=diag+1
       call filld('DUW jet pt bin4LHC',ktjet(1),dsig)
-      diag=diag+1
       call filld('DUW ttbar pt bin4TeV',ptttbar,dsig)
-      diag=diag+1
       call filld('DUW ttbar pt bin4LHC',ptttbar,dsig)
-      diag=diag+1
       call filld('DUW t pt bin4TeV',ptt,dsig)
-      diag=diag+1
       call filld('DUW t pt bin4LHC',ptt,dsig)
-      diag=diag+1
       call filld('DUW t eta bin4TeV',etat,dsig)
-      diag=diag+1
       call filld('DUW t eta bin4LHC',etat,dsig)
-      diag=diag+1
       call filld('DUW t y bin4TeV',yt,dsig)
-      diag=diag+1
       call filld('DUW t y bin4LHC',yt,dsig)
-      diag=diag+1
       call filld('DUW jet y bin4TeV',yjet(1),dsig)
-      diag=diag+1
       call filld('DUW jet y bin4LHC',yjet(1),dsig)
 
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C PLOTS FOR ASYMMETRY
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
-      diag=diag+1
-      
-      idiag=0
+
       do icut=0,1000,200
          if(mttbar.gt.icut) then
             write(attcut,'(i4)') icut
             call filld('pt 1st jet , mtt>'//attcut,
      &           ktjet(1),dsig)
          endif
-         idiag=idiag+1
       enddo
 
-      diag=diag+idiag
-
-      idiag=0
       do icut=0,1000,200
          if(ktjet(1).gt.icut) then
             write(attcut,'(i4)') icut
             call filld('mtt,  pt 1stjet>'//attcut,
      &           mttbar,dsig)
          endif
-         idiag=idiag+1
       enddo
       
-      diag=diag+idiag
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC      
 C PLOTS FOR MASS
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      diag=diag+1
       m0= 170d0
       mstar= 2d0* m0/sqrt(ppairttbar(1)*pjet(1,1)+ppairttbar(2)*pjet(2
      $     ,1)+ppairttbar(3)*pjet(3,1)+ppairttbar(4)*pjet(4,1))
